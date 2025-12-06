@@ -1,39 +1,50 @@
-// src/app/dashboard/followups/new/page.tsx
+// src/app/dashboard/followups/[id]/edit/page.tsx
 
 'use client';
 
-import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect, use } from 'react';
+import { useRouter } from 'next/navigation';
+import { useFollowUp } from '@/hooks/useFollowUps';
 import { followUpsApi } from '@/lib/api';
 import { useClients } from '@/hooks/useClients';
 import { useOffers } from '@/hooks/useOffers';
 import { useContracts } from '@/hooks/useContracts';
 import { Button, Input, Select, Textarea, Card } from '@/components/ui';
-import { CreateFollowUpData } from '@/types';
+import { PageLoader } from '@/components/ui/LoadingSpinner';
+import { UpdateFollowUpData } from '@/types';
 
-export default function NewFollowUpPage() {
+export default function EditFollowUpPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
     const router = useRouter();
-    const searchParams = useSearchParams();
+    const { followUp, loading: loadingFollowUp, error: fetchError } = useFollowUp(id);
 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [formData, setFormData] = useState<CreateFollowUpData>({
-        title: '',
-        description: '',
-        type: 'TASK',
-        priority: 'MEDIUM',
-        dueDate: new Date().toISOString().split('T')[0],
-        notes: '',
-        clientId: searchParams.get('clientId') || undefined,
-        offerId: searchParams.get('offerId') || undefined,
-        contractId: searchParams.get('contractId') || undefined,
-    });
+    const [formData, setFormData] = useState<UpdateFollowUpData>({});
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
     // Fetch related data for dropdowns - z domyślną wartością pustej tablicy
     const { clients = [] } = useClients({ limit: 100 });
     const { offers = [] } = useOffers({ limit: 100 });
     const { contracts = [] } = useContracts({ limit: 100 });
+
+    // Populate form when follow-up is loaded
+    useEffect(() => {
+        if (followUp) {
+            setFormData({
+                title: followUp.title,
+                description: followUp.description || '',
+                type: followUp.type,
+                status: followUp.status,
+                priority: followUp.priority,
+                dueDate: followUp.dueDate.split('T')[0],
+                notes: followUp.notes || '',
+                clientId: followUp.clientId || undefined,
+                offerId: followUp.offerId || undefined,
+                contractId: followUp.contractId || undefined,
+            });
+        }
+    }, [followUp]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -58,9 +69,6 @@ export default function NewFollowUpPage() {
         return Object.keys(errors).length === 0;
     };
 
-// W src/app/dashboard/followups/new/page.tsx
-// Zmień handleSubmit:
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -70,29 +78,26 @@ export default function NewFollowUpPage() {
         setError(null);
 
         try {
-            const cleanData: Record<string, unknown> = {};
+            const cleanData: UpdateFollowUpData = {};
 
-            // Required fields
+            // Only include changed fields
             if (formData.title) cleanData.title = formData.title;
             if (formData.type) cleanData.type = formData.type;
-
-            // Convert date to ISO string with time
-            if (formData.dueDate) {
-                cleanData.dueDate = new Date(formData.dueDate).toISOString();
-            }
-
-            // Optional fields
+            if (formData.status) cleanData.status = formData.status;
             if (formData.priority) cleanData.priority = formData.priority;
+            if (formData.dueDate) cleanData.dueDate = formData.dueDate;
+
+            // Optional string fields - only include if has value
             if (formData.description) cleanData.description = formData.description;
             if (formData.notes) cleanData.notes = formData.notes;
+
+            // Optional relation fields - only include if has value
             if (formData.clientId) cleanData.clientId = formData.clientId;
             if (formData.offerId) cleanData.offerId = formData.offerId;
             if (formData.contractId) cleanData.contractId = formData.contractId;
 
-            console.log('Sending data:', cleanData); // Debug
-
-            await followUpsApi.create(cleanData);
-            router.push('/dashboard/followups');
+            await followUpsApi.update(id, cleanData);
+            router.push(`/dashboard/followups/${id}`);
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -103,6 +108,23 @@ export default function NewFollowUpPage() {
             setIsLoading(false);
         }
     };
+
+    if (loadingFollowUp) return <PageLoader />;
+
+    if (fetchError || !followUp) {
+        return (
+            <div className="p-8">
+                <Card>
+                    <div className="text-center py-12">
+                        <p className="text-red-600 mb-4">{fetchError || 'Nie znaleziono follow-upa'}</p>
+                        <Button onClick={() => router.push('/dashboard/followups')}>
+                            Wróć do listy
+                        </Button>
+                    </div>
+                </Card>
+            </div>
+        );
+    }
 
     return (
         <div className="p-8 max-w-3xl mx-auto">
@@ -117,8 +139,8 @@ export default function NewFollowUpPage() {
                     </svg>
                     Powrót
                 </button>
-                <h1 className="text-2xl font-bold text-slate-900">Nowy follow-up</h1>
-                <p className="text-slate-500 mt-1">Utwórz nowe zadanie lub przypomnienie</p>
+                <h1 className="text-2xl font-bold text-slate-900">Edytuj follow-up</h1>
+                <p className="text-slate-500 mt-1">Modyfikuj szczegóły zadania</p>
             </div>
 
             {/* Error */}
@@ -137,7 +159,7 @@ export default function NewFollowUpPage() {
                             <Input
                                 label="Tytuł"
                                 name="title"
-                                value={formData.title}
+                                value={formData.title || ''}
                                 onChange={handleChange}
                                 error={fieldErrors.title}
                                 required
@@ -147,7 +169,7 @@ export default function NewFollowUpPage() {
                         <Select
                             label="Typ"
                             name="type"
-                            value={formData.type}
+                            value={formData.type || ''}
                             onChange={handleChange}
                             options={[
                                 { value: 'CALL', label: '📞 Telefon' },
@@ -159,9 +181,20 @@ export default function NewFollowUpPage() {
                             ]}
                         />
                         <Select
+                            label="Status"
+                            name="status"
+                            value={formData.status || ''}
+                            onChange={handleChange}
+                            options={[
+                                { value: 'PENDING', label: 'Oczekujące' },
+                                { value: 'COMPLETED', label: 'Wykonane' },
+                                { value: 'CANCELLED', label: 'Anulowane' },
+                            ]}
+                        />
+                        <Select
                             label="Priorytet"
                             name="priority"
-                            value={formData.priority}
+                            value={formData.priority || ''}
                             onChange={handleChange}
                             options={[
                                 { value: 'LOW', label: 'Niski' },
@@ -174,7 +207,7 @@ export default function NewFollowUpPage() {
                             label="Termin"
                             name="dueDate"
                             type="date"
-                            value={formData.dueDate}
+                            value={formData.dueDate || ''}
                             onChange={handleChange}
                             error={fieldErrors.dueDate}
                             required
@@ -194,7 +227,7 @@ export default function NewFollowUpPage() {
                 </Card>
 
                 <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-slate-900 mb-4">Powiązania (opcjonalne)</h2>
+                    <h2 className="text-lg font-semibold text-slate-900 mb-4">Powiązania</h2>
                     <div className="grid grid-cols-1 gap-4">
                         <Select
                             label="Klient"
@@ -246,7 +279,7 @@ export default function NewFollowUpPage() {
                         Anuluj
                     </Button>
                     <Button type="submit" isLoading={isLoading}>
-                        Utwórz follow-up
+                        Zapisz zmiany
                     </Button>
                 </div>
             </form>

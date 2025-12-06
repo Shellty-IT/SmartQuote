@@ -205,3 +205,21 @@ export const contractsApi = {
     downloadPdf: (id: string) =>
         api.downloadBlob(`/contracts/${id}/pdf`),
 };
+
+// Follow-ups
+export const followUpsApi = {
+    list: (params?: Record<string, any>) =>
+        api.get<any[]>('/followups', params),
+    get: (id: string) =>
+        api.get<any>(`/followups/${id}`),
+    create: (data: any) =>
+        api.post<any>('/followups', data),
+    update: (id: string, data: any) =>
+        api.put<any>(`/followups/${id}`, data),
+    delete: (id: string) =>
+        api.delete(`/followups/${id}`),
+    complete: (id: string) =>
+        api.put<any>(`/followups/${id}/complete`, {}),
+    stats: () =>
+        api.get<any>('/followups/stats'),
+};

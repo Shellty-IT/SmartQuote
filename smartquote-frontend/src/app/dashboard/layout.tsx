@@ -1,9 +1,12 @@
+// src/app/dashboard/layout.tsx
+
 'use client';
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import Sidebar from './components/Sidebar';
+import Header from './components/Header';
 
 export default function DashboardLayout({
                                             children,
@@ -38,7 +41,8 @@ export default function DashboardLayout({
         <div className="min-h-screen bg-slate-50">
             <Sidebar />
             <div className="pl-64">
-                {children}
+                <Header />
+                <main>{children}</main>
             </div>
         </div>
     );
