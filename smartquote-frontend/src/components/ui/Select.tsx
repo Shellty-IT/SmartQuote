@@ -1,6 +1,8 @@
+// SmartQuote-AI/src/components/ui/Select.tsx
+
 'use client';
 
-import { forwardRef, SelectHTMLAttributes } from 'react';
+import { forwardRef, SelectHTMLAttributes, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 interface SelectOption {
@@ -8,15 +10,16 @@ interface SelectOption {
     label: string;
 }
 
-interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
+export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
     label?: string;
     error?: string;
-    options: SelectOption[];
+    options?: SelectOption[];
     placeholder?: string;
+    children?: ReactNode;
 }
 
 const Select = forwardRef<HTMLSelectElement, SelectProps>(
-    ({ className, label, error, options, placeholder, id, ...props }, ref) => {
+    ({ className, label, error, options, placeholder, id, children, ...props }, ref) => {
         const selectId = id || props.name;
 
         return (
@@ -48,11 +51,14 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
                             {placeholder}
                         </option>
                     )}
-                    {options.map((option) => (
+                    {/* Renderuj options jeśli podano tablicę */}
+                    {options && options.map((option) => (
                         <option key={option.value} value={option.value}>
                             {option.label}
                         </option>
                     ))}
+                    {/* Lub renderuj children jeśli podano */}
+                    {children}
                 </select>
                 {error && <p className="mt-1.5 text-sm text-red-600">{error}</p>}
             </div>

@@ -1,3 +1,5 @@
+// SmartQuote-AI/src/lib/api.ts
+
 import { getSession } from 'next-auth/react';
 import { ApiResponse } from '@/types';
 
@@ -101,6 +103,24 @@ class ApiClient {
     async delete<T>(endpoint: string): Promise<ApiResponse<T>> {
         return this.request<T>(endpoint, { method: 'DELETE' });
     }
+
+    async downloadBlob(endpoint: string): Promise<Blob> {
+        const session = await getSession();
+        const headers: HeadersInit = {};
+
+        if ((session as any)?.accessToken) {
+            headers['Authorization'] = `Bearer ${(session as any).accessToken}`;
+        }
+
+        const url = `${this.baseUrl}${endpoint}`;
+        const response = await fetch(url, { headers });
+
+        if (!response.ok) {
+            throw new ApiError('Nie udało się pobrać pliku', 'DOWNLOAD_ERROR', response.status);
+        }
+
+        return response.blob();
+    }
 }
 
 export class ApiError extends Error {
@@ -162,4 +182,26 @@ export const offersApi = {
         api.post<any>(`/offers/${id}/duplicate`),
     stats: () =>
         api.get<any>('/offers/stats'),
+};
+
+// Contracts
+export const contractsApi = {
+    list: (params?: Record<string, any>) =>
+        api.get<any[]>('/contracts', params),
+    get: (id: string) =>
+        api.get<any>(`/contracts/${id}`),
+    create: (data: any) =>
+        api.post<any>('/contracts', data),
+    update: (id: string, data: any) =>
+        api.put<any>(`/contracts/${id}`, data),
+    delete: (id: string) =>
+        api.delete(`/contracts/${id}`),
+    createFromOffer: (offerId: string) =>
+        api.post<any>(`/contracts/from-offer/${offerId}`),
+    updateStatus: (id: string, status: string) =>
+        api.put<any>(`/contracts/${id}/status`, { status }),
+    stats: () =>
+        api.get<any>('/contracts/stats'),
+    downloadPdf: (id: string) =>
+        api.downloadBlob(`/contracts/${id}/pdf`),
 };

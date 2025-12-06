@@ -79,3 +79,20 @@ export function debounce<T extends (...args: any[]) => any>(
         timeout = setTimeout(() => func(...args), wait);
     };
 }
+
+
+export function getContractStatusConfig(status: string): {
+    label: string;
+    color: string;
+    bgColor: string;
+} {
+    const configs: Record<string, { label: string; color: string; bgColor: string }> = {
+        DRAFT: { label: 'Szkic', color: 'text-gray-700', bgColor: 'bg-gray-100' },
+        PENDING_SIGNATURE: { label: 'Do podpisu', color: 'text-yellow-700', bgColor: 'bg-yellow-100' },
+        ACTIVE: { label: 'Aktywna', color: 'text-green-700', bgColor: 'bg-green-100' },
+        COMPLETED: { label: 'Zakończona', color: 'text-blue-700', bgColor: 'bg-blue-100' },
+        TERMINATED: { label: 'Rozwiązana', color: 'text-red-700', bgColor: 'bg-red-100' },
+        EXPIRED: { label: 'Wygasła', color: 'text-orange-700', bgColor: 'bg-orange-100' },
+    };
+    return configs[status] || { label: status, color: 'text-gray-700', bgColor: 'bg-gray-100' };
+}
