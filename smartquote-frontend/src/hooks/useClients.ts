@@ -39,7 +39,9 @@ export function useClients(initialFilters: ClientFilters = {}): UseClientsResult
         setError(null);
 
         try {
-            const response = await clientsApi.list(filters);
+            const response = await clientsApi.list(
+                filters as Record<string, string | number | boolean | undefined>
+            );
             setClients(response.data || []);
             setTotal(response.meta?.total || 0);
             setPage(response.meta?.page || 1);
@@ -64,12 +66,18 @@ export function useClients(initialFilters: ClientFilters = {}): UseClientsResult
     const createClient = useCallback(async (data: CreateClientInput): Promise<Client> => {
         const response = await clientsApi.create(data);
         await fetchClients();
+        if (!response.data) {
+            throw new Error('Nie udało się utworzyć klienta');
+        }
         return response.data;
     }, [fetchClients]);
 
     const updateClient = useCallback(async (id: string, data: UpdateClientInput): Promise<Client> => {
         const response = await clientsApi.update(id, data);
         await fetchClients();
+        if (!response.data) {
+            throw new Error('Nie udało się zaktualizować klienta');
+        }
         return response.data;
     }, [fetchClients]);
 
@@ -107,7 +115,7 @@ export function useClient(id: string) {
 
         try {
             const response = await clientsApi.get(id);
-            setClient(response.data);
+            setClient(response.data ?? null);
         } catch (err) {
             const message = err instanceof ApiError ? err.message : 'Błąd pobierania klienta';
             setError(message);
@@ -124,7 +132,6 @@ export function useClient(id: string) {
     return { client, isLoading, error, refresh: fetchClient };
 }
 
-
 export function useClientsStats() {
     const [stats, setStats] = useState<ClientsStats | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -136,7 +143,7 @@ export function useClientsStats() {
 
         try {
             const response = await clientsApi.stats();
-            setStats(response.data);
+            setStats(response.data ?? null);
         } catch (err) {
             const message = err instanceof ApiError ? err.message : 'Błąd pobierania statystyk';
             setError(message);
@@ -151,4 +158,3 @@ export function useClientsStats() {
 
     return { stats, isLoading, error, refresh: fetchStats };
 }
-

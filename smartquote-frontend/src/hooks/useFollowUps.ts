@@ -4,7 +4,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { followUpsApi } from '@/lib/api';
-import { FollowUp, FollowUpStats, CreateFollowUpData, UpdateFollowUpData } from '@/types';
+import { FollowUp, FollowUpStats } from '@/types';
 
 interface UseFollowUpsOptions {
     page?: number;
@@ -42,7 +42,7 @@ export function useFollowUps(initialOptions: UseFollowUpsOptions = {}) {
             setLoading(true);
             setError(null);
 
-            const params: Record<string, any> = {};
+            const params: Record<string, string | number | boolean> = {};
             if (filters.page) params.page = filters.page;
             if (filters.limit) params.limit = filters.limit;
             if (filters.search) params.search = filters.search;
@@ -65,8 +65,12 @@ export function useFollowUps(initialOptions: UseFollowUpsOptions = {}) {
             } else {
                 setError(response.error?.message || 'Błąd pobierania follow-upów');
             }
-        } catch (err: any) {
-            setError(err.message || 'Błąd połączenia z serwerem');
+        } catch (err) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Błąd połączenia z serwerem');
+            }
         } finally {
             setLoading(false);
         }
@@ -131,12 +135,16 @@ export function useFollowUp(id: string) {
             const response = await followUpsApi.get(id);
 
             if (response.success) {
-                setFollowUp(response.data);
+                setFollowUp(response.data ?? null);
             } else {
                 setError(response.error?.message || 'Nie znaleziono follow-upa');
             }
-        } catch (err: any) {
-            setError(err.message || 'Błąd połączenia z serwerem');
+        } catch (err) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Błąd połączenia z serwerem');
+            }
         } finally {
             setLoading(false);
         }
@@ -161,12 +169,16 @@ export function useFollowUpStats() {
             const response = await followUpsApi.stats();
 
             if (response.success) {
-                setStats(response.data);
+                setStats(response.data ?? null);
             } else {
                 setError(response.error?.message || 'Błąd pobierania statystyk');
             }
-        } catch (err: any) {
-            setError(err.message || 'Błąd połączenia z serwerem');
+        } catch (err) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Błąd połączenia z serwerem');
+            }
         } finally {
             setLoading(false);
         }

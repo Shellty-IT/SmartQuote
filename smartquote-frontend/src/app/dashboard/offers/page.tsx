@@ -77,7 +77,11 @@ export default function OffersPage() {
     const handleDuplicate = async (offer: Offer) => {
         try {
             const response = await offersApi.duplicate(offer.id);
-            router.push(`/dashboard/offers/${response.data.id}/edit`);
+            if (response.data?.id) {
+                router.push(`/dashboard/offers/${response.data.id}/edit`);
+            } else {
+                throw new Error('Nie udało się zduplikować oferty');
+            }
         } catch (err) {
             console.error('Duplicate error:', err);
         }

@@ -40,7 +40,9 @@ export function useOffers(initialFilters: OfferFilters = {}): UseOffersResult {
         setError(null);
 
         try {
-            const response = await offersApi.list(filters);
+            const response = await offersApi.list(
+                filters as Record<string, string | number | boolean | undefined>
+            );
             setOffers(response.data || []);
             setTotal(response.meta?.total || 0);
             setPage(response.meta?.page || 1);
@@ -65,12 +67,18 @@ export function useOffers(initialFilters: OfferFilters = {}): UseOffersResult {
     const createOffer = useCallback(async (data: CreateOfferInput): Promise<Offer> => {
         const response = await offersApi.create(data);
         await fetchOffers();
+        if (!response.data) {
+            throw new Error('Nie udało się utworzyć oferty');
+        }
         return response.data;
     }, [fetchOffers]);
 
     const updateOffer = useCallback(async (id: string, data: UpdateOfferInput): Promise<Offer> => {
         const response = await offersApi.update(id, data);
         await fetchOffers();
+        if (!response.data) {
+            throw new Error('Nie udało się zaktualizować oferty');
+        }
         return response.data;
     }, [fetchOffers]);
 
@@ -82,6 +90,9 @@ export function useOffers(initialFilters: OfferFilters = {}): UseOffersResult {
     const duplicateOffer = useCallback(async (id: string): Promise<Offer> => {
         const response = await offersApi.duplicate(id);
         await fetchOffers();
+        if (!response.data) {
+            throw new Error('Nie udało się zduplikować oferty');
+        }
         return response.data;
     }, [fetchOffers]);
 
@@ -115,7 +126,7 @@ export function useOffer(id: string) {
 
         try {
             const response = await offersApi.get(id);
-            setOffer(response.data);
+            setOffer(response.data ?? null);
         } catch (err) {
             const message = err instanceof ApiError ? err.message : 'Błąd pobierania oferty';
             setError(message);
@@ -132,7 +143,6 @@ export function useOffer(id: string) {
     return { offer, isLoading, error, refresh: fetchOffer };
 }
 
-
 export function useOffersStats() {
     const [stats, setStats] = useState<OffersStats | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -144,7 +154,7 @@ export function useOffersStats() {
 
         try {
             const response = await offersApi.stats();
-            setStats(response.data);
+            setStats(response.data ?? null);
         } catch (err) {
             const message = err instanceof ApiError ? err.message : 'Błąd pobierania statystyk';
             setError(message);

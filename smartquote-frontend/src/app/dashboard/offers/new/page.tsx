@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useClients } from '@/hooks/useClients';
 import { offersApi, ApiError } from '@/lib/api';
-import { Button, Input, Select, Textarea, Card, Badge } from '@/components/ui';
+import { Button, Input, Select, Textarea, Card } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { formatCurrency, getInitials } from '@/lib/utils';
 import { CreateOfferInput, CreateOfferItemInput, Client } from '@/types';
@@ -146,7 +146,7 @@ export default function NewOfferPage() {
         }
     };
 
-    const updateItem = (index: number, field: keyof CreateOfferItemInput, value: any) => {
+    const updateItem = (index: number, field: keyof CreateOfferItemInput, value: string | number) => {
         const newItems = [...items];
         newItems[index] = { ...newItems[index], [field]: value };
         setItems(newItems);
@@ -194,7 +194,11 @@ export default function NewOfferPage() {
             };
 
             const response = await offersApi.create(data);
-            router.push(`/dashboard/offers/${response.data.id}`);
+            if (response.data?.id) {
+                router.push(`/dashboard/offers/${response.data.id}`);
+            } else {
+                throw new Error('Nie udało się utworzyć oferty');
+            }
         } catch (err) {
             if (err instanceof ApiError) {
                 setError(err.message);
@@ -232,7 +236,6 @@ export default function NewOfferPage() {
                     {STEPS.map((step, index) => {
                         const isActive = step.id === currentStep;
                         const isPast = STEPS.findIndex((s) => s.id === currentStep) > index;
-                        const isClickable = isPast || (index === STEPS.findIndex((s) => s.id === currentStep) + 1 && canProceed());
 
                         return (
                             <div key={step.id} className="flex items-center flex-1">

@@ -72,7 +72,9 @@ export default function OfferDetailPage({ params }: PageProps) {
 
         try {
             const response = await offersApi.duplicate(offer.id);
-            router.push(`/dashboard/offers/${response.data.id}/edit`);
+            if (response.data?.id) {
+                router.push(`/dashboard/offers/${response.data.id}/edit`);
+            }
         } catch (err) {
             console.error('Duplicate error:', err);
         }
