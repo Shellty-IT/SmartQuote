@@ -4,23 +4,77 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
-// ❌ USUŃ TEN IMPORT: import { SparklesIcon } from '@heroicons/react/24/outline';
-
-const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-    { name: 'Oferty', href: '/dashboard/offers', icon: DocumentIcon, badge: 12 },
-    { name: 'Umowy', href: '/dashboard/contracts', icon: ClipboardIcon },
-    { name: 'Klienci', href: '/dashboard/clients', icon: UsersIcon },
-    { name: 'Follow-upy', href: '/dashboard/followups', icon: BellIcon },
-    { name: 'AI Asystent', href: '/dashboard/ai', icon: SparklesIcon },
-];
-
-const bottomNav = [
-    { name: 'Ustawienia', href: '/dashboard/settings', icon: SettingsIcon },
-];
+import { useSidebarStats } from '@/hooks/useSidebarStats';
 
 export default function Sidebar() {
     const pathname = usePathname();
+    const { stats, isLoading: loading } = useSidebarStats();
+    const navigation = [
+        {
+            name: 'Dashboard',
+            href: '/dashboard',
+            icon: HomeIcon,
+            badge: null, // Dashboard nie ma badge
+        },
+        {
+            name: 'Oferty',
+            href: '/dashboard/offers',
+            icon: DocumentIcon,
+            badge: stats.offers,
+            badgeColor: 'cyan', // aktywne oferty
+        },
+        {
+            name: 'Umowy',
+            href: '/dashboard/contracts',
+            icon: ClipboardIcon,
+            badge: stats.contracts > 0 ? stats.contracts : null,
+            badgeColor: 'green',
+        },
+        {
+            name: 'Klienci',
+            href: '/dashboard/clients',
+            icon: UsersIcon,
+            badge: stats.clients,
+            badgeColor: 'blue',
+        },
+        {
+            name: 'Follow-upy',
+            href: '/dashboard/followups',
+            icon: BellIcon,
+            badge: stats.followups > 0 ? stats.followups : null,
+            badgeColor: 'orange',
+        },
+        {
+            name: 'AI Asystent',
+            href: '/dashboard/ai',
+            icon: SparklesIcon,
+            badge: null,
+        },
+    ];
+
+    const bottomNav = [
+        { name: 'Ustawienia', href: '/dashboard/settings', icon: SettingsIcon },
+    ];
+
+    // Kolory badge
+    const badgeColors: Record<string, { active: string; inactive: string }> = {
+        cyan: {
+            active: 'bg-cyan-500 text-white',
+            inactive: 'bg-cyan-500/20 text-cyan-400'
+        },
+        blue: {
+            active: 'bg-blue-500 text-white',
+            inactive: 'bg-blue-500/20 text-blue-400'
+        },
+        green: {
+            active: 'bg-green-500 text-white',
+            inactive: 'bg-green-500/20 text-green-400'
+        },
+        orange: {
+            active: 'bg-orange-500 text-white',
+            inactive: 'bg-orange-500/20 text-orange-400'
+        },
+    };
 
     return (
         <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-slate-900 border-r border-slate-800">
@@ -42,7 +96,10 @@ export default function Sidebar() {
             <nav className="flex flex-col justify-between h-[calc(100vh-4rem)] px-3 py-4">
                 <div className="space-y-1">
                     {navigation.map((item) => {
-                        const isActive = pathname === item.href;
+                        const isActive = pathname === item.href ||
+                            (item.href !== '/dashboard' && pathname.startsWith(item.href));
+                        const colorConfig = item.badgeColor ? badgeColors[item.badgeColor] : badgeColors.cyan;
+
                         return (
                             <Link
                                 key={item.name}
@@ -57,10 +114,14 @@ export default function Sidebar() {
                                     <item.icon className={`h-5 w-5 ${isActive ? 'text-cyan-400' : 'text-slate-500 group-hover:text-slate-300'}`} />
                                     {item.name}
                                 </div>
-                                {item.badge && (
-                                    <span className={`px-2 py-0.5 text-xs font-semibold rounded-full
-                                        ${isActive ? 'bg-cyan-500 text-white' : 'bg-slate-700 text-slate-300'}`}>
-                                        {item.badge}
+
+                                {/* Badge z liczbą */}
+                                {item.badge !== null && item.badge > 0 && (
+                                    <span className={`min-w-[20px] px-1.5 py-0.5 text-xs font-semibold rounded-full text-center transition-all
+                                        ${loading ? 'animate-pulse bg-slate-700' : ''}
+                                        ${isActive ? colorConfig.active : colorConfig.inactive}`}
+                                    >
+                                        {loading ? '...' : item.badge}
                                     </span>
                                 )}
                             </Link>
