@@ -1,12 +1,40 @@
 // SmartQuote-AI/src/lib/api.ts
 
 import { getSession } from 'next-auth/react';
-import { ApiResponse } from '@/types';
+import type {
+    ApiResponse,
+    Client,
+    CreateClientInput,
+    UpdateClientInput,
+    ClientsStats,
+    Offer,
+    CreateOfferInput,
+    UpdateOfferInput,
+    OffersStats,
+    Contract,
+    CreateContractInput,
+    ContractsStats,
+    FollowUp,
+    CreateFollowUpData,
+    UpdateFollowUpData,
+    FollowUpStats,
+    User
+} from '@/types';
+import type {
+    ChatData,
+    SuggestionsData,
+    GeneratedOffer,
+    ClientAnalysis
+} from '@/types/ai';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
 
 interface FetchOptions extends RequestInit {
-    params?: Record<string, any>;
+    params?: Record<string, string | number | boolean | undefined>;
+}
+
+interface SessionWithToken {
+    accessToken?: string;
 }
 
 class ApiClient {
@@ -17,20 +45,19 @@ class ApiClient {
     }
 
     private async getAuthHeaders(): Promise<HeadersInit> {
-        const session = await getSession();
+        const session = await getSession() as SessionWithToken | null;
         const headers: HeadersInit = {
             'Content-Type': 'application/json',
         };
 
-        // Jeśli mamy token z backendu, użyj go
-        if ((session as any)?.accessToken) {
-            headers['Authorization'] = `Bearer ${(session as any).accessToken}`;
+        if (session?.accessToken) {
+            headers['Authorization'] = `Bearer ${session.accessToken}`;
         }
 
         return headers;
     }
 
-    private buildUrl(endpoint: string, params?: Record<string, any>): string {
+    private buildUrl(endpoint: string, params?: Record<string, string | number | boolean | undefined>): string {
         const url = new URL(`${this.baseUrl}${endpoint}`);
 
         if (params) {
@@ -82,20 +109,27 @@ class ApiClient {
         }
     }
 
-    async get<T>(endpoint: string, params?: Record<string, any>): Promise<ApiResponse<T>> {
+    async get<T>(endpoint: string, params?: Record<string, string | number | boolean | undefined>): Promise<ApiResponse<T>> {
         return this.request<T>(endpoint, { method: 'GET', params });
     }
 
-    async post<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
+    async post<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
         return this.request<T>(endpoint, {
             method: 'POST',
             body: data ? JSON.stringify(data) : undefined,
         });
     }
 
-    async put<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
+    async put<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
         return this.request<T>(endpoint, {
             method: 'PUT',
+            body: data ? JSON.stringify(data) : undefined,
+        });
+    }
+
+    async patch<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
+        return this.request<T>(endpoint, {
+            method: 'PATCH',
             body: data ? JSON.stringify(data) : undefined,
         });
     }
@@ -105,11 +139,11 @@ class ApiClient {
     }
 
     async downloadBlob(endpoint: string): Promise<Blob> {
-        const session = await getSession();
+        const session = await getSession() as SessionWithToken | null;
         const headers: HeadersInit = {};
 
-        if ((session as any)?.accessToken) {
-            headers['Authorization'] = `Bearer ${(session as any).accessToken}`;
+        if (session?.accessToken) {
+            headers['Authorization'] = `Bearer ${session.accessToken}`;
         }
 
         const url = `${this.baseUrl}${endpoint}`;
@@ -128,7 +162,7 @@ export class ApiError extends Error {
         message: string,
         public code: string,
         public status: number,
-        public details?: any
+        public details?: unknown
     ) {
         super(message);
         this.name = 'ApiError';
@@ -144,82 +178,132 @@ export const api = new ApiClient(`${API_URL}/api`);
 // Auth
 export const authApi = {
     login: (email: string, password: string) =>
-        api.post<{ user: any; token: string }>('/auth/login', { email, password }),
+        api.post<{ user: User; token: string }>('/auth/login', { email, password }),
     register: (data: { email: string; password: string; name?: string }) =>
-        api.post('/auth/register', data),
-    me: () => api.get('/auth/me'),
+        api.post<{ user: User; token: string }>('/auth/register', data),
+    me: () =>
+        api.get<User>('/auth/me'),
 };
 
 // Clients
 export const clientsApi = {
-    list: (params?: Record<string, any>) =>
-        api.get<any[]>('/clients', params),
+    list: (params?: Record<string, string | number | boolean | undefined>) =>
+        api.get<Client[]>('/clients', params),
     get: (id: string) =>
-        api.get<any>(`/clients/${id}`),
-    create: (data: any) =>
-        api.post<any>('/clients', data),
-    update: (id: string, data: any) =>
-        api.put<any>(`/clients/${id}`, data),
+        api.get<Client>(`/clients/${id}`),
+    create: (data: CreateClientInput) =>
+        api.post<Client>('/clients', data),
+    update: (id: string, data: UpdateClientInput) =>
+        api.put<Client>(`/clients/${id}`, data),
     delete: (id: string) =>
-        api.delete(`/clients/${id}`),
+        api.delete<{ message: string }>(`/clients/${id}`),
     stats: () =>
-        api.get<any>('/clients/stats'),
+        api.get<ClientsStats>('/clients/stats'),
 };
 
 // Offers
 export const offersApi = {
-    list: (params?: Record<string, any>) =>
-        api.get<any[]>('/offers', params),
+    list: (params?: Record<string, string | number | boolean | undefined>) =>
+        api.get<Offer[]>('/offers', params),
     get: (id: string) =>
-        api.get<any>(`/offers/${id}`),
-    create: (data: any) =>
-        api.post<any>('/offers', data),
-    update: (id: string, data: any) =>
-        api.put<any>(`/offers/${id}`, data),
+        api.get<Offer>(`/offers/${id}`),
+    create: (data: CreateOfferInput) =>
+        api.post<Offer>('/offers', data),
+    update: (id: string, data: UpdateOfferInput) =>
+        api.put<Offer>(`/offers/${id}`, data),
     delete: (id: string) =>
-        api.delete(`/offers/${id}`),
+        api.delete<{ message: string }>(`/offers/${id}`),
     duplicate: (id: string) =>
-        api.post<any>(`/offers/${id}/duplicate`),
+        api.post<Offer>(`/offers/${id}/duplicate`),
     stats: () =>
-        api.get<any>('/offers/stats'),
+        api.get<OffersStats>('/offers/stats'),
+    downloadPdf: (id: string) =>
+        api.downloadBlob(`/offers/${id}/pdf`),
 };
 
 // Contracts
 export const contractsApi = {
-    list: (params?: Record<string, any>) =>
-        api.get<any[]>('/contracts', params),
+    list: (params?: Record<string, string | number | boolean | undefined>) =>
+        api.get<Contract[]>('/contracts', params),
     get: (id: string) =>
-        api.get<any>(`/contracts/${id}`),
-    create: (data: any) =>
-        api.post<any>('/contracts', data),
-    update: (id: string, data: any) =>
-        api.put<any>(`/contracts/${id}`, data),
+        api.get<Contract>(`/contracts/${id}`),
+    create: (data: CreateContractInput) =>
+        api.post<Contract>('/contracts', data),
+    update: (id: string, data: Partial<CreateContractInput>) =>
+        api.put<Contract>(`/contracts/${id}`, data),
     delete: (id: string) =>
-        api.delete(`/contracts/${id}`),
+        api.delete<{ message: string }>(`/contracts/${id}`),
     createFromOffer: (offerId: string) =>
-        api.post<any>(`/contracts/from-offer/${offerId}`),
+        api.post<Contract>(`/contracts/from-offer/${offerId}`),
     updateStatus: (id: string, status: string) =>
-        api.put<any>(`/contracts/${id}/status`, { status }),
+        api.put<Contract>(`/contracts/${id}/status`, { status }),
     stats: () =>
-        api.get<any>('/contracts/stats'),
+        api.get<ContractsStats>('/contracts/stats'),
     downloadPdf: (id: string) =>
         api.downloadBlob(`/contracts/${id}/pdf`),
 };
 
 // Follow-ups
 export const followUpsApi = {
-    list: (params?: Record<string, any>) =>
-        api.get<any[]>('/followups', params),
+    list: (params?: Record<string, string | number | boolean | undefined>) =>
+        api.get<FollowUp[]>('/followups', params),
     get: (id: string) =>
-        api.get<any>(`/followups/${id}`),
-    create: (data: any) =>
-        api.post<any>('/followups', data),
-    update: (id: string, data: any) =>
-        api.put<any>(`/followups/${id}`, data),
+        api.get<FollowUp>(`/followups/${id}`),
+    create: (data: CreateFollowUpData) =>
+        api.post<FollowUp>('/followups', data),
+    update: (id: string, data: UpdateFollowUpData) =>
+        api.put<FollowUp>(`/followups/${id}`, data),
     delete: (id: string) =>
-        api.delete(`/followups/${id}`),
+        api.delete<{ message: string }>(`/followups/${id}`),
     complete: (id: string) =>
-        api.put<any>(`/followups/${id}/complete`, {}),
+        api.patch<FollowUp>(`/followups/${id}/complete`, {}),
     stats: () =>
-        api.get<any>('/followups/stats'),
+        api.get<FollowUpStats>('/followups/stats'),
+    upcoming: (params?: Record<string, string | number | boolean | undefined>) =>
+        api.get<FollowUp[]>('/followups/upcoming', params),
+    overdue: () =>
+        api.get<FollowUp[]>('/followups/overdue'),
+};
+
+// ============ AI ============
+export const ai = {
+    chat: async (message: string, history: Array<{ role: 'user' | 'assistant'; content: string }> = []): Promise<ChatData> => {
+        const response = await api.post<ChatData>('/ai/chat', { message, history });
+        return response.data as ChatData;
+    },
+
+    generateOffer: async (description: string, clientId?: string): Promise<GeneratedOffer> => {
+        const response = await api.post<GeneratedOffer>('/ai/generate-offer', { description, clientId });
+        return response.data as GeneratedOffer;
+    },
+
+    generateEmail: async (
+        type: 'offer_send' | 'followup' | 'thank_you' | 'reminder',
+        clientName: string,
+        offerTitle?: string,
+        customContext?: string
+    ): Promise<{ email: string }> => {
+        const response = await api.post<{ email: string }>('/ai/generate-email', {
+            type,
+            clientName,
+            offerTitle,
+            customContext,
+        });
+        return response.data as { email: string };
+    },
+
+    analyzeClient: async (clientId: string): Promise<ClientAnalysis> => {
+        const response = await api.get<ClientAnalysis>(`/ai/analyze-client/${clientId}`);
+        return response.data as ClientAnalysis;
+    },
+
+    getSuggestions: async (): Promise<SuggestionsData> => {
+        const response = await api.get<SuggestionsData>('/ai/suggestions');
+        return response.data as SuggestionsData;
+    },
+
+    clearHistory: async (): Promise<{ message: string }> => {
+        const response = await api.delete<{ message: string }>('/ai/history');
+        return response.data as { message: string };
+    },
 };

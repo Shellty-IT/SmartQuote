@@ -371,3 +371,5 @@ export interface UpdateFollowUpData {
     offerId?: string | null;
     contractId?: string | null;
 }
+
+export * from './ai';

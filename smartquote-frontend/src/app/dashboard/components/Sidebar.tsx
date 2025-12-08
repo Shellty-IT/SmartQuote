@@ -1,8 +1,10 @@
+// src/app/dashboard/components/Sidebar.tsx
 'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
+// ❌ USUŃ TEN IMPORT: import { SparklesIcon } from '@heroicons/react/24/outline';
 
 const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
