@@ -1,5 +1,6 @@
-import NextAuth, { NextAuthOptions } from 'next-auth';
+import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import type { NextAuthOptions } from 'next-auth';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8080';
 
@@ -17,9 +18,14 @@ export const authOptions: NextAuthOptions = {
                 }
 
                 try {
+                    console.log('[NextAuth] Próba logowania do:', `${BACKEND_URL}/api/auth/login`);
+
                     const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
                         body: JSON.stringify({
                             email: credentials.email,
                             password: credentials.password,
@@ -28,21 +34,26 @@ export const authOptions: NextAuthOptions = {
 
                     const data = await response.json();
 
+                    console.log('[NextAuth] Odpowiedź z backendu:', {
+                        status: response.status,
+                        success: data.success
+                    });
+
                     if (!response.ok || !data.success) {
                         throw new Error(data.error?.message || 'Błąd logowania');
                     }
 
-                    // Zwróć użytkownika z tokenem JWT z backendu
                     return {
                         id: data.data.user.id,
                         email: data.data.user.email,
                         name: data.data.user.name,
                         role: data.data.user.role,
-                        accessToken: data.data.token, // Token JWT z backendu
+                        accessToken: data.data.token,
                     };
-                } catch (error: any) {
-                    console.error('[NextAuth] Auth error:', error.message);
-                    throw new Error(error.message || 'Nieprawidłowy email lub hasło');
+                } catch (error) {
+                    const message = error instanceof Error ? error.message : 'Nieprawidłowy email lub hasło';
+                    console.error('[NextAuth] Błąd autoryzacji:', message);
+                    throw new Error(message);
                 }
             },
         }),
@@ -50,26 +61,27 @@ export const authOptions: NextAuthOptions = {
 
     callbacks: {
         async jwt({ token, user }) {
-            // Przy pierwszym logowaniu dodaj dane użytkownika do tokena
             if (user) {
                 token.id = user.id;
                 token.email = user.email;
                 token.name = user.name;
-                token.role = (user as any).role;
-                token.accessToken = (user as any).accessToken;
+                // Bezpieczny dostęp do rozszerzonych właściwości
+                if ('role' in user) {
+                    token.role = user.role;
+                }
+                if ('accessToken' in user) {
+                    token.accessToken = user.accessToken;
+                }
             }
             return token;
         },
 
         async session({ session, token }) {
-            // Przekaż dane z tokena do sesji
             if (session.user) {
-                (session.user as any).id = token.id;
-                session.user.email = token.email as string;
-                session.user.name = token.name as string;
-                (session as any).accessToken = token.accessToken;
-                (session.user as any).role = token.role;
+                session.user.id = token.id;
+                session.user.role = token.role;
             }
+            session.accessToken = token.accessToken;
             return session;
         },
     },
@@ -81,7 +93,7 @@ export const authOptions: NextAuthOptions = {
 
     session: {
         strategy: 'jwt',
-        maxAge: 24 * 60 * 60, // 24 godziny
+        maxAge: 24 * 60 * 60,
     },
 
     secret: process.env.NEXTAUTH_SECRET,
