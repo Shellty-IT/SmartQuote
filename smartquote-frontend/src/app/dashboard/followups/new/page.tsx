@@ -70,26 +70,22 @@ export default function NewFollowUpPage() {
         setError(null);
 
         try {
-            const cleanData: Record<string, unknown> = {};
+            const cleanData: CreateFollowUpData = {
+                // Required fields
+                title: formData.title,
+                type: formData.type,
+                dueDate: new Date(formData.dueDate).toISOString(),
 
-            // Required fields
-            if (formData.title) cleanData.title = formData.title;
-            if (formData.type) cleanData.type = formData.type;
+                // Optional fields - dodawane warunkowo
+                ...(formData.priority && { priority: formData.priority }),
+                ...(formData.description && { description: formData.description }),
+                ...(formData.notes && { notes: formData.notes }),
+                ...(formData.clientId && { clientId: formData.clientId }),
+                ...(formData.offerId && { offerId: formData.offerId }),
+                ...(formData.contractId && { contractId: formData.contractId }),
+            };
 
-            // Convert date to ISO string with time
-            if (formData.dueDate) {
-                cleanData.dueDate = new Date(formData.dueDate).toISOString();
-            }
-
-            // Optional fields
-            if (formData.priority) cleanData.priority = formData.priority;
-            if (formData.description) cleanData.description = formData.description;
-            if (formData.notes) cleanData.notes = formData.notes;
-            if (formData.clientId) cleanData.clientId = formData.clientId;
-            if (formData.offerId) cleanData.offerId = formData.offerId;
-            if (formData.contractId) cleanData.contractId = formData.contractId;
-
-            console.log('Sending data:', cleanData); // Debug
+            console.log('Sending data:', cleanData);
 
             await followUpsApi.create(cleanData);
             router.push('/dashboard/followups');
