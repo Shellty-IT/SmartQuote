@@ -372,4 +372,116 @@ export interface UpdateFollowUpData {
     contractId?: string | null;
 }
 
+export interface UserSettings {
+    id: string;
+    userId: string;
+    theme: 'light' | 'dark' | 'system';
+    language: 'pl' | 'en';
+    emailNotifications: boolean;
+    offerNotifications: boolean;
+    followUpReminders: boolean;
+    weeklyReport: boolean;
+    aiTone: 'professional' | 'friendly' | 'formal';
+    aiAutoSuggestions: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface CompanyInfo {
+    id: string;
+    userId: string;
+    name: string | null;
+    nip: string | null;
+    regon: string | null;
+    address: string | null;
+    city: string | null;
+    postalCode: string | null;
+    country: string | null;
+    phone: string | null;
+    email: string | null;
+    website: string | null;
+    bankName: string | null;
+    bankAccount: string | null;
+    logo: string | null;
+    defaultPaymentDays: number;
+    defaultTerms: string | null;
+    defaultNotes: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ApiKey {
+    id: string;
+    name: string;
+    key: string; // Zamaskowany klucz
+    lastUsedAt: string | null;
+    expiresAt: string | null;
+    isActive: boolean;
+    permissions: string[];
+    createdAt: string;
+}
+
+export interface UserProfile {
+    id: string;
+    email: string;
+    name: string | null;
+    phone: string | null;
+    avatar: string | null;
+    role: 'USER' | 'ADMIN';
+    createdAt: string;
+}
+
+export interface AllSettings {
+    profile: UserProfile;
+    settings: UserSettings;
+    companyInfo: CompanyInfo;
+    apiKeys: ApiKey[];
+}
+
+export interface UpdateProfileInput {
+    name?: string;
+    phone?: string | null;
+    avatar?: string | null;
+}
+
+export interface ChangePasswordInput {
+    currentPassword: string;
+    newPassword: string;
+}
+
+export interface UpdateSettingsInput {
+    theme?: 'light' | 'dark' | 'system';
+    language?: 'pl' | 'en';
+    emailNotifications?: boolean;
+    offerNotifications?: boolean;
+    followUpReminders?: boolean;
+    weeklyReport?: boolean;
+    aiTone?: 'professional' | 'friendly' | 'formal';
+    aiAutoSuggestions?: boolean;
+}
+
+export interface UpdateCompanyInfoInput {
+    name?: string | null;
+    nip?: string | null;
+    regon?: string | null;
+    address?: string | null;
+    city?: string | null;
+    postalCode?: string | null;
+    country?: string | null;
+    phone?: string | null;
+    email?: string | null;
+    website?: string | null;
+    bankName?: string | null;
+    bankAccount?: string | null;
+    logo?: string | null;
+    defaultPaymentDays?: number;
+    defaultTerms?: string | null;
+    defaultNotes?: string | null;
+}
+
+export interface CreateApiKeyInput {
+    name: string;
+    permissions?: string[];
+    expiresAt?: string | null;
+}
 export * from './ai';

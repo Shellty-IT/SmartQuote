@@ -18,7 +18,17 @@ import type {
     CreateFollowUpData,
     UpdateFollowUpData,
     FollowUpStats,
-    User
+    User,
+    AllSettings,
+    UserProfile,
+    UserSettings,
+    CompanyInfo,
+    ApiKey,
+    UpdateProfileInput,
+    ChangePasswordInput,
+    UpdateSettingsInput,
+    UpdateCompanyInfoInput,
+    CreateApiKeyInput
 } from '@/types';
 import type {
     ChatData,
@@ -304,6 +314,75 @@ export const ai = {
 
     clearHistory: async (): Promise<{ message: string }> => {
         const response = await api.delete<{ message: string }>('/ai/history');
+        return response.data as { message: string };
+    },
+};
+
+// ============ Settings ============
+export const settingsApi = {
+    // Pobierz wszystkie ustawienia naraz
+    getAll: async (): Promise<AllSettings> => {
+        const response = await api.get<AllSettings>('/settings');
+        return response.data as AllSettings;
+    },
+
+    // Profile
+    getProfile: async (): Promise<UserProfile> => {
+        const response = await api.get<UserProfile>('/settings/profile');
+        return response.data as UserProfile;
+    },
+
+    updateProfile: async (data: UpdateProfileInput): Promise<UserProfile> => {
+        const response = await api.put<UserProfile>('/settings/profile', data);
+        return response.data as UserProfile;
+    },
+
+    // Password
+    changePassword: async (data: ChangePasswordInput): Promise<{ message: string }> => {
+        const response = await api.put<{ message: string }>('/settings/password', data);
+        return response.data as { message: string };
+    },
+
+    // Preferences
+    getPreferences: async (): Promise<UserSettings> => {
+        const response = await api.get<UserSettings>('/settings/preferences');
+        return response.data as UserSettings;
+    },
+
+    updatePreferences: async (data: UpdateSettingsInput): Promise<UserSettings> => {
+        const response = await api.put<UserSettings>('/settings/preferences', data);
+        return response.data as UserSettings;
+    },
+
+    // Company
+    getCompany: async (): Promise<CompanyInfo> => {
+        const response = await api.get<CompanyInfo>('/settings/company');
+        return response.data as CompanyInfo;
+    },
+
+    updateCompany: async (data: UpdateCompanyInfoInput): Promise<CompanyInfo> => {
+        const response = await api.put<CompanyInfo>('/settings/company', data);
+        return response.data as CompanyInfo;
+    },
+
+    // API Keys
+    getApiKeys: async (): Promise<ApiKey[]> => {
+        const response = await api.get<ApiKey[]>('/settings/api-keys');
+        return response.data as ApiKey[];
+    },
+
+    createApiKey: async (data: CreateApiKeyInput): Promise<ApiKey & { key: string }> => {
+        const response = await api.post<ApiKey & { key: string }>('/settings/api-keys', data);
+        return response.data as ApiKey & { key: string };
+    },
+
+    toggleApiKey: async (id: string): Promise<ApiKey> => {
+        const response = await api.patch<ApiKey>(`/settings/api-keys/${id}/toggle`);
+        return response.data as ApiKey;
+    },
+
+    deleteApiKey: async (id: string): Promise<{ message: string }> => {
+        const response = await api.delete<{ message: string }>(`/settings/api-keys/${id}`);
         return response.data as { message: string };
     },
 };
