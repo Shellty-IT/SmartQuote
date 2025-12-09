@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useContracts } from '@/hooks/useContracts';
@@ -11,7 +11,7 @@ import { Button, Card, Input, Select, Textarea, LoadingSpinner } from '@/compone
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Client } from '@/types';
 
-export default function NewContractPage() {
+function NewContractForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const fromOfferId = searchParams.get('fromOffer');
@@ -282,5 +282,24 @@ export default function NewContractPage() {
                 </div>
             </form>
         </div>
+    );
+}
+
+// Komponent ładowania
+function NewContractLoading() {
+    return (
+        <div className="flex flex-col items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p className="mt-4 text-gray-500">Ładowanie...</p>
+        </div>
+    );
+}
+
+// Główny eksport strony z Suspense
+export default function NewContractPage() {
+    return (
+        <Suspense fallback={<NewContractLoading />}>
+            <NewContractForm />
+        </Suspense>
     );
 }

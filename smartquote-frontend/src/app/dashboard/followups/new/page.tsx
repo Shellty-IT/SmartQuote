@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { followUpsApi } from '@/lib/api';
 import { useClients } from '@/hooks/useClients';
@@ -11,7 +11,7 @@ import { useContracts } from '@/hooks/useContracts';
 import { Button, Input, Select, Textarea, Card } from '@/components/ui';
 import { CreateFollowUpData } from '@/types';
 
-export default function NewFollowUpPage() {
+function NewFollowUpForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -57,9 +57,6 @@ export default function NewFollowUpPage() {
         setFieldErrors(errors);
         return Object.keys(errors).length === 0;
     };
-
-// W src/app/dashboard/followups/new/page.tsx
-// Zmień handleSubmit:
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -247,5 +244,24 @@ export default function NewFollowUpPage() {
                 </div>
             </form>
         </div>
+    );
+}
+
+// Komponent ładowania
+function NewFollowUpLoading() {
+    return (
+        <div className="flex flex-col items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p className="mt-4 text-gray-500">Ładowanie...</p>
+        </div>
+    );
+}
+
+// Główny eksport strony z Suspense
+export default function NewFollowUpPage() {
+    return (
+        <Suspense fallback={<NewFollowUpLoading />}>
+            <NewFollowUpForm />
+        </Suspense>
     );
 }
