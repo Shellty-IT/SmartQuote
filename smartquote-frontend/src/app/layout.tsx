@@ -1,9 +1,9 @@
+// src/app/layout.tsx
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "./providers";
-import { GlobalAIChat } from "@/components/ai/GlobalAIChat";
 import "./globals.css";
-import type { Viewport } from "next";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -20,13 +20,6 @@ export const metadata: Metadata = {
     description: "Inteligentny system wycen projektów",
 };
 
-// Upewnij się, że mobilne urządzenia mają właściwą skalę i szerokość widoku
-export const viewport: Viewport = {
-    width: "device-width",
-    initialScale: 1,
-    viewportFit: "cover",
-};
-
 export default function RootLayout({
                                        children,
                                    }: Readonly<{
@@ -37,7 +30,7 @@ export default function RootLayout({
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>
             {children}
-            <GlobalAIChat />
+            {/* USUNIĘTE: <GlobalAIChat /> */}
         </Providers>
         </body>
         </html>
