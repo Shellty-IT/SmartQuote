@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "./providers";
+import { GlobalAIChat } from "@/components/ai/GlobalAIChat";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -25,10 +26,11 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="pl">
-        <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-        <Providers>{children}</Providers>
+        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <Providers>
+            {children}
+            <GlobalAIChat />
+        </Providers>
         </body>
         </html>
     );

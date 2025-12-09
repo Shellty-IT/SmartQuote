@@ -33,8 +33,6 @@ export default function DashboardPage() {
         ? Math.round(((offersStats.byStatus?.ACCEPTED?.count || 0) / offersStats.total) * 100)
         : 0;
 
-    const pendingFollowups = (offersStats?.byStatus?.SENT?.count || 0) + (offersStats?.byStatus?.VIEWED?.count || 0);
-
     const isLoading = isLoadingOffersStats || isLoadingClientsStats || isLoadingOffers;
 
     if (isLoading) {
@@ -43,55 +41,6 @@ export default function DashboardPage() {
 
     return (
         <div className="min-h-screen">
-            {/* Top Header */}
-            <header className="sticky top-0 z-30 bg-slate-50/80 backdrop-blur-sm border-b border-slate-200/60">
-                <div className="flex items-center justify-between px-8 py-4">
-                    {/* Search */}
-                    <div className="relative w-96">
-                        <svg
-                            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                        <input
-                            type="text"
-                            placeholder="Szukaj ofert, klientów, umów..."
-                            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all"
-                        />
-                        <kbd className="absolute right-3 top-1/2 -translate-y-1/2 px-2 py-1 text-xs text-slate-400 bg-slate-100 rounded">
-                            ⌘K
-                        </kbd>
-                    </div>
-
-                    {/* Right side */}
-                    <div className="flex items-center gap-4">
-                        {/* Notifications */}
-                        <button className="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors">
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                            </svg>
-                            {pendingFollowups > 0 && (
-                                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-                            )}
-                        </button>
-
-                        {/* User */}
-                        <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
-                            <div className="text-right">
-                                <p className="text-sm font-medium text-slate-700">{userName}</p>
-                                <p className="text-xs text-slate-500">{session?.user?.email}</p>
-                            </div>
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-semibold shadow-lg shadow-cyan-500/25">
-                                {userName.charAt(0).toUpperCase()}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
             {/* Main Content */}
             <main className="p-8">
                 {/* Welcome Section */}
@@ -282,7 +231,6 @@ export default function DashboardPage() {
                                     { status: 'REJECTED', label: 'Odrzucone' },
                                 ].map(({ status, label }) => {
                                     const count = offersStats?.byStatus?.[status as keyof typeof offersStats.byStatus]?.count || 0;
-                                    const config = getStatusConfig(status);
                                     const percentage = offersStats?.total ? Math.round((count / offersStats.total) * 100) : 0;
 
                                     return (
