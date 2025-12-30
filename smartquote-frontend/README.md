@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SmartQuote-AI
 
-## Getting Started
+SmartQuote-AI to zaawansowana platforma wspomagająca proces sprzedaży, zarządzanie klientami oraz automatyczne generowanie ofert z wykorzystaniem sztucznej inteligencji.
 
-First, run the development server:
+## 🚀 O Projekcie
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Projekt został stworzony, aby zautomatyzować powtarzalne czynności w pracy handlowca i menedżera. Dzięki integracji z AI, system potrafi analizować potrzeby klientów, generować spersonalizowane oferty oraz pilnować terminów follow-upów.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Główne funkcjonalności:
+- 👥 **Zarządzanie Klientami (CRM)**: Pełna historia interakcji, podział na osoby prywatne i firmy.
+- 📄 **Generator Ofert**: Tworzenie profesjonalnych ofert w kilka sekund, eksport do PDF.
+- 🤖 **Asystent AI**: Dedykowany chatbot pomagający w przygotowaniu treści i analizie danych.
+- ✍️ **Kontrakty**: Zarządzanie umowami powiązanymi z ofertami.
+- 📅 **Follow-upy**: System przypomnień o kontaktach z klientami.
+- 📊 **Dashboard Analityczny**: Podgląd kluczowych wskaźników (KPI) w czasie rzeczywistym.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Stack Technologiczny
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Frontend**: Next.js 16, React 19, Tailwind CSS
+- **Stan**: React Context, Custom Hooks
+- **Autoryzacja**: NextAuth.js
+- **Ikony**: Lucide React
+- **Animacje**: Framer Motion
 
-## Learn More
+## ⏱️ Szybki Start
 
-To learn more about Next.js, take a look at the following resources:
+1. **Sklonuj repozytorium**: `git clone https://github.com/twoje-uzytkownik/SmartQuote-AI.git`
+2. **Zainstaluj zależności**: `npm install`
+3. **Skonfiguruj zmienne**: skopiuj `.env.example` do `.env.local`
+4. **Uruchom projekt**: `npm run dev`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Szczegółowa instrukcja znajduje się w pliku [INSTALLATION.md](./docs/INSTALLATION.md).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📚 Dokumentacja
 
-## Deploy on Vercel
+Zapraszamy do zapoznania się ze szczegółową dokumentacją projektu:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- 📥 [**Instalacja**](./docs/INSTALLATION.md) - Jak uruchomić projekt lokalnie.
+- 🏗️ [**Architektura**](./docs/ARCHITECTURE.md) - Struktura systemu i decyzje techniczne.
+- 🔌 [**API**](./docs/API.md) - Dokumentacja punktów końcowych.
+- ⚙️ [**Konfiguracja**](./docs/CONFIGURATION.md) - Opis zmiennych środowiskowych.
+- 👩‍💻 [**Development**](./docs/DEVELOPMENT.md) - Przewodnik dla programistów.
+- 🚀 [**Deployment**](./docs/DEPLOYMENT.md) - Instrukcja wdrożenia produkcyjnego.
+- 🤝 [**Contributing**](./docs/CONTRIBUTING.md) - Jak pomóc w rozwoju projektu.
+- 📜 [**Changelog**](./docs/CHANGELOG.md) - Historia zmian w projekcie.
+- ❓ [**FAQ**](./docs/FAQ.md) - Najczęściej zadawane pytania.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📄 Licencja
+
+Ten projekt jest prywatny i chroniony prawem autorskim.
