@@ -1,6 +1,8 @@
+// SmartQuote-AI/src/app/dashboard/clients/[id]/edit/page.tsx
+
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useClient } from '@/hooks/useClients';
 import { clientsApi, ApiError } from '@/lib/api';
@@ -8,9 +10,10 @@ import { Button, Input, Select, Textarea, Card } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { UpdateClientInput } from '@/types';
 
-export default function EditClientPage({ params }: { params: { id: string } }) {
+export default function EditClientPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
     const router = useRouter();
-    const { client, isLoading: isLoadingClient, error: clientError } = useClient(params.id);
+    const { client, isLoading: isLoadingClient, error: clientError } = useClient(id);
 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -51,8 +54,8 @@ export default function EditClientPage({ params }: { params: { id: string } }) {
         setError(null);
 
         try {
-            await clientsApi.update(params.id, formData);
-            router.push(`/dashboard/clients/${params.id}`);
+            await clientsApi.update(id, formData);
+            router.push(`/dashboard/clients/${id}`);
         } catch (err) {
             if (err instanceof ApiError) {
                 setError(err.message);
@@ -83,7 +86,6 @@ export default function EditClientPage({ params }: { params: { id: string } }) {
 
     return (
         <div className="p-8 max-w-3xl mx-auto">
-            {/* Header */}
             <div className="mb-8">
                 <button
                     onClick={() => router.back()}

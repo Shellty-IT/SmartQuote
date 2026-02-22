@@ -1,4 +1,5 @@
-// src/app/dashboard/offers/new/NewOfferContent.tsx
+// SmartQuote-AI/src/app/dashboard/offers/new/NewOfferContent.tsx
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -37,7 +38,13 @@ const UNITS = [
     { value: 'usł.', label: 'usł.' },
 ];
 
-const emptyItem: CreateOfferItemInput = {
+interface ExtendedOfferItem extends CreateOfferItemInput {
+    isOptional: boolean;
+    minQuantity: number;
+    maxQuantity: number;
+}
+
+const emptyItem: ExtendedOfferItem = {
     name: '',
     description: '',
     quantity: 1,
@@ -45,6 +52,9 @@ const emptyItem: CreateOfferItemInput = {
     unitPrice: 0,
     vatRate: 23,
     discount: 0,
+    isOptional: false,
+    minQuantity: 1,
+    maxQuantity: 100,
 };
 
 export default function NewOfferContent() {
@@ -68,7 +78,7 @@ export default function NewOfferContent() {
         terms: 'Płatność przelewem w ciągu 14 dni od wystawienia faktury.',
         paymentDays: 14,
     });
-    const [items, setItems] = useState<CreateOfferItemInput[]>([{ ...emptyItem }]);
+    const [items, setItems] = useState<ExtendedOfferItem[]>([{ ...emptyItem }]);
 
     useEffect(() => {
         if (preselectedClientId && clients.length > 0) {
@@ -80,7 +90,7 @@ export default function NewOfferContent() {
         }
     }, [preselectedClientId, clients]);
 
-    const calculateItemTotal = (item: CreateOfferItemInput) => {
+    const calculateItemTotal = (item: ExtendedOfferItem) => {
         const quantity = item.quantity || 0;
         const unitPrice = item.unitPrice || 0;
         const discount = item.discount || 0;
@@ -113,9 +123,7 @@ export default function NewOfferContent() {
             client.company?.toLowerCase().includes(clientSearch.toLowerCase())
     );
 
-    const goToStep = (step: Step) => {
-        setCurrentStep(step);
-    };
+    const goToStep = (step: Step) => setCurrentStep(step);
 
     const goNext = () => {
         const currentIndex = STEPS.findIndex((s) => s.id === currentStep);
@@ -131,9 +139,7 @@ export default function NewOfferContent() {
         }
     };
 
-    const addItem = () => {
-        setItems([...items, { ...emptyItem }]);
-    };
+    const addItem = () => setItems([...items, { ...emptyItem }]);
 
     const removeItem = (index: number) => {
         if (items.length > 1) {
@@ -141,7 +147,7 @@ export default function NewOfferContent() {
         }
     };
 
-    const updateItem = (index: number, field: keyof CreateOfferItemInput, value: string | number) => {
+    const updateItem = (index: number, field: keyof ExtendedOfferItem, value: string | number | boolean) => {
         const newItems = [...items];
         newItems[index] = { ...newItems[index], [field]: value };
         setItems(newItems);
@@ -183,6 +189,9 @@ export default function NewOfferContent() {
                     unitPrice: item.unitPrice,
                     vatRate: item.vatRate,
                     discount: item.discount,
+                    isOptional: item.isOptional,
+                    minQuantity: item.isOptional ? item.minQuantity : undefined,
+                    maxQuantity: item.isOptional ? item.maxQuantity : undefined,
                 })),
             };
 
@@ -208,7 +217,6 @@ export default function NewOfferContent() {
 
     return (
         <div className="p-8 max-w-4xl mx-auto">
-            {/* Header */}
             <div className="mb-8">
                 <button
                     onClick={() => router.back()}
@@ -223,7 +231,6 @@ export default function NewOfferContent() {
                 <p className="text-slate-500 mt-1">Utwórz nową ofertę handlową</p>
             </div>
 
-            {/* Stepper */}
             <div className="mb-8">
                 <div className="flex items-center justify-between">
                     {STEPS.map((step, index) => {
@@ -263,11 +270,7 @@ export default function NewOfferContent() {
                                     </span>
                                 </button>
                                 {index < STEPS.length - 1 && (
-                                    <div
-                                        className={`flex-1 h-0.5 mx-4 ${
-                                            isPast ? 'bg-emerald-500' : 'bg-slate-200'
-                                        }`}
-                                    />
+                                    <div className={`flex-1 h-0.5 mx-4 ${isPast ? 'bg-emerald-500' : 'bg-slate-200'}`} />
                                 )}
                             </div>
                         );
@@ -275,20 +278,16 @@ export default function NewOfferContent() {
                 </div>
             </div>
 
-            {/* Error */}
             {error && (
                 <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
                     {error}
                 </div>
             )}
 
-            {/* Step Content */}
             <Card className="mb-6">
-                {/* Step 1: Select Client */}
                 {currentStep === 'client' && (
                     <div>
                         <h2 className="text-lg font-semibold text-slate-900 mb-4">Wybierz klienta</h2>
-
                         <Input
                             placeholder="Szukaj klienta..."
                             value={clientSearch}
@@ -300,7 +299,6 @@ export default function NewOfferContent() {
                                 </svg>
                             }
                         />
-
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto">
                             {filteredClients.map((client) => (
                                 <button
@@ -329,7 +327,6 @@ export default function NewOfferContent() {
                                 </button>
                             ))}
                         </div>
-
                         {filteredClients.length === 0 && (
                             <div className="text-center py-8">
                                 <p className="text-slate-500 mb-4">Nie znaleziono klientów</p>
@@ -341,11 +338,9 @@ export default function NewOfferContent() {
                     </div>
                 )}
 
-                {/* Step 2: Offer Details */}
                 {currentStep === 'details' && (
                     <div>
                         <h2 className="text-lg font-semibold text-slate-900 mb-4">Szczegóły oferty</h2>
-
                         <div className="space-y-4">
                             <Input
                                 label="Tytuł oferty"
@@ -354,7 +349,6 @@ export default function NewOfferContent() {
                                 placeholder="np. System CRM dla firmy X"
                                 required
                             />
-
                             <Textarea
                                 label="Opis"
                                 value={offerDetails.description}
@@ -362,7 +356,6 @@ export default function NewOfferContent() {
                                 placeholder="Krótki opis zakresu oferty..."
                                 rows={3}
                             />
-
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <Input
                                     label="Ważna do"
@@ -371,7 +364,6 @@ export default function NewOfferContent() {
                                     onChange={(e) => setOfferDetails({ ...offerDetails, validUntil: e.target.value })}
                                     min={new Date().toISOString().split('T')[0]}
                                 />
-
                                 <Input
                                     label="Termin płatności (dni)"
                                     type="number"
@@ -381,14 +373,12 @@ export default function NewOfferContent() {
                                     max={365}
                                 />
                             </div>
-
                             <Textarea
                                 label="Warunki płatności"
                                 value={offerDetails.terms}
                                 onChange={(e) => setOfferDetails({ ...offerDetails, terms: e.target.value })}
                                 rows={2}
                             />
-
                             <Textarea
                                 label="Notatki wewnętrzne"
                                 value={offerDetails.notes}
@@ -400,7 +390,6 @@ export default function NewOfferContent() {
                     </div>
                 )}
 
-                {/* Step 3: Items */}
                 {currentStep === 'items' && (
                     <div>
                         <div className="flex items-center justify-between mb-4">
@@ -494,6 +483,46 @@ export default function NewOfferContent() {
                                             />
                                         </div>
 
+                                        <div className="p-3 bg-white rounded-lg border border-slate-200">
+                                            <label className="flex items-center gap-3 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={item.isOptional}
+                                                    onChange={(e) => updateItem(index, 'isOptional', e.target.checked)}
+                                                    className="w-4 h-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
+                                                />
+                                                <div>
+                                                    <span className="text-sm font-medium text-slate-900">
+                                                        Pozycja opcjonalna
+                                                    </span>
+                                                    <p className="text-xs text-slate-500">
+                                                        Klient może odznaczyć tę pozycję lub zmienić ilość
+                                                    </p>
+                                                </div>
+                                            </label>
+
+                                            {item.isOptional && (
+                                                <div className="flex gap-4 mt-3 pl-7">
+                                                    <Input
+                                                        label="Min. ilość"
+                                                        type="number"
+                                                        value={item.minQuantity}
+                                                        onChange={(e) => updateItem(index, 'minQuantity', parseInt(e.target.value) || 1)}
+                                                        min={1}
+                                                        className="w-32"
+                                                    />
+                                                    <Input
+                                                        label="Max. ilość"
+                                                        type="number"
+                                                        value={item.maxQuantity}
+                                                        onChange={(e) => updateItem(index, 'maxQuantity', parseInt(e.target.value) || 100)}
+                                                        min={1}
+                                                        className="w-32"
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+
                                         <div className="flex justify-end gap-4 pt-2 border-t border-slate-200">
                                             <span className="text-sm text-slate-500">
                                                 Netto: <strong>{formatCurrency(itemTotals.totalNet)}</strong>
@@ -510,7 +539,6 @@ export default function NewOfferContent() {
                             })}
                         </div>
 
-                        {/* Totals */}
                         <div className="mt-6 p-4 bg-slate-900 rounded-xl text-white">
                             <div className="flex justify-between items-center">
                                 <span className="text-slate-400">Suma netto:</span>
@@ -528,13 +556,10 @@ export default function NewOfferContent() {
                     </div>
                 )}
 
-                {/* Step 4: Summary */}
                 {currentStep === 'summary' && selectedClient && (
                     <div>
                         <h2 className="text-lg font-semibold text-slate-900 mb-6">Podsumowanie oferty</h2>
-
                         <div className="space-y-6">
-                            {/* Client */}
                             <div className="p-4 bg-slate-50 rounded-xl">
                                 <h3 className="text-sm font-medium text-slate-500 mb-2">Klient</h3>
                                 <div className="flex items-center gap-3">
@@ -548,7 +573,6 @@ export default function NewOfferContent() {
                                 </div>
                             </div>
 
-                            {/* Details */}
                             <div className="p-4 bg-slate-50 rounded-xl">
                                 <h3 className="text-sm font-medium text-slate-500 mb-2">Szczegóły</h3>
                                 <div className="grid grid-cols-2 gap-4">
@@ -575,7 +599,6 @@ export default function NewOfferContent() {
                                 )}
                             </div>
 
-                            {/* Items */}
                             <div className="p-4 bg-slate-50 rounded-xl">
                                 <h3 className="text-sm font-medium text-slate-500 mb-2">Pozycje ({items.length})</h3>
                                 <div className="space-y-2">
@@ -584,7 +607,14 @@ export default function NewOfferContent() {
                                         return (
                                             <div key={index} className="flex justify-between items-center py-2 border-b border-slate-200 last:border-0">
                                                 <div>
-                                                    <p className="text-slate-900">{item.name}</p>
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="text-slate-900">{item.name}</p>
+                                                        {item.isOptional && (
+                                                            <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 font-medium">
+                                                                Opcjonalna
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                     <p className="text-sm text-slate-500">
                                                         {item.quantity} {item.unit} × {formatCurrency(item.unitPrice)}
                                                         {item.discount ? ` (-${item.discount}%)` : ''}
@@ -599,7 +629,6 @@ export default function NewOfferContent() {
                                 </div>
                             </div>
 
-                            {/* Totals */}
                             <div className="p-4 bg-slate-900 rounded-xl text-white">
                                 <div className="flex justify-between items-center">
                                     <span className="text-slate-400">Suma netto:</span>
@@ -619,7 +648,6 @@ export default function NewOfferContent() {
                 )}
             </Card>
 
-            {/* Navigation */}
             <div className="flex justify-between">
                 <Button
                     variant="outline"

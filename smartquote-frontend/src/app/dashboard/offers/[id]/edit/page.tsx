@@ -1,6 +1,8 @@
+// SmartQuote-AI/src/app/dashboard/offers/[id]/edit/page.tsx
+
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useOffer } from '@/hooks/useOffers';
 import { useClients } from '@/hooks/useClients';
@@ -30,9 +32,10 @@ const UNITS = [
 
 type ItemFieldValue = string | number | undefined | null;
 
-export default function EditOfferPage({ params }: { params: { id: string } }) {
+export default function EditOfferPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
     const router = useRouter();
-    const { offer, isLoading: isLoadingOffer, error: offerError } = useOffer(params.id);
+    const { offer, isLoading: isLoadingOffer, error: offerError } = useOffer(id);
     const { clients } = useClients({ limit: 100 });
 
     const [isLoading, setIsLoading] = useState(false);
@@ -49,7 +52,6 @@ export default function EditOfferPage({ params }: { params: { id: string } }) {
     });
     const [items, setItems] = useState<CreateOfferItemInput[]>([]);
 
-    // Populate form when offer loads
     useEffect(() => {
         if (offer) {
             setOfferDetails({
@@ -79,16 +81,13 @@ export default function EditOfferPage({ params }: { params: { id: string } }) {
         }
     }, [offer]);
 
-    // Update selected client when clients load
     useEffect(() => {
         if (offer && clients.length > 0 && !selectedClient) {
-            // ✅ FIX 1: Zmieniono offer.clientId na offer.client.id
             const client = clients.find((c) => c.id === offer.client?.id);
             if (client) setSelectedClient(client);
         }
     }, [offer, clients, selectedClient]);
 
-    // Calculate totals
     const calculateItemTotal = (item: CreateOfferItemInput) => {
         const quantity = item.quantity || 0;
         const unitPrice = item.unitPrice || 0;
@@ -115,7 +114,6 @@ export default function EditOfferPage({ params }: { params: { id: string } }) {
         { totalNet: 0, totalVat: 0, totalGross: 0 }
     );
 
-    // Item management
     const addItem = () => {
         setItems([
             ...items,
@@ -137,14 +135,12 @@ export default function EditOfferPage({ params }: { params: { id: string } }) {
         }
     };
 
-    // ✅ FIX 2: Zmieniono typ 'any' na 'ItemFieldValue'
     const updateItem = (index: number, field: keyof CreateOfferItemInput, value: ItemFieldValue) => {
         const newItems = [...items];
         newItems[index] = { ...newItems[index], [field]: value };
         setItems(newItems);
     };
 
-    // Submit
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -205,7 +201,6 @@ export default function EditOfferPage({ params }: { params: { id: string } }) {
 
     return (
         <div className="p-8 max-w-4xl mx-auto">
-            {/* Header */}
             <div className="mb-8">
                 <button
                     onClick={() => router.back()}
@@ -220,7 +215,6 @@ export default function EditOfferPage({ params }: { params: { id: string } }) {
                 <p className="text-slate-500 mt-1">{offer.number}</p>
             </div>
 
-            {/* Error */}
             {error && (
                 <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
                     {error}
@@ -228,7 +222,6 @@ export default function EditOfferPage({ params }: { params: { id: string } }) {
             )}
 
             <form onSubmit={handleSubmit}>
-                {/* Client */}
                 <Card className="mb-6">
                     <h2 className="text-lg font-semibold text-slate-900 mb-4">Klient</h2>
                     {selectedClient && (
@@ -253,7 +246,6 @@ export default function EditOfferPage({ params }: { params: { id: string } }) {
                     )}
                 </Card>
 
-                {/* Details */}
                 <Card className="mb-6">
                     <h2 className="text-lg font-semibold text-slate-900 mb-4">Szczegóły oferty</h2>
 
@@ -305,7 +297,6 @@ export default function EditOfferPage({ params }: { params: { id: string } }) {
                     </div>
                 </Card>
 
-                {/* Items */}
                 <Card className="mb-6">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-lg font-semibold text-slate-900">Pozycje oferty</h2>
@@ -398,7 +389,6 @@ export default function EditOfferPage({ params }: { params: { id: string } }) {
                                         />
                                     </div>
 
-                                    {/* ✅ FIX 3: Upewnij się że JSX jest poprawny */}
                                     <div className="flex justify-end gap-4 pt-2 border-t border-slate-200">
                                         <span className="text-sm text-slate-500">
                                             Netto: <strong>{formatCurrency(itemTotals.totalNet)}</strong>
@@ -415,7 +405,6 @@ export default function EditOfferPage({ params }: { params: { id: string } }) {
                         })}
                     </div>
 
-                    {/* Totals */}
                     <div className="mt-6 p-4 bg-slate-900 rounded-xl text-white">
                         <div className="flex justify-between items-center">
                             <span className="text-slate-400">Suma netto:</span>
@@ -432,7 +421,6 @@ export default function EditOfferPage({ params }: { params: { id: string } }) {
                     </div>
                 </Card>
 
-                {/* Actions */}
                 <div className="flex justify-end gap-3">
                     <Button type="button" variant="outline" onClick={() => router.back()}>
                         Anuluj

@@ -1,8 +1,5 @@
 // SmartQuote-AI/src/types/index.ts
 
-// ============================================
-// API Response Types
-// ============================================
 export interface ApiResponse<T = any> {
     success: boolean;
     data?: T;
@@ -19,9 +16,6 @@ export interface ApiResponse<T = any> {
     };
 }
 
-// ============================================
-// Paginated Response Type
-// ============================================
 export interface PaginatedResponse<T> {
     data: T[];
     pagination: {
@@ -32,9 +26,6 @@ export interface PaginatedResponse<T> {
     };
 }
 
-// ============================================
-// User Types
-// ============================================
 export interface User {
     id: string;
     email: string;
@@ -45,9 +36,6 @@ export interface User {
     createdAt: string;
 }
 
-// ============================================
-// Client Types
-// ============================================
 export type ClientType = 'PERSON' | 'COMPANY';
 
 export interface Client {
@@ -101,9 +89,6 @@ export interface ClientsStats {
     withOffers: number;
 }
 
-// ============================================
-// Offer Types
-// ============================================
 export type OfferStatus =
     | 'DRAFT'
     | 'SENT'
@@ -126,6 +111,10 @@ export interface OfferItem {
     totalVat: number;
     totalGross: number;
     position: number;
+    isOptional: boolean;
+    isSelected: boolean;
+    minQuantity: number;
+    maxQuantity: number;
 }
 
 export interface Offer {
@@ -146,6 +135,11 @@ export interface Offer {
     notes: string | null;
     terms: string | null;
     paymentDays: number;
+    publicToken: string | null;
+    isInteractive: boolean;
+    viewCount: number;
+    lastViewedAt: string | null;
+    clientSelectedData: any | null;
     createdAt: string;
     updatedAt: string;
     client: Client;
@@ -153,6 +147,8 @@ export interface Offer {
     _count?: {
         items: number;
         followUps?: number;
+        comments?: number;
+        views?: number;
     };
 }
 
@@ -164,6 +160,9 @@ export interface CreateOfferItemInput {
     unitPrice: number;
     vatRate?: number;
     discount?: number;
+    isOptional?: boolean;
+    minQuantity?: number;
+    maxQuantity?: number;
 }
 
 export interface CreateOfferInput {
@@ -189,9 +188,144 @@ export interface OffersStats {
     acceptedValue: number;
 }
 
-// ============================================
-// Contract Types
-// ============================================
+export interface PublishOfferResult {
+    publicToken: string;
+    publicUrl: string;
+    alreadyPublished: boolean;
+}
+
+export interface OfferView {
+    id: string;
+    offerId: string;
+    viewedAt: string;
+    ipAddress: string | null;
+    userAgent: string | null;
+    duration: number | null;
+}
+
+export type InteractionType =
+    | 'VIEW'
+    | 'ITEM_SELECT'
+    | 'ITEM_DESELECT'
+    | 'QUANTITY_CHANGE'
+    | 'ACCEPT'
+    | 'REJECT'
+    | 'COMMENT'
+    | 'PDF_DOWNLOAD';
+
+export interface OfferInteraction {
+    id: string;
+    offerId: string;
+    type: InteractionType;
+    details: any;
+    createdAt: string;
+}
+
+export type CommentAuthor = 'CLIENT' | 'SELLER';
+
+export interface OfferComment {
+    id: string;
+    offerId: string;
+    author: CommentAuthor;
+    content: string;
+    createdAt: string;
+}
+
+export interface OfferAnalytics {
+    id: string;
+    number: string;
+    title: string;
+    status: OfferStatus;
+    publicToken: string | null;
+    isInteractive: boolean;
+    viewCount: number;
+    lastViewedAt: string | null;
+    acceptedAt: string | null;
+    rejectedAt: string | null;
+    clientSelectedData: any | null;
+    validUntil: string | null;
+    totalNet: number;
+    totalGross: number;
+    views: OfferView[];
+    interactions: OfferInteraction[];
+    comments: OfferComment[];
+    uniqueVisitors: number;
+    publicUrl: string | null;
+}
+
+export interface PublicOfferData {
+    expired: boolean;
+    decided: boolean;
+    offer: {
+        id: string;
+        number: string;
+        title: string;
+        description: string | null;
+        status: OfferStatus;
+        validUntil: string | null;
+        totalNet: number;
+        totalVat: number;
+        totalGross: number;
+        currency: string;
+        acceptedAt: string | null;
+        rejectedAt: string | null;
+        clientSelectedData: any | null;
+        terms: string | null;
+        paymentDays: number;
+        createdAt: string;
+        items: PublicOfferItem[];
+        client: {
+            name: string;
+            company: string | null;
+        };
+        seller: {
+            name: string | null;
+            email: string;
+            phone: string | null;
+            company: string | null;
+            nip: string | null;
+            address: string | null;
+            city: string | null;
+            postalCode: string | null;
+            website: string | null;
+            logo: string | null;
+        };
+        comments: OfferComment[];
+    };
+}
+
+export interface PublicOfferItem {
+    id: string;
+    name: string;
+    description: string | null;
+    quantity: number;
+    unit: string;
+    unitPrice: number;
+    vatRate: number;
+    discount: number;
+    totalNet: number;
+    totalVat: number;
+    totalGross: number;
+    position: number;
+    isOptional: boolean;
+    isSelected: boolean;
+    minQuantity: number;
+    maxQuantity: number;
+}
+
+export interface PublicOfferAcceptPayload {
+    confirmationChecked: true;
+    selectedItems: Array<{
+        id: string;
+        isSelected: boolean;
+        quantity: number;
+    }>;
+}
+
+export interface PublicOfferRejectPayload {
+    reason?: string;
+}
+
 export type ContractStatus =
     | 'DRAFT'
     | 'PENDING_SIGNATURE'
@@ -271,9 +405,6 @@ export interface CreateContractInput {
     }[];
 }
 
-// ============================================
-// Filter & Pagination Types
-// ============================================
 export interface PaginationParams {
     page?: number;
     limit?: number;
@@ -294,7 +425,6 @@ export interface OfferFilters extends PaginationParams {
     dateTo?: string;
 }
 
-// Follow-up types
 export type FollowUpType = 'CALL' | 'EMAIL' | 'MEETING' | 'TASK' | 'REMINDER' | 'OTHER';
 export type FollowUpStatus = 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'OVERDUE';
 export type Priority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
@@ -413,7 +543,7 @@ export interface CompanyInfo {
 export interface ApiKey {
     id: string;
     name: string;
-    key: string; // Zamaskowany klucz
+    key: string;
     lastUsedAt: string | null;
     expiresAt: string | null;
     isActive: boolean;
@@ -484,4 +614,5 @@ export interface CreateApiKeyInput {
     permissions?: string[];
     expiresAt?: string | null;
 }
+
 export * from './ai';

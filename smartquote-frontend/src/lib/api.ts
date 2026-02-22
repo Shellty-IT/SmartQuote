@@ -11,6 +11,9 @@ import type {
     CreateOfferInput,
     UpdateOfferInput,
     OffersStats,
+    PublishOfferResult,
+    OfferAnalytics,
+    OfferComment,
     Contract,
     CreateContractInput,
     ContractsStats,
@@ -28,7 +31,10 @@ import type {
     ChangePasswordInput,
     UpdateSettingsInput,
     UpdateCompanyInfoInput,
-    CreateApiKeyInput
+    CreateApiKeyInput,
+    PublicOfferData,
+    PublicOfferAcceptPayload,
+    PublicOfferRejectPayload,
 } from '@/types';
 import type {
     ChatData,
@@ -119,6 +125,43 @@ class ApiClient {
         }
     }
 
+    async requestPublic<T>(endpoint: string, options: FetchOptions = {}): Promise<ApiResponse<T>> {
+        const { params, ...fetchOptions } = options;
+        const url = this.buildUrl(endpoint, params);
+
+        try {
+            const response = await fetch(url, {
+                ...fetchOptions,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...fetchOptions.headers,
+                },
+            });
+
+            const data: ApiResponse<T> = await response.json();
+
+            if (!response.ok) {
+                throw new ApiError(
+                    data.error?.message || 'Wystąpił błąd',
+                    data.error?.code || 'UNKNOWN_ERROR',
+                    response.status,
+                    data.error?.details
+                );
+            }
+
+            return data;
+        } catch (error) {
+            if (error instanceof ApiError) {
+                throw error;
+            }
+            throw new ApiError(
+                'Błąd połączenia z serwerem',
+                'NETWORK_ERROR',
+                0
+            );
+        }
+    }
+
     async get<T>(endpoint: string, params?: Record<string, string | number | boolean | undefined>): Promise<ApiResponse<T>> {
         return this.request<T>(endpoint, { method: 'GET', params });
     }
@@ -165,6 +208,24 @@ class ApiClient {
 
         return response.blob();
     }
+
+    async getPublic<T>(endpoint: string, params?: Record<string, string | number | boolean | undefined>): Promise<ApiResponse<T>> {
+        return this.requestPublic<T>(endpoint, { method: 'GET', params });
+    }
+
+    async postPublic<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
+        return this.requestPublic<T>(endpoint, {
+            method: 'POST',
+            body: data ? JSON.stringify(data) : undefined,
+        });
+    }
+
+    async patchPublic<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
+        return this.requestPublic<T>(endpoint, {
+            method: 'PATCH',
+            body: data ? JSON.stringify(data) : undefined,
+        });
+    }
 }
 
 export class ApiError extends Error {
@@ -181,11 +242,6 @@ export class ApiError extends Error {
 
 export const api = new ApiClient(`${API_URL}/api`);
 
-// ============================================
-// API Endpoints
-// ============================================
-
-// Auth
 export const authApi = {
     login: (email: string, password: string) =>
         api.post<{ user: User; token: string }>('/auth/login', { email, password }),
@@ -195,7 +251,6 @@ export const authApi = {
         api.get<User>('/auth/me'),
 };
 
-// Clients
 export const clientsApi = {
     list: (params?: Record<string, string | number | boolean | undefined>) =>
         api.get<Client[]>('/clients', params),
@@ -211,7 +266,6 @@ export const clientsApi = {
         api.get<ClientsStats>('/clients/stats'),
 };
 
-// Offers
 export const offersApi = {
     list: (params?: Record<string, string | number | boolean | undefined>) =>
         api.get<Offer[]>('/offers', params),
@@ -229,9 +283,33 @@ export const offersApi = {
         api.get<OffersStats>('/offers/stats'),
     downloadPdf: (id: string) =>
         api.downloadBlob(`/offers/${id}/pdf`),
+    publish: (id: string) =>
+        api.post<PublishOfferResult>(`/offers/${id}/publish`),
+    unpublish: (id: string) =>
+        api.delete<{ unpublished: boolean }>(`/offers/${id}/publish`),
+    analytics: (id: string) =>
+        api.get<OfferAnalytics>(`/offers/${id}/analytics`),
+    getComments: (id: string) =>
+        api.get<OfferComment[]>(`/offers/${id}/comments`),
+    addComment: (id: string, content: string) =>
+        api.post<OfferComment>(`/offers/${id}/comments`, { content }),
 };
 
-// Contracts
+export const publicOffersApi = {
+    get: (token: string) =>
+        api.getPublic<PublicOfferData>(`/public/offers/${token}`),
+    registerView: (token: string) =>
+        api.postPublic<{ registered: boolean }>(`/public/offers/${token}/view`),
+    accept: (token: string, payload: PublicOfferAcceptPayload) =>
+        api.postPublic<any>(`/public/offers/${token}/accept`, payload),
+    reject: (token: string, payload: PublicOfferRejectPayload) =>
+        api.postPublic<any>(`/public/offers/${token}/reject`, payload),
+    addComment: (token: string, content: string) =>
+        api.postPublic<OfferComment>(`/public/offers/${token}/comment`, { content }),
+    trackSelection: (token: string, items: Array<{ id: string; isSelected: boolean; quantity: number }>) =>
+        api.patchPublic<{ tracked: boolean }>(`/public/offers/${token}/selection`, { items }),
+};
+
 export const contractsApi = {
     list: (params?: Record<string, string | number | boolean | undefined>) =>
         api.get<Contract[]>('/contracts', params),
@@ -253,7 +331,6 @@ export const contractsApi = {
         api.downloadBlob(`/contracts/${id}/pdf`),
 };
 
-// Follow-ups
 export const followUpsApi = {
     list: (params?: Record<string, string | number | boolean | undefined>) =>
         api.get<FollowUp[]>('/followups', params),
@@ -275,7 +352,6 @@ export const followUpsApi = {
         api.get<FollowUp[]>('/followups/overdue'),
 };
 
-// ============ AI ============
 export const ai = {
     chat: async (message: string, history: Array<{ role: 'user' | 'assistant'; content: string }> = []): Promise<ChatData> => {
         const response = await api.post<ChatData>('/ai/chat', { message, history });
@@ -318,15 +394,12 @@ export const ai = {
     },
 };
 
-// ============ Settings ============
 export const settingsApi = {
-    // Pobierz wszystkie ustawienia naraz
     getAll: async (): Promise<AllSettings> => {
         const response = await api.get<AllSettings>('/settings');
         return response.data as AllSettings;
     },
 
-    // Profile
     getProfile: async (): Promise<UserProfile> => {
         const response = await api.get<UserProfile>('/settings/profile');
         return response.data as UserProfile;
@@ -337,13 +410,11 @@ export const settingsApi = {
         return response.data as UserProfile;
     },
 
-    // Password
     changePassword: async (data: ChangePasswordInput): Promise<{ message: string }> => {
         const response = await api.put<{ message: string }>('/settings/password', data);
         return response.data as { message: string };
     },
 
-    // Preferences
     getPreferences: async (): Promise<UserSettings> => {
         const response = await api.get<UserSettings>('/settings/preferences');
         return response.data as UserSettings;
@@ -354,7 +425,6 @@ export const settingsApi = {
         return response.data as UserSettings;
     },
 
-    // Company
     getCompany: async (): Promise<CompanyInfo> => {
         const response = await api.get<CompanyInfo>('/settings/company');
         return response.data as CompanyInfo;
@@ -365,7 +435,6 @@ export const settingsApi = {
         return response.data as CompanyInfo;
     },
 
-    // API Keys
     getApiKeys: async (): Promise<ApiKey[]> => {
         const response = await api.get<ApiKey[]>('/settings/api-keys');
         return response.data as ApiKey[];

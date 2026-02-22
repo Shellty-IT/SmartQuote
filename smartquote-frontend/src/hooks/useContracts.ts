@@ -4,7 +4,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/api';
-import { Contract, ContractsStats, PaginatedResponse, CreateContractInput, ContractStatus } from '@/types';
+import { Contract, ContractsStats, CreateContractInput, ContractStatus } from '@/types';
 
 interface UseContractsParams {
     page?: number;
@@ -37,17 +37,26 @@ export function useContracts(params: UseContractsParams = {}) {
             if (params.clientId) queryParams.set('clientId', params.clientId);
             if (params.search) queryParams.set('search', params.search);
 
-            const response = await api.get<PaginatedResponse<Contract>>(
+            const response = await api.get<Contract[]>(
                 `/contracts?${queryParams.toString()}`
             );
 
-            if (response.success && response.data) {
-                setContracts(response.data.data);
-                setPagination(response.data.pagination);
+            if (response.success) {
+                const contractsData = Array.isArray(response.data) ? response.data : [];
+                setContracts(contractsData);
+
+                if (response.meta) {
+                    setPagination({
+                        page: response.meta.page ?? 1,
+                        limit: response.meta.limit ?? 10,
+                        total: response.meta.total ?? 0,
+                        totalPages: response.meta.totalPages ?? 0,
+                    });
+                }
             }
         } catch (err) {
             setError('Nie udało się pobrać umów');
-            console.error(err);
+            console.error('Fetch contracts error:', err);
         } finally {
             setLoading(false);
         }
@@ -126,7 +135,7 @@ export function useContract(id: string) {
                 }
             } catch (err) {
                 setError('Nie udało się pobrać umowy');
-                console.error(err);
+                console.error('Fetch contract error:', err);
             } finally {
                 setLoading(false);
             }
@@ -155,7 +164,7 @@ export function useContractsStats() {
                 }
             } catch (err) {
                 setError('Nie udało się pobrać statystyk');
-                console.error(err);
+                console.error('Fetch contracts stats error:', err);
             } finally {
                 setLoading(false);
             }

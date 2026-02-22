@@ -1,8 +1,19 @@
+// SmartQuote-AI/src/hooks/useOffers.ts
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { offersApi, ApiError } from '@/lib/api';
-import { Offer, OfferFilters, OffersStats, CreateOfferInput, UpdateOfferInput } from '@/types';
+import type {
+    Offer,
+    OfferFilters,
+    OffersStats,
+    CreateOfferInput,
+    UpdateOfferInput,
+    PublishOfferResult,
+    OfferAnalytics,
+    OfferComment,
+} from '@/types';
 
 interface UseOffersResult {
     offers: Offer[];
@@ -168,4 +179,125 @@ export function useOffersStats() {
     }, [fetchStats]);
 
     return { stats, isLoading, error, refresh: fetchStats };
+}
+
+export function useOfferPublish(id: string) {
+    const [isPublishing, setIsPublishing] = useState(false);
+    const [isUnpublishing, setIsUnpublishing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const publish = useCallback(async (): Promise<PublishOfferResult | null> => {
+        setIsPublishing(true);
+        setError(null);
+
+        try {
+            const response = await offersApi.publish(id);
+            return response.data ?? null;
+        } catch (err) {
+            const message = err instanceof ApiError ? err.message : 'Nie udało się opublikować oferty';
+            setError(message);
+            return null;
+        } finally {
+            setIsPublishing(false);
+        }
+    }, [id]);
+
+    const unpublish = useCallback(async (): Promise<boolean> => {
+        setIsUnpublishing(true);
+        setError(null);
+
+        try {
+            await offersApi.unpublish(id);
+            return true;
+        } catch (err) {
+            const message = err instanceof ApiError ? err.message : 'Nie udało się dezaktywować linku';
+            setError(message);
+            return false;
+        } finally {
+            setIsUnpublishing(false);
+        }
+    }, [id]);
+
+    return { publish, unpublish, isPublishing, isUnpublishing, error };
+}
+
+export function useOfferAnalytics(id: string) {
+    const [analytics, setAnalytics] = useState<OfferAnalytics | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const fetchAnalytics = useCallback(async () => {
+        if (!id) return;
+
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            const response = await offersApi.analytics(id);
+            setAnalytics(response.data ?? null);
+        } catch (err) {
+            const message = err instanceof ApiError ? err.message : 'Błąd pobierania analityki';
+            setError(message);
+            setAnalytics(null);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [id]);
+
+    useEffect(() => {
+        fetchAnalytics();
+    }, [fetchAnalytics]);
+
+    return { analytics, isLoading, error, refresh: fetchAnalytics };
+}
+
+export function useOfferComments(id: string) {
+    const [comments, setComments] = useState<OfferComment[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSending, setIsSending] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const fetchComments = useCallback(async () => {
+        if (!id) return;
+
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            const response = await offersApi.getComments(id);
+            setComments(response.data ?? []);
+        } catch (err) {
+            const message = err instanceof ApiError ? err.message : 'Błąd pobierania komentarzy';
+            setError(message);
+            setComments([]);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [id]);
+
+    useEffect(() => {
+        fetchComments();
+    }, [fetchComments]);
+
+    const addComment = useCallback(async (content: string): Promise<OfferComment | null> => {
+        setIsSending(true);
+        setError(null);
+
+        try {
+            const response = await offersApi.addComment(id, content);
+            if (response.data) {
+                setComments((prev) => [...prev, response.data!]);
+                return response.data;
+            }
+            return null;
+        } catch (err) {
+            const message = err instanceof ApiError ? err.message : 'Nie udało się dodać komentarza';
+            setError(message);
+            return null;
+        } finally {
+            setIsSending(false);
+        }
+    }, [id]);
+
+    return { comments, isLoading, isSending, error, addComment, refresh: fetchComments };
 }

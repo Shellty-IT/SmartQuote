@@ -1,4 +1,5 @@
-// src/hooks/useSidebarStats.ts
+// SmartQuote-AI/src/hooks/useSidebarStats.ts
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -26,7 +27,6 @@ export function useSidebarStats() {
         setError(null);
 
         try {
-            // Pobieramy wszystkie statystyki równolegle
             const [offersRes, clientsRes, contractsRes, followupsRes] = await Promise.allSettled([
                 offersApi.stats(),
                 clientsApi.stats(),
@@ -39,30 +39,21 @@ export function useSidebarStats() {
             let contractsCount = 0;
             let followupsCount = 0;
 
-            // Oferty - liczymy aktywne (SENT, VIEWED, NEGOTIATION)
             if (offersRes.status === 'fulfilled' && offersRes.value.data) {
                 const data = offersRes.value.data;
-                offersCount =
-                    (data.byStatus?.SENT?.count || 0) +
-                    (data.byStatus?.VIEWED?.count || 0) +
-                    (data.byStatus?.NEGOTIATION?.count || 0);
+                offersCount = data.total || 0;
             }
 
-            // Klienci - liczymy aktywnych
             if (clientsRes.status === 'fulfilled' && clientsRes.value.data) {
                 const data = clientsRes.value.data;
-                clientsCount = data.active || 0;
+                clientsCount = data.total || 0;
             }
 
-            // Umowy - liczymy aktywne (PENDING_SIGNATURE + ACTIVE)
             if (contractsRes.status === 'fulfilled' && contractsRes.value.data) {
                 const data = contractsRes.value.data;
-                contractsCount =
-                    (data.byStatus?.PENDING_SIGNATURE || 0) +
-                    (data.byStatus?.ACTIVE || 0);
+                contractsCount = data.total || 0;
             }
 
-            // Follow-upy - liczymy oczekujące + zaległe
             if (followupsRes.status === 'fulfilled' && followupsRes.value.data) {
                 const data = followupsRes.value.data;
                 followupsCount =
@@ -76,11 +67,9 @@ export function useSidebarStats() {
                 clients: clientsCount,
                 followups: followupsCount,
             });
-
         } catch (err) {
             const message = err instanceof ApiError ? err.message : 'Błąd pobierania statystyk';
             setError(message);
-            console.error('Błąd pobierania statystyk sidebar:', err);
         } finally {
             setIsLoading(false);
         }
@@ -89,7 +78,6 @@ export function useSidebarStats() {
     useEffect(() => {
         fetchStats();
 
-        // Odświeżaj co 60 sekund
         const interval = setInterval(fetchStats, 60000);
         return () => clearInterval(interval);
     }, [fetchStats]);
