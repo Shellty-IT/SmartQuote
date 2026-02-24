@@ -10,6 +10,7 @@ import { Button, Input, Select, Textarea, Card } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { formatCurrency, getInitials } from '@/lib/utils';
 import { CreateOfferInput, CreateOfferItemInput, Client } from '@/types';
+import AIPriceInsight from '@/components/ai/AIPriceInsight';
 
 type Step = 'client' | 'details' | 'items' | 'summary';
 
@@ -480,6 +481,14 @@ export default function NewOfferContent() {
                                                 onChange={(e) => updateItem(index, 'discount', parseFloat(e.target.value) || 0)}
                                                 min={0}
                                                 max={100}
+                                            />
+                                        </div>
+
+                                        <div className="flex items-center justify-between">
+                                            <AIPriceInsight
+                                                itemName={item.name}
+                                                currentPrice={item.unitPrice}
+                                                onPriceSelect={(price) => updateItem(index, 'unitPrice', price)}
                                             />
                                         </div>
 

@@ -11,6 +11,7 @@ import { Button, Input, Select, Textarea, Card } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { formatCurrency, getInitials } from '@/lib/utils';
 import { UpdateOfferInput, CreateOfferItemInput, Client } from '@/types';
+import AIPriceInsight from '@/components/ai/AIPriceInsight';
 
 const VAT_RATES = [
     { value: '23', label: '23%' },
@@ -30,7 +31,13 @@ const UNITS = [
     { value: 'usł.', label: 'usł.' },
 ];
 
-type ItemFieldValue = string | number | undefined | null;
+interface ExtendedEditItem extends CreateOfferItemInput {
+    isOptional: boolean;
+    minQuantity: number;
+    maxQuantity: number;
+}
+
+type ItemFieldValue = string | number | boolean | undefined | null;
 
 export default function EditOfferPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -50,7 +57,7 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
         terms: '',
         paymentDays: 14,
     });
-    const [items, setItems] = useState<CreateOfferItemInput[]>([]);
+    const [items, setItems] = useState<ExtendedEditItem[]>([]);
 
     useEffect(() => {
         if (offer) {
@@ -72,6 +79,9 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
                     unitPrice: Number(item.unitPrice),
                     vatRate: Number(item.vatRate),
                     discount: Number(item.discount),
+                    isOptional: item.isOptional || false,
+                    minQuantity: item.minQuantity || 1,
+                    maxQuantity: item.maxQuantity || 100,
                 }))
             );
 
@@ -88,7 +98,7 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
         }
     }, [offer, clients, selectedClient]);
 
-    const calculateItemTotal = (item: CreateOfferItemInput) => {
+    const calculateItemTotal = (item: ExtendedEditItem) => {
         const quantity = item.quantity || 0;
         const unitPrice = item.unitPrice || 0;
         const discount = item.discount || 0;
@@ -125,6 +135,9 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
                 unitPrice: 0,
                 vatRate: 23,
                 discount: 0,
+                isOptional: false,
+                minQuantity: 1,
+                maxQuantity: 100,
             },
         ]);
     };
@@ -135,7 +148,7 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
         }
     };
 
-    const updateItem = (index: number, field: keyof CreateOfferItemInput, value: ItemFieldValue) => {
+    const updateItem = (index: number, field: keyof ExtendedEditItem, value: ItemFieldValue) => {
         const newItems = [...items];
         newItems[index] = { ...newItems[index], [field]: value };
         setItems(newItems);
@@ -166,6 +179,9 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
                     unitPrice: item.unitPrice,
                     vatRate: item.vatRate,
                     discount: item.discount,
+                    isOptional: item.isOptional,
+                    minQuantity: item.isOptional ? item.minQuantity : undefined,
+                    maxQuantity: item.isOptional ? item.maxQuantity : undefined,
                 })),
             };
 
@@ -387,6 +403,54 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
                                             min={0}
                                             max={100}
                                         />
+                                    </div>
+
+                                    <div className="flex items-center justify-between">
+                                        <AIPriceInsight
+                                            itemName={item.name}
+                                            currentPrice={item.unitPrice}
+                                            onPriceSelect={(price) => updateItem(index, 'unitPrice', price)}
+                                        />
+                                    </div>
+
+                                    <div className="p-3 bg-white rounded-lg border border-slate-200">
+                                        <label className="flex items-center gap-3 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={item.isOptional}
+                                                onChange={(e) => updateItem(index, 'isOptional', e.target.checked)}
+                                                className="w-4 h-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
+                                            />
+                                            <div>
+                                                <span className="text-sm font-medium text-slate-900">
+                                                    Pozycja opcjonalna
+                                                </span>
+                                                <p className="text-xs text-slate-500">
+                                                    Klient może odznaczyć tę pozycję lub zmienić ilość
+                                                </p>
+                                            </div>
+                                        </label>
+
+                                        {item.isOptional && (
+                                            <div className="flex gap-4 mt-3 pl-7">
+                                                <Input
+                                                    label="Min. ilość"
+                                                    type="number"
+                                                    value={item.minQuantity}
+                                                    onChange={(e) => updateItem(index, 'minQuantity', parseInt(e.target.value) || 1)}
+                                                    min={1}
+                                                    className="w-32"
+                                                />
+                                                <Input
+                                                    label="Max. ilość"
+                                                    type="number"
+                                                    value={item.maxQuantity}
+                                                    onChange={(e) => updateItem(index, 'maxQuantity', parseInt(e.target.value) || 100)}
+                                                    min={1}
+                                                    className="w-32"
+                                                />
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="flex justify-end gap-4 pt-2 border-t border-slate-200">

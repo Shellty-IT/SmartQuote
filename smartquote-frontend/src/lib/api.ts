@@ -40,7 +40,10 @@ import type {
     ChatData,
     SuggestionsData,
     GeneratedOffer,
-    ClientAnalysis
+    ClientAnalysis,
+    PriceInsightResult,
+    ObserverInsight,
+    ClosingStrategy,
 } from '@/types/ai';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
@@ -391,6 +394,21 @@ export const ai = {
     clearHistory: async (): Promise<{ message: string }> => {
         const response = await api.delete<{ message: string }>('/ai/history');
         return response.data as { message: string };
+    },
+
+    priceInsight: async (itemName: string, category?: string): Promise<PriceInsightResult> => {
+        const response = await api.post<PriceInsightResult>('/ai/price-insight', { itemName, category });
+        return response.data as PriceInsightResult;
+    },
+
+    observerInsight: async (offerId: string): Promise<ObserverInsight> => {
+        const response = await api.get<ObserverInsight>(`/ai/observer/${offerId}`);
+        return response.data as ObserverInsight;
+    },
+
+    closingStrategy: async (offerId: string): Promise<ClosingStrategy> => {
+        const response = await api.get<ClosingStrategy>(`/ai/closing-strategy/${offerId}`);
+        return response.data as ClosingStrategy;
     },
 };
 

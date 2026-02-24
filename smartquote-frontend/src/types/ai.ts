@@ -56,7 +56,6 @@ export interface ClientAnalysis {
     risks: string[];
 }
 
-// Typy dla API responses
 export interface ChatData {
     message: string;
     suggestions?: string[];
@@ -66,4 +65,74 @@ export interface ChatData {
 export interface SuggestionsData {
     suggestions: AISuggestion[];
     stats: AIStats;
+}
+
+export interface PriceInsightHistoricalItem {
+    name: string;
+    unitPrice: number;
+    quantity: number;
+    unit: string;
+    offerTitle: string;
+    offerStatus: string;
+    clientName: string;
+    date: string;
+}
+
+export interface PriceInsightResult {
+    historicalData: {
+        avgPrice: number;
+        minPrice: number;
+        maxPrice: number;
+        count: number;
+        items: PriceInsightHistoricalItem[];
+    };
+    aiSuggestion: {
+        suggestedMin: number;
+        suggestedMax: number;
+        marketAnalysis: string;
+        marginWarning: string | null;
+        confidence: 'low' | 'medium' | 'high';
+    };
+}
+
+export interface ObserverInsight {
+    summary: string;
+    keyFindings: string[];
+    clientIntent: 'likely_accept' | 'undecided' | 'likely_reject' | 'unknown';
+    interestAreas: string[];
+    concerns: string[];
+    engagementScore: number;
+    timeAnalysis: {
+        totalViews: number;
+        avgViewDuration: number | null;
+        mostActiveTime: string | null;
+    };
+}
+
+export interface ClosingStrategyVariant {
+    title: string;
+    description: string;
+    suggestedResponse: string;
+}
+
+export interface ClosingStrategy {
+    aggressive: ClosingStrategyVariant & {
+        riskLevel: 'low' | 'medium' | 'high';
+    };
+    partnership: ClosingStrategyVariant & {
+        proposedConcessions: string[];
+    };
+    quickClose: ClosingStrategyVariant & {
+        maxDiscountPercent: number;
+    };
+    contextSummary: string;
+}
+
+export interface PostMortemInsight {
+    outcome: string;
+    summary: string;
+    keyLessons: string[];
+    pricingInsight: string;
+    improvementSuggestions: string[];
+    industryNote: string | null;
 }

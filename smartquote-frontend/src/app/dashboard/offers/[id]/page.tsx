@@ -6,11 +6,12 @@ import { useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useOffer, useOfferAnalytics, useOfferComments } from '@/hooks/useOffers';
-import { offersApi } from '@/lib/api';
+import { offersApi, ai } from '@/lib/api';
 import { Button, Card, Badge, ConfirmDialog } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { formatDate, formatDateTime, formatCurrency, getStatusConfig, getInitials } from '@/lib/utils';
 import { OfferStatus } from '@/types';
+import type { ObserverInsight, ClosingStrategy } from '@/types/ai';
 import PublishDialog from '@/components/offers/PublishDialog';
 
 const STATUS_TRANSITIONS: Record<OfferStatus, OfferStatus[]> = {
@@ -29,6 +30,13 @@ interface PageProps {
     params: Promise<{ id: string }>;
 }
 
+const intentConfig: Record<string, { label: string; color: string }> = {
+    likely_accept: { label: 'Prawdopodobna akceptacja', color: 'bg-emerald-100 text-emerald-700' },
+    undecided: { label: 'Niezdecydowany', color: 'bg-amber-100 text-amber-700' },
+    likely_reject: { label: 'Prawdopodobne odrzucenie', color: 'bg-red-100 text-red-700' },
+    unknown: { label: 'Brak danych', color: 'bg-slate-100 text-slate-500' },
+};
+
 export default function OfferDetailPage({ params }: PageProps) {
     const { id } = use(params);
 
@@ -46,6 +54,46 @@ export default function OfferDetailPage({ params }: PageProps) {
     const [pdfError, setPdfError] = useState<string | null>(null);
     const [publishDialogOpen, setPublishDialogOpen] = useState(false);
     const [newComment, setNewComment] = useState('');
+
+    const [observerInsight, setObserverInsight] = useState<ObserverInsight | null>(null);
+    const [isLoadingObserver, setIsLoadingObserver] = useState(false);
+    const [observerError, setObserverError] = useState<string | null>(null);
+
+    const [closingStrategy, setClosingStrategy] = useState<ClosingStrategy | null>(null);
+    const [isLoadingCloser, setIsLoadingCloser] = useState(false);
+    const [closerError, setCloserError] = useState<string | null>(null);
+    const [expandedStrategy, setExpandedStrategy] = useState<string | null>(null);
+
+    const handleLoadObserver = async () => {
+        setIsLoadingObserver(true);
+        setObserverError(null);
+        try {
+            const data = await ai.observerInsight(id);
+            setObserverInsight(data);
+        } catch (err) {
+            setObserverError(err instanceof Error ? err.message : 'Błąd analizy');
+        } finally {
+            setIsLoadingObserver(false);
+        }
+    };
+
+    const handleLoadCloser = async () => {
+        setIsLoadingCloser(true);
+        setCloserError(null);
+        try {
+            const data = await ai.closingStrategy(id);
+            setClosingStrategy(data);
+        } catch (err) {
+            setCloserError(err instanceof Error ? err.message : 'Błąd generowania strategii');
+        } finally {
+            setIsLoadingCloser(false);
+        }
+    };
+
+    const handleUseStrategy = (text: string) => {
+        setNewComment(text);
+        setExpandedStrategy(null);
+    };
 
     const handleStatusChange = async (newStatus: OfferStatus) => {
         if (!offer) return;
@@ -158,6 +206,12 @@ export default function OfferDetailPage({ params }: PageProps) {
         { id: 'analytics', label: 'Analityka', count: offer.viewCount || 0 },
         { id: 'comments', label: 'Komentarze', count: offer._count?.comments || 0 },
     ];
+
+    const engagementColor = (score: number) => {
+        if (score <= 3) return 'bg-red-500';
+        if (score <= 6) return 'bg-amber-500';
+        return 'bg-emerald-500';
+    };
 
     return (
         <div className="p-8">
@@ -531,6 +585,131 @@ export default function OfferDetailPage({ params }: PageProps) {
                         </Card>
                     </div>
 
+                    <Card>
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <svg className="w-5 h-5 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                                </svg>
+                                <h2 className="text-lg font-semibold text-slate-900">AI Observer — Analiza zachowań</h2>
+                            </div>
+                            <button
+                                onClick={handleLoadObserver}
+                                disabled={isLoadingObserver}
+                                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-sm font-medium hover:from-cyan-600 hover:to-blue-600 transition-all disabled:opacity-50"
+                            >
+                                {isLoadingObserver ? (
+                                    <>
+                                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                        </svg>
+                                        Analizuję...
+                                    </>
+                                ) : (
+                                    <>
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        {observerInsight ? 'Odśwież analizę' : 'Analizuj zachowanie'}
+                                    </>
+                                )}
+                            </button>
+                        </div>
+
+                        {observerError && (
+                            <div className="p-3 rounded-lg bg-red-50 text-red-700 text-sm mb-4">{observerError}</div>
+                        )}
+
+                        {!observerInsight && !isLoadingObserver && !observerError && (
+                            <div className="text-center py-8">
+                                <svg className="w-12 h-12 mx-auto text-slate-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <p className="text-slate-400 text-sm">Kliknij &quot;Analizuj zachowanie&quot; aby AI przeanalizowało interakcje klienta</p>
+                            </div>
+                        )}
+
+                        {observerInsight && !isLoadingObserver && (
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-3 flex-wrap">
+                                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${intentConfig[observerInsight.clientIntent]?.color || intentConfig.unknown.color}`}>
+                                        {intentConfig[observerInsight.clientIntent]?.label || 'Brak danych'}
+                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs text-slate-500">Zaangażowanie:</span>
+                                        <div className="w-20 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                            <div
+                                                className={`h-full rounded-full transition-all ${engagementColor(observerInsight.engagementScore)}`}
+                                                style={{ width: `${observerInsight.engagementScore * 10}%` }}
+                                            />
+                                        </div>
+                                        <span className="text-xs font-semibold text-slate-700">{observerInsight.engagementScore}/10</span>
+                                    </div>
+                                </div>
+
+                                <p className="text-sm text-slate-700 leading-relaxed bg-slate-50 rounded-lg p-3">
+                                    {observerInsight.summary}
+                                </p>
+
+                                {observerInsight.keyFindings.length > 0 && (
+                                    <div>
+                                        <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Kluczowe ustalenia</h4>
+                                        <ul className="space-y-1">
+                                            {observerInsight.keyFindings.map((finding, idx) => (
+                                                <li key={idx} className="flex items-start gap-2 text-sm text-slate-700">
+                                                    <svg className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    {finding}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {observerInsight.interestAreas.length > 0 && (
+                                        <div>
+                                            <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Obszary zainteresowania</h4>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {observerInsight.interestAreas.map((area, idx) => (
+                                                    <span key={idx} className="text-xs px-2 py-1 rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200">
+                                                        {area}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                    {observerInsight.concerns.length > 0 && (
+                                        <div>
+                                            <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Obawy klienta</h4>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {observerInsight.concerns.map((concern, idx) => (
+                                                    <span key={idx} className="text-xs px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                                                        {concern}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="flex gap-4 text-xs text-slate-500 pt-2 border-t border-slate-100">
+                                    <span>Wyświetlenia: <strong className="text-slate-700">{observerInsight.timeAnalysis.totalViews}</strong></span>
+                                    {observerInsight.timeAnalysis.avgViewDuration !== null && (
+                                        <span>Śr. czas: <strong className="text-slate-700">{observerInsight.timeAnalysis.avgViewDuration}s</strong></span>
+                                    )}
+                                    {observerInsight.timeAnalysis.mostActiveTime && (
+                                        <span>Najaktywniejszy: <strong className="text-slate-700">{observerInsight.timeAnalysis.mostActiveTime}</strong></span>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </Card>
+
                     {analytics?.interactions && analytics.interactions.length > 0 && (
                         <Card>
                             <h2 className="text-lg font-semibold text-slate-900 mb-4">Aktywność klienta</h2>
@@ -637,7 +816,153 @@ export default function OfferDetailPage({ params }: PageProps) {
                             </div>
                         )}
 
-                        <div className="flex gap-2 pt-4 border-t border-slate-200">
+                        <div className="mb-4 pt-4 border-t border-slate-200">
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                    <svg className="w-4 h-4 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                                    </svg>
+                                    <span className="text-sm font-semibold text-slate-700">AI Closer — Strategia negocjacji</span>
+                                </div>
+                                <button
+                                    onClick={handleLoadCloser}
+                                    disabled={isLoadingCloser}
+                                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-medium hover:from-cyan-600 hover:to-blue-600 transition-all disabled:opacity-50"
+                                >
+                                    {isLoadingCloser ? (
+                                        <>
+                                            <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                            </svg>
+                                            Generuję...
+                                        </>
+                                    ) : (
+                                        closingStrategy ? 'Odśwież strategię' : 'Zasugeruj strategię'
+                                    )}
+                                </button>
+                            </div>
+
+                            {closerError && (
+                                <div className="p-3 rounded-lg bg-red-50 text-red-700 text-sm mb-3">{closerError}</div>
+                            )}
+
+                            {closingStrategy && !isLoadingCloser && (
+                                <div className="space-y-3">
+                                    {closingStrategy.contextSummary && (
+                                        <p className="text-xs text-slate-500 bg-slate-50 rounded-lg p-2.5 italic">
+                                            {closingStrategy.contextSummary}
+                                        </p>
+                                    )}
+
+                                    <div
+                                        className="rounded-xl border border-red-200 bg-red-50/30 overflow-hidden cursor-pointer"
+                                        onClick={() => setExpandedStrategy(expandedStrategy === 'aggressive' ? null : 'aggressive')}
+                                    >
+                                        <div className="flex items-center justify-between px-4 py-3">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm">🛡️</span>
+                                                <span className="text-sm font-semibold text-slate-900">{closingStrategy.aggressive.title}</span>
+                                                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                                                    closingStrategy.aggressive.riskLevel === 'low' ? 'bg-emerald-100 text-emerald-700' :
+                                                        closingStrategy.aggressive.riskLevel === 'medium' ? 'bg-amber-100 text-amber-700' :
+                                                            'bg-red-100 text-red-700'
+                                                }`}>
+                                                    Ryzyko: {closingStrategy.aggressive.riskLevel === 'low' ? 'niskie' : closingStrategy.aggressive.riskLevel === 'medium' ? 'średnie' : 'wysokie'}
+                                                </span>
+                                            </div>
+                                            <svg className={`w-4 h-4 text-slate-400 transition-transform ${expandedStrategy === 'aggressive' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+                                        {expandedStrategy === 'aggressive' && (
+                                            <div className="px-4 pb-4 space-y-3">
+                                                <p className="text-xs text-slate-600">{closingStrategy.aggressive.description}</p>
+                                                <div className="bg-white rounded-lg p-3 border border-red-100 text-sm text-slate-800">
+                                                    {closingStrategy.aggressive.suggestedResponse}
+                                                </div>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleUseStrategy(closingStrategy.aggressive.suggestedResponse); }}
+                                                    className="text-xs px-3 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition-colors"
+                                                >
+                                                    Wstaw odpowiedź
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div
+                                        className="rounded-xl border border-cyan-200 bg-cyan-50/30 overflow-hidden cursor-pointer"
+                                        onClick={() => setExpandedStrategy(expandedStrategy === 'partnership' ? null : 'partnership')}
+                                    >
+                                        <div className="flex items-center justify-between px-4 py-3">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm">🤝</span>
+                                                <span className="text-sm font-semibold text-slate-900">{closingStrategy.partnership.title}</span>
+                                            </div>
+                                            <svg className={`w-4 h-4 text-slate-400 transition-transform ${expandedStrategy === 'partnership' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+                                        {expandedStrategy === 'partnership' && (
+                                            <div className="px-4 pb-4 space-y-3">
+                                                <p className="text-xs text-slate-600">{closingStrategy.partnership.description}</p>
+                                                {closingStrategy.partnership.proposedConcessions.length > 0 && (
+                                                    <div className="flex flex-wrap gap-1.5">
+                                                        {closingStrategy.partnership.proposedConcessions.map((c, i) => (
+                                                            <span key={i} className="text-xs px-2 py-1 rounded-full bg-cyan-100 text-cyan-700">{c}</span>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                                <div className="bg-white rounded-lg p-3 border border-cyan-100 text-sm text-slate-800">
+                                                    {closingStrategy.partnership.suggestedResponse}
+                                                </div>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleUseStrategy(closingStrategy.partnership.suggestedResponse); }}
+                                                    className="text-xs px-3 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition-colors"
+                                                >
+                                                    Wstaw odpowiedź
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div
+                                        className="rounded-xl border border-emerald-200 bg-emerald-50/30 overflow-hidden cursor-pointer"
+                                        onClick={() => setExpandedStrategy(expandedStrategy === 'quickClose' ? null : 'quickClose')}
+                                    >
+                                        <div className="flex items-center justify-between px-4 py-3">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm">⚡</span>
+                                                <span className="text-sm font-semibold text-slate-900">{closingStrategy.quickClose.title}</span>
+                                                <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-medium">
+                                                    Max rabat: {closingStrategy.quickClose.maxDiscountPercent}%
+                                                </span>
+                                            </div>
+                                            <svg className={`w-4 h-4 text-slate-400 transition-transform ${expandedStrategy === 'quickClose' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+                                        {expandedStrategy === 'quickClose' && (
+                                            <div className="px-4 pb-4 space-y-3">
+                                                <p className="text-xs text-slate-600">{closingStrategy.quickClose.description}</p>
+                                                <div className="bg-white rounded-lg p-3 border border-emerald-100 text-sm text-slate-800">
+                                                    {closingStrategy.quickClose.suggestedResponse}
+                                                </div>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleUseStrategy(closingStrategy.quickClose.suggestedResponse); }}
+                                                    className="text-xs px-3 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition-colors"
+                                                >
+                                                    Wstaw odpowiedź
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex gap-2">
                             <textarea
                                 value={newComment}
                                 onChange={(e) => setNewComment(e.target.value)}
