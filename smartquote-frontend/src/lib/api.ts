@@ -35,6 +35,7 @@ import type {
     PublicOfferData,
     PublicOfferAcceptPayload,
     PublicOfferRejectPayload,
+    Notification,
 } from '@/types';
 import type {
     ChatData,
@@ -353,6 +354,19 @@ export const followUpsApi = {
         api.get<FollowUp[]>('/followups/upcoming', params),
     overdue: () =>
         api.get<FollowUp[]>('/followups/overdue'),
+};
+
+export const notificationsApi = {
+    list: (params?: Record<string, string | number | boolean | undefined>) =>
+        api.get<Notification[]>('/notifications', params),
+    unreadCount: () =>
+        api.get<{ count: number }>('/notifications/unread-count'),
+    markAsRead: (id: string) =>
+        api.patch<{ marked: boolean }>(`/notifications/${id}/read`),
+    markAllAsRead: () =>
+        api.patch<{ marked: boolean }>('/notifications/read-all'),
+    delete: (id: string) =>
+        api.delete<{ deleted: boolean }>(`/notifications/${id}`),
 };
 
 export const ai = {

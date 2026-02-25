@@ -615,4 +615,25 @@ export interface CreateApiKeyInput {
     expiresAt?: string | null;
 }
 
+export type NotificationType =
+    | 'OFFER_VIEWED'
+    | 'OFFER_ACCEPTED'
+    | 'OFFER_REJECTED'
+    | 'OFFER_COMMENT'
+    | 'AI_INSIGHT'
+    | 'FOLLOW_UP_REMINDER'
+    | 'SYSTEM';
+
+export interface Notification {
+    id: string;
+    userId: string;
+    type: NotificationType;
+    title: string;
+    message: string;
+    isRead: boolean;
+    link: string | null;
+    metadata: Record<string, any> | null;
+    createdAt: string;
+}
+
 export * from './ai';
