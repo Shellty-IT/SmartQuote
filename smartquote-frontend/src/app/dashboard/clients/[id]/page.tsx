@@ -1,5 +1,8 @@
+// SmartQuote-AI/src/app/dashboard/clients/[id]/page.tsx
+
 'use client';
 
+import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useClient } from '@/hooks/useClients';
 import { useOffers } from '@/hooks/useOffers';
@@ -7,10 +10,15 @@ import { Button, Card, Badge } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { formatDate, formatCurrency, getStatusConfig, getInitials } from '@/lib/utils';
 
-export default function ClientDetailPage({ params }: { params: { id: string } }) {
+interface PageProps {
+    params: Promise<{ id: string }>;
+}
+
+export default function ClientDetailPage({ params }: PageProps) {
+    const { id } = use(params);
     const router = useRouter();
-    const { client, isLoading, error } = useClient(params.id);
-    const { offers } = useOffers({ clientId: params.id, limit: 5 });
+    const { client, isLoading, error } = useClient(id);
+    const { offers } = useOffers({ clientId: id, limit: 5 });
 
     if (isLoading) return <PageLoader />;
 
