@@ -194,6 +194,11 @@ export interface PublishOfferResult {
     alreadyPublished: boolean;
 }
 
+export interface SendToClientResult {
+    sent: boolean;
+    email: string;
+}
+
 export interface OfferView {
     id: string;
     offerId: string;
@@ -513,8 +518,44 @@ export interface UserSettings {
     weeklyReport: boolean;
     aiTone: 'professional' | 'friendly' | 'formal';
     aiAutoSuggestions: boolean;
+    smtpHost: string | null;
+    smtpPort: number | null;
+    smtpUser: string | null;
+    smtpPass: string | null;
+    smtpFrom: string | null;
+    smtpConfigured: boolean;
     createdAt: string;
     updatedAt: string;
+}
+
+export interface SmtpConfigData {
+    smtpHost: string | null;
+    smtpPort: number | null;
+    smtpUser: string | null;
+    smtpPass: string | null;
+    smtpFrom: string | null;
+    smtpConfigured: boolean;
+}
+
+export interface UpdateSmtpConfigInput {
+    smtpHost: string;
+    smtpPort: number;
+    smtpUser: string;
+    smtpPass?: string;
+    smtpFrom?: string;
+}
+
+export interface TestSmtpConnectionInput {
+    host: string;
+    port: number;
+    user: string;
+    pass: string;
+    from?: string;
+}
+
+export interface TestSmtpConnectionResult {
+    connected: boolean;
+    message: string;
 }
 
 export interface CompanyInfo {

@@ -11,6 +11,7 @@ import type {
     CreateOfferInput,
     UpdateOfferInput,
     PublishOfferResult,
+    SendToClientResult,
     OfferAnalytics,
     OfferComment,
 } from '@/types';
@@ -219,6 +220,29 @@ export function useOfferPublish(id: string) {
     }, [id]);
 
     return { publish, unpublish, isPublishing, isUnpublishing, error };
+}
+
+export function useOfferSendToClient(id: string) {
+    const [isSending, setIsSending] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const sendToClient = useCallback(async (): Promise<SendToClientResult | null> => {
+        setIsSending(true);
+        setError(null);
+
+        try {
+            const response = await offersApi.sendToClient(id);
+            return response.data ?? null;
+        } catch (err) {
+            const message = err instanceof ApiError ? err.message : 'Nie udało się wysłać oferty';
+            setError(message);
+            return null;
+        } finally {
+            setIsSending(false);
+        }
+    }, [id]);
+
+    return { sendToClient, isSending, error };
 }
 
 export function useOfferAnalytics(id: string) {

@@ -12,6 +12,7 @@ import type {
     UpdateOfferInput,
     OffersStats,
     PublishOfferResult,
+    SendToClientResult,
     OfferAnalytics,
     OfferComment,
     Contract,
@@ -32,6 +33,10 @@ import type {
     UpdateSettingsInput,
     UpdateCompanyInfoInput,
     CreateApiKeyInput,
+    SmtpConfigData,
+    UpdateSmtpConfigInput,
+    TestSmtpConnectionInput,
+    TestSmtpConnectionResult,
     PublicOfferData,
     PublicOfferAcceptPayload,
     PublicOfferRejectPayload,
@@ -297,6 +302,8 @@ export const offersApi = {
         api.get<OfferComment[]>(`/offers/${id}/comments`),
     addComment: (id: string, content: string) =>
         api.post<OfferComment>(`/offers/${id}/comments`, { content }),
+    sendToClient: (id: string) =>
+        api.post<SendToClientResult>(`/offers/${id}/send-to-client`),
 };
 
 export const publicOffersApi = {
@@ -305,9 +312,9 @@ export const publicOffersApi = {
     registerView: (token: string) =>
         api.postPublic<{ registered: boolean }>(`/public/offers/${token}/view`),
     accept: (token: string, payload: PublicOfferAcceptPayload) =>
-        api.postPublic<any>(`/public/offers/${token}/accept`, payload),
+        api.postPublic<{ accepted: boolean }>(`/public/offers/${token}/accept`, payload),
     reject: (token: string, payload: PublicOfferRejectPayload) =>
-        api.postPublic<any>(`/public/offers/${token}/reject`, payload),
+        api.postPublic<{ rejected: boolean }>(`/public/offers/${token}/reject`, payload),
     addComment: (token: string, content: string) =>
         api.postPublic<OfferComment>(`/public/offers/${token}/comment`, { content }),
     trackSelection: (token: string, items: Array<{ id: string; isSelected: boolean; quantity: number }>) =>
@@ -485,5 +492,25 @@ export const settingsApi = {
     deleteApiKey: async (id: string): Promise<{ message: string }> => {
         const response = await api.delete<{ message: string }>(`/settings/api-keys/${id}`);
         return response.data as { message: string };
+    },
+
+    getSmtpConfig: async (): Promise<SmtpConfigData> => {
+        const response = await api.get<SmtpConfigData>('/settings/smtp');
+        return response.data as SmtpConfigData;
+    },
+
+    updateSmtpConfig: async (data: UpdateSmtpConfigInput): Promise<SmtpConfigData> => {
+        const response = await api.put<SmtpConfigData>('/settings/smtp', data);
+        return response.data as SmtpConfigData;
+    },
+
+    deleteSmtpConfig: async (): Promise<{ message: string }> => {
+        const response = await api.delete<{ message: string }>('/settings/smtp');
+        return response.data as { message: string };
+    },
+
+    testSmtpConnection: async (data: TestSmtpConnectionInput): Promise<TestSmtpConnectionResult> => {
+        const response = await api.post<TestSmtpConnectionResult>('/settings/smtp/test', data);
+        return response.data as TestSmtpConnectionResult;
     },
 };

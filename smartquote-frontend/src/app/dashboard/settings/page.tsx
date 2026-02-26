@@ -1,4 +1,4 @@
-// src/app/dashboard/settings/page.tsx
+// SmartQuote-AI/src/app/dashboard/settings/page.tsx
 
 'use client';
 
@@ -11,6 +11,7 @@ import {
     Bot,
     Key,
     Shield,
+    Mail,
     ChevronRight
 } from 'lucide-react';
 import { useSettings } from '@/hooks/useSettings';
@@ -21,17 +22,19 @@ import ProfileSection from './components/ProfileSection';
 import SecuritySection from './components/SecuritySection';
 import CompanySection from './components/CompanySection';
 import NotificationsSection from './components/NotificationsSection';
+import SmtpSection from './components/SmtpSection';
 import AppearanceSection from './components/AppearanceSection';
 import AISection from './components/AISection';
 import ApiKeysSection from './components/ApiKeysSection';
 
-type SettingsTab = 'profile' | 'security' | 'company' | 'notifications' | 'appearance' | 'ai' | 'api-keys';
+type SettingsTab = 'profile' | 'security' | 'company' | 'notifications' | 'smtp' | 'appearance' | 'ai' | 'api-keys';
 
 const tabs: { id: SettingsTab; label: string; icon: React.ReactNode; description: string }[] = [
     { id: 'profile', label: 'Profil', icon: <User className="w-5 h-5" />, description: 'Dane osobowe i avatar' },
     { id: 'security', label: 'Bezpieczeństwo', icon: <Shield className="w-5 h-5" />, description: 'Hasło i zabezpieczenia' },
     { id: 'company', label: 'Firma', icon: <Building2 className="w-5 h-5" />, description: 'Dane firmy na dokumentach' },
     { id: 'notifications', label: 'Powiadomienia', icon: <Bell className="w-5 h-5" />, description: 'Email i przypomnienia' },
+    { id: 'smtp', label: 'Skrzynka pocztowa', icon: <Mail className="w-5 h-5" />, description: 'Konfiguracja SMTP' },
     { id: 'appearance', label: 'Wygląd', icon: <Palette className="w-5 h-5" />, description: 'Motyw i język' },
     { id: 'ai', label: 'AI Asystent', icon: <Bot className="w-5 h-5" />, description: 'Konfiguracja AI' },
     { id: 'api-keys', label: 'Klucze API', icon: <Key className="w-5 h-5" />, description: 'Integracje zewnętrzne' },
@@ -75,6 +78,8 @@ export default function SettingsPage() {
                 return <CompanySection company={settings.companyInfo} onUpdate={actions.updateCompany} />;
             case 'notifications':
                 return <NotificationsSection settings={settings.settings} onUpdate={actions.updatePreferences} />;
+            case 'smtp':
+                return <SmtpSection />;
             case 'appearance':
                 return <AppearanceSection settings={settings.settings} onUpdate={actions.updatePreferences} />;
             case 'ai':
@@ -95,14 +100,12 @@ export default function SettingsPage() {
 
     return (
         <div className="p-8">
-            {/* Header */}
             <div className="mb-8">
                 <h1 className="text-2xl font-bold text-slate-900">Ustawienia</h1>
                 <p className="text-slate-500 mt-1">Zarządzaj swoim kontem i preferencjami</p>
             </div>
 
             <div className="flex gap-8">
-                {/* Sidebar Navigation */}
                 <div className="w-72 flex-shrink-0">
                     <Card padding="none" className="overflow-hidden">
                         <nav className="divide-y divide-slate-100">
@@ -140,7 +143,6 @@ export default function SettingsPage() {
                     </Card>
                 </div>
 
-                {/* Content */}
                 <div className="flex-1 min-w-0">
                     {renderContent()}
                 </div>
