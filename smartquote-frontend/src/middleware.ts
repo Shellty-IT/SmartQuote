@@ -1,22 +1,24 @@
-import { withAuth } from 'next-auth/middleware';
+// SmartQuote-AI/middleware.ts
+
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 
-export default withAuth(
-    function middleware(req) {
-        // Możesz dodać dodatkową logikę tutaj
-        return NextResponse.next();
-    },
-    {
-        callbacks: {
-            authorized: ({ token }) => !!token,
-        },
-        pages: {
-            signIn: '/',
-        },
+export async function middleware(request: NextRequest) {
+    const token = await getToken({
+        req: request,
+        secret: process.env.NEXTAUTH_SECRET
+    });
+
+    if (!token) {
+        const signInUrl = new URL('/', request.url);
+        signInUrl.searchParams.set('callbackUrl', request.url);
+        return NextResponse.redirect(signInUrl);
     }
-);
 
-// Chroń wszystkie ścieżki zaczynające się od /dashboard
+    return NextResponse.next();
+}
+
 export const config = {
     matcher: ['/dashboard/:path*'],
 };
