@@ -3,4 +3,4 @@
   publish = ".next/standalone"
 
 [build.environment]
-  NODE_ENV = "production"et=utf-8"
+  NODE_ENV = "production"
