@@ -1,5 +1,4 @@
-// SmartQuote-AI/src/components/publicOffer/AcceptDialog.tsx
-
+// src/components/publicOffer/AcceptDialog.tsx
 'use client';
 
 import { useState } from 'react';
@@ -57,14 +56,29 @@ export default function AcceptDialog({
         await onConfirm();
     };
 
+    const handleBackdropClick = (e: React.MouseEvent) => {
+        if (e.target === e.currentTarget) {
+            handleClose();
+        }
+    };
+
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="accept-dialog-title"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            onClick={handleBackdropClick}
+        >
             <div
                 className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-                onClick={handleClose}
+                aria-hidden="true"
             />
 
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div
+                className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <div className="p-6">
                     <div className="flex items-center gap-3 mb-6">
                         <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
@@ -73,7 +87,7 @@ export default function AcceptDialog({
                             </svg>
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-slate-900">
+                            <h2 id="accept-dialog-title" className="text-xl font-bold text-slate-900">
                                 Potwierdzenie akceptacji
                             </h2>
                             <p className="text-sm text-slate-500">

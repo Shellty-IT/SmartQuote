@@ -1,5 +1,4 @@
 // src/app/dashboard/layout.tsx
-
 'use client';
 
 import { useSession } from 'next-auth/react';
@@ -41,12 +40,10 @@ export default function DashboardLayout({
     return (
         <div className="min-h-screen bg-slate-50">
             <Sidebar />
-            <div className="pl-64">
+            <div className="lg:pl-64">
                 <Header />
                 <main>{children}</main>
             </div>
-
-            {/* Chat AI - tylko dla zalogowanych */}
             <GlobalAIChat />
         </div>
     );

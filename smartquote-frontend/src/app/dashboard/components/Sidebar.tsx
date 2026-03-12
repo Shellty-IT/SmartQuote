@@ -1,6 +1,7 @@
 // src/app/dashboard/components/Sidebar.tsx
 'use client';
 
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
@@ -9,19 +10,42 @@ import { useSidebarStats } from '@/hooks/useSidebarStats';
 export default function Sidebar() {
     const pathname = usePathname();
     const { stats, isLoading: loading } = useSidebarStats();
+    const [isMobileOpen, setIsMobileOpen] = useState(false);
+    const prevPathnameRef = useRef(pathname);
+
+    useEffect(() => {
+        if (prevPathnameRef.current !== pathname) {
+            prevPathnameRef.current = pathname;
+            requestAnimationFrame(() => {
+                setIsMobileOpen(false);
+            });
+        }
+    }, [pathname]);
+
+    useEffect(() => {
+        if (isMobileOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isMobileOpen]);
+
     const navigation = [
         {
             name: 'Dashboard',
             href: '/dashboard',
             icon: HomeIcon,
-            badge: null, // Dashboard nie ma badge
+            badge: null,
         },
         {
             name: 'Oferty',
             href: '/dashboard/offers',
             icon: DocumentIcon,
             badge: stats.offers,
-            badgeColor: 'cyan', // aktywne oferty
+            badgeColor: 'cyan',
         },
         {
             name: 'Umowy',
@@ -56,7 +80,6 @@ export default function Sidebar() {
         { name: 'Ustawienia', href: '/dashboard/settings', icon: SettingsIcon },
     ];
 
-    // Kolory badge
     const badgeColors: Record<string, { active: string; inactive: string }> = {
         cyan: {
             active: 'bg-cyan-500 text-white',
@@ -76,9 +99,8 @@ export default function Sidebar() {
         },
     };
 
-    return (
-        <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-slate-900 border-r border-slate-800">
-            {/* Logo */}
+    const sidebarContent = (
+        <>
             <div className="flex h-16 items-center gap-3 px-6 border-b border-slate-800">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 shadow-lg shadow-cyan-500/25">
                     <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -86,13 +108,21 @@ export default function Sidebar() {
                               d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                 </div>
-                <div>
+                <div className="flex-1">
                     <span className="text-lg font-bold text-white">SmartQuote</span>
                     <span className="ml-1 text-xs font-medium text-cyan-400">AI</span>
                 </div>
+                <button
+                    onClick={() => setIsMobileOpen(false)}
+                    className="p-2 text-slate-400 hover:text-white lg:hidden"
+                    aria-label="Zamknij menu"
+                >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
 
-            {/* Navigation */}
             <nav className="flex flex-col justify-between h-[calc(100vh-4rem)] px-3 py-4">
                 <div className="space-y-1">
                     {navigation.map((item) => {
@@ -104,6 +134,7 @@ export default function Sidebar() {
                             <Link
                                 key={item.name}
                                 href={item.href}
+                                onClick={() => setIsMobileOpen(false)}
                                 className={`group flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
                                     ${isActive
                                     ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-white border border-cyan-500/30'
@@ -115,7 +146,6 @@ export default function Sidebar() {
                                     {item.name}
                                 </div>
 
-                                {/* Badge z liczbą */}
                                 {item.badge !== null && item.badge > 0 && (
                                     <span className={`min-w-[20px] px-1.5 py-0.5 text-xs font-semibold rounded-full text-center transition-all
                                         ${loading ? 'animate-pulse bg-slate-700' : ''}
@@ -129,12 +159,12 @@ export default function Sidebar() {
                     })}
                 </div>
 
-                {/* Bottom Navigation */}
                 <div className="space-y-1 border-t border-slate-800 pt-4">
                     {bottomNav.map((item) => (
                         <Link
                             key={item.name}
                             href={item.href}
+                            onClick={() => setIsMobileOpen(false)}
                             className="group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-200"
                         >
                             <item.icon className="h-5 w-5 text-slate-500 group-hover:text-slate-300" />
@@ -150,11 +180,41 @@ export default function Sidebar() {
                     </button>
                 </div>
             </nav>
-        </aside>
+        </>
+    );
+
+    return (
+        <>
+            <button
+                onClick={() => setIsMobileOpen(true)}
+                className="fixed top-4 left-4 z-30 p-2 bg-slate-900 text-white rounded-lg shadow-lg lg:hidden"
+                aria-label="Otwórz menu"
+            >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+
+            <aside className="hidden lg:block fixed left-0 top-0 z-40 h-screen w-64 bg-slate-900 border-r border-slate-800">
+                {sidebarContent}
+            </aside>
+
+            {isMobileOpen && (
+                <>
+                    <div
+                        className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+                        onClick={() => setIsMobileOpen(false)}
+                        aria-hidden="true"
+                    />
+                    <aside className="fixed left-0 top-0 z-50 h-screen w-64 bg-slate-900 border-r border-slate-800 lg:hidden">
+                        {sidebarContent}
+                    </aside>
+                </>
+            )}
+        </>
     );
 }
 
-// Icons as components
 function HomeIcon({ className }: { className?: string }) {
     return (
         <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">

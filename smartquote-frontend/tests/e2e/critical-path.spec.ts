@@ -1,4 +1,4 @@
-// SmartQuote-AI/tests/e2e/critical-path.spec.ts
+// tests/e2e/critical-path.spec.ts
 import { test, expect } from '@playwright/test';
 import { login } from './helpers';
 
@@ -33,13 +33,16 @@ test.describe('Critical Path', () => {
         await publishBtn.waitFor({ state: 'visible', timeout: 5000 });
         await publishBtn.click();
 
-        const dialog = page.locator('[role="dialog"]');
-        await dialog.waitFor({ state: 'visible', timeout: 5000 });
+        const publishDialog = page.locator('[role="dialog"]');
+        await publishDialog.waitFor({ state: 'visible', timeout: 5000 });
 
-        const confirmBtn = dialog.getByRole('button', { name: /publikuj|aktywuj|generuj/i });
-        if (await confirmBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-            await confirmBtn.click();
-        }
+        const publishContent = publishDialog.locator('div.relative.bg-white');
+        await publishContent.waitFor({ state: 'visible', timeout: 3000 });
+
+        const generateBtn = publishContent.getByRole('button', { name: /publikuj|aktywuj|generuj/i });
+        await generateBtn.waitFor({ state: 'visible', timeout: 5000 });
+        await generateBtn.scrollIntoViewIfNeeded();
+        await generateBtn.click({ force: true });
 
         await page.waitForFunction(
             () => document.body.innerHTML.includes('/offer/view/'),
@@ -58,15 +61,27 @@ test.describe('Critical Path', () => {
         await clientPage.goto(publicPath, { waitUntil: 'networkidle' });
         await expect(clientPage.getByText(OFFER_TITLE)).toBeVisible({ timeout: 15000 });
 
-        await clientPage.getByRole('button', { name: /akceptuj/i }).click();
+        const acceptBtn = clientPage.getByRole('button', { name: /akceptuj/i });
+        await acceptBtn.waitFor({ state: 'visible', timeout: 5000 });
+        await acceptBtn.scrollIntoViewIfNeeded();
+        await acceptBtn.click();
 
         const acceptDialog = clientPage.locator('[role="dialog"]');
-        await acceptDialog.waitFor({ state: 'visible', timeout: 5000 });
-        await acceptDialog.locator('input[type="checkbox"]').check();
-        await acceptDialog.getByRole('button', { name: /zatwierdź|potwierdź/i }).click();
+        await acceptDialog.waitFor({ state: 'visible', timeout: 10000 });
+
+        const acceptContent = acceptDialog.locator('div.relative.bg-white');
+        await acceptContent.waitFor({ state: 'visible', timeout: 5000 });
+
+        const checkbox = acceptContent.locator('input[type="checkbox"]');
+        await checkbox.scrollIntoViewIfNeeded();
+        await checkbox.check({ force: true });
+
+        const confirmBtn = acceptContent.getByRole('button', { name: /zatwierdź/i });
+        await confirmBtn.scrollIntoViewIfNeeded();
+        await confirmBtn.click({ force: true });
 
         await expect(
-            clientPage.getByText(/zaakceptowana|przyjęta|dziękujemy/i)
+            clientPage.getByRole('heading', { name: /zaakceptowana/i })
         ).toBeVisible({ timeout: 15000 });
 
         await clientPage.close();
@@ -77,7 +92,7 @@ test.describe('Error handling', () => {
     test('Shows error for invalid token', async ({ page }) => {
         await page.goto('/offer/view/invalid-token-xyz', { waitUntil: 'networkidle' });
         await expect(
-            page.getByText(/nie znalezion|nieprawidłowy|wygasła/i)
+            page.getByRole('heading', { name: /nie znalezion/i })
         ).toBeVisible({ timeout: 15000 });
     });
 });

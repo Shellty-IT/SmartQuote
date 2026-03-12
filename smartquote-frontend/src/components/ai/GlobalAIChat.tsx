@@ -1,3 +1,4 @@
+// SmartQuote-AI/src/components/ai/GlobalAIChat.tsx
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -55,7 +56,6 @@ export function GlobalAIChat() {
         }
     }, [isOpen, isMinimized]);
 
-    // Load messages from localStorage
     useEffect(() => {
         const savedMessages = localStorage.getItem('global-ai-chat-messages');
         if (savedMessages) {
@@ -76,7 +76,6 @@ export function GlobalAIChat() {
         }
     }, []);
 
-    // Save messages to localStorage
     useEffect(() => {
         if (messages.length > 0) {
             localStorage.setItem('global-ai-chat-messages', JSON.stringify(messages));
@@ -99,13 +98,11 @@ export function GlobalAIChat() {
         setIsLoading(true);
 
         try {
-            // Przygotuj historię w formacie wymaganym przez API
             const history = messages.map(m => ({
                 role: m.role as 'user' | 'assistant',
                 content: m.content,
             }));
 
-            // Użyj API client - dokładnie tak jak AI Asystent
             const response = await ai.chat(messageToSend, history);
 
             const assistantMessage: Message = {
@@ -172,14 +169,12 @@ export function GlobalAIChat() {
         }
     };
 
-    // Nie pokazuj chatu jeśli użytkownik nie jest zalogowany
     if (!session) {
         return null;
     }
 
     return (
         <>
-            {/* Floating Button */}
             <AnimatePresence>
                 {!isOpen && (
                     <motion.button
@@ -193,25 +188,27 @@ export function GlobalAIChat() {
                                    bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full shadow-lg
                                    shadow-cyan-500/25 hover:shadow-xl hover:shadow-cyan-500/30 transition-shadow"
                     >
-                        <Sparkles className="w-6 h-6 text-white" />
+                        <Sparkles className="w-6 h-6 text-white relative z-10" />
 
                         {unreadCount > 0 && (
                             <motion.span
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
                                 className="absolute -top-1 -right-1 flex items-center justify-center
-                                           w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full"
+                                           w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full z-20"
                             >
                                 {unreadCount > 9 ? '9+' : unreadCount}
                             </motion.span>
                         )}
 
-                        <span className="absolute inset-0 rounded-full bg-cyan-500 animate-ping opacity-25" />
+                        <span
+                            className="absolute inset-0 rounded-full bg-cyan-500 animate-ping opacity-25 pointer-events-none"
+                            aria-hidden="true"
+                        />
                     </motion.button>
                 )}
             </AnimatePresence>
 
-            {/* Chat Window */}
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -224,11 +221,10 @@ export function GlobalAIChat() {
                         }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
                         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                        className="fixed bottom-6 right-6 z-50 w-96 bg-white dark:bg-slate-900
+                        className="fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] bg-white dark:bg-slate-900
                                    rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700
                                    overflow-hidden flex flex-col"
                     >
-                        {/* Header */}
                         <div className="flex items-center justify-between px-4 py-3
                                         bg-gradient-to-r from-cyan-500 to-blue-600">
                             <div className="flex items-center gap-3">
@@ -271,7 +267,6 @@ export function GlobalAIChat() {
                             </div>
                         </div>
 
-                        {/* Messages */}
                         <AnimatePresence>
                             {!isMinimized && (
                                 <motion.div
@@ -323,7 +318,6 @@ export function GlobalAIChat() {
                                         <div ref={messagesEndRef} />
                                     </div>
 
-                                    {/* Quick Actions */}
                                     {messages.length === 0 && (
                                         <div className="px-4 pb-2">
                                             <div className="flex flex-wrap gap-2">
@@ -346,7 +340,6 @@ export function GlobalAIChat() {
                                         </div>
                                     )}
 
-                                    {/* Input */}
                                     <div className="p-4 border-t border-slate-200 dark:border-slate-700">
                                         <div className="flex items-end gap-2">
                                             <textarea
