@@ -267,8 +267,8 @@ export default function NewOfferContent() {
                                             isActive ? 'text-cyan-600' : isPast ? 'text-emerald-600' : 'text-slate-500'
                                         }`}
                                     >
-                                        {step.label}
-                                    </span>
+                                    {step.label}
+                                </span>
                                 </button>
                                 {index < STEPS.length - 1 && (
                                     <div className={`flex-1 h-0.5 mx-4 ${isPast ? 'bg-emerald-500' : 'bg-slate-200'}`} />
@@ -410,9 +410,9 @@ export default function NewOfferContent() {
                                 return (
                                     <div key={index} className="p-4 bg-slate-50 rounded-xl space-y-4">
                                         <div className="flex items-start justify-between">
-                                            <span className="text-sm font-medium text-slate-500">
-                                                Pozycja {index + 1}
-                                            </span>
+                                        <span className="text-sm font-medium text-slate-500">
+                                            Pozycja {index + 1}
+                                        </span>
                                             {items.length > 1 && (
                                                 <button
                                                     onClick={() => removeItem(index)}
@@ -501,9 +501,9 @@ export default function NewOfferContent() {
                                                     className="w-4 h-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
                                                 />
                                                 <div>
-                                                    <span className="text-sm font-medium text-slate-900">
-                                                        Pozycja opcjonalna
-                                                    </span>
+                                                <span className="text-sm font-medium text-slate-900">
+                                                    Pozycja opcjonalna
+                                                </span>
                                                     <p className="text-xs text-slate-500">
                                                         Klient może odznaczyć tę pozycję lub zmienić ilość
                                                     </p>
@@ -533,15 +533,15 @@ export default function NewOfferContent() {
                                         </div>
 
                                         <div className="flex justify-end gap-4 pt-2 border-t border-slate-200">
+                                        <span className="text-sm text-slate-500">
+                                            Netto: <strong>{formatCurrency(itemTotals.totalNet)}</strong>
+                                        </span>
                                             <span className="text-sm text-slate-500">
-                                                Netto: <strong>{formatCurrency(itemTotals.totalNet)}</strong>
-                                            </span>
-                                            <span className="text-sm text-slate-500">
-                                                VAT: <strong>{formatCurrency(itemTotals.totalVat)}</strong>
-                                            </span>
+                                            VAT: <strong>{formatCurrency(itemTotals.totalVat)}</strong>
+                                        </span>
                                             <span className="text-sm text-slate-900">
-                                                Brutto: <strong>{formatCurrency(itemTotals.totalGross)}</strong>
-                                            </span>
+                                            Brutto: <strong>{formatCurrency(itemTotals.totalGross)}</strong>
+                                        </span>
                                         </div>
                                     </div>
                                 );
@@ -620,8 +620,8 @@ export default function NewOfferContent() {
                                                         <p className="text-slate-900">{item.name}</p>
                                                         {item.isOptional && (
                                                             <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 font-medium">
-                                                                Opcjonalna
-                                                            </span>
+                                                            Opcjonalna
+                                                        </span>
                                                         )}
                                                     </div>
                                                     <p className="text-sm text-slate-500">
@@ -685,4 +685,5 @@ export default function NewOfferContent() {
             </div>
         </div>
     );
+
 }

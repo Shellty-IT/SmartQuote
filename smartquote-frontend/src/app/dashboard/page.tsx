@@ -1,26 +1,40 @@
+// SmartQuote-AI/src/app/dashboard/page.tsx
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useOffers, useOffersStats } from '@/hooks/useOffers';
 import { useClientsStats } from '@/hooks/useClients';
+import { ai } from '@/lib/api';
 import KPICard from './components/KPICard';
 import { Card, Badge, Button } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { formatCurrency, formatRelativeTime, getStatusConfig, getInitials } from '@/lib/utils';
+import type { LatestInsightItem } from '@/types/ai';
 
 export default function DashboardPage() {
     const { data: session } = useSession();
     const router = useRouter();
 
-    // Pobierz dane z API
     const { stats: offersStats, isLoading: isLoadingOffersStats } = useOffersStats();
     const { stats: clientsStats, isLoading: isLoadingClientsStats } = useClientsStats();
     const { offers: recentOffers, isLoading: isLoadingOffers } = useOffers({ limit: 5 });
 
+    const [latestInsights, setLatestInsights] = useState<LatestInsightItem[]>([]);
+    const [isLoadingInsights, setIsLoadingInsights] = useState(true);
+
+    useEffect(() => {
+        ai.latestInsights(3)
+            .then(setLatestInsights)
+            .catch((err: unknown) => {
+                console.error('Failed to load AI insights:', err);
+            })
+            .finally(() => setIsLoadingInsights(false));
+    }, []);
+
     const userName = session?.user?.name || session?.user?.email?.split('@')[0] || 'Użytkownik';
 
-    // Oblicz metryki
     const activeOffersCount = offersStats?.total
         ? offersStats.total - (offersStats.byStatus?.REJECTED?.count || 0) - (offersStats.byStatus?.EXPIRED?.count || 0)
         : 0;
@@ -41,9 +55,7 @@ export default function DashboardPage() {
 
     return (
         <div className="min-h-screen">
-            {/* Main Content */}
             <main className="p-8">
-                {/* Welcome Section */}
                 <div className="mb-8">
                     <h1 className="text-2xl font-bold text-slate-900">
                         Witaj ponownie, {userName}! 👋
@@ -53,7 +65,6 @@ export default function DashboardPage() {
                     </p>
                 </div>
 
-                {/* Quick Actions */}
                 <div className="flex items-center gap-3 mb-8">
                     <Button onClick={() => router.push('/dashboard/offers/new')}>
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -69,7 +80,6 @@ export default function DashboardPage() {
                     </Button>
                 </div>
 
-                {/* KPI Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <KPICard
                         title="Aktywne oferty"
@@ -125,12 +135,9 @@ export default function DashboardPage() {
                     />
                 </div>
 
-                {/* Main Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Recent Offers - Takes 2 columns */}
                     <div className="lg:col-span-2">
                         <Card padding="none">
-                            {/* Header */}
                             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
                                 <div>
                                     <h3 className="text-lg font-semibold text-slate-900">Ostatnie oferty</h3>
@@ -144,7 +151,6 @@ export default function DashboardPage() {
                                 </button>
                             </div>
 
-                            {/* List */}
                             {recentOffers.length === 0 ? (
                                 <div className="px-6 py-12 text-center">
                                     <svg className="w-12 h-12 text-slate-300 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -165,12 +171,10 @@ export default function DashboardPage() {
                                                 className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50/50 transition-colors cursor-pointer group"
                                                 onClick={() => router.push(`/dashboard/offers/${offer.id}`)}
                                             >
-                                                {/* Avatar */}
                                                 <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-white text-sm font-semibold">
                                                     {offer.client ? getInitials(offer.client.name) : '??'}
                                                 </div>
 
-                                                {/* Content */}
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center gap-2">
                                                         <p className="text-sm font-medium text-slate-900 truncate group-hover:text-cyan-600 transition-colors">
@@ -189,7 +193,6 @@ export default function DashboardPage() {
                                                     </div>
                                                 </div>
 
-                                                {/* Value & Date */}
                                                 <div className="flex-shrink-0 text-right">
                                                     <p className="text-sm font-semibold text-slate-900">
                                                         {formatCurrency(Number(offer.totalGross))}
@@ -199,7 +202,6 @@ export default function DashboardPage() {
                                                     </p>
                                                 </div>
 
-                                                {/* Arrow */}
                                                 <svg
                                                     className="w-5 h-5 text-slate-300 group-hover:text-cyan-500 group-hover:translate-x-1 transition-all"
                                                     fill="none"
@@ -216,9 +218,7 @@ export default function DashboardPage() {
                         </Card>
                     </div>
 
-                    {/* Quick Stats - Takes 1 column */}
                     <div className="lg:col-span-1 space-y-6">
-                        {/* Status Breakdown */}
                         <Card>
                             <h3 className="text-lg font-semibold text-slate-900 mb-4">Status ofert</h3>
                             <div className="space-y-3">
@@ -259,7 +259,84 @@ export default function DashboardPage() {
                             </div>
                         </Card>
 
-                        {/* Quick Actions */}
+                        <div className="rounded-2xl border border-cyan-200 bg-gradient-to-br from-cyan-50 to-blue-50 overflow-hidden">
+                            <div className="flex items-center gap-2 px-5 py-3.5 border-b border-cyan-200/50">
+                                <svg className="w-5 h-5 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                                </svg>
+                                <h3 className="text-sm font-semibold text-cyan-900">Wnioski AI</h3>
+                            </div>
+
+                            <div className="p-4">
+                                {isLoadingInsights ? (
+                                    <div className="flex items-center justify-center py-6">
+                                        <svg className="w-5 h-5 animate-spin text-cyan-500" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                        </svg>
+                                    </div>
+                                ) : latestInsights.length === 0 ? (
+                                    <div className="text-center py-6">
+                                        <svg className="w-10 h-10 mx-auto text-cyan-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                                        </svg>
+                                        <p className="text-xs text-cyan-600">Brak wniosków. Pojawią się po zakończeniu ofert.</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {latestInsights.map((insight) => (
+                                            <div
+                                                key={insight.id}
+                                                className="bg-white/70 rounded-xl p-3.5 border border-cyan-100 hover:border-cyan-300 hover:bg-white transition-all cursor-pointer group"
+                                                onClick={() => router.push(`/dashboard/offers/${insight.offerId}`)}
+                                            >
+                                                <div className="flex items-start justify-between gap-2 mb-2">
+                                                    <div className="flex items-center gap-2 min-w-0">
+                                                        <span className={`flex-shrink-0 w-2 h-2 rounded-full ${
+                                                            insight.outcome === 'ACCEPTED' ? 'bg-emerald-500' : 'bg-red-500'
+                                                        }`} />
+                                                        <span className="text-xs font-semibold text-slate-800 truncate">
+                                                            {insight.offerNumber}
+                                                        </span>
+                                                        <span className={`flex-shrink-0 text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                                                            insight.outcome === 'ACCEPTED'
+                                                                ? 'bg-emerald-100 text-emerald-700'
+                                                                : 'bg-red-100 text-red-700'
+                                                        }`}>
+                                                            {insight.outcome === 'ACCEPTED' ? 'Wygrana' : 'Przegrana'}
+                                                        </span>
+                                                    </div>
+                                                    <svg className="w-4 h-4 text-slate-300 group-hover:text-cyan-500 flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                                    </svg>
+                                                </div>
+
+                                                <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed mb-2">
+                                                    {insight.insights.summary || insight.offerTitle}
+                                                </p>
+
+                                                {insight.insights.keyLessons && insight.insights.keyLessons.length > 0 && (
+                                                    <div className="flex items-start gap-1.5 mb-2">
+                                                        <svg className="w-3.5 h-3.5 text-cyan-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                                                        </svg>
+                                                        <span className="text-xs text-cyan-700 leading-relaxed line-clamp-1">
+                                                            {insight.insights.keyLessons[0]}
+                                                        </span>
+                                                    </div>
+                                                )}
+
+                                                <div className="flex items-center justify-between text-xs text-slate-400">
+                                                    <span>{insight.clientName}</span>
+                                                    <span>{formatRelativeTime(insight.createdAt)}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
                         <Card>
                             <h3 className="text-lg font-semibold text-slate-900 mb-4">Szybkie akcje</h3>
                             <div className="space-y-2">

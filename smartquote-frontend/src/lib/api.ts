@@ -1,5 +1,4 @@
 // SmartQuote-AI/src/lib/api.ts
-
 import { getSession } from 'next-auth/react';
 import type {
     ApiResponse,
@@ -50,6 +49,7 @@ import type {
     PriceInsightResult,
     ObserverInsight,
     ClosingStrategy,
+    LatestInsightItem,
 } from '@/types/ai';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
@@ -430,6 +430,12 @@ export const ai = {
     closingStrategy: async (offerId: string): Promise<ClosingStrategy> => {
         const response = await api.get<ClosingStrategy>(`/ai/closing-strategy/${offerId}`);
         return response.data as ClosingStrategy;
+    },
+
+    latestInsights: async (limit?: number): Promise<LatestInsightItem[]> => {
+        const params = limit ? { limit: String(limit) } : undefined;
+        const response = await api.get<LatestInsightItem[]>('/ai/latest-insights', params);
+        return response.data as LatestInsightItem[];
     },
 };
 

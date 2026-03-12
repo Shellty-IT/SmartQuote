@@ -1,14 +1,15 @@
+// src/components/ui/Card.tsx
 'use client';
 
 import { cn } from '@/lib/utils';
 
-interface CardProps {
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
     children: React.ReactNode;
     className?: string;
     padding?: 'none' | 'sm' | 'md' | 'lg';
 }
 
-export default function Card({ children, className, padding = 'md' }: CardProps) {
+export default function Card({ children, className, padding = 'md', ...props }: CardProps) {
     const paddings = {
         none: '',
         sm: 'p-4',
@@ -23,6 +24,7 @@ export default function Card({ children, className, padding = 'md' }: CardProps)
                 paddings[padding],
                 className
             )}
+            {...props}
         >
             {children}
         </div>

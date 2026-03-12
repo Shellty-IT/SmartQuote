@@ -136,3 +136,21 @@ export interface PostMortemInsight {
     improvementSuggestions: string[];
     industryNote: string | null;
 }
+
+export interface LatestInsightItem {
+    id: string;
+    offerId: string;
+    offerNumber: string;
+    offerTitle: string;
+    offerValue: number;
+    clientName: string;
+    outcome: string;
+    insights: {
+        summary?: string;
+        keyLessons?: string[];
+        pricingInsight?: string;
+        improvementSuggestions?: string[];
+        industryNote?: string;
+    };
+    createdAt: string;
+}

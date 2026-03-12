@@ -1,0 +1,97 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - img [ref=e6]
+        - generic [ref=e8]: SmartQuoteAI
+      - navigation [ref=e9]:
+        - generic [ref=e10]:
+          - link "Dashboard" [ref=e11]:
+            - /url: /dashboard
+            - generic [ref=e12]:
+              - img [ref=e13]
+              - text: Dashboard
+          - link "Oferty 4" [ref=e15]:
+            - /url: /dashboard/offers
+            - generic [ref=e16]:
+              - img [ref=e17]
+              - text: Oferty
+            - generic [ref=e19]: "4"
+          - link "Umowy" [ref=e20]:
+            - /url: /dashboard/contracts
+            - generic [ref=e21]:
+              - img [ref=e22]
+              - text: Umowy
+          - link "Klienci 1" [ref=e24]:
+            - /url: /dashboard/clients
+            - generic [ref=e25]:
+              - img [ref=e26]
+              - text: Klienci
+            - generic [ref=e28]: "1"
+          - link "Follow-upy" [ref=e29]:
+            - /url: /dashboard/followups
+            - generic [ref=e30]:
+              - img [ref=e31]
+              - text: Follow-upy
+          - link "AI Asystent" [ref=e33]:
+            - /url: /dashboard/ai
+            - generic [ref=e34]:
+              - img [ref=e35]
+              - text: AI Asystent
+        - generic [ref=e37]:
+          - link "Ustawienia" [ref=e38]:
+            - /url: /dashboard/settings
+            - img [ref=e39]
+            - text: Ustawienia
+          - button "Wyloguj się" [ref=e42]:
+            - img [ref=e43]
+            - text: Wyloguj się
+    - generic [ref=e45]:
+      - banner [ref=e46]:
+        - generic [ref=e47]:
+          - button "12" [ref=e49]:
+            - img [ref=e50]
+            - generic [ref=e52]: "12"
+          - generic [ref=e54]: U
+      - main [ref=e55]:
+        - generic [ref=e56]:
+          - generic [ref=e57]:
+            - button "Powrót" [ref=e58]:
+              - img [ref=e59]
+              - text: Powrót
+            - heading "Nowa oferta" [level=1] [ref=e61]
+            - paragraph [ref=e62]: Utwórz nową ofertę handlową
+          - generic [ref=e64]:
+            - button "1" [disabled] [ref=e66]:
+              - generic [ref=e67]: "1"
+            - button "2" [disabled] [ref=e69]:
+              - generic [ref=e70]: "2"
+            - button "3" [disabled] [ref=e72]:
+              - generic [ref=e73]: "3"
+            - button "4" [disabled] [ref=e75]:
+              - generic [ref=e76]: "4"
+          - generic [ref=e78]:
+            - heading "Wybierz klienta" [level=2] [ref=e79]
+            - generic [ref=e81]:
+              - generic:
+                - img
+              - textbox "Szukaj klienta..." [ref=e82]
+            - button "T TEST test@ol.pl" [ref=e84]:
+              - generic [ref=e85]: T
+              - generic:
+                - paragraph: TEST
+                - paragraph: test@ol.pl
+          - generic [ref=e86]:
+            - button "Anuluj" [ref=e87]
+            - button "Dalej" [disabled] [ref=e89]:
+              - text: Dalej
+              - img [ref=e90]
+    - button [ref=e92]:
+      - img [ref=e93]
+  - button "Open Next.js Dev Tools" [ref=e102] [cursor=pointer]:
+    - img [ref=e103]
+  - alert [ref=e108]
+```
