@@ -101,8 +101,8 @@ export default function Sidebar() {
 
     const sidebarContent = (
         <>
-            <div className="flex h-16 items-center gap-3 px-6 border-b border-slate-800">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 shadow-lg shadow-cyan-500/25">
+            <div className="flex h-16 items-center gap-3 px-6 border-b border-white/5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 shadow-lg shadow-cyan-500/25">
                     <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                               d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -138,7 +138,7 @@ export default function Sidebar() {
                                 className={`group flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
                                     ${isActive
                                     ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-white border border-cyan-500/30'
-                                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                                    : 'text-slate-400 hover:bg-white/5 hover:text-white'
                                 }`}
                             >
                                 <div className="flex items-center gap-3">
@@ -159,13 +159,13 @@ export default function Sidebar() {
                     })}
                 </div>
 
-                <div className="space-y-1 border-t border-slate-800 pt-4">
+                <div className="space-y-1 border-t border-white/5 pt-4">
                     {bottomNav.map((item) => (
                         <Link
                             key={item.name}
                             href={item.href}
                             onClick={() => setIsMobileOpen(false)}
-                            className="group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-200"
+                            className="group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all duration-200"
                         >
                             <item.icon className="h-5 w-5 text-slate-500 group-hover:text-slate-300" />
                             {item.name}
@@ -187,26 +187,27 @@ export default function Sidebar() {
         <>
             <button
                 onClick={() => setIsMobileOpen(true)}
-                className="fixed top-4 left-4 z-30 p-2 bg-slate-900 text-white rounded-lg shadow-lg lg:hidden"
+                className="fixed top-4 left-4 z-30 p-2 rounded-xl shadow-lg lg:hidden transition-colors"
+                style={{ backgroundColor: 'var(--sidebar-bg)' }}
                 aria-label="Otwórz menu"
             >
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
             </button>
 
-            <aside className="hidden lg:block fixed left-0 top-0 z-40 h-screen w-64 bg-slate-900 border-r border-slate-800">
+            <aside className="hidden lg:block fixed left-0 top-0 z-40 h-screen w-64 sidebar-themed border-r transition-colors duration-300">
                 {sidebarContent}
             </aside>
 
             {isMobileOpen && (
                 <>
                     <div
-                        className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+                        className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
                         onClick={() => setIsMobileOpen(false)}
                         aria-hidden="true"
                     />
-                    <aside className="fixed left-0 top-0 z-50 h-screen w-64 bg-slate-900 border-r border-slate-800 lg:hidden">
+                    <aside className="fixed left-0 top-0 z-50 h-screen w-64 sidebar-themed border-r lg:hidden">
                         {sidebarContent}
                     </aside>
                 </>

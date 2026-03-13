@@ -1,5 +1,4 @@
-// SmartQuote-AI/src/app/dashboard/settings/page.tsx
-
+// src/app/dashboard/settings/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -50,8 +49,8 @@ export default function SettingsPage() {
 
     if (error) {
         return (
-            <div className="p-8">
-                <Card className="p-6 text-center">
+            <div className="p-4 sm:p-8">
+                <Card className="p-6 text-center card-themed">
                     <p className="text-red-500 mb-4">{error}</p>
                     <button
                         onClick={refetch}
@@ -99,51 +98,74 @@ export default function SettingsPage() {
     };
 
     return (
-        <div className="p-8">
+        <div className="p-4 sm:p-8">
             <div className="mb-8">
-                <h1 className="text-2xl font-bold text-slate-900">Ustawienia</h1>
-                <p className="text-slate-500 mt-1">Zarządzaj swoim kontem i preferencjami</p>
+                <h1 className="text-2xl font-bold text-themed">Ustawienia</h1>
+                <p className="text-themed-muted mt-1">Zarządzaj swoim kontem i preferencjami</p>
             </div>
 
-            <div className="flex gap-8">
+            <div className="hidden md:flex gap-8">
                 <div className="w-72 flex-shrink-0">
-                    <Card padding="none" className="overflow-hidden">
-                        <nav className="divide-y divide-slate-100">
+                    <div className="card-themed rounded-2xl border overflow-hidden shadow-sm">
+                        <nav className="divide-y divider-themed">
                             {tabs.map((tab) => (
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
-                                    className={`w-full flex items-center gap-4 px-4 py-4 text-left transition-colors ${
+                                    className={`w-full flex items-center gap-4 px-4 py-4 text-left transition-all duration-200 ${
                                         activeTab === tab.id
-                                            ? 'bg-cyan-50 border-l-4 border-cyan-500'
-                                            : 'hover:bg-slate-50 border-l-4 border-transparent'
+                                            ? 'bg-cyan-500/10 border-l-4 border-cyan-500'
+                                            : 'hover-themed border-l-4 border-transparent'
                                     }`}
                                 >
                                     <div className={`${
-                                        activeTab === tab.id ? 'text-cyan-600' : 'text-slate-400'
+                                        activeTab === tab.id ? 'text-cyan-500' : 'text-themed-muted'
                                     }`}>
                                         {tab.icon}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className={`text-sm font-medium ${
-                                            activeTab === tab.id ? 'text-cyan-900' : 'text-slate-900'
+                                            activeTab === tab.id ? 'text-cyan-600' : 'text-themed'
                                         }`}>
                                             {tab.label}
                                         </p>
-                                        <p className="text-xs text-slate-500 truncate">
+                                        <p className="text-xs text-themed-muted truncate">
                                             {tab.description}
                                         </p>
                                     </div>
                                     <ChevronRight className={`w-4 h-4 ${
-                                        activeTab === tab.id ? 'text-cyan-500' : 'text-slate-300'
+                                        activeTab === tab.id ? 'text-cyan-500' : 'text-themed-muted opacity-40'
                                     }`} />
                                 </button>
                             ))}
                         </nav>
-                    </Card>
+                    </div>
                 </div>
 
                 <div className="flex-1 min-w-0">
+                    {renderContent()}
+                </div>
+            </div>
+
+            <div className="md:hidden space-y-4">
+                <div className="flex overflow-x-auto gap-2 pb-2 -mx-4 px-4 scrollbar-hide">
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${
+                                activeTab === tab.id
+                                    ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/30'
+                                    : 'card-themed border text-themed-muted'
+                            }`}
+                        >
+                            <span className={activeTab === tab.id ? 'text-white' : ''}>{tab.icon}</span>
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
+
+                <div>
                     {renderContent()}
                 </div>
             </div>

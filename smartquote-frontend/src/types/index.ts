@@ -1,5 +1,4 @@
-// SmartQuote-AI/src/types/index.ts
-
+// src/types/index.ts
 export interface ApiResponse<T = any> {
     success: boolean;
     data?: T;
@@ -510,7 +509,7 @@ export interface UpdateFollowUpData {
 export interface UserSettings {
     id: string;
     userId: string;
-    theme: 'light' | 'dark' | 'system';
+    theme: 'light' | 'dark';
     language: 'pl' | 'en';
     emailNotifications: boolean;
     offerNotifications: boolean;
@@ -621,7 +620,7 @@ export interface ChangePasswordInput {
 }
 
 export interface UpdateSettingsInput {
-    theme?: 'light' | 'dark' | 'system';
+    theme?: 'light' | 'dark';
     language?: 'pl' | 'en';
     emailNotifications?: boolean;
     offerNotifications?: boolean;

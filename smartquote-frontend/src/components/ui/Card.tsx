@@ -20,7 +20,7 @@ export default function Card({ children, className, padding = 'md', ...props }: 
     return (
         <div
             className={cn(
-                'bg-white rounded-2xl shadow-sm border border-slate-200/60',
+                'rounded-2xl shadow-sm border card-themed transition-colors duration-300',
                 paddings[padding],
                 className
             )}
@@ -43,8 +43,8 @@ export function CardHeader({
     return (
         <div className="flex items-center justify-between mb-6">
             <div>
-                <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
-                {description && <p className="text-sm text-slate-500 mt-1">{description}</p>}
+                <h3 className="text-lg font-semibold text-themed">{title}</h3>
+                {description && <p className="text-sm text-themed-muted mt-1">{description}</p>}
             </div>
             {action && <div>{action}</div>}
         </div>

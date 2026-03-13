@@ -1,11 +1,9 @@
 // src/app/dashboard/settings/components/NotificationsSection.tsx
-
 'use client';
 
 import { useState } from 'react';
 import { Bell, Mail, Calendar, FileText, BarChart3, Loader2, Check } from 'lucide-react';
 import { Card } from '@/components/ui';
-import Button from '@/components/ui/Button';
 import type { UserSettings, UpdateSettingsInput } from '@/types';
 
 interface Props {
@@ -25,12 +23,12 @@ function Toggle({ enabled, onChange, disabled }: ToggleProps) {
             type="button"
             onClick={() => !disabled && onChange(!enabled)}
             disabled={disabled}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                enabled ? 'bg-cyan-500' : 'bg-slate-200'
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${
+                enabled ? 'bg-cyan-500' : 'bg-slate-300'
             } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
         >
             <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform duration-300 ${
                     enabled ? 'translate-x-6' : 'translate-x-1'
                 }`}
             />
@@ -57,8 +55,7 @@ export default function NotificationsSection({ settings, onUpdate }: Props) {
             await onUpdate({ [key]: value });
             setSuccess(true);
             setTimeout(() => setSuccess(false), 2000);
-        } catch (error) {
-            // Revert on error
+        } catch (error: unknown) {
             setLocalSettings(prev => ({ ...prev, [key]: !value }));
             console.error('Failed to update notifications:', error);
         } finally {
@@ -101,35 +98,35 @@ export default function NotificationsSection({ settings, onUpdate }: Props) {
         <Card>
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h2 className="text-lg font-semibold text-slate-900">Powiadomienia</h2>
-                    <p className="text-sm text-slate-500">Zarządzaj preferencjami powiadomień</p>
+                    <h2 className="text-lg font-semibold text-themed">Powiadomienia</h2>
+                    <p className="text-sm text-themed-muted">Zarządzaj preferencjami powiadomień</p>
                 </div>
-                {success && (
-                    <div className="flex items-center gap-2 text-green-600 text-sm">
-                        <Check className="w-4 h-4" />
-                        Zapisano
-                    </div>
-                )}
-                {isSaving && (
-                    <Loader2 className="w-4 h-4 animate-spin text-cyan-500" />
-                )}
+                <div className="flex items-center gap-2">
+                    {success && (
+                        <div className="flex items-center gap-1.5 text-emerald-500 text-sm">
+                            <Check className="w-4 h-4" />
+                            <span>Zapisano</span>
+                        </div>
+                    )}
+                    {isSaving && <Loader2 className="w-4 h-4 animate-spin text-cyan-500" />}
+                </div>
             </div>
 
             <div className="space-y-1">
                 {notifications.map((item, index) => (
                     <div
                         key={item.key}
-                        className={`flex items-center justify-between p-4 rounded-lg hover:bg-slate-50 transition-colors ${
-                            index !== notifications.length - 1 ? 'border-b border-slate-100' : ''
+                        className={`flex items-center justify-between p-4 rounded-xl hover-themed transition-colors ${
+                            index !== notifications.length - 1 ? 'border-b divider-themed' : ''
                         }`}
                     >
                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-lg bg-cyan-100 flex items-center justify-center text-cyan-600">
+                            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-500">
                                 {item.icon}
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-slate-900">{item.title}</p>
-                                <p className="text-sm text-slate-500">{item.description}</p>
+                                <p className="text-sm font-medium text-themed">{item.title}</p>
+                                <p className="text-sm text-themed-muted">{item.description}</p>
                             </div>
                         </div>
                         <Toggle
@@ -141,12 +138,12 @@ export default function NotificationsSection({ settings, onUpdate }: Props) {
                 ))}
             </div>
 
-            <div className="mt-6 pt-6 border-t border-slate-100">
-                <div className="flex items-start gap-3 p-4 bg-amber-50 rounded-lg">
-                    <Bell className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="mt-6 pt-6 border-t divider-themed">
+                <div className="flex items-start gap-3 p-4 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                    <Bell className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
                     <div>
-                        <p className="text-sm font-medium text-amber-800">Wskazówka</p>
-                        <p className="text-sm text-amber-700">
+                        <p className="text-sm font-medium text-amber-700">Wskazówka</p>
+                        <p className="text-sm text-amber-600">
                             Powiadomienia email są wysyłane tylko gdy jesteś offline.
                             Gdy korzystasz z aplikacji, zobaczysz powiadomienia w interfejsie.
                         </p>

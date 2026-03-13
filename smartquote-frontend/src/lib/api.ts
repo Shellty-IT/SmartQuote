@@ -1,4 +1,4 @@
-// SmartQuote-AI/src/lib/api.ts
+// src/lib/api.ts
 import { getSession } from 'next-auth/react';
 import type {
     ApiResponse,
@@ -218,6 +218,47 @@ class ApiClient {
         return response.blob();
     }
 
+    async uploadFile<T>(endpoint: string, formData: FormData): Promise<ApiResponse<T>> {
+        const session = await getSession() as SessionWithToken | null;
+        const headers: HeadersInit = {};
+
+        if (session?.accessToken) {
+            headers['Authorization'] = `Bearer ${session.accessToken}`;
+        }
+
+        const url = `${this.baseUrl}${endpoint}`;
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers,
+                body: formData,
+            });
+
+            const data: ApiResponse<T> = await response.json();
+
+            if (!response.ok) {
+                throw new ApiError(
+                    data.error?.message || 'Wystąpił błąd',
+                    data.error?.code || 'UPLOAD_ERROR',
+                    response.status,
+                    data.error?.details
+                );
+            }
+
+            return data;
+        } catch (error) {
+            if (error instanceof ApiError) {
+                throw error;
+            }
+            throw new ApiError(
+                'Błąd przesyłania pliku',
+                'NETWORK_ERROR',
+                0
+            );
+        }
+    }
+
     async getPublic<T>(endpoint: string, params?: Record<string, string | number | boolean | undefined>): Promise<ApiResponse<T>> {
         return this.requestPublic<T>(endpoint, { method: 'GET', params });
     }
@@ -250,6 +291,18 @@ export class ApiError extends Error {
 }
 
 export const api = new ApiClient(`${API_URL}/api`);
+
+export async function checkBackendHealth(): Promise<boolean> {
+    try {
+        const response = await fetch(`${API_URL}/api/health`, {
+            method: 'GET',
+            signal: AbortSignal.timeout(30000),
+        });
+        return response.ok;
+    } catch (err: unknown) {
+        return false;
+    }
+}
 
 export const authApi = {
     login: (email: string, password: string) =>
@@ -455,6 +508,13 @@ export const settingsApi = {
         return response.data as UserProfile;
     },
 
+    uploadAvatar: async (file: File): Promise<{ url: string }> => {
+        const formData = new FormData();
+        formData.append('avatar', file);
+        const response = await api.uploadFile<{ url: string }>('/settings/profile/avatar', formData);
+        return response.data as { url: string };
+    },
+
     changePassword: async (data: ChangePasswordInput): Promise<{ message: string }> => {
         const response = await api.put<{ message: string }>('/settings/password', data);
         return response.data as { message: string };
@@ -478,6 +538,13 @@ export const settingsApi = {
     updateCompany: async (data: UpdateCompanyInfoInput): Promise<CompanyInfo> => {
         const response = await api.put<CompanyInfo>('/settings/company', data);
         return response.data as CompanyInfo;
+    },
+
+    uploadLogo: async (file: File): Promise<{ url: string }> => {
+        const formData = new FormData();
+        formData.append('logo', file);
+        const response = await api.uploadFile<{ url: string }>('/settings/company/logo', formData);
+        return response.data as { url: string };
     },
 
     getApiKeys: async (): Promise<ApiKey[]> => {

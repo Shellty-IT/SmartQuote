@@ -1,3 +1,4 @@
+// src/components/ui/Button.tsx
 'use client';
 
 import { forwardRef, ButtonHTMLAttributes } from 'react';
@@ -11,26 +12,29 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ({ className, variant = 'primary', size = 'md', isLoading, children, disabled, ...props }, ref) => {
-        const baseStyles = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+        const baseStyles = 'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
 
         const variants = {
             primary: 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/25 hover:shadow-xl hover:shadow-cyan-500/30 hover:-translate-y-0.5 focus:ring-cyan-500',
-            secondary: 'bg-slate-100 text-slate-700 hover:bg-slate-200 focus:ring-slate-500',
-            outline: 'border border-slate-300 text-slate-700 hover:bg-slate-50 focus:ring-slate-500',
-            ghost: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:ring-slate-500',
+            secondary: 'text-themed hover-themed focus:ring-slate-500',
+            outline: 'border text-themed hover-themed focus:ring-cyan-500',
+            ghost: 'text-themed-muted hover-themed focus:ring-slate-500',
             danger: 'bg-red-500 text-white hover:bg-red-600 focus:ring-red-500',
-        };
-
-        const sizes = {
-            sm: 'px-3 py-1.5 text-sm gap-1.5',
-            md: 'px-4 py-2 text-sm gap-2',
-            lg: 'px-6 py-3 text-base gap-2',
         };
 
         return (
             <button
                 ref={ref}
-                className={cn(baseStyles, variants[variant], sizes[size], className)}
+                className={cn(
+                    baseStyles,
+                    variants[variant],
+                    variant === 'outline' && 'border-[var(--input-border)]',
+                    variant === 'secondary' && 'bg-[var(--section-bg)]',
+                    size === 'sm' && 'px-3 py-1.5 text-sm gap-1.5',
+                    size === 'md' && 'px-4 py-2 text-sm gap-2',
+                    size === 'lg' && 'px-6 py-3 text-base gap-2',
+                    className
+                )}
                 disabled={disabled || isLoading}
                 {...props}
             >

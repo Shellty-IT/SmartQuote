@@ -24,10 +24,10 @@ export default function DashboardLayout({
 
     if (status === 'loading') {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50">
+            <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--background)' }}>
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
-                    <p className="text-slate-500 font-medium">Ładowanie...</p>
+                    <p className="text-themed-muted font-medium">Ładowanie...</p>
                 </div>
             </div>
         );
@@ -38,7 +38,7 @@ export default function DashboardLayout({
     }
 
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="min-h-screen" style={{ backgroundColor: 'var(--background)' }}>
             <Sidebar />
             <div className="lg:pl-64">
                 <Header />
