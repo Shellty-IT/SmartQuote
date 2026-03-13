@@ -55,12 +55,12 @@ export default function DashboardPage() {
     }
 
     const statusChartData = [
-        { label: 'Szkice', value: offersStats?.byStatus?.DRAFT?.count || 0, color: 'bg-slate-400', bgColor: 'bg-slate-100' },
-        { label: 'Wysłane', value: offersStats?.byStatus?.SENT?.count || 0, color: 'bg-blue-500', bgColor: 'bg-blue-100' },
-        { label: 'Otwarte', value: offersStats?.byStatus?.VIEWED?.count || 0, color: 'bg-cyan-500', bgColor: 'bg-cyan-100' },
-        { label: 'Negocjacje', value: offersStats?.byStatus?.NEGOTIATION?.count || 0, color: 'bg-amber-500', bgColor: 'bg-amber-100' },
-        { label: 'Zaakceptowane', value: offersStats?.byStatus?.ACCEPTED?.count || 0, color: 'bg-emerald-500', bgColor: 'bg-emerald-100' },
-        { label: 'Odrzucone', value: offersStats?.byStatus?.REJECTED?.count || 0, color: 'bg-red-500', bgColor: 'bg-red-100' },
+        { label: 'Szkice', value: offersStats?.byStatus?.DRAFT?.count || 0, color: 'bg-slate-400', bgColor: 'bg-slate-100 dark:bg-slate-700' },
+        { label: 'Wysłane', value: offersStats?.byStatus?.SENT?.count || 0, color: 'bg-blue-500', bgColor: 'bg-blue-100 dark:bg-blue-900/30' },
+        { label: 'Otwarte', value: offersStats?.byStatus?.VIEWED?.count || 0, color: 'bg-cyan-500', bgColor: 'bg-cyan-100 dark:bg-cyan-900/30' },
+        { label: 'Negocjacje', value: offersStats?.byStatus?.NEGOTIATION?.count || 0, color: 'bg-amber-500', bgColor: 'bg-amber-100 dark:bg-amber-900/30' },
+        { label: 'Zaakceptowane', value: offersStats?.byStatus?.ACCEPTED?.count || 0, color: 'bg-emerald-500', bgColor: 'bg-emerald-100 dark:bg-emerald-900/30' },
+        { label: 'Odrzucone', value: offersStats?.byStatus?.REJECTED?.count || 0, color: 'bg-red-500', bgColor: 'bg-red-100 dark:bg-red-900/30' },
     ];
 
     return (
@@ -162,7 +162,7 @@ export default function DashboardPage() {
                                 </div>
                                 <button
                                     onClick={() => router.push('/dashboard/offers')}
-                                    className="text-sm font-medium text-cyan-600 hover:text-cyan-700 transition-colors"
+                                    className="text-sm font-medium text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors"
                                 >
                                     Wszystkie →
                                 </button>
@@ -188,13 +188,13 @@ export default function DashboardPage() {
                                                 className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3 sm:py-4 hover-themed transition-colors cursor-pointer group"
                                                 onClick={() => router.push(`/dashboard/offers/${offer.id}`)}
                                             >
-                                                <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-white text-xs sm:text-sm font-semibold">
+                                                <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-cyan-600 to-blue-700 flex items-center justify-center text-white text-xs sm:text-sm font-semibold">
                                                     {offer.client ? getInitials(offer.client.name) : '??'}
                                                 </div>
 
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center gap-2">
-                                                        <p className="text-sm font-medium text-themed truncate group-hover:text-cyan-600 transition-colors">
+                                                        <p className="text-sm font-medium text-themed truncate group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
                                                             {offer.title}
                                                         </p>
                                                         <Badge className={`${status.bgColor} ${status.color} hidden sm:inline-flex`}>
@@ -241,20 +241,20 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="xl:col-span-4 space-y-4 sm:space-y-6">
-                        <div className="rounded-2xl border overflow-hidden bg-gradient-to-br from-cyan-50 to-blue-50 border-cyan-200" style={{ background: 'var(--card-bg)' }}>
-                            <div className="flex items-center justify-between px-5 py-3.5 border-b border-cyan-200/50">
+                        <div className="rounded-2xl border overflow-hidden ai-card-themed">
+                            <div className="flex items-center justify-between px-5 py-3.5 border-b border-cyan-500/20">
                                 <div className="flex items-center gap-2">
                                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
                                         <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
                                         </svg>
                                     </div>
-                                    <h3 className="text-sm font-bold text-cyan-900">Wnioski AI</h3>
+                                    <h3 className="text-sm font-bold text-themed">Wnioski AI</h3>
                                 </div>
                                 {latestInsights.length > 0 && (
-                                    <span className="text-xs font-medium text-cyan-600 bg-cyan-100 px-2 py-0.5 rounded-full">
-                                        {latestInsights.length}
-                                    </span>
+                                    <span className="text-xs font-medium text-cyan-600 dark:text-cyan-400 bg-cyan-500/15 px-2 py-0.5 rounded-full">
+                    {latestInsights.length}
+                  </span>
                                 )}
                             </div>
 
@@ -265,44 +265,44 @@ export default function DashboardPage() {
                                     </div>
                                 ) : latestInsights.length === 0 ? (
                                     <div className="text-center py-8">
-                                        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-cyan-100 flex items-center justify-center">
-                                            <svg className="w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-cyan-500/15 flex items-center justify-center">
+                                            <svg className="w-6 h-6 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
                                             </svg>
                                         </div>
-                                        <p className="text-sm font-medium text-cyan-800">Brak wniosków</p>
-                                        <p className="text-xs text-cyan-600 mt-1">Pojawią się po zakończeniu ofert</p>
+                                        <p className="text-sm font-medium text-themed">Brak wniosków</p>
+                                        <p className="text-xs text-themed-muted mt-1">Pojawią się po zakończeniu ofert</p>
                                     </div>
                                 ) : (
                                     <div className="space-y-3">
                                         {latestInsights.map((insight) => (
                                             <div
                                                 key={insight.id}
-                                                className="bg-white rounded-xl p-3.5 border border-cyan-100 hover:border-cyan-300 hover:shadow-sm transition-all cursor-pointer group"
+                                                className="card-themed rounded-xl p-3.5 border hover:border-cyan-500/50 hover:shadow-sm transition-all cursor-pointer group"
                                                 onClick={() => router.push(`/dashboard/offers/${insight.offerId}`)}
                                             >
                                                 <div className="flex items-start justify-between gap-2 mb-2">
                                                     <div className="flex items-center gap-2 min-w-0">
-                                                        <span className={`flex-shrink-0 w-2 h-2 rounded-full ${
-                                                            insight.outcome === 'ACCEPTED' ? 'bg-emerald-500' : 'bg-red-500'
-                                                        }`} />
-                                                        <span className="text-xs font-bold text-slate-800 truncate">
-                                                            {insight.offerNumber}
-                                                        </span>
+                            <span className={`flex-shrink-0 w-2 h-2 rounded-full ${
+                                insight.outcome === 'ACCEPTED' ? 'bg-emerald-500' : 'bg-red-500'
+                            }`} />
+                                                        <span className="text-xs font-bold text-themed truncate">
+                              {insight.offerNumber}
+                            </span>
                                                         <span className={`flex-shrink-0 text-xs px-1.5 py-0.5 rounded-full font-semibold ${
                                                             insight.outcome === 'ACCEPTED'
-                                                                ? 'bg-emerald-100 text-emerald-700'
-                                                                : 'bg-red-100 text-red-700'
+                                                                ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                                                                : 'bg-red-500/15 text-red-600 dark:text-red-400'
                                                         }`}>
-                                                            {insight.outcome === 'ACCEPTED' ? 'Wygrana' : 'Przegrana'}
-                                                        </span>
+                              {insight.outcome === 'ACCEPTED' ? 'Wygrana' : 'Przegrana'}
+                            </span>
                                                     </div>
-                                                    <svg className="w-4 h-4 text-slate-300 group-hover:text-cyan-500 flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <svg className="w-4 h-4 text-themed-muted group-hover:text-cyan-500 flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                                                     </svg>
                                                 </div>
 
-                                                <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed mb-2">
+                                                <p className="text-xs text-themed-muted line-clamp-2 leading-relaxed mb-2">
                                                     {insight.insights.summary || insight.offerTitle}
                                                 </p>
 
@@ -311,13 +311,13 @@ export default function DashboardPage() {
                                                         <svg className="w-3 h-3 text-cyan-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
                                                         </svg>
-                                                        <span className="text-xs text-cyan-700 leading-relaxed line-clamp-1">
-                                                            {insight.insights.keyLessons[0]}
-                                                        </span>
+                                                        <span className="text-xs text-cyan-600 dark:text-cyan-400 leading-relaxed line-clamp-1">
+                              {insight.insights.keyLessons[0]}
+                            </span>
                                                     </div>
                                                 )}
 
-                                                <div className="flex items-center justify-between text-xs text-slate-400">
+                                                <div className="flex items-center justify-between text-xs text-themed-muted">
                                                     <span className="truncate">{insight.clientName}</span>
                                                     <span className="flex-shrink-0 ml-2">{formatRelativeTime(insight.createdAt)}</span>
                                                 </div>
@@ -341,7 +341,7 @@ export default function DashboardPage() {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                             </svg>
                                         ),
-                                        color: 'bg-cyan-100 text-cyan-600',
+                                        color: 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400',
                                     },
                                     {
                                         label: 'Dodaj klienta',
@@ -352,7 +352,7 @@ export default function DashboardPage() {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                                             </svg>
                                         ),
-                                        color: 'bg-violet-100 text-violet-600',
+                                        color: 'bg-violet-500/15 text-violet-600 dark:text-violet-400',
                                     },
                                     {
                                         label: 'AI Asystent',
@@ -363,7 +363,7 @@ export default function DashboardPage() {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                                             </svg>
                                         ),
-                                        color: 'bg-amber-100 text-amber-600',
+                                        color: 'bg-amber-500/15 text-amber-600 dark:text-amber-400',
                                     },
                                     {
                                         label: 'Follow-upy',
@@ -374,7 +374,7 @@ export default function DashboardPage() {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                         ),
-                                        color: 'bg-emerald-100 text-emerald-600',
+                                        color: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400',
                                     },
                                 ].map((action) => (
                                     <button
