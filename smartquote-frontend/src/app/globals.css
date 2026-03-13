@@ -27,9 +27,9 @@
     --kpi-hover-shadow: rgba(6, 182, 212, 0.15);
     --accent-gradient-from: #06b6d4;
     --accent-gradient-to: #2563eb;
-    --ai-card-bg: #deeeff;
-    --ai-card-border: #a8cbef;
-    --ai-example-bg: #e4f0ff;
+    --ai-card-bg: #e8f4fc;
+    --ai-card-border: #a8d4f0;
+    --ai-example-bg: #dceefb;
     --ai-info-from: #d0e8fc;
     --ai-info-to: #c8dffb;
     --tone-active-bg: #cce8ef;
@@ -63,9 +63,9 @@
     --kpi-hover-shadow: rgba(6, 182, 212, 0.1);
     --accent-gradient-from: #06b6d4;
     --accent-gradient-to: #3b82f6;
-    --ai-card-bg: #162640;
-    --ai-card-border: #2a4a6a;
-    --ai-example-bg: #131f35;
+    --ai-card-bg: #0f2a3d;
+    --ai-card-border: #1a4a6a;
+    --ai-example-bg: #0a1f2e;
     --ai-info-from: #142438;
     --ai-info-to: #16283e;
     --tone-active-bg: #153040;

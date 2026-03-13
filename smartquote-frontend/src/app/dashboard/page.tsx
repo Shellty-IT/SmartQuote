@@ -55,12 +55,12 @@ export default function DashboardPage() {
     }
 
     const statusChartData = [
-        { label: 'Szkice', value: offersStats?.byStatus?.DRAFT?.count || 0, color: 'bg-slate-400', bgColor: 'bg-slate-100 dark:bg-slate-700' },
-        { label: 'Wysłane', value: offersStats?.byStatus?.SENT?.count || 0, color: 'bg-blue-500', bgColor: 'bg-blue-100 dark:bg-blue-900/30' },
-        { label: 'Otwarte', value: offersStats?.byStatus?.VIEWED?.count || 0, color: 'bg-cyan-500', bgColor: 'bg-cyan-100 dark:bg-cyan-900/30' },
-        { label: 'Negocjacje', value: offersStats?.byStatus?.NEGOTIATION?.count || 0, color: 'bg-amber-500', bgColor: 'bg-amber-100 dark:bg-amber-900/30' },
-        { label: 'Zaakceptowane', value: offersStats?.byStatus?.ACCEPTED?.count || 0, color: 'bg-emerald-500', bgColor: 'bg-emerald-100 dark:bg-emerald-900/30' },
-        { label: 'Odrzucone', value: offersStats?.byStatus?.REJECTED?.count || 0, color: 'bg-red-500', bgColor: 'bg-red-100 dark:bg-red-900/30' },
+        { label: 'Szkice', value: offersStats?.byStatus?.DRAFT?.count || 0, color: 'bg-slate-400', bgColor: 'bg-slate-200 dark:bg-slate-700' },
+        { label: 'Wysłane', value: offersStats?.byStatus?.SENT?.count || 0, color: 'bg-blue-500', bgColor: 'bg-blue-100 dark:bg-blue-900/40' },
+        { label: 'Otwarte', value: offersStats?.byStatus?.VIEWED?.count || 0, color: 'bg-cyan-500', bgColor: 'bg-cyan-100 dark:bg-cyan-900/40' },
+        { label: 'Negocjacje', value: offersStats?.byStatus?.NEGOTIATION?.count || 0, color: 'bg-amber-500', bgColor: 'bg-amber-100 dark:bg-amber-900/40' },
+        { label: 'Zaakceptowane', value: offersStats?.byStatus?.ACCEPTED?.count || 0, color: 'bg-emerald-500', bgColor: 'bg-emerald-100 dark:bg-emerald-900/40' },
+        { label: 'Odrzucone', value: offersStats?.byStatus?.REJECTED?.count || 0, color: 'bg-red-500', bgColor: 'bg-red-100 dark:bg-red-900/40' },
     ];
 
     return (
@@ -154,47 +154,48 @@ export default function DashboardPage() {
 
                 <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6">
                     <div className="xl:col-span-8 space-y-4 sm:space-y-6">
-                        <div className="rounded-2xl border overflow-hidden card-themed">
-                            <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b divider-themed">
+                        {/* Ostatnie oferty - z błękitnym akcentem */}
+                        <div className="rounded-2xl border-2 border-cyan-200 dark:border-cyan-800/50 overflow-hidden bg-gradient-to-br from-cyan-50/50 to-blue-50/30 dark:from-cyan-950/30 dark:to-blue-950/20">
+                            <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-cyan-200/50 dark:border-cyan-800/30 bg-cyan-100/50 dark:bg-cyan-900/20">
                                 <div>
-                                    <h3 className="text-base sm:text-lg font-semibold text-themed">Ostatnie oferty</h3>
-                                    <p className="text-xs sm:text-sm text-themed-muted">Twoja aktywność z ostatnich dni</p>
+                                    <h3 className="text-base sm:text-lg font-semibold text-cyan-900 dark:text-cyan-100">Ostatnie oferty</h3>
+                                    <p className="text-xs sm:text-sm text-cyan-700 dark:text-cyan-300/70">Twoja aktywność z ostatnich dni</p>
                                 </div>
                                 <button
                                     onClick={() => router.push('/dashboard/offers')}
-                                    className="text-sm font-medium text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors"
+                                    className="text-sm font-medium text-cyan-600 dark:text-cyan-400 hover:text-cyan-800 dark:hover:text-cyan-300 transition-colors"
                                 >
                                     Wszystkie →
                                 </button>
                             </div>
 
                             {recentOffers.length === 0 ? (
-                                <div className="px-6 py-12 text-center">
-                                    <svg className="w-12 h-12 text-themed-muted mx-auto mb-3 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div className="px-6 py-12 text-center bg-white/50 dark:bg-slate-900/30">
+                                    <svg className="w-12 h-12 text-cyan-400 dark:text-cyan-600 mx-auto mb-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
-                                    <p className="text-themed-muted mb-4">Brak ofert</p>
+                                    <p className="text-cyan-700 dark:text-cyan-300 mb-4">Brak ofert</p>
                                     <Button size="sm" onClick={() => router.push('/dashboard/offers/new')}>
                                         Utwórz pierwszą ofertę
                                     </Button>
                                 </div>
                             ) : (
-                                <div className="divide-y divider-themed">
+                                <div className="divide-y divide-cyan-200/50 dark:divide-cyan-800/30 bg-white/60 dark:bg-slate-900/40">
                                     {recentOffers.map((offer) => {
                                         const status = getStatusConfig(offer.status);
                                         return (
                                             <div
                                                 key={offer.id}
-                                                className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3 sm:py-4 hover-themed transition-colors cursor-pointer group"
+                                                className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3 sm:py-4 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors cursor-pointer group"
                                                 onClick={() => router.push(`/dashboard/offers/${offer.id}`)}
                                             >
-                                                <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-cyan-600 to-blue-700 flex items-center justify-center text-white text-xs sm:text-sm font-semibold">
+                                                <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white text-xs sm:text-sm font-semibold shadow-md">
                                                     {offer.client ? getInitials(offer.client.name) : '??'}
                                                 </div>
 
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center gap-2">
-                                                        <p className="text-sm font-medium text-themed truncate group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
+                                                        <p className="text-sm font-medium text-slate-800 dark:text-slate-100 truncate group-hover:text-cyan-700 dark:group-hover:text-cyan-300 transition-colors">
                                                             {offer.title}
                                                         </p>
                                                         <Badge className={`${status.bgColor} ${status.color} hidden sm:inline-flex`}>
@@ -202,25 +203,25 @@ export default function DashboardPage() {
                                                         </Badge>
                                                     </div>
                                                     <div className="flex items-center gap-2 mt-0.5">
-                                                        <p className="text-xs sm:text-sm text-themed-muted truncate">
+                                                        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 truncate">
                                                             {offer.client?.name || 'Brak klienta'}
                                                         </p>
-                                                        <span className="text-themed-muted opacity-30 hidden sm:inline">•</span>
-                                                        <p className="text-xs text-themed-muted hidden sm:inline">{offer.number}</p>
+                                                        <span className="text-slate-400 dark:text-slate-600 hidden sm:inline">•</span>
+                                                        <p className="text-xs text-slate-500 dark:text-slate-500 hidden sm:inline">{offer.number}</p>
                                                     </div>
                                                 </div>
 
                                                 <div className="flex-shrink-0 text-right">
-                                                    <p className="text-xs sm:text-sm font-semibold text-themed">
+                                                    <p className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100">
                                                         {formatCurrency(Number(offer.totalGross))}
                                                     </p>
-                                                    <p className="text-xs text-themed-muted mt-0.5">
+                                                    <p className="text-xs text-slate-500 dark:text-slate-500 mt-0.5">
                                                         {formatRelativeTime(offer.createdAt)}
                                                     </p>
                                                 </div>
 
                                                 <svg
-                                                    className="w-4 h-4 text-themed-muted opacity-30 group-hover:text-cyan-500 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all hidden sm:block"
+                                                    className="w-4 h-4 text-cyan-400 dark:text-cyan-600 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all hidden sm:block"
                                                     fill="none"
                                                     viewBox="0 0 24 24"
                                                     stroke="currentColor"
@@ -234,25 +235,29 @@ export default function DashboardPage() {
                             )}
                         </div>
 
-                        <div className="rounded-2xl border p-4 sm:p-6 card-themed">
-                            <h3 className="text-base sm:text-lg font-semibold text-themed mb-4">Rozkład statusów ofert</h3>
-                            <StatsChart data={statusChartData} total={offersStats?.total || 0} />
+                        {/* Rozkład statusów - z fioletowym akcentem */}
+                        <div className="rounded-2xl border-2 border-violet-200 dark:border-violet-800/50 p-4 sm:p-6 bg-gradient-to-br from-violet-50/50 to-purple-50/30 dark:from-violet-950/30 dark:to-purple-950/20">
+                            <h3 className="text-base sm:text-lg font-semibold text-violet-900 dark:text-violet-100 mb-4">Rozkład statusów ofert</h3>
+                            <div className="bg-white/60 dark:bg-slate-900/40 rounded-xl p-4">
+                                <StatsChart data={statusChartData} total={offersStats?.total || 0} />
+                            </div>
                         </div>
                     </div>
 
                     <div className="xl:col-span-4 space-y-4 sm:space-y-6">
-                        <div className="rounded-2xl border overflow-hidden ai-card-themed">
-                            <div className="flex items-center justify-between px-5 py-3.5 border-b border-cyan-500/20">
+                        {/* Wnioski AI - z wyraźnym błękitem */}
+                        <div className="rounded-2xl border-2 border-cyan-300 dark:border-cyan-700/60 overflow-hidden bg-gradient-to-br from-cyan-100 to-blue-100 dark:from-cyan-950/50 dark:to-blue-950/40">
+                            <div className="flex items-center justify-between px-5 py-3.5 border-b border-cyan-300/50 dark:border-cyan-700/40 bg-gradient-to-r from-cyan-200/80 to-blue-200/60 dark:from-cyan-900/50 dark:to-blue-900/40">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-md">
                                         <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
                                         </svg>
                                     </div>
-                                    <h3 className="text-sm font-bold text-themed">Wnioski AI</h3>
+                                    <h3 className="text-sm font-bold text-cyan-900 dark:text-cyan-100">Wnioski AI</h3>
                                 </div>
                                 {latestInsights.length > 0 && (
-                                    <span className="text-xs font-medium text-cyan-600 dark:text-cyan-400 bg-cyan-500/15 px-2 py-0.5 rounded-full">
+                                    <span className="text-xs font-medium text-cyan-700 dark:text-cyan-300 bg-cyan-200 dark:bg-cyan-800/60 px-2 py-0.5 rounded-full">
                     {latestInsights.length}
                   </span>
                                 )}
@@ -264,21 +269,21 @@ export default function DashboardPage() {
                                         <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
                                     </div>
                                 ) : latestInsights.length === 0 ? (
-                                    <div className="text-center py-8">
-                                        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-cyan-500/15 flex items-center justify-center">
-                                            <svg className="w-6 h-6 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                    <div className="text-center py-8 bg-white/40 dark:bg-slate-900/30 rounded-xl">
+                                        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-cyan-200 dark:bg-cyan-800/50 flex items-center justify-center">
+                                            <svg className="w-6 h-6 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
                                             </svg>
                                         </div>
-                                        <p className="text-sm font-medium text-themed">Brak wniosków</p>
-                                        <p className="text-xs text-themed-muted mt-1">Pojawią się po zakończeniu ofert</p>
+                                        <p className="text-sm font-medium text-cyan-800 dark:text-cyan-200">Brak wniosków</p>
+                                        <p className="text-xs text-cyan-600 dark:text-cyan-400 mt-1">Pojawią się po zakończeniu ofert</p>
                                     </div>
                                 ) : (
                                     <div className="space-y-3">
                                         {latestInsights.map((insight) => (
                                             <div
                                                 key={insight.id}
-                                                className="card-themed rounded-xl p-3.5 border hover:border-cyan-500/50 hover:shadow-sm transition-all cursor-pointer group"
+                                                className="bg-white dark:bg-slate-800/80 rounded-xl p-3.5 border border-cyan-200 dark:border-cyan-700/50 hover:border-cyan-400 dark:hover:border-cyan-500 hover:shadow-md transition-all cursor-pointer group"
                                                 onClick={() => router.push(`/dashboard/offers/${insight.offerId}`)}
                                             >
                                                 <div className="flex items-start justify-between gap-2 mb-2">
@@ -286,23 +291,23 @@ export default function DashboardPage() {
                             <span className={`flex-shrink-0 w-2 h-2 rounded-full ${
                                 insight.outcome === 'ACCEPTED' ? 'bg-emerald-500' : 'bg-red-500'
                             }`} />
-                                                        <span className="text-xs font-bold text-themed truncate">
+                                                        <span className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
                               {insight.offerNumber}
                             </span>
                                                         <span className={`flex-shrink-0 text-xs px-1.5 py-0.5 rounded-full font-semibold ${
                                                             insight.outcome === 'ACCEPTED'
-                                                                ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-                                                                : 'bg-red-500/15 text-red-600 dark:text-red-400'
+                                                                ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
+                                                                : 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300'
                                                         }`}>
                               {insight.outcome === 'ACCEPTED' ? 'Wygrana' : 'Przegrana'}
                             </span>
                                                     </div>
-                                                    <svg className="w-4 h-4 text-themed-muted group-hover:text-cyan-500 flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <svg className="w-4 h-4 text-cyan-400 dark:text-cyan-500 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                                                     </svg>
                                                 </div>
 
-                                                <p className="text-xs text-themed-muted line-clamp-2 leading-relaxed mb-2">
+                                                <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed mb-2">
                                                     {insight.insights.summary || insight.offerTitle}
                                                 </p>
 
@@ -311,13 +316,13 @@ export default function DashboardPage() {
                                                         <svg className="w-3 h-3 text-cyan-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
                                                         </svg>
-                                                        <span className="text-xs text-cyan-600 dark:text-cyan-400 leading-relaxed line-clamp-1">
+                                                        <span className="text-xs text-cyan-700 dark:text-cyan-300 leading-relaxed line-clamp-1">
                               {insight.insights.keyLessons[0]}
                             </span>
                                                     </div>
                                                 )}
 
-                                                <div className="flex items-center justify-between text-xs text-themed-muted">
+                                                <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                                                     <span className="truncate">{insight.clientName}</span>
                                                     <span className="flex-shrink-0 ml-2">{formatRelativeTime(insight.createdAt)}</span>
                                                 </div>
@@ -328,8 +333,9 @@ export default function DashboardPage() {
                             </div>
                         </div>
 
-                        <div className="rounded-2xl border p-4 sm:p-5 card-themed">
-                            <h3 className="text-base font-semibold text-themed mb-4">Szybkie akcje</h3>
+                        {/* Szybkie akcje - z zielonym akcentem */}
+                        <div className="rounded-2xl border-2 border-emerald-200 dark:border-emerald-800/50 p-4 sm:p-5 bg-gradient-to-br from-emerald-50/50 to-green-50/30 dark:from-emerald-950/30 dark:to-green-950/20">
+                            <h3 className="text-base font-semibold text-emerald-900 dark:text-emerald-100 mb-4">Szybkie akcje</h3>
                             <div className="space-y-1.5">
                                 {[
                                     {
@@ -341,7 +347,7 @@ export default function DashboardPage() {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                             </svg>
                                         ),
-                                        color: 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400',
+                                        color: 'bg-cyan-100 dark:bg-cyan-900/50 text-cyan-600 dark:text-cyan-400',
                                     },
                                     {
                                         label: 'Dodaj klienta',
@@ -352,7 +358,7 @@ export default function DashboardPage() {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                                             </svg>
                                         ),
-                                        color: 'bg-violet-500/15 text-violet-600 dark:text-violet-400',
+                                        color: 'bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400',
                                     },
                                     {
                                         label: 'AI Asystent',
@@ -363,7 +369,7 @@ export default function DashboardPage() {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                                             </svg>
                                         ),
-                                        color: 'bg-amber-500/15 text-amber-600 dark:text-amber-400',
+                                        color: 'bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400',
                                     },
                                     {
                                         label: 'Follow-upy',
@@ -374,22 +380,22 @@ export default function DashboardPage() {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                         ),
-                                        color: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400',
+                                        color: 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400',
                                     },
                                 ].map((action) => (
                                     <button
                                         key={action.href}
                                         onClick={() => router.push(action.href)}
-                                        className="w-full flex items-center gap-3 p-3 rounded-xl hover-themed transition-all text-left group"
+                                        className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/60 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 border border-emerald-200/50 dark:border-emerald-800/30 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all text-left group"
                                     >
                                         <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${action.color} transition-transform group-hover:scale-110`}>
                                             {action.icon}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium text-themed">{action.label}</p>
-                                            <p className="text-xs text-themed-muted">{action.desc}</p>
+                                            <p className="text-sm font-medium text-slate-800 dark:text-slate-100">{action.label}</p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">{action.desc}</p>
                                         </div>
-                                        <svg className="w-4 h-4 text-themed-muted opacity-30 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg className="w-4 h-4 text-emerald-400 dark:text-emerald-600 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                         </svg>
                                     </button>
