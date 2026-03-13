@@ -186,7 +186,7 @@ export default function OfferDetailPage({ params }: PageProps) {
             <div className="p-4 md:p-8">
                 <Card>
                     <div className="text-center py-12">
-                        <p className="text-red-600 mb-4">{error || 'Nie znaleziono oferty'}</p>
+                        <p className="text-red-600 dark:text-red-400 mb-4">{error || 'Nie znaleziono oferty'}</p>
                         <Button onClick={() => router.push('/dashboard/offers')}>
                             Wróć do listy
                         </Button>
@@ -234,7 +234,7 @@ export default function OfferDetailPage({ params }: PageProps) {
                                 <Badge variant="danger" size="md">Wygasła</Badge>
                             )}
                             {offer.isInteractive && (
-                                <Badge className="bg-cyan-500/15 text-cyan-600" size="md">
+                                <Badge className="bg-cyan-500/15 text-cyan-600 dark:text-cyan-400" size="md">
                                     Link aktywny
                                 </Badge>
                             )}
@@ -299,18 +299,18 @@ export default function OfferDetailPage({ params }: PageProps) {
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
                                 activeTab === tab.id
                                     ? 'card-themed text-themed shadow-sm'
-                                    : 'text-themed-muted'
+                                    : 'text-themed-muted hover-themed'
                             }`}
                         >
                             {tab.label}
                             {tab.count !== undefined && tab.count > 0 && (
                                 <span className={`text-xs px-1.5 py-0.5 rounded-full ${
                                     activeTab === tab.id
-                                        ? 'bg-cyan-500/15 text-cyan-600'
+                                        ? 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400'
                                         : 'badge-themed'
                                 }`}>
-                                    {tab.count}
-                                </span>
+                  {tab.count}
+                </span>
                             )}
                         </button>
                     ))}
@@ -350,8 +350,8 @@ export default function OfferDetailPage({ params }: PageProps) {
                                                     <p className="font-medium text-themed">{item.name}</p>
                                                     {item.isOptional && (
                                                         <span className="text-xs px-1.5 py-0.5 rounded-full badge-info font-medium">
-                                                            Opcjonalna
-                                                        </span>
+                                Opcjonalna
+                              </span>
                                                     )}
                                                 </div>
                                                 {item.description && (
@@ -364,9 +364,9 @@ export default function OfferDetailPage({ params }: PageProps) {
                                             <td className="py-3 text-right text-themed-muted">
                                                 {formatCurrency(Number(item.unitPrice))}
                                                 {Number(item.discount) > 0 && (
-                                                    <span className="text-xs text-emerald-600 ml-1">
-                                                        -{item.discount}%
-                                                    </span>
+                                                    <span className="text-xs text-emerald-600 dark:text-emerald-400 ml-1">
+                              -{item.discount}%
+                            </span>
                                                 )}
                                             </td>
                                             <td className="py-3 text-right text-themed-muted">
@@ -393,7 +393,7 @@ export default function OfferDetailPage({ params }: PageProps) {
                                         </div>
                                         <div className="flex justify-between text-lg pt-2 border-t divider-themed">
                                             <span className="font-semibold text-themed">Suma brutto:</span>
-                                            <span className="font-bold text-cyan-600">{formatCurrency(Number(offer.totalGross))}</span>
+                                            <span className="font-bold text-cyan-600 dark:text-cyan-400">{formatCurrency(Number(offer.totalGross))}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -410,12 +410,12 @@ export default function OfferDetailPage({ params }: PageProps) {
                         {offer.notes && (
                             <Card>
                                 <h2 className="text-lg font-semibold text-themed mb-3">
-                                    <span className="flex items-center gap-2">
-                                        <svg className="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                        </svg>
-                                        Notatki wewnętrzne
-                                    </span>
+                  <span className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    Notatki wewnętrzne
+                  </span>
                                 </h2>
                                 <p className="text-themed whitespace-pre-wrap">{offer.notes}</p>
                             </Card>
@@ -456,9 +456,9 @@ export default function OfferDetailPage({ params }: PageProps) {
                                 {offer.validUntil && (
                                     <div className="flex justify-between">
                                         <span className="text-themed-muted">Ważna do</span>
-                                        <span className={isExpired ? 'text-red-600 font-medium' : 'text-themed'}>
-                                            {formatDate(offer.validUntil)}
-                                        </span>
+                                        <span className={isExpired ? 'text-red-600 dark:text-red-400 font-medium' : 'text-themed'}>
+                      {formatDate(offer.validUntil)}
+                    </span>
                                     </div>
                                 )}
                                 <div className="flex justify-between">
@@ -480,13 +480,13 @@ export default function OfferDetailPage({ params }: PageProps) {
                                 {offer.acceptedAt && (
                                     <div className="flex justify-between">
                                         <span className="text-themed-muted">Zaakceptowano</span>
-                                        <span className="text-emerald-600 font-medium">{formatDateTime(offer.acceptedAt)}</span>
+                                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">{formatDateTime(offer.acceptedAt)}</span>
                                     </div>
                                 )}
                                 {offer.rejectedAt && (
                                     <div className="flex justify-between">
                                         <span className="text-themed-muted">Odrzucono</span>
-                                        <span className="text-red-600 font-medium">{formatDateTime(offer.rejectedAt)}</span>
+                                        <span className="text-red-600 dark:text-red-400 font-medium">{formatDateTime(offer.rejectedAt)}</span>
                                     </div>
                                 )}
                                 {offer.viewCount > 0 && (
@@ -525,7 +525,7 @@ export default function OfferDetailPage({ params }: PageProps) {
                                     )}
                                 </Button>
                                 {pdfError && (
-                                    <p className="text-sm text-red-600 px-2">{pdfError}</p>
+                                    <p className="text-sm text-red-600 dark:text-red-400 px-2">{pdfError}</p>
                                 )}
                                 <Button
                                     variant="outline"
@@ -540,7 +540,7 @@ export default function OfferDetailPage({ params }: PageProps) {
                                 <div className="pt-2 border-t divider-themed">
                                     <Button
                                         variant="ghost"
-                                        className="w-full justify-start text-red-600 hover:bg-red-500/10 hover:text-red-700"
+                                        className="w-full justify-start text-red-600 dark:text-red-400 hover:bg-red-500/10"
                                         onClick={() => setDeleteModal(true)}
                                     >
                                         <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -618,7 +618,7 @@ export default function OfferDetailPage({ params }: PageProps) {
                         </div>
 
                         {observerError && (
-                            <div className="p-3 rounded-lg bg-red-500/10 text-red-600 text-sm mb-4">{observerError}</div>
+                            <div className="p-3 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 text-sm mb-4">{observerError}</div>
                         )}
 
                         {!observerInsight && !isLoadingObserver && !observerError && (
@@ -634,9 +634,9 @@ export default function OfferDetailPage({ params }: PageProps) {
                         {observerInsight && !isLoadingObserver && (
                             <div className="space-y-4">
                                 <div className="flex items-center gap-3 flex-wrap">
-                                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${intentConfig[observerInsight.clientIntent]?.color || intentConfig.unknown.color}`}>
-                                        {intentConfig[observerInsight.clientIntent]?.label || 'Brak danych'}
-                                    </span>
+                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${intentConfig[observerInsight.clientIntent]?.color || intentConfig.unknown.color}`}>
+                    {intentConfig[observerInsight.clientIntent]?.label || 'Brak danych'}
+                  </span>
                                     <div className="flex items-center gap-2">
                                         <span className="text-xs text-themed-muted">Zaangażowanie:</span>
                                         <div className="w-20 h-2 section-themed rounded-full overflow-hidden">
@@ -675,9 +675,9 @@ export default function OfferDetailPage({ params }: PageProps) {
                                             <h4 className="text-xs font-semibold text-themed-muted uppercase tracking-wide mb-2">Obszary zainteresowania</h4>
                                             <div className="flex flex-wrap gap-1.5">
                                                 {observerInsight.interestAreas.map((area, idx) => (
-                                                    <span key={idx} className="text-xs px-2 py-1 rounded-full bg-cyan-500/15 text-cyan-600 border border-cyan-500/25">
-                                                        {area}
-                                                    </span>
+                                                    <span key={idx} className="text-xs px-2 py-1 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/25">
+                            {area}
+                          </span>
                                                 ))}
                                             </div>
                                         </div>
@@ -687,9 +687,9 @@ export default function OfferDetailPage({ params }: PageProps) {
                                             <h4 className="text-xs font-semibold text-themed-muted uppercase tracking-wide mb-2">Obawy klienta</h4>
                                             <div className="flex flex-wrap gap-1.5">
                                                 {observerInsight.concerns.map((concern, idx) => (
-                                                    <span key={idx} className="text-xs px-2 py-1 rounded-full bg-amber-500/15 text-amber-600 border border-amber-500/25">
-                                                        {concern}
-                                                    </span>
+                                                    <span key={idx} className="text-xs px-2 py-1 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25">
+                            {concern}
+                          </span>
                                                 ))}
                                             </div>
                                         </div>
@@ -715,12 +715,12 @@ export default function OfferDetailPage({ params }: PageProps) {
                             <div className="space-y-3 max-h-96 overflow-y-auto">
                                 {analytics.interactions.map((interaction) => {
                                     const typeLabels: Record<string, { label: string; icon: string; color: string }> = {
-                                        VIEW: { label: 'Otworzył ofertę', icon: '👁', color: 'text-blue-600' },
-                                        ITEM_SELECT: { label: 'Zmienił wybór pozycji', icon: '☑', color: 'text-cyan-600' },
-                                        ACCEPT: { label: 'Zaakceptował ofertę', icon: '✅', color: 'text-emerald-600' },
-                                        REJECT: { label: 'Odrzucił ofertę', icon: '❌', color: 'text-red-600' },
-                                        COMMENT: { label: 'Dodał komentarz', icon: '💬', color: 'text-purple-600' },
-                                        PDF_DOWNLOAD: { label: 'Pobrał PDF', icon: '📄', color: 'text-orange-600' },
+                                        VIEW: { label: 'Otworzył ofertę', icon: '👁', color: 'text-blue-600 dark:text-blue-400' },
+                                        ITEM_SELECT: { label: 'Zmienił wybór pozycji', icon: '☑', color: 'text-cyan-600 dark:text-cyan-400' },
+                                        ACCEPT: { label: 'Zaakceptował ofertę', icon: '✅', color: 'text-emerald-600 dark:text-emerald-400' },
+                                        REJECT: { label: 'Odrzucił ofertę', icon: '❌', color: 'text-red-600 dark:text-red-400' },
+                                        COMMENT: { label: 'Dodał komentarz', icon: '💬', color: 'text-purple-600 dark:text-purple-400' },
+                                        PDF_DOWNLOAD: { label: 'Pobrał PDF', icon: '📄', color: 'text-orange-600 dark:text-orange-400' },
                                     };
                                     const config = typeLabels[interaction.type] || { label: interaction.type, icon: '•', color: 'text-themed-muted' };
 
@@ -759,12 +759,12 @@ export default function OfferDetailPage({ params }: PageProps) {
                                                 </svg>
                                             )}
                                             <span className={`text-sm ${item.isSelected ? 'text-themed' : 'text-themed-muted line-through'}`}>
-                                                {item.name} ×{item.quantity}
-                                            </span>
+                        {item.name} ×{item.quantity}
+                      </span>
                                         </div>
                                         <span className={`text-sm font-medium ${item.isSelected ? 'text-themed' : 'text-themed-muted opacity-40'}`}>
-                                            {formatCurrency(item.brutto)}
-                                        </span>
+                      {formatCurrency(item.brutto)}
+                    </span>
                                     </div>
                                 ))}
                             </div>
@@ -794,13 +794,13 @@ export default function OfferDetailPage({ params }: PageProps) {
                                         }`}>
                                             <p className="text-sm whitespace-pre-wrap">{comment.content}</p>
                                             <div className={`flex items-center gap-2 mt-1 ${comment.author === 'SELLER' ? 'justify-end' : 'justify-start'}`}>
-                                                <span className={`text-xs ${comment.author === 'SELLER' ? 'text-cyan-100' : 'text-themed-muted'}`}>
-                                                    {comment.author === 'SELLER' ? 'Ty' : 'Klient'}
-                                                </span>
+                        <span className={`text-xs ${comment.author === 'SELLER' ? 'text-cyan-100' : 'text-themed-muted'}`}>
+                          {comment.author === 'SELLER' ? 'Ty' : 'Klient'}
+                        </span>
                                                 <span className={`text-xs ${comment.author === 'SELLER' ? 'text-cyan-200' : 'text-themed-muted opacity-50'}`}>•</span>
                                                 <span className={`text-xs ${comment.author === 'SELLER' ? 'text-cyan-200' : 'text-themed-muted'}`}>
-                                                    {formatDateTime(comment.createdAt)}
-                                                </span>
+                          {formatDateTime(comment.createdAt)}
+                        </span>
                                             </div>
                                         </div>
                                     </div>
@@ -843,7 +843,7 @@ export default function OfferDetailPage({ params }: PageProps) {
                             </div>
 
                             {closerError && (
-                                <div className="p-3 rounded-lg bg-red-500/10 text-red-600 text-sm mb-3">{closerError}</div>
+                                <div className="p-3 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 text-sm mb-3">{closerError}</div>
                             )}
 
                             {closingStrategy && !isLoadingCloser && (
@@ -867,8 +867,8 @@ export default function OfferDetailPage({ params }: PageProps) {
                                                         closingStrategy.aggressive.riskLevel === 'medium' ? 'badge-warning' :
                                                             'badge-danger'
                                                 }`}>
-                                                    Ryzyko: {closingStrategy.aggressive.riskLevel === 'low' ? 'niskie' : closingStrategy.aggressive.riskLevel === 'medium' ? 'średnie' : 'wysokie'}
-                                                </span>
+                          Ryzyko: {closingStrategy.aggressive.riskLevel === 'low' ? 'niskie' : closingStrategy.aggressive.riskLevel === 'medium' ? 'średnie' : 'wysokie'}
+                        </span>
                                             </div>
                                             <svg className={`w-4 h-4 text-themed-muted transition-transform ${expandedStrategy === 'aggressive' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -882,7 +882,7 @@ export default function OfferDetailPage({ params }: PageProps) {
                                                 </div>
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleUseStrategy(closingStrategy.aggressive.suggestedResponse); }}
-                                                    className="text-xs px-3 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition-colors"
+                                                    className="text-xs px-3 py-1.5 rounded-lg bg-cyan-600 text-white hover:bg-cyan-700 transition-colors"
                                                 >
                                                     Wstaw odpowiedź
                                                 </button>
@@ -909,7 +909,7 @@ export default function OfferDetailPage({ params }: PageProps) {
                                                 {closingStrategy.partnership.proposedConcessions.length > 0 && (
                                                     <div className="flex flex-wrap gap-1.5">
                                                         {closingStrategy.partnership.proposedConcessions.map((c, i) => (
-                                                            <span key={i} className="text-xs px-2 py-1 rounded-full bg-cyan-500/15 text-cyan-600">{c}</span>
+                                                            <span key={i} className="text-xs px-2 py-1 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-400">{c}</span>
                                                         ))}
                                                     </div>
                                                 )}
@@ -918,7 +918,7 @@ export default function OfferDetailPage({ params }: PageProps) {
                                                 </div>
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleUseStrategy(closingStrategy.partnership.suggestedResponse); }}
-                                                    className="text-xs px-3 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition-colors"
+                                                    className="text-xs px-3 py-1.5 rounded-lg bg-cyan-600 text-white hover:bg-cyan-700 transition-colors"
                                                 >
                                                     Wstaw odpowiedź
                                                 </button>
@@ -935,8 +935,8 @@ export default function OfferDetailPage({ params }: PageProps) {
                                                 <span className="text-sm">⚡</span>
                                                 <span className="text-sm font-semibold text-themed">{closingStrategy.quickClose.title}</span>
                                                 <span className="text-xs px-2 py-0.5 rounded-full badge-success font-medium">
-                                                    Max rabat: {closingStrategy.quickClose.maxDiscountPercent}%
-                                                </span>
+                          Max rabat: {closingStrategy.quickClose.maxDiscountPercent}%
+                        </span>
                                             </div>
                                             <svg className={`w-4 h-4 text-themed-muted transition-transform ${expandedStrategy === 'quickClose' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -950,7 +950,7 @@ export default function OfferDetailPage({ params }: PageProps) {
                                                 </div>
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleUseStrategy(closingStrategy.quickClose.suggestedResponse); }}
-                                                    className="text-xs px-3 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition-colors"
+                                                    className="text-xs px-3 py-1.5 rounded-lg bg-cyan-600 text-white hover:bg-cyan-700 transition-colors"
                                                 >
                                                     Wstaw odpowiedź
                                                 </button>
@@ -962,20 +962,20 @@ export default function OfferDetailPage({ params }: PageProps) {
                         </div>
 
                         <div className="flex gap-2">
-                            <textarea
-                                value={newComment}
-                                onChange={(e) => setNewComment(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && !e.shiftKey) {
-                                        e.preventDefault();
-                                        handleAddSellerComment();
-                                    }
-                                }}
-                                disabled={isSending}
-                                placeholder="Odpowiedz klientowi..."
-                                rows={2}
-                                className="flex-1 px-4 py-3 rounded-xl border input-themed resize-none disabled:opacity-50 text-sm"
-                            />
+              <textarea
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleAddSellerComment();
+                      }
+                  }}
+                  disabled={isSending}
+                  placeholder="Odpowiedz klientowi..."
+                  rows={2}
+                  className="flex-1 px-4 py-3 rounded-xl border input-themed resize-none disabled:opacity-50 text-sm"
+              />
                             <button
                                 onClick={handleAddSellerComment}
                                 disabled={!newComment.trim() || isSending}

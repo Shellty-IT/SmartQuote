@@ -1,4 +1,4 @@
-// SmartQuote-AI/src/app/dashboard/offers/page.tsx
+// src/app/dashboard/offers/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -55,12 +55,12 @@ function OfferMobileCard({
         <Card className="p-4" onClick={onView}>
             <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-white text-xs font-semibold shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-600 to-blue-700 flex items-center justify-center text-white text-xs font-semibold shrink-0">
                         {getInitials(offer.client?.name || '?')}
                     </div>
                     <div className="min-w-0">
-                        <p className="font-semibold text-slate-900 truncate">{offer.title}</p>
-                        <p className="text-xs text-slate-500">{offer.number}</p>
+                        <p className="font-semibold text-themed truncate">{offer.title}</p>
+                        <p className="text-xs text-themed-muted">{offer.number}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
@@ -73,20 +73,20 @@ function OfferMobileCard({
 
             <div className="flex items-center justify-between mb-3">
                 <div>
-                    <p className="text-xs text-slate-500">{offer.client?.name || 'Nieznany'}</p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-themed-muted">{offer.client?.name || 'Nieznany'}</p>
+                    <p className="text-xs text-themed-muted opacity-70">
                         {offer.validUntil ? `do ${formatDate(offer.validUntil)}` : 'Bez terminu'}
                     </p>
                 </div>
                 <div className="text-right">
-                    <p className="font-bold text-slate-900">{formatCurrency(Number(offer.totalGross))}</p>
-                    <p className="text-xs text-slate-400">netto: {formatCurrency(Number(offer.totalNet))}</p>
+                    <p className="font-bold text-themed">{formatCurrency(Number(offer.totalGross))}</p>
+                    <p className="text-xs text-themed-muted">netto: {formatCurrency(Number(offer.totalNet))}</p>
                 </div>
             </div>
 
             {offer.publicToken && (
                 <div className="mb-3">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-50 text-cyan-700 border border-cyan-200">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/25">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
             Link aktywny
           </span>
@@ -94,24 +94,24 @@ function OfferMobileCard({
             )}
 
             <div
-                className="flex items-center gap-2 pt-3 border-t border-slate-100"
+                className="flex items-center gap-2 pt-3 border-t divider-themed"
                 onClick={(e) => e.stopPropagation()}
             >
                 <button
                     onClick={onView}
-                    className="flex-1 py-2 text-xs font-medium text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors"
+                    className="flex-1 py-2 text-xs font-medium text-themed-muted section-themed hover-themed rounded-lg transition-colors"
                 >
                     Szczegóły
                 </button>
                 <button
                     onClick={onEdit}
-                    className="flex-1 py-2 text-xs font-medium text-cyan-600 bg-cyan-50 hover:bg-cyan-100 rounded-lg transition-colors"
+                    className="flex-1 py-2 text-xs font-medium text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 hover:bg-cyan-500/20 rounded-lg transition-colors"
                 >
                     Edytuj
                 </button>
                 <button
                     onClick={onDuplicate}
-                    className="py-2 px-3 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                    className="py-2 px-3 text-themed-muted hover:text-themed hover-themed rounded-lg transition-colors"
                     title="Duplikuj"
                 >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -120,7 +120,7 @@ function OfferMobileCard({
                 </button>
                 <button
                     onClick={onDelete}
-                    className="py-2 px-3 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    className="py-2 px-3 text-themed-muted hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                     title="Usuń"
                 >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -199,8 +199,8 @@ export default function OffersPage() {
         <div className="p-4 md:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
                 <div>
-                    <h1 className="text-xl md:text-2xl font-bold text-slate-900">Oferty</h1>
-                    <p className="text-sm text-slate-500 mt-1">Zarządzaj swoimi ofertami handlowymi</p>
+                    <h1 className="text-xl md:text-2xl font-bold text-themed">Oferty</h1>
+                    <p className="text-sm text-themed-muted mt-1">Zarządzaj swoimi ofertami handlowymi</p>
                 </div>
                 <Link href="/dashboard/offers/new">
                     <Button className="w-full sm:w-auto">
@@ -215,20 +215,20 @@ export default function OffersPage() {
             {!statsLoading && stats && (
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
                     <Card className="p-3 md:p-4">
-                        <p className="text-xs md:text-sm text-slate-500">Wszystkie</p>
-                        <p className="text-xl md:text-2xl font-bold text-slate-900">{stats.total || 0}</p>
+                        <p className="text-xs md:text-sm text-themed-muted">Wszystkie</p>
+                        <p className="text-xl md:text-2xl font-bold text-themed">{stats.total || 0}</p>
                     </Card>
                     <Card className="p-3 md:p-4">
-                        <p className="text-xs md:text-sm text-slate-500">Zaakceptowane</p>
-                        <p className="text-xl md:text-2xl font-bold text-emerald-600">{acceptedCount}</p>
+                        <p className="text-xs md:text-sm text-themed-muted">Zaakceptowane</p>
+                        <p className="text-xl md:text-2xl font-bold text-emerald-600 dark:text-emerald-400">{acceptedCount}</p>
                     </Card>
                     <Card className="p-3 md:p-4">
-                        <p className="text-xs md:text-sm text-slate-500">Oczekujące</p>
-                        <p className="text-xl md:text-2xl font-bold text-amber-600">{pendingCount}</p>
+                        <p className="text-xs md:text-sm text-themed-muted">Oczekujące</p>
+                        <p className="text-xl md:text-2xl font-bold text-amber-600 dark:text-amber-400">{pendingCount}</p>
                     </Card>
                     <Card className="p-3 md:p-4">
-                        <p className="text-xs md:text-sm text-slate-500">Łączna wartość</p>
-                        <p className="text-lg md:text-2xl font-bold text-cyan-600">
+                        <p className="text-xs md:text-sm text-themed-muted">Łączna wartość</p>
+                        <p className="text-lg md:text-2xl font-bold text-cyan-600 dark:text-cyan-400">
                             {formatCurrency(Number(stats.totalValue) || 0)}
                         </p>
                     </Card>
@@ -246,7 +246,7 @@ export default function OffersPage() {
                                 setPage(1);
                             }}
                             icon={
-                                <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             }
@@ -259,7 +259,7 @@ export default function OffersPage() {
                                 setStatus(e.target.value as OfferStatus | '');
                                 setPage(1);
                             }}
-                            className="flex-1 md:w-48 px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                            className="flex-1 md:w-48 px-3 py-2 text-sm border rounded-lg input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                         >
                             {STATUS_OPTIONS.map((opt) => (
                                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -268,7 +268,7 @@ export default function OffersPage() {
                         <select
                             value={sort}
                             onChange={(e) => setSort(e.target.value)}
-                            className="flex-1 md:w-48 px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                            className="flex-1 md:w-48 px-3 py-2 text-sm border rounded-lg input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                         >
                             {SORT_OPTIONS.map((opt) => (
                                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -283,7 +283,7 @@ export default function OffersPage() {
             ) : error ? (
                 <Card>
                     <div className="text-center py-12">
-                        <p className="text-red-600">{error}</p>
+                        <p className="text-red-600 dark:text-red-400">{error}</p>
                         <Button variant="outline" onClick={refresh} className="mt-4">
                             Spróbuj ponownie
                         </Button>
@@ -292,15 +292,15 @@ export default function OffersPage() {
             ) : offers.length === 0 ? (
                 <Card>
                     <div className="text-center py-12">
-                        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div className="w-16 h-16 section-themed rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-8 h-8 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                         </div>
-                        <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                        <h3 className="text-lg font-semibold text-themed mb-2">
                             {search || status ? 'Brak wyników' : 'Brak ofert'}
                         </h3>
-                        <p className="text-slate-500 mb-4">
+                        <p className="text-themed-muted mb-4">
                             {search || status
                                 ? 'Spróbuj zmienić kryteria wyszukiwania'
                                 : 'Stwórz swoją pierwszą ofertę handlową'}
@@ -318,32 +318,32 @@ export default function OffersPage() {
                         <Card className="overflow-hidden">
                             <div className="overflow-x-auto">
                                 <table className="w-full">
-                                    <thead className="bg-slate-50 border-b border-slate-200">
+                                    <thead className="section-themed border-b divider-themed">
                                     <tr>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">
                                             Oferta
                                         </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">
                                             Klient
                                         </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">
                                             Status
                                         </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">
                                             Dystrybucja
                                         </th>
-                                        <th className="px-6 py-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                        <th className="px-6 py-4 text-right text-xs font-semibold text-themed-muted uppercase tracking-wider">
                                             Wartość
                                         </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">
                                             Ważna do
                                         </th>
-                                        <th className="px-6 py-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                        <th className="px-6 py-4 text-right text-xs font-semibold text-themed-muted uppercase tracking-wider">
                                             Akcje
                                         </th>
                                     </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-slate-100">
+                                    <tbody className="divide-y divider-themed">
                                     {offers.map((offer) => {
                                         const statusConfig = getStatusConfig(offer.status);
                                         const isExpired =
@@ -356,22 +356,22 @@ export default function OffersPage() {
                                         return (
                                             <tr
                                                 key={offer.id}
-                                                className="hover:bg-slate-50 transition-colors cursor-pointer"
+                                                className="hover-themed transition-colors cursor-pointer"
                                                 onClick={() => router.push(`/dashboard/offers/${offer.id}`)}
                                             >
                                                 <td className="px-6 py-4">
                                                     <div>
-                                                        <p className="font-medium text-slate-900">{offer.title}</p>
-                                                        <p className="text-sm text-slate-500">{offer.number}</p>
+                                                        <p className="font-medium text-themed">{offer.title}</p>
+                                                        <p className="text-sm text-themed-muted">{offer.number}</p>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-white text-xs font-semibold">
+                                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-600 to-blue-700 flex items-center justify-center text-white text-xs font-semibold">
                                                             {getInitials(offer.client?.name || '?')}
                                                         </div>
                                                         <div>
-                                                            <p className="text-sm font-medium text-slate-900">
+                                                            <p className="text-sm font-medium text-themed">
                                                                 {offer.client?.name || 'Nieznany'}
                                                             </p>
                                                         </div>
@@ -390,7 +390,7 @@ export default function OffersPage() {
                                                 <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                                                     {offer.publicToken ? (
                                                         <div className="flex items-center gap-2">
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-50 text-cyan-700 border border-cyan-200">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/25">
                                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
                                   Link aktywny
                                 </span>
@@ -399,7 +399,7 @@ export default function OffersPage() {
                                                                     const url = `${window.location.origin}/offer/view/${offer.publicToken}`;
                                                                     navigator.clipboard.writeText(url);
                                                                 }}
-                                                                className="p-1 text-slate-400 hover:text-cyan-600 rounded transition-colors"
+                                                                className="p-1 text-themed-muted hover:text-cyan-600 dark:hover:text-cyan-400 rounded transition-colors"
                                                                 title="Kopiuj link"
                                                             >
                                                                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -408,19 +408,19 @@ export default function OffersPage() {
                                                             </button>
                                                         </div>
                                                     ) : (
-                                                        <span className="text-xs text-slate-400">—</span>
+                                                        <span className="text-xs text-themed-muted">—</span>
                                                     )}
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
-                                                    <p className="font-semibold text-slate-900">
+                                                    <p className="font-semibold text-themed">
                                                         {formatCurrency(Number(offer.totalGross))}
                                                     </p>
-                                                    <p className="text-xs text-slate-500">
+                                                    <p className="text-xs text-themed-muted">
                                                         netto: {formatCurrency(Number(offer.totalNet))}
                                                     </p>
                                                 </td>
                                                 <td className="px-6 py-4">
-                            <span className={isExpired ? 'text-red-600 font-medium' : 'text-slate-600'}>
+                            <span className={isExpired ? 'text-red-600 dark:text-red-400 font-medium' : 'text-themed-muted'}>
                               {offer.validUntil ? formatDate(offer.validUntil) : '-'}
                             </span>
                                                 </td>
@@ -431,7 +431,7 @@ export default function OffersPage() {
                                                     >
                                                         <button
                                                             onClick={() => router.push(`/dashboard/offers/${offer.id}`)}
-                                                            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                                                            className="p-2 text-themed-muted hover:text-themed hover-themed rounded-lg transition-colors"
                                                             title="Szczegóły"
                                                         >
                                                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -441,7 +441,7 @@ export default function OffersPage() {
                                                         </button>
                                                         <button
                                                             onClick={() => router.push(`/dashboard/offers/${offer.id}/edit`)}
-                                                            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                                                            className="p-2 text-themed-muted hover:text-themed hover-themed rounded-lg transition-colors"
                                                             title="Edytuj"
                                                         >
                                                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -450,7 +450,7 @@ export default function OffersPage() {
                                                         </button>
                                                         <button
                                                             onClick={() => handleDuplicate(offer)}
-                                                            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                                                            className="p-2 text-themed-muted hover:text-themed hover-themed rounded-lg transition-colors"
                                                             title="Duplikuj"
                                                         >
                                                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -459,7 +459,7 @@ export default function OffersPage() {
                                                         </button>
                                                         <button
                                                             onClick={() => setDeleteModal(offer)}
-                                                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                            className="p-2 text-themed-muted hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                                                             title="Usuń"
                                                         >
                                                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -476,8 +476,8 @@ export default function OffersPage() {
                             </div>
 
                             {totalPages > 1 && (
-                                <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
-                                    <p className="text-sm text-slate-500">
+                                <div className="px-6 py-4 border-t divider-themed flex items-center justify-between">
+                                    <p className="text-sm text-themed-muted">
                                         {((page - 1) * 10) + 1}–{Math.min(page * 10, total)} z {total}
                                     </p>
                                     <div className="flex items-center gap-2">
@@ -506,7 +506,7 @@ export default function OffersPage() {
                                                         className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
                                                             page === pageNum
                                                                 ? 'bg-cyan-600 text-white'
-                                                                : 'text-slate-600 hover:bg-slate-100'
+                                                                : 'text-themed-muted hover-themed'
                                                         }`}
                                                     >
                                                         {pageNum}
@@ -544,24 +544,24 @@ export default function OffersPage() {
 
                         {totalPages > 1 && (
                             <div className="flex items-center justify-between pt-2">
-                                <p className="text-xs text-slate-500">
+                                <p className="text-xs text-themed-muted">
                                     {((page - 1) * 10) + 1}–{Math.min(page * 10, total)} z {total}
                                 </p>
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                                         disabled={page === 1}
-                                        className="px-3 py-1.5 text-sm font-medium rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50 transition-colors"
+                                        className="px-3 py-1.5 text-sm font-medium rounded-lg border card-themed disabled:opacity-40 hover-themed transition-colors"
                                     >
                                         ←
                                     </button>
-                                    <span className="text-sm text-slate-600 font-medium">
+                                    <span className="text-sm text-themed-muted font-medium">
                     {page}/{totalPages}
                   </span>
                                     <button
                                         onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                                         disabled={page === totalPages}
-                                        className="px-3 py-1.5 text-sm font-medium rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50 transition-colors"
+                                        className="px-3 py-1.5 text-sm font-medium rounded-lg border card-themed disabled:opacity-40 hover-themed transition-colors"
                                     >
                                         →
                                     </button>
