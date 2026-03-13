@@ -1,3 +1,4 @@
+// src/app/dashboard/clients/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -43,12 +44,11 @@ export default function ClientsPage() {
     }
 
     return (
-        <div className="p-8">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-8">
+        <div className="p-4 md:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Klienci</h1>
-                    <p className="text-slate-500 mt-1">Zarządzaj swoimi klientami i kontrahentami</p>
+                    <h1 className="text-2xl font-bold text-themed">Klienci</h1>
+                    <p className="text-themed-muted mt-1">Zarządzaj swoimi klientami i kontrahentami</p>
                 </div>
                 <Button onClick={() => router.push('/dashboard/clients/new')}>
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -58,7 +58,6 @@ export default function ClientsPage() {
                 </Button>
             </div>
 
-            {/* Filters */}
             <Card className="mb-6">
                 <div className="flex flex-wrap gap-4">
                     <div className="flex-1 min-w-[200px]">
@@ -74,16 +73,16 @@ export default function ClientsPage() {
                         />
                     </div>
                     <select
-                        className="px-4 py-2.5 border border-slate-300 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                        className="px-4 py-2.5 border rounded-lg input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                         value={filters.type || ''}
-                        onChange={(e) => setFilters({ type: e.target.value as any, page: 1 })}
+                        onChange={(e) => setFilters({ type: e.target.value as 'COMPANY' | 'PERSON' | undefined, page: 1 })}
                     >
                         <option value="">Wszystkie typy</option>
                         <option value="COMPANY">Firmy</option>
                         <option value="PERSON">Osoby prywatne</option>
                     </select>
                     <select
-                        className="px-4 py-2.5 border border-slate-300 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                        className="px-4 py-2.5 border rounded-lg input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                         value={filters.isActive?.toString() || ''}
                         onChange={(e) => setFilters({ isActive: e.target.value ? e.target.value === 'true' : undefined, page: 1 })}
                     >
@@ -94,9 +93,8 @@ export default function ClientsPage() {
                 </div>
             </Card>
 
-            {/* Error */}
             {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/25 rounded-lg text-red-600">
                     {error}
                     <button onClick={refresh} className="ml-2 underline">
                         Spróbuj ponownie
@@ -104,7 +102,6 @@ export default function ClientsPage() {
                 </div>
             )}
 
-            {/* Clients List */}
             {clients.length === 0 ? (
                 <Card>
                     <EmptyState
@@ -126,51 +123,51 @@ export default function ClientsPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                            <tr className="border-b border-slate-200 bg-slate-50">
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                            <tr className="border-b divider-themed section-themed">
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">
                                     Klient
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">
                                     Kontakt
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">
                                     Typ
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">
                                     Oferty
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">
                                     Dodano
                                 </th>
-                                <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                <th className="px-6 py-3 text-right text-xs font-semibold text-themed-muted uppercase tracking-wider">
                                     Akcje
                                 </th>
                             </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-200">
+                            <tbody>
                             {clients.map((client) => (
                                 <tr
                                     key={client.id}
-                                    className="hover:bg-slate-50 transition-colors cursor-pointer"
+                                    className="border-b divider-themed hover-themed transition-colors cursor-pointer"
                                     onClick={() => router.push(`/dashboard/clients/${client.id}`)}
                                 >
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-white text-sm font-semibold">
+                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-600 to-blue-700 flex items-center justify-center text-white text-sm font-semibold">
                                                 {getInitials(client.name)}
                                             </div>
                                             <div>
-                                                <p className="font-medium text-slate-900">{client.name}</p>
+                                                <p className="font-medium text-themed">{client.name}</p>
                                                 {client.company && (
-                                                    <p className="text-sm text-slate-500">{client.company}</p>
+                                                    <p className="text-sm text-themed-muted">{client.company}</p>
                                                 )}
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="text-sm">
-                                            {client.email && <p className="text-slate-900">{client.email}</p>}
-                                            {client.phone && <p className="text-slate-500">{client.phone}</p>}
+                                            {client.email && <p className="text-themed">{client.email}</p>}
+                                            {client.phone && <p className="text-themed-muted">{client.phone}</p>}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
@@ -179,20 +176,20 @@ export default function ClientsPage() {
                                         </Badge>
                                     </td>
                                     <td className="px-6 py-4">
-                                            <span className="text-sm text-slate-600">
-                                                {client._count?.offers || 0}
-                                            </span>
+                                        <span className="text-sm text-themed-muted">
+                                            {client._count?.offers || 0}
+                                        </span>
                                     </td>
                                     <td className="px-6 py-4">
-                                            <span className="text-sm text-slate-500">
-                                                {formatDate(client.createdAt)}
-                                            </span>
+                                        <span className="text-sm text-themed-muted">
+                                            {formatDate(client.createdAt)}
+                                        </span>
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                                             <button
                                                 onClick={() => router.push(`/dashboard/clients/${client.id}/edit`)}
-                                                className="p-2 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors"
+                                                className="p-2 text-themed-muted hover:text-cyan-600 hover:bg-cyan-500/10 rounded-lg transition-colors"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -200,7 +197,7 @@ export default function ClientsPage() {
                                             </button>
                                             <button
                                                 onClick={() => setDeleteModal({ isOpen: true, client })}
-                                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                className="p-2 text-themed-muted hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -214,10 +211,9 @@ export default function ClientsPage() {
                         </table>
                     </div>
 
-                    {/* Pagination */}
                     {totalPages > 1 && (
-                        <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
-                            <p className="text-sm text-slate-500">
+                        <div className="px-6 py-4 border-t divider-themed flex items-center justify-between">
+                            <p className="text-sm text-themed-muted">
                                 Pokazano {clients.length} z {total} klientów
                             </p>
                             <div className="flex gap-2">
@@ -243,7 +239,6 @@ export default function ClientsPage() {
                 </Card>
             )}
 
-            {/* Delete Confirmation */}
             <ConfirmDialog
                 isOpen={deleteModal.isOpen}
                 onClose={() => setDeleteModal({ isOpen: false, client: null })}

@@ -1,6 +1,7 @@
+// src/components/ui/Modal.tsx
 'use client';
 
-import { Fragment, ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 interface ModalProps {
@@ -30,48 +31,51 @@ export default function Modal({
         full: 'max-w-6xl',
     };
 
+    const modalId = title ? 'modal-title-' + title.replace(/\s+/g, '-').toLowerCase() : undefined;
+
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-            {/* Backdrop */}
+        <div
+            className="fixed inset-0 z-50 overflow-y-auto"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={modalId}
+        >
             <div
                 className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+                aria-hidden="true"
                 onClick={onClose}
             />
 
-            {/* Modal */}
             <div className="flex min-h-full items-center justify-center p-4">
                 <div
                     className={cn(
-                        'relative w-full bg-white rounded-2xl shadow-2xl transform transition-all',
+                        'relative w-full card-themed border rounded-2xl shadow-2xl transform transition-all',
                         sizes[size]
                     )}
                     onClick={(e) => e.stopPropagation()}
                 >
-                    {/* Header */}
                     {(title || description) && (
-                        <div className="px-6 py-4 border-b border-slate-200">
+                        <div className="px-6 py-4 border-b divider-themed">
                             {title && (
-                                <h3 className="text-lg font-semibold text-slate-900">
+                                <h3 id={modalId} className="text-lg font-semibold text-themed">
                                     {title}
                                 </h3>
                             )}
                             {description && (
-                                <p className="mt-1 text-sm text-slate-500">{description}</p>
+                                <p className="mt-1 text-sm text-themed-muted">{description}</p>
                             )}
                         </div>
                     )}
 
-                    {/* Close Button */}
                     <button
                         onClick={onClose}
-                        className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                        className="absolute top-4 right-4 p-2 text-themed-muted hover-themed rounded-lg transition-colors"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
 
-                    {/* Content */}
                     <div className="px-6 py-4">{children}</div>
                 </div>
             </div>

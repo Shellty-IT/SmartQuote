@@ -1,4 +1,4 @@
-// SmartQuote-AI/src/components/ai/QuickActions.tsx
+// src/components/ai/QuickActions.tsx
 'use client';
 
 interface QuickActionsProps {
@@ -51,12 +51,13 @@ export function QuickActions({ onAction }: QuickActionsProps) {
                 <button
                     key={index}
                     onClick={() => onAction(action.prompt)}
-                    className="flex items-center gap-3 p-4 rounded-xl border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all group"
+                    className="flex items-center gap-3 p-4 rounded-xl border card-themed
+                               hover:border-cyan-500 hover:shadow-md transition-all group"
                 >
                     <div className={`p-2 rounded-lg ${action.color} text-white text-lg group-hover:scale-110 transition-transform`}>
                         {action.icon}
                     </div>
-                    <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600">
+                    <span className="text-sm font-medium text-themed group-hover:text-cyan-600">
                         {action.label}
                     </span>
                 </button>

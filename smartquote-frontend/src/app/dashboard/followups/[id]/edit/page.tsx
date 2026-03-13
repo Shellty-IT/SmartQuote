@@ -1,5 +1,4 @@
 // src/app/dashboard/followups/[id]/edit/page.tsx
-
 'use client';
 
 import { useState, useEffect, use } from 'react';
@@ -23,12 +22,10 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
     const [formData, setFormData] = useState<UpdateFollowUpData>({});
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-    // Fetch related data for dropdowns - z domyślną wartością pustej tablicy
     const { clients = [] } = useClients({ limit: 100 });
     const { offers = [] } = useOffers({ limit: 100 });
     const { contracts = [] } = useContracts({ limit: 100 });
 
-    // Populate form when follow-up is loaded
     useEffect(() => {
         if (followUp) {
             setFormData({
@@ -80,18 +77,15 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
         try {
             const cleanData: UpdateFollowUpData = {};
 
-            // Only include changed fields
             if (formData.title) cleanData.title = formData.title;
             if (formData.type) cleanData.type = formData.type;
             if (formData.status) cleanData.status = formData.status;
             if (formData.priority) cleanData.priority = formData.priority;
             if (formData.dueDate) cleanData.dueDate = formData.dueDate;
 
-            // Optional string fields - only include if has value
             if (formData.description) cleanData.description = formData.description;
             if (formData.notes) cleanData.notes = formData.notes;
 
-            // Optional relation fields - only include if has value
             if (formData.clientId) cleanData.clientId = formData.clientId;
             if (formData.offerId) cleanData.offerId = formData.offerId;
             if (formData.contractId) cleanData.contractId = formData.contractId;
@@ -113,10 +107,10 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
 
     if (fetchError || !followUp) {
         return (
-            <div className="p-8">
+            <div className="p-4 md:p-8">
                 <Card>
                     <div className="text-center py-12">
-                        <p className="text-red-600 mb-4">{fetchError || 'Nie znaleziono follow-upa'}</p>
+                        <p className="text-red-600 dark:text-red-400 mb-4">{fetchError || 'Nie znaleziono follow-upa'}</p>
                         <Button onClick={() => router.push('/dashboard/followups')}>
                             Wróć do listy
                         </Button>
@@ -127,33 +121,30 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
     }
 
     return (
-        <div className="p-8 max-w-3xl mx-auto">
-            {/* Header */}
+        <div className="p-4 md:p-8 max-w-3xl mx-auto">
             <div className="mb-8">
                 <button
                     onClick={() => router.back()}
-                    className="flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-4"
+                    className="flex items-center gap-2 text-themed-muted hover:text-themed mb-4"
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     Powrót
                 </button>
-                <h1 className="text-2xl font-bold text-slate-900">Edytuj follow-up</h1>
-                <p className="text-slate-500 mt-1">Modyfikuj szczegóły zadania</p>
+                <h1 className="text-2xl font-bold text-themed">Edytuj follow-up</h1>
+                <p className="text-themed-muted mt-1">Modyfikuj szczegóły zadania</p>
             </div>
 
-            {/* Error */}
             {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400">
                     {error}
                 </div>
             )}
 
-            {/* Form */}
             <form onSubmit={handleSubmit}>
                 <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-slate-900 mb-4">Podstawowe informacje</h2>
+                    <h2 className="text-lg font-semibold text-themed mb-4">Podstawowe informacje</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="md:col-span-2">
                             <Input
@@ -216,7 +207,7 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
                 </Card>
 
                 <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-slate-900 mb-4">Opis</h2>
+                    <h2 className="text-lg font-semibold text-themed mb-4">Opis</h2>
                     <Textarea
                         name="description"
                         value={formData.description || ''}
@@ -227,7 +218,7 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
                 </Card>
 
                 <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-slate-900 mb-4">Powiązania</h2>
+                    <h2 className="text-lg font-semibold text-themed mb-4">Powiązania</h2>
                     <div className="grid grid-cols-1 gap-4">
                         <Select
                             label="Klient"
@@ -263,7 +254,7 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
                 </Card>
 
                 <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-slate-900 mb-4">Notatki</h2>
+                    <h2 className="text-lg font-semibold text-themed mb-4">Notatki</h2>
                     <Textarea
                         name="notes"
                         value={formData.notes || ''}
@@ -273,8 +264,7 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
                     />
                 </Card>
 
-                {/* Actions */}
-                <div className="flex justify-end gap-3">
+                <div className="flex flex-col sm:flex-row justify-end gap-3">
                     <Button type="button" variant="outline" onClick={() => router.back()}>
                         Anuluj
                     </Button>

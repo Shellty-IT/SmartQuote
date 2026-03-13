@@ -1,4 +1,4 @@
-// SmartQuote-AI/src/components/ai/ChatMessage.tsx
+// src/components/ai/ChatMessage.tsx
 'use client';
 
 import { useRouter } from 'next/navigation';
@@ -41,11 +41,11 @@ export function ChatMessage({ message, onAction, onSuggestionClick }: ChatMessag
     if (message.isLoading) {
         return (
             <div className="flex justify-start">
-                <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-gray-100">
+                <div className="max-w-[80%] rounded-2xl px-4 py-3 section-themed">
                     <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                        <div className="w-2 h-2 bg-cyan-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <div className="w-2 h-2 bg-cyan-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <div className="w-2 h-2 bg-cyan-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                     </div>
                 </div>
             </div>
@@ -57,16 +57,16 @@ export function ChatMessage({ message, onAction, onSuggestionClick }: ChatMessag
             <div
                 className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                     isUser
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-900'
+                        ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white'
+                        : 'section-themed text-themed'
                 }`}
             >
                 {!isUser && (
                     <div className="flex items-center gap-2 mb-2">
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center">
                             <span className="text-white text-xs">AI</span>
                         </div>
-                        <span className="text-xs text-gray-500">SmartQuote AI</span>
+                        <span className="text-xs text-themed-muted">SmartQuote AI</span>
                     </div>
                 )}
 
@@ -80,7 +80,8 @@ export function ChatMessage({ message, onAction, onSuggestionClick }: ChatMessag
                             <button
                                 key={index}
                                 onClick={() => handleAction(action)}
-                                className="px-3 py-1 text-xs font-medium rounded-full bg-white border border-gray-200 hover:border-blue-500 hover:text-blue-600 transition-colors"
+                                className="px-3 py-1 text-xs font-medium rounded-full card-themed border
+                                           hover:border-cyan-500 hover:text-cyan-600 transition-colors"
                             >
                                 {action.label}
                             </button>
@@ -89,14 +90,15 @@ export function ChatMessage({ message, onAction, onSuggestionClick }: ChatMessag
                 )}
 
                 {message.suggestions && message.suggestions.length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-gray-200">
-                        <p className="text-xs text-gray-500 mb-2">Sugestie:</p>
+                    <div className="mt-3 pt-3 border-t divider-themed">
+                        <p className="text-xs text-themed-muted mb-2">Sugestie:</p>
                         <div className="flex flex-wrap gap-2">
                             {message.suggestions.map((suggestion, index) => (
                                 <button
                                     key={index}
                                     onClick={() => onSuggestionClick?.(suggestion)}
-                                    className="text-xs px-3 py-1 rounded-full bg-white border border-gray-200 hover:border-blue-500 hover:text-blue-600 transition-colors"
+                                    className="text-xs px-3 py-1 rounded-full card-themed border
+                                               hover:border-cyan-500 hover:text-cyan-600 transition-colors"
                                 >
                                     {suggestion}
                                 </button>
@@ -105,7 +107,7 @@ export function ChatMessage({ message, onAction, onSuggestionClick }: ChatMessag
                     </div>
                 )}
 
-                <div className={`text-xs mt-2 ${isUser ? 'text-blue-200' : 'text-gray-400'}`}>
+                <div className={`text-xs mt-2 ${isUser ? 'text-cyan-100' : 'text-themed-muted'}`}>
                     {new Date(message.timestamp).toLocaleTimeString('pl-PL', {
                         hour: '2-digit',
                         minute: '2-digit',

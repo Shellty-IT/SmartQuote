@@ -1,4 +1,4 @@
-// SmartQuote-AI/src/components/ai/SuggestionCard.tsx
+// src/components/ai/SuggestionCard.tsx
 'use client';
 
 import { useRouter } from 'next/navigation';
@@ -17,10 +17,10 @@ const iconMap = {
 };
 
 const colorMap = {
-    warning: 'bg-amber-50 border-amber-200 text-amber-800',
-    info: 'bg-blue-50 border-blue-200 text-blue-800',
-    tip: 'bg-purple-50 border-purple-200 text-purple-800',
-    success: 'bg-green-50 border-green-200 text-green-800',
+    warning: 'badge-warning border',
+    info: 'badge-info border',
+    tip: 'bg-purple-500/15 text-purple-700 border border-purple-300/30',
+    success: 'badge-success border',
 };
 
 export function SuggestionCard({ suggestion, onPrompt }: SuggestionCardProps) {
@@ -39,7 +39,7 @@ export function SuggestionCard({ suggestion, onPrompt }: SuggestionCardProps) {
     return (
         <div
             onClick={handleClick}
-            className={`p-4 rounded-xl border ${colorMap[suggestion.type]} cursor-pointer hover:shadow-md transition-shadow`}
+            className={`p-4 rounded-xl ${colorMap[suggestion.type]} cursor-pointer hover:shadow-md transition-shadow`}
         >
             <div className="flex items-start gap-3">
                 <span className="text-lg">{iconMap[suggestion.type]}</span>

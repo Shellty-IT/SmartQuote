@@ -1,5 +1,4 @@
-// SmartQuote-AI/src/app/dashboard/clients/[id]/page.tsx
-
+// src/app/dashboard/clients/[id]/page.tsx
 'use client';
 
 import { use } from 'react';
@@ -24,7 +23,7 @@ export default function ClientDetailPage({ params }: PageProps) {
 
     if (error || !client) {
         return (
-            <div className="p-8">
+            <div className="p-4 md:p-8">
                 <Card>
                     <div className="text-center py-12">
                         <p className="text-red-600 mb-4">{error || 'Nie znaleziono klienta'}</p>
@@ -38,23 +37,22 @@ export default function ClientDetailPage({ params }: PageProps) {
     }
 
     return (
-        <div className="p-8">
-            {/* Header */}
-            <div className="flex items-start justify-between mb-8">
+        <div className="p-4 md:p-8">
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-8">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => router.push('/dashboard/clients')}
-                        className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg"
+                        className="p-2 text-themed-muted hover-themed rounded-lg"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                     </button>
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-white text-xl font-semibold">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-600 to-blue-700 flex items-center justify-center text-white text-xl font-semibold">
                         {getInitials(client.name)}
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-900">{client.name}</h1>
+                        <h1 className="text-2xl font-bold text-themed">{client.name}</h1>
                         <div className="flex items-center gap-2 mt-1">
                             <Badge variant={client.type === 'COMPANY' ? 'info' : 'default'}>
                                 {client.type === 'COMPANY' ? 'Firma' : 'Osoba prywatna'}
@@ -76,62 +74,58 @@ export default function ClientDetailPage({ params }: PageProps) {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Main Info */}
                 <div className="lg:col-span-2 space-y-6">
                     <Card>
-                        <h2 className="text-lg font-semibold text-slate-900 mb-4">Dane kontaktowe</h2>
+                        <h2 className="text-lg font-semibold text-themed mb-4">Dane kontaktowe</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <p className="text-sm text-slate-500">Email</p>
-                                <p className="text-slate-900">{client.email || '-'}</p>
+                                <p className="text-sm text-themed-muted">Email</p>
+                                <p className="text-themed">{client.email || '-'}</p>
                             </div>
                             <div>
-                                <p className="text-sm text-slate-500">Telefon</p>
-                                <p className="text-slate-900">{client.phone || '-'}</p>
+                                <p className="text-sm text-themed-muted">Telefon</p>
+                                <p className="text-themed">{client.phone || '-'}</p>
                             </div>
                             <div>
-                                <p className="text-sm text-slate-500">Strona WWW</p>
+                                <p className="text-sm text-themed-muted">Strona WWW</p>
                                 {client.website ? (
                                     <a href={client.website} target="_blank" className="text-cyan-600 hover:underline">
                                         {client.website}
                                     </a>
                                 ) : (
-                                    <p className="text-slate-900">-</p>
+                                    <p className="text-themed">-</p>
                                 )}
                             </div>
                             {client.type === 'COMPANY' && (
-                                <>
-                                    <div>
-                                        <p className="text-sm text-slate-500">NIP</p>
-                                        <p className="text-slate-900">{client.nip || '-'}</p>
-                                    </div>
-                                </>
+                                <div>
+                                    <p className="text-sm text-themed-muted">NIP</p>
+                                    <p className="text-themed">{client.nip || '-'}</p>
+                                </div>
                             )}
                         </div>
                     </Card>
 
                     <Card>
-                        <h2 className="text-lg font-semibold text-slate-900 mb-4">Adres</h2>
+                        <h2 className="text-lg font-semibold text-themed mb-4">Adres</h2>
                         <div className="space-y-1">
-                            <p className="text-slate-900">{client.address || '-'}</p>
-                            <p className="text-slate-900">
+                            <p className="text-themed">{client.address || '-'}</p>
+                            <p className="text-themed">
                                 {client.postalCode} {client.city}
                             </p>
-                            <p className="text-slate-500">{client.country}</p>
+                            <p className="text-themed-muted">{client.country}</p>
                         </div>
                     </Card>
 
                     {client.notes && (
                         <Card>
-                            <h2 className="text-lg font-semibold text-slate-900 mb-4">Notatki</h2>
-                            <p className="text-slate-700 whitespace-pre-wrap">{client.notes}</p>
+                            <h2 className="text-lg font-semibold text-themed mb-4">Notatki</h2>
+                            <p className="text-themed whitespace-pre-wrap">{client.notes}</p>
                         </Card>
                     )}
 
-                    {/* Recent Offers */}
                     <Card>
                         <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-semibold text-slate-900">Ostatnie oferty</h2>
+                            <h2 className="text-lg font-semibold text-themed">Ostatnie oferty</h2>
                             <Button
                                 variant="ghost"
                                 size="sm"
@@ -142,7 +136,7 @@ export default function ClientDetailPage({ params }: PageProps) {
                         </div>
 
                         {offers.length === 0 ? (
-                            <p className="text-slate-500 text-center py-8">Brak ofert dla tego klienta</p>
+                            <p className="text-themed-muted text-center py-8">Brak ofert dla tego klienta</p>
                         ) : (
                             <div className="space-y-3">
                                 {offers.map((offer) => {
@@ -151,14 +145,14 @@ export default function ClientDetailPage({ params }: PageProps) {
                                         <div
                                             key={offer.id}
                                             onClick={() => router.push(`/dashboard/offers/${offer.id}`)}
-                                            className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 cursor-pointer transition-colors"
+                                            className="flex items-center justify-between p-4 section-themed rounded-xl hover-themed cursor-pointer transition-colors"
                                         >
                                             <div>
-                                                <p className="font-medium text-slate-900">{offer.title}</p>
-                                                <p className="text-sm text-slate-500">{offer.number}</p>
+                                                <p className="font-medium text-themed">{offer.title}</p>
+                                                <p className="text-sm text-themed-muted">{offer.number}</p>
                                             </div>
                                             <div className="text-right">
-                                                <p className="font-semibold text-slate-900">
+                                                <p className="font-semibold text-themed">
                                                     {formatCurrency(offer.totalGross)}
                                                 </p>
                                                 <Badge className={`${status.bgColor} ${status.color}`}>
@@ -173,28 +167,27 @@ export default function ClientDetailPage({ params }: PageProps) {
                     </Card>
                 </div>
 
-                {/* Sidebar */}
                 <div className="space-y-6">
                     <Card>
-                        <h2 className="text-lg font-semibold text-slate-900 mb-4">Statystyki</h2>
+                        <h2 className="text-lg font-semibold text-themed mb-4">Statystyki</h2>
                         <div className="space-y-4">
                             <div className="flex justify-between">
-                                <span className="text-slate-500">Wszystkie oferty</span>
-                                <span className="font-semibold text-slate-900">{client._count?.offers || 0}</span>
+                                <span className="text-themed-muted">Wszystkie oferty</span>
+                                <span className="font-semibold text-themed">{client._count?.offers || 0}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-slate-500">Dodano</span>
-                                <span className="text-slate-900">{formatDate(client.createdAt)}</span>
+                                <span className="text-themed-muted">Dodano</span>
+                                <span className="text-themed">{formatDate(client.createdAt)}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-slate-500">Ostatnia aktualizacja</span>
-                                <span className="text-slate-900">{formatDate(client.updatedAt)}</span>
+                                <span className="text-themed-muted">Ostatnia aktualizacja</span>
+                                <span className="text-themed">{formatDate(client.updatedAt)}</span>
                             </div>
                         </div>
                     </Card>
 
                     <Card>
-                        <h2 className="text-lg font-semibold text-slate-900 mb-4">Szybkie akcje</h2>
+                        <h2 className="text-lg font-semibold text-themed mb-4">Szybkie akcje</h2>
                         <div className="space-y-2">
                             <Button
                                 variant="outline"

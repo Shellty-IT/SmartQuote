@@ -1,5 +1,4 @@
-// SmartQuote-AI/src/app/dashboard/settings/components/SmtpSection.tsx
-
+// src/app/dashboard/settings/components/SmtpSection.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -128,35 +127,35 @@ export default function SmtpSection() {
 
     return (
         <Card>
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
-                    <h2 className="text-lg font-semibold text-slate-900">Skrzynka pocztowa (SMTP)</h2>
-                    <p className="text-sm text-slate-500">Podłącz swoją skrzynkę do wysyłania maili z ofertami</p>
+                    <h2 className="text-lg font-semibold text-themed">Skrzynka pocztowa (SMTP)</h2>
+                    <p className="text-sm text-themed-muted">Podłącz swoją skrzynkę do wysyłania maili z ofertami</p>
                 </div>
                 <div className="flex items-center gap-2">
                     {config?.smtpConfigured ? (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-medium">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                            Skonfigurowano
-                        </span>
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              Skonfigurowano
+            </span>
                     ) : (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                            Nie skonfigurowano
-                        </span>
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+              Nie skonfigurowano
+            </span>
                     )}
                 </div>
             </div>
 
             {error && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 flex items-start gap-2">
+                <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-700 dark:text-red-400 flex items-start gap-2">
                     <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                     {error}
                 </div>
             )}
 
             <div className="mb-6">
-                <label className="block text-sm font-medium text-slate-700 mb-2">Dostawca poczty</label>
+                <label className="block text-sm font-medium text-themed-label mb-2">Dostawca poczty</label>
                 <div className="flex flex-wrap gap-2">
                     {Object.entries(PRESETS).map(([key, preset]) => (
                         <button
@@ -164,8 +163,8 @@ export default function SmtpSection() {
                             onClick={() => handlePresetChange(key)}
                             className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors border ${
                                 selectedPreset === key
-                                    ? 'bg-cyan-50 border-cyan-300 text-cyan-700'
-                                    : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                                    ? 'bg-cyan-50 dark:bg-cyan-900/30 border-cyan-300 dark:border-cyan-700 text-cyan-700 dark:text-cyan-400'
+                                    : 'card-themed text-themed-muted hover-themed'
                             }`}
                         >
                             {key === 'gmail' ? 'Gmail' :
@@ -176,85 +175,85 @@ export default function SmtpSection() {
                     ))}
                 </div>
                 {selectedPreset !== 'custom' && (
-                    <p className="mt-2 text-xs text-slate-500">{PRESETS[selectedPreset]?.note}</p>
+                    <p className="mt-2 text-xs text-themed-muted">{PRESETS[selectedPreset]?.note}</p>
                 )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Host SMTP</label>
+                    <label className="block text-sm font-medium text-themed-label mb-1">Host SMTP</label>
                     <input
                         type="text"
                         value={form.smtpHost}
                         onChange={(e) => handleChange('smtpHost', e.target.value)}
                         placeholder="smtp.gmail.com"
-                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2.5 rounded-xl border input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Port</label>
+                    <label className="block text-sm font-medium text-themed-label mb-1">Port</label>
                     <input
                         type="number"
                         value={form.smtpPort}
                         onChange={(e) => handleChange('smtpPort', parseInt(e.target.value) || 587)}
                         placeholder="587"
-                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2.5 rounded-xl border input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
                     />
-                    <p className="mt-1 text-xs text-slate-400">587 (STARTTLS) lub 465 (SSL)</p>
+                    <p className="mt-1 text-xs text-themed-muted">587 (STARTTLS) lub 465 (SSL)</p>
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Użytkownik (login)</label>
+                    <label className="block text-sm font-medium text-themed-label mb-1">Użytkownik (login)</label>
                     <input
                         type="text"
                         value={form.smtpUser}
                         onChange={(e) => handleChange('smtpUser', e.target.value)}
                         placeholder="twoj@email.com"
-                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2.5 rounded-xl border input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                        Hasło {config?.smtpConfigured && <span className="text-slate-400 font-normal">(zostaw puste aby nie zmieniać)</span>}
+                    <label className="block text-sm font-medium text-themed-label mb-1">
+                        Hasło {config?.smtpConfigured && <span className="text-themed-muted font-normal">(zostaw puste aby nie zmieniać)</span>}
                     </label>
                     <input
                         type="password"
                         value={form.smtpPass}
                         onChange={(e) => handleChange('smtpPass', e.target.value)}
                         placeholder={config?.smtpConfigured ? '••••••••' : 'Hasło lub hasło aplikacji'}
-                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2.5 rounded-xl border input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
                     />
                 </div>
                 <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                        Adres nadawcy <span className="text-slate-400 font-normal">(opcjonalny)</span>
+                    <label className="block text-sm font-medium text-themed-label mb-1">
+                        Adres nadawcy <span className="text-themed-muted font-normal">(opcjonalny)</span>
                     </label>
                     <input
                         type="text"
                         value={form.smtpFrom}
                         onChange={(e) => handleChange('smtpFrom', e.target.value)}
                         placeholder="Firma <twoj@email.com>"
-                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2.5 rounded-xl border input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
                     />
-                    <p className="mt-1 text-xs text-slate-400">Np. &quot;SmartQuote &lt;oferty@firma.pl&gt;&quot; — domyślnie używany login</p>
+                    <p className="mt-1 text-xs text-themed-muted">Np. &quot;SmartQuote &lt;oferty@firma.pl&gt;&quot; — domyślnie używany login</p>
                 </div>
             </div>
 
             {testResult && (
                 <div className={`mb-4 p-3 rounded-xl text-sm flex items-start gap-2 ${
                     testResult.success
-                        ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
-                        : 'bg-red-50 border border-red-200 text-red-700'
+                        ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400'
+                        : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400'
                 }`}>
                     {testResult.success ? <Check className="w-4 h-4 flex-shrink-0 mt-0.5" /> : <X className="w-4 h-4 flex-shrink-0 mt-0.5" />}
                     {testResult.message}
                 </div>
             )}
 
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex flex-wrap items-center gap-3 mb-6">
                 <button
                     onClick={handleTest}
                     disabled={!canTest || isTesting}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-medium text-sm hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border card-themed text-themed font-medium text-sm hover-themed transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {isTesting ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -281,7 +280,7 @@ export default function SmtpSection() {
                     <>
                         {deleteConfirm ? (
                             <div className="flex items-center gap-2">
-                                <span className="text-sm text-red-600">Na pewno?</span>
+                                <span className="text-sm text-red-600 dark:text-red-400">Na pewno?</span>
                                 <button
                                     onClick={handleDelete}
                                     disabled={isDeleting}
@@ -291,7 +290,7 @@ export default function SmtpSection() {
                                 </button>
                                 <button
                                     onClick={() => setDeleteConfirm(false)}
-                                    className="px-3 py-2 rounded-lg border border-slate-200 text-slate-600 text-sm hover:bg-slate-50"
+                                    className="px-3 py-2 rounded-lg border card-themed text-themed-muted text-sm hover-themed"
                                 >
                                     Anuluj
                                 </button>
@@ -299,7 +298,7 @@ export default function SmtpSection() {
                         ) : (
                             <button
                                 onClick={() => setDeleteConfirm(true)}
-                                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-200 text-red-600 font-medium text-sm hover:bg-red-50 transition-colors"
+                                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 font-medium text-sm hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
                             >
                                 <Trash2 className="w-4 h-4" />
                                 Usuń
@@ -309,12 +308,12 @@ export default function SmtpSection() {
                 )}
             </div>
 
-            <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
                 <div className="flex items-start gap-3">
-                    <Shield className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                    <Shield className="w-5 h-5 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                     <div>
-                        <p className="text-sm font-medium text-blue-800">Bezpieczeństwo</p>
-                        <p className="text-sm text-blue-700 mt-1">
+                        <p className="text-sm font-medium text-blue-800 dark:text-blue-300">Bezpieczeństwo</p>
+                        <p className="text-sm text-blue-700 dark:text-blue-400 mt-1">
                             Hasło jest szyfrowane algorytmem AES-256 i przechowywane w zaszyfrowanej formie.
                             Nigdy nie jest wyświetlane po zapisaniu. Połączenie z serwerem SMTP odbywa się
                             przez szyfrowany kanał TLS/SSL.
@@ -324,12 +323,12 @@ export default function SmtpSection() {
             </div>
 
             {selectedPreset === 'gmail' && (
-                <div className="mt-4 p-4 bg-amber-50 rounded-xl border border-amber-100">
+                <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-100 dark:border-amber-800">
                     <div className="flex items-start gap-3">
-                        <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                        <AlertTriangle className="w-5 h-5 text-amber-500 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                         <div>
-                            <p className="text-sm font-medium text-amber-800">Gmail — hasło aplikacji</p>
-                            <p className="text-sm text-amber-700 mt-1">
+                            <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Gmail — hasło aplikacji</p>
+                            <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
                                 Gmail wymaga &quot;hasła aplikacji&quot; zamiast zwykłego hasła.
                                 Wejdź na myaccount.google.com → Bezpieczeństwo → Weryfikacja dwuetapowa →
                                 Hasła aplikacji, wygeneruj nowe hasło i wklej je tutaj.

@@ -1,5 +1,4 @@
-// SmartQuote-AI/src/components/notifications/NotificationBell.tsx
-
+// src/components/notifications/NotificationBell.tsx
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -7,14 +6,14 @@ import { useRouter } from 'next/navigation';
 import { useNotifications } from '@/hooks/useNotifications';
 import type { Notification, NotificationType } from '@/types';
 
-const typeConfig: Record<NotificationType, { icon: string; bg: string; iconBg: string }> = {
-    OFFER_VIEWED: { icon: '👁️', bg: 'bg-blue-50', iconBg: 'bg-blue-100' },
-    OFFER_ACCEPTED: { icon: '✅', bg: 'bg-emerald-50', iconBg: 'bg-emerald-100' },
-    OFFER_REJECTED: { icon: '❌', bg: 'bg-red-50', iconBg: 'bg-red-100' },
-    OFFER_COMMENT: { icon: '💬', bg: 'bg-cyan-50', iconBg: 'bg-cyan-100' },
-    AI_INSIGHT: { icon: '✨', bg: 'bg-purple-50', iconBg: 'bg-purple-100' },
-    FOLLOW_UP_REMINDER: { icon: '🔔', bg: 'bg-amber-50', iconBg: 'bg-amber-100' },
-    SYSTEM: { icon: '⚙️', bg: 'bg-slate-50', iconBg: 'bg-slate-100' },
+const typeConfig: Record<NotificationType, { icon: string; colorClass: string }> = {
+    OFFER_VIEWED: { icon: '👁️', colorClass: 'badge-info' },
+    OFFER_ACCEPTED: { icon: '✅', colorClass: 'badge-success' },
+    OFFER_REJECTED: { icon: '❌', colorClass: 'badge-danger' },
+    OFFER_COMMENT: { icon: '💬', colorClass: 'bg-cyan-500/15 text-cyan-700' },
+    AI_INSIGHT: { icon: '✨', colorClass: 'bg-purple-500/15 text-purple-700' },
+    FOLLOW_UP_REMINDER: { icon: '🔔', colorClass: 'badge-warning' },
+    SYSTEM: { icon: '⚙️', colorClass: 'badge-themed' },
 };
 
 function timeAgo(dateStr: string): string {
@@ -79,7 +78,7 @@ export default function NotificationBell() {
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                className="relative p-2 text-themed-muted hover-themed rounded-lg transition-colors"
             >
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
@@ -98,13 +97,13 @@ export default function NotificationBell() {
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-[420px] bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden">
-                    <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
+                <div className="absolute right-0 mt-2 w-[420px] card-themed border rounded-xl shadow-xl z-50 overflow-hidden">
+                    <div className="px-4 py-3 section-themed border-b divider-themed">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                                <h3 className="font-semibold text-slate-900">Powiadomienia</h3>
+                                <h3 className="font-semibold text-themed">Powiadomienia</h3>
                                 {unreadCount > 0 && (
-                                    <span className="px-2 py-0.5 text-xs font-medium bg-cyan-100 text-cyan-700 rounded-full">
+                                    <span className="px-2 py-0.5 text-xs font-medium bg-cyan-500/15 text-cyan-700 rounded-full">
                                         {unreadCount} nowych
                                     </span>
                                 )}
@@ -127,16 +126,16 @@ export default function NotificationBell() {
                             </div>
                         ) : notifications.length === 0 ? (
                             <div className="p-8 text-center">
-                                <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                    <svg className="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div className="w-12 h-12 section-themed rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <svg className="w-6 h-6 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                                     </svg>
                                 </div>
-                                <p className="text-slate-600 font-medium">Brak powiadomień</p>
-                                <p className="text-sm text-slate-400 mt-1">Wszystko na bieżąco!</p>
+                                <p className="text-themed font-medium">Brak powiadomień</p>
+                                <p className="text-sm text-themed-muted mt-1">Wszystko na bieżąco!</p>
                             </div>
                         ) : (
-                            <div className="divide-y divide-slate-100">
+                            <div className="divide-y divider-themed">
                                 {notifications.map((notification) => {
                                     const cfg = typeConfig[notification.type] || typeConfig.SYSTEM;
 
@@ -146,12 +145,12 @@ export default function NotificationBell() {
                                             onClick={() => handleNotificationClick(notification)}
                                             className={`w-full px-4 py-3 text-left transition-colors group ${
                                                 notification.isRead
-                                                    ? 'bg-white hover:bg-slate-50'
-                                                    : `${cfg.bg} hover:bg-slate-50`
+                                                    ? 'card-themed hover-themed'
+                                                    : 'section-themed hover-themed'
                                             }`}
                                         >
                                             <div className="flex items-start gap-3">
-                                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg flex-shrink-0 ${cfg.iconBg}`}>
+                                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg flex-shrink-0 ${cfg.colorClass}`}>
                                                     {cfg.icon}
                                                 </div>
 
@@ -159,8 +158,8 @@ export default function NotificationBell() {
                                                     <div className="flex items-start justify-between gap-2">
                                                         <p className={`text-sm leading-tight ${
                                                             notification.isRead
-                                                                ? 'font-medium text-slate-700'
-                                                                : 'font-semibold text-slate-900'
+                                                                ? 'font-medium text-themed-muted'
+                                                                : 'font-semibold text-themed'
                                                         }`}>
                                                             {notification.title}
                                                         </p>
@@ -171,7 +170,7 @@ export default function NotificationBell() {
                                                             )}
                                                             <button
                                                                 onClick={(e) => handleDelete(e, notification.id)}
-                                                                className="p-1 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all rounded"
+                                                                className="p-1 text-themed-muted hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all rounded"
                                                                 title="Usuń"
                                                             >
                                                                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -182,12 +181,12 @@ export default function NotificationBell() {
                                                     </div>
 
                                                     <p className={`text-xs mt-0.5 leading-relaxed line-clamp-2 ${
-                                                        notification.isRead ? 'text-slate-400' : 'text-slate-600'
+                                                        notification.isRead ? 'text-themed-muted' : 'text-themed'
                                                     }`}>
                                                         {notification.message}
                                                     </p>
 
-                                                    <p className="text-xs text-slate-400 mt-1">
+                                                    <p className="text-xs text-themed-muted mt-1">
                                                         {timeAgo(notification.createdAt)}
                                                     </p>
                                                 </div>
@@ -200,7 +199,7 @@ export default function NotificationBell() {
                     </div>
 
                     {notifications.length > 0 && (
-                        <div className="px-4 py-3 bg-slate-50 border-t border-slate-200 text-center">
+                        <div className="px-4 py-3 section-themed border-t divider-themed text-center">
                             <button
                                 onClick={() => {
                                     setIsOpen(false);

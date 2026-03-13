@@ -1,4 +1,4 @@
-// SmartQuote-AI/src/components/ai/GlobalAIChat.tsx
+// src/components/ai/GlobalAIChat.tsx
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -221,9 +221,8 @@ export function GlobalAIChat() {
                         }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
                         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                        className="fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] bg-white dark:bg-slate-900
-                                   rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700
-                                   overflow-hidden flex flex-col"
+                        className="fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] card-themed border
+                                   rounded-2xl shadow-2xl overflow-hidden flex flex-col"
                     >
                         <div className="flex items-center justify-between px-4 py-3
                                         bg-gradient-to-r from-cyan-500 to-blue-600">
@@ -278,14 +277,13 @@ export function GlobalAIChat() {
                                     <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ maxHeight: '320px' }}>
                                         {messages.length === 0 ? (
                                             <div className="flex flex-col items-center justify-center h-full text-center py-8">
-                                                <div className="w-16 h-16 bg-cyan-100 dark:bg-cyan-900/30
-                                                                rounded-full flex items-center justify-center mb-4">
+                                                <div className="w-16 h-16 bg-cyan-500/15 rounded-full flex items-center justify-center mb-4">
                                                     <MessageSquare className="w-8 h-8 text-cyan-600" />
                                                 </div>
-                                                <h4 className="font-medium text-slate-900 dark:text-slate-100 mb-1">
+                                                <h4 className="font-medium text-themed mb-1">
                                                     Cześć{session.user?.name ? `, ${session.user.name.split(' ')[0]}` : ''}!
                                                 </h4>
-                                                <p className="text-sm text-slate-500 dark:text-slate-400 max-w-[250px]">
+                                                <p className="text-sm text-themed-muted max-w-[250px]">
                                                     Jak mogę Ci dzisiaj pomóc?
                                                 </p>
                                             </div>
@@ -297,18 +295,16 @@ export function GlobalAIChat() {
 
                                         {isLoading && (
                                             <div className="flex items-start gap-3">
-                                                <div className="w-8 h-8 bg-cyan-100 dark:bg-cyan-900/30
-                                                                rounded-full flex items-center justify-center flex-shrink-0">
+                                                <div className="w-8 h-8 bg-cyan-500/15 rounded-full flex items-center justify-center flex-shrink-0">
                                                     <Bot className="w-4 h-4 text-cyan-600" />
                                                 </div>
-                                                <div className="bg-slate-100 dark:bg-slate-800 rounded-2xl
-                                                                rounded-tl-none px-4 py-3">
+                                                <div className="section-themed rounded-2xl rounded-tl-none px-4 py-3">
                                                     <div className="flex items-center gap-1">
-                                                        <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
+                                                        <span className="w-2 h-2 bg-cyan-500 rounded-full animate-bounce"
                                                               style={{ animationDelay: '0ms' }} />
-                                                        <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
+                                                        <span className="w-2 h-2 bg-cyan-500 rounded-full animate-bounce"
                                                               style={{ animationDelay: '150ms' }} />
-                                                        <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
+                                                        <span className="w-2 h-2 bg-cyan-500 rounded-full animate-bounce"
                                                               style={{ animationDelay: '300ms' }} />
                                                     </div>
                                                 </div>
@@ -329,9 +325,8 @@ export function GlobalAIChat() {
                                                     <button
                                                         key={suggestion}
                                                         onClick={() => setInput(suggestion)}
-                                                        className="text-xs px-3 py-1.5 bg-slate-100 dark:bg-slate-800
-                                                                   text-slate-700 dark:text-slate-300 rounded-full
-                                                                   hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                                                        className="text-xs px-3 py-1.5 section-themed text-themed-muted rounded-full
+                                                                   hover-themed transition-colors"
                                                     >
                                                         {suggestion}
                                                     </button>
@@ -340,7 +335,7 @@ export function GlobalAIChat() {
                                         </div>
                                     )}
 
-                                    <div className="p-4 border-t border-slate-200 dark:border-slate-700">
+                                    <div className="p-4 border-t divider-themed">
                                         <div className="flex items-end gap-2">
                                             <textarea
                                                 ref={inputRef}
@@ -349,10 +344,9 @@ export function GlobalAIChat() {
                                                 onKeyDown={handleKeyDown}
                                                 placeholder="Napisz wiadomość..."
                                                 rows={1}
-                                                className="flex-1 resize-none rounded-xl border border-slate-200
-                                                           dark:border-slate-700 bg-slate-50 dark:bg-slate-800
-                                                           px-4 py-2.5 text-sm focus:outline-none focus:ring-2
-                                                           focus:ring-cyan-500 dark:text-slate-100"
+                                                className="flex-1 resize-none rounded-xl border px-4 py-2.5 text-sm
+                                                           focus:outline-none focus:ring-2 focus:ring-cyan-500
+                                                           input-themed"
                                                 style={{ maxHeight: '120px' }}
                                             />
                                             <Button
@@ -391,7 +385,7 @@ function ChatBubble({ message }: { message: Message }) {
             <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                 isUser
                     ? 'bg-gradient-to-r from-cyan-500 to-blue-600'
-                    : 'bg-cyan-100 dark:bg-cyan-900/30'
+                    : 'bg-cyan-500/15'
             }`}>
                 {isUser ? (
                     <User className="w-4 h-4 text-white" />
@@ -403,11 +397,11 @@ function ChatBubble({ message }: { message: Message }) {
             <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
                 isUser
                     ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-tr-none'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-tl-none'
+                    : 'section-themed text-themed rounded-tl-none'
             }`}>
                 <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                 <p className={`text-xs mt-1 ${
-                    isUser ? 'text-cyan-100' : 'text-slate-500 dark:text-slate-400'
+                    isUser ? 'text-cyan-100' : 'text-themed-muted'
                 }`}>
                     {message.timestamp.toLocaleTimeString('pl-PL', {
                         hour: '2-digit',

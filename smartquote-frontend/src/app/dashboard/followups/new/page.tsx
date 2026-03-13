@@ -1,5 +1,4 @@
 // src/app/dashboard/followups/new/page.tsx
-
 'use client';
 
 import { useState, Suspense } from 'react';
@@ -30,7 +29,6 @@ function NewFollowUpForm() {
     });
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-    // Fetch related data for dropdowns - z domyślną wartością pustej tablicy
     const { clients = [] } = useClients({ limit: 100 });
     const { offers = [] } = useOffers({ limit: 100 });
     const { contracts = [] } = useContracts({ limit: 100 });
@@ -68,12 +66,9 @@ function NewFollowUpForm() {
 
         try {
             const cleanData: CreateFollowUpData = {
-                // Required fields
                 title: formData.title,
                 type: formData.type,
                 dueDate: new Date(formData.dueDate).toISOString(),
-
-                // Optional fields - dodawane warunkowo
                 ...(formData.priority && { priority: formData.priority }),
                 ...(formData.description && { description: formData.description }),
                 ...(formData.notes && { notes: formData.notes }),
@@ -81,8 +76,6 @@ function NewFollowUpForm() {
                 ...(formData.offerId && { offerId: formData.offerId }),
                 ...(formData.contractId && { contractId: formData.contractId }),
             };
-
-            console.log('Sending data:', cleanData);
 
             await followUpsApi.create(cleanData);
             router.push('/dashboard/followups');
@@ -98,33 +91,30 @@ function NewFollowUpForm() {
     };
 
     return (
-        <div className="p-8 max-w-3xl mx-auto">
-            {/* Header */}
+        <div className="p-4 md:p-8 max-w-3xl mx-auto">
             <div className="mb-8">
                 <button
                     onClick={() => router.back()}
-                    className="flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-4"
+                    className="flex items-center gap-2 text-themed-muted hover:text-themed mb-4"
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     Powrót
                 </button>
-                <h1 className="text-2xl font-bold text-slate-900">Nowy follow-up</h1>
-                <p className="text-slate-500 mt-1">Utwórz nowe zadanie lub przypomnienie</p>
+                <h1 className="text-2xl font-bold text-themed">Nowy follow-up</h1>
+                <p className="text-themed-muted mt-1">Utwórz nowe zadanie lub przypomnienie</p>
             </div>
 
-            {/* Error */}
             {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400">
                     {error}
                 </div>
             )}
 
-            {/* Form */}
             <form onSubmit={handleSubmit}>
                 <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-slate-900 mb-4">Podstawowe informacje</h2>
+                    <h2 className="text-lg font-semibold text-themed mb-4">Podstawowe informacje</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="md:col-span-2">
                             <Input
@@ -176,7 +166,7 @@ function NewFollowUpForm() {
                 </Card>
 
                 <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-slate-900 mb-4">Opis</h2>
+                    <h2 className="text-lg font-semibold text-themed mb-4">Opis</h2>
                     <Textarea
                         name="description"
                         value={formData.description || ''}
@@ -187,7 +177,7 @@ function NewFollowUpForm() {
                 </Card>
 
                 <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-slate-900 mb-4">Powiązania (opcjonalne)</h2>
+                    <h2 className="text-lg font-semibold text-themed mb-4">Powiązania (opcjonalne)</h2>
                     <div className="grid grid-cols-1 gap-4">
                         <Select
                             label="Klient"
@@ -223,7 +213,7 @@ function NewFollowUpForm() {
                 </Card>
 
                 <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-slate-900 mb-4">Notatki</h2>
+                    <h2 className="text-lg font-semibold text-themed mb-4">Notatki</h2>
                     <Textarea
                         name="notes"
                         value={formData.notes || ''}
@@ -233,8 +223,7 @@ function NewFollowUpForm() {
                     />
                 </Card>
 
-                {/* Actions */}
-                <div className="flex justify-end gap-3">
+                <div className="flex flex-col sm:flex-row justify-end gap-3">
                     <Button type="button" variant="outline" onClick={() => router.back()}>
                         Anuluj
                     </Button>
@@ -247,17 +236,15 @@ function NewFollowUpForm() {
     );
 }
 
-// Komponent ładowania
 function NewFollowUpLoading() {
     return (
         <div className="flex flex-col items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-4 text-gray-500">Ładowanie...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600"></div>
+            <p className="mt-4 text-themed-muted">Ładowanie...</p>
         </div>
     );
 }
 
-// Główny eksport strony z Suspense
 export default function NewFollowUpPage() {
     return (
         <Suspense fallback={<NewFollowUpLoading />}>

@@ -1,5 +1,4 @@
-// SmartQuote-AI/src/app/dashboard/offers/new/NewOfferContent.tsx
-
+// src/app/dashboard/offers/new/NewOfferContent.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -217,19 +216,19 @@ export default function NewOfferContent() {
     }
 
     return (
-        <div className="p-8 max-w-4xl mx-auto">
+        <div className="p-4 md:p-8 max-w-4xl mx-auto">
             <div className="mb-8">
                 <button
                     onClick={() => router.back()}
-                    className="flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-4"
+                    className="flex items-center gap-2 text-themed-muted hover:opacity-70 mb-4"
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     Powrót
                 </button>
-                <h1 className="text-2xl font-bold text-slate-900">Nowa oferta</h1>
-                <p className="text-slate-500 mt-1">Utwórz nową ofertę handlową</p>
+                <h1 className="text-2xl font-bold text-themed">Nowa oferta</h1>
+                <p className="text-themed-muted mt-1">Utwórz nową ofertę handlową</p>
             </div>
 
             <div className="mb-8">
@@ -251,7 +250,7 @@ export default function NewOfferContent() {
                                                 ? 'bg-cyan-500 text-white'
                                                 : isPast
                                                     ? 'bg-emerald-500 text-white'
-                                                    : 'bg-slate-200 text-slate-500'
+                                                    : 'section-themed text-themed-muted'
                                         }`}
                                     >
                                         {isPast ? (
@@ -264,14 +263,14 @@ export default function NewOfferContent() {
                                     </div>
                                     <span
                                         className={`text-sm font-medium hidden sm:block ${
-                                            isActive ? 'text-cyan-600' : isPast ? 'text-emerald-600' : 'text-slate-500'
+                                            isActive ? 'text-cyan-600' : isPast ? 'text-emerald-600' : 'text-themed-muted'
                                         }`}
                                     >
                                     {step.label}
                                 </span>
                                 </button>
                                 {index < STEPS.length - 1 && (
-                                    <div className={`flex-1 h-0.5 mx-4 ${isPast ? 'bg-emerald-500' : 'bg-slate-200'}`} />
+                                    <div className={`flex-1 h-0.5 mx-4 ${isPast ? 'bg-emerald-500' : 'section-themed'}`} />
                                 )}
                             </div>
                         );
@@ -280,7 +279,7 @@ export default function NewOfferContent() {
             </div>
 
             {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/25 rounded-lg text-red-600">
                     {error}
                 </div>
             )}
@@ -288,7 +287,7 @@ export default function NewOfferContent() {
             <Card className="mb-6">
                 {currentStep === 'client' && (
                     <div>
-                        <h2 className="text-lg font-semibold text-slate-900 mb-4">Wybierz klienta</h2>
+                        <h2 className="text-lg font-semibold text-themed mb-4">Wybierz klienta</h2>
                         <Input
                             placeholder="Szukaj klienta..."
                             value={clientSearch}
@@ -307,16 +306,16 @@ export default function NewOfferContent() {
                                     onClick={() => setSelectedClient(client)}
                                     className={`flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all ${
                                         selectedClient?.id === client.id
-                                            ? 'border-cyan-500 bg-cyan-50'
-                                            : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                                            ? 'border-cyan-500 bg-cyan-500/10'
+                                            : 'card-themed border hover-themed'
                                     }`}
                                 >
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-600 to-blue-700 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
                                         {getInitials(client.name)}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-medium text-slate-900 truncate">{client.name}</p>
-                                        <p className="text-sm text-slate-500 truncate">
+                                        <p className="font-medium text-themed truncate">{client.name}</p>
+                                        <p className="text-sm text-themed-muted truncate">
                                             {client.email || client.phone || 'Brak kontaktu'}
                                         </p>
                                     </div>
@@ -330,7 +329,7 @@ export default function NewOfferContent() {
                         </div>
                         {filteredClients.length === 0 && (
                             <div className="text-center py-8">
-                                <p className="text-slate-500 mb-4">Nie znaleziono klientów</p>
+                                <p className="text-themed-muted mb-4">Nie znaleziono klientów</p>
                                 <Button variant="outline" onClick={() => router.push('/dashboard/clients/new')}>
                                     Dodaj nowego klienta
                                 </Button>
@@ -341,7 +340,7 @@ export default function NewOfferContent() {
 
                 {currentStep === 'details' && (
                     <div>
-                        <h2 className="text-lg font-semibold text-slate-900 mb-4">Szczegóły oferty</h2>
+                        <h2 className="text-lg font-semibold text-themed mb-4">Szczegóły oferty</h2>
                         <div className="space-y-4">
                             <Input
                                 label="Tytuł oferty"
@@ -394,7 +393,7 @@ export default function NewOfferContent() {
                 {currentStep === 'items' && (
                     <div>
                         <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-semibold text-slate-900">Pozycje oferty</h2>
+                            <h2 className="text-lg font-semibold text-themed">Pozycje oferty</h2>
                             <Button variant="outline" size="sm" onClick={addItem}>
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -408,15 +407,15 @@ export default function NewOfferContent() {
                                 const itemTotals = calculateItemTotal(item);
 
                                 return (
-                                    <div key={index} className="p-4 bg-slate-50 rounded-xl space-y-4">
+                                    <div key={index} className="p-4 section-themed rounded-xl space-y-4">
                                         <div className="flex items-start justify-between">
-                                        <span className="text-sm font-medium text-slate-500">
+                                        <span className="text-sm font-medium text-themed-muted">
                                             Pozycja {index + 1}
                                         </span>
                                             {items.length > 1 && (
                                                 <button
                                                     onClick={() => removeItem(index)}
-                                                    className="p-1 text-slate-400 hover:text-red-500 transition-colors"
+                                                    className="p-1 text-themed-muted hover:text-red-500 transition-colors"
                                                 >
                                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -492,7 +491,7 @@ export default function NewOfferContent() {
                                             />
                                         </div>
 
-                                        <div className="p-3 bg-white rounded-lg border border-slate-200">
+                                        <div className="p-3 card-themed border rounded-lg">
                                             <label className="flex items-center gap-3 cursor-pointer">
                                                 <input
                                                     type="checkbox"
@@ -501,10 +500,10 @@ export default function NewOfferContent() {
                                                     className="w-4 h-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
                                                 />
                                                 <div>
-                                                <span className="text-sm font-medium text-slate-900">
+                                                <span className="text-sm font-medium text-themed">
                                                     Pozycja opcjonalna
                                                 </span>
-                                                    <p className="text-xs text-slate-500">
+                                                    <p className="text-xs text-themed-muted">
                                                         Klient może odznaczyć tę pozycję lub zmienić ilość
                                                     </p>
                                                 </div>
@@ -532,14 +531,14 @@ export default function NewOfferContent() {
                                             )}
                                         </div>
 
-                                        <div className="flex justify-end gap-4 pt-2 border-t border-slate-200">
-                                        <span className="text-sm text-slate-500">
+                                        <div className="flex justify-end gap-4 pt-2 border-t divider-themed">
+                                        <span className="text-sm text-themed-muted">
                                             Netto: <strong>{formatCurrency(itemTotals.totalNet)}</strong>
                                         </span>
-                                            <span className="text-sm text-slate-500">
+                                            <span className="text-sm text-themed-muted">
                                             VAT: <strong>{formatCurrency(itemTotals.totalVat)}</strong>
                                         </span>
-                                            <span className="text-sm text-slate-900">
+                                            <span className="text-sm text-themed">
                                             Brutto: <strong>{formatCurrency(itemTotals.totalGross)}</strong>
                                         </span>
                                         </div>
@@ -567,69 +566,69 @@ export default function NewOfferContent() {
 
                 {currentStep === 'summary' && selectedClient && (
                     <div>
-                        <h2 className="text-lg font-semibold text-slate-900 mb-6">Podsumowanie oferty</h2>
+                        <h2 className="text-lg font-semibold text-themed mb-6">Podsumowanie oferty</h2>
                         <div className="space-y-6">
-                            <div className="p-4 bg-slate-50 rounded-xl">
-                                <h3 className="text-sm font-medium text-slate-500 mb-2">Klient</h3>
+                            <div className="p-4 section-themed rounded-xl">
+                                <h3 className="text-sm font-medium text-themed-muted mb-2">Klient</h3>
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-white text-sm font-semibold">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-600 to-blue-700 flex items-center justify-center text-white text-sm font-semibold">
                                         {getInitials(selectedClient.name)}
                                     </div>
                                     <div>
-                                        <p className="font-medium text-slate-900">{selectedClient.name}</p>
-                                        <p className="text-sm text-slate-500">{selectedClient.email}</p>
+                                        <p className="font-medium text-themed">{selectedClient.name}</p>
+                                        <p className="text-sm text-themed-muted">{selectedClient.email}</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="p-4 bg-slate-50 rounded-xl">
-                                <h3 className="text-sm font-medium text-slate-500 mb-2">Szczegóły</h3>
+                            <div className="p-4 section-themed rounded-xl">
+                                <h3 className="text-sm font-medium text-themed-muted mb-2">Szczegóły</h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <p className="text-sm text-slate-500">Tytuł</p>
-                                        <p className="text-slate-900">{offerDetails.title}</p>
+                                        <p className="text-sm text-themed-muted">Tytuł</p>
+                                        <p className="text-themed">{offerDetails.title}</p>
                                     </div>
                                     {offerDetails.validUntil && (
                                         <div>
-                                            <p className="text-sm text-slate-500">Ważna do</p>
-                                            <p className="text-slate-900">{offerDetails.validUntil}</p>
+                                            <p className="text-sm text-themed-muted">Ważna do</p>
+                                            <p className="text-themed">{offerDetails.validUntil}</p>
                                         </div>
                                     )}
                                     <div>
-                                        <p className="text-sm text-slate-500">Termin płatności</p>
-                                        <p className="text-slate-900">{offerDetails.paymentDays} dni</p>
+                                        <p className="text-sm text-themed-muted">Termin płatności</p>
+                                        <p className="text-themed">{offerDetails.paymentDays} dni</p>
                                     </div>
                                 </div>
                                 {offerDetails.description && (
                                     <div className="mt-4">
-                                        <p className="text-sm text-slate-500">Opis</p>
-                                        <p className="text-slate-900">{offerDetails.description}</p>
+                                        <p className="text-sm text-themed-muted">Opis</p>
+                                        <p className="text-themed">{offerDetails.description}</p>
                                     </div>
                                 )}
                             </div>
 
-                            <div className="p-4 bg-slate-50 rounded-xl">
-                                <h3 className="text-sm font-medium text-slate-500 mb-2">Pozycje ({items.length})</h3>
+                            <div className="p-4 section-themed rounded-xl">
+                                <h3 className="text-sm font-medium text-themed-muted mb-2">Pozycje ({items.length})</h3>
                                 <div className="space-y-2">
                                     {items.map((item, index) => {
                                         const itemTotals = calculateItemTotal(item);
                                         return (
-                                            <div key={index} className="flex justify-between items-center py-2 border-b border-slate-200 last:border-0">
+                                            <div key={index} className="flex justify-between items-center py-2 border-b divider-themed last:border-0">
                                                 <div>
                                                     <div className="flex items-center gap-2">
-                                                        <p className="text-slate-900">{item.name}</p>
+                                                        <p className="text-themed">{item.name}</p>
                                                         {item.isOptional && (
-                                                            <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 font-medium">
+                                                            <span className="text-xs px-1.5 py-0.5 rounded-full badge-info font-medium">
                                                             Opcjonalna
                                                         </span>
                                                         )}
                                                     </div>
-                                                    <p className="text-sm text-slate-500">
+                                                    <p className="text-sm text-themed-muted">
                                                         {item.quantity} {item.unit} × {formatCurrency(item.unitPrice)}
                                                         {item.discount ? ` (-${item.discount}%)` : ''}
                                                     </p>
                                                 </div>
-                                                <p className="font-semibold text-slate-900">
+                                                <p className="font-semibold text-themed">
                                                     {formatCurrency(itemTotals.totalGross)}
                                                 </p>
                                             </div>
@@ -685,5 +684,4 @@ export default function NewOfferContent() {
             </div>
         </div>
     );
-
 }

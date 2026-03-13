@@ -1,5 +1,4 @@
 // src/app/dashboard/settings/components/SecuritySection.tsx
-
 'use client';
 
 import { useState } from 'react';
@@ -70,11 +69,11 @@ export default function SecuritySection({ onChangePassword }: Props) {
         <Card>
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h2 className="text-lg font-semibold text-slate-900">Zmiana hasła</h2>
-                    <p className="text-sm text-slate-500">Zaktualizuj hasło do konta</p>
+                    <h2 className="text-lg font-semibold text-themed">Zmiana hasła</h2>
+                    <p className="text-sm text-themed-muted">Zaktualizuj hasło do konta</p>
                 </div>
                 {success && (
-                    <div className="flex items-center gap-2 text-green-600 text-sm">
+                    <div className="flex items-center gap-2 text-green-600 dark:text-green-400 text-sm">
                         <Check className="w-4 h-4" />
                         Hasło zmienione
                     </div>
@@ -82,55 +81,53 @@ export default function SecuritySection({ onChangePassword }: Props) {
             </div>
 
             {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700">
+                <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-3 text-red-700 dark:text-red-400">
                     <AlertCircle className="w-5 h-5 flex-shrink-0" />
                     <p className="text-sm">{error}</p>
                 </div>
             )}
 
             <div className="space-y-6">
-                {/* Current Password */}
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <label className="block text-sm font-medium text-themed-label mb-2">
                         Obecne hasło
                     </label>
                     <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" />
                         <input
                             type={showCurrentPassword ? 'text' : 'password'}
                             value={formData.currentPassword}
                             onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
-                            className="w-full pl-10 pr-12 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500"
+                            className="w-full pl-10 pr-12 py-2.5 border rounded-lg input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500"
                             placeholder="••••••••"
                         />
                         <button
                             type="button"
                             onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-themed-muted hover:text-themed"
                         >
                             {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
                     </div>
                 </div>
 
-                {/* New Password */}
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <label className="block text-sm font-medium text-themed-label mb-2">
                         Nowe hasło
                     </label>
                     <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" />
                         <input
                             type={showNewPassword ? 'text' : 'password'}
                             value={formData.newPassword}
                             onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
-                            className="w-full pl-10 pr-12 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500"
+                            className="w-full pl-10 pr-12 py-2.5 border rounded-lg input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500"
                             placeholder="••••••••"
                         />
                         <button
                             type="button"
                             onClick={() => setShowNewPassword(!showNewPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-themed-muted hover:text-themed"
                         >
                             {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
@@ -142,50 +139,49 @@ export default function SecuritySection({ onChangePassword }: Props) {
                                     key={req}
                                     className={`text-xs px-2 py-1 rounded-full ${
                                         passwordErrors.includes(req)
-                                            ? 'bg-red-100 text-red-600'
-                                            : 'bg-green-100 text-green-600'
+                                            ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                                            : 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
                                     }`}
                                 >
-                                    {passwordErrors.includes(req) ? '✗' : '✓'} {req}
-                                </span>
+                  {passwordErrors.includes(req) ? '✗' : '✓'} {req}
+                </span>
                             ))}
                         </div>
                     )}
                 </div>
 
-                {/* Confirm Password */}
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <label className="block text-sm font-medium text-themed-label mb-2">
                         Potwierdź nowe hasło
                     </label>
                     <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" />
                         <input
                             type={showConfirmPassword ? 'text' : 'password'}
                             value={formData.confirmPassword}
                             onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                            className={`w-full pl-10 pr-12 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 ${
+                            className={`w-full pl-10 pr-12 py-2.5 border rounded-lg input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 ${
                                 formData.confirmPassword && !passwordsMatch
-                                    ? 'border-red-300'
-                                    : 'border-slate-200'
+                                    ? 'border-red-300 dark:border-red-700'
+                                    : ''
                             }`}
                             placeholder="••••••••"
                         />
                         <button
                             type="button"
                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-themed-muted hover:text-themed"
                         >
                             {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
                     </div>
                     {formData.confirmPassword && !passwordsMatch && (
-                        <p className="text-xs text-red-500 mt-1">Hasła nie są identyczne</p>
+                        <p className="text-xs text-red-500 dark:text-red-400 mt-1">Hasła nie są identyczne</p>
                     )}
                 </div>
             </div>
 
-            <div className="flex justify-end mt-8 pt-6 border-t border-slate-100">
+            <div className="flex justify-end mt-8 pt-6 border-t divider-themed">
                 <Button onClick={handleSubmit} disabled={!canSubmit || isSaving}>
                     {isSaving ? (
                         <>

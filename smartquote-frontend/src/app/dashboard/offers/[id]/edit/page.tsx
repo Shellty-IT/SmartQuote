@@ -1,5 +1,4 @@
-// SmartQuote-AI/src/app/dashboard/offers/[id]/edit/page.tsx
-
+// src/app/dashboard/offers/[id]/edit/page.tsx
 'use client';
 
 import React, { useState, useEffect, use } from 'react';
@@ -202,7 +201,7 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
 
     if (offerError || !offer) {
         return (
-            <div className="p-8">
+            <div className="p-4 md:p-8">
                 <Card>
                     <div className="text-center py-12">
                         <p className="text-red-600 mb-4">{offerError || 'Nie znaleziono oferty'}</p>
@@ -216,38 +215,38 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
     }
 
     return (
-        <div className="p-8 max-w-4xl mx-auto">
+        <div className="p-4 md:p-8 max-w-4xl mx-auto">
             <div className="mb-8">
                 <button
                     onClick={() => router.back()}
-                    className="flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-4"
+                    className="flex items-center gap-2 text-themed-muted hover:opacity-70 mb-4"
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     Powrót
                 </button>
-                <h1 className="text-2xl font-bold text-slate-900">Edytuj ofertę</h1>
-                <p className="text-slate-500 mt-1">{offer.number}</p>
+                <h1 className="text-2xl font-bold text-themed">Edytuj ofertę</h1>
+                <p className="text-themed-muted mt-1">{offer.number}</p>
             </div>
 
             {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/25 rounded-lg text-red-600">
                     {error}
                 </div>
             )}
 
             <form onSubmit={handleSubmit}>
                 <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-slate-900 mb-4">Klient</h2>
+                    <h2 className="text-lg font-semibold text-themed mb-4">Klient</h2>
                     {selectedClient && (
-                        <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-white text-sm font-semibold">
+                        <div className="flex items-center gap-3 p-4 section-themed rounded-xl">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-600 to-blue-700 flex items-center justify-center text-white text-sm font-semibold">
                                 {getInitials(selectedClient.name)}
                             </div>
                             <div className="flex-1">
-                                <p className="font-medium text-slate-900">{selectedClient.name}</p>
-                                <p className="text-sm text-slate-500">{selectedClient.email}</p>
+                                <p className="font-medium text-themed">{selectedClient.name}</p>
+                                <p className="text-sm text-themed-muted">{selectedClient.email}</p>
                             </div>
                             <Select
                                 value={selectedClient.id}
@@ -263,7 +262,7 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
                 </Card>
 
                 <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-slate-900 mb-4">Szczegóły oferty</h2>
+                    <h2 className="text-lg font-semibold text-themed mb-4">Szczegóły oferty</h2>
 
                     <div className="space-y-4">
                         <Input
@@ -315,7 +314,7 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
 
                 <Card className="mb-6">
                     <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-semibold text-slate-900">Pozycje oferty</h2>
+                        <h2 className="text-lg font-semibold text-themed">Pozycje oferty</h2>
                         <Button variant="outline" size="sm" type="button" onClick={addItem}>
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -329,16 +328,16 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
                             const itemTotals = calculateItemTotal(item);
 
                             return (
-                                <div key={index} className="p-4 bg-slate-50 rounded-xl space-y-4">
+                                <div key={index} className="p-4 section-themed rounded-xl space-y-4">
                                     <div className="flex items-start justify-between">
-                                        <span className="text-sm font-medium text-slate-500">
+                                        <span className="text-sm font-medium text-themed-muted">
                                             Pozycja {index + 1}
                                         </span>
                                         {items.length > 1 && (
                                             <button
                                                 type="button"
                                                 onClick={() => removeItem(index)}
-                                                className="p-1 text-slate-400 hover:text-red-500 transition-colors"
+                                                className="p-1 text-themed-muted hover:text-red-500 transition-colors"
                                             >
                                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -413,7 +412,7 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
                                         />
                                     </div>
 
-                                    <div className="p-3 bg-white rounded-lg border border-slate-200">
+                                    <div className="p-3 card-themed border rounded-lg">
                                         <label className="flex items-center gap-3 cursor-pointer">
                                             <input
                                                 type="checkbox"
@@ -422,10 +421,10 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
                                                 className="w-4 h-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
                                             />
                                             <div>
-                                                <span className="text-sm font-medium text-slate-900">
+                                                <span className="text-sm font-medium text-themed">
                                                     Pozycja opcjonalna
                                                 </span>
-                                                <p className="text-xs text-slate-500">
+                                                <p className="text-xs text-themed-muted">
                                                     Klient może odznaczyć tę pozycję lub zmienić ilość
                                                 </p>
                                             </div>
@@ -453,14 +452,14 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
                                         )}
                                     </div>
 
-                                    <div className="flex justify-end gap-4 pt-2 border-t border-slate-200">
-                                        <span className="text-sm text-slate-500">
+                                    <div className="flex justify-end gap-4 pt-2 border-t divider-themed">
+                                        <span className="text-sm text-themed-muted">
                                             Netto: <strong>{formatCurrency(itemTotals.totalNet)}</strong>
                                         </span>
-                                        <span className="text-sm text-slate-500">
+                                        <span className="text-sm text-themed-muted">
                                             VAT: <strong>{formatCurrency(itemTotals.totalVat)}</strong>
                                         </span>
-                                        <span className="text-sm text-slate-900">
+                                        <span className="text-sm text-themed">
                                             Brutto: <strong>{formatCurrency(itemTotals.totalGross)}</strong>
                                         </span>
                                     </div>

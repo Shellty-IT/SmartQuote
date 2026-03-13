@@ -1,3 +1,4 @@
+// src/components/ai/AIQuickAccess.tsx
 'use client';
 
 import React from 'react';

@@ -1,5 +1,4 @@
-// SmartQuote-AI/src/app/dashboard/offers/[id]/page.tsx
-
+// src/app/dashboard/offers/[id]/page.tsx
 'use client';
 
 import { useState, use } from 'react';
@@ -31,10 +30,10 @@ interface PageProps {
 }
 
 const intentConfig: Record<string, { label: string; color: string }> = {
-    likely_accept: { label: 'Prawdopodobna akceptacja', color: 'bg-emerald-100 text-emerald-700' },
-    undecided: { label: 'Niezdecydowany', color: 'bg-amber-100 text-amber-700' },
-    likely_reject: { label: 'Prawdopodobne odrzucenie', color: 'bg-red-100 text-red-700' },
-    unknown: { label: 'Brak danych', color: 'bg-slate-100 text-slate-500' },
+    likely_accept: { label: 'Prawdopodobna akceptacja', color: 'badge-success' },
+    undecided: { label: 'Niezdecydowany', color: 'badge-warning' },
+    likely_reject: { label: 'Prawdopodobne odrzucenie', color: 'badge-danger' },
+    unknown: { label: 'Brak danych', color: 'badge-themed' },
 };
 
 export default function OfferDetailPage({ params }: PageProps) {
@@ -184,7 +183,7 @@ export default function OfferDetailPage({ params }: PageProps) {
 
     if (error || !offer) {
         return (
-            <div className="p-8">
+            <div className="p-4 md:p-8">
                 <Card>
                     <div className="text-center py-12">
                         <p className="text-red-600 mb-4">{error || 'Nie znaleziono oferty'}</p>
@@ -214,20 +213,20 @@ export default function OfferDetailPage({ params }: PageProps) {
     };
 
     return (
-        <div className="p-8">
-            <div className="flex items-start justify-between mb-8">
+        <div className="p-4 md:p-8">
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-8">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => router.push('/dashboard/offers')}
-                        className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg"
+                        className="p-2 text-themed-muted hover-themed rounded-lg"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                     </button>
                     <div>
-                        <div className="flex items-center gap-3">
-                            <h1 className="text-2xl font-bold text-slate-900">{offer.title}</h1>
+                        <div className="flex items-center gap-3 flex-wrap">
+                            <h1 className="text-2xl font-bold text-themed">{offer.title}</h1>
                             <Badge className={`${status.bgColor} ${status.color}`} size="md">
                                 {status.label}
                             </Badge>
@@ -235,15 +234,15 @@ export default function OfferDetailPage({ params }: PageProps) {
                                 <Badge variant="danger" size="md">Wygasła</Badge>
                             )}
                             {offer.isInteractive && (
-                                <Badge className="bg-cyan-100 text-cyan-700" size="md">
+                                <Badge className="bg-cyan-500/15 text-cyan-600" size="md">
                                     Link aktywny
                                 </Badge>
                             )}
                         </div>
-                        <p className="text-slate-500 mt-1">{offer.number}</p>
+                        <p className="text-themed-muted mt-1">{offer.number}</p>
                     </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                     <Button variant="outline" onClick={() => setPublishDialogOpen(true)}>
                         <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -258,14 +257,14 @@ export default function OfferDetailPage({ params }: PageProps) {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                 </svg>
                             </Button>
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                            <div className="absolute right-0 mt-2 w-48 card-themed border rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
                                 {availableTransitions.map((newStatus) => {
                                     const statusConfig = getStatusConfig(newStatus);
                                     return (
                                         <button
                                             key={newStatus}
                                             onClick={() => handleStatusChange(newStatus)}
-                                            className="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 first:rounded-t-lg last:rounded-b-lg"
+                                            className="w-full px-4 py-2 text-left text-sm hover-themed first:rounded-t-lg last:rounded-b-lg"
                                         >
                                             <Badge className={`${statusConfig.bgColor} ${statusConfig.color}`}>
                                                 {statusConfig.label}
@@ -292,23 +291,23 @@ export default function OfferDetailPage({ params }: PageProps) {
             </div>
 
             <div className="mb-6">
-                <div className="flex gap-1 bg-slate-100 rounded-xl p-1 w-fit">
+                <div className="flex gap-1 section-themed rounded-xl p-1 w-fit">
                     {tabs.map((tab) => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
                                 activeTab === tab.id
-                                    ? 'bg-white text-slate-900 shadow-sm'
-                                    : 'text-slate-500 hover:text-slate-700'
+                                    ? 'card-themed text-themed shadow-sm'
+                                    : 'text-themed-muted'
                             }`}
                         >
                             {tab.label}
                             {tab.count !== undefined && tab.count > 0 && (
                                 <span className={`text-xs px-1.5 py-0.5 rounded-full ${
                                     activeTab === tab.id
-                                        ? 'bg-cyan-100 text-cyan-700'
-                                        : 'bg-slate-200 text-slate-500'
+                                        ? 'bg-cyan-500/15 text-cyan-600'
+                                        : 'badge-themed'
                                 }`}>
                                     {tab.count}
                                 </span>
@@ -323,46 +322,46 @@ export default function OfferDetailPage({ params }: PageProps) {
                     <div className="lg:col-span-2 space-y-6">
                         {offer.description && (
                             <Card>
-                                <h2 className="text-lg font-semibold text-slate-900 mb-3">Opis</h2>
-                                <p className="text-slate-700 whitespace-pre-wrap">{offer.description}</p>
+                                <h2 className="text-lg font-semibold text-themed mb-3">Opis</h2>
+                                <p className="text-themed whitespace-pre-wrap">{offer.description}</p>
                             </Card>
                         )}
 
                         <Card>
-                            <h2 className="text-lg font-semibold text-slate-900 mb-4">
+                            <h2 className="text-lg font-semibold text-themed mb-4">
                                 Pozycje ({offer.items?.length || 0})
                             </h2>
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
-                                    <tr className="border-b border-slate-200">
-                                        <th className="pb-3 text-left text-xs font-semibold text-slate-500 uppercase">Pozycja</th>
-                                        <th className="pb-3 text-right text-xs font-semibold text-slate-500 uppercase">Ilość</th>
-                                        <th className="pb-3 text-right text-xs font-semibold text-slate-500 uppercase">Cena</th>
-                                        <th className="pb-3 text-right text-xs font-semibold text-slate-500 uppercase">VAT</th>
-                                        <th className="pb-3 text-right text-xs font-semibold text-slate-500 uppercase">Wartość</th>
+                                    <tr className="border-b divider-themed">
+                                        <th className="pb-3 text-left text-xs font-semibold text-themed-muted uppercase">Pozycja</th>
+                                        <th className="pb-3 text-right text-xs font-semibold text-themed-muted uppercase">Ilość</th>
+                                        <th className="pb-3 text-right text-xs font-semibold text-themed-muted uppercase">Cena</th>
+                                        <th className="pb-3 text-right text-xs font-semibold text-themed-muted uppercase">VAT</th>
+                                        <th className="pb-3 text-right text-xs font-semibold text-themed-muted uppercase">Wartość</th>
                                     </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-slate-100">
+                                    <tbody>
                                     {offer.items?.map((item, index) => (
-                                        <tr key={item.id || index}>
+                                        <tr key={item.id || index} className="border-b divider-themed last:border-0">
                                             <td className="py-3">
                                                 <div className="flex items-center gap-2">
-                                                    <p className="font-medium text-slate-900">{item.name}</p>
+                                                    <p className="font-medium text-themed">{item.name}</p>
                                                     {item.isOptional && (
-                                                        <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 font-medium">
+                                                        <span className="text-xs px-1.5 py-0.5 rounded-full badge-info font-medium">
                                                             Opcjonalna
                                                         </span>
                                                     )}
                                                 </div>
                                                 {item.description && (
-                                                    <p className="text-sm text-slate-500 mt-1">{item.description}</p>
+                                                    <p className="text-sm text-themed-muted mt-1">{item.description}</p>
                                                 )}
                                             </td>
-                                            <td className="py-3 text-right text-slate-600">
+                                            <td className="py-3 text-right text-themed-muted">
                                                 {Number(item.quantity)} {item.unit}
                                             </td>
-                                            <td className="py-3 text-right text-slate-600">
+                                            <td className="py-3 text-right text-themed-muted">
                                                 {formatCurrency(Number(item.unitPrice))}
                                                 {Number(item.discount) > 0 && (
                                                     <span className="text-xs text-emerald-600 ml-1">
@@ -370,10 +369,10 @@ export default function OfferDetailPage({ params }: PageProps) {
                                                     </span>
                                                 )}
                                             </td>
-                                            <td className="py-3 text-right text-slate-600">
+                                            <td className="py-3 text-right text-themed-muted">
                                                 {item.vatRate}%
                                             </td>
-                                            <td className="py-3 text-right font-semibold text-slate-900">
+                                            <td className="py-3 text-right font-semibold text-themed">
                                                 {formatCurrency(Number(item.totalGross))}
                                             </td>
                                         </tr>
@@ -381,19 +380,19 @@ export default function OfferDetailPage({ params }: PageProps) {
                                     </tbody>
                                 </table>
                             </div>
-                            <div className="mt-4 pt-4 border-t border-slate-200">
+                            <div className="mt-4 pt-4 border-t divider-themed">
                                 <div className="flex justify-end">
                                     <div className="w-64 space-y-2">
                                         <div className="flex justify-between text-sm">
-                                            <span className="text-slate-500">Suma netto:</span>
-                                            <span className="font-medium text-slate-900">{formatCurrency(Number(offer.totalNet))}</span>
+                                            <span className="text-themed-muted">Suma netto:</span>
+                                            <span className="font-medium text-themed">{formatCurrency(Number(offer.totalNet))}</span>
                                         </div>
                                         <div className="flex justify-between text-sm">
-                                            <span className="text-slate-500">VAT:</span>
-                                            <span className="font-medium text-slate-900">{formatCurrency(Number(offer.totalVat))}</span>
+                                            <span className="text-themed-muted">VAT:</span>
+                                            <span className="font-medium text-themed">{formatCurrency(Number(offer.totalVat))}</span>
                                         </div>
-                                        <div className="flex justify-between text-lg pt-2 border-t border-slate-200">
-                                            <span className="font-semibold text-slate-900">Suma brutto:</span>
+                                        <div className="flex justify-between text-lg pt-2 border-t divider-themed">
+                                            <span className="font-semibold text-themed">Suma brutto:</span>
                                             <span className="font-bold text-cyan-600">{formatCurrency(Number(offer.totalGross))}</span>
                                         </div>
                                     </div>
@@ -403,14 +402,14 @@ export default function OfferDetailPage({ params }: PageProps) {
 
                         {offer.terms && (
                             <Card>
-                                <h2 className="text-lg font-semibold text-slate-900 mb-3">Warunki płatności</h2>
-                                <p className="text-slate-700 whitespace-pre-wrap">{offer.terms}</p>
+                                <h2 className="text-lg font-semibold text-themed mb-3">Warunki płatności</h2>
+                                <p className="text-themed whitespace-pre-wrap">{offer.terms}</p>
                             </Card>
                         )}
 
                         {offer.notes && (
                             <Card>
-                                <h2 className="text-lg font-semibold text-slate-900 mb-3">
+                                <h2 className="text-lg font-semibold text-themed mb-3">
                                     <span className="flex items-center gap-2">
                                         <svg className="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -418,89 +417,89 @@ export default function OfferDetailPage({ params }: PageProps) {
                                         Notatki wewnętrzne
                                     </span>
                                 </h2>
-                                <p className="text-slate-700 whitespace-pre-wrap">{offer.notes}</p>
+                                <p className="text-themed whitespace-pre-wrap">{offer.notes}</p>
                             </Card>
                         )}
                     </div>
 
                     <div className="space-y-6">
                         <Card>
-                            <h2 className="text-lg font-semibold text-slate-900 mb-4">Klient</h2>
+                            <h2 className="text-lg font-semibold text-themed mb-4">Klient</h2>
                             <div
-                                className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100 transition-colors"
+                                className="flex items-center gap-3 p-3 section-themed rounded-xl cursor-pointer hover-themed transition-colors"
                                 onClick={() => router.push(`/dashboard/clients/${offer.client.id}`)}
                             >
-                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-white font-semibold">
+                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-600 to-blue-700 flex items-center justify-center text-white font-semibold">
                                     {getInitials(offer.client.name)}
                                 </div>
                                 <div className="flex-1">
-                                    <p className="font-medium text-slate-900">{offer.client.name}</p>
-                                    <p className="text-sm text-slate-500">{offer.client.email}</p>
+                                    <p className="font-medium text-themed">{offer.client.name}</p>
+                                    <p className="text-sm text-themed-muted">{offer.client.email}</p>
                                 </div>
-                                <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                 </svg>
                             </div>
                         </Card>
 
                         <Card>
-                            <h2 className="text-lg font-semibold text-slate-900 mb-4">Szczegóły</h2>
+                            <h2 className="text-lg font-semibold text-themed mb-4">Szczegóły</h2>
                             <div className="space-y-3">
                                 <div className="flex justify-between">
-                                    <span className="text-slate-500">Numer</span>
-                                    <span className="font-medium text-slate-900">{offer.number}</span>
+                                    <span className="text-themed-muted">Numer</span>
+                                    <span className="font-medium text-themed">{offer.number}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-slate-500">Utworzono</span>
-                                    <span className="text-slate-900">{formatDateTime(offer.createdAt)}</span>
+                                    <span className="text-themed-muted">Utworzono</span>
+                                    <span className="text-themed">{formatDateTime(offer.createdAt)}</span>
                                 </div>
                                 {offer.validUntil && (
                                     <div className="flex justify-between">
-                                        <span className="text-slate-500">Ważna do</span>
-                                        <span className={isExpired ? 'text-red-600 font-medium' : 'text-slate-900'}>
+                                        <span className="text-themed-muted">Ważna do</span>
+                                        <span className={isExpired ? 'text-red-600 font-medium' : 'text-themed'}>
                                             {formatDate(offer.validUntil)}
                                         </span>
                                     </div>
                                 )}
                                 <div className="flex justify-between">
-                                    <span className="text-slate-500">Termin płatności</span>
-                                    <span className="text-slate-900">{offer.paymentDays} dni</span>
+                                    <span className="text-themed-muted">Termin płatności</span>
+                                    <span className="text-themed">{offer.paymentDays} dni</span>
                                 </div>
                                 {offer.sentAt && (
                                     <div className="flex justify-between">
-                                        <span className="text-slate-500">Wysłano</span>
-                                        <span className="text-slate-900">{formatDateTime(offer.sentAt)}</span>
+                                        <span className="text-themed-muted">Wysłano</span>
+                                        <span className="text-themed">{formatDateTime(offer.sentAt)}</span>
                                     </div>
                                 )}
                                 {offer.viewedAt && (
                                     <div className="flex justify-between">
-                                        <span className="text-slate-500">Otwarto</span>
-                                        <span className="text-slate-900">{formatDateTime(offer.viewedAt)}</span>
+                                        <span className="text-themed-muted">Otwarto</span>
+                                        <span className="text-themed">{formatDateTime(offer.viewedAt)}</span>
                                     </div>
                                 )}
                                 {offer.acceptedAt && (
                                     <div className="flex justify-between">
-                                        <span className="text-slate-500">Zaakceptowano</span>
+                                        <span className="text-themed-muted">Zaakceptowano</span>
                                         <span className="text-emerald-600 font-medium">{formatDateTime(offer.acceptedAt)}</span>
                                     </div>
                                 )}
                                 {offer.rejectedAt && (
                                     <div className="flex justify-between">
-                                        <span className="text-slate-500">Odrzucono</span>
+                                        <span className="text-themed-muted">Odrzucono</span>
                                         <span className="text-red-600 font-medium">{formatDateTime(offer.rejectedAt)}</span>
                                     </div>
                                 )}
                                 {offer.viewCount > 0 && (
                                     <div className="flex justify-between">
-                                        <span className="text-slate-500">Wyświetlenia</span>
-                                        <span className="text-slate-900">{offer.viewCount}</span>
+                                        <span className="text-themed-muted">Wyświetlenia</span>
+                                        <span className="text-themed">{offer.viewCount}</span>
                                     </div>
                                 )}
                             </div>
                         </Card>
 
                         <Card>
-                            <h2 className="text-lg font-semibold text-slate-900 mb-4">Akcje</h2>
+                            <h2 className="text-lg font-semibold text-themed mb-4">Akcje</h2>
                             <div className="space-y-2">
                                 <Button
                                     variant="outline"
@@ -538,10 +537,10 @@ export default function OfferDetailPage({ params }: PageProps) {
                                     </svg>
                                     {offer.isInteractive ? 'Zarządzaj linkiem' : 'Publikuj interaktywny link'}
                                 </Button>
-                                <div className="pt-2 border-t border-slate-200">
+                                <div className="pt-2 border-t divider-themed">
                                     <Button
                                         variant="ghost"
-                                        className="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700"
+                                        className="w-full justify-start text-red-600 hover:bg-red-500/10 hover:text-red-700"
                                         onClick={() => setDeleteModal(true)}
                                     >
                                         <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -560,26 +559,26 @@ export default function OfferDetailPage({ params }: PageProps) {
                 <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <Card>
-                            <p className="text-sm text-slate-500">Wyświetlenia</p>
-                            <p className="text-3xl font-bold text-slate-900 mt-1">{analytics?.viewCount || 0}</p>
+                            <p className="text-sm text-themed-muted">Wyświetlenia</p>
+                            <p className="text-3xl font-bold text-themed mt-1">{analytics?.viewCount || 0}</p>
                         </Card>
                         <Card>
-                            <p className="text-sm text-slate-500">Unikalni odwiedzający</p>
-                            <p className="text-3xl font-bold text-slate-900 mt-1">{analytics?.uniqueVisitors || 0}</p>
+                            <p className="text-sm text-themed-muted">Unikalni odwiedzający</p>
+                            <p className="text-3xl font-bold text-themed mt-1">{analytics?.uniqueVisitors || 0}</p>
                         </Card>
                         <Card>
-                            <p className="text-sm text-slate-500">Ostatnie otwarcie</p>
-                            <p className="text-lg font-semibold text-slate-900 mt-1">
+                            <p className="text-sm text-themed-muted">Ostatnie otwarcie</p>
+                            <p className="text-lg font-semibold text-themed mt-1">
                                 {analytics?.lastViewedAt ? formatDateTime(analytics.lastViewedAt) : '—'}
                             </p>
                         </Card>
                         <Card>
-                            <p className="text-sm text-slate-500">Status linku</p>
+                            <p className="text-sm text-themed-muted">Status linku</p>
                             <div className="mt-1">
                                 {analytics?.isInteractive ? (
-                                    <Badge className="bg-emerald-100 text-emerald-700">Aktywny</Badge>
+                                    <Badge className="badge-success">Aktywny</Badge>
                                 ) : (
-                                    <Badge className="bg-slate-100 text-slate-500">Nieaktywny</Badge>
+                                    <Badge className="badge-themed">Nieaktywny</Badge>
                                 )}
                             </div>
                         </Card>
@@ -591,7 +590,7 @@ export default function OfferDetailPage({ params }: PageProps) {
                                 <svg className="w-5 h-5 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                                 </svg>
-                                <h2 className="text-lg font-semibold text-slate-900">AI Observer — Analiza zachowań</h2>
+                                <h2 className="text-lg font-semibold text-themed">AI Observer — Analiza zachowań</h2>
                             </div>
                             <button
                                 onClick={handleLoadObserver}
@@ -619,16 +618,16 @@ export default function OfferDetailPage({ params }: PageProps) {
                         </div>
 
                         {observerError && (
-                            <div className="p-3 rounded-lg bg-red-50 text-red-700 text-sm mb-4">{observerError}</div>
+                            <div className="p-3 rounded-lg bg-red-500/10 text-red-600 text-sm mb-4">{observerError}</div>
                         )}
 
                         {!observerInsight && !isLoadingObserver && !observerError && (
                             <div className="text-center py-8">
-                                <svg className="w-12 h-12 mx-auto text-slate-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                                <svg className="w-12 h-12 mx-auto text-themed-muted opacity-40 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                                <p className="text-slate-400 text-sm">Kliknij &quot;Analizuj zachowanie&quot; aby AI przeanalizowało interakcje klienta</p>
+                                <p className="text-themed-muted text-sm">Kliknij &quot;Analizuj zachowanie&quot; aby AI przeanalizowało interakcje klienta</p>
                             </div>
                         )}
 
@@ -639,27 +638,27 @@ export default function OfferDetailPage({ params }: PageProps) {
                                         {intentConfig[observerInsight.clientIntent]?.label || 'Brak danych'}
                                     </span>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-xs text-slate-500">Zaangażowanie:</span>
-                                        <div className="w-20 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                        <span className="text-xs text-themed-muted">Zaangażowanie:</span>
+                                        <div className="w-20 h-2 section-themed rounded-full overflow-hidden">
                                             <div
                                                 className={`h-full rounded-full transition-all ${engagementColor(observerInsight.engagementScore)}`}
                                                 style={{ width: `${observerInsight.engagementScore * 10}%` }}
                                             />
                                         </div>
-                                        <span className="text-xs font-semibold text-slate-700">{observerInsight.engagementScore}/10</span>
+                                        <span className="text-xs font-semibold text-themed">{observerInsight.engagementScore}/10</span>
                                     </div>
                                 </div>
 
-                                <p className="text-sm text-slate-700 leading-relaxed bg-slate-50 rounded-lg p-3">
+                                <p className="text-sm text-themed leading-relaxed section-themed rounded-lg p-3">
                                     {observerInsight.summary}
                                 </p>
 
                                 {observerInsight.keyFindings.length > 0 && (
                                     <div>
-                                        <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Kluczowe ustalenia</h4>
+                                        <h4 className="text-xs font-semibold text-themed-muted uppercase tracking-wide mb-2">Kluczowe ustalenia</h4>
                                         <ul className="space-y-1">
                                             {observerInsight.keyFindings.map((finding, idx) => (
-                                                <li key={idx} className="flex items-start gap-2 text-sm text-slate-700">
+                                                <li key={idx} className="flex items-start gap-2 text-sm text-themed">
                                                     <svg className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                     </svg>
@@ -673,10 +672,10 @@ export default function OfferDetailPage({ params }: PageProps) {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {observerInsight.interestAreas.length > 0 && (
                                         <div>
-                                            <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Obszary zainteresowania</h4>
+                                            <h4 className="text-xs font-semibold text-themed-muted uppercase tracking-wide mb-2">Obszary zainteresowania</h4>
                                             <div className="flex flex-wrap gap-1.5">
                                                 {observerInsight.interestAreas.map((area, idx) => (
-                                                    <span key={idx} className="text-xs px-2 py-1 rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200">
+                                                    <span key={idx} className="text-xs px-2 py-1 rounded-full bg-cyan-500/15 text-cyan-600 border border-cyan-500/25">
                                                         {area}
                                                     </span>
                                                 ))}
@@ -685,10 +684,10 @@ export default function OfferDetailPage({ params }: PageProps) {
                                     )}
                                     {observerInsight.concerns.length > 0 && (
                                         <div>
-                                            <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Obawy klienta</h4>
+                                            <h4 className="text-xs font-semibold text-themed-muted uppercase tracking-wide mb-2">Obawy klienta</h4>
                                             <div className="flex flex-wrap gap-1.5">
                                                 {observerInsight.concerns.map((concern, idx) => (
-                                                    <span key={idx} className="text-xs px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                                                    <span key={idx} className="text-xs px-2 py-1 rounded-full bg-amber-500/15 text-amber-600 border border-amber-500/25">
                                                         {concern}
                                                     </span>
                                                 ))}
@@ -697,13 +696,13 @@ export default function OfferDetailPage({ params }: PageProps) {
                                     )}
                                 </div>
 
-                                <div className="flex gap-4 text-xs text-slate-500 pt-2 border-t border-slate-100">
-                                    <span>Wyświetlenia: <strong className="text-slate-700">{observerInsight.timeAnalysis.totalViews}</strong></span>
+                                <div className="flex gap-4 text-xs text-themed-muted pt-2 border-t divider-themed">
+                                    <span>Wyświetlenia: <strong className="text-themed">{observerInsight.timeAnalysis.totalViews}</strong></span>
                                     {observerInsight.timeAnalysis.avgViewDuration !== null && (
-                                        <span>Śr. czas: <strong className="text-slate-700">{observerInsight.timeAnalysis.avgViewDuration}s</strong></span>
+                                        <span>Śr. czas: <strong className="text-themed">{observerInsight.timeAnalysis.avgViewDuration}s</strong></span>
                                     )}
                                     {observerInsight.timeAnalysis.mostActiveTime && (
-                                        <span>Najaktywniejszy: <strong className="text-slate-700">{observerInsight.timeAnalysis.mostActiveTime}</strong></span>
+                                        <span>Najaktywniejszy: <strong className="text-themed">{observerInsight.timeAnalysis.mostActiveTime}</strong></span>
                                     )}
                                 </div>
                             </div>
@@ -712,7 +711,7 @@ export default function OfferDetailPage({ params }: PageProps) {
 
                     {analytics?.interactions && analytics.interactions.length > 0 && (
                         <Card>
-                            <h2 className="text-lg font-semibold text-slate-900 mb-4">Aktywność klienta</h2>
+                            <h2 className="text-lg font-semibold text-themed mb-4">Aktywność klienta</h2>
                             <div className="space-y-3 max-h-96 overflow-y-auto">
                                 {analytics.interactions.map((interaction) => {
                                     const typeLabels: Record<string, { label: string; icon: string; color: string }> = {
@@ -723,16 +722,16 @@ export default function OfferDetailPage({ params }: PageProps) {
                                         COMMENT: { label: 'Dodał komentarz', icon: '💬', color: 'text-purple-600' },
                                         PDF_DOWNLOAD: { label: 'Pobrał PDF', icon: '📄', color: 'text-orange-600' },
                                     };
-                                    const config = typeLabels[interaction.type] || { label: interaction.type, icon: '•', color: 'text-slate-600' };
+                                    const config = typeLabels[interaction.type] || { label: interaction.type, icon: '•', color: 'text-themed-muted' };
 
                                     return (
-                                        <div key={interaction.id} className="flex items-start gap-3 py-2 border-b border-slate-100 last:border-0">
+                                        <div key={interaction.id} className="flex items-start gap-3 py-2 border-b divider-themed last:border-0">
                                             <span className="text-lg flex-shrink-0">{config.icon}</span>
                                             <div className="flex-1 min-w-0">
                                                 <p className={`text-sm font-medium ${config.color}`}>
                                                     {config.label}
                                                 </p>
-                                                <p className="text-xs text-slate-400">
+                                                <p className="text-xs text-themed-muted">
                                                     {formatDateTime(interaction.createdAt)}
                                                 </p>
                                             </div>
@@ -745,25 +744,25 @@ export default function OfferDetailPage({ params }: PageProps) {
 
                     {analytics?.clientSelectedData && (
                         <Card>
-                            <h2 className="text-lg font-semibold text-slate-900 mb-4">Wybór klienta</h2>
+                            <h2 className="text-lg font-semibold text-themed mb-4">Wybór klienta</h2>
                             <div className="space-y-2">
                                 {(analytics.clientSelectedData as Array<{ name: string; isSelected: boolean; quantity: number; brutto: number }>).map((item, index) => (
-                                    <div key={index} className={`flex justify-between items-center py-2 px-3 rounded-lg ${item.isSelected ? 'bg-emerald-50' : 'bg-slate-50'}`}>
+                                    <div key={index} className={`flex justify-between items-center py-2 px-3 rounded-lg ${item.isSelected ? 'bg-emerald-500/10' : 'section-themed'}`}>
                                         <div className="flex items-center gap-2">
                                             {item.isSelected ? (
                                                 <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                                 </svg>
                                             ) : (
-                                                <svg className="w-4 h-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <svg className="w-4 h-4 text-themed-muted opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                                                 </svg>
                                             )}
-                                            <span className={`text-sm ${item.isSelected ? 'text-slate-900' : 'text-slate-400 line-through'}`}>
+                                            <span className={`text-sm ${item.isSelected ? 'text-themed' : 'text-themed-muted line-through'}`}>
                                                 {item.name} ×{item.quantity}
                                             </span>
                                         </div>
-                                        <span className={`text-sm font-medium ${item.isSelected ? 'text-slate-900' : 'text-slate-300'}`}>
+                                        <span className={`text-sm font-medium ${item.isSelected ? 'text-themed' : 'text-themed-muted opacity-40'}`}>
                                             {formatCurrency(item.brutto)}
                                         </span>
                                     </div>
@@ -777,7 +776,7 @@ export default function OfferDetailPage({ params }: PageProps) {
             {activeTab === 'comments' && (
                 <div className="max-w-2xl space-y-6">
                     <Card>
-                        <h2 className="text-lg font-semibold text-slate-900 mb-4">
+                        <h2 className="text-lg font-semibold text-themed mb-4">
                             Komentarze ({comments.length})
                         </h2>
 
@@ -791,15 +790,15 @@ export default function OfferDetailPage({ params }: PageProps) {
                                         <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                                             comment.author === 'SELLER'
                                                 ? 'bg-cyan-500 text-white rounded-br-sm'
-                                                : 'bg-slate-100 text-slate-900 rounded-bl-sm'
+                                                : 'section-themed text-themed rounded-bl-sm'
                                         }`}>
                                             <p className="text-sm whitespace-pre-wrap">{comment.content}</p>
                                             <div className={`flex items-center gap-2 mt-1 ${comment.author === 'SELLER' ? 'justify-end' : 'justify-start'}`}>
-                                                <span className={`text-xs ${comment.author === 'SELLER' ? 'text-cyan-100' : 'text-slate-400'}`}>
+                                                <span className={`text-xs ${comment.author === 'SELLER' ? 'text-cyan-100' : 'text-themed-muted'}`}>
                                                     {comment.author === 'SELLER' ? 'Ty' : 'Klient'}
                                                 </span>
-                                                <span className={`text-xs ${comment.author === 'SELLER' ? 'text-cyan-200' : 'text-slate-300'}`}>•</span>
-                                                <span className={`text-xs ${comment.author === 'SELLER' ? 'text-cyan-200' : 'text-slate-400'}`}>
+                                                <span className={`text-xs ${comment.author === 'SELLER' ? 'text-cyan-200' : 'text-themed-muted opacity-50'}`}>•</span>
+                                                <span className={`text-xs ${comment.author === 'SELLER' ? 'text-cyan-200' : 'text-themed-muted'}`}>
                                                     {formatDateTime(comment.createdAt)}
                                                 </span>
                                             </div>
@@ -809,20 +808,20 @@ export default function OfferDetailPage({ params }: PageProps) {
                             </div>
                         ) : (
                             <div className="text-center py-8 mb-6">
-                                <svg className="w-12 h-12 mx-auto text-slate-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                                <svg className="w-12 h-12 mx-auto text-themed-muted opacity-40 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                 </svg>
-                                <p className="text-slate-400">Brak komentarzy</p>
+                                <p className="text-themed-muted">Brak komentarzy</p>
                             </div>
                         )}
 
-                        <div className="mb-4 pt-4 border-t border-slate-200">
+                        <div className="mb-4 pt-4 border-t divider-themed">
                             <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-2">
                                     <svg className="w-4 h-4 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                                     </svg>
-                                    <span className="text-sm font-semibold text-slate-700">AI Closer — Strategia negocjacji</span>
+                                    <span className="text-sm font-semibold text-themed-label">AI Closer — Strategia negocjacji</span>
                                 </div>
                                 <button
                                     onClick={handleLoadCloser}
@@ -844,41 +843,41 @@ export default function OfferDetailPage({ params }: PageProps) {
                             </div>
 
                             {closerError && (
-                                <div className="p-3 rounded-lg bg-red-50 text-red-700 text-sm mb-3">{closerError}</div>
+                                <div className="p-3 rounded-lg bg-red-500/10 text-red-600 text-sm mb-3">{closerError}</div>
                             )}
 
                             {closingStrategy && !isLoadingCloser && (
                                 <div className="space-y-3">
                                     {closingStrategy.contextSummary && (
-                                        <p className="text-xs text-slate-500 bg-slate-50 rounded-lg p-2.5 italic">
+                                        <p className="text-xs text-themed-muted section-themed rounded-lg p-2.5 italic">
                                             {closingStrategy.contextSummary}
                                         </p>
                                     )}
 
                                     <div
-                                        className="rounded-xl border border-red-200 bg-red-50/30 overflow-hidden cursor-pointer"
+                                        className="rounded-xl border border-red-500/25 bg-red-500/5 overflow-hidden cursor-pointer"
                                         onClick={() => setExpandedStrategy(expandedStrategy === 'aggressive' ? null : 'aggressive')}
                                     >
                                         <div className="flex items-center justify-between px-4 py-3">
                                             <div className="flex items-center gap-2">
                                                 <span className="text-sm">🛡️</span>
-                                                <span className="text-sm font-semibold text-slate-900">{closingStrategy.aggressive.title}</span>
+                                                <span className="text-sm font-semibold text-themed">{closingStrategy.aggressive.title}</span>
                                                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                                                    closingStrategy.aggressive.riskLevel === 'low' ? 'bg-emerald-100 text-emerald-700' :
-                                                        closingStrategy.aggressive.riskLevel === 'medium' ? 'bg-amber-100 text-amber-700' :
-                                                            'bg-red-100 text-red-700'
+                                                    closingStrategy.aggressive.riskLevel === 'low' ? 'badge-success' :
+                                                        closingStrategy.aggressive.riskLevel === 'medium' ? 'badge-warning' :
+                                                            'badge-danger'
                                                 }`}>
                                                     Ryzyko: {closingStrategy.aggressive.riskLevel === 'low' ? 'niskie' : closingStrategy.aggressive.riskLevel === 'medium' ? 'średnie' : 'wysokie'}
                                                 </span>
                                             </div>
-                                            <svg className={`w-4 h-4 text-slate-400 transition-transform ${expandedStrategy === 'aggressive' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <svg className={`w-4 h-4 text-themed-muted transition-transform ${expandedStrategy === 'aggressive' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                                             </svg>
                                         </div>
                                         {expandedStrategy === 'aggressive' && (
                                             <div className="px-4 pb-4 space-y-3">
-                                                <p className="text-xs text-slate-600">{closingStrategy.aggressive.description}</p>
-                                                <div className="bg-white rounded-lg p-3 border border-red-100 text-sm text-slate-800">
+                                                <p className="text-xs text-themed-muted">{closingStrategy.aggressive.description}</p>
+                                                <div className="card-themed border rounded-lg p-3 text-sm text-themed">
                                                     {closingStrategy.aggressive.suggestedResponse}
                                                 </div>
                                                 <button
@@ -892,29 +891,29 @@ export default function OfferDetailPage({ params }: PageProps) {
                                     </div>
 
                                     <div
-                                        className="rounded-xl border border-cyan-200 bg-cyan-50/30 overflow-hidden cursor-pointer"
+                                        className="rounded-xl border border-cyan-500/25 bg-cyan-500/5 overflow-hidden cursor-pointer"
                                         onClick={() => setExpandedStrategy(expandedStrategy === 'partnership' ? null : 'partnership')}
                                     >
                                         <div className="flex items-center justify-between px-4 py-3">
                                             <div className="flex items-center gap-2">
                                                 <span className="text-sm">🤝</span>
-                                                <span className="text-sm font-semibold text-slate-900">{closingStrategy.partnership.title}</span>
+                                                <span className="text-sm font-semibold text-themed">{closingStrategy.partnership.title}</span>
                                             </div>
-                                            <svg className={`w-4 h-4 text-slate-400 transition-transform ${expandedStrategy === 'partnership' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <svg className={`w-4 h-4 text-themed-muted transition-transform ${expandedStrategy === 'partnership' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                                             </svg>
                                         </div>
                                         {expandedStrategy === 'partnership' && (
                                             <div className="px-4 pb-4 space-y-3">
-                                                <p className="text-xs text-slate-600">{closingStrategy.partnership.description}</p>
+                                                <p className="text-xs text-themed-muted">{closingStrategy.partnership.description}</p>
                                                 {closingStrategy.partnership.proposedConcessions.length > 0 && (
                                                     <div className="flex flex-wrap gap-1.5">
                                                         {closingStrategy.partnership.proposedConcessions.map((c, i) => (
-                                                            <span key={i} className="text-xs px-2 py-1 rounded-full bg-cyan-100 text-cyan-700">{c}</span>
+                                                            <span key={i} className="text-xs px-2 py-1 rounded-full bg-cyan-500/15 text-cyan-600">{c}</span>
                                                         ))}
                                                     </div>
                                                 )}
-                                                <div className="bg-white rounded-lg p-3 border border-cyan-100 text-sm text-slate-800">
+                                                <div className="card-themed border rounded-lg p-3 text-sm text-themed">
                                                     {closingStrategy.partnership.suggestedResponse}
                                                 </div>
                                                 <button
@@ -928,25 +927,25 @@ export default function OfferDetailPage({ params }: PageProps) {
                                     </div>
 
                                     <div
-                                        className="rounded-xl border border-emerald-200 bg-emerald-50/30 overflow-hidden cursor-pointer"
+                                        className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 overflow-hidden cursor-pointer"
                                         onClick={() => setExpandedStrategy(expandedStrategy === 'quickClose' ? null : 'quickClose')}
                                     >
                                         <div className="flex items-center justify-between px-4 py-3">
                                             <div className="flex items-center gap-2">
                                                 <span className="text-sm">⚡</span>
-                                                <span className="text-sm font-semibold text-slate-900">{closingStrategy.quickClose.title}</span>
-                                                <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-medium">
+                                                <span className="text-sm font-semibold text-themed">{closingStrategy.quickClose.title}</span>
+                                                <span className="text-xs px-2 py-0.5 rounded-full badge-success font-medium">
                                                     Max rabat: {closingStrategy.quickClose.maxDiscountPercent}%
                                                 </span>
                                             </div>
-                                            <svg className={`w-4 h-4 text-slate-400 transition-transform ${expandedStrategy === 'quickClose' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <svg className={`w-4 h-4 text-themed-muted transition-transform ${expandedStrategy === 'quickClose' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                                             </svg>
                                         </div>
                                         {expandedStrategy === 'quickClose' && (
                                             <div className="px-4 pb-4 space-y-3">
-                                                <p className="text-xs text-slate-600">{closingStrategy.quickClose.description}</p>
-                                                <div className="bg-white rounded-lg p-3 border border-emerald-100 text-sm text-slate-800">
+                                                <p className="text-xs text-themed-muted">{closingStrategy.quickClose.description}</p>
+                                                <div className="card-themed border rounded-lg p-3 text-sm text-themed">
                                                     {closingStrategy.quickClose.suggestedResponse}
                                                 </div>
                                                 <button
@@ -975,7 +974,7 @@ export default function OfferDetailPage({ params }: PageProps) {
                                 disabled={isSending}
                                 placeholder="Odpowiedz klientowi..."
                                 rows={2}
-                                className="flex-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent resize-none disabled:opacity-50 text-sm"
+                                className="flex-1 px-4 py-3 rounded-xl border input-themed resize-none disabled:opacity-50 text-sm"
                             />
                             <button
                                 onClick={handleAddSellerComment}
