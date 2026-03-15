@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { useSidebarStats } from '@/hooks/useSidebarStats';
@@ -102,12 +103,13 @@ export default function Sidebar() {
     const sidebarContent = (
         <>
             <div className="flex h-16 items-center gap-3 px-6 border-b border-white/5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 shadow-lg shadow-cyan-500/25">
-                    <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                </div>
+                <Image
+                    src="/android-chrome-512x512.png"
+                    alt="SmartQuote AI"
+                    width={48}
+                    height={48}
+                    className="flex-shrink-0"
+                />
                 <div className="flex-1">
                     <span className="text-lg font-bold text-white">SmartQuote</span>
                     <span className="ml-1 text-xs font-medium text-cyan-400">AI</span>
