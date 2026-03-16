@@ -2,12 +2,13 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import type { PublicOfferData, PublicOfferItem, OfferComment } from '@/types';
+import type { PublicOfferData, PublicOfferItem, OfferComment, PublicOfferAcceptResponse } from '@/types';
 import { publicOffersApi, ApiError } from '@/lib/api';
 import OfferHeader from './OfferHeader';
 import OfferItemRow from './OfferItemRow';
 import OfferCalculator from './OfferCalculator';
 import AcceptDialog from './AcceptDialog';
+import type { AcceptAuditData } from './AcceptDialog';
 import RejectDialog from './RejectDialog';
 import CommentSection from './CommentSection';
 
@@ -75,8 +76,22 @@ function calculateTotals(
     };
 }
 
+function formatPLN(amount: number): string {
+    return new Intl.NumberFormat('pl-PL', { style: 'currency', currency: 'PLN' }).format(amount);
+}
+
+function formatDateTime(isoString: string): string {
+    return new Date(isoString).toLocaleString('pl-PL', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+}
+
 export default function InteractiveOffer({ token, data }: InteractiveOfferProps) {
-    const { offer, expired, decided, variants } = data;
+    const { offer, expired, decided, variants, requireAuditTrail, acceptanceLog } = data;
     const isFinalized = decided || expired;
     const hasVariants = variants.length > 0;
 
@@ -104,6 +119,7 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
     const [finalStatus, setFinalStatus] = useState<'ACCEPTED' | 'REJECTED' | null>(
         offer.status === 'ACCEPTED' ? 'ACCEPTED' : offer.status === 'REJECTED' ? 'REJECTED' : null
     );
+    const [acceptResult, setAcceptResult] = useState<PublicOfferAcceptResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     const trackingTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -176,7 +192,7 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
         [token]
     );
 
-    const handleAccept = useCallback(async () => {
+    const handleAccept = useCallback(async (auditData?: AcceptAuditData) => {
         setIsAccepting(true);
         setError(null);
 
@@ -187,12 +203,15 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                 quantity: state.quantity,
             }));
 
-            await publicOffersApi.accept(token, {
+            const response = await publicOffersApi.accept(token, {
                 confirmationChecked: true,
                 selectedVariant: selectedVariant || undefined,
+                clientName: auditData?.clientName,
+                clientEmail: auditData?.clientEmail,
                 selectedItems,
             });
 
+            setAcceptResult(response.data as unknown as PublicOfferAcceptResponse ?? null);
             setFinalStatus('ACCEPTED');
             setAcceptDialogOpen(false);
         } catch (err) {
@@ -246,6 +265,12 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
             };
         });
 
+    const auditTrailData = acceptResult?.auditTrail || (acceptanceLog ? {
+        contentHash: acceptanceLog.contentHash,
+        ipAddress: 'recorded',
+        acceptedAt: acceptanceLog.acceptedAt,
+    } : null);
+
     if (finalStatus === 'ACCEPTED') {
         return (
             <div className="max-w-2xl mx-auto text-center py-16 px-4">
@@ -271,9 +296,42 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                 <div className="bg-slate-900 rounded-xl p-6 inline-block">
                     <p className="text-slate-400 text-sm mb-1">Zaakceptowana kwota brutto</p>
                     <p className="text-3xl font-bold text-cyan-400">
-                        {new Intl.NumberFormat('pl-PL', { style: 'currency', currency: 'PLN' }).format(totals.totalGross)}
+                        {formatPLN(totals.totalGross)}
                     </p>
                 </div>
+
+                {auditTrailData && (
+                    <div className="mt-8 bg-white rounded-xl border border-emerald-200 p-6 text-left max-w-lg mx-auto">
+                        <div className="flex items-center gap-2 mb-4">
+                            <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                            <h3 className="text-lg font-semibold text-slate-900">Certyfikat akceptacji</h3>
+                        </div>
+
+                        <div className="space-y-3">
+                            <div>
+                                <p className="text-xs uppercase tracking-wider text-slate-400 font-medium">Oferta</p>
+                                <p className="text-sm text-slate-900 font-medium">{offer.number} — {offer.title}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs uppercase tracking-wider text-slate-400 font-medium">Data akceptacji</p>
+                                <p className="text-sm text-slate-900">{formatDateTime(auditTrailData.acceptedAt)}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs uppercase tracking-wider text-slate-400 font-medium">Cyfrowy odcisk treści (SHA-256)</p>
+                                <p className="text-xs text-emerald-700 font-mono break-all bg-emerald-50 p-2 rounded-lg mt-1">
+                                    {auditTrailData.contentHash}
+                                </p>
+                            </div>
+                        </div>
+
+                        <p className="text-xs text-slate-400 mt-4 leading-relaxed">
+                            Ten hash jest unikalnym odciskiem cyfrowym treści oferty w momencie akceptacji.
+                            Potwierdzenie zostało również wysłane na Twój adres email.
+                        </p>
+                    </div>
+                )}
             </div>
         );
     }
@@ -357,6 +415,21 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                         >
                             Zamknij
                         </button>
+                    </div>
+                </div>
+            )}
+
+            {requireAuditTrail && (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
+                    <svg className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    <div>
+                        <p className="text-sm font-medium text-emerald-800">Oferta z formalnym potwierdzeniem</p>
+                        <p className="text-xs text-emerald-600 mt-1">
+                            Przy akceptacji zostaniesz poproszony o podanie imienia i adresu email.
+                            Otrzymasz potwierdzenie z cyfrowym odciskiem treści (SHA-256).
+                        </p>
                     </div>
                 </div>
             )}
@@ -493,6 +566,7 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                 selectedItems={selectedItemsSummary}
                 totalGross={totals.totalGross}
                 isLoading={isAccepting}
+                requireAuditTrail={requireAuditTrail}
             />
 
             <RejectDialog

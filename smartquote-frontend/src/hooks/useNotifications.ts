@@ -1,6 +1,6 @@
 // SmartQuote-AI/src/hooks/useNotifications.ts
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { notificationsApi } from '@/lib/api';
 import type { Notification } from '@/types';
 
@@ -83,8 +83,16 @@ export function useNotifications(limit: number = 10) {
         fetchNotifications();
     }, [fetchNotifications]);
 
+    const initialized = useRef(false);
+
     useEffect(() => {
-        fetchNotifications();
+        if (initialized.current) return;
+        initialized.current = true;
+
+        requestAnimationFrame(() => {
+            fetchNotifications();
+        });
+
         const interval = setInterval(fetchNotifications, POLL_INTERVAL);
         return () => clearInterval(interval);
     }, [fetchNotifications]);
@@ -105,7 +113,7 @@ export function useNotifications(limit: number = 10) {
 export function useUnreadCount() {
     const [count, setCount] = useState(0);
 
-    const fetch = useCallback(async () => {
+    const fetchCount = useCallback(async () => {
         try {
             const res = await notificationsApi.unreadCount();
             if (res.success && res.data) {
@@ -116,11 +124,19 @@ export function useUnreadCount() {
         }
     }, []);
 
-    useEffect(() => {
-        fetch();
-        const interval = setInterval(fetch, POLL_INTERVAL);
-        return () => clearInterval(interval);
-    }, [fetch]);
+    const initialized = useRef(false);
 
-    return { count, refresh: fetch };
+    useEffect(() => {
+        if (initialized.current) return;
+        initialized.current = true;
+
+        requestAnimationFrame(() => {
+            fetchCount();
+        });
+
+        const interval = setInterval(fetchCount, POLL_INTERVAL);
+        return () => clearInterval(interval);
+    }, [fetchCount]);
+
+    return { count, refresh: fetchCount };
 }

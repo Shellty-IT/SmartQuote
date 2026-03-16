@@ -1,7 +1,7 @@
 // src/app/dashboard/settings/components/SmtpSection.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSmtpConfig } from '@/hooks/useSettings';
 import { Card } from '@/components/ui';
 import { Mail, Shield, Loader2, Check, X, AlertTriangle, Wifi, Trash2 } from 'lucide-react';
@@ -30,8 +30,13 @@ export default function SmtpSection() {
     const [saveSuccess, setSaveSuccess] = useState(false);
     const [deleteConfirm, setDeleteConfirm] = useState(false);
 
+    const configLoaded = useRef(false);
+
     useEffect(() => {
-        if (config) {
+        if (!config || configLoaded.current) return;
+        configLoaded.current = true;
+
+        requestAnimationFrame(() => {
             setForm({
                 smtpHost: config.smtpHost || '',
                 smtpPort: config.smtpPort || 587,
@@ -44,13 +49,13 @@ export default function SmtpSection() {
                 const found = Object.entries(PRESETS).find(([, p]) => p.host === config.smtpHost);
                 setSelectedPreset(found ? found[0] : 'custom');
             }
-        }
+        });
     }, [config]);
 
-    const handlePresetChange = (preset: string) => {
-        setSelectedPreset(preset);
-        const p = PRESETS[preset];
-        if (preset !== 'custom' && p) {
+    const handlePresetChange = (key: string) => {
+        setSelectedPreset(key);
+        const p = PRESETS[key];
+        if (key !== 'custom' && p) {
             setForm(prev => ({ ...prev, smtpHost: p.host, smtpPort: p.port }));
         }
         setTestResult(null);
@@ -108,6 +113,7 @@ export default function SmtpSection() {
             setSelectedPreset('custom');
             setTestResult(null);
             setDeleteConfirm(false);
+            configLoaded.current = false;
         } catch {
         }
     };
@@ -157,7 +163,7 @@ export default function SmtpSection() {
             <div className="mb-6">
                 <label className="block text-sm font-medium text-themed-label mb-2">Dostawca poczty</label>
                 <div className="flex flex-wrap gap-2">
-                    {Object.entries(PRESETS).map(([key, preset]) => (
+                    {Object.entries(PRESETS).map(([key]) => (
                         <button
                             key={key}
                             onClick={() => handlePresetChange(key)}

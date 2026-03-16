@@ -2,7 +2,7 @@
 'use client';
 
 import { SessionProvider } from 'next-auth/react';
-import { ReactNode, useEffect, useState, createContext, useContext, useCallback } from 'react';
+import { ReactNode, useEffect, useState, createContext, useContext, useCallback, useRef } from 'react';
 import { AIChatProvider } from '@/contexts/AIChatContext';
 
 type Theme = 'light' | 'dark';
@@ -24,14 +24,20 @@ export function useTheme() {
 function ThemeProvider({ children }: { children: ReactNode }) {
     const [theme, setThemeState] = useState<Theme>('light');
     const [mounted, setMounted] = useState(false);
+    const initialized = useRef(false);
 
     useEffect(() => {
-        const saved = localStorage.getItem('smartquote-theme') as Theme | null;
-        if (saved === 'light' || saved === 'dark') {
-            setThemeState(saved);
-            document.documentElement.setAttribute('data-theme', saved);
-        }
-        setMounted(true);
+        if (initialized.current) return;
+        initialized.current = true;
+
+        requestAnimationFrame(() => {
+            const saved = localStorage.getItem('smartquote-theme') as Theme | null;
+            if (saved === 'light' || saved === 'dark') {
+                setThemeState(saved);
+                document.documentElement.setAttribute('data-theme', saved);
+            }
+            setMounted(true);
+        });
     }, []);
 
     const setTheme = useCallback((newTheme: Theme) => {

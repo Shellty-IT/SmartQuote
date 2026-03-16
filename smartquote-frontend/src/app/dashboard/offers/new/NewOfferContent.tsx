@@ -86,6 +86,7 @@ export default function NewOfferContent() {
         notes: '',
         terms: 'Płatność przelewem w ciągu 14 dni od wystawienia faktury.',
         paymentDays: 14,
+        requireAuditTrail: false,
     });
     const [items, setItems] = useState<ExtendedOfferItem[]>([{ ...emptyItem }]);
 
@@ -190,6 +191,7 @@ export default function NewOfferContent() {
                 notes: offerDetails.notes || undefined,
                 terms: offerDetails.terms || undefined,
                 paymentDays: offerDetails.paymentDays,
+                requireAuditTrail: offerDetails.requireAuditTrail,
                 items: items.map((item) => ({
                     name: item.name,
                     description: item.description || undefined,
@@ -398,6 +400,32 @@ export default function NewOfferContent() {
                                 placeholder="Notatki widoczne tylko dla Ciebie..."
                                 rows={2}
                             />
+
+                            <div className="p-4 card-themed border rounded-xl">
+                                <label className="flex items-start gap-3 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={offerDetails.requireAuditTrail}
+                                        onChange={(e) => setOfferDetails({ ...offerDetails, requireAuditTrail: e.target.checked })}
+                                        className="mt-0.5 w-5 h-5 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
+                                    />
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <svg className="w-4 h-4 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                            </svg>
+                                            <span className="text-sm font-medium text-themed">
+                                                Formalne potwierdzenie akceptacji
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-themed-muted mt-1">
+                                            Przy akceptacji zostanie zapisany adres IP, przeglądarka oraz wygenerowany
+                                            cyfrowy odcisk treści (SHA-256). Klient otrzyma email z potwierdzeniem i hashem.
+                                            PDF będzie zawierał certyfikat akceptacji.
+                                        </p>
+                                    </div>
+                                </label>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -662,6 +690,22 @@ export default function NewOfferContent() {
                                     </div>
                                 )}
                             </div>
+
+                            {offerDetails.requireAuditTrail && (
+                                <div className="p-4 bg-gradient-to-r from-emerald-50 to-cyan-50 border border-emerald-200 rounded-xl">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                        </svg>
+                                        <span className="text-sm font-medium text-emerald-800">
+                                            Formalne potwierdzenie akceptacji włączone
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-emerald-600">
+                                        Przy akceptacji: zapis IP, przeglądarki, hash SHA-256, email z potwierdzeniem do klienta, certyfikat w PDF.
+                                    </p>
+                                </div>
+                            )}
 
                             {uniqueVariants.length > 0 && (
                                 <div className="p-4 bg-gradient-to-r from-cyan-50 to-blue-50 border border-cyan-200 rounded-xl">

@@ -1,7 +1,7 @@
 // SmartQuote-AI/src/components/offers/PublishDialog.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useOfferPublish, useOfferSendToClient } from '@/hooks/useOffers';
 import { useSmtpConfig } from '@/hooks/useSettings';
 
@@ -42,19 +42,31 @@ export default function PublishDialog({
     const smtpReady = smtpConfig?.smtpConfigured === true;
     const canSendEmail = !!clientEmail && smtpReady;
 
+    const prevOpenRef = useRef(false);
+
     useEffect(() => {
-        if (isOpen && currentToken && isInteractive) {
-            const baseUrl = window.location.origin;
-            setPublicUrl(`${baseUrl}/offer/view/${currentToken}`);
-            setWasPublished(true);
-        } else if (isOpen) {
-            setPublicUrl(null);
-            setWasPublished(false);
+        if (!isOpen) {
+            prevOpenRef.current = false;
+            return;
         }
-        setCopied(false);
-        setSendEmail(false);
-        setEmailSent(false);
-        setEmailSentTo(null);
+
+        if (prevOpenRef.current) return;
+        prevOpenRef.current = true;
+
+        requestAnimationFrame(() => {
+            if (currentToken && isInteractive) {
+                const baseUrl = window.location.origin;
+                setPublicUrl(`${baseUrl}/offer/view/${currentToken}`);
+                setWasPublished(true);
+            } else {
+                setPublicUrl(null);
+                setWasPublished(false);
+            }
+            setCopied(false);
+            setSendEmail(false);
+            setEmailSent(false);
+            setEmailSentTo(null);
+        });
     }, [isOpen, currentToken, isInteractive]);
 
     useEffect(() => {

@@ -118,6 +118,24 @@ export interface OfferItem {
     variantName: string | null;
 }
 
+export interface OfferAcceptanceLog {
+    id: string;
+    offerId: string;
+    ipAddress: string;
+    userAgent: string;
+    acceptedAt: string;
+    contentHash: string;
+    acceptedData: Record<string, unknown>;
+    clientName: string | null;
+    clientEmail: string | null;
+    selectedVariant: string | null;
+    totalNet: number;
+    totalVat: number;
+    totalGross: number;
+    currency: string;
+    createdAt: string;
+}
+
 export interface Offer {
     id: string;
     number: string;
@@ -141,6 +159,8 @@ export interface Offer {
     viewCount: number;
     lastViewedAt: string | null;
     clientSelectedData: Record<string, unknown> | null;
+    requireAuditTrail: boolean;
+    acceptanceLog?: OfferAcceptanceLog | null;
     createdAt: string;
     updatedAt: string;
     client: Client;
@@ -175,11 +195,13 @@ export interface CreateOfferInput {
     notes?: string | null;
     terms?: string | null;
     paymentDays?: number;
+    requireAuditTrail?: boolean;
     items: CreateOfferItemInput[];
 }
 
 export interface UpdateOfferInput extends Partial<Omit<CreateOfferInput, 'items'>> {
     status?: OfferStatus;
+    requireAuditTrail?: boolean;
     items?: CreateOfferItemInput[];
 }
 
@@ -261,10 +283,20 @@ export interface OfferAnalytics {
     publicUrl: string | null;
 }
 
+export interface PublicOfferAcceptanceLog {
+    contentHash: string;
+    acceptedAt: string;
+    selectedVariant: string | null;
+    totalGross: number;
+    currency: string;
+}
+
 export interface PublicOfferData {
     expired: boolean;
     decided: boolean;
+    requireAuditTrail: boolean;
     variants: string[];
+    acceptanceLog: PublicOfferAcceptanceLog | null;
     offer: {
         id: string;
         number: string;
@@ -326,6 +358,8 @@ export interface PublicOfferItem {
 export interface PublicOfferAcceptPayload {
     confirmationChecked: true;
     selectedVariant?: string;
+    clientName?: string;
+    clientEmail?: string;
     selectedItems: Array<{
         id: string;
         isSelected: boolean;
@@ -335,6 +369,28 @@ export interface PublicOfferAcceptPayload {
 
 export interface PublicOfferRejectPayload {
     reason?: string;
+}
+
+export interface PublicOfferAcceptResponse {
+    offerId: string;
+    offerNumber: string;
+    offerTitle: string;
+    clientName: string;
+    clientCompany: string | null;
+    clientEmail: string | null;
+    selectedVariant: string | null;
+    totalNet: number;
+    totalVat: number;
+    totalGross: number;
+    selectedItems: Array<Record<string, unknown>>;
+    sellerEmail: string;
+    sellerName: string | null;
+    userId: string;
+    auditTrail: {
+        contentHash: string;
+        ipAddress: string;
+        acceptedAt: string;
+    } | null;
 }
 
 export type ContractStatus =

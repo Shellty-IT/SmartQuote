@@ -4,22 +4,28 @@
 import { useState } from 'react';
 
 interface SelectedItem {
-    name: string;
-    quantity: number;
-    unit: string;
-    brutto: number;
+    readonly name: string;
+    readonly quantity: number;
+    readonly unit: string;
+    readonly brutto: number;
+}
+
+export interface AcceptAuditData {
+    readonly clientName: string;
+    readonly clientEmail: string;
 }
 
 interface AcceptDialogProps {
-    isOpen: boolean;
-    onClose: () => void;
-    onConfirm: () => Promise<void>;
-    offerNumber: string;
-    clientName: string;
-    clientCompany: string | null;
-    selectedItems: SelectedItem[];
-    totalGross: number;
-    isLoading: boolean;
+    readonly isOpen: boolean;
+    readonly onClose: () => void;
+    readonly onConfirm: (auditData?: AcceptAuditData) => Promise<void>;
+    readonly offerNumber: string;
+    readonly clientName: string;
+    readonly clientCompany: string | null;
+    readonly selectedItems: SelectedItem[];
+    readonly totalGross: number;
+    readonly isLoading: boolean;
+    readonly requireAuditTrail?: boolean;
 }
 
 function formatPLN(amount: number): string {
@@ -40,20 +46,35 @@ export default function AcceptDialog({
                                          selectedItems,
                                          totalGross,
                                          isLoading,
+                                         requireAuditTrail = false,
                                      }: AcceptDialogProps) {
     const [confirmed, setConfirmed] = useState(false);
+    const [auditName, setAuditName] = useState('');
+    const [auditEmail, setAuditEmail] = useState('');
 
     if (!isOpen) return null;
 
     const handleClose = () => {
         if (isLoading) return;
         setConfirmed(false);
+        setAuditName('');
+        setAuditEmail('');
         onClose();
     };
 
+    const isAuditValid = !requireAuditTrail || (auditName.trim().length >= 2 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(auditEmail));
+
     const handleConfirm = async () => {
-        if (!confirmed || isLoading) return;
-        await onConfirm();
+        if (!confirmed || isLoading || !isAuditValid) return;
+
+        if (requireAuditTrail) {
+            await onConfirm({
+                clientName: auditName.trim(),
+                clientEmail: auditEmail.trim(),
+            });
+        } else {
+            await onConfirm();
+        }
     };
 
     const handleBackdropClick = (e: React.MouseEvent) => {
@@ -106,6 +127,54 @@ export default function AcceptDialog({
                         )}
                     </div>
 
+                    {requireAuditTrail && (
+                        <div className="bg-cyan-50 border border-cyan-200 rounded-xl p-4 mb-4">
+                            <div className="flex items-center gap-2 mb-3">
+                                <svg className="w-4 h-4 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                                <span className="text-sm font-medium text-cyan-800">
+                                    Formalna akceptacja — potwierdź swoje dane
+                                </span>
+                            </div>
+                            <p className="text-xs text-cyan-600 mb-3">
+                                Ta oferta wymaga formalnego potwierdzenia. Twoje dane, adres IP i cyfrowy
+                                odcisk treści (SHA-256) zostaną zapisane. Otrzymasz email z potwierdzeniem.
+                            </p>
+                            <div className="space-y-3">
+                                <div>
+                                    <label className="block text-xs font-medium text-cyan-800 mb-1">
+                                        Imię i nazwisko *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={auditName}
+                                        onChange={(e) => setAuditName(e.target.value)}
+                                        placeholder="Jan Kowalski"
+                                        disabled={isLoading}
+                                        className="w-full px-3 py-2 rounded-lg border border-cyan-300 bg-white text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent disabled:opacity-50"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-cyan-800 mb-1">
+                                        Adres email *
+                                    </label>
+                                    <input
+                                        type="email"
+                                        value={auditEmail}
+                                        onChange={(e) => setAuditEmail(e.target.value)}
+                                        placeholder="jan@firma.pl"
+                                        disabled={isLoading}
+                                        className="w-full px-3 py-2 rounded-lg border border-cyan-300 bg-white text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent disabled:opacity-50"
+                                    />
+                                    <p className="text-xs text-cyan-500 mt-1">
+                                        Na ten adres wyślemy potwierdzenie z hashem cyfrowym
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="bg-slate-50 rounded-xl p-4 mb-4">
                         <p className="text-xs uppercase tracking-wider text-slate-400 font-medium mb-3">
                             Wybrane pozycje
@@ -147,6 +216,9 @@ export default function AcceptDialog({
                         <span className="text-sm text-amber-900 leading-relaxed">
                             Potwierdzam akceptację niniejszej oferty i zapoznałem/am się z jej warunkami.
                             Rozumiem, że akceptacja jest wiążąca.
+                            {requireAuditTrail && (
+                                <> Wyrażam zgodę na zapisanie moich danych w celu potwierdzenia akceptacji.</>
+                            )}
                         </span>
                     </label>
 
@@ -160,7 +232,7 @@ export default function AcceptDialog({
                         </button>
                         <button
                             onClick={handleConfirm}
-                            disabled={!confirmed || isLoading}
+                            disabled={!confirmed || isLoading || !isAuditValid}
                             className="flex-1 px-4 py-3 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
                             {isLoading ? (

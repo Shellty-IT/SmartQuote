@@ -1,3 +1,5 @@
+// src/lib/utils.ts
+
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -69,17 +71,16 @@ export function getInitials(name: string): string {
         .slice(0, 2);
 }
 
-export function debounce<T extends (...args: any[]) => any>(
-    func: T,
+export function debounce<Args extends unknown[]>(
+    func: (...args: Args) => void,
     wait: number
-): (...args: Parameters<T>) => void {
+): (...args: Args) => void {
     let timeout: NodeJS.Timeout;
-    return (...args: Parameters<T>) => {
+    return (...args: Args) => {
         clearTimeout(timeout);
         timeout = setTimeout(() => func(...args), wait);
     };
 }
-
 
 export function getContractStatusConfig(status: string): {
     label: string;

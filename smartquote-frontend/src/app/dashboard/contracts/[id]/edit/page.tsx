@@ -1,24 +1,21 @@
 // SmartQuote-AI/src/app/dashboard/contracts/[id]/edit/page.tsx
-
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useState, useEffect, useRef, use } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useContract, useContracts } from '@/hooks/useContracts';
 import { useClients } from '@/hooks/useClients';
 import { Button, Card, Input, Select, Textarea, LoadingSpinner } from '@/components/ui';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Client, ContractItem } from '@/types';
 
-export default function EditContractPage() {
-    const params = useParams();
+export default function EditContractPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
     const router = useRouter();
-    const id = params.id as string;
 
     const { contract, loading: contractLoading, error: contractError } = useContract(id);
     const { updateContract } = useContracts();
-    const { clients, isLoading: clientsLoading } = useClients({ limit: 100 });
+    const { clients } = useClients({ limit: 100 });
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -37,9 +34,13 @@ export default function EditContractPage() {
         ],
     });
 
-    // Wypełnij formularz danymi umowy
+    const formInitialized = useRef(false);
+
     useEffect(() => {
-        if (contract) {
+        if (!contract || formInitialized.current) return;
+        formInitialized.current = true;
+
+        requestAnimationFrame(() => {
             setFormData({
                 title: contract.title || '',
                 description: contract.description || '',
@@ -62,7 +63,7 @@ export default function EditContractPage() {
                     }))
                     : [{ name: '', description: '', quantity: 1, unit: 'szt.', unitPrice: 0, vatRate: 23, discount: 0 }],
             });
-        }
+        });
     }, [contract]);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -138,17 +139,18 @@ export default function EditContractPage() {
     }
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center space-x-4">
+        <div className="space-y-6 p-4 md:p-8">
+            <div className="flex items-center gap-4">
                 <Link href={`/dashboard/contracts/${id}`}>
                     <Button variant="ghost" size="sm">
-                        <ArrowLeftIcon className="h-5 w-5" />
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
                     </Button>
                 </Link>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Edytuj umowę</h1>
-                    <p className="text-gray-500">{contract.number}</p>
+                    <h1 className="text-2xl font-bold text-themed">Edytuj umowę</h1>
+                    <p className="text-themed-muted">{contract.number}</p>
                 </div>
             </div>
 
@@ -160,7 +162,7 @@ export default function EditContractPage() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <Card className="p-6">
-                    <h2 className="text-lg font-semibold mb-4">Informacje podstawowe</h2>
+                    <h2 className="text-lg font-semibold text-themed mb-4">Informacje podstawowe</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Input
                             label="Tytuł umowy *"
@@ -210,7 +212,7 @@ export default function EditContractPage() {
 
                 <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-semibold">Pozycje umowy</h2>
+                        <h2 className="text-lg font-semibold text-themed">Pozycje umowy</h2>
                         <Button type="button" variant="outline" size="sm" onClick={addItem}>
                             + Dodaj pozycję
                         </Button>
@@ -218,7 +220,7 @@ export default function EditContractPage() {
 
                     <div className="space-y-4">
                         {formData.items.map((item, index) => (
-                            <div key={index} className="border border-gray-200 rounded-lg p-4">
+                            <div key={index} className="card-themed border rounded-lg p-4">
                                 <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
                                     <div className="md:col-span-2">
                                         <Input
@@ -267,7 +269,7 @@ export default function EditContractPage() {
                 </Card>
 
                 <Card className="p-6">
-                    <h2 className="text-lg font-semibold mb-4">Warunki</h2>
+                    <h2 className="text-lg font-semibold text-themed mb-4">Warunki</h2>
                     <div className="space-y-4">
                         <Textarea
                             label="Warunki umowy"
@@ -284,7 +286,7 @@ export default function EditContractPage() {
                     </div>
                 </Card>
 
-                <div className="flex justify-end space-x-4">
+                <div className="flex justify-end gap-4">
                     <Link href={`/dashboard/contracts/${id}`}>
                         <Button type="button" variant="outline">
                             Anuluj
