@@ -1,4 +1,5 @@
 // src/lib/api.ts
+
 import { getSession } from 'next-auth/react';
 import type {
     ApiResponse,
@@ -59,11 +60,11 @@ interface FetchOptions extends RequestInit {
 }
 
 interface SessionWithToken {
-    accessToken?: string;
+    readonly accessToken?: string;
 }
 
 class ApiClient {
-    private baseUrl: string;
+    private readonly baseUrl: string;
 
     constructor(baseUrl: string) {
         this.baseUrl = baseUrl;
@@ -101,74 +102,52 @@ class ApiClient {
         const url = this.buildUrl(endpoint, params);
         const headers = await this.getAuthHeaders();
 
-        try {
-            const response = await fetch(url, {
-                ...fetchOptions,
-                headers: {
-                    ...headers,
-                    ...fetchOptions.headers,
-                },
-            });
+        const response = await fetch(url, {
+            ...fetchOptions,
+            headers: {
+                ...headers,
+                ...fetchOptions.headers,
+            },
+        });
 
-            const data: ApiResponse<T> = await response.json();
+        const data: ApiResponse<T> = await response.json();
 
-            if (!response.ok) {
-                throw new ApiError(
-                    data.error?.message || 'Wystąpił błąd',
-                    data.error?.code || 'UNKNOWN_ERROR',
-                    response.status,
-                    data.error?.details
-                );
-            }
-
-            return data;
-        } catch (error) {
-            if (error instanceof ApiError) {
-                throw error;
-            }
+        if (!response.ok) {
             throw new ApiError(
-                'Błąd połączenia z serwerem',
-                'NETWORK_ERROR',
-                0
+                data.error?.message || 'Wystąpił błąd',
+                data.error?.code || 'UNKNOWN_ERROR',
+                response.status,
+                data.error?.details
             );
         }
+
+        return data;
     }
 
     async requestPublic<T>(endpoint: string, options: FetchOptions = {}): Promise<ApiResponse<T>> {
         const { params, ...fetchOptions } = options;
         const url = this.buildUrl(endpoint, params);
 
-        try {
-            const response = await fetch(url, {
-                ...fetchOptions,
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...fetchOptions.headers,
-                },
-            });
+        const response = await fetch(url, {
+            ...fetchOptions,
+            headers: {
+                'Content-Type': 'application/json',
+                ...fetchOptions.headers,
+            },
+        });
 
-            const data: ApiResponse<T> = await response.json();
+        const data: ApiResponse<T> = await response.json();
 
-            if (!response.ok) {
-                throw new ApiError(
-                    data.error?.message || 'Wystąpił błąd',
-                    data.error?.code || 'UNKNOWN_ERROR',
-                    response.status,
-                    data.error?.details
-                );
-            }
-
-            return data;
-        } catch (error) {
-            if (error instanceof ApiError) {
-                throw error;
-            }
+        if (!response.ok) {
             throw new ApiError(
-                'Błąd połączenia z serwerem',
-                'NETWORK_ERROR',
-                0
+                data.error?.message || 'Wystąpił błąd',
+                data.error?.code || 'UNKNOWN_ERROR',
+                response.status,
+                data.error?.details
             );
         }
+
+        return data;
     }
 
     async get<T>(endpoint: string, params?: Record<string, string | number | boolean | undefined>): Promise<ApiResponse<T>> {
@@ -228,35 +207,24 @@ class ApiClient {
 
         const url = `${this.baseUrl}${endpoint}`;
 
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers,
-                body: formData,
-            });
+        const response = await fetch(url, {
+            method: 'POST',
+            headers,
+            body: formData,
+        });
 
-            const data: ApiResponse<T> = await response.json();
+        const data: ApiResponse<T> = await response.json();
 
-            if (!response.ok) {
-                throw new ApiError(
-                    data.error?.message || 'Wystąpił błąd',
-                    data.error?.code || 'UPLOAD_ERROR',
-                    response.status,
-                    data.error?.details
-                );
-            }
-
-            return data;
-        } catch (error) {
-            if (error instanceof ApiError) {
-                throw error;
-            }
+        if (!response.ok) {
             throw new ApiError(
-                'Błąd przesyłania pliku',
-                'NETWORK_ERROR',
-                0
+                data.error?.message || 'Wystąpił błąd',
+                data.error?.code || 'UPLOAD_ERROR',
+                response.status,
+                data.error?.details
             );
         }
+
+        return data;
     }
 
     async getPublic<T>(endpoint: string, params?: Record<string, string | number | boolean | undefined>): Promise<ApiResponse<T>> {
@@ -279,14 +247,21 @@ class ApiClient {
 }
 
 export class ApiError extends Error {
+    readonly code: string;
+    readonly status: number;
+    readonly details?: unknown;
+
     constructor(
         message: string,
-        public code: string,
-        public status: number,
-        public details?: unknown
+        code: string,
+        status: number,
+        details?: unknown
     ) {
         super(message);
         this.name = 'ApiError';
+        this.code = code;
+        this.status = status;
+        this.details = details;
     }
 }
 
@@ -299,7 +274,7 @@ export async function checkBackendHealth(): Promise<boolean> {
             signal: AbortSignal.timeout(30000),
         });
         return response.ok;
-    } catch (err: unknown) {
+    } catch {
         return false;
     }
 }
@@ -370,8 +345,12 @@ export const publicOffersApi = {
         api.postPublic<{ rejected: boolean }>(`/public/offers/${token}/reject`, payload),
     addComment: (token: string, content: string) =>
         api.postPublic<OfferComment>(`/public/offers/${token}/comment`, { content }),
-    trackSelection: (token: string, items: Array<{ id: string; isSelected: boolean; quantity: number }>) =>
-        api.patchPublic<{ tracked: boolean }>(`/public/offers/${token}/selection`, { items }),
+    trackSelection: (
+        token: string,
+        items: Array<{ id: string; isSelected: boolean; quantity: number }>,
+        selectedVariant?: string
+    ) =>
+        api.patchPublic<{ tracked: boolean }>(`/public/offers/${token}/selection`, { items, selectedVariant }),
 };
 
 export const contractsApi = {
@@ -393,6 +372,10 @@ export const contractsApi = {
         api.get<ContractsStats>('/contracts/stats'),
     downloadPdf: (id: string) =>
         api.downloadBlob(`/contracts/${id}/pdf`),
+    publish: (id: string) =>
+        api.post<{ publicToken: string; publicUrl: string; alreadyPublished: boolean }>(`/contracts/${id}/publish`),
+    unpublish: (id: string) =>
+        api.delete<{ unpublished: boolean }>(`/contracts/${id}/publish`),
 };
 
 export const followUpsApi = {

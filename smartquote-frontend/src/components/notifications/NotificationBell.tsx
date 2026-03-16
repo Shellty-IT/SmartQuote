@@ -97,7 +97,7 @@ export default function NotificationBell() {
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-[420px] card-themed border rounded-xl shadow-xl z-50 overflow-hidden">
+                <div className="absolute right-0 mt-2 w-[420px] max-w-[calc(100vw-2rem)] card-themed border rounded-xl shadow-xl z-50 overflow-hidden">
                     <div className="px-4 py-3 section-themed border-b divider-themed">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
@@ -140,10 +140,13 @@ export default function NotificationBell() {
                                     const cfg = typeConfig[notification.type] || typeConfig.SYSTEM;
 
                                     return (
-                                        <button
+                                        <div
                                             key={notification.id}
                                             onClick={() => handleNotificationClick(notification)}
-                                            className={`w-full px-4 py-3 text-left transition-colors group ${
+                                            role="button"
+                                            tabIndex={0}
+                                            onKeyDown={(e) => { if (e.key === 'Enter') handleNotificationClick(notification); }}
+                                            className={`w-full px-4 py-3 text-left transition-colors group cursor-pointer ${
                                                 notification.isRead
                                                     ? 'card-themed hover-themed'
                                                     : 'section-themed hover-themed'
@@ -191,7 +194,7 @@ export default function NotificationBell() {
                                                     </p>
                                                 </div>
                                             </div>
-                                        </button>
+                                        </div>
                                     );
                                 })}
                             </div>
@@ -203,7 +206,7 @@ export default function NotificationBell() {
                             <button
                                 onClick={() => {
                                     setIsOpen(false);
-                                    router.push('/dashboard/followups');
+                                    router.push('/dashboard/notifications');
                                 }}
                                 className="text-sm font-medium text-cyan-600 hover:text-cyan-700 transition-colors"
                             >

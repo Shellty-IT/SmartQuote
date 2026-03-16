@@ -42,6 +42,7 @@ interface ExtendedOfferItem extends CreateOfferItemInput {
     isOptional: boolean;
     minQuantity: number;
     maxQuantity: number;
+    variantName: string;
 }
 
 const emptyItem: ExtendedOfferItem = {
@@ -55,7 +56,15 @@ const emptyItem: ExtendedOfferItem = {
     isOptional: false,
     minQuantity: 1,
     maxQuantity: 100,
+    variantName: '',
 };
+
+function getUniqueVariants(items: ExtendedOfferItem[]): string[] {
+    const variants = items
+        .map((i) => i.variantName.trim())
+        .filter((v) => v.length > 0);
+    return [...new Set(variants)];
+}
 
 export default function NewOfferContent() {
     const router = useRouter();
@@ -192,6 +201,7 @@ export default function NewOfferContent() {
                     isOptional: item.isOptional,
                     minQuantity: item.isOptional ? item.minQuantity : undefined,
                     maxQuantity: item.isOptional ? item.maxQuantity : undefined,
+                    variantName: item.variantName.trim() || undefined,
                 })),
             };
 
@@ -210,6 +220,8 @@ export default function NewOfferContent() {
             setIsSubmitting(false);
         }
     };
+
+    const uniqueVariants = getUniqueVariants(items);
 
     if (isLoadingClients && clients.length === 0) {
         return <PageLoader />;
@@ -402,16 +414,43 @@ export default function NewOfferContent() {
                             </Button>
                         </div>
 
+                        {uniqueVariants.length > 0 && (
+                            <div className="mb-4 p-3 bg-gradient-to-r from-cyan-50 to-blue-50 border border-cyan-200 rounded-xl">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <svg className="w-4 h-4 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                    <span className="text-sm font-medium text-cyan-800">
+                                        Warianty: {uniqueVariants.join(', ')}
+                                    </span>
+                                </div>
+                                <p className="text-xs text-cyan-600">
+                                    Pozycje bez wariantu są wspólne dla wszystkich wariantów. Klient wybierze jeden wariant.
+                                </p>
+                            </div>
+                        )}
+
                         <div className="space-y-4">
                             {items.map((item, index) => {
                                 const itemTotals = calculateItemTotal(item);
 
                                 return (
-                                    <div key={index} className="p-4 section-themed rounded-xl space-y-4">
+                                    <div key={index} className={`p-4 rounded-xl space-y-4 ${
+                                        item.variantName.trim()
+                                            ? 'section-themed border-l-4 border-l-cyan-400'
+                                            : 'section-themed'
+                                    }`}>
                                         <div className="flex items-start justify-between">
-                                        <span className="text-sm font-medium text-themed-muted">
-                                            Pozycja {index + 1}
-                                        </span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm font-medium text-themed-muted">
+                                                    Pozycja {index + 1}
+                                                </span>
+                                                {item.variantName.trim() && (
+                                                    <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-100 text-cyan-700 font-medium">
+                                                        {item.variantName.trim()}
+                                                    </span>
+                                                )}
+                                            </div>
                                             {items.length > 1 && (
                                                 <button
                                                     onClick={() => removeItem(index)}
@@ -483,6 +522,23 @@ export default function NewOfferContent() {
                                             />
                                         </div>
 
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <Input
+                                                label="Wariant (opcjonalnie)"
+                                                value={item.variantName}
+                                                onChange={(e) => updateItem(index, 'variantName', e.target.value)}
+                                                placeholder="np. Basic, Standard, Premium"
+                                                list={`variant-suggestions-${index}`}
+                                            />
+                                            {uniqueVariants.length > 0 && (
+                                                <datalist id={`variant-suggestions-${index}`}>
+                                                    {uniqueVariants.map((v) => (
+                                                        <option key={v} value={v} />
+                                                    ))}
+                                                </datalist>
+                                            )}
+                                        </div>
+
                                         <div className="flex items-center justify-between">
                                             <AIPriceInsight
                                                 itemName={item.name}
@@ -500,9 +556,9 @@ export default function NewOfferContent() {
                                                     className="w-4 h-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
                                                 />
                                                 <div>
-                                                <span className="text-sm font-medium text-themed">
-                                                    Pozycja opcjonalna
-                                                </span>
+                                                    <span className="text-sm font-medium text-themed">
+                                                        Pozycja opcjonalna
+                                                    </span>
                                                     <p className="text-xs text-themed-muted">
                                                         Klient może odznaczyć tę pozycję lub zmienić ilość
                                                     </p>
@@ -532,15 +588,15 @@ export default function NewOfferContent() {
                                         </div>
 
                                         <div className="flex justify-end gap-4 pt-2 border-t divider-themed">
-                                        <span className="text-sm text-themed-muted">
-                                            Netto: <strong>{formatCurrency(itemTotals.totalNet)}</strong>
-                                        </span>
                                             <span className="text-sm text-themed-muted">
-                                            VAT: <strong>{formatCurrency(itemTotals.totalVat)}</strong>
-                                        </span>
+                                                Netto: <strong>{formatCurrency(itemTotals.totalNet)}</strong>
+                                            </span>
+                                            <span className="text-sm text-themed-muted">
+                                                VAT: <strong>{formatCurrency(itemTotals.totalVat)}</strong>
+                                            </span>
                                             <span className="text-sm text-themed">
-                                            Brutto: <strong>{formatCurrency(itemTotals.totalGross)}</strong>
-                                        </span>
+                                                Brutto: <strong>{formatCurrency(itemTotals.totalGross)}</strong>
+                                            </span>
                                         </div>
                                     </div>
                                 );
@@ -607,6 +663,22 @@ export default function NewOfferContent() {
                                 )}
                             </div>
 
+                            {uniqueVariants.length > 0 && (
+                                <div className="p-4 bg-gradient-to-r from-cyan-50 to-blue-50 border border-cyan-200 rounded-xl">
+                                    <h3 className="text-sm font-medium text-cyan-800 mb-1">Warianty oferty</h3>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        {uniqueVariants.map((v) => (
+                                            <span key={v} className="px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 text-sm font-medium">
+                                                {v}
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <p className="text-xs text-cyan-600 mt-2">
+                                        Klient wybierze jeden wariant. Pozycje wspólne ({items.filter((i) => !i.variantName.trim()).length}) będą widoczne zawsze.
+                                    </p>
+                                </div>
+                            )}
+
                             <div className="p-4 section-themed rounded-xl">
                                 <h3 className="text-sm font-medium text-themed-muted mb-2">Pozycje ({items.length})</h3>
                                 <div className="space-y-2">
@@ -619,8 +691,13 @@ export default function NewOfferContent() {
                                                         <p className="text-themed">{item.name}</p>
                                                         {item.isOptional && (
                                                             <span className="text-xs px-1.5 py-0.5 rounded-full badge-info font-medium">
-                                                            Opcjonalna
-                                                        </span>
+                                                                Opcjonalna
+                                                            </span>
+                                                        )}
+                                                        {item.variantName.trim() && (
+                                                            <span className="text-xs px-1.5 py-0.5 rounded-full bg-cyan-100 text-cyan-700 font-medium">
+                                                                {item.variantName.trim()}
+                                                            </span>
                                                         )}
                                                     </div>
                                                     <p className="text-sm text-themed-muted">

@@ -1,5 +1,4 @@
 // SmartQuote-AI/src/components/publicOffer/InteractiveOffer.tsx
-
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -22,16 +21,29 @@ interface ItemState {
     quantity: number;
 }
 
-function calculateTotals(
+function getVisibleItems(
     items: PublicOfferItem[],
-    itemStates: Record<string, ItemState>
+    variants: string[],
+    selectedVariant: string | null
+): PublicOfferItem[] {
+    if (variants.length === 0) return items;
+    return items.filter((item) => !item.variantName || item.variantName === selectedVariant);
+}
+
+function calculateTotals(
+    allItems: PublicOfferItem[],
+    itemStates: Record<string, ItemState>,
+    variants: string[],
+    selectedVariant: string | null
 ) {
+    const visibleItems = getVisibleItems(allItems, variants, selectedVariant);
+
     let totalNet = 0;
     let totalVat = 0;
     let totalGross = 0;
     let selectedCount = 0;
 
-    items.forEach((item) => {
+    visibleItems.forEach((item) => {
         const state = itemStates[item.id];
         if (!state) return;
 
@@ -59,12 +71,18 @@ function calculateTotals(
         totalVat: Math.round(totalVat * 100) / 100,
         totalGross: Math.round(totalGross * 100) / 100,
         selectedCount,
+        totalVisible: visibleItems.length,
     };
 }
 
 export default function InteractiveOffer({ token, data }: InteractiveOfferProps) {
-    const { offer, expired, decided } = data;
+    const { offer, expired, decided, variants } = data;
     const isFinalized = decided || expired;
+    const hasVariants = variants.length > 0;
+
+    const [selectedVariant, setSelectedVariant] = useState<string | null>(
+        hasVariants ? variants[0] : null
+    );
 
     const [itemStates, setItemStates] = useState<Record<string, ItemState>>(() => {
         const states: Record<string, ItemState> = {};
@@ -95,7 +113,7 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
     }, [token]);
 
     const trackSelectionDebounced = useCallback(
-        (states: Record<string, ItemState>) => {
+        (states: Record<string, ItemState>, variant: string | null) => {
             if (trackingTimeout.current) {
                 clearTimeout(trackingTimeout.current);
             }
@@ -105,7 +123,7 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                     isSelected: state.isSelected,
                     quantity: state.quantity,
                 }));
-                publicOffersApi.trackSelection(token, items).catch(() => {});
+                publicOffersApi.trackSelection(token, items, variant || undefined).catch(() => {});
             }, 2000);
         },
         [token]
@@ -115,22 +133,30 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
         (id: string, selected: boolean) => {
             setItemStates((prev) => {
                 const next = { ...prev, [id]: { ...prev[id], isSelected: selected } };
-                trackSelectionDebounced(next);
+                trackSelectionDebounced(next, selectedVariant);
                 return next;
             });
         },
-        [trackSelectionDebounced]
+        [trackSelectionDebounced, selectedVariant]
     );
 
     const handleQuantityChange = useCallback(
         (id: string, quantity: number) => {
             setItemStates((prev) => {
                 const next = { ...prev, [id]: { ...prev[id], quantity } };
-                trackSelectionDebounced(next);
+                trackSelectionDebounced(next, selectedVariant);
                 return next;
             });
         },
-        [trackSelectionDebounced]
+        [trackSelectionDebounced, selectedVariant]
+    );
+
+    const handleVariantSwitch = useCallback(
+        (variant: string) => {
+            setSelectedVariant(variant);
+            trackSelectionDebounced(itemStates, variant);
+        },
+        [trackSelectionDebounced, itemStates]
     );
 
     const handleAddComment = useCallback(
@@ -163,6 +189,7 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
 
             await publicOffersApi.accept(token, {
                 confirmationChecked: true,
+                selectedVariant: selectedVariant || undefined,
                 selectedItems,
             });
 
@@ -173,7 +200,7 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
         } finally {
             setIsAccepting(false);
         }
-    }, [token, itemStates]);
+    }, [token, itemStates, selectedVariant]);
 
     const handleReject = useCallback(
         async (reason?: string) => {
@@ -193,9 +220,10 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
         [token]
     );
 
-    const totals = calculateTotals(offer.items, itemStates);
+    const visibleItems = getVisibleItems(offer.items, variants, selectedVariant);
+    const totals = calculateTotals(offer.items, itemStates, variants, selectedVariant);
 
-    const selectedItemsSummary = offer.items
+    const selectedItemsSummary = visibleItems
         .filter((item) => {
             const state = itemStates[item.id];
             return item.isOptional ? state?.isSelected : true;
@@ -232,6 +260,11 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                 <p className="text-lg text-slate-600 mb-2">
                     Dziękujemy za akceptację oferty <span className="font-semibold">{offer.number}</span>.
                 </p>
+                {selectedVariant && (
+                    <p className="text-slate-500 mb-2">
+                        Wybrany wariant: <span className="font-semibold text-cyan-600">{selectedVariant}</span>
+                    </p>
+                )}
                 <p className="text-slate-500 mb-8">
                     Sprzedawca został powiadomiony i wkrótce się z Tobą skontaktuje.
                 </p>
@@ -328,19 +361,54 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                 </div>
             )}
 
+            {hasVariants && (
+                <div className="bg-white rounded-xl border border-slate-200 p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                        <svg className="w-5 h-5 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                        </svg>
+                        <h2 className="text-lg font-semibold text-slate-900">Wybierz wariant</h2>
+                    </div>
+                    <p className="text-sm text-slate-500 mb-4">
+                        Oferta zawiera {variants.length} wariant{variants.length > 1 ? 'y' : ''}. Wybierz ten, który najlepiej odpowiada Twoim potrzebom.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                        {variants.map((variant) => (
+                            <button
+                                key={variant}
+                                onClick={() => !isFinalized && handleVariantSwitch(variant)}
+                                disabled={isFinalized}
+                                className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                                    selectedVariant === variant
+                                        ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/25'
+                                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                } ${isFinalized ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                            >
+                                {variant}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             <div className="bg-white rounded-xl border border-slate-200 p-6">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-semibold text-slate-900">
                         Pozycje oferty
+                        {selectedVariant && (
+                            <span className="ml-2 text-sm font-normal text-cyan-600">
+                                — {selectedVariant}
+                            </span>
+                        )}
                     </h2>
-                    {offer.items.some((i) => i.isOptional) && (
+                    {visibleItems.some((i) => i.isOptional) && (
                         <p className="text-xs text-slate-400">
                             Pozycje opcjonalne możesz zaznaczyć lub odznaczyć
                         </p>
                     )}
                 </div>
                 <div className="space-y-3">
-                    {offer.items.map((item) => (
+                    {visibleItems.map((item) => (
                         <OfferItemRow
                             key={item.id}
                             item={item}
@@ -364,7 +432,7 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                 totalGross={totals.totalGross}
                 currency={offer.currency}
                 selectedCount={totals.selectedCount}
-                totalCount={offer.items.length}
+                totalCount={totals.totalVisible}
             />
 
             {offer.terms && (

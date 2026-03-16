@@ -1,10 +1,9 @@
-// SmartQuote-AI/src/hooks/useContracts.ts
-
+// src/hooks/useContracts.ts
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { api } from '@/lib/api';
-import { Contract, ContractsStats, CreateContractInput, ContractStatus } from '@/types';
+import { contractsApi } from '@/lib/api';
+import type { Contract, ContractsStats, CreateContractInput, ContractStatus } from '@/types';
 
 interface UseContractsParams {
     page?: number;
@@ -30,21 +29,16 @@ export function useContracts(params: UseContractsParams = {}) {
             setLoading(true);
             setError(null);
 
-            const queryParams = new URLSearchParams();
-            if (params.page) queryParams.set('page', params.page.toString());
-            if (params.limit) queryParams.set('limit', params.limit.toString());
-            if (params.status) queryParams.set('status', params.status);
-            if (params.clientId) queryParams.set('clientId', params.clientId);
-            if (params.search) queryParams.set('search', params.search);
-
-            const response = await api.get<Contract[]>(
-                `/contracts?${queryParams.toString()}`
-            );
+            const response = await contractsApi.list({
+                page: params.page,
+                limit: params.limit,
+                status: params.status,
+                clientId: params.clientId,
+                search: params.search,
+            });
 
             if (response.success) {
-                const contractsData = Array.isArray(response.data) ? response.data : [];
-                setContracts(contractsData);
-
+                setContracts(Array.isArray(response.data) ? response.data : []);
                 if (response.meta) {
                     setPagination({
                         page: response.meta.page ?? 1,
@@ -54,7 +48,7 @@ export function useContracts(params: UseContractsParams = {}) {
                     });
                 }
             }
-        } catch (err) {
+        } catch (err: unknown) {
             setError('Nie udało się pobrać umów');
             console.error('Fetch contracts error:', err);
         } finally {
@@ -67,7 +61,7 @@ export function useContracts(params: UseContractsParams = {}) {
     }, [fetchContracts]);
 
     const createContract = async (data: CreateContractInput) => {
-        const response = await api.post<Contract>('/contracts', data);
+        const response = await contractsApi.create(data);
         if (response.success) {
             await fetchContracts();
         }
@@ -75,7 +69,7 @@ export function useContracts(params: UseContractsParams = {}) {
     };
 
     const createFromOffer = async (offerId: string) => {
-        const response = await api.post<Contract>(`/contracts/from-offer/${offerId}`);
+        const response = await contractsApi.createFromOffer(offerId);
         if (response.success) {
             await fetchContracts();
         }
@@ -83,7 +77,7 @@ export function useContracts(params: UseContractsParams = {}) {
     };
 
     const updateContract = async (id: string, data: Partial<CreateContractInput>) => {
-        const response = await api.put<Contract>(`/contracts/${id}`, data);
+        const response = await contractsApi.update(id, data);
         if (response.success) {
             await fetchContracts();
         }
@@ -91,7 +85,7 @@ export function useContracts(params: UseContractsParams = {}) {
     };
 
     const updateStatus = async (id: string, status: ContractStatus) => {
-        const response = await api.put<Contract>(`/contracts/${id}/status`, { status });
+        const response = await contractsApi.updateStatus(id, status);
         if (response.success) {
             await fetchContracts();
         }
@@ -99,7 +93,7 @@ export function useContracts(params: UseContractsParams = {}) {
     };
 
     const deleteContract = async (id: string) => {
-        const response = await api.delete(`/contracts/${id}`);
+        const response = await contractsApi.delete(id);
         if (response.success) {
             await fetchContracts();
         }
@@ -125,28 +119,28 @@ export function useContract(id: string) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const fetchContract = async () => {
-            try {
-                setLoading(true);
-                const response = await api.get<Contract>(`/contracts/${id}`);
-                if (response.success && response.data) {
-                    setContract(response.data);
-                }
-            } catch (err) {
-                setError('Nie udało się pobrać umowy');
-                console.error('Fetch contract error:', err);
-            } finally {
-                setLoading(false);
+    const fetchContract = useCallback(async () => {
+        if (!id) return;
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await contractsApi.get(id);
+            if (response.success && response.data) {
+                setContract(response.data);
             }
-        };
-
-        if (id) {
-            fetchContract();
+        } catch (err: unknown) {
+            setError('Nie udało się pobrać umowy');
+            console.error('Fetch contract error:', err);
+        } finally {
+            setLoading(false);
         }
     }, [id]);
 
-    return { contract, loading, error };
+    useEffect(() => {
+        fetchContract();
+    }, [fetchContract]);
+
+    return { contract, loading, error, refetch: fetchContract };
 }
 
 export function useContractsStats() {
@@ -158,11 +152,11 @@ export function useContractsStats() {
         const fetchStats = async () => {
             try {
                 setLoading(true);
-                const response = await api.get<ContractsStats>('/contracts/stats');
+                const response = await contractsApi.stats();
                 if (response.success && response.data) {
                     setStats(response.data);
                 }
-            } catch (err) {
+            } catch (err: unknown) {
                 setError('Nie udało się pobrać statystyk');
                 console.error('Fetch contracts stats error:', err);
             } finally {

@@ -1,11 +1,12 @@
 // src/types/index.ts
-export interface ApiResponse<T = any> {
+
+export interface ApiResponse<T = unknown> {
     success: boolean;
     data?: T;
     error?: {
         code: string;
         message: string;
-        details?: any;
+        details?: Record<string, unknown>;
     };
     meta?: {
         page: number;
@@ -114,6 +115,7 @@ export interface OfferItem {
     isSelected: boolean;
     minQuantity: number;
     maxQuantity: number;
+    variantName: string | null;
 }
 
 export interface Offer {
@@ -138,7 +140,7 @@ export interface Offer {
     isInteractive: boolean;
     viewCount: number;
     lastViewedAt: string | null;
-    clientSelectedData: any | null;
+    clientSelectedData: Record<string, unknown> | null;
     createdAt: string;
     updatedAt: string;
     client: Client;
@@ -162,6 +164,7 @@ export interface CreateOfferItemInput {
     isOptional?: boolean;
     minQuantity?: number;
     maxQuantity?: number;
+    variantName?: string | null;
 }
 
 export interface CreateOfferInput {
@@ -215,13 +218,14 @@ export type InteractionType =
     | 'ACCEPT'
     | 'REJECT'
     | 'COMMENT'
-    | 'PDF_DOWNLOAD';
+    | 'PDF_DOWNLOAD'
+    | 'VARIANT_SWITCH';
 
 export interface OfferInteraction {
     id: string;
     offerId: string;
     type: InteractionType;
-    details: any;
+    details: Record<string, unknown>;
     createdAt: string;
 }
 
@@ -246,7 +250,7 @@ export interface OfferAnalytics {
     lastViewedAt: string | null;
     acceptedAt: string | null;
     rejectedAt: string | null;
-    clientSelectedData: any | null;
+    clientSelectedData: Record<string, unknown> | null;
     validUntil: string | null;
     totalNet: number;
     totalGross: number;
@@ -260,6 +264,7 @@ export interface OfferAnalytics {
 export interface PublicOfferData {
     expired: boolean;
     decided: boolean;
+    variants: string[];
     offer: {
         id: string;
         number: string;
@@ -273,7 +278,7 @@ export interface PublicOfferData {
         currency: string;
         acceptedAt: string | null;
         rejectedAt: string | null;
-        clientSelectedData: any | null;
+        clientSelectedData: Record<string, unknown> | null;
         terms: string | null;
         paymentDays: number;
         createdAt: string;
@@ -315,10 +320,12 @@ export interface PublicOfferItem {
     isSelected: boolean;
     minQuantity: number;
     maxQuantity: number;
+    variantName: string | null;
 }
 
 export interface PublicOfferAcceptPayload {
     confirmationChecked: true;
+    selectedVariant?: string;
     selectedItems: Array<{
         id: string;
         isSelected: boolean;
@@ -370,6 +377,8 @@ export interface Contract {
     paymentTerms: string | null;
     paymentDays: number;
     notes: string | null;
+    publicToken: string | null;
+    sentAt: string | null;
     clientId: string;
     client: Client;
     offerId: string | null;
@@ -672,7 +681,7 @@ export interface Notification {
     message: string;
     isRead: boolean;
     link: string | null;
-    metadata: Record<string, any> | null;
+    metadata: Record<string, unknown> | null;
     createdAt: string;
 }
 

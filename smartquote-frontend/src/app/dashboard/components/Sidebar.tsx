@@ -7,10 +7,12 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { useSidebarStats } from '@/hooks/useSidebarStats';
+import { useUnreadCount } from '@/hooks/useNotifications';
 
 export default function Sidebar() {
     const pathname = usePathname();
     const { stats, isLoading: loading } = useSidebarStats();
+    const { count: unreadNotifications } = useUnreadCount();
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     const prevPathnameRef = useRef(pathname);
 
@@ -65,9 +67,16 @@ export default function Sidebar() {
         {
             name: 'Follow-upy',
             href: '/dashboard/followups',
-            icon: BellIcon,
+            icon: CalendarIcon,
             badge: stats.followups > 0 ? stats.followups : null,
             badgeColor: 'orange',
+        },
+        {
+            name: 'Powiadomienia',
+            href: '/dashboard/notifications',
+            icon: BellIcon,
+            badge: unreadNotifications > 0 ? unreadNotifications : null,
+            badgeColor: 'purple',
         },
         {
             name: 'AI Asystent',
@@ -97,6 +106,10 @@ export default function Sidebar() {
         orange: {
             active: 'bg-orange-500 text-white',
             inactive: 'bg-orange-500/20 text-orange-400'
+        },
+        purple: {
+            active: 'bg-purple-500 text-white',
+            inactive: 'bg-purple-500/20 text-purple-400'
         },
     };
 
@@ -246,6 +259,14 @@ function UsersIcon({ className }: { className?: string }) {
     return (
         <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+    );
+}
+
+function CalendarIcon({ className }: { className?: string }) {
+    return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
     );
 }

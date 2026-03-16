@@ -1,7 +1,7 @@
 // src/app/dashboard/offers/[id]/page.tsx
 'use client';
 
-import { useState, use } from 'react';
+import { useState, use, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useOffer, useOfferAnalytics, useOfferComments } from '@/hooks/useOffers';
@@ -9,7 +9,7 @@ import { offersApi, ai } from '@/lib/api';
 import { Button, Card, Badge, ConfirmDialog } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { formatDate, formatDateTime, formatCurrency, getStatusConfig, getInitials } from '@/lib/utils';
-import { OfferStatus } from '@/types';
+import { OfferStatus, OfferItem } from '@/types';
 import type { ObserverInsight, ClosingStrategy } from '@/types/ai';
 import PublishDialog from '@/components/offers/PublishDialog';
 
@@ -35,6 +35,31 @@ const intentConfig: Record<string, { label: string; color: string }> = {
     likely_reject: { label: 'Prawdopodobne odrzucenie', color: 'badge-danger' },
     unknown: { label: 'Brak danych', color: 'badge-themed' },
 };
+
+interface VariantGroup {
+    name: string | null;
+    items: OfferItem[];
+}
+
+function groupByVariant(items: OfferItem[]): { groups: VariantGroup[]; variantNames: string[] } {
+    const hasVariants = items.some((i) => i.variantName);
+    if (!hasVariants) {
+        return { groups: [{ name: null, items }], variantNames: [] };
+    }
+
+    const groups: VariantGroup[] = [];
+    const baseItems = items.filter((i) => !i.variantName);
+    if (baseItems.length > 0) {
+        groups.push({ name: null, items: baseItems });
+    }
+
+    const variantNames = [...new Set(items.filter((i) => i.variantName).map((i) => i.variantName!))];
+    for (const vn of variantNames) {
+        groups.push({ name: vn, items: items.filter((i) => i.variantName === vn) });
+    }
+
+    return { groups, variantNames };
+}
 
 export default function OfferDetailPage({ params }: PageProps) {
     const { id } = use(params);
@@ -62,6 +87,11 @@ export default function OfferDetailPage({ params }: PageProps) {
     const [isLoadingCloser, setIsLoadingCloser] = useState(false);
     const [closerError, setCloserError] = useState<string | null>(null);
     const [expandedStrategy, setExpandedStrategy] = useState<string | null>(null);
+
+    const variantData = useMemo(() => {
+        if (!offer?.items) return { groups: [], variantNames: [] };
+        return groupByVariant(offer.items);
+    }, [offer?.items]);
 
     const handleLoadObserver = async () => {
         setIsLoadingObserver(true);
@@ -212,6 +242,58 @@ export default function OfferDetailPage({ params }: PageProps) {
         return 'bg-emerald-500';
     };
 
+    const renderItemsTable = (items: OfferItem[]) => (
+        <div className="overflow-x-auto">
+            <table className="w-full">
+                <thead>
+                <tr className="border-b divider-themed">
+                    <th className="pb-3 text-left text-xs font-semibold text-themed-muted uppercase">Pozycja</th>
+                    <th className="pb-3 text-right text-xs font-semibold text-themed-muted uppercase">Ilość</th>
+                    <th className="pb-3 text-right text-xs font-semibold text-themed-muted uppercase">Cena</th>
+                    <th className="pb-3 text-right text-xs font-semibold text-themed-muted uppercase">VAT</th>
+                    <th className="pb-3 text-right text-xs font-semibold text-themed-muted uppercase">Wartość</th>
+                </tr>
+                </thead>
+                <tbody>
+                {items.map((item, index) => (
+                    <tr key={item.id || index} className="border-b divider-themed last:border-0">
+                        <td className="py-3">
+                            <div className="flex items-center gap-2">
+                                <p className="font-medium text-themed">{item.name}</p>
+                                {item.isOptional && (
+                                    <span className="text-xs px-1.5 py-0.5 rounded-full badge-info font-medium">
+                                        Opcjonalna
+                                    </span>
+                                )}
+                            </div>
+                            {item.description && (
+                                <p className="text-sm text-themed-muted mt-1">{item.description}</p>
+                            )}
+                        </td>
+                        <td className="py-3 text-right text-themed-muted">
+                            {Number(item.quantity)} {item.unit}
+                        </td>
+                        <td className="py-3 text-right text-themed-muted">
+                            {formatCurrency(Number(item.unitPrice))}
+                            {Number(item.discount) > 0 && (
+                                <span className="text-xs text-emerald-600 dark:text-emerald-400 ml-1">
+                                    -{item.discount}%
+                                </span>
+                            )}
+                        </td>
+                        <td className="py-3 text-right text-themed-muted">
+                            {item.vatRate}%
+                        </td>
+                        <td className="py-3 text-right font-semibold text-themed">
+                            {formatCurrency(Number(item.totalGross))}
+                        </td>
+                    </tr>
+                ))}
+                </tbody>
+            </table>
+        </div>
+    );
+
     return (
         <div className="p-4 md:p-8">
             <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-8">
@@ -236,6 +318,11 @@ export default function OfferDetailPage({ params }: PageProps) {
                             {offer.isInteractive && (
                                 <Badge className="bg-cyan-500/15 text-cyan-600 dark:text-cyan-400" size="md">
                                     Link aktywny
+                                </Badge>
+                            )}
+                            {variantData.variantNames.length > 0 && (
+                                <Badge className="bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300" size="md">
+                                    {variantData.variantNames.length} wariant{variantData.variantNames.length > 1 ? 'y' : ''}
                                 </Badge>
                             )}
                         </div>
@@ -309,8 +396,8 @@ export default function OfferDetailPage({ params }: PageProps) {
                                         ? 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400'
                                         : 'badge-themed'
                                 }`}>
-                  {tab.count}
-                </span>
+                                    {tab.count}
+                                </span>
                             )}
                         </button>
                     ))}
@@ -327,59 +414,66 @@ export default function OfferDetailPage({ params }: PageProps) {
                             </Card>
                         )}
 
+                        {variantData.variantNames.length > 0 && (
+                            <div className="p-4 bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-950/30 dark:to-blue-950/30 border border-cyan-200 dark:border-cyan-800 rounded-xl">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <svg className="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                    <h3 className="text-sm font-semibold text-cyan-800 dark:text-cyan-300">Warianty oferty</h3>
+                                </div>
+                                <div className="flex flex-wrap gap-2 mb-2">
+                                    {variantData.variantNames.map((v) => {
+                                        const count = offer.items.filter((i) => i.variantName === v).length;
+                                        return (
+                                            <span key={v} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300 text-sm font-medium">
+                                                {v}
+                                                <span className="text-xs text-cyan-500 dark:text-cyan-400">({count})</span>
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+                                <p className="text-xs text-cyan-600 dark:text-cyan-400">
+                                    Pozycje wspólne: {offer.items.filter((i) => !i.variantName).length} • Klient wybierze jeden wariant na interaktywnej stronie oferty.
+                                </p>
+                            </div>
+                        )}
+
                         <Card>
                             <h2 className="text-lg font-semibold text-themed mb-4">
                                 Pozycje ({offer.items?.length || 0})
                             </h2>
-                            <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead>
-                                    <tr className="border-b divider-themed">
-                                        <th className="pb-3 text-left text-xs font-semibold text-themed-muted uppercase">Pozycja</th>
-                                        <th className="pb-3 text-right text-xs font-semibold text-themed-muted uppercase">Ilość</th>
-                                        <th className="pb-3 text-right text-xs font-semibold text-themed-muted uppercase">Cena</th>
-                                        <th className="pb-3 text-right text-xs font-semibold text-themed-muted uppercase">VAT</th>
-                                        <th className="pb-3 text-right text-xs font-semibold text-themed-muted uppercase">Wartość</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {offer.items?.map((item, index) => (
-                                        <tr key={item.id || index} className="border-b divider-themed last:border-0">
-                                            <td className="py-3">
-                                                <div className="flex items-center gap-2">
-                                                    <p className="font-medium text-themed">{item.name}</p>
-                                                    {item.isOptional && (
-                                                        <span className="text-xs px-1.5 py-0.5 rounded-full badge-info font-medium">
-                                Opcjonalna
-                              </span>
-                                                    )}
-                                                </div>
-                                                {item.description && (
-                                                    <p className="text-sm text-themed-muted mt-1">{item.description}</p>
+
+                            {variantData.variantNames.length > 0 ? (
+                                <div className="space-y-6">
+                                    {variantData.groups.map((group, gi) => (
+                                        <div key={gi}>
+                                            <div className={`flex items-center gap-2 mb-3 pb-2 border-b ${group.name ? 'border-cyan-200 dark:border-cyan-800' : 'divider-themed'}`}>
+                                                {group.name ? (
+                                                    <>
+                                                        <div className="w-1 h-5 rounded-full bg-cyan-400" />
+                                                        <h3 className="text-sm font-semibold text-cyan-700 dark:text-cyan-400">
+                                                            Wariant: {group.name}
+                                                        </h3>
+                                                        <span className="text-xs text-themed-muted">({group.items.length} poz.)</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <h3 className="text-sm font-semibold text-themed-muted">
+                                                            Pozycje wspólne
+                                                        </h3>
+                                                        <span className="text-xs text-themed-muted">({group.items.length} poz.)</span>
+                                                    </>
                                                 )}
-                                            </td>
-                                            <td className="py-3 text-right text-themed-muted">
-                                                {Number(item.quantity)} {item.unit}
-                                            </td>
-                                            <td className="py-3 text-right text-themed-muted">
-                                                {formatCurrency(Number(item.unitPrice))}
-                                                {Number(item.discount) > 0 && (
-                                                    <span className="text-xs text-emerald-600 dark:text-emerald-400 ml-1">
-                              -{item.discount}%
-                            </span>
-                                                )}
-                                            </td>
-                                            <td className="py-3 text-right text-themed-muted">
-                                                {item.vatRate}%
-                                            </td>
-                                            <td className="py-3 text-right font-semibold text-themed">
-                                                {formatCurrency(Number(item.totalGross))}
-                                            </td>
-                                        </tr>
+                                            </div>
+                                            {renderItemsTable(group.items)}
+                                        </div>
                                     ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                </div>
+                            ) : (
+                                renderItemsTable(offer.items || [])
+                            )}
+
                             <div className="mt-4 pt-4 border-t divider-themed">
                                 <div className="flex justify-end">
                                     <div className="w-64 space-y-2">
@@ -395,6 +489,11 @@ export default function OfferDetailPage({ params }: PageProps) {
                                             <span className="font-semibold text-themed">Suma brutto:</span>
                                             <span className="font-bold text-cyan-600 dark:text-cyan-400">{formatCurrency(Number(offer.totalGross))}</span>
                                         </div>
+                                        {variantData.variantNames.length > 0 && (
+                                            <p className="text-xs text-themed-muted text-right">
+                                                * wspólne + pierwszy wariant
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -410,12 +509,12 @@ export default function OfferDetailPage({ params }: PageProps) {
                         {offer.notes && (
                             <Card>
                                 <h2 className="text-lg font-semibold text-themed mb-3">
-                  <span className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    Notatki wewnętrzne
-                  </span>
+                                    <span className="flex items-center gap-2">
+                                        <svg className="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                        Notatki wewnętrzne
+                                    </span>
                                 </h2>
                                 <p className="text-themed whitespace-pre-wrap">{offer.notes}</p>
                             </Card>
@@ -457,8 +556,8 @@ export default function OfferDetailPage({ params }: PageProps) {
                                     <div className="flex justify-between">
                                         <span className="text-themed-muted">Ważna do</span>
                                         <span className={isExpired ? 'text-red-600 dark:text-red-400 font-medium' : 'text-themed'}>
-                      {formatDate(offer.validUntil)}
-                    </span>
+                                            {formatDate(offer.validUntil)}
+                                        </span>
                                     </div>
                                 )}
                                 <div className="flex justify-between">
@@ -634,9 +733,9 @@ export default function OfferDetailPage({ params }: PageProps) {
                         {observerInsight && !isLoadingObserver && (
                             <div className="space-y-4">
                                 <div className="flex items-center gap-3 flex-wrap">
-                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${intentConfig[observerInsight.clientIntent]?.color || intentConfig.unknown.color}`}>
-                    {intentConfig[observerInsight.clientIntent]?.label || 'Brak danych'}
-                  </span>
+                                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${intentConfig[observerInsight.clientIntent]?.color || intentConfig.unknown.color}`}>
+                                        {intentConfig[observerInsight.clientIntent]?.label || 'Brak danych'}
+                                    </span>
                                     <div className="flex items-center gap-2">
                                         <span className="text-xs text-themed-muted">Zaangażowanie:</span>
                                         <div className="w-20 h-2 section-themed rounded-full overflow-hidden">
@@ -676,8 +775,8 @@ export default function OfferDetailPage({ params }: PageProps) {
                                             <div className="flex flex-wrap gap-1.5">
                                                 {observerInsight.interestAreas.map((area, idx) => (
                                                     <span key={idx} className="text-xs px-2 py-1 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/25">
-                            {area}
-                          </span>
+                                                        {area}
+                                                    </span>
                                                 ))}
                                             </div>
                                         </div>
@@ -688,8 +787,8 @@ export default function OfferDetailPage({ params }: PageProps) {
                                             <div className="flex flex-wrap gap-1.5">
                                                 {observerInsight.concerns.map((concern, idx) => (
                                                     <span key={idx} className="text-xs px-2 py-1 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25">
-                            {concern}
-                          </span>
+                                                        {concern}
+                                                    </span>
                                                 ))}
                                             </div>
                                         </div>
@@ -721,6 +820,7 @@ export default function OfferDetailPage({ params }: PageProps) {
                                         REJECT: { label: 'Odrzucił ofertę', icon: '❌', color: 'text-red-600 dark:text-red-400' },
                                         COMMENT: { label: 'Dodał komentarz', icon: '💬', color: 'text-purple-600 dark:text-purple-400' },
                                         PDF_DOWNLOAD: { label: 'Pobrał PDF', icon: '📄', color: 'text-orange-600 dark:text-orange-400' },
+                                        VARIANT_SWITCH: { label: 'Zmienił wariant', icon: '🔀', color: 'text-cyan-600 dark:text-cyan-400' },
                                     };
                                     const config = typeLabels[interaction.type] || { label: interaction.type, icon: '•', color: 'text-themed-muted' };
 
@@ -746,8 +846,7 @@ export default function OfferDetailPage({ params }: PageProps) {
                         <Card>
                             <h2 className="text-lg font-semibold text-themed mb-4">Wybór klienta</h2>
                             <div className="space-y-2">
-                                {(analytics.clientSelectedData as Array<{ name: string; isSelected: boolean; quantity: number; brutto: number }>).map((item, index) => (
-                                    <div key={index} className={`flex justify-between items-center py-2 px-3 rounded-lg ${item.isSelected ? 'bg-emerald-500/10' : 'section-themed'}`}>
+                                {(analytics.clientSelectedData as unknown as Array<{ name: string; isSelected: boolean; quantity: number; brutto: number }>).map((item, index) => (                                    <div key={index} className={`flex justify-between items-center py-2 px-3 rounded-lg ${item.isSelected ? 'bg-emerald-500/10' : 'section-themed'}`}>
                                         <div className="flex items-center gap-2">
                                             {item.isSelected ? (
                                                 <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -759,12 +858,12 @@ export default function OfferDetailPage({ params }: PageProps) {
                                                 </svg>
                                             )}
                                             <span className={`text-sm ${item.isSelected ? 'text-themed' : 'text-themed-muted line-through'}`}>
-                        {item.name} ×{item.quantity}
-                      </span>
+                                                {item.name} ×{item.quantity}
+                                            </span>
                                         </div>
                                         <span className={`text-sm font-medium ${item.isSelected ? 'text-themed' : 'text-themed-muted opacity-40'}`}>
-                      {formatCurrency(item.brutto)}
-                    </span>
+                                            {formatCurrency(item.brutto)}
+                                        </span>
                                     </div>
                                 ))}
                             </div>
@@ -794,13 +893,13 @@ export default function OfferDetailPage({ params }: PageProps) {
                                         }`}>
                                             <p className="text-sm whitespace-pre-wrap">{comment.content}</p>
                                             <div className={`flex items-center gap-2 mt-1 ${comment.author === 'SELLER' ? 'justify-end' : 'justify-start'}`}>
-                        <span className={`text-xs ${comment.author === 'SELLER' ? 'text-cyan-100' : 'text-themed-muted'}`}>
-                          {comment.author === 'SELLER' ? 'Ty' : 'Klient'}
-                        </span>
+                                                <span className={`text-xs ${comment.author === 'SELLER' ? 'text-cyan-100' : 'text-themed-muted'}`}>
+                                                    {comment.author === 'SELLER' ? 'Ty' : 'Klient'}
+                                                </span>
                                                 <span className={`text-xs ${comment.author === 'SELLER' ? 'text-cyan-200' : 'text-themed-muted opacity-50'}`}>•</span>
                                                 <span className={`text-xs ${comment.author === 'SELLER' ? 'text-cyan-200' : 'text-themed-muted'}`}>
-                          {formatDateTime(comment.createdAt)}
-                        </span>
+                                                    {formatDateTime(comment.createdAt)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -867,8 +966,8 @@ export default function OfferDetailPage({ params }: PageProps) {
                                                         closingStrategy.aggressive.riskLevel === 'medium' ? 'badge-warning' :
                                                             'badge-danger'
                                                 }`}>
-                          Ryzyko: {closingStrategy.aggressive.riskLevel === 'low' ? 'niskie' : closingStrategy.aggressive.riskLevel === 'medium' ? 'średnie' : 'wysokie'}
-                        </span>
+                                                    Ryzyko: {closingStrategy.aggressive.riskLevel === 'low' ? 'niskie' : closingStrategy.aggressive.riskLevel === 'medium' ? 'średnie' : 'wysokie'}
+                                                </span>
                                             </div>
                                             <svg className={`w-4 h-4 text-themed-muted transition-transform ${expandedStrategy === 'aggressive' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -935,8 +1034,8 @@ export default function OfferDetailPage({ params }: PageProps) {
                                                 <span className="text-sm">⚡</span>
                                                 <span className="text-sm font-semibold text-themed">{closingStrategy.quickClose.title}</span>
                                                 <span className="text-xs px-2 py-0.5 rounded-full badge-success font-medium">
-                          Max rabat: {closingStrategy.quickClose.maxDiscountPercent}%
-                        </span>
+                                                    Max rabat: {closingStrategy.quickClose.maxDiscountPercent}%
+                                                </span>
                                             </div>
                                             <svg className={`w-4 h-4 text-themed-muted transition-transform ${expandedStrategy === 'quickClose' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -962,20 +1061,20 @@ export default function OfferDetailPage({ params }: PageProps) {
                         </div>
 
                         <div className="flex gap-2">
-              <textarea
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleAddSellerComment();
-                      }
-                  }}
-                  disabled={isSending}
-                  placeholder="Odpowiedz klientowi..."
-                  rows={2}
-                  className="flex-1 px-4 py-3 rounded-xl border input-themed resize-none disabled:opacity-50 text-sm"
-              />
+                            <textarea
+                                value={newComment}
+                                onChange={(e) => setNewComment(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        handleAddSellerComment();
+                                    }
+                                }}
+                                disabled={isSending}
+                                placeholder="Odpowiedz klientowi..."
+                                rows={2}
+                                className="flex-1 px-4 py-3 rounded-xl border input-themed resize-none disabled:opacity-50 text-sm"
+                            />
                             <button
                                 onClick={handleAddSellerComment}
                                 disabled={!newComment.trim() || isSending}

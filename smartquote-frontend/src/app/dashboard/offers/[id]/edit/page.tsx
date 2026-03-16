@@ -34,9 +34,17 @@ interface ExtendedEditItem extends CreateOfferItemInput {
     isOptional: boolean;
     minQuantity: number;
     maxQuantity: number;
+    variantName: string;
 }
 
 type ItemFieldValue = string | number | boolean | undefined | null;
+
+function getUniqueVariants(items: ExtendedEditItem[]): string[] {
+    const variants = items
+        .map((i) => i.variantName.trim())
+        .filter((v) => v.length > 0);
+    return [...new Set(variants)];
+}
 
 export default function EditOfferPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -81,6 +89,7 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
                     isOptional: item.isOptional || false,
                     minQuantity: item.minQuantity || 1,
                     maxQuantity: item.maxQuantity || 100,
+                    variantName: item.variantName || '',
                 }))
             );
 
@@ -137,6 +146,7 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
                 isOptional: false,
                 minQuantity: 1,
                 maxQuantity: 100,
+                variantName: '',
             },
         ]);
     };
@@ -152,6 +162,8 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
         newItems[index] = { ...newItems[index], [field]: value };
         setItems(newItems);
     };
+
+    const uniqueVariants = getUniqueVariants(items);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -181,6 +193,7 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
                     isOptional: item.isOptional,
                     minQuantity: item.isOptional ? item.minQuantity : undefined,
                     maxQuantity: item.isOptional ? item.maxQuantity : undefined,
+                    variantName: item.variantName.trim() || undefined,
                 })),
             };
 
@@ -323,16 +336,43 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
                         </Button>
                     </div>
 
+                    {uniqueVariants.length > 0 && (
+                        <div className="mb-4 p-3 bg-gradient-to-r from-cyan-50 to-blue-50 border border-cyan-200 rounded-xl">
+                            <div className="flex items-center gap-2 mb-1">
+                                <svg className="w-4 h-4 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                                <span className="text-sm font-medium text-cyan-800">
+                                    Warianty: {uniqueVariants.join(', ')}
+                                </span>
+                            </div>
+                            <p className="text-xs text-cyan-600">
+                                Pozycje bez wariantu są wspólne dla wszystkich wariantów.
+                            </p>
+                        </div>
+                    )}
+
                     <div className="space-y-4">
                         {items.map((item, index) => {
                             const itemTotals = calculateItemTotal(item);
 
                             return (
-                                <div key={index} className="p-4 section-themed rounded-xl space-y-4">
+                                <div key={index} className={`p-4 rounded-xl space-y-4 ${
+                                    item.variantName.trim()
+                                        ? 'section-themed border-l-4 border-l-cyan-400'
+                                        : 'section-themed'
+                                }`}>
                                     <div className="flex items-start justify-between">
-                                        <span className="text-sm font-medium text-themed-muted">
-                                            Pozycja {index + 1}
-                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm font-medium text-themed-muted">
+                                                Pozycja {index + 1}
+                                            </span>
+                                            {item.variantName.trim() && (
+                                                <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-100 text-cyan-700 font-medium">
+                                                    {item.variantName.trim()}
+                                                </span>
+                                            )}
+                                        </div>
                                         {items.length > 1 && (
                                             <button
                                                 type="button"
@@ -402,6 +442,23 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
                                             min={0}
                                             max={100}
                                         />
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <Input
+                                            label="Wariant (opcjonalnie)"
+                                            value={item.variantName}
+                                            onChange={(e) => updateItem(index, 'variantName', e.target.value)}
+                                            placeholder="np. Basic, Standard, Premium"
+                                            list={`edit-variant-suggestions-${index}`}
+                                        />
+                                        {uniqueVariants.length > 0 && (
+                                            <datalist id={`edit-variant-suggestions-${index}`}>
+                                                {uniqueVariants.map((v) => (
+                                                    <option key={v} value={v} />
+                                                ))}
+                                            </datalist>
+                                        )}
                                     </div>
 
                                     <div className="flex items-center justify-between">
