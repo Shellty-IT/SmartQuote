@@ -330,6 +330,7 @@ export interface PublicOfferData {
             postalCode: string | null;
             website: string | null;
             logo: string | null;
+            primaryColor: string | null;
         };
         comments: OfferComment[];
     };
@@ -638,6 +639,7 @@ export interface CompanyInfo {
     bankName: string | null;
     bankAccount: string | null;
     logo: string | null;
+    primaryColor: string | null;
     defaultPaymentDays: number;
     defaultTerms: string | null;
     defaultNotes: string | null;
@@ -709,6 +711,7 @@ export interface UpdateCompanyInfoInput {
     bankName?: string | null;
     bankAccount?: string | null;
     logo?: string | null;
+    primaryColor?: string | null;
     defaultPaymentDays?: number;
     defaultTerms?: string | null;
     defaultNotes?: string | null;

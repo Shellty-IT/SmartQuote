@@ -14,7 +14,8 @@ import {
     Check,
     Upload,
     X,
-    Image
+    Image,
+    Palette
 } from 'lucide-react';
 import { Card } from '@/components/ui';
 import Button from '@/components/ui/Button';
@@ -25,6 +26,25 @@ interface Props {
     company: CompanyInfo;
     onUpdate: (data: UpdateCompanyInfoInput) => Promise<CompanyInfo>;
 }
+
+const PRESET_COLORS = [
+    '#0891b2',
+    '#0ea5e9',
+    '#3b82f6',
+    '#6366f1',
+    '#8b5cf6',
+    '#a855f7',
+    '#d946ef',
+    '#ec4899',
+    '#f43f5e',
+    '#ef4444',
+    '#f97316',
+    '#eab308',
+    '#84cc16',
+    '#22c55e',
+    '#10b981',
+    '#14b8a6',
+];
 
 export default function CompanySection({ company, onUpdate }: Props) {
     const [isEditing, setIsEditing] = useState(false);
@@ -49,9 +69,11 @@ export default function CompanySection({ company, onUpdate }: Props) {
         defaultPaymentDays: company.defaultPaymentDays || 14,
         defaultTerms: company.defaultTerms || '',
         defaultNotes: company.defaultNotes || '',
+        primaryColor: company.primaryColor || '',
     });
 
     const logoInputRef = useRef<HTMLInputElement>(null);
+    const colorInputRef = useRef<HTMLInputElement>(null);
 
     const handleChange = (field: keyof UpdateCompanyInfoInput, value: string | number) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -90,6 +112,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
             defaultPaymentDays: company.defaultPaymentDays || 14,
             defaultTerms: company.defaultTerms || '',
             defaultNotes: company.defaultNotes || '',
+            primaryColor: company.primaryColor || '',
         });
         setIsEditing(false);
     };
@@ -145,6 +168,16 @@ export default function CompanySection({ company, onUpdate }: Props) {
             setIsUploadingLogo(false);
         }
     };
+
+    const handlePresetColor = (color: string) => {
+        handleChange('primaryColor', color);
+    };
+
+    const handleResetColor = () => {
+        handleChange('primaryColor', '');
+    };
+
+    const activeColor = formData.primaryColor || '#0891b2';
 
     return (
         <div className="space-y-6">
@@ -249,6 +282,90 @@ export default function CompanySection({ company, onUpdate }: Props) {
                             className="w-full px-4 py-2.5 border rounded-xl focus:outline-none transition-colors"
                             placeholder="123456789"
                         />
+                    </div>
+                </div>
+            </Card>
+
+            <Card>
+                <div className="flex items-center gap-2 mb-6">
+                    <Palette className="w-5 h-5 text-cyan-500" />
+                    <div>
+                        <h3 className="text-lg font-semibold text-themed">Kolor firmowy</h3>
+                        <p className="text-sm text-themed-muted">Kolor widoczny na publicznej stronie oferty (przyciski, akcenty, linki)</p>
+                    </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-start gap-6">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => colorInputRef.current?.click()}
+                            className="w-14 h-14 rounded-xl border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all hover:scale-105 hover:shadow-lg flex-shrink-0"
+                            style={{ backgroundColor: activeColor }}
+                        />
+                        <input
+                            ref={colorInputRef}
+                            type="color"
+                            value={activeColor}
+                            onChange={(e) => handleChange('primaryColor', e.target.value)}
+                            className="sr-only"
+                        />
+                        <div>
+                            <p className="text-sm font-mono text-themed">{activeColor.toUpperCase()}</p>
+                            <p className="text-xs text-themed-muted">
+                                {formData.primaryColor ? 'Kolor niestandardowy' : 'Domyślny (cyan)'}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex-1">
+                        <p className="text-xs text-themed-muted mb-2">Szybki wybór:</p>
+                        <div className="flex flex-wrap gap-2">
+                            {PRESET_COLORS.map((color) => (
+                                <button
+                                    key={color}
+                                    onClick={() => handlePresetColor(color)}
+                                    className={`w-8 h-8 rounded-lg transition-all hover:scale-110 ${
+                                        formData.primaryColor === color
+                                            ? 'ring-2 ring-offset-2 ring-slate-400 dark:ring-offset-slate-900'
+                                            : ''
+                                    }`}
+                                    style={{ backgroundColor: color }}
+                                />
+                            ))}
+                        </div>
+                        {formData.primaryColor && (
+                            <button
+                                onClick={handleResetColor}
+                                className="text-xs text-themed-muted hover:text-red-500 mt-3 flex items-center gap-1 transition-colors"
+                            >
+                                <X className="w-3 h-3" />
+                                Przywróć domyślny kolor
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                <div className="mt-6 pt-6 border-t divider-themed">
+                    <p className="text-xs text-themed-muted mb-3">Podgląd:</p>
+                    <div className="flex flex-wrap gap-3">
+                        <button
+                            className="px-5 py-2.5 rounded-xl text-white text-sm font-semibold transition-colors"
+                            style={{ backgroundColor: activeColor }}
+                        >
+                            Akceptuję ofertę
+                        </button>
+                        <span
+                            className="px-3 py-1.5 rounded-full text-xs font-medium text-white"
+                            style={{ backgroundColor: activeColor }}
+                        >
+                            Wariant A
+                        </span>
+                        <span
+                            className="text-sm font-semibold"
+                            style={{ color: activeColor }}
+                        >
+                            OFR/2025/001
+                        </span>
                     </div>
                 </div>
             </Card>

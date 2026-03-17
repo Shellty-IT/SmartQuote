@@ -13,6 +13,7 @@ interface OfferHeaderProps {
     createdAt: string;
     validUntil: string | null;
     expired: boolean;
+    primaryColor?: string;
 }
 
 function formatDateLocal(dateStr: string): string {
@@ -32,6 +33,7 @@ export default function OfferHeader({
                                         createdAt,
                                         validUntil,
                                         expired,
+                                        primaryColor = '#0891b2',
                                     }: OfferHeaderProps) {
     return (
         <div className="space-y-4">
@@ -45,7 +47,10 @@ export default function OfferHeader({
                                 className="w-16 h-16 object-contain rounded-lg flex-shrink-0"
                             />
                         ) : (
-                            <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
+                            <div
+                                className="w-16 h-16 rounded-lg flex items-center justify-center text-white text-xl font-bold flex-shrink-0"
+                                style={{ background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}cc)` }}
+                            >
                                 {(seller.company || seller.name || 'S').charAt(0).toUpperCase()}
                             </div>
                         )}
@@ -68,7 +73,8 @@ export default function OfferHeader({
                                 {seller.email && (
                                     <a
                                         href={`mailto:${seller.email}`}
-                                        className="text-sm text-cyan-600 hover:text-cyan-700 transition-colors"
+                                        className="text-sm transition-colors"
+                                        style={{ color: primaryColor }}
                                     >
                                         {seller.email}
                                     </a>
@@ -76,7 +82,8 @@ export default function OfferHeader({
                                 {seller.phone && (
                                     <a
                                         href={`tel:${seller.phone}`}
-                                        className="text-sm text-cyan-600 hover:text-cyan-700 transition-colors"
+                                        className="text-sm transition-colors"
+                                        style={{ color: primaryColor }}
                                     >
                                         {seller.phone}
                                     </a>
@@ -87,7 +94,7 @@ export default function OfferHeader({
 
                     <div className="text-left md:text-right flex-shrink-0">
                         <p className="text-xs text-slate-400 uppercase tracking-wider font-medium">Oferta</p>
-                        <p className="text-xl font-bold text-cyan-600 mt-1">{offerNumber}</p>
+                        <p className="text-xl font-bold mt-1" style={{ color: primaryColor }}>{offerNumber}</p>
                         <div className="mt-3 space-y-1">
                             <p className="text-sm text-slate-600">
                                 <span className="text-slate-400">Wystawiona: </span>

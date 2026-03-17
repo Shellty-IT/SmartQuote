@@ -95,6 +95,8 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
     const isFinalized = decided || expired;
     const hasVariants = variants.length > 0;
 
+    const primaryColor = offer.seller.primaryColor || '#0891b2';
+
     const [selectedVariant, setSelectedVariant] = useState<string | null>(
         hasVariants ? variants[0] : null
     );
@@ -123,6 +125,13 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
     const [error, setError] = useState<string | null>(null);
 
     const trackingTimeout = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        document.documentElement.style.setProperty('--primary-color', primaryColor);
+        return () => {
+            document.documentElement.style.removeProperty('--primary-color');
+        };
+    }, [primaryColor]);
 
     useEffect(() => {
         publicOffersApi.registerView(token).catch(() => {});
@@ -287,7 +296,7 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                 </p>
                 {selectedVariant && (
                     <p className="text-slate-500 mb-2">
-                        Wybrany wariant: <span className="font-semibold text-cyan-600">{selectedVariant}</span>
+                        Wybrany wariant: <span className="font-semibold" style={{ color: primaryColor }}>{selectedVariant}</span>
                     </p>
                 )}
                 <p className="text-slate-500 mb-8">
@@ -295,7 +304,7 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                 </p>
                 <div className="bg-slate-900 rounded-xl p-6 inline-block">
                     <p className="text-slate-400 text-sm mb-1">Zaakceptowana kwota brutto</p>
-                    <p className="text-3xl font-bold text-cyan-400">
+                    <p className="text-3xl font-bold" style={{ color: primaryColor }}>
                         {formatPLN(totals.totalGross)}
                     </p>
                 </div>
@@ -377,7 +386,8 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                 {offer.seller.email && (
                     <a
                         href={`mailto:${offer.seller.email}`}
-                        className="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-cyan-500 text-white font-medium rounded-xl hover:bg-cyan-600 transition-colors"
+                        className="inline-flex items-center gap-2 mt-6 px-6 py-3 text-white font-medium rounded-xl transition-colors"
+                        style={{ backgroundColor: primaryColor }}
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -400,6 +410,7 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                 createdAt={offer.createdAt}
                 validUntil={offer.validUntil}
                 expired={expired}
+                primaryColor={primaryColor}
             />
 
             {error && (
@@ -437,7 +448,7 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
             {hasVariants && (
                 <div className="bg-white rounded-xl border border-slate-200 p-6">
                     <div className="flex items-center gap-2 mb-4">
-                        <svg className="w-5 h-5 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} style={{ color: primaryColor }}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                         </svg>
                         <h2 className="text-lg font-semibold text-slate-900">Wybierz wariant</h2>
@@ -453,9 +464,13 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                                 disabled={isFinalized}
                                 className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                                     selectedVariant === variant
-                                        ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/25'
+                                        ? 'text-white shadow-lg'
                                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                                 } ${isFinalized ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                                style={selectedVariant === variant ? {
+                                    backgroundColor: primaryColor,
+                                    boxShadow: `0 10px 15px -3px ${primaryColor}40`,
+                                } : undefined}
                             >
                                 {variant}
                             </button>
@@ -469,7 +484,7 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                     <h2 className="text-lg font-semibold text-slate-900">
                         Pozycje oferty
                         {selectedVariant && (
-                            <span className="ml-2 text-sm font-normal text-cyan-600">
+                            <span className="ml-2 text-sm font-normal" style={{ color: primaryColor }}>
                                 — {selectedVariant}
                             </span>
                         )}
@@ -536,7 +551,8 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                     <div className="flex flex-col sm:flex-row gap-3">
                         <button
                             onClick={() => setAcceptDialogOpen(true)}
-                            className="flex-1 px-6 py-4 rounded-xl bg-emerald-600 text-white font-semibold text-lg hover:bg-emerald-700 transition-colors flex items-center justify-center gap-3"
+                            className="flex-1 px-6 py-4 rounded-xl text-white font-semibold text-lg transition-colors flex items-center justify-center gap-3"
+                            style={{ backgroundColor: '#059669' }}
                         >
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
