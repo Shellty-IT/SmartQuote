@@ -148,7 +148,7 @@ export default function Sidebar() {
                 <div className="space-y-1">
                     {navigation.map((item) => {
                         const isActive = pathname === item.href ||
-                            (item.href !== '/dashboard' && pathname.startsWith(item.href));
+                            (item.href !== '/dashboard' && pathname.startsWith(item.href + '/'));
                         const colorConfig = item.badgeColor ? badgeColors[item.badgeColor] : badgeColors.cyan;
 
                         return (

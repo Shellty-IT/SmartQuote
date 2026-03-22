@@ -417,6 +417,19 @@ export interface ContractItem {
     position: number;
 }
 
+export interface ContractSignatureLog {
+    id: string;
+    contractId: string;
+    signerName: string;
+    signerEmail: string;
+    signatureImage: string;
+    ipAddress: string;
+    userAgent: string;
+    contentHash: string;
+    signedAt: string;
+    createdAt: string;
+}
+
 export interface Contract {
     id: string;
     number: string;
@@ -441,6 +454,7 @@ export interface Contract {
     offerId: string | null;
     offer?: Offer;
     items: ContractItem[];
+    signatureLog?: ContractSignatureLog | null;
     createdAt: string;
     updatedAt: string;
 }
