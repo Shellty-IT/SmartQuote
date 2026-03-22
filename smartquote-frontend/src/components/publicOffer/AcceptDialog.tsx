@@ -1,4 +1,4 @@
-// src/components/publicOffer/AcceptDialog.tsx
+// SmartQuote-AI/src/components/publicOffer/AcceptDialog.tsx
 'use client';
 
 import { useState } from 'react';
@@ -26,6 +26,7 @@ interface AcceptDialogProps {
     readonly totalGross: number;
     readonly isLoading: boolean;
     readonly requireAuditTrail?: boolean;
+    readonly primaryColor?: string;
 }
 
 function formatPLN(amount: number): string {
@@ -47,6 +48,7 @@ export default function AcceptDialog({
                                          totalGross,
                                          isLoading,
                                          requireAuditTrail = false,
+                                         primaryColor = '#0891b2',
                                      }: AcceptDialogProps) {
     const [confirmed, setConfirmed] = useState(false);
     const [auditName, setAuditName] = useState('');
@@ -199,7 +201,10 @@ export default function AcceptDialog({
                     <div className="bg-slate-900 rounded-xl p-4 mb-6">
                         <div className="flex justify-between items-center">
                             <span className="text-slate-300 font-medium">Kwota brutto</span>
-                            <span className="text-2xl font-bold text-cyan-400">
+                            <span
+                                className="text-2xl font-bold"
+                                style={{ color: primaryColor }}
+                            >
                                 {formatPLN(totalGross)}
                             </span>
                         </div>
@@ -211,7 +216,7 @@ export default function AcceptDialog({
                             checked={confirmed}
                             onChange={(e) => setConfirmed(e.target.checked)}
                             disabled={isLoading}
-                            className="mt-0.5 w-5 h-5 rounded border-amber-300 text-cyan-600 focus:ring-cyan-500 cursor-pointer"
+                            className="mt-0.5 w-5 h-5 rounded border-amber-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                         />
                         <span className="text-sm text-amber-900 leading-relaxed">
                             Potwierdzam akceptację niniejszej oferty i zapoznałem/am się z jej warunkami.

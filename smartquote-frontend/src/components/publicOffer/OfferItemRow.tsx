@@ -1,16 +1,16 @@
 // SmartQuote-AI/src/components/publicOffer/OfferItemRow.tsx
-
 'use client';
 
 import type { PublicOfferItem } from '@/types';
 
 interface OfferItemRowProps {
-    item: PublicOfferItem;
-    isSelected: boolean;
-    quantity: number;
-    onToggle: (id: string, selected: boolean) => void;
-    onQuantityChange: (id: string, quantity: number) => void;
-    disabled: boolean;
+    readonly item: PublicOfferItem;
+    readonly isSelected: boolean;
+    readonly quantity: number;
+    readonly onToggle: (id: string, selected: boolean) => void;
+    readonly onQuantityChange: (id: string, quantity: number) => void;
+    readonly disabled: boolean;
+    readonly primaryColor?: string;
 }
 
 function formatPLN(amount: number): string {
@@ -21,6 +21,11 @@ function formatPLN(amount: number): string {
     }).format(amount);
 }
 
+function withAlpha(hex: string, alpha: number): string {
+    const a = Math.round(alpha * 255).toString(16).padStart(2, '0');
+    return `${hex}${a}`;
+}
+
 export default function OfferItemRow({
                                          item,
                                          isSelected,
@@ -28,6 +33,7 @@ export default function OfferItemRow({
                                          onToggle,
                                          onQuantityChange,
                                          disabled,
+                                         primaryColor = '#0891b2',
                                      }: OfferItemRowProps) {
     const unitPrice = Number(item.unitPrice);
     const vatRate = Number(item.vatRate);
@@ -47,9 +53,14 @@ export default function OfferItemRow({
                 !item.isOptional
                     ? 'border-slate-200 bg-white'
                     : isSelected
-                        ? 'border-cyan-200 bg-cyan-50/30'
+                        ? ''
                         : 'border-dashed border-slate-200 bg-slate-50/50 opacity-60'
             }`}
+            style={
+                item.isOptional && isSelected
+                    ? { borderColor: withAlpha(primaryColor, 0.25), backgroundColor: withAlpha(primaryColor, 0.05) }
+                    : undefined
+            }
         >
             <div className="flex items-start gap-3">
                 {item.isOptional ? (
@@ -60,9 +71,14 @@ export default function OfferItemRow({
                             disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
                         } ${
                             isSelected
-                                ? 'bg-cyan-500 border-cyan-500 text-white'
-                                : 'bg-white border-slate-300 hover:border-cyan-400'
+                                ? 'text-white'
+                                : 'bg-white border-slate-300 hover:border-slate-400'
                         }`}
+                        style={
+                            isSelected
+                                ? { backgroundColor: primaryColor, borderColor: primaryColor }
+                                : undefined
+                        }
                     >
                         {isSelected && (
                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>

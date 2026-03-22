@@ -1,4 +1,4 @@
-// SmartQuote-AI/src/types/ai.ts
+// src/types/ai.ts
 export interface AIMessage {
     id: string;
     role: 'user' | 'assistant';
@@ -128,6 +128,20 @@ export interface ClosingStrategy {
     contextSummary: string;
 }
 
+export interface VariantHistoryEntry {
+    offerId: string;
+    offerNumber: string;
+    selectedVariant: string;
+    outcome: string;
+    date: string;
+}
+
+export interface VariantHistoryStats {
+    totalAcceptedWithVariant: number;
+    distribution: Record<string, number>;
+    entries: VariantHistoryEntry[];
+}
+
 export interface PostMortemInsight {
     outcome: string;
     summary: string;
@@ -135,6 +149,9 @@ export interface PostMortemInsight {
     pricingInsight: string;
     improvementSuggestions: string[];
     industryNote: string | null;
+    selectedVariant?: string | null;
+    availableVariants?: string[];
+    variantHistory?: VariantHistoryStats;
 }
 
 export interface LatestInsightItem {
@@ -151,6 +168,25 @@ export interface LatestInsightItem {
         pricingInsight?: string;
         improvementSuggestions?: string[];
         industryNote?: string;
+        selectedVariant?: string | null;
+        availableVariants?: string[];
+        variantHistory?: VariantHistoryStats;
     };
     createdAt: string;
+}
+
+export interface InsightsListItem extends LatestInsightItem {
+    offerStatus: string;
+    offerCurrency: string;
+    clientCompany: string | null;
+    resolvedAt: string | null;
+}
+
+export interface InsightsListParams {
+    page?: number;
+    limit?: number;
+    outcome?: 'ACCEPTED' | 'REJECTED';
+    dateFrom?: string;
+    dateTo?: string;
+    search?: string;
 }

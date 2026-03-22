@@ -1,15 +1,15 @@
 // SmartQuote-AI/src/components/publicOffer/CommentSection.tsx
-
 'use client';
 
 import { useState } from 'react';
 import type { OfferComment } from '@/types';
 
 interface CommentSectionProps {
-    comments: OfferComment[];
-    onAddComment: (content: string) => Promise<void>;
-    disabled: boolean;
-    isSending: boolean;
+    readonly comments: OfferComment[];
+    readonly onAddComment: (content: string) => Promise<void>;
+    readonly disabled: boolean;
+    readonly isSending: boolean;
+    readonly primaryColor?: string;
 }
 
 function formatCommentDate(dateStr: string): string {
@@ -39,6 +39,7 @@ export default function CommentSection({
                                            onAddComment,
                                            disabled,
                                            isSending,
+                                           primaryColor = '#0891b2',
                                        }: CommentSectionProps) {
     const [newComment, setNewComment] = useState('');
 
@@ -85,9 +86,14 @@ export default function CommentSection({
                             <div
                                 className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                                     comment.author === 'CLIENT'
-                                        ? 'bg-cyan-500 text-white rounded-br-sm'
+                                        ? 'text-white rounded-br-sm'
                                         : 'bg-slate-100 text-slate-900 rounded-bl-sm'
                                 }`}
+                                style={
+                                    comment.author === 'CLIENT'
+                                        ? { backgroundColor: primaryColor }
+                                        : undefined
+                                }
                             >
                                 <p className="text-sm whitespace-pre-wrap">{comment.content}</p>
                                 <div
@@ -98,7 +104,7 @@ export default function CommentSection({
                                     <span
                                         className={`text-xs ${
                                             comment.author === 'CLIENT'
-                                                ? 'text-cyan-100'
+                                                ? 'text-white/70'
                                                 : 'text-slate-400'
                                         }`}
                                     >
@@ -107,7 +113,7 @@ export default function CommentSection({
                                     <span
                                         className={`text-xs ${
                                             comment.author === 'CLIENT'
-                                                ? 'text-cyan-200'
+                                                ? 'text-white/50'
                                                 : 'text-slate-300'
                                         }`}
                                     >
@@ -116,7 +122,7 @@ export default function CommentSection({
                                     <span
                                         className={`text-xs ${
                                             comment.author === 'CLIENT'
-                                                ? 'text-cyan-200'
+                                                ? 'text-white/50'
                                                 : 'text-slate-400'
                                         }`}
                                     >
@@ -140,7 +146,8 @@ export default function CommentSection({
                             placeholder="Napisz pytanie lub komentarz..."
                             rows={2}
                             maxLength={2000}
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent resize-none disabled:opacity-50 text-sm"
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:border-transparent resize-none disabled:opacity-50 text-sm"
+                            style={{ '--tw-ring-color': primaryColor } as React.CSSProperties}
                         />
                         <p className="absolute bottom-2 right-3 text-xs text-slate-300">
                             {newComment.length}/2000
@@ -149,7 +156,8 @@ export default function CommentSection({
                     <button
                         onClick={handleSubmit}
                         disabled={!newComment.trim() || isSending || disabled}
-                        className="self-end px-4 py-3 rounded-xl bg-cyan-500 text-white hover:bg-cyan-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                        className="self-end px-4 py-3 rounded-xl text-white hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                        style={{ backgroundColor: primaryColor }}
                     >
                         {isSending ? (
                             <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">

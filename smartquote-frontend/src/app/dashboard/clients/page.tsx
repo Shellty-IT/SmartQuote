@@ -32,8 +32,8 @@ export default function ClientsPage() {
         try {
             await deleteClient(deleteModal.client.id);
             setDeleteModal({ isOpen: false, client: null });
-        } catch (error) {
-            console.error('Delete error:', error);
+        } catch (err: unknown) {
+            console.error('Delete error:', err);
         } finally {
             setIsDeleting(false);
         }
@@ -73,7 +73,12 @@ export default function ClientsPage() {
                         />
                     </div>
                     <select
-                        className="px-4 py-2.5 border rounded-lg input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                        className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                        style={{
+                            backgroundColor: 'var(--input-bg)',
+                            borderColor: 'var(--divider)',
+                            color: 'var(--input-text)',
+                        }}
                         value={filters.type || ''}
                         onChange={(e) => setFilters({ type: e.target.value as 'COMPANY' | 'PERSON' | undefined, page: 1 })}
                     >
@@ -82,7 +87,12 @@ export default function ClientsPage() {
                         <option value="PERSON">Osoby prywatne</option>
                     </select>
                     <select
-                        className="px-4 py-2.5 border rounded-lg input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                        className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                        style={{
+                            backgroundColor: 'var(--input-bg)',
+                            borderColor: 'var(--divider)',
+                            color: 'var(--input-text)',
+                        }}
                         value={filters.isActive?.toString() || ''}
                         onChange={(e) => setFilters({ isActive: e.target.value ? e.target.value === 'true' : undefined, page: 1 })}
                     >
@@ -94,9 +104,16 @@ export default function ClientsPage() {
             </Card>
 
             {error && (
-                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/25 rounded-lg text-red-600">
+                <div
+                    className="mb-6 p-4 rounded-lg border"
+                    style={{
+                        backgroundColor: 'var(--error-bg, rgba(239, 68, 68, 0.1))',
+                        borderColor: 'var(--error-border, rgba(239, 68, 68, 0.25))',
+                        color: 'var(--error-text, #ef4444)',
+                    }}
+                >
                     {error}
-                    <button onClick={refresh} className="ml-2 underline">
+                    <button onClick={refresh} className="ml-2 underline hover:opacity-80">
                         Spróbuj ponownie
                     </button>
                 </div>
@@ -123,7 +140,7 @@ export default function ClientsPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                            <tr className="border-b divider-themed section-themed">
+                            <tr className="border-b" style={{ borderColor: 'var(--divider)', backgroundColor: 'var(--section-bg)' }}>
                                 <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">
                                     Klient
                                 </th>
@@ -148,7 +165,8 @@ export default function ClientsPage() {
                             {clients.map((client) => (
                                 <tr
                                     key={client.id}
-                                    className="border-b divider-themed hover-themed transition-colors cursor-pointer"
+                                    className="border-b hover-themed transition-colors cursor-pointer"
+                                    style={{ borderColor: 'var(--divider)' }}
                                     onClick={() => router.push(`/dashboard/clients/${client.id}`)}
                                 >
                                     <td className="px-6 py-4">
@@ -189,7 +207,16 @@ export default function ClientsPage() {
                                         <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                                             <button
                                                 onClick={() => router.push(`/dashboard/clients/${client.id}/edit`)}
-                                                className="p-2 text-themed-muted hover:text-cyan-600 hover:bg-cyan-500/10 rounded-lg transition-colors"
+                                                className="p-2 text-themed-muted rounded-lg transition-colors"
+                                                style={{ backgroundColor: 'transparent' }}
+                                                onMouseEnter={(e) => {
+                                                    e.currentTarget.style.backgroundColor = 'var(--tone-active-bg)';
+                                                    e.currentTarget.style.color = 'var(--accent-gradient-from)';
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                                    e.currentTarget.style.color = 'var(--muted-text)';
+                                                }}
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -197,7 +224,16 @@ export default function ClientsPage() {
                                             </button>
                                             <button
                                                 onClick={() => setDeleteModal({ isOpen: true, client })}
-                                                className="p-2 text-themed-muted hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors"
+                                                className="p-2 text-themed-muted rounded-lg transition-colors"
+                                                style={{ backgroundColor: 'transparent' }}
+                                                onMouseEnter={(e) => {
+                                                    e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                                                    e.currentTarget.style.color = '#ef4444';
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                                    e.currentTarget.style.color = 'var(--muted-text)';
+                                                }}
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -212,7 +248,7 @@ export default function ClientsPage() {
                     </div>
 
                     {totalPages > 1 && (
-                        <div className="px-6 py-4 border-t divider-themed flex items-center justify-between">
+                        <div className="px-6 py-4 border-t flex items-center justify-between" style={{ borderColor: 'var(--divider)' }}>
                             <p className="text-sm text-themed-muted">
                                 Pokazano {clients.length} z {total} klientów
                             </p>

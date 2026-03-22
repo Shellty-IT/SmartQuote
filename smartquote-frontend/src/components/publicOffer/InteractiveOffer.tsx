@@ -509,6 +509,7 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                             onToggle={handleToggle}
                             onQuantityChange={handleQuantityChange}
                             disabled={isFinalized}
+                            primaryColor={primaryColor}
                         />
                     ))}
                 </div>
@@ -521,6 +522,7 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                 currency={offer.currency}
                 selectedCount={totals.selectedCount}
                 totalCount={totals.totalVisible}
+                primaryColor={primaryColor}
             />
 
             {offer.terms && (
@@ -544,6 +546,7 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                 onAddComment={handleAddComment}
                 disabled={isFinalized}
                 isSending={isSendingComment}
+                primaryColor={primaryColor}
             />
 
             {!isFinalized && (
@@ -583,6 +586,7 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                 totalGross={totals.totalGross}
                 isLoading={isAccepting}
                 requireAuditTrail={requireAuditTrail}
+                primaryColor={primaryColor}
             />
 
             <RejectDialog

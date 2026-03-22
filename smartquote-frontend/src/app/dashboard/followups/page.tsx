@@ -10,10 +10,10 @@ import { formatDate } from '@/lib/utils';
 import { FollowUp, FollowUpStatus, FollowUpType, Priority } from '@/types';
 
 const statusConfig: Record<FollowUpStatus, { label: string; color: string; bgColor: string }> = {
-    PENDING: { label: 'Oczekujące', color: 'text-amber-700 dark:text-amber-400', bgColor: 'bg-amber-50 dark:bg-amber-900/30' },
-    COMPLETED: { label: 'Wykonane', color: 'text-green-700 dark:text-green-400', bgColor: 'bg-green-50 dark:bg-green-900/30' },
-    CANCELLED: { label: 'Anulowane', color: 'text-slate-700 dark:text-slate-300', bgColor: 'bg-slate-100 dark:bg-slate-700/50' },
-    OVERDUE: { label: 'Zaległe', color: 'text-red-700 dark:text-red-400', bgColor: 'bg-red-50 dark:bg-red-900/30' },
+    PENDING: { label: 'Oczekujące', color: 'text-amber-600', bgColor: 'bg-amber-500/15' },
+    COMPLETED: { label: 'Wykonane', color: 'text-emerald-600', bgColor: 'bg-emerald-500/15' },
+    CANCELLED: { label: 'Anulowane', color: 'text-slate-500', bgColor: 'bg-slate-500/15' },
+    OVERDUE: { label: 'Zaległe', color: 'text-red-600', bgColor: 'bg-red-500/15' },
 };
 
 const typeConfig: Record<FollowUpType, { label: string; icon: string }> = {
@@ -26,10 +26,10 @@ const typeConfig: Record<FollowUpType, { label: string; icon: string }> = {
 };
 
 const priorityConfig: Record<Priority, { label: string; color: string; bgColor: string }> = {
-    LOW: { label: 'Niski', color: 'text-slate-600 dark:text-slate-400', bgColor: 'bg-slate-100 dark:bg-slate-700/50' },
-    MEDIUM: { label: 'Średni', color: 'text-blue-700 dark:text-blue-400', bgColor: 'bg-blue-50 dark:bg-blue-900/30' },
-    HIGH: { label: 'Wysoki', color: 'text-orange-700 dark:text-orange-400', bgColor: 'bg-orange-50 dark:bg-orange-900/30' },
-    URGENT: { label: 'Pilne', color: 'text-red-700 dark:text-red-400', bgColor: 'bg-red-50 dark:bg-red-900/30' },
+    LOW: { label: 'Niski', color: 'text-slate-500', bgColor: 'bg-slate-500/15' },
+    MEDIUM: { label: 'Średni', color: 'text-blue-600', bgColor: 'bg-blue-500/15' },
+    HIGH: { label: 'Wysoki', color: 'text-orange-600', bgColor: 'bg-orange-500/15' },
+    URGENT: { label: 'Pilne', color: 'text-red-600', bgColor: 'bg-red-500/15' },
 };
 
 export default function FollowUpsPage() {
@@ -70,8 +70,8 @@ export default function FollowUpsPage() {
         try {
             await deleteFollowUp(deleteModal.followUp.id);
             setDeleteModal({ isOpen: false, followUp: null });
-        } catch (error) {
-            console.error('Delete error:', error);
+        } catch (err: unknown) {
+            console.error('Delete error:', err);
         } finally {
             setIsDeleting(false);
         }
@@ -81,8 +81,8 @@ export default function FollowUpsPage() {
         setCompletingId(followUp.id);
         try {
             await completeFollowUp(followUp.id);
-        } catch (error) {
-            console.error('Complete error:', error);
+        } catch (err: unknown) {
+            console.error('Complete error:', err);
         } finally {
             setCompletingId(null);
         }
@@ -120,7 +120,10 @@ export default function FollowUpsPage() {
                                 <p className="text-sm text-themed-muted">Oczekujące</p>
                                 <p className="text-2xl font-bold text-themed">{stats.byStatus?.PENDING || 0}</p>
                             </div>
-                            <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                            <div
+                                className="w-10 h-10 rounded-lg flex items-center justify-center"
+                                style={{ backgroundColor: 'var(--tone-active-bg)' }}
+                            >
                                 <span className="text-xl">⏳</span>
                             </div>
                         </div>
@@ -129,9 +132,12 @@ export default function FollowUpsPage() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-themed-muted">Zaległe</p>
-                                <p className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.overdue || 0}</p>
+                                <p className="text-2xl font-bold text-red-500">{stats.overdue || 0}</p>
                             </div>
-                            <div className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                            <div
+                                className="w-10 h-10 rounded-lg flex items-center justify-center"
+                                style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)' }}
+                            >
                                 <span className="text-xl">🚨</span>
                             </div>
                         </div>
@@ -140,9 +146,12 @@ export default function FollowUpsPage() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-themed-muted">Na dziś</p>
-                                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.todayDue || 0}</p>
+                                <p className="text-2xl font-bold text-blue-500">{stats.todayDue || 0}</p>
                             </div>
-                            <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                            <div
+                                className="w-10 h-10 rounded-lg flex items-center justify-center"
+                                style={{ backgroundColor: 'rgba(59, 130, 246, 0.15)' }}
+                            >
                                 <span className="text-xl">📅</span>
                             </div>
                         </div>
@@ -151,9 +160,12 @@ export default function FollowUpsPage() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-themed-muted">Wykonane (miesiąc)</p>
-                                <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.completedThisMonth || 0}</p>
+                                <p className="text-2xl font-bold text-emerald-500">{stats.completedThisMonth || 0}</p>
                             </div>
-                            <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                            <div
+                                className="w-10 h-10 rounded-lg flex items-center justify-center"
+                                style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)' }}
+                            >
                                 <span className="text-xl">✅</span>
                             </div>
                         </div>
@@ -176,7 +188,12 @@ export default function FollowUpsPage() {
                         />
                     </div>
                     <select
-                        className="px-4 py-2.5 border rounded-lg input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                        className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                        style={{
+                            backgroundColor: 'var(--input-bg)',
+                            borderColor: 'var(--divider)',
+                            color: 'var(--input-text)',
+                        }}
                         value={filters.status || ''}
                         onChange={(e) => setFilters({ status: e.target.value, page: 1 })}
                     >
@@ -186,7 +203,12 @@ export default function FollowUpsPage() {
                         <option value="CANCELLED">Anulowane</option>
                     </select>
                     <select
-                        className="px-4 py-2.5 border rounded-lg input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                        className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                        style={{
+                            backgroundColor: 'var(--input-bg)',
+                            borderColor: 'var(--divider)',
+                            color: 'var(--input-text)',
+                        }}
                         value={filters.type || ''}
                         onChange={(e) => setFilters({ type: e.target.value, page: 1 })}
                     >
@@ -199,7 +221,12 @@ export default function FollowUpsPage() {
                         <option value="OTHER">Inne</option>
                     </select>
                     <select
-                        className="px-4 py-2.5 border rounded-lg input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                        className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                        style={{
+                            backgroundColor: 'var(--input-bg)',
+                            borderColor: 'var(--divider)',
+                            color: 'var(--input-text)',
+                        }}
                         value={filters.priority || ''}
                         onChange={(e) => setFilters({ priority: e.target.value, page: 1 })}
                     >
@@ -209,7 +236,13 @@ export default function FollowUpsPage() {
                         <option value="HIGH">Wysoki</option>
                         <option value="URGENT">Pilne</option>
                     </select>
-                    <label className="flex items-center gap-2 px-4 py-2.5 border rounded-lg card-themed cursor-pointer hover-themed">
+                    <label
+                        className="flex items-center gap-2 px-4 py-2.5 border rounded-lg cursor-pointer transition-colors"
+                        style={{
+                            backgroundColor: 'var(--card-bg)',
+                            borderColor: 'var(--divider)',
+                        }}
+                    >
                         <input
                             type="checkbox"
                             checked={filters.overdue || false}
@@ -222,9 +255,16 @@ export default function FollowUpsPage() {
             </Card>
 
             {error && (
-                <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400">
+                <div
+                    className="mb-6 p-4 rounded-lg border"
+                    style={{
+                        backgroundColor: 'var(--error-bg, rgba(239, 68, 68, 0.1))',
+                        borderColor: 'var(--error-border, rgba(239, 68, 68, 0.25))',
+                        color: 'var(--error-text, #ef4444)',
+                    }}
+                >
                     {error}
-                    <button onClick={refetch} className="ml-2 underline">
+                    <button onClick={refetch} className="ml-2 underline hover:opacity-80">
                         Spróbuj ponownie
                     </button>
                 </div>
@@ -251,7 +291,7 @@ export default function FollowUpsPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                            <tr className="border-b divider-themed section-themed">
+                            <tr className="border-b" style={{ borderColor: 'var(--divider)', backgroundColor: 'var(--section-bg)' }}>
                                 <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">
                                     Follow-up
                                 </th>
@@ -275,7 +315,7 @@ export default function FollowUpsPage() {
                                 </th>
                             </tr>
                             </thead>
-                            <tbody className="divide-y divider-themed">
+                            <tbody>
                             {followUps.map((followUp) => {
                                 const status = isOverdue(followUp) ? statusConfig.OVERDUE : statusConfig[followUp.status];
                                 const type = typeConfig[followUp.type];
@@ -284,7 +324,8 @@ export default function FollowUpsPage() {
                                 return (
                                     <tr
                                         key={followUp.id}
-                                        className="hover-themed transition-colors cursor-pointer"
+                                        className="border-b hover-themed transition-colors cursor-pointer"
+                                        style={{ borderColor: 'var(--divider)' }}
                                         onClick={() => router.push(`/dashboard/followups/${followUp.id}`)}
                                     >
                                         <td className="px-6 py-4">
@@ -314,10 +355,10 @@ export default function FollowUpsPage() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 hidden sm:table-cell">
-                        <span className="inline-flex items-center gap-1.5">
-                          <span>{type.icon}</span>
-                          <span className="text-sm text-themed">{type.label}</span>
-                        </span>
+                                            <span className="inline-flex items-center gap-1.5">
+                                                <span>{type.icon}</span>
+                                                <span className="text-sm text-themed">{type.label}</span>
+                                            </span>
                                         </td>
                                         <td className="px-6 py-4 hidden lg:table-cell">
                                             <Badge className={`${priority.bgColor} ${priority.color}`}>
@@ -325,9 +366,9 @@ export default function FollowUpsPage() {
                                             </Badge>
                                         </td>
                                         <td className="px-6 py-4">
-                        <span className={`text-sm ${isOverdue(followUp) ? 'text-red-600 dark:text-red-400 font-medium' : 'text-themed-muted'}`}>
-                          {formatDate(followUp.dueDate)}
-                        </span>
+                                            <span className={`text-sm ${isOverdue(followUp) ? 'text-red-500 font-medium' : 'text-themed-muted'}`}>
+                                                {formatDate(followUp.dueDate)}
+                                            </span>
                                         </td>
                                         <td className="px-6 py-4 hidden sm:table-cell">
                                             <Badge className={`${status.bgColor} ${status.color}`}>
@@ -340,7 +381,16 @@ export default function FollowUpsPage() {
                                                     <button
                                                         onClick={() => handleComplete(followUp)}
                                                         disabled={completingId === followUp.id}
-                                                        className="p-2 text-themed-muted hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors disabled:opacity-50"
+                                                        className="p-2 text-themed-muted rounded-lg transition-colors disabled:opacity-50"
+                                                        style={{ backgroundColor: 'transparent' }}
+                                                        onMouseEnter={(e) => {
+                                                            e.currentTarget.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
+                                                            e.currentTarget.style.color = '#10b981';
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            e.currentTarget.style.backgroundColor = 'transparent';
+                                                            e.currentTarget.style.color = 'var(--muted-text)';
+                                                        }}
                                                         title="Oznacz jako wykonane"
                                                     >
                                                         {completingId === followUp.id ? (
@@ -357,7 +407,16 @@ export default function FollowUpsPage() {
                                                 )}
                                                 <button
                                                     onClick={() => router.push(`/dashboard/followups/${followUp.id}/edit`)}
-                                                    className="p-2 text-themed-muted hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/30 rounded-lg transition-colors"
+                                                    className="p-2 text-themed-muted rounded-lg transition-colors"
+                                                    style={{ backgroundColor: 'transparent' }}
+                                                    onMouseEnter={(e) => {
+                                                        e.currentTarget.style.backgroundColor = 'var(--tone-active-bg)';
+                                                        e.currentTarget.style.color = 'var(--accent-gradient-from)';
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        e.currentTarget.style.backgroundColor = 'transparent';
+                                                        e.currentTarget.style.color = 'var(--muted-text)';
+                                                    }}
                                                 >
                                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -365,7 +424,16 @@ export default function FollowUpsPage() {
                                                 </button>
                                                 <button
                                                     onClick={() => setDeleteModal({ isOpen: true, followUp })}
-                                                    className="p-2 text-themed-muted hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                                    className="p-2 text-themed-muted rounded-lg transition-colors"
+                                                    style={{ backgroundColor: 'transparent' }}
+                                                    onMouseEnter={(e) => {
+                                                        e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                                                        e.currentTarget.style.color = '#ef4444';
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        e.currentTarget.style.backgroundColor = 'transparent';
+                                                        e.currentTarget.style.color = 'var(--muted-text)';
+                                                    }}
                                                 >
                                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -381,7 +449,7 @@ export default function FollowUpsPage() {
                     </div>
 
                     {totalPages > 1 && (
-                        <div className="px-6 py-4 border-t divider-themed flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="px-6 py-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4" style={{ borderColor: 'var(--divider)' }}>
                             <p className="text-sm text-themed-muted">
                                 Pokazano {followUps.length} z {total} follow-upów
                             </p>

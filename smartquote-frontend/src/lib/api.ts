@@ -51,6 +51,7 @@ import type {
     ObserverInsight,
     ClosingStrategy,
     LatestInsightItem,
+    InsightsListItem,
 } from '@/types/ai';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
@@ -472,6 +473,14 @@ export const ai = {
         const params = limit ? { limit: String(limit) } : undefined;
         const response = await api.get<LatestInsightItem[]>('/ai/latest-insights', params);
         return response.data as LatestInsightItem[];
+    },
+
+    insightsList: async (params?: Record<string, string | number | boolean | undefined>): Promise<{ data: InsightsListItem[]; meta: { page: number; limit: number; total: number; totalPages: number } }> => {
+        const response = await api.get<InsightsListItem[]>('/ai/insights', params);
+        return {
+            data: response.data as InsightsListItem[],
+            meta: response.meta as { page: number; limit: number; total: number; totalPages: number },
+        };
     },
 };
 

@@ -14,6 +14,170 @@ import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { formatCurrency, formatRelativeTime, getStatusConfig, getInitials } from '@/lib/utils';
 import type { LatestInsightItem } from '@/types/ai';
 
+function InsightCard({ insight, onClick }: { insight: LatestInsightItem; onClick: () => void }) {
+    const [expanded, setExpanded] = useState(false);
+
+    const keyLessons = insight.insights.keyLessons || [];
+    const hasMultipleLessons = keyLessons.length > 1;
+    const hasVariant = !!insight.insights.selectedVariant;
+    const hasPricing = !!insight.insights.pricingInsight;
+    const hasExpandableContent = hasMultipleLessons || hasVariant || hasPricing;
+
+    return (
+        <div
+            className="rounded-xl p-3.5 border dash-insight-card hover:shadow-sm transition-all group"
+        >
+            <div
+                className="cursor-pointer"
+                onClick={onClick}
+            >
+                <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                        <span className={`flex-shrink-0 w-2 h-2 rounded-full ${
+                            insight.outcome === 'ACCEPTED' ? 'bg-emerald-500' : 'bg-red-500'
+                        }`} />
+                        <span className="text-xs font-bold text-themed truncate">
+                            {insight.offerNumber}
+                        </span>
+                        <span className={`flex-shrink-0 text-xs px-1.5 py-0.5 rounded-full font-semibold ${
+                            insight.outcome === 'ACCEPTED'
+                                ? 'badge-success'
+                                : 'badge-danger'
+                        }`}>
+                            {insight.outcome === 'ACCEPTED' ? 'Wygrana' : 'Przegrana'}
+                        </span>
+                    </div>
+                    <svg className="w-4 h-4 text-themed-muted group-hover:text-cyan-500 flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+
+                <p className="text-xs text-themed-muted line-clamp-2 leading-relaxed mb-2">
+                    {insight.insights.summary || insight.offerTitle}
+                </p>
+            </div>
+
+            {keyLessons.length > 0 && (
+                <div className="mb-2">
+                    <div className="flex items-start gap-1.5">
+                        <svg className="w-3 h-3 flex-shrink-0 mt-0.5" style={{ color: 'var(--accent-gradient-from)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                        </svg>
+                        <span className="text-xs text-themed-label leading-relaxed line-clamp-2">
+                            {keyLessons[0]}
+                        </span>
+                    </div>
+                </div>
+            )}
+
+            {hasVariant && !expanded && (
+                <div className="flex items-center gap-1.5 mb-2">
+                    <svg className="w-3 h-3 flex-shrink-0" style={{ color: 'var(--accent-gradient-from)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                    </svg>
+                    <span className="text-xs font-medium" style={{ color: 'var(--accent-gradient-from)' }}>
+                        Wariant: {insight.insights.selectedVariant}
+                    </span>
+                </div>
+            )}
+
+            {hasExpandableContent && expanded && (
+                <div className="mt-2 pt-2 border-t space-y-2" style={{ borderColor: 'var(--divider)' }}>
+                    {keyLessons.length > 1 && (
+                        <div className="space-y-1.5">
+                            <span className="text-xs font-semibold text-themed-label">Wnioski:</span>
+                            {keyLessons.slice(1).map((lesson, idx) => (
+                                <div key={idx} className="flex items-start gap-1.5">
+                                    <span className="text-xs flex-shrink-0 mt-0.5" style={{ color: 'var(--accent-gradient-from)' }}>•</span>
+                                    <span className="text-xs text-themed-muted leading-relaxed">{lesson}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {hasVariant && (
+                        <div className="flex items-center gap-1.5">
+                            <svg className="w-3 h-3 flex-shrink-0" style={{ color: 'var(--accent-gradient-from)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                            </svg>
+                            <span className="text-xs font-medium" style={{ color: 'var(--accent-gradient-from)' }}>
+                                Wybrany wariant: {insight.insights.selectedVariant}
+                            </span>
+                            {insight.insights.availableVariants && insight.insights.availableVariants.length > 0 && (
+                                <span className="text-xs text-themed-muted">
+                                    (z {insight.insights.availableVariants.length} dostępnych)
+                                </span>
+                            )}
+                        </div>
+                    )}
+
+                    {hasPricing && (
+                        <div className="flex items-start gap-1.5">
+                            <svg className="w-3 h-3 flex-shrink-0 mt-0.5" style={{ color: 'var(--accent-gradient-from)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span className="text-xs text-themed-muted leading-relaxed">{insight.insights.pricingInsight}</span>
+                        </div>
+                    )}
+
+                    {insight.insights.variantHistory && insight.insights.variantHistory.totalAcceptedWithVariant > 0 && (
+                        <div className="rounded-lg p-2" style={{ backgroundColor: 'var(--tone-active-bg)' }}>
+                            <span className="text-xs font-semibold text-themed-label block mb-1">Trend wariantów:</span>
+                            <div className="flex flex-wrap gap-1.5">
+                                {Object.entries(insight.insights.variantHistory.distribution).map(([variant, count]) => {
+                                    const total = insight.insights.variantHistory?.totalAcceptedWithVariant || 1;
+                                    const pct = Math.round((count / total) * 100);
+                                    return (
+                                        <span
+                                            key={variant}
+                                            className="text-xs px-2 py-0.5 rounded-full font-medium"
+                                            style={{
+                                                backgroundColor: variant === insight.insights.selectedVariant
+                                                    ? 'var(--accent-gradient-from)'
+                                                    : 'var(--divider)',
+                                                color: variant === insight.insights.selectedVariant
+                                                    ? '#ffffff'
+                                                    : 'var(--muted-text)',
+                                            }}
+                                        >
+                                            {variant}: {pct}%
+                                        </span>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            <div className="flex items-center justify-between text-xs text-themed-muted mt-2">
+                <span className="truncate">{insight.clientName}</span>
+                <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                    {hasExpandableContent && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setExpanded(!expanded);
+                            }}
+                            className="flex items-center gap-0.5 font-medium transition-colors hover:opacity-80"
+                            style={{ color: 'var(--accent-gradient-from)' }}
+                        >
+                            {expanded ? 'Zwiń' : 'Więcej'}
+                            <svg
+                                className={`w-3 h-3 transition-transform ${expanded ? 'rotate-180' : ''}`}
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                    )}
+                    <span>{formatRelativeTime(insight.createdAt)}</span>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function DashboardPage() {
     const { data: session } = useSession();
     const router = useRouter();
@@ -255,11 +419,20 @@ export default function DashboardPage() {
                                     </div>
                                     <h3 className="text-sm font-bold dash-section-title">Wnioski AI</h3>
                                 </div>
-                                {latestInsights.length > 0 && (
-                                    <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: 'var(--tone-active-bg)', color: 'var(--accent-gradient-from)' }}>
-                    {latestInsights.length}
-                  </span>
-                                )}
+                                <div className="flex items-center gap-2">
+                                    {latestInsights.length > 0 && (
+                                        <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: 'var(--tone-active-bg)', color: 'var(--accent-gradient-from)' }}>
+                                            {latestInsights.length}
+                                        </span>
+                                    )}
+                                    <button
+                                        onClick={() => router.push('/dashboard/ai-insights')}
+                                        className="text-xs font-medium transition-colors hover:opacity-80"
+                                        style={{ color: 'var(--accent-gradient-from)' }}
+                                    >
+                                        Wszystkie →
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="p-4">
@@ -280,52 +453,11 @@ export default function DashboardPage() {
                                 ) : (
                                     <div className="space-y-3">
                                         {latestInsights.map((insight) => (
-                                            <div
+                                            <InsightCard
                                                 key={insight.id}
-                                                className="rounded-xl p-3.5 border dash-insight-card hover:shadow-sm transition-all cursor-pointer group"
+                                                insight={insight}
                                                 onClick={() => router.push(`/dashboard/offers/${insight.offerId}`)}
-                                            >
-                                                <div className="flex items-start justify-between gap-2 mb-2">
-                                                    <div className="flex items-center gap-2 min-w-0">
-                            <span className={`flex-shrink-0 w-2 h-2 rounded-full ${
-                                insight.outcome === 'ACCEPTED' ? 'bg-emerald-500' : 'bg-red-500'
-                            }`} />
-                                                        <span className="text-xs font-bold text-themed truncate">
-                              {insight.offerNumber}
-                            </span>
-                                                        <span className={`flex-shrink-0 text-xs px-1.5 py-0.5 rounded-full font-semibold ${
-                                                            insight.outcome === 'ACCEPTED'
-                                                                ? 'badge-success'
-                                                                : 'badge-danger'
-                                                        }`}>
-                              {insight.outcome === 'ACCEPTED' ? 'Wygrana' : 'Przegrana'}
-                            </span>
-                                                    </div>
-                                                    <svg className="w-4 h-4 text-themed-muted group-hover:text-cyan-500 flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                                                    </svg>
-                                                </div>
-
-                                                <p className="text-xs text-themed-muted line-clamp-2 leading-relaxed mb-2">
-                                                    {insight.insights.summary || insight.offerTitle}
-                                                </p>
-
-                                                {insight.insights.keyLessons && insight.insights.keyLessons.length > 0 && (
-                                                    <div className="flex items-start gap-1.5 mb-2">
-                                                        <svg className="w-3 h-3 flex-shrink-0 mt-0.5" style={{ color: 'var(--accent-gradient-from)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-                                                        </svg>
-                                                        <span className="text-xs text-themed-label leading-relaxed line-clamp-1">
-                              {insight.insights.keyLessons[0]}
-                            </span>
-                                                    </div>
-                                                )}
-
-                                                <div className="flex items-center justify-between text-xs text-themed-muted">
-                                                    <span className="truncate">{insight.clientName}</span>
-                                                    <span className="flex-shrink-0 ml-2">{formatRelativeTime(insight.createdAt)}</span>
-                                                </div>
-                                            </div>
+                                            />
                                         ))}
                                     </div>
                                 )}

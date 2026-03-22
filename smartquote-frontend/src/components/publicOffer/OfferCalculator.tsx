@@ -1,14 +1,14 @@
 // SmartQuote-AI/src/components/publicOffer/OfferCalculator.tsx
-
 'use client';
 
 interface OfferCalculatorProps {
-    totalNet: number;
-    totalVat: number;
-    totalGross: number;
-    currency: string;
-    selectedCount: number;
-    totalCount: number;
+    readonly totalNet: number;
+    readonly totalVat: number;
+    readonly totalGross: number;
+    readonly currency: string;
+    readonly selectedCount: number;
+    readonly totalCount: number;
+    readonly primaryColor?: string;
 }
 
 function formatPLN(amount: number): string {
@@ -25,6 +25,7 @@ export default function OfferCalculator({
                                             totalGross,
                                             selectedCount,
                                             totalCount,
+                                            primaryColor = '#0891b2',
                                         }: OfferCalculatorProps) {
     return (
         <div className="bg-slate-900 rounded-xl p-6 text-white">
@@ -51,7 +52,10 @@ export default function OfferCalculator({
                 <div className="border-t border-slate-700 pt-3">
                     <div className="flex justify-between items-center">
                         <span className="text-slate-200 font-medium">Suma brutto</span>
-                        <span className="text-2xl font-bold text-cyan-400">
+                        <span
+                            className="text-2xl font-bold"
+                            style={{ color: primaryColor }}
+                        >
                             {formatPLN(totalGross)}
                         </span>
                     </div>

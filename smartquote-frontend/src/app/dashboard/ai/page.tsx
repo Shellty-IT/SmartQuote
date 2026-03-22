@@ -52,8 +52,14 @@ export default function AIAssistantPage() {
 
     return (
         <div className="h-[calc(100vh-120px)] flex flex-col lg:flex-row gap-4 lg:gap-6 p-4 sm:p-6 lg:p-8">
-            <div className="flex-1 flex flex-col rounded-2xl border card-themed overflow-hidden">
-                <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b divider-themed">
+            <div
+                className="flex-1 flex flex-col rounded-2xl border overflow-hidden"
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--divider)' }}
+            >
+                <div
+                    className="flex items-center justify-between px-4 sm:px-6 py-4 border-b"
+                    style={{ borderColor: 'var(--divider)' }}
+                >
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
                             <span className="text-white text-lg">✨</span>
@@ -66,14 +72,26 @@ export default function AIAssistantPage() {
                     {messages.length > 0 && (
                         <button
                             onClick={clearMessages}
-                            className="px-3 py-1.5 text-sm text-themed-muted hover:text-red-500 rounded-lg hover-themed transition-colors"
+                            className="px-3 py-1.5 text-sm text-themed-muted rounded-lg transition-colors"
+                            style={{ backgroundColor: 'transparent' }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                                e.currentTarget.style.color = '#ef4444';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                                e.currentTarget.style.color = 'var(--muted-text)';
+                            }}
                         >
                             🗑️ Wyczyść
                         </button>
                     )}
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 sm:p-6" style={{ backgroundColor: 'var(--section-bg)' }}>
+                <div
+                    className="flex-1 overflow-y-auto p-4 sm:p-6"
+                    style={{ backgroundColor: 'var(--section-bg)' }}
+                >
                     {messages.length === 0 ? (
                         <div className="h-full flex flex-col items-center justify-center text-center">
                             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center mb-6 shadow-xl shadow-cyan-500/20">
@@ -102,7 +120,10 @@ export default function AIAssistantPage() {
                     )}
                 </div>
 
-                <div className="px-4 sm:px-6 py-4 border-t divider-themed" style={{ backgroundColor: 'var(--card-bg)' }}>
+                <div
+                    className="px-4 sm:px-6 py-4 border-t"
+                    style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--divider)' }}
+                >
                     <form onSubmit={handleSubmit} className="flex gap-3">
                         <div className="flex-1">
                             <textarea
@@ -110,7 +131,12 @@ export default function AIAssistantPage() {
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={handleKeyDown}
                                 placeholder="Napisz wiadomość... (Enter aby wysłać, Shift+Enter nowa linia)"
-                                className="w-full px-4 py-3 rounded-xl border resize-none transition-colors"
+                                className="w-full px-4 py-3 rounded-xl border resize-none transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                                style={{
+                                    backgroundColor: 'var(--input-bg)',
+                                    borderColor: 'var(--divider)',
+                                    color: 'var(--input-text)',
+                                }}
                                 rows={1}
                                 disabled={isLoading}
                             />
@@ -137,25 +163,40 @@ export default function AIAssistantPage() {
 
             <div className="w-full lg:w-80 flex flex-col gap-4 lg:max-h-[calc(100vh-120px)] lg:overflow-y-auto">
                 {stats && (
-                    <div className="rounded-2xl border p-4 card-themed">
+                    <div
+                        className="rounded-2xl border p-4"
+                        style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--divider)' }}
+                    >
                         <div className="flex items-center gap-2 mb-4">
                             <span className="text-lg">📊</span>
                             <h3 className="font-semibold text-themed">Podsumowanie</h3>
                         </div>
                         <div className="grid grid-cols-2 gap-3">
-                            <div className="text-center p-3 rounded-xl" style={{ backgroundColor: 'var(--section-bg)' }}>
+                            <div
+                                className="text-center p-3 rounded-xl"
+                                style={{ backgroundColor: 'var(--section-bg)' }}
+                            >
                                 <div className="text-2xl font-bold text-cyan-500">{stats.totalClients}</div>
                                 <div className="text-xs text-themed-muted">Klienci</div>
                             </div>
-                            <div className="text-center p-3 rounded-xl" style={{ backgroundColor: 'var(--section-bg)' }}>
+                            <div
+                                className="text-center p-3 rounded-xl"
+                                style={{ backgroundColor: 'var(--section-bg)' }}
+                            >
                                 <div className="text-2xl font-bold text-emerald-500">{stats.activeOffers}</div>
                                 <div className="text-xs text-themed-muted">Aktywne oferty</div>
                             </div>
-                            <div className="text-center p-3 rounded-xl" style={{ backgroundColor: 'var(--section-bg)' }}>
+                            <div
+                                className="text-center p-3 rounded-xl"
+                                style={{ backgroundColor: 'var(--section-bg)' }}
+                            >
                                 <div className="text-2xl font-bold text-amber-500">{stats.pendingFollowUps}</div>
                                 <div className="text-xs text-themed-muted">Zaległe zadania</div>
                             </div>
-                            <div className="text-center p-3 rounded-xl" style={{ backgroundColor: 'var(--section-bg)' }}>
+                            <div
+                                className="text-center p-3 rounded-xl"
+                                style={{ backgroundColor: 'var(--section-bg)' }}
+                            >
                                 <div className="text-xl font-bold text-violet-500">
                                     {(stats.monthlyRevenue / 1000).toFixed(0)}k
                                 </div>
@@ -166,7 +207,10 @@ export default function AIAssistantPage() {
                 )}
 
                 {suggestions.length > 0 && (
-                    <div className="rounded-2xl border p-4 card-themed flex-1 overflow-y-auto">
+                    <div
+                        className="rounded-2xl border p-4 flex-1 overflow-y-auto"
+                        style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--divider)' }}
+                    >
                         <h3 className="font-semibold text-themed mb-4">Inteligentne sugestie</h3>
                         <div className="space-y-3">
                             {suggestions.map((suggestion, index) => (
@@ -180,7 +224,10 @@ export default function AIAssistantPage() {
                     </div>
                 )}
 
-                <div className="rounded-2xl border p-4 card-themed">
+                <div
+                    className="rounded-2xl border p-4"
+                    style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--divider)' }}
+                >
                     <h3 className="font-semibold text-themed mb-3">Wskazówki</h3>
                     <ul className="text-xs text-themed-muted space-y-2.5">
                         <li className="flex items-start gap-2">
