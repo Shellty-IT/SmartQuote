@@ -60,6 +60,8 @@ export default function FollowUpsPage() {
     const [isDeleting, setIsDeleting] = useState(false);
     const [completingId, setCompletingId] = useState<string | null>(null);
 
+    const hasFilters = !!(searchValue || filters.status || filters.type || filters.priority || filters.overdue);
+
     const handleSearch = (value: string) => {
         setSearchValue(value);
         setFilters({ search: value, page: 1 });
@@ -305,16 +307,27 @@ export default function FollowUpsPage() {
                 <Card>
                     <EmptyState
                         icon={
-                            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                            </svg>
+                            hasFilters ? (
+                                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            ) : (
+                                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                </svg>
+                            )
                         }
-                        title="Brak follow-upów"
-                        description="Utwórz pierwszy follow-up, aby śledzić zadania i przypomnienia"
-                        action={{
-                            label: 'Nowy follow-up',
-                            onClick: () => router.push('/dashboard/followups/new'),
-                        }}
+                        title={hasFilters ? 'Brak wyników' : 'Brak follow-upów'}
+                        description={
+                            hasFilters
+                                ? 'Spróbuj zmienić kryteria wyszukiwania'
+                                : 'Utwórz pierwszy follow-up, aby śledzić zadania i przypomnienia'
+                        }
+                        action={
+                            hasFilters
+                                ? undefined
+                                : { label: 'Nowy follow-up', onClick: () => router.push('/dashboard/followups/new') }
+                        }
                     />
                 </Card>
             ) : (

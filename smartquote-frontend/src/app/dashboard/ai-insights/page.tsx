@@ -4,10 +4,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ai } from '@/lib/api';
-import { Button } from '@/components/ui';
-import { PageLoader } from '@/components/ui/LoadingSpinner';
+import { Button, EmptyState } from '@/components/ui';
+import { SkeletonInsightCard } from '@/components/ui/Skeleton';
 import { formatCurrency, formatRelativeTime } from '@/lib/utils';
-import type { InsightsListItem, InsightsListParams } from '@/types/ai';
+import { useToast } from '@/contexts/ToastContext';
+import type { InsightsListItem } from '@/types/ai';
 
 type OutcomeFilter = 'ALL' | 'ACCEPTED' | 'REJECTED';
 
@@ -210,6 +211,7 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
 export default function AIInsightsPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const toast = useToast();
 
     const [insights, setInsights] = useState<InsightsListItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -238,12 +240,12 @@ export default function AIInsightsPage() {
             const result = await ai.insightsList(params);
             setInsights(result.data);
             setMeta(result.meta);
-        } catch (err: unknown) {
-            console.error('Failed to load insights:', err);
+        } catch {
+            toast.error('Błąd', 'Nie udało się pobrać wniosków AI');
         } finally {
             setIsLoading(false);
         }
-    }, [outcomeFilter, search, dateFrom, dateTo]);
+    }, [outcomeFilter, search, dateFrom, dateTo, toast]);
 
     useEffect(() => {
         fetchInsights(1);
@@ -268,13 +270,6 @@ export default function AIInsightsPage() {
     };
 
     const hasActiveFilters = outcomeFilter !== 'ALL' || search || dateFrom || dateTo;
-
-    const acceptedCount = insights.filter(i => i.outcome === 'ACCEPTED').length;
-    const rejectedCount = insights.filter(i => i.outcome === 'REJECTED').length;
-
-    if (isLoading && insights.length === 0) {
-        return <PageLoader />;
-    }
 
     return (
         <div className="min-h-screen">
@@ -329,8 +324,8 @@ export default function AIInsightsPage() {
                                 {(['ALL', 'ACCEPTED', 'REJECTED'] as const).map((filter) => {
                                     const labels: Record<OutcomeFilter, string> = {
                                         ALL: 'Wszystkie',
-                                        ACCEPTED: `Wygrane${outcomeFilter === 'ALL' && acceptedCount > 0 ? ` (${acceptedCount})` : ''}`,
-                                        REJECTED: `Przegrane${outcomeFilter === 'ALL' && rejectedCount > 0 ? ` (${rejectedCount})` : ''}`,
+                                        ACCEPTED: 'Wygrane',
+                                        REJECTED: 'Przegrane',
                                     };
                                     const isActive = outcomeFilter === filter;
                                     return (
@@ -394,34 +389,37 @@ export default function AIInsightsPage() {
                 </div>
 
                 {isLoading ? (
-                    <div className="flex items-center justify-center py-16">
-                        <div className="w-8 h-8 border-3 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+                    <div className="space-y-3">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <SkeletonInsightCard key={i} />
+                        ))}
                     </div>
                 ) : insights.length === 0 ? (
-                    <div className="rounded-2xl border dash-section p-12 text-center">
-                        <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--tone-active-bg)' }}>
-                            <svg className="w-8 h-8" style={{ color: 'var(--accent-gradient-from)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-                            </svg>
-                        </div>
-                        <h3 className="text-lg font-semibold text-themed mb-1">
-                            {hasActiveFilters ? 'Brak wyników' : 'Brak wniosków AI'}
-                        </h3>
-                        <p className="text-sm text-themed-muted">
-                            {hasActiveFilters
-                                ? 'Spróbuj zmienić filtry wyszukiwania'
-                                : 'Wnioski pojawią się po zaakceptowaniu lub odrzuceniu ofert'
+                    <div className="rounded-2xl border dash-section">
+                        <EmptyState
+                            icon={
+                                hasActiveFilters ? (
+                                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                ) : (
+                                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                                    </svg>
+                                )
                             }
-                        </p>
-                        {hasActiveFilters && (
-                            <button
-                                onClick={clearFilters}
-                                className="mt-4 text-sm font-medium transition-colors hover:opacity-80"
-                                style={{ color: 'var(--accent-gradient-from)' }}
-                            >
-                                Wyczyść filtry
-                            </button>
-                        )}
+                            title={hasActiveFilters ? 'Brak wyników' : 'Brak wniosków AI'}
+                            description={
+                                hasActiveFilters
+                                    ? 'Spróbuj zmienić filtry wyszukiwania'
+                                    : 'Wnioski pojawią się automatycznie po zaakceptowaniu lub odrzuceniu ofert przez klientów'
+                            }
+                            action={
+                                hasActiveFilters
+                                    ? { label: 'Wyczyść filtry', onClick: clearFilters }
+                                    : { label: 'Przejdź do ofert', onClick: () => router.push('/dashboard/offers') }
+                            }
+                        />
                     </div>
                 ) : (
                     <>
