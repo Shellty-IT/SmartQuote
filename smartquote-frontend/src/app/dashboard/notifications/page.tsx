@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { notificationsApi } from '@/lib/api';
+import { useToast } from '@/contexts/ToastContext';
 import type { Notification, NotificationType } from '@/types';
 
 type FilterTab = 'all' | 'unread' | 'read';
@@ -59,6 +60,7 @@ function getPageNumbers(current: number, total: number): (number | 'dots')[] {
 
 export default function NotificationsPage() {
     const router = useRouter();
+    const toast = useToast();
     const [allNotifications, setAllNotifications] = useState<Notification[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<FilterTab>('all');
@@ -72,12 +74,12 @@ export default function NotificationsPage() {
             if (res.success && res.data) {
                 setAllNotifications(res.data);
             }
-        } catch (err: unknown) {
-            console.error('Failed to fetch notifications:', err);
+        } catch {
+            toast.error('Błąd', 'Nie udało się pobrać powiadomień');
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [toast]);
 
     useEffect(() => {
         fetchNotifications();
@@ -104,8 +106,8 @@ export default function NotificationsPage() {
         try {
             await notificationsApi.markAsRead(id);
             setAllNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
-        } catch (err: unknown) {
-            console.error('Mark as read failed:', err);
+        } catch {
+            toast.error('Błąd', 'Nie udało się oznaczyć jako przeczytane');
         }
     };
 
@@ -113,8 +115,9 @@ export default function NotificationsPage() {
         try {
             await notificationsApi.markAllAsRead();
             setAllNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-        } catch (err: unknown) {
-            console.error('Mark all as read failed:', err);
+            toast.success('Oznaczono', 'Wszystkie powiadomienia oznaczone jako przeczytane');
+        } catch {
+            toast.error('Błąd', 'Nie udało się oznaczyć powiadomień');
         }
     };
 
@@ -123,8 +126,9 @@ export default function NotificationsPage() {
         try {
             await notificationsApi.delete(id);
             setAllNotifications(prev => prev.filter(n => n.id !== id));
-        } catch (err: unknown) {
-            console.error('Delete failed:', err);
+            toast.success('Usunięto', 'Powiadomienie zostało usunięte');
+        } catch {
+            toast.error('Błąd', 'Nie udało się usunąć powiadomienia');
         }
     };
 
@@ -133,8 +137,8 @@ export default function NotificationsPage() {
             try {
                 await notificationsApi.markAsRead(notification.id);
                 setAllNotifications(prev => prev.map(n => n.id === notification.id ? { ...n, isRead: true } : n));
-            } catch (err: unknown) {
-                console.error('Mark as read failed:', err);
+            } catch {
+                // Silent fail for auto-mark on click
             }
         }
         if (notification.link) {

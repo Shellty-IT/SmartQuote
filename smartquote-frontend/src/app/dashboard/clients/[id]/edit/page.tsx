@@ -8,14 +8,15 @@ import { clientsApi, ApiError } from '@/lib/api';
 import { Button, Input, Select, Textarea, Card } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { UpdateClientInput } from '@/types';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function EditClientPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const router = useRouter();
+    const toast = useToast();
     const { client, isLoading: isLoadingClient, error: clientError } = useClient(id);
 
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState<UpdateClientInput>({});
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -50,16 +51,16 @@ export default function EditClientPage({ params }: { params: Promise<{ id: strin
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        setError(null);
 
         try {
             await clientsApi.update(id, formData);
+            toast.success('Klient zaktualizowany', 'Zmiany zostały zapisane');
             router.push(`/dashboard/clients/${id}`);
         } catch (err) {
             if (err instanceof ApiError) {
-                setError(err.message);
+                toast.error('Błąd zapisu', err.message);
             } else {
-                setError('Wystąpił nieoczekiwany błąd');
+                toast.error('Błąd', 'Wystąpił nieoczekiwany błąd');
             }
         } finally {
             setIsLoading(false);
@@ -98,12 +99,6 @@ export default function EditClientPage({ params }: { params: Promise<{ id: strin
                 <h1 className="text-2xl font-bold text-themed">Edytuj klienta</h1>
                 <p className="text-themed-muted mt-1">{client.name}</p>
             </div>
-
-            {error && (
-                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/25 rounded-lg text-red-600">
-                    {error}
-                </div>
-            )}
 
             <form onSubmit={handleSubmit}>
                 <Card className="mb-6">

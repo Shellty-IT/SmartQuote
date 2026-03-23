@@ -5,9 +5,10 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFollowUps, useFollowUpStats } from '@/hooks/useFollowUps';
 import { Button, Card, Input, Badge, EmptyState, ConfirmDialog } from '@/components/ui';
-import { PageLoader } from '@/components/ui/LoadingSpinner';
+import { SkeletonStatsCardWithIcon, SkeletonTableRow } from '@/components/ui/Skeleton';
 import { formatDate } from '@/lib/utils';
 import { FollowUp, FollowUpStatus, FollowUpType, Priority } from '@/types';
+import { useToast } from '@/contexts/ToastContext';
 
 const statusConfig: Record<FollowUpStatus, { label: string; color: string; bgColor: string }> = {
     PENDING: { label: 'Oczekujące', color: 'text-amber-600', bgColor: 'bg-amber-500/15' },
@@ -34,6 +35,7 @@ const priorityConfig: Record<Priority, { label: string; color: string; bgColor: 
 
 export default function FollowUpsPage() {
     const router = useRouter();
+    const toast = useToast();
     const {
         followUps,
         loading,
@@ -48,7 +50,7 @@ export default function FollowUpsPage() {
         totalPages,
     } = useFollowUps({ limit: 10 });
 
-    const { stats } = useFollowUpStats();
+    const { stats, loading: statsLoading } = useFollowUpStats();
 
     const [searchValue, setSearchValue] = useState('');
     const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; followUp: FollowUp | null }>({
@@ -69,9 +71,10 @@ export default function FollowUpsPage() {
         setIsDeleting(true);
         try {
             await deleteFollowUp(deleteModal.followUp.id);
+            toast.success('Follow-up usunięty', `"${deleteModal.followUp.title}" został usunięty`);
             setDeleteModal({ isOpen: false, followUp: null });
         } catch (err: unknown) {
-            console.error('Delete error:', err);
+            toast.error('Błąd', 'Nie udało się usunąć follow-upu');
         } finally {
             setIsDeleting(false);
         }
@@ -81,8 +84,9 @@ export default function FollowUpsPage() {
         setCompletingId(followUp.id);
         try {
             await completeFollowUp(followUp.id);
+            toast.success('Follow-up wykonany', `"${followUp.title}" został oznaczony jako wykonany`);
         } catch (err: unknown) {
-            console.error('Complete error:', err);
+            toast.error('Błąd', 'Nie udało się oznaczyć jako wykonane');
         } finally {
             setCompletingId(null);
         }
@@ -93,10 +97,6 @@ export default function FollowUpsPage() {
         if (followUp.status === 'COMPLETED' || followUp.status === 'CANCELLED') return false;
         return new Date(followUp.dueDate) < new Date();
     };
-
-    if (loading && followUps.length === 0) {
-        return <PageLoader />;
-    }
 
     return (
         <div className="p-4 md:p-8">
@@ -113,7 +113,13 @@ export default function FollowUpsPage() {
                 </Button>
             </div>
 
-            {stats && (
+            {statsLoading ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                        <SkeletonStatsCardWithIcon key={i} />
+                    ))}
+                </div>
+            ) : stats ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                     <Card className="!p-4">
                         <div className="flex items-center justify-between">
@@ -172,7 +178,7 @@ export default function FollowUpsPage() {
                         </div>
                     </Card>
                 </div>
-            )}
+            ) : null}
 
             <Card className="mb-6">
                 <div className="flex flex-wrap gap-4">
@@ -272,7 +278,30 @@ export default function FollowUpsPage() {
                 </div>
             )}
 
-            {followUps.length === 0 ? (
+            {loading && followUps.length === 0 ? (
+                <Card padding="none">
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                            <tr className="border-b" style={{ borderColor: 'var(--divider)', backgroundColor: 'var(--section-bg)' }}>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Follow-up</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider hidden md:table-cell">Powiązanie</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider hidden sm:table-cell">Typ</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider hidden lg:table-cell">Priorytet</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Termin</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider hidden sm:table-cell">Status</th>
+                                <th className="px-6 py-3 text-right text-xs font-semibold text-themed-muted uppercase tracking-wider">Akcje</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {Array.from({ length: 6 }).map((_, i) => (
+                                <SkeletonTableRow key={i} columns={7} />
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </Card>
+            ) : followUps.length === 0 ? (
                 <Card>
                     <EmptyState
                         icon={

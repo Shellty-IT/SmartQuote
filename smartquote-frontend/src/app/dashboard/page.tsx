@@ -9,8 +9,9 @@ import { useClientsStats } from '@/hooks/useClients';
 import { ai } from '@/lib/api';
 import KPICard from './components/KPICard';
 import StatsChart from './components/StatsChart';
+import DashboardSkeleton from './components/DashboardSkeleton';
 import { Badge, Button } from '@/components/ui';
-import { PageLoader } from '@/components/ui/LoadingSpinner';
+import { SkeletonInsightCard } from '@/components/ui/Skeleton';
 import { formatCurrency, formatRelativeTime, getStatusConfig, getInitials } from '@/lib/utils';
 import type { LatestInsightItem } from '@/types/ai';
 
@@ -215,7 +216,7 @@ export default function DashboardPage() {
     const isLoading = isLoadingOffersStats || isLoadingClientsStats || isLoadingOffers;
 
     if (isLoading) {
-        return <PageLoader />;
+        return <DashboardSkeleton />;
     }
 
     const statusChartData = [
@@ -437,8 +438,10 @@ export default function DashboardPage() {
 
                             <div className="p-4">
                                 {isLoadingInsights ? (
-                                    <div className="flex items-center justify-center py-8">
-                                        <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+                                    <div className="space-y-3">
+                                        {Array.from({ length: 3 }).map((_, i) => (
+                                            <SkeletonInsightCard key={i} />
+                                        ))}
                                     </div>
                                 ) : latestInsights.length === 0 ? (
                                     <div className="text-center py-8">

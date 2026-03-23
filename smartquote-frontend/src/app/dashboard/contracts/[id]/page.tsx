@@ -9,6 +9,7 @@ import { contractsApi } from '@/lib/api';
 import { Button, Badge, Card, ConfirmDialog } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { formatCurrency, formatDate, getContractStatusConfig } from '@/lib/utils';
+import { useToast } from '@/contexts/ToastContext';
 import type { ContractStatus } from '@/types';
 
 interface PageProps {
@@ -108,23 +109,24 @@ function StatusTimeline({ currentStatus }: { currentStatus: ContractStatus }) {
 export default function ContractDetailsPage({ params }: PageProps) {
     const { id } = use(params);
     const router = useRouter();
+    const toast = useToast();
     const { contract, loading, error, refetch } = useContract(id);
     const [statusConfirm, setStatusConfirm] = useState<{ next: ContractStatus; label: string; description: string } | null>(null);
     const [isChangingStatus, setIsChangingStatus] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
     const [isPublishing, setIsPublishing] = useState(false);
-    const [copiedLink, setCopiedLink] = useState(false);
-    const [copiedHash, setCopiedHash] = useState(false);
 
     const handleStatusChange = async () => {
         if (!statusConfirm || !contract) return;
         setIsChangingStatus(true);
         try {
             await contractsApi.updateStatus(contract.id, statusConfirm.next);
+            const newStatusConfig = getContractStatusConfig(statusConfirm.next);
+            toast.success('Status zmieniony', `Umowa: ${newStatusConfig.label}`);
             setStatusConfirm(null);
             await refetch();
-        } catch (err: unknown) {
-            console.error('Status change error:', err);
+        } catch {
+            toast.error('Błąd', 'Nie udało się zmienić statusu umowy');
         } finally {
             setIsChangingStatus(false);
         }
@@ -143,8 +145,9 @@ export default function ContractDetailsPage({ params }: PageProps) {
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-        } catch (err: unknown) {
-            console.error('PDF download error:', err);
+            toast.success('PDF pobrany', `Umowa ${contract.number}`);
+        } catch {
+            toast.error('Błąd PDF', 'Nie udało się pobrać dokumentu');
         } finally {
             setIsDownloading(false);
         }
@@ -155,9 +158,10 @@ export default function ContractDetailsPage({ params }: PageProps) {
         setIsPublishing(true);
         try {
             await contractsApi.publish(contract.id);
+            toast.success('Link opublikowany', 'Możesz teraz udostępnić link klientowi');
             await refetch();
-        } catch (err: unknown) {
-            console.error('Publish error:', err);
+        } catch {
+            toast.error('Błąd', 'Nie udało się opublikować linku');
         } finally {
             setIsPublishing(false);
         }
@@ -168,9 +172,10 @@ export default function ContractDetailsPage({ params }: PageProps) {
         setIsPublishing(true);
         try {
             await contractsApi.unpublish(contract.id);
+            toast.success('Link dezaktywowany', 'Link publiczny został wyłączony');
             await refetch();
-        } catch (err: unknown) {
-            console.error('Unpublish error:', err);
+        } catch {
+            toast.error('Błąd', 'Nie udało się dezaktywować linku');
         } finally {
             setIsPublishing(false);
         }
@@ -182,10 +187,9 @@ export default function ContractDetailsPage({ params }: PageProps) {
         const url = `${frontendUrl}/contract/view/${contract.publicToken}`;
         try {
             await navigator.clipboard.writeText(url);
-            setCopiedLink(true);
-            setTimeout(() => setCopiedLink(false), 2000);
-        } catch (err: unknown) {
-            console.error('Copy failed:', err);
+            toast.info('Skopiowano', 'Link skopiowany do schowka');
+        } catch {
+            toast.error('Błąd', 'Nie udało się skopiować linku');
         }
     };
 
@@ -193,10 +197,9 @@ export default function ContractDetailsPage({ params }: PageProps) {
         if (!contract?.signatureLog?.contentHash) return;
         try {
             await navigator.clipboard.writeText(contract.signatureLog.contentHash);
-            setCopiedHash(true);
-            setTimeout(() => setCopiedHash(false), 2000);
-        } catch (err: unknown) {
-            console.error('Copy failed:', err);
+            toast.info('Skopiowano', 'Hash skopiowany do schowka');
+        } catch {
+            toast.error('Błąd', 'Nie udało się skopiować hasha');
         }
     };
 
@@ -436,15 +439,9 @@ export default function ContractDetailsPage({ params }: PageProps) {
                                                 className="flex-shrink-0 p-2 rounded-lg hover-themed transition-colors"
                                                 title="Kopiuj hash"
                                             >
-                                                {copiedHash ? (
-                                                    <svg className="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                    </svg>
-                                                ) : (
-                                                    <svg className="w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                    </svg>
-                                                )}
+                                                <svg className="w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                </svg>
                                             </button>
                                         </div>
                                     </div>
@@ -527,21 +524,10 @@ export default function ContractDetailsPage({ params }: PageProps) {
                                         </span>
                                     </div>
                                     <Button variant="outline" className="w-full" onClick={handleCopyLink}>
-                                        {copiedLink ? (
-                                            <>
-                                                <svg className="w-5 h-5 mr-2 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                </svg>
-                                                Skopiowano!
-                                            </>
-                                        ) : (
-                                            <>
-                                                <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                </svg>
-                                                Kopiuj link dla klienta
-                                            </>
-                                        )}
+                                        <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                        </svg>
+                                        Kopiuj link dla klienta
                                     </Button>
                                     <Button variant="outline" className="w-full text-red-600 hover:bg-red-500/10" onClick={handleUnpublish} disabled={isPublishing}>
                                         <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

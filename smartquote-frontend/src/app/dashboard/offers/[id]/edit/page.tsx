@@ -11,6 +11,7 @@ import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { formatCurrency, getInitials } from '@/lib/utils';
 import { UpdateOfferInput, CreateOfferItemInput, Client } from '@/types';
 import AIPriceInsight from '@/components/ai/AIPriceInsight';
+import { useToast } from '@/contexts/ToastContext';
 
 const VAT_RATES = [
     { value: '23', label: '23%' },
@@ -49,11 +50,11 @@ function getUniqueVariants(items: ExtendedEditItem[]): string[] {
 export default function EditOfferPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const router = useRouter();
+    const toast = useToast();
     const { offer, isLoading: isLoadingOffer, error: offerError } = useOffer(id);
     const { clients } = useClients({ limit: 100 });
 
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [offerDetails, setOfferDetails] = useState({
@@ -173,7 +174,6 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
         if (!selectedClient || !offer) return;
 
         setIsLoading(true);
-        setError(null);
 
         try {
             const data: UpdateOfferInput = {
@@ -201,12 +201,13 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
             };
 
             await offersApi.update(offer.id, data);
+            toast.success('Oferta zaktualizowana', 'Zmiany zostały zapisane pomyślnie');
             router.push(`/dashboard/offers/${offer.id}`);
         } catch (err) {
             if (err instanceof ApiError) {
-                setError(err.message);
+                toast.error('Błąd zapisu', err.message);
             } else {
-                setError('Wystąpił nieoczekiwany błąd');
+                toast.error('Błąd zapisu', 'Wystąpił nieoczekiwany błąd');
             }
         } finally {
             setIsLoading(false);
@@ -245,12 +246,6 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
                 <h1 className="text-2xl font-bold text-themed">Edytuj ofertę</h1>
                 <p className="text-themed-muted mt-1">{offer.number}</p>
             </div>
-
-            {error && (
-                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/25 rounded-lg text-red-600">
-                    {error}
-                </div>
-            )}
 
             <form onSubmit={handleSubmit}>
                 <Card className="mb-6">

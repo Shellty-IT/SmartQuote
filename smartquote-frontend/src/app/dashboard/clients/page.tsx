@@ -5,12 +5,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useClients } from '@/hooks/useClients';
 import { Button, Card, Input, Badge, EmptyState, ConfirmDialog } from '@/components/ui';
-import { PageLoader } from '@/components/ui/LoadingSpinner';
+import { SkeletonTableRow } from '@/components/ui/Skeleton';
 import { formatDate, getInitials } from '@/lib/utils';
 import { Client } from '@/types';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function ClientsPage() {
     const router = useRouter();
+    const toast = useToast();
     const { clients, total, page, totalPages, isLoading, error, filters, setFilters, deleteClient, refresh } = useClients();
 
     const [searchValue, setSearchValue] = useState('');
@@ -31,17 +33,14 @@ export default function ClientsPage() {
         setIsDeleting(true);
         try {
             await deleteClient(deleteModal.client.id);
+            toast.success('Klient usunięty', `"${deleteModal.client.name}" został usunięty`);
             setDeleteModal({ isOpen: false, client: null });
-        } catch (err: unknown) {
-            console.error('Delete error:', err);
+        } catch {
+            toast.error('Błąd', 'Nie udało się usunąć klienta');
         } finally {
             setIsDeleting(false);
         }
     };
-
-    if (isLoading && clients.length === 0) {
-        return <PageLoader />;
-    }
 
     return (
         <div className="p-4 md:p-8">
@@ -119,7 +118,29 @@ export default function ClientsPage() {
                 </div>
             )}
 
-            {clients.length === 0 ? (
+            {isLoading && clients.length === 0 ? (
+                <Card padding="none">
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                            <tr className="border-b" style={{ borderColor: 'var(--divider)', backgroundColor: 'var(--section-bg)' }}>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Klient</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Kontakt</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Typ</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Oferty</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Dodano</th>
+                                <th className="px-6 py-3 text-right text-xs font-semibold text-themed-muted uppercase tracking-wider">Akcje</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {Array.from({ length: 6 }).map((_, i) => (
+                                <SkeletonTableRow key={i} columns={6} />
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </Card>
+            ) : clients.length === 0 ? (
                 <Card>
                     <EmptyState
                         icon={

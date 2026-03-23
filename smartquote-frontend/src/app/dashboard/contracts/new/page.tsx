@@ -1,5 +1,4 @@
-// SmartQuote-AI/src/app/dashboard/contracts/new/page.tsx
-
+// src/app/dashboard/contracts/new/page.tsx
 'use client';
 
 import { useState, useEffect, useRef, Suspense } from 'react';
@@ -8,23 +7,21 @@ import Link from 'next/link';
 import { useContracts } from '@/hooks/useContracts';
 import { useClients } from '@/hooks/useClients';
 import { Button, Card, Input, Select, Textarea, LoadingSpinner } from '@/components/ui';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Client } from '@/types';
+import { useToast } from '@/contexts/ToastContext';
 
 function NewContractForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const toast = useToast();
     const fromOfferId = searchParams.get('fromOffer');
 
     const { createContract, createFromOffer } = useContracts();
     const { clients, isLoading: clientsLoading } = useClients({ limit: 100 });
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
-    // Ref do śledzenia czy już próbowaliśmy utworzyć umowę z oferty
     const createFromOfferAttempted = useRef(false);
 
-    // Formularz do ręcznego tworzenia umowy
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -40,33 +37,31 @@ function NewContractForm() {
         ],
     });
 
-    // Jeśli jest fromOffer, automatycznie tworzymy umowę z oferty
     useEffect(() => {
         if (fromOfferId && !createFromOfferAttempted.current) {
             createFromOfferAttempted.current = true;
 
             const handleCreateFromOffer = async () => {
                 setLoading(true);
-                setError(null);
 
                 const response = await createFromOffer(fromOfferId);
 
                 if (response.success && response.data) {
+                    toast.success('Umowa utworzona', 'Umowa została wygenerowana z oferty');
                     router.push(`/dashboard/contracts/${response.data.id}`);
                 } else {
-                    setError('Nie udało się utworzyć umowy z oferty');
+                    toast.error('Błąd', 'Nie udało się utworzyć umowy z oferty');
                     setLoading(false);
                 }
             };
 
             handleCreateFromOffer();
         }
-    }, [fromOfferId, createFromOffer, router]);
+    }, [fromOfferId, createFromOffer, router, toast]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setError(null);
 
         const response = await createContract({
             ...formData,
@@ -82,9 +77,10 @@ function NewContractForm() {
         });
 
         if (response.success && response.data) {
+            toast.success('Umowa utworzona', `"${formData.title}" została zapisana`);
             router.push(`/dashboard/contracts/${response.data.id}`);
         } else {
-            setError('Nie udało się utworzyć umowy');
+            toast.error('Błąd', 'Nie udało się utworzyć umowy');
             setLoading(false);
         }
     };
@@ -118,35 +114,30 @@ function NewContractForm() {
         return (
             <div className="flex flex-col items-center justify-center py-12">
                 <LoadingSpinner size="lg" />
-                <p className="mt-4 text-gray-500">Tworzenie umowy z oferty...</p>
+                <p className="mt-4 text-themed-muted">Tworzenie umowy z oferty...</p>
             </div>
         );
     }
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center space-x-4">
+        <div className="space-y-6 p-4 md:p-8">
+            <div className="flex items-center gap-4">
                 <Link href="/dashboard/contracts">
                     <Button variant="ghost" size="sm">
-                        <ArrowLeftIcon className="h-5 w-5" />
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
                     </Button>
                 </Link>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Nowa umowa</h1>
-                    <p className="text-gray-500">Utwórz nową umowę</p>
+                    <h1 className="text-2xl font-bold text-themed">Nowa umowa</h1>
+                    <p className="text-themed-muted">Utwórz nową umowę</p>
                 </div>
             </div>
 
-            {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                    {error}
-                </div>
-            )}
-
             <form onSubmit={handleSubmit} className="space-y-6">
                 <Card className="p-6">
-                    <h2 className="text-lg font-semibold mb-4">Informacje podstawowe</h2>
+                    <h2 className="text-lg font-semibold text-themed mb-4">Informacje podstawowe</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Input
                             label="Tytuł umowy *"
@@ -196,7 +187,7 @@ function NewContractForm() {
 
                 <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-semibold">Pozycje umowy</h2>
+                        <h2 className="text-lg font-semibold text-themed">Pozycje umowy</h2>
                         <Button type="button" variant="outline" size="sm" onClick={addItem}>
                             + Dodaj pozycję
                         </Button>
@@ -204,7 +195,7 @@ function NewContractForm() {
 
                     <div className="space-y-4">
                         {formData.items.map((item, index) => (
-                            <div key={index} className="border border-gray-200 rounded-lg p-4">
+                            <div key={index} className="card-themed border rounded-lg p-4">
                                 <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
                                     <div className="md:col-span-2">
                                         <Input
@@ -253,7 +244,7 @@ function NewContractForm() {
                 </Card>
 
                 <Card className="p-6">
-                    <h2 className="text-lg font-semibold mb-4">Warunki</h2>
+                    <h2 className="text-lg font-semibold text-themed mb-4">Warunki</h2>
                     <div className="space-y-4">
                         <Textarea
                             label="Warunki umowy"
@@ -270,7 +261,7 @@ function NewContractForm() {
                     </div>
                 </Card>
 
-                <div className="flex justify-end space-x-4">
+                <div className="flex justify-end gap-4">
                     <Link href="/dashboard/contracts">
                         <Button type="button" variant="outline">
                             Anuluj
@@ -285,17 +276,15 @@ function NewContractForm() {
     );
 }
 
-// Komponent ładowania
 function NewContractLoading() {
     return (
         <div className="flex flex-col items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-4 text-gray-500">Ładowanie...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+            <p className="mt-4 text-themed-muted">Ładowanie...</p>
         </div>
     );
 }
 
-// Główny eksport strony z Suspense
 export default function NewContractPage() {
     return (
         <Suspense fallback={<NewContractLoading />}>

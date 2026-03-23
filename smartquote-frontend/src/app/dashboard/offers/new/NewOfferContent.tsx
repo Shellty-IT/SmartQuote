@@ -10,6 +10,7 @@ import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { formatCurrency, getInitials } from '@/lib/utils';
 import { CreateOfferInput, CreateOfferItemInput, Client } from '@/types';
 import AIPriceInsight from '@/components/ai/AIPriceInsight';
+import { useToast } from '@/contexts/ToastContext';
 
 type Step = 'client' | 'details' | 'items' | 'summary';
 
@@ -69,13 +70,13 @@ function getUniqueVariants(items: ExtendedOfferItem[]): string[] {
 export default function NewOfferContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const toast = useToast();
     const preselectedClientId = searchParams.get('clientId');
 
     const { clients, isLoading: isLoadingClients } = useClients({ limit: 100 });
 
     const [currentStep, setCurrentStep] = useState<Step>('client');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [clientSearch, setClientSearch] = useState('');
@@ -180,7 +181,6 @@ export default function NewOfferContent() {
         if (!selectedClient) return;
 
         setIsSubmitting(true);
-        setError(null);
 
         try {
             const data: CreateOfferInput = {
@@ -209,15 +209,16 @@ export default function NewOfferContent() {
 
             const response = await offersApi.create(data);
             if (response.data?.id) {
+                toast.success('Oferta utworzona', `"${offerDetails.title}" została zapisana`);
                 router.push(`/dashboard/offers/${response.data.id}`);
             } else {
                 throw new Error('Nie udało się utworzyć oferty');
             }
         } catch (err) {
             if (err instanceof ApiError) {
-                setError(err.message);
+                toast.error('Błąd tworzenia oferty', err.message);
             } else {
-                setError('Wystąpił nieoczekiwany błąd');
+                toast.error('Błąd', 'Wystąpił nieoczekiwany błąd');
             }
             setIsSubmitting(false);
         }
@@ -291,12 +292,6 @@ export default function NewOfferContent() {
                     })}
                 </div>
             </div>
-
-            {error && (
-                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/25 rounded-lg text-red-600">
-                    {error}
-                </div>
-            )}
 
             <Card className="mb-6">
                 {currentStep === 'client' && (

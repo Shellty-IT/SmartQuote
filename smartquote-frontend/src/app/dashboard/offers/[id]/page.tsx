@@ -12,6 +12,7 @@ import { formatDate, formatDateTime, formatCurrency, getStatusConfig, getInitial
 import { OfferStatus, OfferItem } from '@/types';
 import type { ObserverInsight, ClosingStrategy } from '@/types/ai';
 import PublishDialog from '@/components/offers/PublishDialog';
+import { useToast } from '@/contexts/ToastContext';
 
 const STATUS_TRANSITIONS: Record<OfferStatus, OfferStatus[]> = {
     DRAFT: ['SENT'],
@@ -70,6 +71,7 @@ export default function OfferDetailPage({ params }: PageProps) {
     const { id } = use(params);
 
     const router = useRouter();
+    const toast = useToast();
     const { data: session } = useSession();
     const { offer, isLoading, error, refresh } = useOffer(id);
     const { analytics, refresh: refreshAnalytics } = useOfferAnalytics(id);
@@ -80,10 +82,8 @@ export default function OfferDetailPage({ params }: PageProps) {
     const [deleteModal, setDeleteModal] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isDownloadingPDF, setIsDownloadingPDF] = useState(false);
-    const [pdfError, setPdfError] = useState<string | null>(null);
     const [publishDialogOpen, setPublishDialogOpen] = useState(false);
     const [newComment, setNewComment] = useState('');
-    const [hashCopied, setHashCopied] = useState(false);
 
     const [observerInsight, setObserverInsight] = useState<ObserverInsight | null>(null);
     const [isLoadingObserver, setIsLoadingObserver] = useState(false);
@@ -102,10 +102,9 @@ export default function OfferDetailPage({ params }: PageProps) {
     const handleCopyHash = async (hash: string) => {
         try {
             await navigator.clipboard.writeText(hash);
-            setHashCopied(true);
-            setTimeout(() => setHashCopied(false), 2000);
+            toast.info('Skopiowano', 'Hash skopiowany do schowka');
         } catch {
-            setHashCopied(false);
+            toast.error('Błąd', 'Nie udało się skopiować do schowka');
         }
     };
 
@@ -146,8 +145,10 @@ export default function OfferDetailPage({ params }: PageProps) {
         try {
             await offersApi.update(offer.id, { status: newStatus });
             await refresh();
-        } catch (err) {
-            console.error('Status update error:', err);
+            const statusConfig = getStatusConfig(newStatus);
+            toast.success('Status zmieniony', `Oferta: ${statusConfig.label}`);
+        } catch {
+            toast.error('Błąd', 'Nie udało się zmienić statusu oferty');
         } finally {
             setIsUpdatingStatus(false);
         }
@@ -158,9 +159,10 @@ export default function OfferDetailPage({ params }: PageProps) {
         setIsDeleting(true);
         try {
             await offersApi.delete(offer.id);
+            toast.success('Oferta usunięta', `${offer.number} została usunięta`);
             router.push('/dashboard/offers');
-        } catch (err) {
-            console.error('Delete error:', err);
+        } catch {
+            toast.error('Błąd', 'Nie udało się usunąć oferty');
             setIsDeleting(false);
         }
     };
@@ -170,10 +172,11 @@ export default function OfferDetailPage({ params }: PageProps) {
         try {
             const response = await offersApi.duplicate(offer.id);
             if (response.data?.id) {
+                toast.success('Oferta zduplikowana', 'Możesz teraz edytować kopię');
                 router.push(`/dashboard/offers/${response.data.id}/edit`);
             }
-        } catch (err) {
-            console.error('Duplicate error:', err);
+        } catch {
+            toast.error('Błąd', 'Nie udało się zduplikować oferty');
         }
     };
 
@@ -181,11 +184,10 @@ export default function OfferDetailPage({ params }: PageProps) {
         if (!offer) return;
         const token = session?.accessToken || localStorage.getItem('token');
         if (!token) {
-            setPdfError('Brak autoryzacji. Zaloguj się ponownie.');
+            toast.error('Brak autoryzacji', 'Zaloguj się ponownie');
             return;
         }
         setIsDownloadingPDF(true);
-        setPdfError(null);
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
             const response = await fetch(`${apiUrl}/offers/${offer.id}/pdf`, {
@@ -205,9 +207,9 @@ export default function OfferDetailPage({ params }: PageProps) {
             link.click();
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
+            toast.success('PDF pobrany', `Oferta ${offer.number}`);
         } catch (err) {
-            console.error('Error downloading PDF:', err);
-            setPdfError(err instanceof Error ? err.message : 'Wystąpił błąd podczas pobierania PDF');
+            toast.error('Błąd PDF', err instanceof Error ? err.message : 'Wystąpił błąd podczas pobierania');
         } finally {
             setIsDownloadingPDF(false);
         }
@@ -693,21 +695,10 @@ export default function OfferDetailPage({ params }: PageProps) {
                                                     onClick={() => handleCopyHash(auditLog.contentHash)}
                                                     className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md hover-themed text-cyan-600 dark:text-cyan-400 transition-colors"
                                                 >
-                                                    {hashCopied ? (
-                                                        <>
-                                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                                            </svg>
-                                                            Skopiowano
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                            </svg>
-                                                            Kopiuj
-                                                        </>
-                                                    )}
+                                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                    </svg>
+                                                    Kopiuj
                                                 </button>
                                             </div>
                                             <div className="font-mono text-xs break-all leading-relaxed p-2.5 rounded-lg bg-slate-900 dark:bg-black/40 text-emerald-400 dark:text-emerald-300 select-all">
@@ -772,9 +763,6 @@ export default function OfferDetailPage({ params }: PageProps) {
                                         </>
                                     )}
                                 </Button>
-                                {pdfError && (
-                                    <p className="text-sm text-red-600 dark:text-red-400 px-2">{pdfError}</p>
-                                )}
                                 <Button
                                     variant="outline"
                                     className="w-full justify-start"

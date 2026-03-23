@@ -7,9 +7,10 @@ import Link from 'next/link';
 import { useOffers, useOffersStats } from '@/hooks/useOffers';
 import { offersApi } from '@/lib/api';
 import { Button, Card, Badge, Input, ConfirmDialog } from '@/components/ui';
-import { PageLoader } from '@/components/ui/LoadingSpinner';
+import { SkeletonStatsCard, SkeletonTableRow, SkeletonMobileCard } from '@/components/ui/Skeleton';
 import { formatDate, formatCurrency, getStatusConfig, getInitials } from '@/lib/utils';
 import { Offer, OfferStatus } from '@/types';
+import { useToast } from '@/contexts/ToastContext';
 
 const STATUS_OPTIONS = [
     { value: '', label: 'Wszystkie statusy' },
@@ -36,12 +37,14 @@ function OfferMobileCard({
                              onEdit,
                              onDuplicate,
                              onDelete,
+                             onCopyLink,
                          }: {
     offer: Offer;
     onView: () => void;
     onEdit: () => void;
     onDuplicate: () => void;
     onDelete: () => void;
+    onCopyLink: () => void;
 }) {
     const statusConfig = getStatusConfig(offer.status);
     const isExpired =
@@ -85,11 +88,14 @@ function OfferMobileCard({
             </div>
 
             {offer.publicToken && (
-                <div className="mb-3">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/25">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
-            Link aktywny
-          </span>
+                <div className="mb-3" onClick={(e) => e.stopPropagation()}>
+                    <button
+                        onClick={onCopyLink}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/25 hover:bg-cyan-500/25 transition-colors"
+                    >
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
+                        Link aktywny — kopiuj
+                    </button>
                 </div>
             )}
 
@@ -134,6 +140,7 @@ function OfferMobileCard({
 
 export default function OffersPage() {
     const router = useRouter();
+    const toast = useToast();
 
     const [search, setSearch] = useState('');
     const [status, setStatus] = useState<OfferStatus | ''>('');
@@ -161,10 +168,11 @@ export default function OffersPage() {
         setIsDeleting(true);
         try {
             await offersApi.delete(deleteModal.id);
+            toast.success('Oferta usunięta', `"${deleteModal.title}" została usunięta`);
             setDeleteModal(null);
             refresh();
-        } catch (err) {
-            console.error('Delete error:', err);
+        } catch {
+            toast.error('Błąd', 'Nie udało się usunąć oferty');
         } finally {
             setIsDeleting(false);
         }
@@ -174,10 +182,22 @@ export default function OffersPage() {
         try {
             const response = await offersApi.duplicate(offer.id);
             if (response.data?.id) {
+                toast.success('Oferta zduplikowana', 'Możesz teraz edytować kopię');
                 router.push(`/dashboard/offers/${response.data.id}/edit`);
             }
-        } catch (err) {
-            console.error('Duplicate error:', err);
+        } catch {
+            toast.error('Błąd', 'Nie udało się zduplikować oferty');
+        }
+    };
+
+    const handleCopyLink = async (offer: Offer) => {
+        if (!offer.publicToken) return;
+        const url = `${window.location.origin}/offer/view/${offer.publicToken}`;
+        try {
+            await navigator.clipboard.writeText(url);
+            toast.info('Link skopiowany', 'Link do oferty został skopiowany do schowka');
+        } catch {
+            toast.error('Błąd', 'Nie udało się skopiować linku');
         }
     };
 
@@ -212,7 +232,13 @@ export default function OffersPage() {
                 </Link>
             </div>
 
-            {!statsLoading && stats && (
+            {statsLoading ? (
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                        <SkeletonStatsCard key={i} />
+                    ))}
+                </div>
+            ) : stats ? (
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
                     <Card className="p-3 md:p-4">
                         <p className="text-xs md:text-sm text-themed-muted">Wszystkie</p>
@@ -233,7 +259,7 @@ export default function OffersPage() {
                         </p>
                     </Card>
                 </div>
-            )}
+            ) : null}
 
             <Card className="mb-6">
                 <div className="p-3 md:p-4 flex flex-col gap-3 md:flex-row md:gap-4">
@@ -279,7 +305,37 @@ export default function OffersPage() {
             </Card>
 
             {isLoading ? (
-                <PageLoader />
+                <>
+                    <div className="hidden lg:block">
+                        <Card className="overflow-hidden">
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead className="section-themed border-b divider-themed">
+                                    <tr>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Oferta</th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Klient</th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Status</th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Dystrybucja</th>
+                                        <th className="px-6 py-4 text-right text-xs font-semibold text-themed-muted uppercase tracking-wider">Wartość</th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Ważna do</th>
+                                        <th className="px-6 py-4 text-right text-xs font-semibold text-themed-muted uppercase tracking-wider">Akcje</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody className="divide-y divider-themed">
+                                    {Array.from({ length: 6 }).map((_, i) => (
+                                        <SkeletonTableRow key={i} columns={7} />
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </Card>
+                    </div>
+                    <div className="lg:hidden space-y-3">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <SkeletonMobileCard key={i} />
+                        ))}
+                    </div>
+                </>
             ) : error ? (
                 <Card>
                     <div className="text-center py-12">
@@ -390,15 +446,12 @@ export default function OffersPage() {
                                                 <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                                                     {offer.publicToken ? (
                                                         <div className="flex items-center gap-2">
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/25">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
-                                  Link aktywny
-                                </span>
+                                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/25">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
+                                                                Link aktywny
+                                                            </span>
                                                             <button
-                                                                onClick={() => {
-                                                                    const url = `${window.location.origin}/offer/view/${offer.publicToken}`;
-                                                                    navigator.clipboard.writeText(url);
-                                                                }}
+                                                                onClick={() => handleCopyLink(offer)}
                                                                 className="p-1 text-themed-muted hover:text-cyan-600 dark:hover:text-cyan-400 rounded transition-colors"
                                                                 title="Kopiuj link"
                                                             >
@@ -420,9 +473,9 @@ export default function OffersPage() {
                                                     </p>
                                                 </td>
                                                 <td className="px-6 py-4">
-                            <span className={isExpired ? 'text-red-600 dark:text-red-400 font-medium' : 'text-themed-muted'}>
-                              {offer.validUntil ? formatDate(offer.validUntil) : '-'}
-                            </span>
+                                                    <span className={isExpired ? 'text-red-600 dark:text-red-400 font-medium' : 'text-themed-muted'}>
+                                                        {offer.validUntil ? formatDate(offer.validUntil) : '-'}
+                                                    </span>
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
                                                     <div
@@ -539,6 +592,7 @@ export default function OffersPage() {
                                 onEdit={() => router.push(`/dashboard/offers/${offer.id}/edit`)}
                                 onDuplicate={() => handleDuplicate(offer)}
                                 onDelete={() => setDeleteModal(offer)}
+                                onCopyLink={() => handleCopyLink(offer)}
                             />
                         ))}
 
@@ -556,8 +610,8 @@ export default function OffersPage() {
                                         ←
                                     </button>
                                     <span className="text-sm text-themed-muted font-medium">
-                    {page}/{totalPages}
-                  </span>
+                                        {page}/{totalPages}
+                                    </span>
                                     <button
                                         onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                                         disabled={page === totalPages}

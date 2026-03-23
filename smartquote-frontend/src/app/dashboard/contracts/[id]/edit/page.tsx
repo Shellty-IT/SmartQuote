@@ -1,4 +1,4 @@
-// SmartQuote-AI/src/app/dashboard/contracts/[id]/edit/page.tsx
+// src/app/dashboard/contracts/[id]/edit/page.tsx
 'use client';
 
 import { useState, useEffect, useRef, use } from 'react';
@@ -8,17 +8,18 @@ import { useContract, useContracts } from '@/hooks/useContracts';
 import { useClients } from '@/hooks/useClients';
 import { Button, Card, Input, Select, Textarea, LoadingSpinner } from '@/components/ui';
 import { Client, ContractItem } from '@/types';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function EditContractPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const router = useRouter();
+    const toast = useToast();
 
     const { contract, loading: contractLoading, error: contractError } = useContract(id);
     const { updateContract } = useContracts();
     const { clients } = useClients({ limit: 100 });
 
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -69,7 +70,6 @@ export default function EditContractPage({ params }: { params: Promise<{ id: str
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setError(null);
 
         const response = await updateContract(id, {
             ...formData,
@@ -85,9 +85,10 @@ export default function EditContractPage({ params }: { params: Promise<{ id: str
         });
 
         if (response.success) {
+            toast.success('Umowa zaktualizowana', 'Zmiany zostały zapisane');
             router.push(`/dashboard/contracts/${id}`);
         } else {
-            setError('Nie udało się zaktualizować umowy');
+            toast.error('Błąd', 'Nie udało się zaktualizować umowy');
             setLoading(false);
         }
     };
@@ -153,12 +154,6 @@ export default function EditContractPage({ params }: { params: Promise<{ id: str
                     <p className="text-themed-muted">{contract.number}</p>
                 </div>
             </div>
-
-            {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                    {error}
-                </div>
-            )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <Card className="p-6">

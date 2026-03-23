@@ -1,9 +1,10 @@
-// SmartQuote-AI/src/components/offers/PublishDialog.tsx
+// src/components/offers/PublishDialog.tsx
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { useOfferPublish, useOfferSendToClient } from '@/hooks/useOffers';
 import { useSmtpConfig } from '@/hooks/useSettings';
+import { useToast } from '@/contexts/ToastContext';
 
 interface PublishDialogProps {
     isOpen: boolean;
@@ -31,9 +32,9 @@ export default function PublishDialog({
     const { publish, unpublish, isPublishing, isUnpublishing, error } = useOfferPublish(offerId);
     const { sendToClient, isSending, error: sendError } = useOfferSendToClient(offerId);
     const { config: smtpConfig, isLoading: isLoadingSmtp } = useSmtpConfig();
+    const toast = useToast();
 
     const [publicUrl, setPublicUrl] = useState<string | null>(null);
-    const [copied, setCopied] = useState(false);
     const [wasPublished, setWasPublished] = useState(false);
     const [sendEmail, setSendEmail] = useState(false);
     const [emailSent, setEmailSent] = useState(false);
@@ -62,7 +63,6 @@ export default function PublishDialog({
                 setPublicUrl(null);
                 setWasPublished(false);
             }
-            setCopied(false);
             setSendEmail(false);
             setEmailSent(false);
             setEmailSentTo(null);
@@ -88,12 +88,14 @@ export default function PublishDialog({
             setPublicUrl(result.publicUrl);
             setWasPublished(true);
             onPublished();
+            toast.success('Link opublikowany', `Oferta ${offerNumber} jest teraz dostępna`);
 
             if (sendEmail && canSendEmail) {
                 const sendResult = await sendToClient();
                 if (sendResult?.sent) {
                     setEmailSent(true);
                     setEmailSentTo(sendResult.email);
+                    toast.success('Email wysłany', `Link wysłany na ${sendResult.email}`);
                 }
             }
         }
@@ -104,6 +106,7 @@ export default function PublishDialog({
         if (result?.sent) {
             setEmailSent(true);
             setEmailSentTo(result.email);
+            toast.success('Email wysłany', `Link wysłany na ${result.email}`);
         }
     };
 
@@ -114,6 +117,7 @@ export default function PublishDialog({
             setWasPublished(false);
             setEmailSent(false);
             onPublished();
+            toast.warning('Link dezaktywowany', `Oferta ${offerNumber} nie jest już dostępna`);
         }
     };
 
@@ -121,8 +125,7 @@ export default function PublishDialog({
         if (!publicUrl) return;
         try {
             await navigator.clipboard.writeText(publicUrl);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 3000);
+            toast.info('Link skopiowany', 'Link do oferty został skopiowany do schowka');
         } catch {
             const input = document.createElement('input');
             input.value = publicUrl;
@@ -130,8 +133,7 @@ export default function PublishDialog({
             input.select();
             document.execCommand('copy');
             document.body.removeChild(input);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 3000);
+            toast.info('Link skopiowany', 'Link do oferty został skopiowany do schowka');
         }
     };
 
@@ -299,27 +301,12 @@ export default function PublishDialog({
                                     </div>
                                     <button
                                         onClick={handleCopy}
-                                        className={`px-4 py-3 rounded-xl font-medium transition-colors flex items-center gap-2 flex-shrink-0 ${
-                                            copied
-                                                ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                                                : 'bg-cyan-500 text-white hover:bg-cyan-600'
-                                        }`}
+                                        className="px-4 py-3 rounded-xl font-medium transition-colors flex items-center gap-2 flex-shrink-0 bg-cyan-500 text-white hover:bg-cyan-600"
                                     >
-                                        {copied ? (
-                                            <>
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                                </svg>
-                                                Skopiowano
-                                            </>
-                                        ) : (
-                                            <>
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                                                </svg>
-                                                Kopiuj
-                                            </>
-                                        )}
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                        </svg>
+                                        Kopiuj
                                     </button>
                                 </div>
                             </div>

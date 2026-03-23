@@ -6,11 +6,12 @@ import { useRouter } from 'next/navigation';
 import { clientsApi } from '@/lib/api';
 import { Button, Input, Select, Textarea, Card } from '@/components/ui';
 import { CreateClientInput } from '@/types';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function NewClientPage() {
     const router = useRouter();
+    const toast = useToast();
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState<CreateClientInput>({
         type: 'COMPANY',
         name: '',
@@ -63,7 +64,6 @@ export default function NewClientPage() {
         if (!validateForm()) return;
 
         setIsLoading(true);
-        setError(null);
 
         try {
             const cleanData: CreateClientInput = {
@@ -81,10 +81,10 @@ export default function NewClientPage() {
             };
 
             await clientsApi.create(cleanData);
+            toast.success('Klient dodany', `"${formData.name}" został dodany do bazy`);
             router.push('/dashboard/clients');
-        } catch (err: unknown) {
-            console.error('Create client error:', err);
-            setError('Wystąpił błąd podczas tworzenia klienta');
+        } catch {
+            toast.error('Błąd', 'Nie udało się utworzyć klienta');
         } finally {
             setIsLoading(false);
         }
@@ -105,12 +105,6 @@ export default function NewClientPage() {
                 <h1 className="text-2xl font-bold text-themed">Nowy klient</h1>
                 <p className="text-themed-muted mt-1">Dodaj nowego klienta do swojej bazy</p>
             </div>
-
-            {error && (
-                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/25 rounded-lg text-red-600">
-                    {error}
-                </div>
-            )}
 
             <form onSubmit={handleSubmit}>
                 <Card className="mb-6">

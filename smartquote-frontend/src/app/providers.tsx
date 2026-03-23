@@ -4,6 +4,7 @@
 import { SessionProvider } from 'next-auth/react';
 import { ReactNode, useEffect, useState, createContext, useContext, useCallback, useRef } from 'react';
 import { AIChatProvider } from '@/contexts/AIChatContext';
+import { ToastProvider } from '@/contexts/ToastContext';
 
 type Theme = 'light' | 'dark';
 
@@ -61,9 +62,11 @@ export function Providers({ children }: { children: ReactNode }) {
     return (
         <SessionProvider>
             <ThemeProvider>
-                <AIChatProvider>
-                    {children}
-                </AIChatProvider>
+                <ToastProvider>
+                    <AIChatProvider>
+                        {children}
+                    </AIChatProvider>
+                </ToastProvider>
             </ThemeProvider>
         </SessionProvider>
     );

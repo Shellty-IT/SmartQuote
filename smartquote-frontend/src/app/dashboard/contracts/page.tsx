@@ -6,9 +6,10 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useContracts, useContractsStats } from '@/hooks/useContracts';
 import { Button, Card, Badge, Input, Select, ConfirmDialog } from '@/components/ui';
-import { PageLoader } from '@/components/ui/LoadingSpinner';
+import { SkeletonStatsCard, SkeletonTableRow } from '@/components/ui/Skeleton';
 import { formatCurrency, formatDate, getContractStatusConfig, getInitials } from '@/lib/utils';
 import type { ContractStatus, Contract } from '@/types';
+import { useToast } from '@/contexts/ToastContext';
 
 const STATUS_OPTIONS = [
     { value: '', label: 'Wszystkie statusy' },
@@ -29,13 +30,13 @@ const SORT_OPTIONS = [
 
 export default function ContractsPage() {
     const router = useRouter();
+    const toast = useToast();
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState<ContractStatus | ''>('');
     const [sort, setSort] = useState('createdAt:desc');
     const [page, setPage] = useState(1);
     const [deleteModal, setDeleteModal] = useState<Contract | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
-    const [copiedId, setCopiedId] = useState<string | null>(null);
 
     const [sortBy, sortOrder] = sort.split(':');
 
@@ -53,9 +54,10 @@ export default function ContractsPage() {
         setIsDeleting(true);
         try {
             await deleteContract(deleteModal.id);
+            toast.success('Umowa usunięta', `"${deleteModal.title}" została usunięta`);
             setDeleteModal(null);
-        } catch (err: unknown) {
-            console.error('Delete error:', err);
+        } catch {
+            toast.error('Błąd', 'Nie udało się usunąć umowy');
         } finally {
             setIsDeleting(false);
         }
@@ -68,10 +70,9 @@ export default function ContractsPage() {
         const url = `${frontendUrl}/contract/view/${contract.publicToken}`;
         try {
             await navigator.clipboard.writeText(url);
-            setCopiedId(contract.id);
-            setTimeout(() => setCopiedId(null), 2000);
-        } catch (err: unknown) {
-            console.error('Copy failed:', err);
+            toast.info('Link skopiowany', 'Link do umowy został skopiowany do schowka');
+        } catch {
+            toast.error('Błąd', 'Nie udało się skopiować linku');
         }
     };
 
@@ -94,7 +95,13 @@ export default function ContractsPage() {
                 </Link>
             </div>
 
-            {!statsLoading && stats && (
+            {statsLoading ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                        <SkeletonStatsCard key={i} />
+                    ))}
+                </div>
+            ) : stats ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                     <Card className="p-4">
                         <p className="text-sm text-themed-muted">Wszystkie</p>
@@ -113,7 +120,7 @@ export default function ContractsPage() {
                         <p className="text-2xl font-bold text-cyan-600">{formatCurrency(stats.activeValue)}</p>
                     </Card>
                 </div>
-            )}
+            ) : null}
 
             <Card className="mb-6">
                 <div className="p-4 flex flex-col md:flex-row gap-4">
@@ -147,7 +154,28 @@ export default function ContractsPage() {
             </Card>
 
             {loading ? (
-                <PageLoader />
+                <Card className="overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead className="section-themed border-b divider-themed">
+                            <tr>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Umowa</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Klient</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Status</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Dystrybucja</th>
+                                <th className="px-6 py-4 text-right text-xs font-semibold text-themed-muted uppercase tracking-wider">Wartość</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Daty</th>
+                                <th className="px-6 py-4 text-right text-xs font-semibold text-themed-muted uppercase tracking-wider">Akcje</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {Array.from({ length: 6 }).map((_, i) => (
+                                <SkeletonTableRow key={i} columns={7} />
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </Card>
             ) : error ? (
                 <Card>
                     <div className="text-center py-12">
@@ -199,7 +227,6 @@ export default function ContractsPage() {
                             <tbody>
                             {contracts.map((contract) => {
                                 const statusConfig = getContractStatusConfig(contract.status);
-                                const isCopied = copiedId === contract.id;
 
                                 return (
                                     <tr
@@ -243,22 +270,12 @@ export default function ContractsPage() {
                                                         </span>
                                                         <button
                                                             onClick={(e) => handleCopyLink(e, contract)}
-                                                            className={`p-1.5 rounded-lg transition-all ${
-                                                                isCopied
-                                                                    ? 'bg-emerald-500/15 text-emerald-600'
-                                                                    : 'text-themed-muted hover:text-emerald-600 hover:bg-emerald-500/10'
-                                                            }`}
-                                                            title={isCopied ? 'Skopiowano!' : 'Kopiuj link'}
+                                                            className="p-1.5 rounded-lg transition-all text-themed-muted hover:text-emerald-600 hover:bg-emerald-500/10"
+                                                            title="Kopiuj link"
                                                         >
-                                                            {isCopied ? (
-                                                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                                </svg>
-                                                            ) : (
-                                                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                                </svg>
-                                                            )}
+                                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                            </svg>
                                                         </button>
                                                     </>
                                                 ) : (

@@ -114,9 +114,11 @@ export default function PublicContractPage({ params }: PageProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isDownloading, setIsDownloading] = useState(false);
+    const [downloadError, setDownloadError] = useState<string | null>(null);
     const [showSignDialog, setShowSignDialog] = useState(false);
     const [signSuccess, setSignSuccess] = useState(false);
     const [hashCopied, setHashCopied] = useState(false);
+    const [copyError, setCopyError] = useState(false);
 
     const loadContract = useCallback(async (showSpinner = true) => {
         if (showSpinner) setIsLoading(true);
@@ -135,7 +137,7 @@ export default function PublicContractPage({ params }: PageProps) {
                 return;
             }
             setData(json.data);
-        } catch (err: unknown) {
+        } catch {
             setError('Nie udało się załadować umowy');
         } finally {
             if (showSpinner) setIsLoading(false);
@@ -164,9 +166,10 @@ export default function PublicContractPage({ params }: PageProps) {
 
     const handleDownloadPdf = async () => {
         setIsDownloading(true);
+        setDownloadError(null);
         try {
             const response = await fetch(`${API_URL}/api/public/contracts/${token}/pdf`);
-            if (!response.ok) throw new Error('PDF download failed');
+            if (!response.ok) throw new Error('Nie udało się pobrać dokumentu PDF');
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -176,20 +179,22 @@ export default function PublicContractPage({ params }: PageProps) {
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-        } catch (err: unknown) {
-            console.error('PDF download error:', err);
+        } catch (err) {
+            setDownloadError(err instanceof Error ? err.message : 'Wystąpił błąd podczas pobierania PDF');
         } finally {
             setIsDownloading(false);
         }
     };
 
     const handleCopyHash = async (hash: string) => {
+        setCopyError(false);
         try {
             await navigator.clipboard.writeText(hash);
             setHashCopied(true);
             setTimeout(() => setHashCopied(false), 2000);
-        } catch (err: unknown) {
-            console.error('Copy failed:', err);
+        } catch {
+            setCopyError(true);
+            setTimeout(() => setCopyError(false), 3000);
         }
     };
 
@@ -268,6 +273,28 @@ export default function PublicContractPage({ params }: PageProps) {
                 </div>
             )}
 
+            {downloadError && (
+                <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                        </svg>
+                    </div>
+                    <div className="flex-1">
+                        <p className="font-semibold text-red-800">Błąd pobierania PDF</p>
+                        <p className="text-sm text-red-600">{downloadError}</p>
+                    </div>
+                    <button
+                        onClick={() => setDownloadError(null)}
+                        className="p-1 text-red-400 hover:text-red-600 transition-colors"
+                    >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            )}
+
             <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
                 <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -283,8 +310,8 @@ export default function PublicContractPage({ params }: PageProps) {
                         <div className="text-right">
                             <p className="text-white/80 text-sm">Nr {contract.number}</p>
                             <span className={`inline-block mt-1 px-3 py-1 rounded-full text-xs font-medium ${status.bg} ${status.color}`}>
-                {status.label}
-              </span>
+                                {status.label}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -454,12 +481,16 @@ export default function PublicContractPage({ params }: PageProps) {
                                 </code>
                                 <button
                                     onClick={() => handleCopyHash(contract.signatureLog!.contentHash)}
-                                    className="flex-shrink-0 p-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors"
+                                    className="flex-shrink-0 p-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors relative"
                                     title="Kopiuj hash"
                                 >
                                     {hashCopied ? (
                                         <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    ) : copyError ? (
+                                        <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                                         </svg>
                                     ) : (
                                         <svg className="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -468,6 +499,9 @@ export default function PublicContractPage({ params }: PageProps) {
                                     )}
                                 </button>
                             </div>
+                            {copyError && (
+                                <p className="text-xs text-red-500 mt-1">Nie udało się skopiować. Zaznacz hash ręcznie.</p>
+                            )}
                             <p className="text-xs text-slate-400 mt-2">
                                 Ten hash jest unikalnym odciskiem cyfrowym treści umowy w momencie podpisu.
                                 Każda zmiana w treści generowałaby inny hash — co potwierdza integralność dokumentu.
