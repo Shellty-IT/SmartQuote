@@ -89,6 +89,7 @@ export default function FollowUpsPage() {
     };
 
     const isOverdue = (followUp: FollowUp) => {
+        if (followUp.status === 'OVERDUE') return true;
         if (followUp.status === 'COMPLETED' || followUp.status === 'CANCELLED') return false;
         return new Date(followUp.dueDate) < new Date();
     };
@@ -199,6 +200,7 @@ export default function FollowUpsPage() {
                     >
                         <option value="">Wszystkie statusy</option>
                         <option value="PENDING">Oczekujące</option>
+                        <option value="OVERDUE">Zaległe</option>
                         <option value="COMPLETED">Wykonane</option>
                         <option value="CANCELLED">Anulowane</option>
                     </select>
@@ -317,25 +319,36 @@ export default function FollowUpsPage() {
                             </thead>
                             <tbody>
                             {followUps.map((followUp) => {
-                                const status = isOverdue(followUp) ? statusConfig.OVERDUE : statusConfig[followUp.status];
+                                const overdue = isOverdue(followUp);
+                                const status = overdue ? statusConfig.OVERDUE : statusConfig[followUp.status];
                                 const type = typeConfig[followUp.type];
                                 const priority = priorityConfig[followUp.priority];
 
                                 return (
                                     <tr
                                         key={followUp.id}
-                                        className="border-b hover-themed transition-colors cursor-pointer"
-                                        style={{ borderColor: 'var(--divider)' }}
+                                        className={`border-b hover-themed transition-colors cursor-pointer ${
+                                            overdue ? 'border-l-4 border-l-red-500' : ''
+                                        }`}
+                                        style={{
+                                            borderBottomColor: 'var(--divider)',
+                                            backgroundColor: overdue ? 'rgba(239, 68, 68, 0.04)' : undefined,
+                                        }}
                                         onClick={() => router.push(`/dashboard/followups/${followUp.id}`)}
                                     >
                                         <td className="px-6 py-4">
-                                            <div>
-                                                <p className="font-medium text-themed">{followUp.title}</p>
-                                                {followUp.description && (
-                                                    <p className="text-sm text-themed-muted truncate max-w-xs">
-                                                        {followUp.description}
-                                                    </p>
+                                            <div className="flex items-start gap-2">
+                                                {overdue && (
+                                                    <span className="text-red-500 animate-pulse flex-shrink-0 mt-0.5" title="Zaległy!">⚠️</span>
                                                 )}
+                                                <div>
+                                                    <p className="font-medium text-themed">{followUp.title}</p>
+                                                    {followUp.description && (
+                                                        <p className="text-sm text-themed-muted truncate max-w-xs">
+                                                            {followUp.description}
+                                                        </p>
+                                                    )}
+                                                </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 hidden md:table-cell">
@@ -366,8 +379,11 @@ export default function FollowUpsPage() {
                                             </Badge>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className={`text-sm ${isOverdue(followUp) ? 'text-red-500 font-medium' : 'text-themed-muted'}`}>
+                                            <span className={`text-sm ${overdue ? 'text-red-500 font-semibold' : 'text-themed-muted'}`}>
                                                 {formatDate(followUp.dueDate)}
+                                                {overdue && (
+                                                    <span className="block text-xs text-red-400 mt-0.5">Zaległy!</span>
+                                                )}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 hidden sm:table-cell">
@@ -377,7 +393,7 @@ export default function FollowUpsPage() {
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                                                {followUp.status === 'PENDING' && (
+                                                {(followUp.status === 'PENDING' || followUp.status === 'OVERDUE') && (
                                                     <button
                                                         onClick={() => handleComplete(followUp)}
                                                         disabled={completingId === followUp.id}

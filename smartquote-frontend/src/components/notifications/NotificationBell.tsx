@@ -12,7 +12,8 @@ const typeConfig: Record<NotificationType, { icon: string; colorClass: string }>
     OFFER_REJECTED: { icon: '❌', colorClass: 'badge-danger' },
     OFFER_COMMENT: { icon: '💬', colorClass: 'bg-cyan-500/15 text-cyan-700' },
     AI_INSIGHT: { icon: '✨', colorClass: 'bg-purple-500/15 text-purple-700' },
-    FOLLOW_UP_REMINDER: { icon: '🔔', colorClass: 'badge-warning' },
+    FOLLOW_UP_REMINDER: { icon: '⏰', colorClass: 'bg-amber-500/15 text-amber-700' },
+    CONTRACT_SIGNED: { icon: '✍️', colorClass: 'bg-emerald-500/15 text-emerald-700' },
     SYSTEM: { icon: '⚙️', colorClass: 'badge-themed' },
 };
 

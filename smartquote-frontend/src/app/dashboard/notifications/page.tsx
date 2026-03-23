@@ -16,7 +16,8 @@ const typeConfig: Record<NotificationType, { icon: string; label: string; colorC
     OFFER_REJECTED: { icon: '❌', label: 'Odrzucenie oferty', colorClass: 'bg-red-500/15 text-red-700' },
     OFFER_COMMENT: { icon: '💬', label: 'Komentarz', colorClass: 'bg-cyan-500/15 text-cyan-700' },
     AI_INSIGHT: { icon: '✨', label: 'Wgląd AI', colorClass: 'bg-purple-500/15 text-purple-700' },
-    FOLLOW_UP_REMINDER: { icon: '🔔', label: 'Przypomnienie', colorClass: 'bg-amber-500/15 text-amber-700' },
+    FOLLOW_UP_REMINDER: { icon: '⏰', label: 'Follow-up', colorClass: 'bg-amber-500/15 text-amber-700' },
+    CONTRACT_SIGNED: { icon: '✍️', label: 'Podpis umowy', colorClass: 'bg-emerald-500/15 text-emerald-700' },
     SYSTEM: { icon: '⚙️', label: 'Systemowe', colorClass: 'bg-slate-500/15 text-slate-700' },
 };
 
@@ -27,7 +28,8 @@ const typeOptions = [
     { value: 'OFFER_REJECTED', label: '❌ Odrzucenia' },
     { value: 'OFFER_COMMENT', label: '💬 Komentarze' },
     { value: 'AI_INSIGHT', label: '✨ AI Insights' },
-    { value: 'FOLLOW_UP_REMINDER', label: '🔔 Przypomnienia' },
+    { value: 'FOLLOW_UP_REMINDER', label: '⏰ Follow-upy' },
+    { value: 'CONTRACT_SIGNED', label: '✍️ Podpisy umów' },
     { value: 'SYSTEM', label: '⚙️ Systemowe' },
 ];
 

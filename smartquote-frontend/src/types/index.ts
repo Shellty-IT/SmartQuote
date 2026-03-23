@@ -744,6 +744,7 @@ export type NotificationType =
     | 'OFFER_COMMENT'
     | 'AI_INSIGHT'
     | 'FOLLOW_UP_REMINDER'
+    | 'CONTRACT_SIGNED'
     | 'SYSTEM';
 
 export interface Notification {
