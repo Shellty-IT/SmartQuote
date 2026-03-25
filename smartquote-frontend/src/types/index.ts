@@ -10,3 +10,4 @@ export * from './follow-up.types';
 export * from './settings.types';
 export * from './notification.types';
 export * from './ai';
+export * from './ksef.types';

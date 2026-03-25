@@ -22,6 +22,8 @@ export function OfferMobileCard({ offer, onView, onEdit, onDuplicate, onDelete, 
         offer.status !== 'ACCEPTED' &&
         offer.status !== 'REJECTED';
 
+    const hasInvoice = !!offer.invoiceSentAt;
+
     return (
         <Card className="p-4" onClick={onView}>
             <div className="flex items-start justify-between mb-3">
@@ -30,7 +32,19 @@ export function OfferMobileCard({ offer, onView, onEdit, onDuplicate, onDelete, 
                         {getInitials(offer.client?.name || '?')}
                     </div>
                     <div className="min-w-0">
-                        <p className="font-semibold text-themed truncate">{offer.title}</p>
+                        <div className="flex items-center gap-1.5">
+                            <p className="font-semibold text-themed truncate">{offer.title}</p>
+                            {hasInvoice && (
+                                <span
+                                    className="shrink-0 w-4 h-4 rounded bg-amber-500/15 flex items-center justify-center"
+                                    title="Faktura wysłana"
+                                >
+                                    <svg className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </span>
+                            )}
+                        </div>
                         <p className="text-xs text-themed-muted">{offer.number}</p>
                     </div>
                 </div>
@@ -55,17 +69,27 @@ export function OfferMobileCard({ offer, onView, onEdit, onDuplicate, onDelete, 
                 </div>
             </div>
 
-            {offer.publicToken && (
-                <div className="mb-3" onClick={(e) => e.stopPropagation()}>
-                    <button
-                        onClick={onCopyLink}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/25 hover:bg-cyan-500/25 transition-colors"
-                    >
-                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
-                        Link aktywny — kopiuj
-                    </button>
-                </div>
-            )}
+            <div className="flex items-center gap-2 mb-3">
+                {offer.publicToken && (
+                    <div onClick={(e) => e.stopPropagation()}>
+                        <button
+                            onClick={onCopyLink}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/25 hover:bg-cyan-500/25 transition-colors"
+                        >
+                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
+                            Link aktywny — kopiuj
+                        </button>
+                    </div>
+                )}
+                {hasInvoice && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25">
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Faktura
+                    </span>
+                )}
+            </div>
 
             <div
                 className="flex items-center gap-2 pt-3 border-t divider-themed"

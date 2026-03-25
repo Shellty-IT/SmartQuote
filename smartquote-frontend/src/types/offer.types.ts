@@ -75,6 +75,8 @@ export interface Offer {
     clientSelectedData: Record<string, unknown> | null;
     requireAuditTrail: boolean;
     acceptanceLog?: OfferAcceptanceLog | null;
+    invoiceSentAt: string | null;
+    invoiceExternalId: string | null;
     createdAt: string;
     updatedAt: string;
     client: Client;
