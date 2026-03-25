@@ -1,4 +1,4 @@
-// SmartQuote-AI/src/app/offer/view/[token]/layout.tsx
+// SmartQuote-AI/src/app/offer/views/[token]/layout.tsx
 import type { Metadata, Viewport } from 'next';
 
 export const viewport: Viewport = {

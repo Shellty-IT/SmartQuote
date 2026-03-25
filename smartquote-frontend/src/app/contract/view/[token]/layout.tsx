@@ -1,4 +1,4 @@
-// src/app/contract/view/[token]/layout.tsx
+// src/app/contract/views/[token]/layout.tsx
 import type { Metadata, Viewport } from 'next';
 
 export const viewport: Viewport = {

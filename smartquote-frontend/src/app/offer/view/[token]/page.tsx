@@ -1,4 +1,4 @@
-// SmartQuote-AI/src/app/offer/view/[token]/page.tsx
+// SmartQuote-AI/src/app/offer/views/[token]/page.tsx
 
 'use client';
 

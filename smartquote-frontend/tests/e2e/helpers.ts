@@ -171,7 +171,7 @@ export async function createAndPublishOffer(
     await generateBtn.click({ force: true });
 
     await page.waitForFunction(
-        () => document.body.innerHTML.includes('/offer/view/'),
+        () => document.body.innerHTML.includes('/offer/views/'),
         { timeout: 30000 }
     );
 

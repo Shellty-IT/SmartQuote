@@ -1,4 +1,4 @@
-// src/app/contract/view/[token]/page.tsx
+// src/app/contract/views/[token]/page.tsx
 'use client';
 
 import { useState, useEffect, useCallback, use } from 'react';
