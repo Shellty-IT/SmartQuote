@@ -117,8 +117,8 @@ export default function LoginPage() {
                 </svg>
             ),
             text: 'Sprawdzanie połączenia...',
-            color: 'text-slate-600',
-            bg: 'bg-slate-50 border-slate-200',
+            color: 'text-blue-600',
+            bg: 'bg-blue-50 border-blue-200',
         },
         waking: {
             icon: (
@@ -129,8 +129,8 @@ export default function LoginPage() {
                 </svg>
             ),
             text: `Budzenie serwera... (${elapsedSeconds}s)`,
-            color: 'text-amber-700',
-            bg: 'bg-amber-50 border-amber-200',
+            color: 'text-blue-700',
+            bg: 'bg-blue-50 border-blue-200',
         },
         ready: {
             icon: (
@@ -184,7 +184,7 @@ export default function LoginPage() {
                         <div className="flex-1 min-w-0">
                             <p className={`text-sm font-medium ${currentStatus.color}`}>{currentStatus.text}</p>
                             {backendStatus === 'waking' && (
-                                <p className="text-xs text-amber-600 mt-0.5">
+                                <p className="text-xs text-blue-600 mt-0.5">
                                     Darmowy serwer wymaga rozruchu — to może potrwać do 60s
                                 </p>
                             )}
@@ -201,9 +201,9 @@ export default function LoginPage() {
 
                     {backendStatus === 'waking' && (
                         <div className="mb-6">
-                            <div className="h-1.5 bg-amber-100 rounded-full overflow-hidden">
+                            <div className="h-1.5 bg-blue-100 rounded-full overflow-hidden">
                                 <div
-                                    className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full transition-all duration-1000 ease-out"
+                                    className="h-full bg-gradient-to-r from-blue-400 to-blue-500 rounded-full transition-all duration-1000 ease-out"
                                     style={{ width: `${Math.min((wakeAttempt / 12) * 100, 95)}%` }}
                                 />
                             </div>
