@@ -5,6 +5,7 @@ import { useState, useEffect, useRef, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { checkBackendHealth } from '@/lib/api';
 
 type BackendStatus = 'checking' | 'waking' | 'ready' | 'error';
@@ -157,18 +158,14 @@ export default function LoginPage() {
     const currentStatus = statusConfig[backendStatus];
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-cyan-50/30 to-blue-50 px-4">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-cyan-50 dark:from-slate-900 dark:to-slate-800 px-4">
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-40 -right-40 w-96 h-96 bg-cyan-200 rounded-full opacity-15 blur-3xl animate-pulse" />
-                <div
-                    className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-200 rounded-full opacity-15 blur-3xl animate-pulse"
-                    style={{ animationDelay: '2s' }}
-                />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-cyan-100 to-blue-100 rounded-full opacity-10 blur-3xl" />
+                <div className="absolute -top-40 -right-40 w-80 h-80 bg-cyan-200 dark:bg-cyan-900 rounded-full opacity-20 blur-3xl" />
+                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-200 dark:bg-blue-900 rounded-full opacity-20 blur-3xl" />
             </div>
 
             <div className="relative w-full max-w-md">
-                <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl shadow-cyan-500/10 p-8 border border-white/50">
+                <div className="card-themed border rounded-2xl shadow-xl shadow-cyan-500/10 p-8">
                     <div className="text-center mb-8">
                         <Image
                             src="/android-chrome-512x512.png"
@@ -178,11 +175,11 @@ export default function LoginPage() {
                             className="mx-auto mb-4"
                             priority
                         />
-                        <h1 className="text-2xl font-bold text-slate-800">SmartQuote AI</h1>
-                        <p className="text-slate-500 mt-2">Zaloguj się do swojego konta</p>
+                        <h1 className="text-2xl font-bold text-themed">SmartQuote AI</h1>
+                        <p className="text-themed-muted mt-2">Zaloguj się do swojego konta</p>
                     </div>
 
-                    <div className={`mb-6 p-3 rounded-xl border flex items-center gap-3 transition-all duration-500 ${currentStatus.bg}`}>
+                    <div className={`mb-6 p-3 rounded-lg border flex items-center gap-3 transition-all duration-500 ${currentStatus.bg}`}>
                         <div className={currentStatus.color}>{currentStatus.icon}</div>
                         <div className="flex-1 min-w-0">
                             <p className={`text-sm font-medium ${currentStatus.color}`}>{currentStatus.text}</p>
@@ -214,12 +211,12 @@ export default function LoginPage() {
                     )}
 
                     {error && (
-                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
-                            <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-3">
+                            <svg className="w-5 h-5 text-red-500 dark:text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                       d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span className="text-red-700 text-sm">{error}</span>
+                            <span className="text-red-700 dark:text-red-400 text-sm">{error}</span>
                         </div>
                     )}
 
@@ -231,12 +228,12 @@ export default function LoginPage() {
                         className="space-y-5"
                     >
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
+                            <label htmlFor="email" className="block text-sm font-medium text-themed-label mb-2">
                                 Adres email
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-themed-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                               d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                                     </svg>
@@ -250,22 +247,21 @@ export default function LoginPage() {
                                     value={email}
                                     onChange={e => setEmail(e.target.value)}
                                     disabled={isFormDisabled}
-                                    className="block w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl
+                                    className="block w-full pl-10 pr-4 py-3 border rounded-lg input-themed
                                     focus:ring-2 focus:ring-cyan-500 focus:border-transparent
-                                    disabled:bg-slate-50 disabled:text-slate-400
-                                    placeholder-slate-400 text-slate-800 transition-all duration-200"
+                                    disabled:opacity-50 transition-all duration-200"
                                     placeholder="jan@firma.pl"
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
+                            <label htmlFor="password" className="block text-sm font-medium text-themed-label mb-2">
                                 Hasło
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-themed-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                               d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                     </svg>
@@ -279,10 +275,9 @@ export default function LoginPage() {
                                     value={password}
                                     onChange={e => setPassword(e.target.value)}
                                     disabled={isFormDisabled}
-                                    className="block w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl
+                                    className="block w-full pl-10 pr-4 py-3 border rounded-lg input-themed
                                     focus:ring-2 focus:ring-cyan-500 focus:border-transparent
-                                    disabled:bg-slate-50 disabled:text-slate-400
-                                    placeholder-slate-400 text-slate-800 transition-all duration-200"
+                                    disabled:opacity-50 transition-all duration-200"
                                     placeholder="••••••••"
                                 />
                             </div>
@@ -292,10 +287,10 @@ export default function LoginPage() {
                             type="submit"
                             disabled={isFormDisabled}
                             className="w-full py-3 px-4 bg-gradient-to-r from-cyan-500 to-blue-600
-                            text-white font-semibold rounded-xl shadow-lg shadow-cyan-500/30
+                            text-white font-semibold rounded-lg shadow-lg shadow-cyan-500/30
                             hover:from-cyan-600 hover:to-blue-700
                             focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2
-                            disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-cyan-500 disabled:hover:to-blue-600
+                            disabled:opacity-70 disabled:cursor-not-allowed
                             transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                         >
                             {isLoading ? (
@@ -316,16 +311,19 @@ export default function LoginPage() {
                     </form>
 
                     <div className="mt-6 text-center">
-                        <p className="text-sm text-slate-500">
+                        <p className="text-sm text-themed-muted">
                             Nie masz konta?{' '}
-                            <a href="/register" className="font-medium text-cyan-600 hover:text-cyan-700 transition-colors">
+                            <Link
+                                href="/register"
+                                className="font-medium text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors"
+                            >
                                 Zarejestruj się
-                            </a>
+                            </Link>
                         </p>
                     </div>
                 </div>
 
-                <p className="text-center text-xs text-slate-400 mt-6">© 2025 SmartQuote AI. Wszelkie prawa zastrzeżone.</p>
+                <p className="text-center text-xs text-themed-muted mt-6">© 2025 SmartQuote AI. Wszelkie prawa zastrzeżone.</p>
             </div>
         </div>
     );
