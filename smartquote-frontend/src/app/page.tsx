@@ -139,8 +139,8 @@ export default function LoginPage() {
                 </svg>
             ),
             text: 'Serwer gotowy',
-            color: 'text-emerald-700',
-            bg: 'bg-emerald-50 border-emerald-200',
+            color: 'text-blue-800',
+            bg: 'bg-blue-100 border-blue-300',
         },
         error: {
             icon: (
