@@ -1,7 +1,7 @@
 // src/app/dashboard/offers/[id]/constants.ts
 import type { OfferStatus } from '@/types';
 
-export type Tab = 'details' | 'analytics' | 'comments';
+export type Tab = 'details' | 'analytics' | 'comments' | 'emails';
 
 export const STATUS_TRANSITIONS: Record<OfferStatus, OfferStatus[]> = {
     DRAFT: ['SENT'],
@@ -34,4 +34,5 @@ export const TABS_CONFIG: { id: Tab; label: string }[] = [
     { id: 'details', label: 'Szczegóły' },
     { id: 'analytics', label: 'Analityka' },
     { id: 'comments', label: 'Komentarze' },
+    { id: 'emails', label: 'Korespondencja' },
 ];

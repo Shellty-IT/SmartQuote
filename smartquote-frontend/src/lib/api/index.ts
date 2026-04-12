@@ -11,3 +11,4 @@ export { notificationsApi } from './notifications.api';
 export { ai } from './ai.api';
 export { settingsApi } from './settings.api';
 export { ksefApi } from './ksef.api';
+export { emailsApi } from './emails.api';

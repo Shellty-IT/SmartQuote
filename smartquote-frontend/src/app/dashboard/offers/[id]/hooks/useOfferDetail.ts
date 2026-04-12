@@ -153,7 +153,7 @@ export function useOfferDetail(offerId: string) {
             });
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `Błąd ${response.status}`);
+                throw new Error((errorData as { message?: string }).message || `Błąd ${response.status}`);
             }
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);

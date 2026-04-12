@@ -2,7 +2,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Sun, Moon, Languages, Loader2, Check } from 'lucide-react';
 import { Card } from '@/components/ui';
 import { useTheme } from '@/app/providers';
 import type { UserSettings, UpdateSettingsInput } from '@/types';
@@ -22,7 +21,6 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
         setTheme(newTheme);
         setIsSaving(true);
         setSuccess(false);
-
         try {
             await onUpdate({ theme: newTheme } as UpdateSettingsInput);
             setSuccess(true);
@@ -39,7 +37,6 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
         setLocalLanguage(value);
         setIsSaving(true);
         setSuccess(false);
-
         try {
             await onUpdate({ language: value } as UpdateSettingsInput);
             setSuccess(true);
@@ -56,7 +53,6 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
         {
             id: 'light' as const,
             label: 'Jasny',
-            icon: <Sun className="w-6 h-6" />,
             description: 'Klasyczny jasny motyw w odcieniach błękitu',
             preview: {
                 bg: 'bg-gradient-to-br from-slate-50 to-cyan-50',
@@ -64,14 +60,17 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
                 header: 'bg-white',
                 card: 'bg-white border-slate-200',
                 text: 'bg-slate-300',
-                textSm: 'bg-slate-200',
                 accent: 'bg-cyan-500',
             },
+            icon: (
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 6.343l-.707-.707m12.728 12.728l-.707-.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+            ),
         },
         {
             id: 'dark' as const,
             label: 'Ciemny',
-            icon: <Moon className="w-6 h-6" />,
             description: 'Elegancki ciemny motyw w odcieniach granatu',
             preview: {
                 bg: 'bg-gradient-to-br from-[#0b1120] to-[#111827]',
@@ -79,16 +78,20 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
                 header: 'bg-[#111827]',
                 card: 'bg-[#111827] border-slate-700',
                 text: 'bg-slate-600',
-                textSm: 'bg-slate-700',
                 accent: 'bg-cyan-500',
             },
+            icon: (
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            ),
         },
     ];
 
     const languages = [
-        { id: 'pl', label: 'Polski', flag: '🇵🇱' },
-        { id: 'en', label: 'English', flag: '🇬🇧' },
-    ] as const;
+        { id: 'pl' as const, label: 'Polski', flag: '🇵🇱' },
+        { id: 'en' as const, label: 'English', flag: '🇬🇧' },
+    ];
 
     return (
         <div className="space-y-6">
@@ -101,11 +104,18 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
                     <div className="flex items-center gap-2">
                         {success && (
                             <div className="flex items-center gap-1.5 text-emerald-600 text-sm">
-                                <Check className="w-4 h-4" />
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
                                 <span>Zapisano</span>
                             </div>
                         )}
-                        {isSaving && <Loader2 className="w-4 h-4 animate-spin text-cyan-500" />}
+                        {isSaving && (
+                            <svg className="w-4 h-4 animate-spin text-cyan-500" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                            </svg>
+                        )}
                     </div>
                 </div>
 
@@ -118,12 +128,14 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
                             className={`relative rounded-2xl border-2 transition-all duration-300 text-left overflow-hidden group ${
                                 theme === t.id
                                     ? 'border-cyan-500 shadow-lg shadow-cyan-500/20'
-                                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                             } ${isSaving ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                         >
                             {theme === t.id && (
                                 <div className="absolute top-3 right-3 z-10 w-6 h-6 bg-cyan-500 rounded-full flex items-center justify-center">
-                                    <Check className="w-3.5 h-3.5 text-white" />
+                                    <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
                                 </div>
                             )}
 
@@ -155,7 +167,7 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
                                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
                                         theme === t.id
                                             ? 'bg-cyan-500 text-white'
-                                            : 'bg-slate-100 text-slate-500'
+                                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                                     }`}>
                                         {t.icon}
                                     </div>
@@ -176,29 +188,38 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
                     <p className="text-sm text-themed-muted">Wybierz język interfejsu</p>
                 </div>
 
-                <div className="flex gap-4">
-                    {languages.map((lang) => (
-                        <button
-                            key={lang.id}
-                            onClick={() => handleLanguageChange(lang.id)}
-                            disabled={isSaving}
-                            className={`flex items-center gap-3 px-5 py-3.5 rounded-xl border-2 transition-all ${
-                                localLanguage === lang.id
-                                    ? 'border-cyan-500 bg-cyan-50'
-                                    : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-                            } ${isSaving ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
-                        >
-                            <span className="text-2xl">{lang.flag}</span>
-                            <span className="font-medium text-themed">{lang.label}</span>
-                            {localLanguage === lang.id && (
-                                <Check className="w-4 h-4 text-cyan-500 ml-1" />
-                            )}
-                        </button>
-                    ))}
+                <div className="flex gap-4 flex-wrap">
+                    {languages.map((lang) => {
+                        const isActive = localLanguage === lang.id;
+                        return (
+                            <button
+                                key={lang.id}
+                                onClick={() => handleLanguageChange(lang.id)}
+                                disabled={isSaving}
+                                className={`flex items-center gap-3 px-5 py-3.5 rounded-xl border-2 transition-all ${
+                                    isActive
+                                        ? 'border-cyan-500 bg-cyan-500/10 dark:bg-cyan-500/10'
+                                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
+                                } ${isSaving ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+                            >
+                                <span className="text-2xl">{lang.flag}</span>
+                                <span className={`font-medium ${isActive ? 'text-cyan-600 dark:text-cyan-400' : 'text-themed'}`}>
+                                    {lang.label}
+                                </span>
+                                {isActive && (
+                                    <svg className="w-4 h-4 text-cyan-500 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                )}
+                            </button>
+                        );
+                    })}
                 </div>
 
                 <div className="mt-4 flex items-start gap-2 text-sm text-themed-muted">
-                    <Languages className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
                     <p>Zmiana języka wpłynie na cały interfejs aplikacji po odświeżeniu strony.</p>
                 </div>
             </Card>

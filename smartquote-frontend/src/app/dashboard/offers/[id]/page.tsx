@@ -1,5 +1,4 @@
 // src/app/dashboard/offers/[id]/page.tsx
-
 'use client';
 
 import { use } from 'react';
@@ -12,6 +11,7 @@ import { OfferTabs } from './components/OfferTabs';
 import { DetailsTab } from './components/details/DetailsTab';
 import { AnalyticsTab } from './components/analytics/AnalyticsTab';
 import { CommentsTab } from './components/comments/CommentsTab';
+import { EmailsTab } from './components/emails/EmailsTab';
 import { KsefMasterPreview } from './components/KsefMasterPreview';
 
 interface PageProps {
@@ -105,6 +105,7 @@ export default function OfferDetailPage({ params }: PageProps) {
                 onTabChange={setActiveTab}
                 viewCount={offer.viewCount || 0}
                 commentsCount={offer._count?.comments || 0}
+                emailsCount={0}
             />
 
             {activeTab === 'details' && (
@@ -144,6 +145,13 @@ export default function OfferDetailPage({ params }: PageProps) {
                     onLoadCloser={handleLoadCloser}
                     onExpandStrategy={setExpandedStrategy}
                     onUseStrategy={handleUseStrategy}
+                />
+            )}
+
+            {activeTab === 'emails' && (
+                <EmailsTab
+                    offerId={offer.id}
+                    offerNumber={offer.number}
                 />
             )}
 

@@ -42,6 +42,7 @@ export default function Sidebar() {
             href: '/dashboard',
             icon: HomeIcon,
             badge: null,
+            badgeColor: undefined,
         },
         {
             name: 'Oferty',
@@ -72,6 +73,13 @@ export default function Sidebar() {
             badgeColor: 'orange',
         },
         {
+            name: 'Korespondencja',
+            href: '/dashboard/emails',
+            icon: EnvelopeIcon,
+            badge: null,
+            badgeColor: undefined,
+        },
+        {
             name: 'Powiadomienia',
             href: '/dashboard/notifications',
             icon: BellIcon,
@@ -83,12 +91,14 @@ export default function Sidebar() {
             href: '/dashboard/ai',
             icon: SparklesIcon,
             badge: null,
+            badgeColor: undefined,
         },
         {
             name: 'Wnioski AI',
             href: '/dashboard/ai-insights',
             icon: LightBulbIcon,
             badge: null,
+            badgeColor: undefined,
         },
     ];
 
@@ -97,26 +107,11 @@ export default function Sidebar() {
     ];
 
     const badgeColors: Record<string, { active: string; inactive: string }> = {
-        cyan: {
-            active: 'bg-cyan-500 text-white',
-            inactive: 'bg-cyan-500/20 text-cyan-400'
-        },
-        blue: {
-            active: 'bg-blue-500 text-white',
-            inactive: 'bg-blue-500/20 text-blue-400'
-        },
-        green: {
-            active: 'bg-green-500 text-white',
-            inactive: 'bg-green-500/20 text-green-400'
-        },
-        orange: {
-            active: 'bg-orange-500 text-white',
-            inactive: 'bg-orange-500/20 text-orange-400'
-        },
-        purple: {
-            active: 'bg-purple-500 text-white',
-            inactive: 'bg-purple-500/20 text-purple-400'
-        },
+        cyan: { active: 'bg-cyan-500 text-white', inactive: 'bg-cyan-500/20 text-cyan-400' },
+        blue: { active: 'bg-blue-500 text-white', inactive: 'bg-blue-500/20 text-blue-400' },
+        green: { active: 'bg-green-500 text-white', inactive: 'bg-green-500/20 text-green-400' },
+        orange: { active: 'bg-orange-500 text-white', inactive: 'bg-orange-500/20 text-orange-400' },
+        purple: { active: 'bg-purple-500 text-white', inactive: 'bg-purple-500/20 text-purple-400' },
     };
 
     const sidebarContent = (
@@ -156,22 +151,20 @@ export default function Sidebar() {
                                 key={item.name}
                                 href={item.href}
                                 onClick={() => setIsMobileOpen(false)}
-                                className={`group flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
-                                    ${isActive
-                                    ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-white border border-cyan-500/30'
-                                    : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                                className={`group flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                    isActive
+                                        ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-white border border-cyan-500/30'
+                                        : 'text-slate-400 hover:bg-white/5 hover:text-white'
                                 }`}
                             >
                                 <div className="flex items-center gap-3">
                                     <item.icon className={`h-5 w-5 ${isActive ? 'text-cyan-400' : 'text-slate-500 group-hover:text-slate-300'}`} />
                                     {item.name}
                                 </div>
-
-                                {item.badge !== null && item.badge > 0 && (
-                                    <span className={`min-w-[20px] px-1.5 py-0.5 text-xs font-semibold rounded-full text-center transition-all
-                                        ${loading ? 'animate-pulse bg-slate-700' : ''}
-                                        ${isActive ? colorConfig.active : colorConfig.inactive}`}
-                                    >
+                                {item.badge !== null && item.badge !== undefined && item.badge > 0 && (
+                                    <span className={`min-w-[20px] px-1.5 py-0.5 text-xs font-semibold rounded-full text-center transition-all ${
+                                        loading ? 'animate-pulse bg-slate-700' : ''
+                                    } ${isActive ? colorConfig.active : colorConfig.inactive}`}>
                                         {loading ? '...' : item.badge}
                                     </span>
                                 )}
@@ -273,6 +266,14 @@ function CalendarIcon({ className }: { className?: string }) {
     return (
         <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+    );
+}
+
+function EnvelopeIcon({ className }: { className?: string }) {
+    return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
     );
 }
