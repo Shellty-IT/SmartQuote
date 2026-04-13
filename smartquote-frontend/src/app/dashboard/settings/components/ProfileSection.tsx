@@ -120,9 +120,10 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
             <div className="flex flex-col sm:flex-row items-center gap-6 mb-8 pb-8 border-b divider-themed">
                 <div className="relative group">
                     {currentAvatar ? (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                             src={currentAvatar}
-                            alt="Avatar"
+                            alt="Avatar użytkownika"
                             className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
                         />
                     ) : (

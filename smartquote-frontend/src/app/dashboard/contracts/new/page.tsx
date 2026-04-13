@@ -17,7 +17,7 @@ function NewContractForm() {
     const fromOfferId = searchParams.get('fromOffer');
 
     const { createContract, createFromOffer } = useContracts();
-    const { clients, isLoading: clientsLoading } = useClients({ limit: 100 });
+    const { clients } = useClients({ limit: 100 });
     const [loading, setLoading] = useState(false);
 
     const createFromOfferAttempted = useRef(false);

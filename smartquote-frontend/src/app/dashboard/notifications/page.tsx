@@ -102,8 +102,6 @@ export default function NotificationsPage() {
     const unreadCount = allNotifications.filter(n => !n.isRead).length;
     const readCount = allNotifications.filter(n => n.isRead).length;
 
-    const hasFilters = activeTab !== 'all' || !!typeFilter;
-
     const handleMarkAsRead = async (e: React.MouseEvent, id: string) => {
         e.stopPropagation();
         try {

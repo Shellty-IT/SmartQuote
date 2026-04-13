@@ -1,7 +1,7 @@
 // src/hooks/useEmailList.ts
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { emailsApi } from '@/lib/api/emails.api';
 import type { EmailLog, EmailLogStatus } from '@/types/email.types';
 
@@ -11,6 +11,12 @@ interface Meta {
     total: number;
     totalPages: number;
 }
+
+const STATUS_MAP: Record<'sent' | 'drafts' | 'failed', EmailLogStatus> = {
+    sent: 'SENT',
+    drafts: 'DRAFT',
+    failed: 'FAILED',
+};
 
 export function useEmailList() {
     const [items, setItems] = useState<EmailLog[]>([]);
@@ -23,18 +29,14 @@ export function useEmailList() {
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const statusMap: Record<'sent' | 'drafts' | 'failed', EmailLogStatus> = {
-        sent: 'SENT',
-        drafts: 'DRAFT',
-        failed: 'FAILED',
-    };
+    const currentStatus = useMemo(() => STATUS_MAP[activeTab], [activeTab]);
 
     const load = useCallback(async () => {
         setIsLoading(true);
         setError(null);
         try {
             const params: Record<string, string | number | boolean | undefined> = {
-                status: statusMap[activeTab],
+                status: currentStatus,
                 page,
                 limit: 20,
             };
@@ -49,7 +51,7 @@ export function useEmailList() {
         } finally {
             setIsLoading(false);
         }
-    }, [activeTab, page, search]);
+    }, [currentStatus, page, search]);
 
     useEffect(() => {
         load();

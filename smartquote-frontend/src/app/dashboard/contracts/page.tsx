@@ -38,8 +38,6 @@ export default function ContractsPage() {
     const [deleteModal, setDeleteModal] = useState<Contract | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const [sortBy, sortOrder] = sort.split(':');
-
     const { contracts, pagination, loading, error, refetch, deleteContract } = useContracts({
         page,
         limit: 10,

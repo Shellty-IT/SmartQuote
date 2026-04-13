@@ -1,7 +1,7 @@
 // src/components/publicContract/SignaturePad.tsx
 'use client';
 
-import { useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
+import { useRef, useEffect, useCallback, useState, forwardRef, useImperativeHandle } from 'react';
 
 export interface SignaturePadRef {
     clear: () => void;
@@ -18,6 +18,7 @@ const SignaturePad = forwardRef<SignaturePadRef, SignaturePadProps>(
         const canvasRef = useRef<HTMLCanvasElement>(null);
         const isDrawingRef = useRef(false);
         const hasContentRef = useRef(false);
+        const [hasContent, setHasContent] = useState(false);
 
         const getCtx = useCallback((): CanvasRenderingContext2D | null => {
             const canvas = canvasRef.current;
@@ -68,7 +69,10 @@ const SignaturePad = forwardRef<SignaturePadRef, SignaturePadProps>(
 
             ctx.lineTo(coords.x, coords.y);
             ctx.stroke();
-            hasContentRef.current = true;
+            if (!hasContentRef.current) {
+                hasContentRef.current = true;
+                setHasContent(true);
+            }
         }, [getCoords, getCtx]);
 
         const stopDrawing = useCallback(() => {
@@ -128,6 +132,7 @@ const SignaturePad = forwardRef<SignaturePadRef, SignaturePadProps>(
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
                 hasContentRef.current = false;
+                setHasContent(false);
             },
             isEmpty: () => !hasContentRef.current,
             toDataURL: () => {
@@ -156,7 +161,7 @@ const SignaturePad = forwardRef<SignaturePadRef, SignaturePadProps>(
                 />
                 <div
                     className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                    style={{ opacity: hasContentRef.current ? 0 : 0.3 }}
+                    style={{ opacity: hasContent ? 0 : 0.3 }}
                 >
                     <p className="text-slate-400 text-sm select-none">Narysuj podpis tutaj</p>
                 </div>

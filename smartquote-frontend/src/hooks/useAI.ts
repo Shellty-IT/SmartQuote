@@ -1,4 +1,4 @@
-// SmartQuote-AI/src/hooks/useAI.ts
+// src/hooks/useAI.ts
 'use client';
 
 import { useState, useCallback } from 'react';
@@ -6,7 +6,6 @@ import { ai } from '@/lib/api';
 import { v4 as uuidv4 } from 'uuid';
 import type {
     AIMessage,
-    AIAction,
     AISuggestion,
     AIStats,
     GeneratedOffer,

@@ -14,7 +14,7 @@ import {
     Check,
     Upload,
     X,
-    Image,
+    Image as ImageIcon,
     Palette
 } from 'lucide-react';
 import { Card } from '@/components/ui';
@@ -208,10 +208,11 @@ export default function CompanySection({ company, onUpdate }: Props) {
                         {isUploadingLogo ? (
                             <Loader2 className="w-8 h-8 text-cyan-500 animate-spin" />
                         ) : currentLogo ? (
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img src={currentLogo} alt="Logo firmy" className="w-full h-full object-contain rounded-xl p-2" />
                         ) : (
                             <div className="text-center">
-                                <Image className="w-8 h-8 text-slate-400 group-hover:text-cyan-500 mx-auto mb-1 transition-colors" />
+                                <ImageIcon className="w-8 h-8 text-slate-400 group-hover:text-cyan-500 mx-auto mb-1 transition-colors" />
                                 <span className="text-xs text-slate-400 group-hover:text-cyan-500 transition-colors">Dodaj logo</span>
                             </div>
                         )}

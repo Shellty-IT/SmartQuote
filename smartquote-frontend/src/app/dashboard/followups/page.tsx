@@ -75,7 +75,7 @@ export default function FollowUpsPage() {
             await deleteFollowUp(deleteModal.followUp.id);
             toast.success('Follow-up usunięty', `"${deleteModal.followUp.title}" został usunięty`);
             setDeleteModal({ isOpen: false, followUp: null });
-        } catch (err: unknown) {
+        } catch {
             toast.error('Błąd', 'Nie udało się usunąć follow-upu');
         } finally {
             setIsDeleting(false);
@@ -87,7 +87,7 @@ export default function FollowUpsPage() {
         try {
             await completeFollowUp(followUp.id);
             toast.success('Follow-up wykonany', `"${followUp.title}" został oznaczony jako wykonany`);
-        } catch (err: unknown) {
+        } catch {
             toast.error('Błąd', 'Nie udało się oznaczyć jako wykonane');
         } finally {
             setCompletingId(null);
@@ -336,27 +336,13 @@ export default function FollowUpsPage() {
                         <table className="w-full">
                             <thead>
                             <tr className="border-b" style={{ borderColor: 'var(--divider)', backgroundColor: 'var(--section-bg)' }}>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">
-                                    Follow-up
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider hidden md:table-cell">
-                                    Powiązanie
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider hidden sm:table-cell">
-                                    Typ
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider hidden lg:table-cell">
-                                    Priorytet
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">
-                                    Termin
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider hidden sm:table-cell">
-                                    Status
-                                </th>
-                                <th className="px-6 py-3 text-right text-xs font-semibold text-themed-muted uppercase tracking-wider">
-                                    Akcje
-                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Follow-up</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider hidden md:table-cell">Powiązanie</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider hidden sm:table-cell">Typ</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider hidden lg:table-cell">Priorytet</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Termin</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider hidden sm:table-cell">Status</th>
+                                <th className="px-6 py-3 text-right text-xs font-semibold text-themed-muted uppercase tracking-wider">Akcje</th>
                             </tr>
                             </thead>
                             <tbody>

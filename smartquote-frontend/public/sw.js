@@ -1,4 +1,4 @@
-// SmartQuote-AI/public/sw.js
+// public/sw.js
 const CACHE_NAME = 'smartquote-v1';
 const OFFLINE_URL = '/offline.html';
 
@@ -144,7 +144,7 @@ self.addEventListener('push', function(event) {
     if (event.data) {
         try {
             data = event.data.json();
-        } catch (e) {
+        } catch {
             data.body = event.data.text();
         }
     }
