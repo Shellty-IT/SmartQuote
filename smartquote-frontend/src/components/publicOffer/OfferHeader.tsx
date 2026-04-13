@@ -1,5 +1,4 @@
-// SmartQuote-AI/src/components/publicOffer/OfferHeader.tsx
-
+// src/components/publicOffer/OfferHeader.tsx
 'use client';
 
 import type { PublicOfferData } from '@/types';
@@ -41,9 +40,10 @@ export default function OfferHeader({
                 <div className="flex flex-col md:flex-row md:justify-between gap-6">
                     <div className="flex items-start gap-4">
                         {seller.logo ? (
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img
                                 src={seller.logo}
-                                alt={seller.company || ''}
+                                alt={seller.company || seller.name || 'Logo firmy'}
                                 className="w-16 h-16 object-contain rounded-lg flex-shrink-0"
                             />
                         ) : (

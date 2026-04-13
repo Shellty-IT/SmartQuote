@@ -37,6 +37,7 @@ export default function Header() {
                 <div className="flex items-center gap-3 pl-4 border-l divider-themed">
                     <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 shadow-md shadow-cyan-500/20">
                         {avatar ? (
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img
                                 src={avatar}
                                 alt={displayName}

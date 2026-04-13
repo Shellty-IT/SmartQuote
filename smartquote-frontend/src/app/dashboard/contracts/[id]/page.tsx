@@ -3,7 +3,6 @@
 
 import { use, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useContract } from '@/hooks/useContracts';
 import { contractsApi } from '@/lib/api';
 import { Button, Badge, Card, ConfirmDialog } from '@/components/ui';
@@ -108,7 +107,6 @@ function StatusTimeline({ currentStatus }: { currentStatus: ContractStatus }) {
 
 export default function ContractDetailsPage({ params }: PageProps) {
     const { id } = use(params);
-    const router = useRouter();
     const toast = useToast();
     const { contract, loading, error, refetch } = useContract(id);
     const [statusConfirm, setStatusConfirm] = useState<{ next: ContractStatus; label: string; description: string } | null>(null);
@@ -420,6 +418,7 @@ export default function ContractDetailsPage({ params }: PageProps) {
                                     <div>
                                         <label className="text-xs font-medium text-themed-muted mb-2 block">Podpis</label>
                                         <div className="border divider-themed rounded-lg p-4 bg-white flex items-center justify-center">
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
                                             <img
                                                 src={contract.signatureLog.signatureImage}
                                                 alt="Podpis elektroniczny"

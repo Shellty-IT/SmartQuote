@@ -52,11 +52,6 @@ function EmailComposerContent() {
         handleSaveDraft,
     } = useEmailComposer();
 
-    const allTemplates = [
-        ...BUILT_IN_TEMPLATES,
-        ...userTemplates.filter(t => !t.isBuiltIn),
-    ];
-
     const selectedOffer = offers.find(o => o.id === offerId);
     const selectedContract = contracts.find(c => c.id === contractId);
 

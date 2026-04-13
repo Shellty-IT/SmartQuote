@@ -1,4 +1,4 @@
-// src/app/contract/views/[token]/page.tsx
+// src/app/contract/view/[token]/page.tsx
 'use client';
 
 import { useState, useEffect, useCallback, use } from 'react';
@@ -300,6 +300,7 @@ export default function PublicContractPage({ params }: PageProps) {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
                             {contract.seller.logo && (
+                                // eslint-disable-next-line @next/next/no-img-element
                                 <img src={contract.seller.logo} alt="" className="w-10 h-10 rounded-lg bg-white/20 object-contain" />
                             )}
                             <div>
@@ -447,6 +448,7 @@ export default function PublicContractPage({ params }: PageProps) {
 
                     <div className="p-6 space-y-5">
                         <div className="bg-white rounded-xl border border-emerald-100 p-4 flex items-center justify-center">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={contract.signatureLog.signatureImage}
                                 alt="Podpis elektroniczny"
