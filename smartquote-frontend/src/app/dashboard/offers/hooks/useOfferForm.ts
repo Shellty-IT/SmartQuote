@@ -1,15 +1,15 @@
-// src/app/dashboard/offers/new/hooks/useOfferForm.ts
+// src/app/dashboard/offers/hooks/useOfferForm.ts
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useClients } from '@/hooks/useClients';
 import { offersApi, ApiError } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
-import type { Client, CreateOfferInput, OfferTemplate } from '@/types';
-import type { Step } from '../constants';
-import { STEPS } from '../constants';
-import type { ExtendedOfferItem, OfferDetails, OfferTotalsData } from '../types';
-import { emptyItem, defaultOfferDetails } from '../types';
+import type { Client, CreateOfferInput, OfferTemplate, Offer } from '@/types';
+import type { Step } from '../new/constants';
+import { STEPS } from '../new/constants';
+import type { ExtendedOfferItem, OfferDetails, OfferTotalsData } from '../new/types';
+import { emptyItem, defaultOfferDetails } from '../new/types';
 
 export function calculateItemTotal(item: ExtendedOfferItem): OfferTotalsData {
     const quantity = item.quantity || 0;
@@ -32,10 +32,13 @@ export function getUniqueVariants(items: ExtendedOfferItem[]): string[] {
     return [...new Set(variants)];
 }
 
-export function useOfferForm() {
+export function useOfferForm(options?: { initialData?: Offer }) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const toast = useToast();
+
+    const isEditMode = !!options?.initialData;
+    const offerId = options?.initialData?.id;
     const preselectedClientId = searchParams.get('clientId');
 
     const { clients, isLoading: isLoadingClients } = useClients({ limit: 100 });
@@ -44,19 +47,55 @@ export function useOfferForm() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [templateSelectorOpen, setTemplateSelectorOpen] = useState(false);
 
-    const [selectedClient, setSelectedClient] = useState<Client | null>(null);
-    const [offerDetails, setOfferDetails] = useState<OfferDetails>(defaultOfferDetails);
-    const [items, setItems] = useState<ExtendedOfferItem[]>([{ ...emptyItem }]);
+    const [selectedClient, setSelectedClient] = useState<Client | null>(() => {
+        return options?.initialData?.client || null;
+    });
+
+    const [offerDetails, setOfferDetails] = useState<OfferDetails>(() => {
+        if (options?.initialData) {
+            return {
+                title: options.initialData.title,
+                description: options.initialData.description || '',
+                validUntil: options.initialData.validUntil
+                    ? options.initialData.validUntil.split('T')[0]
+                    : '',
+                notes: options.initialData.notes || '',
+                terms: options.initialData.terms || '',
+                paymentDays: options.initialData.paymentDays,
+                requireAuditTrail: options.initialData.requireAuditTrail || false,
+            };
+        }
+        return defaultOfferDetails;
+    });
+
+    const [items, setItems] = useState<ExtendedOfferItem[]>(() => {
+        if (options?.initialData?.items) {
+            return options.initialData.items.map((item) => ({
+                name: item.name,
+                description: item.description || '',
+                quantity: Number(item.quantity),
+                unit: item.unit,
+                unitPrice: Number(item.unitPrice),
+                vatRate: Number(item.vatRate),
+                discount: Number(item.discount),
+                isOptional: item.isOptional || false,
+                minQuantity: item.minQuantity || 1,
+                maxQuantity: item.maxQuantity || 100,
+                variantName: item.variantName || '',
+            }));
+        }
+        return [{ ...emptyItem }];
+    });
 
     useEffect(() => {
-        if (preselectedClientId && clients.length > 0) {
+        if (!isEditMode && preselectedClientId && clients.length > 0) {
             const client = clients.find((c) => c.id === preselectedClientId);
             if (client) {
                 setSelectedClient(client);
                 setCurrentStep('details');
             }
         }
-    }, [preselectedClientId, clients]);
+    }, [isEditMode, preselectedClientId, clients]);
 
     const totals = useMemo(() => {
         return items.reduce(
@@ -126,11 +165,11 @@ export function useOfferForm() {
             const templateItems: ExtendedOfferItem[] = template.items.map((item) => ({
                 name: item.name,
                 description: item.description ?? '',
-                quantity: item.quantity,
+                quantity: Number(item.quantity),
                 unit: item.unit,
-                unitPrice: item.unitPrice,
-                vatRate: item.vatRate,
-                discount: item.discount,
+                unitPrice: Number(item.unitPrice),
+                vatRate: Number(item.vatRate),
+                discount: Number(item.discount),
                 isOptional: item.isOptional,
                 minQuantity: 1,
                 maxQuantity: 100,
@@ -163,7 +202,9 @@ export function useOfferForm() {
             case 'details':
                 return offerDetails.title.length >= 3;
             case 'items':
-                return items.every((item) => item.name && item.quantity > 0 && item.unitPrice >= 0);
+                return items.every(
+                    (item) => item.name && item.quantity > 0 && item.unitPrice >= 0
+                );
             default:
                 return true;
         }
@@ -199,28 +240,38 @@ export function useOfferForm() {
                 })),
             };
 
-            const response = await offersApi.create(data);
-            if (response.data?.id) {
-                toast.success('Oferta utworzona', `"${offerDetails.title}" została zapisana`);
-                router.push(`/dashboard/offers/${response.data.id}`);
+            if (isEditMode && offerId) {
+                await offersApi.update(offerId, data);
+                toast.success('Oferta zaktualizowana', 'Zmiany zostały zapisane pomyślnie');
+                router.push(`/dashboard/offers/${offerId}`);
             } else {
-                throw new Error('Nie udało się utworzyć oferty');
+                const response = await offersApi.create(data);
+                if (response.data?.id) {
+                    toast.success('Oferta utworzona', `"${offerDetails.title}" została zapisana`);
+                    router.push(`/dashboard/offers/${response.data.id}`);
+                } else {
+                    throw new Error('Nie udało się utworzyć oferty');
+                }
             }
         } catch (err) {
             if (err instanceof ApiError) {
-                toast.error('Błąd tworzenia oferty', err.message);
+                toast.error(
+                    isEditMode ? 'Błąd aktualizacji' : 'Błąd tworzenia oferty',
+                    err.message
+                );
             } else {
                 toast.error('Błąd', 'Wystąpił nieoczekiwany błąd');
             }
             setIsSubmitting(false);
         }
-    }, [selectedClient, offerDetails, items, toast, router]);
+    }, [isEditMode, offerId, selectedClient, offerDetails, items, toast, router]);
 
     return {
         clients,
         isLoadingClients,
         currentStep,
         isSubmitting,
+        isEditMode,
         selectedClient,
         setSelectedClient,
         offerDetails,

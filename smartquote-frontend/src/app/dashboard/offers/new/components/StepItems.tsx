@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui';
 import type { ExtendedOfferItem, OfferTotalsData } from '../types';
-import { calculateItemTotal } from '../hooks/useOfferForm';
+import { calculateItemTotal } from '../../hooks/useOfferForm';
 import OfferItemForm from './OfferItemForm';
 import OfferTotals from './OfferTotals';
 

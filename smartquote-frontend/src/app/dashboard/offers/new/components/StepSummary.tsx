@@ -3,7 +3,7 @@
 import { formatCurrency, getInitials } from '@/lib/utils';
 import type { Client } from '@/types';
 import type { ExtendedOfferItem, OfferDetails, OfferTotalsData } from '../types';
-import { calculateItemTotal } from '../hooks/useOfferForm';
+import { calculateItemTotal } from '../../hooks/useOfferForm';
 import OfferTotals from './OfferTotals';
 
 interface StepSummaryProps {

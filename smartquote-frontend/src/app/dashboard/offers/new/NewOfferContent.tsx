@@ -3,7 +3,7 @@
 
 import { Button, Card } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
-import { useOfferForm } from './hooks/useOfferForm';
+import { useOfferForm } from '../hooks';
 import OfferStepper from './components/OfferStepper';
 import StepClient from './components/StepClient';
 import StepDetails from './components/StepDetails';
