@@ -16,7 +16,6 @@ export async function login(page: Page) {
     try {
         await serverReadyText.waitFor({ state: 'visible', timeout: 90000 });
     } catch {
-        // server might already be ready, continue
     }
 
     await page.waitForTimeout(1000);
