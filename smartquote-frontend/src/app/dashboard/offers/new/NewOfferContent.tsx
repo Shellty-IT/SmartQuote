@@ -9,6 +9,7 @@ import StepClient from './components/StepClient';
 import StepDetails from './components/StepDetails';
 import StepItems from './components/StepItems';
 import StepSummary from './components/StepSummary';
+import TemplateSelector from '@/components/offer-templates/TemplateSelector';
 
 export default function NewOfferContent() {
     const {
@@ -31,6 +32,9 @@ export default function NewOfferContent() {
         goBack,
         canProceed,
         handleSubmit,
+        applyTemplate,
+        templateSelectorOpen,
+        setTemplateSelectorOpen,
         router,
     } = useOfferForm();
 
@@ -50,8 +54,23 @@ export default function NewOfferContent() {
                     </svg>
                     Powrót
                 </button>
-                <h1 className="text-2xl font-bold text-themed">Nowa oferta</h1>
-                <p className="text-themed-muted mt-1">Utwórz nową ofertę handlową</p>
+                <div className="flex items-start justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl font-bold text-themed">Nowa oferta</h1>
+                        <p className="text-themed-muted mt-1">Utwórz nową ofertę handlową</p>
+                    </div>
+                    {currentStep === 'items' && (
+                        <button
+                            onClick={() => setTemplateSelectorOpen(true)}
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-cyan-500/40 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-sm font-medium hover:bg-cyan-500/20 transition-colors shrink-0"
+                        >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                            </svg>
+                            Użyj szablonu
+                        </button>
+                    )}
+                </div>
             </div>
 
             <OfferStepper currentStep={currentStep} onStepClick={goToStep} />
@@ -120,6 +139,12 @@ export default function NewOfferContent() {
                     )}
                 </div>
             </div>
+
+            <TemplateSelector
+                isOpen={templateSelectorOpen}
+                onClose={() => setTemplateSelectorOpen(false)}
+                onSelect={applyTemplate}
+            />
         </div>
     );
 }

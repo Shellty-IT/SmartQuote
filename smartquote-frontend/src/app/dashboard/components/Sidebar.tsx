@@ -52,6 +52,13 @@ export default function Sidebar() {
             badgeColor: 'cyan',
         },
         {
+            name: 'Szablony ofert',
+            href: '/dashboard/offer-templates',
+            icon: TemplateIcon,
+            badge: null,
+            badgeColor: undefined,
+        },
+        {
             name: 'Umowy',
             href: '/dashboard/contracts',
             icon: ClipboardIcon,
@@ -142,7 +149,8 @@ export default function Sidebar() {
             <nav className="flex flex-col justify-between h-[calc(100vh-4rem)] px-3 py-4">
                 <div className="space-y-1">
                     {navigation.map((item) => {
-                        const isActive = pathname === item.href ||
+                        const isActive =
+                            pathname === item.href ||
                             (item.href !== '/dashboard' && pathname.startsWith(item.href + '/'));
                         const colorConfig = item.badgeColor ? badgeColors[item.badgeColor] : badgeColors.cyan;
 
@@ -158,13 +166,17 @@ export default function Sidebar() {
                                 }`}
                             >
                                 <div className="flex items-center gap-3">
-                                    <item.icon className={`h-5 w-5 ${isActive ? 'text-cyan-400' : 'text-slate-500 group-hover:text-slate-300'}`} />
+                                    <item.icon
+                                        className={`h-5 w-5 ${isActive ? 'text-cyan-400' : 'text-slate-500 group-hover:text-slate-300'}`}
+                                    />
                                     {item.name}
                                 </div>
                                 {item.badge !== null && item.badge !== undefined && item.badge > 0 && (
-                                    <span className={`min-w-[20px] px-1.5 py-0.5 text-xs font-semibold rounded-full text-center transition-all ${
-                                        loading ? 'animate-pulse bg-slate-700' : ''
-                                    } ${isActive ? colorConfig.active : colorConfig.inactive}`}>
+                                    <span
+                                        className={`min-w-[20px] px-1.5 py-0.5 text-xs font-semibold rounded-full text-center transition-all ${
+                                            loading ? 'animate-pulse bg-slate-700' : ''
+                                        } ${isActive ? colorConfig.active : colorConfig.inactive}`}
+                                    >
                                         {loading ? '...' : item.badge}
                                     </span>
                                 )}
@@ -242,6 +254,14 @@ function DocumentIcon({ className }: { className?: string }) {
     return (
         <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+    );
+}
+
+function TemplateIcon({ className }: { className?: string }) {
+    return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
         </svg>
     );
 }

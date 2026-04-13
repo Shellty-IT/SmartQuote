@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useClients } from '@/hooks/useClients';
 import { offersApi, ApiError } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
-import type { Client, CreateOfferInput } from '@/types';
+import type { Client, CreateOfferInput, OfferTemplate } from '@/types';
 import type { Step } from '../constants';
 import { STEPS } from '../constants';
 import type { ExtendedOfferItem, OfferDetails, OfferTotalsData } from '../types';
@@ -42,6 +42,7 @@ export function useOfferForm() {
 
     const [currentStep, setCurrentStep] = useState<Step>('client');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [templateSelectorOpen, setTemplateSelectorOpen] = useState(false);
 
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [offerDetails, setOfferDetails] = useState<OfferDetails>(defaultOfferDetails);
@@ -118,6 +119,41 @@ export function useOfferForm() {
             setOfferDetails((prev) => ({ ...prev, [field]: value }));
         },
         []
+    );
+
+    const applyTemplate = useCallback(
+        (template: OfferTemplate) => {
+            const templateItems: ExtendedOfferItem[] = template.items.map((item) => ({
+                name: item.name,
+                description: item.description ?? '',
+                quantity: item.quantity,
+                unit: item.unit,
+                unitPrice: item.unitPrice,
+                vatRate: item.vatRate,
+                discount: item.discount,
+                isOptional: item.isOptional,
+                minQuantity: 1,
+                maxQuantity: 100,
+                variantName: item.variantName ?? '',
+            }));
+
+            setItems(templateItems);
+
+            if (!offerDetails.paymentDays || offerDetails.paymentDays === defaultOfferDetails.paymentDays) {
+                setOfferDetails((prev) => ({
+                    ...prev,
+                    paymentDays: template.defaultPaymentDays,
+                    terms: prev.terms || template.defaultTerms || '',
+                    notes: prev.notes || template.defaultNotes || '',
+                }));
+            }
+
+            toast.success(
+                'Szablon zastosowany',
+                `Wstawiono ${template.items.length} pozycji z szablonu "${template.name}"`
+            );
+        },
+        [offerDetails.paymentDays, toast]
     );
 
     const canProceed = useCallback(() => {
@@ -200,6 +236,9 @@ export function useOfferForm() {
         goBack,
         canProceed,
         handleSubmit,
+        applyTemplate,
+        templateSelectorOpen,
+        setTemplateSelectorOpen,
         router,
     };
 }
