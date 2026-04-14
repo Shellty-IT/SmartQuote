@@ -198,12 +198,12 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
                                 disabled={isSaving}
                                 className={`flex items-center gap-3 px-5 py-3.5 rounded-xl border-2 transition-all ${
                                     isActive
-                                        ? 'border-cyan-500 bg-cyan-500/10 dark:bg-cyan-500/10'
-                                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
+                                        ? 'border-cyan-500 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400'
+                                        : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700/50'
                                 } ${isSaving ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                             >
                                 <span className="text-2xl">{lang.flag}</span>
-                                <span className={`font-medium ${isActive ? 'text-cyan-600 dark:text-cyan-400' : 'text-themed'}`}>
+                                <span className="font-medium">
                                     {lang.label}
                                 </span>
                                 {isActive && (

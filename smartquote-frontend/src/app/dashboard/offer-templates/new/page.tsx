@@ -31,6 +31,15 @@ function toApiItem(item: TemplateItem): CreateOfferTemplateItemInput {
     return rest;
 }
 
+const textareaClass =
+    'w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all duration-200 resize-y';
+
+const inputClass =
+    'w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all duration-200';
+
+const inputSmClass =
+    'w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all duration-200 text-sm';
+
 export default function NewOfferTemplatePage() {
     const router = useRouter();
     const toast = useToast();
@@ -115,7 +124,7 @@ export default function NewOfferTemplatePage() {
                 <h2 className="text-lg font-semibold text-themed mb-4">Podstawowe informacje</h2>
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-themed mb-1.5">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                             Nazwa szablonu <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -123,22 +132,24 @@ export default function NewOfferTemplatePage() {
                             placeholder="np. WordPress Standard"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="w-full px-4 py-2.5 rounded-lg input-themed text-themed"
+                            className={inputClass}
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-themed mb-1.5">Opis (opcjonalne)</label>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                            Opis (opcjonalne)
+                        </label>
                         <textarea
                             placeholder="Krótki opis szablonu..."
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             rows={2}
-                            className="w-full px-4 py-2.5 rounded-lg input-themed text-themed resize-none"
+                            className={`${textareaClass} min-h-[72px]`}
                         />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-themed mb-1.5">
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                                 Kategoria (opcjonalne)
                             </label>
                             <input
@@ -146,11 +157,11 @@ export default function NewOfferTemplatePage() {
                                 placeholder="np. Strony WWW"
                                 value={category}
                                 onChange={(e) => setCategory(e.target.value)}
-                                className="w-full px-4 py-2.5 rounded-lg input-themed text-themed"
+                                className={inputClass}
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-themed mb-1.5">
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                                 Domyślne dni płatności
                             </label>
                             <input
@@ -159,12 +170,12 @@ export default function NewOfferTemplatePage() {
                                 max={365}
                                 value={defaultPaymentDays}
                                 onChange={(e) => setDefaultPaymentDays(Number(e.target.value))}
-                                className="w-full px-4 py-2.5 rounded-lg input-themed text-themed"
+                                className={inputClass}
                             />
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-themed mb-1.5">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                             Domyślne warunki (opcjonalne)
                         </label>
                         <textarea
@@ -172,11 +183,11 @@ export default function NewOfferTemplatePage() {
                             value={defaultTerms}
                             onChange={(e) => setDefaultTerms(e.target.value)}
                             rows={3}
-                            className="w-full px-4 py-2.5 rounded-lg input-themed text-themed resize-none"
+                            className={`${textareaClass} min-h-[88px]`}
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-themed mb-1.5">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                             Domyślne uwagi (opcjonalne)
                         </label>
                         <textarea
@@ -184,7 +195,7 @@ export default function NewOfferTemplatePage() {
                             value={defaultNotes}
                             onChange={(e) => setDefaultNotes(e.target.value)}
                             rows={2}
-                            className="w-full px-4 py-2.5 rounded-lg input-themed text-themed resize-none"
+                            className={`${textareaClass} min-h-[72px]`}
                         />
                     </div>
                 </div>
@@ -223,7 +234,7 @@ export default function NewOfferTemplatePage() {
                                         placeholder="Nazwa pozycji *"
                                         value={item.name}
                                         onChange={(e) => updateItem(item._tempId, 'name', e.target.value)}
-                                        className="w-full px-3 py-2 rounded-lg input-themed text-themed text-sm"
+                                        className={inputSmClass}
                                     />
                                 </div>
                                 <div className="md:col-span-2">
@@ -232,7 +243,7 @@ export default function NewOfferTemplatePage() {
                                         placeholder="Opis (opcjonalnie)"
                                         value={item.description ?? ''}
                                         onChange={(e) => updateItem(item._tempId, 'description', e.target.value || null)}
-                                        className="w-full px-3 py-2 rounded-lg input-themed text-themed text-sm"
+                                        className={inputSmClass}
                                     />
                                 </div>
                                 <div>
@@ -243,7 +254,7 @@ export default function NewOfferTemplatePage() {
                                         step={0.01}
                                         value={item.quantity}
                                         onChange={(e) => updateItem(item._tempId, 'quantity', Number(e.target.value))}
-                                        className="w-full px-3 py-2 rounded-lg input-themed text-themed text-sm"
+                                        className={inputSmClass}
                                     />
                                 </div>
                                 <div>
@@ -252,7 +263,7 @@ export default function NewOfferTemplatePage() {
                                         placeholder="Jednostka"
                                         value={item.unit}
                                         onChange={(e) => updateItem(item._tempId, 'unit', e.target.value)}
-                                        className="w-full px-3 py-2 rounded-lg input-themed text-themed text-sm"
+                                        className={inputSmClass}
                                     />
                                 </div>
                                 <div>
@@ -263,7 +274,7 @@ export default function NewOfferTemplatePage() {
                                         step={0.01}
                                         value={item.unitPrice}
                                         onChange={(e) => updateItem(item._tempId, 'unitPrice', Number(e.target.value))}
-                                        className="w-full px-3 py-2 rounded-lg input-themed text-themed text-sm"
+                                        className={inputSmClass}
                                     />
                                 </div>
                                 <div>
@@ -274,7 +285,7 @@ export default function NewOfferTemplatePage() {
                                         max={100}
                                         value={item.vatRate}
                                         onChange={(e) => updateItem(item._tempId, 'vatRate', Number(e.target.value))}
-                                        className="w-full px-3 py-2 rounded-lg input-themed text-themed text-sm"
+                                        className={inputSmClass}
                                     />
                                 </div>
                                 <div>
@@ -285,7 +296,7 @@ export default function NewOfferTemplatePage() {
                                         max={100}
                                         value={item.discount}
                                         onChange={(e) => updateItem(item._tempId, 'discount', Number(e.target.value))}
-                                        className="w-full px-3 py-2 rounded-lg input-themed text-themed text-sm"
+                                        className={inputSmClass}
                                     />
                                 </div>
                                 <div>
@@ -294,7 +305,7 @@ export default function NewOfferTemplatePage() {
                                         placeholder="Wariant (opcjonalnie)"
                                         value={item.variantName ?? ''}
                                         onChange={(e) => updateItem(item._tempId, 'variantName', e.target.value || null)}
-                                        className="w-full px-3 py-2 rounded-lg input-themed text-themed text-sm"
+                                        className={inputSmClass}
                                     />
                                 </div>
                                 <div className="flex items-center gap-2">

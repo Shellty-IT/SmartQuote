@@ -181,6 +181,7 @@ function NewContractForm() {
                             value={formData.description}
                             onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                             rows={3}
+                            resizable
                         />
                     </div>
                 </Card>
@@ -251,12 +252,14 @@ function NewContractForm() {
                             value={formData.terms}
                             onChange={(e) => setFormData(prev => ({ ...prev, terms: e.target.value }))}
                             rows={4}
+                            resizable
                         />
                         <Textarea
                             label="Notatki wewnętrzne"
                             value={formData.notes}
                             onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                             rows={3}
+                            resizable
                         />
                     </div>
                 </Card>
