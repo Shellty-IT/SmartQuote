@@ -6,7 +6,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 
 interface RichTextEditorProps {
     value: string;
@@ -36,7 +36,7 @@ function ToolbarButton({ onClick, isActive, disabled, title, children }: Toolbar
             className={`p-1.5 rounded-md text-sm font-medium transition-colors ${
                 isActive
                     ? 'bg-cyan-500/20 text-cyan-600 dark:text-cyan-400'
-                    : 'text-themed-muted hover:text-themed hover-themed'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700'
             } ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
         >
             {children}
@@ -50,6 +50,12 @@ export default function RichTextEditor({
                                            placeholder = 'Wpisz treść wiadomości...',
                                            minHeight = 280,
                                        }: RichTextEditorProps) {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [editorHeight, setEditorHeight] = useState(minHeight);
+    const isResizing = useRef(false);
+    const startY = useRef(0);
+    const startHeight = useRef(0);
+
     const editor = useEditor({
         extensions: [
             StarterKit.configure({
@@ -72,8 +78,7 @@ export default function RichTextEditor({
         },
         editorProps: {
             attributes: {
-                class: 'prose prose-sm max-w-none focus:outline-none text-themed',
-                style: `min-height: ${minHeight}px; padding: 12px;`,
+                class: 'prose prose-sm max-w-none focus:outline-none text-slate-900 dark:text-slate-100',
             },
         },
     });
@@ -98,11 +103,38 @@ export default function RichTextEditor({
         editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
     }, [editor]);
 
+    const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
+        e.preventDefault();
+        isResizing.current = true;
+        startY.current = e.clientY;
+        startHeight.current = editorHeight;
+
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!isResizing.current) return;
+            const delta = e.clientY - startY.current;
+            const newHeight = Math.max(120, startHeight.current + delta);
+            setEditorHeight(newHeight);
+        };
+
+        const handleMouseUp = () => {
+            isResizing.current = false;
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    }, [editorHeight]);
+
     if (!editor) return null;
 
     return (
-        <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
-            <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+        <div
+            ref={containerRef}
+            className="border border-slate-300 dark:border-slate-600 rounded-xl overflow-hidden flex flex-col"
+        >
+            {/* Toolbar */}
+            <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex-shrink-0">
                 <ToolbarButton
                     onClick={() => editor.chain().focus().toggleBold().run()}
                     isActive={editor.isActive('bold')}
@@ -191,11 +223,18 @@ export default function RichTextEditor({
                 </ToolbarButton>
             </div>
 
+            {/* Editor area */}
             <div
-                className="bg-white dark:bg-slate-900 cursor-text"
+                className="bg-white dark:bg-slate-900 cursor-text overflow-y-auto"
+                style={{ height: `${editorHeight}px` }}
                 onClick={() => editor.commands.focus()}
             >
                 <style>{`
+                    .ProseMirror {
+                        min-height: 100%;
+                        padding: 12px;
+                        color: inherit;
+                    }
                     .ProseMirror p.is-editor-empty:first-child::before {
                         content: attr(data-placeholder);
                         float: left;
@@ -212,6 +251,19 @@ export default function RichTextEditor({
                     .ProseMirror p { margin: 0.25em 0; }
                 `}</style>
                 <EditorContent editor={editor} />
+            </div>
+
+            {/* Resize handle */}
+            <div
+                className="flex items-center justify-center h-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700 cursor-ns-resize hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors flex-shrink-0 select-none"
+                onMouseDown={handleResizeMouseDown}
+                title="Przeciągnij, aby zmienić rozmiar"
+            >
+                <svg className="w-4 h-3 text-slate-400 dark:text-slate-500" viewBox="0 0 16 10" fill="currentColor">
+                    <rect x="0" y="1" width="16" height="1.5" rx="0.75" />
+                    <rect x="0" y="4.25" width="16" height="1.5" rx="0.75" />
+                    <rect x="0" y="7.5" width="16" height="1.5" rx="0.75" />
+                </svg>
             </div>
         </div>
     );
