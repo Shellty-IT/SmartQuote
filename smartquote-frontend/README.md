@@ -19,7 +19,7 @@ Projekt został stworzony, aby zautomatyzować powtarzalne czynności w pracy ha
 - **Frontend**: Next.js 16, React 19, Tailwind CSS
 - **Stan**: React Context, Custom Hooks
 - **Autoryzacja**: NextAuth.js
-- **Ikony**: Lucide React
+- **Ikony**: 
 - **Animacje**: Framer Motion
 
 ## ⏱️ Szybki Start

@@ -2,7 +2,6 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { User, Mail, Phone, Camera, Loader2, Check, Upload, X } from 'lucide-react';
 import { Card } from '@/components/ui';
 import Button from '@/components/ui/Button';
 import { compressImage } from '@/lib/imageUtils';
@@ -111,7 +110,9 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
                 </div>
                 {success && (
                     <div className="flex items-center gap-2 text-emerald-500 text-sm">
-                        <Check className="w-4 h-4" />
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
                         Zapisano
                     </div>
                 )}
@@ -138,9 +139,15 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
                         className="absolute bottom-0 right-0 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center text-slate-600 hover:text-cyan-600 hover:scale-110 transition-all disabled:opacity-50"
                     >
                         {isUploadingAvatar ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                            </svg>
                         ) : (
-                            <Camera className="w-4 h-4" />
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
                         )}
                     </button>
 
@@ -166,7 +173,9 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
                             disabled={isUploadingAvatar}
                             className="text-xs font-medium text-cyan-600 hover:text-cyan-700 flex items-center gap-1 disabled:opacity-50"
                         >
-                            <Upload className="w-3 h-3" />
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
                             {currentAvatar ? 'Zmień zdjęcie' : 'Dodaj zdjęcie'}
                         </button>
                         {currentAvatar && (
@@ -177,7 +186,9 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
                                     disabled={isUploadingAvatar}
                                     className="text-xs font-medium text-red-500 hover:text-red-600 flex items-center gap-1 disabled:opacity-50"
                                 >
-                                    <X className="w-3 h-3" />
+                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
                                     Usuń
                                 </button>
                             </>
@@ -197,7 +208,9 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
                         Imię i nazwisko
                     </label>
                     <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" />
+                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
                         <input
                             type="text"
                             value={formData.name}
@@ -216,7 +229,9 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
                         Email
                     </label>
                     <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" />
+                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
                         <input
                             type="email"
                             value={profile.email}
@@ -232,7 +247,9 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
                         Telefon
                     </label>
                     <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" />
+                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                        </svg>
                         <input
                             type="tel"
                             value={formData.phone}
@@ -255,7 +272,10 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
                     <Button onClick={handleSave} disabled={isSaving}>
                         {isSaving ? (
                             <>
-                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                </svg>
                                 Zapisywanie...
                             </>
                         ) : (

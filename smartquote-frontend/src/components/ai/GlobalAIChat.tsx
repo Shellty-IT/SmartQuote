@@ -1,146 +1,75 @@
 // src/components/ai/GlobalAIChat.tsx
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    MessageSquare,
-    X,
-    Send,
-    Minimize2,
-    Maximize2,
-    Sparkles,
-    Loader2,
-    Trash2,
-    Bot,
-    User
-} from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { ai } from '@/lib/api';
-import Button from '@/components/ui/Button';
-
-interface Message {
-    id: string;
-    role: 'user' | 'assistant';
-    content: string;
-    timestamp: Date;
-}
+import { useChatMessages } from './hooks/useChatMessages';
+import { useChatScroll } from './hooks/useChatScroll';
+import { ChatHeader } from './ChatHeader';
+import { ChatMessages } from './ChatMessages';
+import { ChatInput } from './ChatInput';
 
 export function GlobalAIChat() {
     const [isOpen, setIsOpen] = useState(false);
     const [isMinimized, setIsMinimized] = useState(false);
-    const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
 
-    const messagesEndRef = useRef<HTMLDivElement>(null);
-    const inputRef = useRef<HTMLTextAreaElement>(null);
-
     const { data: session } = useSession();
-
-    const scrollToBottom = useCallback(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, []);
-
-    useEffect(() => {
-        if (isOpen && !isMinimized) {
-            scrollToBottom();
-            setUnreadCount(0);
-        }
-    }, [messages, isOpen, isMinimized, scrollToBottom]);
-
-    useEffect(() => {
-        if (isOpen && !isMinimized) {
-            inputRef.current?.focus();
-        }
-    }, [isOpen, isMinimized]);
-
-    useEffect(() => {
-        const savedMessages = localStorage.getItem('global-ai-chat-messages');
-        if (savedMessages) {
-            try {
-                const parsed = JSON.parse(savedMessages) as Array<{
-                    id: string;
-                    role: 'user' | 'assistant';
-                    content: string;
-                    timestamp: string;
-                }>;
-                setMessages(parsed.map((m) => ({
-                    ...m,
-                    timestamp: new Date(m.timestamp)
-                })));
-            } catch (e) {
-                console.error('Failed to load chat messages:', e);
-            }
-        }
-    }, []);
-
-    useEffect(() => {
-        if (messages.length > 0) {
-            localStorage.setItem('global-ai-chat-messages', JSON.stringify(messages));
-        }
-    }, [messages]);
+    const { messages, addMessage, clearMessages } = useChatMessages();
+    const { messagesEndRef } = useChatScroll([messages, isOpen, isMinimized]);
 
     const handleSend = async () => {
         if (!input.trim() || isLoading) return;
 
-        const userMessage: Message = {
+        const userMessage = {
             id: crypto.randomUUID(),
-            role: 'user',
+            role: 'user' as const,
             content: input.trim(),
-            timestamp: new Date()
+            timestamp: new Date(),
         };
 
-        setMessages(prev => [...prev, userMessage]);
+        addMessage(userMessage);
         const messageToSend = input.trim();
         setInput('');
         setIsLoading(true);
 
         try {
-            const history = messages.map(m => ({
-                role: m.role as 'user' | 'assistant',
+            const history = messages.map((m) => ({
+                role: m.role,
                 content: m.content,
             }));
 
             const response = await ai.chat(messageToSend, history);
 
-            const assistantMessage: Message = {
+            const assistantMessage = {
                 id: crypto.randomUUID(),
-                role: 'assistant',
+                role: 'assistant' as const,
                 content: response.message || 'Nie otrzymano odpowiedzi',
-                timestamp: new Date()
+                timestamp: new Date(),
             };
 
-            setMessages(prev => [...prev, assistantMessage]);
+            addMessage(assistantMessage);
 
             if (!isOpen || isMinimized) {
-                setUnreadCount(prev => prev + 1);
+                setUnreadCount((prev) => prev + 1);
             }
         } catch (error) {
-            console.error('AI Chat error:', error);
-
-            let errorContent = 'Przepraszam, wystąpił błąd. Spróbuj ponownie później.';
-            if (error instanceof Error) {
-                errorContent = error.message;
-            }
-
-            const errorMessage: Message = {
+            const errorMessage = {
                 id: crypto.randomUUID(),
-                role: 'assistant',
-                content: errorContent,
-                timestamp: new Date()
+                role: 'assistant' as const,
+                content:
+                    error instanceof Error
+                        ? error.message
+                        : 'Przepraszam, wystąpił błąd. Spróbuj ponownie później.',
+                timestamp: new Date(),
             };
-            setMessages(prev => [...prev, errorMessage]);
+            addMessage(errorMessage);
         } finally {
             setIsLoading(false);
-        }
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            handleSend();
         }
     };
 
@@ -150,8 +79,7 @@ export function GlobalAIChat() {
         } catch (error) {
             console.error('Failed to clear AI history:', error);
         }
-        setMessages([]);
-        localStorage.removeItem('global-ai-chat-messages');
+        clearMessages();
     };
 
     const toggleOpen = () => {
@@ -184,18 +112,17 @@ export function GlobalAIChat() {
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={toggleOpen}
-                        className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14
-                                   bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full shadow-lg
-                                   shadow-cyan-500/25 hover:shadow-xl hover:shadow-cyan-500/30 transition-shadow"
+                        className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full shadow-lg shadow-cyan-500/25 hover:shadow-xl hover:shadow-cyan-500/30 transition-shadow"
                     >
-                        <Sparkles className="w-6 h-6 text-white relative z-10" />
+                        <svg className="w-6 h-6 text-white relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                        </svg>
 
                         {unreadCount > 0 && (
                             <motion.span
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
-                                className="absolute -top-1 -right-1 flex items-center justify-center
-                                           w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full z-20"
+                                className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full z-20"
                             >
                                 {unreadCount > 9 ? '9+' : unreadCount}
                             </motion.span>
@@ -217,54 +144,19 @@ export function GlobalAIChat() {
                             opacity: 1,
                             y: 0,
                             scale: 1,
-                            height: isMinimized ? 'auto' : '500px'
+                            height: isMinimized ? 'auto' : '500px',
                         }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
                         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                        className="fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] card-themed border
-                                   rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+                        className="fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] card-themed border rounded-2xl shadow-2xl overflow-hidden flex flex-col"
                     >
-                        <div className="flex items-center justify-between px-4 py-3
-                                        bg-gradient-to-r from-cyan-500 to-blue-600">
-                            <div className="flex items-center gap-3">
-                                <div className="flex items-center justify-center w-8 h-8
-                                                bg-white/20 rounded-full">
-                                    <Bot className="w-5 h-5 text-white" />
-                                </div>
-                                <div>
-                                    <h3 className="text-white font-semibold">Asystent AI</h3>
-                                    <p className="text-white/70 text-xs">
-                                        {isLoading ? 'Pisze...' : 'Online'}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-1">
-                                <button
-                                    onClick={handleClearHistory}
-                                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                                    title="Wyczyść historię"
-                                >
-                                    <Trash2 className="w-4 h-4 text-white/70" />
-                                </button>
-                                <button
-                                    onClick={toggleMinimize}
-                                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                                >
-                                    {isMinimized ? (
-                                        <Maximize2 className="w-4 h-4 text-white" />
-                                    ) : (
-                                        <Minimize2 className="w-4 h-4 text-white" />
-                                    )}
-                                </button>
-                                <button
-                                    onClick={toggleOpen}
-                                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                                >
-                                    <X className="w-4 h-4 text-white" />
-                                </button>
-                            </div>
-                        </div>
+                        <ChatHeader
+                            isLoading={isLoading}
+                            isMinimized={isMinimized}
+                            onToggleMinimize={toggleMinimize}
+                            onClearHistory={handleClearHistory}
+                            onClose={toggleOpen}
+                        />
 
                         <AnimatePresence>
                             {!isMinimized && (
@@ -274,95 +166,20 @@ export function GlobalAIChat() {
                                     exit={{ height: 0 }}
                                     className="flex-1 overflow-hidden flex flex-col"
                                 >
-                                    <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ maxHeight: '320px' }}>
-                                        {messages.length === 0 ? (
-                                            <div className="flex flex-col items-center justify-center h-full text-center py-8">
-                                                <div className="w-16 h-16 bg-cyan-500/15 rounded-full flex items-center justify-center mb-4">
-                                                    <MessageSquare className="w-8 h-8 text-cyan-600" />
-                                                </div>
-                                                <h4 className="font-medium text-themed mb-1">
-                                                    Cześć{session.user?.name ? `, ${session.user.name.split(' ')[0]}` : ''}!
-                                                </h4>
-                                                <p className="text-sm text-themed-muted max-w-[250px]">
-                                                    Jak mogę Ci dzisiaj pomóc?
-                                                </p>
-                                            </div>
-                                        ) : (
-                                            messages.map((message) => (
-                                                <ChatBubble key={message.id} message={message} />
-                                            ))
-                                        )}
+                                    <ChatMessages
+                                        messages={messages}
+                                        isLoading={isLoading}
+                                        messagesEndRef={messagesEndRef}
+                                        onSuggestionClick={setInput}
+                                    />
 
-                                        {isLoading && (
-                                            <div className="flex items-start gap-3">
-                                                <div className="w-8 h-8 bg-cyan-500/15 rounded-full flex items-center justify-center flex-shrink-0">
-                                                    <Bot className="w-4 h-4 text-cyan-600" />
-                                                </div>
-                                                <div className="section-themed rounded-2xl rounded-tl-none px-4 py-3">
-                                                    <div className="flex items-center gap-1">
-                                                        <span className="w-2 h-2 bg-cyan-500 rounded-full animate-bounce"
-                                                              style={{ animationDelay: '0ms' }} />
-                                                        <span className="w-2 h-2 bg-cyan-500 rounded-full animate-bounce"
-                                                              style={{ animationDelay: '150ms' }} />
-                                                        <span className="w-2 h-2 bg-cyan-500 rounded-full animate-bounce"
-                                                              style={{ animationDelay: '300ms' }} />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        <div ref={messagesEndRef} />
-                                    </div>
-
-                                    {messages.length === 0 && (
-                                        <div className="px-4 pb-2">
-                                            <div className="flex flex-wrap gap-2">
-                                                {[
-                                                    'Pomóż mi stworzyć ofertę',
-                                                    'Podsumuj dzisiejsze zadania',
-                                                    'Zaległe follow-upy'
-                                                ].map((suggestion) => (
-                                                    <button
-                                                        key={suggestion}
-                                                        onClick={() => setInput(suggestion)}
-                                                        className="text-xs px-3 py-1.5 section-themed text-themed-muted rounded-full
-                                                                   hover-themed transition-colors"
-                                                    >
-                                                        {suggestion}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <div className="p-4 border-t divider-themed">
-                                        <div className="flex items-end gap-2">
-                                            <textarea
-                                                ref={inputRef}
-                                                value={input}
-                                                onChange={(e) => setInput(e.target.value)}
-                                                onKeyDown={handleKeyDown}
-                                                placeholder="Napisz wiadomość..."
-                                                rows={1}
-                                                className="flex-1 resize-none rounded-xl border px-4 py-2.5 text-sm
-                                                           focus:outline-none focus:ring-2 focus:ring-cyan-500
-                                                           input-themed"
-                                                style={{ maxHeight: '120px' }}
-                                            />
-                                            <Button
-                                                onClick={handleSend}
-                                                disabled={!input.trim() || isLoading}
-                                                size="sm"
-                                                className="rounded-xl h-10 w-10 p-0 flex items-center justify-center"
-                                            >
-                                                {isLoading ? (
-                                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                                ) : (
-                                                    <Send className="w-4 h-4" />
-                                                )}
-                                            </Button>
-                                        </div>
-                                    </div>
+                                    <ChatInput
+                                        value={input}
+                                        onChange={setInput}
+                                        onSend={handleSend}
+                                        isLoading={isLoading}
+                                        isVisible={!isMinimized}
+                                    />
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -370,45 +187,5 @@ export function GlobalAIChat() {
                 )}
             </AnimatePresence>
         </>
-    );
-}
-
-function ChatBubble({ message }: { message: Message }) {
-    const isUser = message.role === 'user';
-
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : ''}`}
-        >
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                isUser
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600'
-                    : 'bg-cyan-500/15'
-            }`}>
-                {isUser ? (
-                    <User className="w-4 h-4 text-white" />
-                ) : (
-                    <Bot className="w-4 h-4 text-cyan-600" />
-                )}
-            </div>
-
-            <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
-                isUser
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-tr-none'
-                    : 'section-themed text-themed rounded-tl-none'
-            }`}>
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                <p className={`text-xs mt-1 ${
-                    isUser ? 'text-cyan-100' : 'text-themed-muted'
-                }`}>
-                    {message.timestamp.toLocaleTimeString('pl-PL', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })}
-                </p>
-            </div>
-        </motion.div>
     );
 }
