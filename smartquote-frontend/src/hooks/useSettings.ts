@@ -155,6 +155,21 @@ export function useSmtpConfig() {
         }
     };
 
+    const testSavedConnection = async (): Promise<TestSmtpConnectionResult> => {
+        setIsTesting(true);
+        setError(null);
+        try {
+            const result = await settingsApi.testSavedSmtpConnection();
+            return result;
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Błąd testu połączenia';
+            setError(message);
+            throw err;
+        } finally {
+            setIsTesting(false);
+        }
+    };
+
     const deleteConfig = async (): Promise<void> => {
         setIsDeleting(true);
         setError(null);
@@ -187,6 +202,7 @@ export function useSmtpConfig() {
         refetch: fetchConfig,
         updateConfig,
         testConnection,
+        testSavedConnection,
         deleteConfig,
     };
 }

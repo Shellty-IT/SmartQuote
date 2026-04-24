@@ -2,7 +2,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Bell, Mail, Calendar, FileText, BarChart3, Loader2, Check } from 'lucide-react';
 import { Card } from '@/components/ui';
 import type { UserSettings, UpdateSettingsInput } from '@/types';
 
@@ -66,28 +65,44 @@ export default function NotificationsSection({ settings, onUpdate }: Props) {
     const notifications = [
         {
             key: 'emailNotifications' as const,
-            icon: <Mail className="w-5 h-5" />,
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+            ),
             title: 'Powiadomienia email',
             description: 'Otrzymuj powiadomienia na adres email',
             enabled: localSettings.emailNotifications,
         },
         {
             key: 'offerNotifications' as const,
-            icon: <FileText className="w-5 h-5" />,
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+            ),
             title: 'Powiadomienia o ofertach',
             description: 'Informacje o zmianach statusu ofert',
             enabled: localSettings.offerNotifications,
         },
         {
             key: 'followUpReminders' as const,
-            icon: <Calendar className="w-5 h-5" />,
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+            ),
             title: 'Przypomnienia follow-up',
             description: 'Przypomnienia o zaplanowanych zadaniach',
             enabled: localSettings.followUpReminders,
         },
         {
             key: 'weeklyReport' as const,
-            icon: <BarChart3 className="w-5 h-5" />,
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+            ),
             title: 'Raport tygodniowy',
             description: 'Podsumowanie aktywności co tydzień',
             enabled: localSettings.weeklyReport,
@@ -104,11 +119,18 @@ export default function NotificationsSection({ settings, onUpdate }: Props) {
                 <div className="flex items-center gap-2">
                     {success && (
                         <div className="flex items-center gap-1.5 text-emerald-500 text-sm">
-                            <Check className="w-4 h-4" />
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
                             <span>Zapisano</span>
                         </div>
                     )}
-                    {isSaving && <Loader2 className="w-4 h-4 animate-spin text-cyan-500" />}
+                    {isSaving && (
+                        <svg className="w-4 h-4 animate-spin text-cyan-500" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                        </svg>
+                    )}
                 </div>
             </div>
 
@@ -140,7 +162,9 @@ export default function NotificationsSection({ settings, onUpdate }: Props) {
 
             <div className="mt-6 pt-6 border-t divider-themed">
                 <div className="flex items-start gap-3 p-4 bg-amber-500/10 rounded-xl border border-amber-500/20">
-                    <Bell className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                    <svg className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
                     <div>
                         <p className="text-sm font-medium text-amber-700">Wskazówka</p>
                         <p className="text-sm text-amber-600">

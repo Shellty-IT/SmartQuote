@@ -2,21 +2,6 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import {
-    Building2,
-    MapPin,
-    Phone,
-    Mail,
-    Globe,
-    CreditCard,
-    FileText,
-    Loader2,
-    Check,
-    Upload,
-    X,
-    Image as ImageIcon,
-    Palette
-} from 'lucide-react';
 import { Card } from '@/components/ui';
 import Button from '@/components/ui/Button';
 import { compressImage } from '@/lib/imageUtils';
@@ -189,7 +174,9 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     </div>
                     {success && (
                         <div className="flex items-center gap-2 text-emerald-500 text-sm">
-                            <Check className="w-4 h-4" />
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
                             Zapisano
                         </div>
                     )}
@@ -206,13 +193,18 @@ export default function CompanySection({ company, onUpdate }: Props) {
                         style={{ backgroundColor: currentLogo ? '#ffffff' : 'var(--section-bg)' }}
                     >
                         {isUploadingLogo ? (
-                            <Loader2 className="w-8 h-8 text-cyan-500 animate-spin" />
+                            <svg className="w-8 h-8 text-cyan-500 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                            </svg>
                         ) : currentLogo ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={currentLogo} alt="Logo firmy" className="w-full h-full object-contain rounded-xl p-2" />
                         ) : (
                             <div className="text-center">
-                                <ImageIcon className="w-8 h-8 text-slate-400 group-hover:text-cyan-500 mx-auto mb-1 transition-colors" />
+                                <svg className="w-8 h-8 text-slate-400 group-hover:text-cyan-500 mx-auto mb-1 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
                                 <span className="text-xs text-slate-400 group-hover:text-cyan-500 transition-colors">Dodaj logo</span>
                             </div>
                         )}
@@ -229,7 +221,9 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     <div>
                         <div className="flex items-center gap-2">
                             <Button variant="outline" size="sm" onClick={handleLogoClick} disabled={isUploadingLogo}>
-                                <Upload className="w-4 h-4" />
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                </svg>
                                 {currentLogo ? 'Zmień logo' : 'Wgraj logo'}
                             </Button>
                             {currentLogo && (
@@ -238,7 +232,9 @@ export default function CompanySection({ company, onUpdate }: Props) {
                                     disabled={isUploadingLogo}
                                     className="text-xs font-medium text-red-500 hover:text-red-600 flex items-center gap-1 px-2 py-1 disabled:opacity-50"
                                 >
-                                    <X className="w-3 h-3" />
+                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
                                     Usuń
                                 </button>
                             )}
@@ -252,7 +248,9 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-themed-label mb-2">Nazwa firmy</label>
                         <div className="relative">
-                            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" />
+                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
                             <input
                                 type="text"
                                 value={formData.name || ''}
@@ -289,7 +287,9 @@ export default function CompanySection({ company, onUpdate }: Props) {
 
             <Card>
                 <div className="flex items-center gap-2 mb-6">
-                    <Palette className="w-5 h-5 text-cyan-500" />
+                    <svg className="w-5 h-5 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                    </svg>
                     <div>
                         <h3 className="text-lg font-semibold text-themed">Kolor firmowy</h3>
                         <p className="text-sm text-themed-muted">Kolor widoczny na publicznej stronie oferty (przyciski, akcenty, linki)</p>
@@ -339,7 +339,9 @@ export default function CompanySection({ company, onUpdate }: Props) {
                                 onClick={handleResetColor}
                                 className="text-xs text-themed-muted hover:text-red-500 mt-3 flex items-center gap-1 transition-colors"
                             >
-                                <X className="w-3 h-3" />
+                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
                                 Przywróć domyślny kolor
                             </button>
                         )}
@@ -378,7 +380,10 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-themed-label mb-2">Ulica i numer</label>
                         <div className="relative">
-                            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" />
+                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
                             <input
                                 type="text"
                                 value={formData.address || ''}
@@ -431,7 +436,9 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     <div>
                         <label className="block text-sm font-medium text-themed-label mb-2">Telefon</label>
                         <div className="relative">
-                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" />
+                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
                             <input
                                 type="tel"
                                 value={formData.phone || ''}
@@ -445,7 +452,9 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     <div>
                         <label className="block text-sm font-medium text-themed-label mb-2">Email firmowy</label>
                         <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" />
+                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
                             <input
                                 type="email"
                                 value={formData.email || ''}
@@ -459,7 +468,9 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-themed-label mb-2">Strona internetowa</label>
                         <div className="relative">
-                            <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" />
+                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                            </svg>
                             <input
                                 type="url"
                                 value={formData.website || ''}
@@ -479,7 +490,9 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     <div>
                         <label className="block text-sm font-medium text-themed-label mb-2">Nazwa banku</label>
                         <div className="relative">
-                            <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" />
+                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            </svg>
                             <input
                                 type="text"
                                 value={formData.bankName || ''}
@@ -524,7 +537,9 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     <div>
                         <label className="block text-sm font-medium text-themed-label mb-2">Domyślne warunki</label>
                         <div className="relative">
-                            <FileText className="absolute left-3 top-3 w-5 h-5 text-themed-muted" />
+                            <svg className="absolute left-3 top-3 w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
                             <textarea
                                 value={formData.defaultTerms || ''}
                                 onChange={(e) => handleChange('defaultTerms', e.target.value)}
@@ -556,7 +571,10 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     <Button onClick={handleSave} disabled={isSaving}>
                         {isSaving ? (
                             <>
-                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                </svg>
                                 Zapisywanie...
                             </>
                         ) : (

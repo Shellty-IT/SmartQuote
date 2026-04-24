@@ -57,6 +57,7 @@ export default function RichTextEditor({
     const startHeight = useRef(0);
 
     const editor = useEditor({
+        immediatelyRender: false,
         extensions: [
             StarterKit.configure({
                 bulletList: { keepMarks: true },
@@ -74,7 +75,7 @@ export default function RichTextEditor({
         ],
         content: value,
         onUpdate: ({ editor }) => {
-            onChange(editor.getText({ blockSeparator: '\n' }));
+            onChange(editor.getHTML());
         },
         editorProps: {
             attributes: {
@@ -85,8 +86,8 @@ export default function RichTextEditor({
 
     useEffect(() => {
         if (!editor) return;
-        const currentText = editor.getText({ blockSeparator: '\n' });
-        if (currentText !== value && value === '') {
+        const currentHtml = editor.getHTML();
+        if (currentHtml !== value && value === '') {
             editor.commands.clearContent();
         }
     }, [value, editor]);
@@ -109,9 +110,9 @@ export default function RichTextEditor({
         startY.current = e.clientY;
         startHeight.current = editorHeight;
 
-        const handleMouseMove = (e: MouseEvent) => {
+        const handleMouseMove = (moveEvent: MouseEvent) => {
             if (!isResizing.current) return;
-            const delta = e.clientY - startY.current;
+            const delta = moveEvent.clientY - startY.current;
             const newHeight = Math.max(120, startHeight.current + delta);
             setEditorHeight(newHeight);
         };
@@ -133,7 +134,6 @@ export default function RichTextEditor({
             ref={containerRef}
             className="border border-slate-300 dark:border-slate-600 rounded-xl overflow-hidden flex flex-col"
         >
-            {/* Toolbar */}
             <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex-shrink-0">
                 <ToolbarButton
                     onClick={() => editor.chain().focus().toggleBold().run()}
@@ -223,7 +223,6 @@ export default function RichTextEditor({
                 </ToolbarButton>
             </div>
 
-            {/* Editor area */}
             <div
                 className="bg-white dark:bg-slate-900 cursor-text overflow-y-auto"
                 style={{ height: `${editorHeight}px` }}
@@ -253,7 +252,6 @@ export default function RichTextEditor({
                 <EditorContent editor={editor} />
             </div>
 
-            {/* Resize handle */}
             <div
                 className="flex items-center justify-center h-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700 cursor-ns-resize hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors flex-shrink-0 select-none"
                 onMouseDown={handleResizeMouseDown}
