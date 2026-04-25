@@ -13,6 +13,14 @@ const PRESETS: Record<string, { host: string; port: number; note: string }> = {
     custom: { host: '', port: 587, note: 'Własny serwer SMTP' },
 };
 
+const PRESET_LABELS: Record<string, string> = {
+    gmail: 'Gmail',
+    outlook: 'Outlook / M365',
+    wp: 'WP',
+    onet: 'Onet',
+    custom: 'Własny serwer',
+};
+
 export default function SmtpSection() {
     const {
         config,
@@ -186,25 +194,37 @@ export default function SmtpSection() {
             <div className="mb-6">
                 <label className="block text-sm font-medium text-themed-label mb-2">Dostawca poczty</label>
                 <div className="flex flex-wrap gap-2">
-                    {Object.entries(PRESETS).map(([key]) => (
-                        <button
-                            key={key}
-                            onClick={() => handlePresetChange(key)}
-                            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors border ${
-                                selectedPreset === key
-                                    ? 'bg-cyan-50 dark:bg-cyan-900/30 border-cyan-300 dark:border-cyan-700 text-cyan-700 dark:text-cyan-400'
-                                    : 'card-themed text-themed-muted hover-themed'
-                            }`}
-                        >
-                            {key === 'gmail' ? 'Gmail' :
-                                key === 'outlook' ? 'Outlook / M365' :
-                                    key === 'wp' ? 'WP' :
-                                        key === 'onet' ? 'Onet' : 'Własny serwer'}
-                        </button>
-                    ))}
+                    {Object.keys(PRESETS).map(key => {
+                        const isActive = selectedPreset === key;
+                        return (
+                            <button
+                                key={key}
+                                onClick={() => handlePresetChange(key)}
+                                className="px-3 py-2 rounded-lg text-sm font-medium transition-all border"
+                                style={
+                                    isActive
+                                        ? {
+                                            backgroundColor: '#1e3a5f',
+                                            borderColor: '#1e3a5f',
+                                            color: '#ffffff',
+                                            boxShadow: '0 1px 4px rgba(30,58,95,0.25)',
+                                        }
+                                        : {
+                                            backgroundColor: 'var(--card-bg)',
+                                            borderColor: 'var(--card-border)',
+                                            color: 'var(--muted-text)',
+                                        }
+                                }
+                            >
+                                {PRESET_LABELS[key]}
+                            </button>
+                        );
+                    })}
                 </div>
                 {selectedPreset !== 'custom' && (
-                    <p className="mt-2 text-xs text-themed-muted">{PRESETS[selectedPreset]?.note}</p>
+                    <p className="mt-2 text-xs" style={{ color: 'var(--muted-text)' }}>
+                        {PRESETS[selectedPreset]?.note}
+                    </p>
                 )}
             </div>
 
@@ -228,7 +248,7 @@ export default function SmtpSection() {
                         placeholder="587"
                         className="w-full px-3 py-2.5 rounded-xl border input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
                     />
-                    <p className="mt-1 text-xs text-themed-muted">587 (STARTTLS) lub 465 (SSL)</p>
+                    <p className="mt-1 text-xs" style={{ color: 'var(--muted-text)' }}>587 (STARTTLS) lub 465 (SSL)</p>
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-themed-label mb-1">Użytkownik (login)</label>
@@ -244,7 +264,7 @@ export default function SmtpSection() {
                     <label className="block text-sm font-medium text-themed-label mb-1">
                         Hasło{' '}
                         {config?.smtpConfigured && (
-                            <span className="text-themed-muted font-normal">(zostaw puste aby nie zmieniać)</span>
+                            <span className="font-normal" style={{ color: 'var(--muted-text)' }}>(zostaw puste aby nie zmieniać)</span>
                         )}
                     </label>
                     <input
@@ -258,7 +278,7 @@ export default function SmtpSection() {
                 <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-themed-label mb-1">
                         Nazwa nadawcy{' '}
-                        <span className="text-themed-muted font-normal">(opcjonalna)</span>
+                        <span className="font-normal" style={{ color: 'var(--muted-text)' }}>(opcjonalna)</span>
                     </label>
                     <input
                         type="text"
@@ -267,14 +287,17 @@ export default function SmtpSection() {
                         placeholder="Tomek"
                         className="w-full px-3 py-2.5 rounded-xl border input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
                     />
-                    <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
-                        <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
-                            <strong className="font-semibold">Jak to działa?</strong><br/>
-                            Wpisz swoję <strong>imię</strong> lub <strong>nazwę firmy</strong> — np. <code className="px-1 py-0.5 bg-blue-100 dark:bg-blue-900/40 rounded">Tomek</code> lub <code className="px-1 py-0.5 bg-blue-100 dark:bg-blue-900/40 rounded">SmartQuote</code>.<br/>
-                            Odbiorca zobaczy: <strong className="text-blue-800 dark:text-blue-300">Tomek &lt;{form.smtpUser || 'twoj@email.com'}&gt;</strong>
+                    <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 smtp-info-box">
+                        <p className="text-xs leading-relaxed">
+                            <strong>Jak to działa?</strong><br />
+                            Wpisz swoje <strong>imię</strong> lub <strong>nazwę firmy</strong> — np.{' '}
+                            <code>Tomek</code> lub <code>SmartQuote</code>.<br />
+                            Odbiorca zobaczy:{' '}
+                            <strong>Tomek &lt;{form.smtpUser || 'twoj@email.com'}&gt;</strong>
                         </p>
-                        <p className="text-xs text-blue-600 dark:text-blue-500 mt-2">
-                            Możesz też wpisać pełny format: <code className="px-1 py-0.5 bg-blue-100 dark:bg-blue-900/40 rounded">Tomek &lt;{form.smtpUser || 'twoj@email.com'}&gt;</code>
+                        <p className="text-xs mt-2">
+                            Możesz też wpisać pełny format:{' '}
+                            <code>Tomek &lt;{form.smtpUser || 'twoj@email.com'}&gt;</code>
                         </p>
                     </div>
                 </div>
@@ -303,7 +326,8 @@ export default function SmtpSection() {
                 <button
                     onClick={handleTest}
                     disabled={!canTest || isTesting}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border card-themed text-themed font-medium text-sm hover-themed transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ backgroundColor: '#059669' }}
                 >
                     {isTesting ? (
                         <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -321,7 +345,8 @@ export default function SmtpSection() {
                 <button
                     onClick={handleSave}
                     disabled={!canSave || isSaving}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500 text-white font-medium text-sm hover:bg-cyan-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ backgroundColor: '#0891b2' }}
                 >
                     {isSaving ? (
                         <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -354,7 +379,8 @@ export default function SmtpSection() {
                                 </button>
                                 <button
                                     onClick={() => setDeleteConfirm(false)}
-                                    className="px-3 py-2 rounded-lg border card-themed text-themed-muted text-sm hover-themed"
+                                    className="px-3 py-2 rounded-lg border text-sm hover-themed"
+                                    style={{ borderColor: 'var(--card-border)', color: 'var(--muted-text)' }}
                                 >
                                     Anuluj
                                 </button>
@@ -362,7 +388,7 @@ export default function SmtpSection() {
                         ) : (
                             <button
                                 onClick={() => setDeleteConfirm(true)}
-                                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 font-medium text-sm hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-medium text-sm transition-colors"
                             >
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -374,14 +400,14 @@ export default function SmtpSection() {
                 )}
             </div>
 
-            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
                 <div className="flex items-start gap-3">
-                    <svg className="w-5 h-5 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
                     </svg>
                     <div>
-                        <p className="text-sm font-medium text-blue-800 dark:text-blue-300">Bezpieczeństwo</p>
-                        <p className="text-sm text-blue-700 dark:text-blue-400 mt-1">
+                        <p className="text-sm font-semibold smtp-security-box-title">Bezpieczeństwo</p>
+                        <p className="text-sm mt-1 smtp-security-box-text">
                             Hasło jest szyfrowane algorytmem AES-256 i przechowywane w zaszyfrowanej formie.
                             Nigdy nie jest wyświetlane po zapisaniu. Połączenie z serwerem SMTP odbywa się
                             przez szyfrowany kanał TLS/SSL.
@@ -391,14 +417,14 @@ export default function SmtpSection() {
             </div>
 
             {selectedPreset === 'gmail' && (
-                <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-100 dark:border-amber-800">
+                <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
                     <div className="flex items-start gap-3">
-                        <svg className="w-5 h-5 text-amber-500 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
                         </svg>
                         <div>
-                            <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Gmail — hasło aplikacji</p>
-                            <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
+                            <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">Gmail — hasło aplikacji</p>
+                            <p className="text-sm mt-1 text-amber-800 dark:text-amber-400">
                                 Gmail wymaga &quot;hasła aplikacji&quot; zamiast zwykłego hasła.
                                 Wejdź na myaccount.google.com → Bezpieczeństwo → Weryfikacja dwuetapowa →
                                 Hasła aplikacji, wygeneruj nowe hasło i wklej je tutaj.
