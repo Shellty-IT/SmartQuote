@@ -323,7 +323,11 @@ export default function LoginPage() {
                     </div>
                 </div>
 
-                <p className="text-center text-xs text-themed-muted mt-6">© 2025 SmartQuote AI. Wszelkie prawa zastrzeżone.</p>
+                <p className="text-center text-xs text-themed-muted mt-6">
+                    © 2026 SmartQuote AI by <a href="https://shellty-it.github.io/" target="_blank" rel="noopener noreferrer" className="underline hover:text-themed">
+                    Shellty
+                </a>
+                </p>
             </div>
         </div>
     );
