@@ -11,13 +11,91 @@ import type { EmailAttachment } from '@/types/email.types';
 
 function AttachmentTypeLabel({ type }: { type: EmailAttachment['type'] }) {
     const labels: Record<EmailAttachment['type'], { text: string; color: string }> = {
-        offer_pdf: { text: 'PDF oferty', color: 'text-red-500' },
-        contract_pdf: { text: 'PDF umowy', color: 'text-emerald-600' },
-        offer_link: { text: 'Link oferty', color: 'text-cyan-600' },
-        contract_link: { text: 'Link umowy', color: 'text-emerald-600' },
+        offer_pdf: { text: 'PDF oferty', color: 'text-cyan-700 dark:text-cyan-400' },
+        contract_pdf: { text: 'PDF umowy', color: 'text-emerald-700 dark:text-emerald-400' },
+        offer_link: { text: 'Link oferty', color: 'text-cyan-700 dark:text-cyan-400' },
+        contract_link: { text: 'Link umowy', color: 'text-emerald-700 dark:text-emerald-400' },
     };
     const { text, color } = labels[type];
     return <span className={`text-xs font-medium ${color}`}>{text}</span>;
+}
+
+function SectionCard({ title, accent, children }: { title: string; accent?: string; children: React.ReactNode }) {
+    return (
+        <div
+            className="rounded-2xl border"
+            style={{
+                backgroundColor: 'var(--card-bg)',
+                borderColor: accent ?? 'var(--card-border)',
+            }}
+        >
+            <div
+                className="px-5 py-3 border-b rounded-t-2xl"
+                style={{
+                    backgroundColor: 'var(--dash-section-header)',
+                    borderColor: accent ?? 'var(--card-border)',
+                }}
+            >
+                <h2 className="text-sm font-semibold" style={{ color: 'var(--dash-section-title)' }}>{title}</h2>
+            </div>
+            <div className="p-5">{children}</div>
+        </div>
+    );
+}
+
+function FormLabel({ children, required }: { children: React.ReactNode; required?: boolean }) {
+    return (
+        <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--label-text)' }}>
+            {children}
+            {required && <span className="text-red-500 ml-0.5">*</span>}
+        </label>
+    );
+}
+
+function StyledSelect({ value, onChange, disabled, children }: {
+    value: string;
+    onChange: (v: string) => void;
+    disabled?: boolean;
+    children: React.ReactNode;
+}) {
+    return (
+        <select
+            value={value}
+            onChange={e => onChange(e.target.value)}
+            disabled={disabled}
+            className="w-full px-3 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 transition-colors"
+            style={{
+                backgroundColor: 'var(--input-bg)',
+                borderColor: 'var(--input-border)',
+                color: 'var(--input-text)',
+            }}
+        >
+            {children}
+        </select>
+    );
+}
+
+function StyledInput({ type = 'text', value, onChange, placeholder, hasError }: {
+    type?: string;
+    value: string;
+    onChange: (v: string) => void;
+    placeholder?: string;
+    hasError?: boolean;
+}) {
+    return (
+        <input
+            type={type}
+            value={value}
+            onChange={e => onChange(e.target.value)}
+            placeholder={placeholder}
+            className="w-full px-3 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 transition-colors"
+            style={{
+                backgroundColor: 'var(--input-bg)',
+                borderColor: hasError ? '#f87171' : 'var(--input-border)',
+                color: 'var(--input-text)',
+            }}
+        />
+    );
 }
 
 function EmailComposerContent() {
@@ -60,7 +138,8 @@ function EmailComposerContent() {
             <div className="flex items-center gap-4 mb-8">
                 <button
                     onClick={() => router.push('/dashboard/emails')}
-                    className="p-2 text-themed-muted hover-themed rounded-lg transition-colors"
+                    className="p-2 rounded-lg transition-colors hover-themed"
+                    style={{ color: 'var(--muted-text)' }}
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -97,15 +176,9 @@ function EmailComposerContent() {
                 </div>
             )}
 
-            <div className="space-y-6">
-                <Card>
-                    <h2 className="text-sm font-semibold text-themed mb-4">Szablon wiadomości</h2>
-                    <select
-                        value={selectedTemplateId}
-                        onChange={e => handleTemplateSelect(e.target.value)}
-                        disabled={isLoadingData}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-themed text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
-                    >
+            <div className="space-y-5">
+                <SectionCard title="Szablon wiadomości" accent="#7dd3fc">
+                    <StyledSelect value={selectedTemplateId} onChange={handleTemplateSelect} disabled={isLoadingData}>
                         <option value="">— Własna wiadomość —</option>
                         <optgroup label="Wbudowane">
                             {BUILT_IN_TEMPLATES.map(t => (
@@ -119,141 +192,100 @@ function EmailComposerContent() {
                                 ))}
                             </optgroup>
                         )}
-                    </select>
-                </Card>
+                    </StyledSelect>
+                </SectionCard>
 
-                <Card>
-                    <h2 className="text-sm font-semibold text-themed mb-4">Odbiorca</h2>
-                    <div className="space-y-3">
+                <SectionCard title="Odbiorca" accent="#93c5fd">
+                    <div className="space-y-4">
                         <div>
-                            <label className="block text-xs font-medium text-themed-muted mb-1">Klient (opcjonalnie)</label>
-                            <select
-                                value={clientId}
-                                onChange={e => handleClientChange(e.target.value)}
-                                disabled={isLoadingData}
-                                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-themed text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
-                            >
+                            <FormLabel>Klient (opcjonalnie)</FormLabel>
+                            <StyledSelect value={clientId} onChange={handleClientChange} disabled={isLoadingData}>
                                 <option value="">— Wybierz klienta —</option>
                                 {clients.map(c => (
                                     <option key={c.id} value={c.id}>
                                         {c.name}{c.email ? ` <${c.email}>` : ''}
                                     </option>
                                 ))}
-                            </select>
+                            </StyledSelect>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs font-medium text-themed-muted mb-1">
-                                    Adres email <span className="text-red-500">*</span>
-                                </label>
-                                <input
+                                <FormLabel required>Adres email</FormLabel>
+                                <StyledInput
                                     type="email"
                                     value={to}
-                                    onChange={e => setTo(e.target.value)}
+                                    onChange={setTo}
                                     placeholder="odbiorca@firma.pl"
-                                    className={`w-full px-3 py-2 rounded-xl border text-themed text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 bg-white dark:bg-slate-800 ${
-                                        errors.to
-                                            ? 'border-red-400 dark:border-red-500'
-                                            : 'border-slate-200 dark:border-slate-700'
-                                    }`}
+                                    hasError={!!errors.to}
                                 />
-                                {errors.to && (
-                                    <p className="mt-1 text-xs text-red-500">{errors.to}</p>
-                                )}
+                                {errors.to && <p className="mt-1 text-xs text-red-500">{errors.to}</p>}
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-themed-muted mb-1">Imię i nazwisko (opcjonalnie)</label>
-                                <input
-                                    type="text"
+                                <FormLabel>Imię i nazwisko (opcjonalnie)</FormLabel>
+                                <StyledInput
                                     value={toName}
-                                    onChange={e => setToName(e.target.value)}
+                                    onChange={setToName}
                                     placeholder="Jan Kowalski"
-                                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-themed text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
                                 />
                             </div>
                         </div>
                     </div>
-                </Card>
+                </SectionCard>
 
-                <Card>
-                    <h2 className="text-sm font-semibold text-themed mb-4">Treść wiadomości</h2>
-                    <div className="space-y-3">
+                <SectionCard title="Treść wiadomości" accent="#60a5fa">
+                    <div className="space-y-4">
                         <div>
-                            <label className="block text-xs font-medium text-themed-muted mb-1">
-                                Temat <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
+                            <FormLabel required>Temat</FormLabel>
+                            <StyledInput
                                 value={subject}
-                                onChange={e => setSubject(e.target.value)}
+                                onChange={setSubject}
                                 placeholder="Temat wiadomości"
-                                className={`w-full px-3 py-2 rounded-xl border text-themed text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 bg-white dark:bg-slate-800 ${
-                                    errors.subject
-                                        ? 'border-red-400 dark:border-red-500'
-                                        : 'border-slate-200 dark:border-slate-700'
-                                }`}
+                                hasError={!!errors.subject}
                             />
-                            {errors.subject && (
-                                <p className="mt-1 text-xs text-red-500">{errors.subject}</p>
-                            )}
+                            {errors.subject && <p className="mt-1 text-xs text-red-500">{errors.subject}</p>}
                         </div>
                         <div>
-                            <label className="block text-xs font-medium text-themed-muted mb-1">
-                                Treść <span className="text-red-500">*</span>
-                            </label>
+                            <FormLabel required>Treść</FormLabel>
                             <RichTextEditor
                                 value={body}
                                 onChange={setBody}
                                 placeholder="Wpisz treść wiadomości..."
                             />
-                            {errors.body && (
-                                <p className="mt-1 text-xs text-red-500">{errors.body}</p>
-                            )}
+                            {errors.body && <p className="mt-1 text-xs text-red-500">{errors.body}</p>}
                         </div>
                     </div>
-                </Card>
+                </SectionCard>
 
-                <Card>
-                    <h2 className="text-sm font-semibold text-themed mb-4">Załączniki</h2>
+                <SectionCard title="Załączniki" accent="#38bdf8">
                     <div className="space-y-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs font-medium text-themed-muted mb-1">Oferta</label>
-                                <select
-                                    value={offerId}
-                                    onChange={e => handleOfferChange(e.target.value)}
-                                    disabled={isLoadingData}
-                                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-themed text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
-                                >
+                                <FormLabel>Oferta</FormLabel>
+                                <StyledSelect value={offerId} onChange={handleOfferChange} disabled={isLoadingData}>
                                     <option value="">— Wybierz ofertę —</option>
                                     {offers.map(o => (
                                         <option key={o.id} value={o.id}>
                                             {o.number} — {o.title}
                                         </option>
                                     ))}
-                                </select>
+                                </StyledSelect>
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-themed-muted mb-1">Umowa</label>
-                                <select
-                                    value={contractId}
-                                    onChange={e => handleContractChange(e.target.value)}
-                                    disabled={isLoadingData}
-                                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-themed text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
-                                >
+                                <FormLabel>Umowa</FormLabel>
+                                <StyledSelect value={contractId} onChange={handleContractChange} disabled={isLoadingData}>
                                     <option value="">— Wybierz umowę —</option>
                                     {contracts.map(c => (
                                         <option key={c.id} value={c.id}>
                                             {c.number} — {c.title}
                                         </option>
                                     ))}
-                                </select>
+                                </StyledSelect>
                             </div>
                         </div>
 
                         {(selectedOffer?.publicToken || selectedContract?.publicToken) && (
-                            <div className="flex flex-wrap gap-2">
+                            <div className="flex flex-wrap gap-2 pt-1">
                                 {selectedOffer?.publicToken && (
                                     <button
                                         type="button"
@@ -262,7 +294,12 @@ function EmailComposerContent() {
                                             selectedOffer.id,
                                             `Link do oferty ${selectedOffer.number}`
                                         )}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-cyan-200 dark:border-cyan-800 text-cyan-600 dark:text-cyan-400 text-xs hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border"
+                                        style={{
+                                            borderColor: '#38bdf8',
+                                            color: '#0369a1',
+                                            backgroundColor: 'rgba(56,189,248,0.08)',
+                                        }}
                                     >
                                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -278,7 +315,7 @@ function EmailComposerContent() {
                                             selectedContract.id,
                                             `Link do umowy ${selectedContract.number}`
                                         )}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 text-xs hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
                                     >
                                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -291,20 +328,28 @@ function EmailComposerContent() {
 
                         {attachments.length > 0 && (
                             <div className="space-y-2">
-                                <p className="text-xs font-medium text-themed-muted">Dodane załączniki:</p>
+                                <p className="text-xs font-semibold" style={{ color: 'var(--label-text)' }}>Dodane załączniki:</p>
                                 {attachments.map((att, i) => (
                                     <div
                                         key={i}
-                                        className="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700"
+                                        className="flex items-center justify-between px-3 py-2 rounded-xl border"
+                                        style={{
+                                            backgroundColor: 'var(--section-bg)',
+                                            borderColor: 'var(--divider)',
+                                        }}
                                     >
                                         <div className="flex items-center gap-2">
+                                            <svg className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--muted-text)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                            </svg>
                                             <AttachmentTypeLabel type={att.type} />
                                             <span className="text-xs text-themed">{att.name}</span>
                                         </div>
                                         <button
                                             type="button"
                                             onClick={() => handleRemoveAttachment(i)}
-                                            className="p-1 text-themed-muted hover:text-red-500 transition-colors"
+                                            className="p-1 rounded-lg transition-colors hover:text-red-500"
+                                            style={{ color: 'var(--muted-text)' }}
                                         >
                                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -315,14 +360,19 @@ function EmailComposerContent() {
                             </div>
                         )}
                     </div>
-                </Card>
+                </SectionCard>
 
-                <div className="flex flex-col sm:flex-row justify-end gap-3">
+                <div className="flex flex-col sm:flex-row justify-end gap-3 pt-1">
                     <button
                         type="button"
                         onClick={handleSaveDraft}
                         disabled={isSavingDraft || isSending}
-                        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-medium text-themed hover-themed transition-colors disabled:opacity-60"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border text-sm font-medium transition-colors disabled:opacity-60"
+                        style={{
+                            borderColor: 'var(--card-border)',
+                            backgroundColor: 'var(--card-bg)',
+                            color: 'var(--foreground)',
+                        }}
                     >
                         {isSavingDraft ? (
                             <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
