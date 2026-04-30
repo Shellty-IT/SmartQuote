@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useSmtpConfig } from '@/hooks/useSettings';
+import { useSmtpConfig, useSenderEmail } from '@/hooks/useSettings';
 import { Card } from '@/components/ui';
 
 const PRESETS: Record<string, { host: string; port: number; note: string }> = {
@@ -24,16 +24,46 @@ const PRESET_LABELS: Record<string, string> = {
 export default function SmtpSection() {
     const {
         config,
-        isLoading,
+        isLoading: smtpLoading,
         isSaving,
         isTesting,
         isDeleting,
-        error,
+        error: smtpError,
         updateConfig,
         testConnection,
         testSavedConnection,
         deleteConfig,
     } = useSmtpConfig();
+
+    const {
+        senderEmail,
+        isLoading: senderLoading,
+        isSaving: senderSaving,
+        error: senderError,
+        updateEmail,
+    } = useSenderEmail();
+
+    const [senderEmailInput, setSenderEmailInput] = useState('');
+    const [senderSaveSuccess, setSenderSaveSuccess] = useState(false);
+    const senderLoaded = useRef(false);
+
+    useEffect(() => {
+        if (senderLoading || senderLoaded.current) return;
+        senderLoaded.current = true;
+        requestAnimationFrame(() => {
+            setSenderEmailInput(senderEmail);
+        });
+    }, [senderEmail, senderLoading]);
+
+    const handleSenderSave = async () => {
+        setSenderSaveSuccess(false);
+        try {
+            await updateEmail(senderEmailInput.trim());
+            setSenderSaveSuccess(true);
+            setTimeout(() => setSenderSaveSuccess(false), 3000);
+        } catch {
+        }
+    };
 
     const [form, setForm] = useState({
         smtpHost: '',
@@ -146,8 +176,9 @@ export default function SmtpSection() {
 
     const canSave = form.smtpHost && form.smtpUser && (form.smtpPass || config?.smtpConfigured);
     const canTest = form.smtpHost && form.smtpUser;
+    const canSaveSender = senderEmailInput.trim().length > 0 && senderEmailInput.includes('@');
 
-    if (isLoading) {
+    if (smtpLoading || senderLoading) {
         return (
             <Card>
                 <div className="flex items-center justify-center py-12">
@@ -161,199 +192,66 @@ export default function SmtpSection() {
     }
 
     return (
-        <Card>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                <div>
-                    <h2 className="text-lg font-semibold text-themed">Skrzynka pocztowa (SMTP)</h2>
-                    <p className="text-sm text-themed-muted">Podłącz swoją skrzynkę do wysyłania maili z ofertami</p>
-                </div>
-                <div className="flex items-center gap-2">
-                    {config?.smtpConfigured ? (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-medium">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                            Skonfigurowano
-                        </span>
-                    ) : (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-medium">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                            Nie skonfigurowano
-                        </span>
-                    )}
-                </div>
-            </div>
+        <div className="space-y-6">
 
-            {error && (
-                <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-700 dark:text-red-400 flex items-start gap-2">
+            {/* SEKCJA AKTYWNA — adres nadawcy */}
+            <Card>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h2 className="text-lg font-semibold text-themed">Adres nadawcy</h2>
+                        <p className="text-sm text-themed-muted">
+                            Twój adres email widoczny dla odbiorców wiadomości
+                        </p>
+                    </div>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-medium">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        Aktywne
+                    </span>
+                </div>
+
+                <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm text-blue-700 dark:text-blue-400 flex items-start gap-2">
                     <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    {error}
+                    <span>
+                        Maile są wysyłane przez SmartQuote AI. Odbiorca zobaczy Twój adres jako nadawcę i może odpowiedzieć bezpośrednio na Twój email.
+                    </span>
                 </div>
-            )}
 
-            <div className="mb-6">
-                <label className="block text-sm font-medium text-themed-label mb-2">Dostawca poczty</label>
-                <div className="flex flex-wrap gap-2">
-                    {Object.keys(PRESETS).map(key => {
-                        const isActive = selectedPreset === key;
-                        return (
-                            <button
-                                key={key}
-                                onClick={() => handlePresetChange(key)}
-                                className="px-3 py-2 rounded-lg text-sm font-medium transition-all border"
-                                style={
-                                    isActive
-                                        ? {
-                                            backgroundColor: '#1e3a5f',
-                                            borderColor: '#1e3a5f',
-                                            color: '#ffffff',
-                                            boxShadow: '0 1px 4px rgba(30,58,95,0.25)',
-                                        }
-                                        : {
-                                            backgroundColor: 'var(--card-bg)',
-                                            borderColor: 'var(--card-border)',
-                                            color: 'var(--muted-text)',
-                                        }
-                                }
-                            >
-                                {PRESET_LABELS[key]}
-                            </button>
-                        );
-                    })}
-                </div>
-                {selectedPreset !== 'custom' && (
-                    <p className="mt-2 text-xs" style={{ color: 'var(--muted-text)' }}>
-                        {PRESETS[selectedPreset]?.note}
-                    </p>
+                {senderError && (
+                    <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-700 dark:text-red-400">
+                        {senderError}
+                    </div>
                 )}
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div>
-                    <label className="block text-sm font-medium text-themed-label mb-1">Host SMTP</label>
+                <div className="mb-6">
+                    <label className="block text-sm font-medium text-themed-label mb-1">
+                        Twój adres email
+                    </label>
                     <input
-                        type="text"
-                        value={form.smtpHost}
-                        onChange={e => handleChange('smtpHost', e.target.value)}
-                        placeholder="smtp.gmail.com"
-                        className="w-full px-3 py-2.5 rounded-xl border input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-themed-label mb-1">Port</label>
-                    <input
-                        type="number"
-                        value={form.smtpPort}
-                        onChange={e => handleChange('smtpPort', parseInt(e.target.value) || 587)}
-                        placeholder="587"
-                        className="w-full px-3 py-2.5 rounded-xl border input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
-                    />
-                    <p className="mt-1 text-xs" style={{ color: 'var(--muted-text)' }}>587 (STARTTLS) lub 465 (SSL)</p>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-themed-label mb-1">Użytkownik (login)</label>
-                    <input
-                        type="text"
-                        value={form.smtpUser}
-                        onChange={e => handleChange('smtpUser', e.target.value)}
+                        type="email"
+                        value={senderEmailInput}
+                        onChange={e => setSenderEmailInput(e.target.value)}
                         placeholder="twoj@email.com"
                         className="w-full px-3 py-2.5 rounded-xl border input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
                     />
+                    <p className="mt-1 text-xs text-themed-muted">
+                        Np. rastuszek88@wp.pl — odbiorca zobaczy ten adres jako nadawcę i będzie mógł odpowiedzieć.
+                    </p>
                 </div>
-                <div>
-                    <label className="block text-sm font-medium text-themed-label mb-1">
-                        Hasło{' '}
-                        {config?.smtpConfigured && (
-                            <span className="font-normal" style={{ color: 'var(--muted-text)' }}>(zostaw puste aby nie zmieniać)</span>
-                        )}
-                    </label>
-                    <input
-                        type="password"
-                        value={form.smtpPass}
-                        onChange={e => handleChange('smtpPass', e.target.value)}
-                        placeholder={config?.smtpConfigured ? '••••••••' : 'Hasło lub hasło aplikacji'}
-                        className="w-full px-3 py-2.5 rounded-xl border input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
-                    />
-                </div>
-                <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-themed-label mb-1">
-                        Nazwa nadawcy{' '}
-                        <span className="font-normal" style={{ color: 'var(--muted-text)' }}>(opcjonalna)</span>
-                    </label>
-                    <input
-                        type="text"
-                        value={form.smtpFrom}
-                        onChange={e => handleChange('smtpFrom', e.target.value)}
-                        placeholder="Tomek"
-                        className="w-full px-3 py-2.5 rounded-xl border input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
-                    />
-                    <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 smtp-info-box">
-                        <p className="text-xs leading-relaxed">
-                            <strong>Jak to działa?</strong><br />
-                            Wpisz swoje <strong>imię</strong> lub <strong>nazwę firmy</strong> — np.{' '}
-                            <code>Tomek</code> lub <code>SmartQuote</code>.<br />
-                            Odbiorca zobaczy:{' '}
-                            <strong>Tomek &lt;{form.smtpUser || 'twoj@email.com'}&gt;</strong>
-                        </p>
-                        <p className="text-xs mt-2">
-                            Możesz też wpisać pełny format:{' '}
-                            <code>Tomek &lt;{form.smtpUser || 'twoj@email.com'}&gt;</code>
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            {testResult && (
-                <div className={`mb-4 p-3 rounded-xl text-sm flex items-start gap-2 ${
-                    testResult.success
-                        ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400'
-                        : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400'
-                }`}>
-                    {testResult.success ? (
-                        <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                    ) : (
-                        <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    )}
-                    {testResult.message}
-                </div>
-            )}
-
-            <div className="flex flex-wrap items-center gap-3 mb-6">
-                <button
-                    onClick={handleTest}
-                    disabled={!canTest || isTesting}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ backgroundColor: '#059669' }}
-                >
-                    {isTesting ? (
-                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                        </svg>
-                    ) : (
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
-                        </svg>
-                    )}
-                    {isTesting ? 'Testuję...' : 'Testuj połączenie'}
-                </button>
 
                 <button
-                    onClick={handleSave}
-                    disabled={!canSave || isSaving}
+                    onClick={handleSenderSave}
+                    disabled={!canSaveSender || senderSaving}
                     className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{ backgroundColor: '#0891b2' }}
                 >
-                    {isSaving ? (
+                    {senderSaving ? (
                         <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                         </svg>
-                    ) : saveSuccess ? (
+                    ) : senderSaveSuccess ? (
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
@@ -362,77 +260,116 @@ export default function SmtpSection() {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                     )}
-                    {isSaving ? 'Zapisuję...' : saveSuccess ? 'Zapisano!' : 'Zapisz konfigurację'}
+                    {senderSaving ? 'Zapisuję...' : senderSaveSuccess ? 'Zapisano!' : 'Zapisz adres'}
                 </button>
+            </Card>
 
-                {config?.smtpConfigured && (
-                    <>
-                        {deleteConfirm ? (
-                            <div className="flex items-center gap-2">
-                                <span className="text-sm text-red-600 dark:text-red-400">Na pewno?</span>
-                                <button
-                                    onClick={handleDelete}
-                                    disabled={isDeleting}
-                                    className="px-3 py-2 rounded-lg bg-red-500 text-white text-sm font-medium hover:bg-red-600 disabled:opacity-50"
-                                >
-                                    {isDeleting ? 'Usuwam...' : 'Tak, usuń'}
-                                </button>
-                                <button
-                                    onClick={() => setDeleteConfirm(false)}
-                                    className="px-3 py-2 rounded-lg border text-sm hover-themed"
-                                    style={{ borderColor: 'var(--card-border)', color: 'var(--muted-text)' }}
-                                >
-                                    Anuluj
-                                </button>
-                            </div>
-                        ) : (
-                            <button
-                                onClick={() => setDeleteConfirm(true)}
-                                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-medium text-sm transition-colors"
-                            >
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                                Usuń
-                            </button>
-                        )}
-                    </>
-                )}
-            </div>
-
-            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
-                <div className="flex items-start gap-3">
-                    <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                    </svg>
+            {/* SEKCJA NIEAKTYWNA — własny serwer SMTP */}
+            <Card>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <div>
-                        <p className="text-sm font-semibold smtp-security-box-title">Bezpieczeństwo</p>
-                        <p className="text-sm mt-1 smtp-security-box-text">
-                            Hasło jest szyfrowane algorytmem AES-256 i przechowywane w zaszyfrowanej formie.
-                            Nigdy nie jest wyświetlane po zapisaniu. Połączenie z serwerem SMTP odbywa się
-                            przez szyfrowany kanał TLS/SSL.
+                        <h2 className="text-lg font-semibold text-themed opacity-60">Własny serwer SMTP</h2>
+                        <p className="text-sm text-themed-muted opacity-60">
+                            Podłącz własną skrzynkę pocztową do wysyłania maili
                         </p>
                     </div>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-xs font-medium">
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                        Wymaga własnej domeny
+                    </span>
                 </div>
-            </div>
 
-            {selectedPreset === 'gmail' && (
-                <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
+                <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
                     <div className="flex items-start gap-3">
                         <svg className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
                         </svg>
                         <div>
-                            <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">Gmail — hasło aplikacji</p>
-                            <p className="text-sm mt-1 text-amber-800 dark:text-amber-400">
-                                Gmail wymaga &quot;hasła aplikacji&quot; zamiast zwykłego hasła.
-                                Wejdź na myaccount.google.com → Bezpieczeństwo → Weryfikacja dwuetapowa →
-                                Hasła aplikacji, wygeneruj nowe hasło i wklej je tutaj.
+                            <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">Funkcja tymczasowo niedostępna</p>
+                            <p className="text-sm mt-1 text-amber-700 dark:text-amber-400">
+                                Własny serwer SMTP wymaga zweryfikowanej domeny. Ta funkcja zostanie aktywowana gdy aplikacja będzie działać na dedykowanym serwerze z własną domeną. Do tego czasu maile są wysyłane przez SmartQuote AI.
                             </p>
                         </div>
                     </div>
                 </div>
-            )}
-        </Card>
+
+                <div className="opacity-40 pointer-events-none select-none">
+                    <div className="mb-6">
+                        <label className="block text-sm font-medium text-themed-label mb-2">Dostawca poczty</label>
+                        <div className="flex flex-wrap gap-2">
+                            {Object.keys(PRESETS).map(key => (
+                                <button
+                                    key={key}
+                                    className="px-3 py-2 rounded-lg text-sm font-medium border"
+                                    style={{
+                                        backgroundColor: 'var(--card-bg)',
+                                        borderColor: 'var(--card-border)',
+                                        color: 'var(--muted-text)',
+                                    }}
+                                >
+                                    {PRESET_LABELS[key]}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label className="block text-sm font-medium text-themed-label mb-1">Host SMTP</label>
+                            <input
+                                type="text"
+                                disabled
+                                placeholder="smtp.gmail.com"
+                                className="w-full px-3 py-2.5 rounded-xl border input-themed text-sm"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-themed-label mb-1">Port</label>
+                            <input
+                                type="number"
+                                disabled
+                                placeholder="587"
+                                className="w-full px-3 py-2.5 rounded-xl border input-themed text-sm"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-themed-label mb-1">Użytkownik (login)</label>
+                            <input
+                                type="text"
+                                disabled
+                                placeholder="twoj@email.com"
+                                className="w-full px-3 py-2.5 rounded-xl border input-themed text-sm"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-themed-label mb-1">Hasło</label>
+                            <input
+                                type="password"
+                                disabled
+                                placeholder="••••••••"
+                                className="w-full px-3 py-2.5 rounded-xl border input-themed text-sm"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3">
+                        <button
+                            disabled
+                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm"
+                            style={{ backgroundColor: '#059669' }}
+                        >
+                            Testuj połączenie
+                        </button>
+                        <button
+                            disabled
+                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm"
+                            style={{ backgroundColor: '#0891b2' }}
+                        >
+                            Zapisz konfigurację
+                        </button>
+                    </div>
+                </div>
+            </Card>
+        </div>
     );
 }

@@ -16,6 +16,8 @@ import type {
     UpdateSmtpConfigInput,
     TestSmtpConnectionInput,
     TestSmtpConnectionResult,
+    SenderEmailData,
+    UpdateSenderEmailInput,
 } from '@/types';
 
 export const settingsApi = {
@@ -69,51 +71,62 @@ export const settingsApi = {
     uploadLogo: async (file: File): Promise<{ url: string }> => {
         const formData = new FormData();
         formData.append('logo', file);
-        const response = await api.uploadFile<{ url: string }>('/settings/company/logo', formData);                return response.data as { url: string };
-            },
+        const response = await api.uploadFile<{ url: string }>('/settings/company/logo', formData);
+        return response.data as { url: string };
+    },
 
-            getApiKeys: async (): Promise<ApiKey[]> => {
-            const response = await api.get<ApiKey[]>('/settings/api-keys');
-            return response.data as ApiKey[];
-        },
+    getApiKeys: async (): Promise<ApiKey[]> => {
+        const response = await api.get<ApiKey[]>('/settings/api-keys');
+        return response.data as ApiKey[];
+    },
 
-            createApiKey: async (data: CreateApiKeyInput): Promise<ApiKey & { key: string }> => {
-            const response = await api.post<ApiKey & { key: string }>('/settings/api-keys', data);
-            return response.data as ApiKey & { key: string };
-        },
+    createApiKey: async (data: CreateApiKeyInput): Promise<ApiKey & { key: string }> => {
+        const response = await api.post<ApiKey & { key: string }>('/settings/api-keys', data);
+        return response.data as ApiKey & { key: string };
+    },
 
-            toggleApiKey: async (id: string): Promise<ApiKey> => {
-            const response = await api.patch<ApiKey>(`/settings/api-keys/${id}/toggle`);
-            return response.data as ApiKey;
-        },
+    toggleApiKey: async (id: string): Promise<ApiKey> => {
+        const response = await api.patch<ApiKey>(`/settings/api-keys/${id}/toggle`);
+        return response.data as ApiKey;
+    },
 
-            deleteApiKey: async (id: string): Promise<{ message: string }> => {
-            const response = await api.delete<{ message: string }>(`/settings/api-keys/${id}`);
-            return response.data as { message: string };
-        },
+    deleteApiKey: async (id: string): Promise<{ message: string }> => {
+        const response = await api.delete<{ message: string }>(`/settings/api-keys/${id}`);
+        return response.data as { message: string };
+    },
 
-            getSmtpConfig: async (): Promise<SmtpConfigData> => {
-            const response = await api.get<SmtpConfigData>('/settings/smtp');
-            return response.data as SmtpConfigData;
-        },
+    getSenderEmail: async (): Promise<SenderEmailData> => {
+        const response = await api.get<SenderEmailData>('/settings/sender-email');
+        return response.data as SenderEmailData;
+    },
 
-            updateSmtpConfig: async (data: UpdateSmtpConfigInput): Promise<SmtpConfigData> => {
-            const response = await api.put<SmtpConfigData>('/settings/smtp', data);
-            return response.data as SmtpConfigData;
-        },
+    updateSenderEmail: async (data: UpdateSenderEmailInput): Promise<SenderEmailData> => {
+        const response = await api.put<SenderEmailData>('/settings/sender-email', data);
+        return response.data as SenderEmailData;
+    },
 
-            deleteSmtpConfig: async (): Promise<{ message: string }> => {
-            const response = await api.delete<{ message: string }>('/settings/smtp');
-            return response.data as { message: string };
-        },
+    getSmtpConfig: async (): Promise<SmtpConfigData> => {
+        const response = await api.get<SmtpConfigData>('/settings/smtp');
+        return response.data as SmtpConfigData;
+    },
 
-            testSmtpConnection: async (data: TestSmtpConnectionInput): Promise<TestSmtpConnectionResult> => {
-            const response = await api.post<TestSmtpConnectionResult>('/settings/smtp/test', data);
-            return response.data as TestSmtpConnectionResult;
-        },
+    updateSmtpConfig: async (data: UpdateSmtpConfigInput): Promise<SmtpConfigData> => {
+        const response = await api.put<SmtpConfigData>('/settings/smtp', data);
+        return response.data as SmtpConfigData;
+    },
 
-            testSavedSmtpConnection: async (): Promise<TestSmtpConnectionResult> => {
-            const response = await api.post<TestSmtpConnectionResult>('/settings/smtp/test-saved');
-            return response.data as TestSmtpConnectionResult;
-        },
-    };
+    deleteSmtpConfig: async (): Promise<{ message: string }> => {
+        const response = await api.delete<{ message: string }>('/settings/smtp');
+        return response.data as { message: string };
+    },
+
+    testSmtpConnection: async (data: TestSmtpConnectionInput): Promise<TestSmtpConnectionResult> => {
+        const response = await api.post<TestSmtpConnectionResult>('/settings/smtp/test', data);
+        return response.data as TestSmtpConnectionResult;
+    },
+
+    testSavedSmtpConnection: async (): Promise<TestSmtpConnectionResult> => {
+        const response = await api.post<TestSmtpConnectionResult>('/settings/smtp/test-saved');
+        return response.data as TestSmtpConnectionResult;
+    },
+};

@@ -19,6 +19,8 @@ import type {
     UpdateSmtpConfigInput,
     TestSmtpConnectionInput,
     TestSmtpConnectionResult,
+    SenderEmailData,
+    UpdateSenderEmailInput,
 } from '@/types';
 
 export function useSettings() {
@@ -205,4 +207,45 @@ export function useSmtpConfig() {
         testSavedConnection,
         deleteConfig,
     };
+}
+
+export function useSenderEmail() {
+    const [senderEmail, setSenderEmail] = useState<string>('');
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const fetchSenderEmail = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const data = await settingsApi.getSenderEmail();
+            setSenderEmail(data.senderEmail ?? '');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Błąd pobierania adresu nadawcy');
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchSenderEmail();
+    }, [fetchSenderEmail]);
+
+    const updateEmail = async (email: string): Promise<void> => {
+        setIsSaving(true);
+        setError(null);
+        try {
+            const data = await settingsApi.updateSenderEmail({ senderEmail: email });
+            setSenderEmail(data.senderEmail ?? '');
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Błąd zapisu adresu nadawcy';
+            setError(message);
+            throw err;
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    return { senderEmail, isLoading, isSaving, error, updateEmail, refetch: fetchSenderEmail };
 }

@@ -150,3 +150,11 @@ export interface CreateApiKeyInput {
     permissions?: string[];
     expiresAt?: string | null;
 }
+
+export interface SenderEmailData {
+    senderEmail: string | null;
+}
+
+export interface UpdateSenderEmailInput {
+    senderEmail: string;
+}
