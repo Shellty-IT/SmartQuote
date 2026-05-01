@@ -209,7 +209,7 @@ export default function SmtpSection() {
                     </span>
                 </div>
 
-                <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm text-blue-700 dark:text-blue-400 flex items-start gap-2">
+                <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm text-blue-800 dark:text-blue-300 flex items-start gap-2">
                     <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -268,8 +268,8 @@ export default function SmtpSection() {
             <Card>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <div>
-                        <h2 className="text-lg font-semibold text-themed opacity-60">Własny serwer SMTP</h2>
-                        <p className="text-sm text-themed-muted opacity-60">
+                        <h2 className="text-lg font-semibold text-themed opacity-50">Własny serwer SMTP</h2>
+                        <p className="text-sm text-themed-muted opacity-50">
                             Podłącz własną skrzynkę pocztową do wysyłania maili
                         </p>
                     </div>
@@ -279,14 +279,14 @@ export default function SmtpSection() {
                     </span>
                 </div>
 
-                <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+                <div className="mb-6 p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl">
                     <div className="flex items-start gap-3">
-                        <svg className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg className="w-5 h-5 text-slate-500 dark:text-slate-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
                         </svg>
                         <div>
-                            <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">Funkcja tymczasowo niedostępna</p>
-                            <p className="text-sm mt-1 text-amber-700 dark:text-amber-400">
+                            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Funkcja tymczasowo niedostępna</p>
+                            <p className="text-sm mt-1 text-slate-600 dark:text-slate-400">
                                 Własny serwer SMTP wymaga zweryfikowanej domeny. Ta funkcja zostanie aktywowana gdy aplikacja będzie działać na dedykowanym serwerze z własną domeną. Do tego czasu maile są wysyłane przez SmartQuote AI.
                             </p>
                         </div>
@@ -316,55 +316,27 @@ export default function SmtpSection() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div>
                             <label className="block text-sm font-medium text-themed-label mb-1">Host SMTP</label>
-                            <input
-                                type="text"
-                                disabled
-                                placeholder="smtp.gmail.com"
-                                className="w-full px-3 py-2.5 rounded-xl border input-themed text-sm"
-                            />
+                            <input type="text" disabled placeholder="smtp.gmail.com" className="w-full px-3 py-2.5 rounded-xl border input-themed text-sm" />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-themed-label mb-1">Port</label>
-                            <input
-                                type="number"
-                                disabled
-                                placeholder="587"
-                                className="w-full px-3 py-2.5 rounded-xl border input-themed text-sm"
-                            />
+                            <input type="number" disabled placeholder="587" className="w-full px-3 py-2.5 rounded-xl border input-themed text-sm" />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-themed-label mb-1">Użytkownik (login)</label>
-                            <input
-                                type="text"
-                                disabled
-                                placeholder="twoj@email.com"
-                                className="w-full px-3 py-2.5 rounded-xl border input-themed text-sm"
-                            />
+                            <input type="text" disabled placeholder="twoj@email.com" className="w-full px-3 py-2.5 rounded-xl border input-themed text-sm" />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-themed-label mb-1">Hasło</label>
-                            <input
-                                type="password"
-                                disabled
-                                placeholder="••••••••"
-                                className="w-full px-3 py-2.5 rounded-xl border input-themed text-sm"
-                            />
+                            <input type="password" disabled placeholder="••••••••" className="w-full px-3 py-2.5 rounded-xl border input-themed text-sm" />
                         </div>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3">
-                        <button
-                            disabled
-                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm"
-                            style={{ backgroundColor: '#059669' }}
-                        >
+                        <button disabled className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm" style={{ backgroundColor: '#059669' }}>
                             Testuj połączenie
                         </button>
-                        <button
-                            disabled
-                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm"
-                            style={{ backgroundColor: '#0891b2' }}
-                        >
+                        <button disabled className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm" style={{ backgroundColor: '#0891b2' }}>
                             Zapisz konfigurację
                         </button>
                     </div>
