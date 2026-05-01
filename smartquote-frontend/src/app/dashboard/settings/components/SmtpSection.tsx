@@ -210,7 +210,7 @@ export default function SmtpSection() {
                     <svg className="w-4 h-4 flex-shrink-0 mt-0.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="text-sm font-semibold text-red-800 dark:text-red-300">
+                    <span className="text-sm" style={{ color: '#1e3a5f' }}>
                         Maile są wysyłane przez SmartQuote AI. Odbiorca zobaczy Twój adres jako nadawcę i może odpowiedzieć bezpośrednio na Twój email.
                     </span>
                 </div>
@@ -231,7 +231,7 @@ export default function SmtpSection() {
                         className="w-full px-3 py-2.5 rounded-xl border input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
                     />
                     <p className="mt-1 text-xs text-themed-muted">
-                        Np. rastuszek88@wp.pl — odbiorca zobaczy ten adres jako nadawcę i będzie mógł odpowiedzieć.
+                        Np. skorupa7@o2.pl — odbiorca zobaczy ten adres jako nadawcę i będzie mógł odpowiedzieć.
                     </p>
                 </div>
 
@@ -277,8 +277,8 @@ export default function SmtpSection() {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <div>
-                            <p className="text-sm font-bold text-slate-900 dark:text-slate-100">Funkcja tymczasowo niedostępna</p>
-                            <p className="text-sm mt-1 text-slate-900 dark:text-slate-100">
+                            <p className="text-sm font-bold" style={{ color: '#1e3a5f' }}>Funkcja tymczasowo niedostępna</p>
+                            <p className="text-sm mt-1" style={{ color: '#1e3a5f' }}>
                                 Własny serwer SMTP wymaga zweryfikowanej domeny. Ta funkcja zostanie aktywowana gdy aplikacja będzie działać na dedykowanym serwerze z własną domeną. Do tego czasu maile są wysyłane przez SmartQuote AI.
                             </p>
                         </div>
