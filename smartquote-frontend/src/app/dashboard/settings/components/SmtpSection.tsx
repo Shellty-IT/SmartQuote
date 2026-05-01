@@ -199,9 +199,7 @@ export default function SmtpSection() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <div>
                         <h2 className="text-lg font-semibold text-themed">Adres nadawcy</h2>
-                        <p className="text-sm text-themed-muted">
-                            Twój adres email widoczny dla odbiorców wiadomości
-                        </p>
+                        <p className="text-sm text-themed-muted">Twój adres email widoczny dla odbiorców wiadomości</p>
                     </div>
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-medium">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -225,9 +223,7 @@ export default function SmtpSection() {
                 )}
 
                 <div className="mb-6">
-                    <label className="block text-sm font-medium text-themed-label mb-1">
-                        Twój adres email
-                    </label>
+                    <label className="block text-sm font-medium text-themed-label mb-1">Twój adres email</label>
                     <input
                         type="email"
                         value={senderEmailInput}
@@ -266,12 +262,10 @@ export default function SmtpSection() {
 
             {/* SEKCJA NIEAKTYWNA — własny serwer SMTP */}
             <Card>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                    <div>
-                        <h2 className="text-lg font-semibold text-themed opacity-50">Własny serwer SMTP</h2>
-                        <p className="text-sm text-themed-muted opacity-50">
-                            Podłącz własną skrzynkę pocztową do wysyłania maili
-                        </p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                    <div className="opacity-40">
+                        <h2 className="text-lg font-semibold text-themed">Własny serwer SMTP</h2>
+                        <p className="text-sm text-themed-muted">Podłącz własną skrzynkę pocztową do wysyłania maili</p>
                     </div>
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-xs font-medium">
                         <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
@@ -279,14 +273,15 @@ export default function SmtpSection() {
                     </span>
                 </div>
 
-                <div className="mb-6 p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl">
+                {/* INFO - poza opacity, zawsze czytelne */}
+                <div className="mb-6 p-4 rounded-xl border-2 border-cyan-200 dark:border-cyan-800 bg-cyan-50 dark:bg-cyan-900/20">
                     <div className="flex items-start gap-3">
-                        <svg className="w-5 h-5 text-slate-500 dark:text-slate-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
+                        <svg className="w-5 h-5 text-cyan-600 dark:text-cyan-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <div>
-                            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Funkcja tymczasowo niedostępna</p>
-                            <p className="text-sm mt-1 text-slate-600 dark:text-slate-400">
+                            <p className="text-sm font-bold text-cyan-900 dark:text-cyan-200">Funkcja tymczasowo niedostępna</p>
+                            <p className="text-sm mt-1 text-cyan-800 dark:text-cyan-300">
                                 Własny serwer SMTP wymaga zweryfikowanej domeny. Ta funkcja zostanie aktywowana gdy aplikacja będzie działać na dedykowanym serwerze z własną domeną. Do tego czasu maile są wysyłane przez SmartQuote AI.
                             </p>
                         </div>
