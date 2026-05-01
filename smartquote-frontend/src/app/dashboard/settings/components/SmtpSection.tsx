@@ -194,7 +194,6 @@ export default function SmtpSection() {
     return (
         <div className="space-y-6">
 
-            {/* SEKCJA AKTYWNA — adres nadawcy */}
             <Card>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <div>
@@ -207,11 +206,11 @@ export default function SmtpSection() {
                     </span>
                 </div>
 
-                <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm text-blue-800 dark:text-blue-300 flex items-start gap-2">
-                    <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl flex items-start gap-2">
+                    <svg className="w-4 h-4 flex-shrink-0 mt-0.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span>
+                    <span className="text-sm text-slate-900 dark:text-slate-100">
                         Maile są wysyłane przez SmartQuote AI. Odbiorca zobaczy Twój adres jako nadawcę i może odpowiedzieć bezpośrednio na Twój email.
                     </span>
                 </div>
@@ -260,7 +259,6 @@ export default function SmtpSection() {
                 </button>
             </Card>
 
-            {/* SEKCJA NIEAKTYWNA — własny serwer SMTP */}
             <Card>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                     <div className="opacity-40">
@@ -273,15 +271,14 @@ export default function SmtpSection() {
                     </span>
                 </div>
 
-                {/* INFO - poza opacity, zawsze czytelne */}
-                <div className="mb-6 p-4 rounded-xl border-2 border-cyan-200 dark:border-cyan-800 bg-cyan-50 dark:bg-cyan-900/20">
+                <div className="mb-6 p-4 rounded-xl border border-slate-300 bg-white dark:bg-slate-800 dark:border-slate-600">
                     <div className="flex items-start gap-3">
-                        <svg className="w-5 h-5 text-cyan-600 dark:text-cyan-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg className="w-5 h-5 text-slate-600 dark:text-slate-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <div>
-                            <p className="text-sm font-bold text-cyan-900 dark:text-cyan-200">Funkcja tymczasowo niedostępna</p>
-                            <p className="text-sm mt-1 text-cyan-800 dark:text-cyan-300">
+                            <p className="text-sm font-bold text-slate-900 dark:text-slate-100">Funkcja tymczasowo niedostępna</p>
+                            <p className="text-sm mt-1 text-slate-900 dark:text-slate-100">
                                 Własny serwer SMTP wymaga zweryfikowanej domeny. Ta funkcja zostanie aktywowana gdy aplikacja będzie działać na dedykowanym serwerze z własną domeną. Do tego czasu maile są wysyłane przez SmartQuote AI.
                             </p>
                         </div>
@@ -293,21 +290,12 @@ export default function SmtpSection() {
                         <label className="block text-sm font-medium text-themed-label mb-2">Dostawca poczty</label>
                         <div className="flex flex-wrap gap-2">
                             {Object.keys(PRESETS).map(key => (
-                                <button
-                                    key={key}
-                                    className="px-3 py-2 rounded-lg text-sm font-medium border"
-                                    style={{
-                                        backgroundColor: 'var(--card-bg)',
-                                        borderColor: 'var(--card-border)',
-                                        color: 'var(--muted-text)',
-                                    }}
-                                >
+                                <button key={key} className="px-3 py-2 rounded-lg text-sm font-medium border" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)', color: 'var(--muted-text)' }}>
                                     {PRESET_LABELS[key]}
                                 </button>
                             ))}
                         </div>
                     </div>
-
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div>
                             <label className="block text-sm font-medium text-themed-label mb-1">Host SMTP</label>
@@ -326,14 +314,9 @@ export default function SmtpSection() {
                             <input type="password" disabled placeholder="••••••••" className="w-full px-3 py-2.5 rounded-xl border input-themed text-sm" />
                         </div>
                     </div>
-
                     <div className="flex flex-wrap items-center gap-3">
-                        <button disabled className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm" style={{ backgroundColor: '#059669' }}>
-                            Testuj połączenie
-                        </button>
-                        <button disabled className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm" style={{ backgroundColor: '#0891b2' }}>
-                            Zapisz konfigurację
-                        </button>
+                        <button disabled className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm" style={{ backgroundColor: '#059669' }}>Testuj połączenie</button>
+                        <button disabled className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm" style={{ backgroundColor: '#0891b2' }}>Zapisz konfigurację</button>
                     </div>
                 </div>
             </Card>
