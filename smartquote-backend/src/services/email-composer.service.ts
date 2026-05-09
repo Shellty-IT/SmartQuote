@@ -1,5 +1,5 @@
 // src/services/email-composer.service.ts
-import { getDecryptedSmtpConfig } from './settings.service';
+import { getEffectiveSmtpConfig } from './settings.service';
 import { emailComposerRepository } from '../repositories/email-composer.repository';
 import { NotFoundError, ValidationError } from '../errors/domain.errors';
 import { createModuleLogger } from '../lib/logger';
@@ -31,33 +31,33 @@ interface SendResult {
 }
 
 async function getSmtpOrThrow(userId: string): Promise<NonNullable<SmtpConfig>> {
-    const { host, port, user, pass, from } = config.smtp;
+  const { host, port, user, pass, from } = config.smtp;
+  
+  if (!host || !user || !pass || !from) {
+    logger.error(
+      { 
+        hasHost: !!host, 
+        hasUser: !!user, 
+        hasPass: !!pass, 
+        hasFrom: !!from 
+      }, 
+      'System SMTP not fully configured in environment variables'
+    );
+    throw new ValidationError(
+      'Wysyłanie maili jest tymczasowo niedostępne. Skontaktuj się z administratorem.'
+    );
+  }
 
-    if (!host || !user || !pass || !from) {
-        logger.error(
-            {
-                hasHost: !!host,
-                hasUser: !!user,
-                hasPass: !!pass,
-                hasfrom: !!from
-            },
-            'System SMTP not fully configured in environment variables'
-        );
-        throw new ValidationError(
-            'Wysyłanie maili jest tymczasowo niedostępne. Skontaktuj się z administratorem.'
-        );
-    }
+  const systemSmtp: SmtpConfig = {
+    host,
+    port: port ?? 587,
+    user,
+    pass,
+    from,
+  };
 
-    const systemSmtp: SmtpConfig = {
-        host,
-        port: port ?? 587,
-        user,
-        pass,
-        from,
-    };
-
-    logger.debug({ userId }, 'Using system SMTP (SmartQuote AI)');
-    return systemSmtp;
+  logger.debug({ userId }, 'Using system SMTP (SmartQuote AI)');
+  return systemSmtp;
 }
 
 class EmailComposerService {
