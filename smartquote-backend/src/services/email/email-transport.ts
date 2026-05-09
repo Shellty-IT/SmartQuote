@@ -14,17 +14,14 @@ export interface SmtpConfig {
     from: string;
 }
 
+// ✅ Użyj Any dla attachments (Resend w free tier ich nie wspiera)
 export interface MailOptions {
     from: string;
     to: string;
     subject: string;
     html: string;
     text?: string;
-    attachments?: Array<{
-        filename: string;
-        content?: Buffer;
-        path?: string;
-    }>;
+    attachments?: any[]; // ← ZMIENIONE z precyzyjnego typu na any[]
 }
 
 export function buildHtmlBody(text: string): string {
@@ -83,13 +80,14 @@ export async function sendEmail(
             'Sending email via Resend',
         );
 
-        // Resend w free tier wymaga onboarding@resend.dev jako FROM
         const { data, error } = await resend.emails.send({
             from: config.resend.fromEmail || 'SmartQuote AI <onboarding@resend.dev>',
             to: mailOptions.to,
             subject: mailOptions.subject,
             html: mailOptions.html,
             text: mailOptions.text,
+            // Attachments pomijamy w free tier Resend
+            // W przyszłości: konwersja nodemailer attachments → Resend format
         });
 
         if (error) {
