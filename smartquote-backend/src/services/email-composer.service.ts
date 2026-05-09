@@ -31,9 +31,33 @@ interface SendResult {
 }
 
 async function getSmtpOrThrow(userId: string): Promise<NonNullable<SmtpConfig>> {
-    const cfg = await getDecryptedSmtpConfig(userId);
-    if (!cfg) throw new ValidationError('Skonfiguruj skrzynkę pocztową w ustawieniach SMTP');
-    return cfg;
+    const { host, port, user, pass, from } = config.smtp;
+
+    if (!host || !user || !pass || !from) {
+        logger.error(
+            {
+                hasHost: !!host,
+                hasUser: !!user,
+                hasPass: !!pass,
+                hasfrom: !!from
+            },
+            'System SMTP not fully configured in environment variables'
+        );
+        throw new ValidationError(
+            'Wysyłanie maili jest tymczasowo niedostępne. Skontaktuj się z administratorem.'
+        );
+    }
+
+    const systemSmtp: SmtpConfig = {
+        host,
+        port: port ?? 587,
+        user,
+        pass,
+        from,
+    };
+
+    logger.debug({ userId }, 'Using system SMTP (SmartQuote AI)');
+    return systemSmtp;
 }
 
 class EmailComposerService {
