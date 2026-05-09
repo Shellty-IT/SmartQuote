@@ -30,6 +30,8 @@ const configSchema = z.object({
     SMTP_USER: z.string().optional(),
     SMTP_PASS: z.string().optional(),
     SMTP_FROM: z.string().optional(),
+    RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY jest wymagany'), // ← NOWE
+    RESEND_FROM_EMAIL: z.string().default('SmartQuote AI <onboarding@resend.dev>'), // ← NOWE
     ENCRYPTION_KEY: z.string().optional(),
     CRON_SECRET: z.string().optional(),
     KSEF_MASTER_URL: z.string().default('http://localhost:5000'),
@@ -71,6 +73,10 @@ export const config = {
         user: env.SMTP_USER,
         pass: env.SMTP_PASS,
         from: env.SMTP_FROM,
+    },
+    resend: {  // ← NOWE
+        apiKey: env.RESEND_API_KEY,
+        fromEmail: env.RESEND_FROM_EMAIL,
     },
     encryptionKey: env.ENCRYPTION_KEY,
     cronSecret: env.CRON_SECRET,
