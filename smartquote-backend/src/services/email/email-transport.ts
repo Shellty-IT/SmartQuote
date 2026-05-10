@@ -1,5 +1,4 @@
 // src/services/email/email-transport.ts
-import { Resend } from 'resend';
 import { config } from '../../config';
 import { createModuleLogger } from '../../lib/logger';
 import type { EmailLogStatus } from '../../types';
@@ -14,14 +13,13 @@ export interface SmtpConfig {
     from: string;
 }
 
-// ✅ Użyj Any dla attachments (Resend w free tier ich nie wspiera)
 export interface MailOptions {
     from: string;
     to: string;
     subject: string;
     html: string;
     text?: string;
-    attachments?: any[]; // ← ZMIENIONE z precyzyjnego typu na any[]
+    attachments?: any[];
 }
 
 export function buildHtmlBody(text: string): string {
@@ -56,19 +54,24 @@ export function appendLinksToBody(body: string, linkLines: string[]): string {
     return `${body}\n\n${'─'.repeat(40)}\n${linkLines.join('\n')}`;
 }
 
+function parseEmailAddress(emailString: string): { name?: string; email: string } {
+    const match = emailString.match(/^(?:"?([^"]*)"?\s)?<?([^>]+)>?$/);
+    const name = match?.[1]?.trim();
+    const email = match?.[2]?.trim() || emailString.trim();
+    return name ? { name, email } : { email };
+}
+
 export async function sendEmail(
     mailOptions: MailOptions,
     smtpConfig: SmtpConfig,
 ): Promise<{ status: EmailLogStatus; errorMessage?: string }> {
-    if (!config.resend.apiKey) {
-        logger.error('Resend API key not configured');
+    if (!config.brevo.apiKey) {
+        logger.error('Brevo API key not configured');
         return {
             status: 'FAILED',
-            errorMessage: 'Resend API key not configured',
+            errorMessage: 'Brevo API key not configured',
         };
     }
-
-    const resend = new Resend(config.resend.apiKey);
 
     try {
         logger.info(
@@ -77,42 +80,70 @@ export async function sendEmail(
                 subject: mailOptions.subject,
                 hasAttachments: !!mailOptions.attachments?.length,
             },
-            'Sending email via Resend',
+            'Sending email via Brevo',
         );
 
-        const { data, error } = await resend.emails.send({
-            from: config.resend.fromEmail || 'SmartQuote AI <onboarding@resend.dev>',
-            to: mailOptions.to,
+        const sender = parseEmailAddress(config.brevo.fromEmail);
+        const recipient = parseEmailAddress(mailOptions.to);
+
+        const payload = {
+            sender,
+            to: [recipient],
             subject: mailOptions.subject,
-            html: mailOptions.html,
-            text: mailOptions.text,
-            // Attachments pomijamy w free tier Resend
-            // W przyszłości: konwersja nodemailer attachments → Resend format
+            htmlContent: mailOptions.html,
+            textContent: mailOptions.text,
+        };
+
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'api-key': config.brevo.apiKey,
+            },
+            body: JSON.stringify(payload),
         });
 
-        if (error) {
-            logger.error({ error, to: mailOptions.to }, 'Resend send failed');
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ message: response.statusText })) as { message?: string };
+            logger.error({ status: response.status, errorData, to: mailOptions.to }, 'Brevo send failed');
             return {
                 status: 'FAILED',
-                errorMessage: error.message,
+                errorMessage: errorData.message || `HTTP ${response.status}`,
             };
         }
 
-        logger.info({ data, to: mailOptions.to }, 'Email sent successfully via Resend');
+        const result = await response.json() as { messageId?: string };
+        logger.info({ messageId: result.messageId, to: recipient.email }, 'Email sent successfully via Brevo');
         return { status: 'SENT' };
-    } catch (err: unknown) {
-        const error = err as Error;
-        logger.error({ err, to: mailOptions.to }, 'Resend send exception');
+    } catch (err: any) {
+        logger.error({ err, to: mailOptions.to }, 'Brevo send exception');
         return {
             status: 'FAILED',
-            errorMessage: error.message || 'Unknown error',
+            errorMessage: err.message || 'Unknown error',
         };
     }
 }
 
 export async function testConnection(smtpConfig: SmtpConfig): Promise<{ success: boolean; error?: string }> {
-    if (!config.resend.apiKey) {
-        return { success: false, error: 'Resend API key not configured' };
+    if (!config.brevo.apiKey) {
+        return { success: false, error: 'Brevo API key not configured' };
     }
-    return { success: true };
+
+    try {
+        const response = await fetch('https://api.brevo.com/v3/account', {
+            headers: {
+                'Accept': 'application/json',
+                'api-key': config.brevo.apiKey,
+            },
+        });
+
+        if (!response.ok) {
+            return { success: false, error: `Invalid API key (HTTP ${response.status})` };
+        }
+
+        return { success: true };
+    } catch (err: any) {
+        return { success: false, error: err.message };
+    }
 }
