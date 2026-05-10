@@ -61,6 +61,28 @@ function parseEmailAddress(emailString: string): { name?: string; email: string 
     return name ? { name, email } : { email };
 }
 
+function buildMailerSendAttachments(
+    attachments: any[] | undefined,
+): Array<{ content: string; filename: string; type?: string; disposition: string }> {
+    if (!attachments || attachments.length === 0) return [];
+
+    const result: Array<{ content: string; filename: string; type?: string; disposition: string }> = [];
+
+    for (const att of attachments) {
+        if (att.content && Buffer.isBuffer(att.content)) {
+            const filename = typeof att.filename === 'string' ? att.filename : 'attachment';
+            result.push({
+                content: att.content.toString('base64'),
+                filename,
+                type: att.contentType || 'application/octet-stream',
+                disposition: 'attachment',
+            });
+        }
+    }
+
+    return result;
+}
+
 export async function sendEmail(
     mailOptions: MailOptions,
     smtpConfig: SmtpConfig,
@@ -75,8 +97,9 @@ export async function sendEmail(
 
     try {
         const recipient = parseEmailAddress(mailOptions.to);
+        const mailerSendAttachments = buildMailerSendAttachments(mailOptions.attachments);
 
-        const payload = {
+        const payload: Record<string, unknown> = {
             from: {
                 email: config.mailersend.fromEmail,
                 name: config.mailersend.fromName,
@@ -92,11 +115,15 @@ export async function sendEmail(
             text: mailOptions.text,
         };
 
+        if (mailerSendAttachments.length > 0) {
+            payload.attachments = mailerSendAttachments;
+        }
+
         logger.info(
             {
                 to: recipient.email,
                 subject: mailOptions.subject,
-                hasAttachments: !!mailOptions.attachments?.length,
+                attachmentsCount: mailerSendAttachments.length,
             },
             'Sending email via MailerSend',
         );
@@ -122,7 +149,7 @@ export async function sendEmail(
         }
 
         const messageId = response.headers.get('x-message-id') || 'unknown';
-        logger.info({ messageId, to: recipient.email }, 'Email sent successfully via MailerSend');
+        logger.info({ messageId, to: recipient.email, attachmentsCount: mailerSendAttachments.length }, 'Email sent successfully via MailerSend');
         return { status: 'SENT' };
     } catch (err: any) {
         logger.error({ err, to: mailOptions.to }, 'MailerSend send exception');
