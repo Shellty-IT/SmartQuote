@@ -30,22 +30,22 @@ interface SendResult {
 }
 
 async function getSmtpOrThrow(userId: string): Promise<NonNullable<SmtpConfig>> {
-    if (!config.brevo.apiKey) {
-        logger.error('Brevo API key not configured');
+    if (!config.mailersend.apiKey) {
+        logger.error('MailerSend API key not configured');
         throw new ValidationError(
             'Wysyłanie maili jest tymczasowo niedostępne. Skontaktuj się z administratorem.'
         );
     }
 
     const dummySmtpConfig: SmtpConfig = {
-        host: 'brevo-api',
+        host: 'mailersend-api',
         port: 443,
         user: 'api',
         pass: 'api',
-        from: config.brevo.fromEmail,
+        from: config.mailersend.fromEmail,
     };
 
-    logger.debug({ userId }, 'Using Brevo HTTP API for email delivery');
+    logger.debug({ userId }, 'Using MailerSend HTTP API for email delivery');
     return dummySmtpConfig;
 }
 

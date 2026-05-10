@@ -65,59 +65,67 @@ export async function sendEmail(
     mailOptions: MailOptions,
     smtpConfig: SmtpConfig,
 ): Promise<{ status: EmailLogStatus; errorMessage?: string }> {
-    if (!config.brevo.apiKey) {
-        logger.error('Brevo API key not configured');
+    if (!config.mailersend.apiKey) {
+        logger.error('MailerSend API key not configured');
         return {
             status: 'FAILED',
-            errorMessage: 'Brevo API key not configured',
+            errorMessage: 'MailerSend API key not configured',
         };
     }
 
     try {
-        logger.info(
-            {
-                to: mailOptions.to,
-                subject: mailOptions.subject,
-                hasAttachments: !!mailOptions.attachments?.length,
-            },
-            'Sending email via Brevo',
-        );
-
-        const sender = parseEmailAddress(config.brevo.fromEmail);
         const recipient = parseEmailAddress(mailOptions.to);
 
         const payload = {
-            sender,
-            to: [recipient],
+            from: {
+                email: config.mailersend.fromEmail,
+                name: config.mailersend.fromName,
+            },
+            to: [
+                {
+                    email: recipient.email,
+                    name: recipient.name || recipient.email,
+                },
+            ],
             subject: mailOptions.subject,
-            htmlContent: mailOptions.html,
-            textContent: mailOptions.text,
+            html: mailOptions.html,
+            text: mailOptions.text,
         };
 
-        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        logger.info(
+            {
+                to: recipient.email,
+                subject: mailOptions.subject,
+                hasAttachments: !!mailOptions.attachments?.length,
+            },
+            'Sending email via MailerSend',
+        );
+
+        const response = await fetch('https://api.mailersend.com/v1/email', {
             method: 'POST',
             headers: {
-                'Accept': 'application/json',
+                'Authorization': `Bearer ${config.mailersend.apiKey}`,
                 'Content-Type': 'application/json',
-                'api-key': config.brevo.apiKey,
+                'X-Requested-With': 'XMLHttpRequest',
             },
             body: JSON.stringify(payload),
         });
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ message: response.statusText })) as { message?: string };
-            logger.error({ status: response.status, errorData, to: mailOptions.to }, 'Brevo send failed');
+            const errorData = await response.json().catch(() => ({ message: response.statusText })) as { message?: string; errors?: Record<string, string[]> };
+            const errorMessage = errorData.message || JSON.stringify(errorData.errors) || `HTTP ${response.status}`;
+            logger.error({ status: response.status, errorData, to: recipient.email }, 'MailerSend send failed');
             return {
                 status: 'FAILED',
-                errorMessage: errorData.message || `HTTP ${response.status}`,
+                errorMessage,
             };
         }
 
-        const result = await response.json() as { messageId?: string };
-        logger.info({ messageId: result.messageId, to: recipient.email }, 'Email sent successfully via Brevo');
+        const messageId = response.headers.get('x-message-id') || 'unknown';
+        logger.info({ messageId, to: recipient.email }, 'Email sent successfully via MailerSend');
         return { status: 'SENT' };
     } catch (err: any) {
-        logger.error({ err, to: mailOptions.to }, 'Brevo send exception');
+        logger.error({ err, to: mailOptions.to }, 'MailerSend send exception');
         return {
             status: 'FAILED',
             errorMessage: err.message || 'Unknown error',
@@ -126,15 +134,15 @@ export async function sendEmail(
 }
 
 export async function testConnection(smtpConfig: SmtpConfig): Promise<{ success: boolean; error?: string }> {
-    if (!config.brevo.apiKey) {
-        return { success: false, error: 'Brevo API key not configured' };
+    if (!config.mailersend.apiKey) {
+        return { success: false, error: 'MailerSend API key not configured' };
     }
 
     try {
-        const response = await fetch('https://api.brevo.com/v3/account', {
+        const response = await fetch('https://api.mailersend.com/v1/domains', {
             headers: {
-                'Accept': 'application/json',
-                'api-key': config.brevo.apiKey,
+                'Authorization': `Bearer ${config.mailersend.apiKey}`,
+                'X-Requested-With': 'XMLHttpRequest',
             },
         });
 
