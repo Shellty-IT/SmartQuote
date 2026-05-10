@@ -55,7 +55,7 @@ export const txt = (text: string | null | undefined): string => text ?? '';
 
 export const money = (amount: Decimal | number, cur = 'PLN'): string => {
     const n = typeof amount === 'number' ? amount : Number(amount);
-    return n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ' + cur;
+    return n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + (cur ? ' ' + cur : '');
 };
 
 export const date = (d: Date | string | null): string => {
@@ -144,16 +144,20 @@ export function renderItemsTable(
     L: number
 ): number {
     let Y = startY;
-    const cols = [22, 175, 40, 30, 58, 35, 35, 70];
-    const headers = ['Lp', 'Nazwa', 'Ilosc', 'Jm', 'Cena', 'VAT', 'Rabat', 'Netto'];
-    const tW = cols.reduce((a, b) => a + b, 0);
-    const tX = L + (W - tW) / 2;
 
+    const cols = [22, 225, 45, 33, 63, 38, 38, 51];
+    const headers = ['Lp', 'Nazwa', 'Ilosc', 'Jm', 'Cena', 'VAT', 'Rabat', 'Netto'];
+
+    const tW = cols.reduce((a, b) => a + b, 0);
+    const tX = L;
+
+    // Nagłówek tabeli
     doc.rect(tX, Y, tW, 18).fill(accentColor);
     let x = tX;
     doc.font('Bold').fontSize(7).fillColor('#fff');
     headers.forEach((h, i) => {
-        doc.text(h, x + 2, Y + 5, { width: cols[i] - 4, align: 'center' });
+        const align: 'center' | 'right' = i === 0 || i === 1 ? 'center' : 'right';
+        doc.text(h, x + 2, Y + 5, { width: cols[i] - 4, align });
         x += cols[i];
     });
     Y += 18;
@@ -175,21 +179,21 @@ export function renderItemsTable(
 
         const row = [
             String(idx + 1),
-            txt(item.name).slice(0, 28),
+            txt(item.name).slice(0, 35),
             String(quantity),
             item.unit,
             money(unitPrice, ''),
             vatRate + '%',
             discount > 0 ? discount + '%' : '-',
-            money(totalNet, '')
+            money(totalNet, ''),
         ];
 
         x = tX;
         doc.font('Regular').fontSize(7).fillColor('#1e293b');
         row.forEach((v, i) => {
-            const align: 'center' | 'right' = i === 1 ? 'center' : 'center';
-            doc.text(v, x + 2, Y + 4, { width: cols[i] - 4, align: i === 1 ? 'center' : 'right' });
-            void align;
+            // Lp i Nazwa wycentrowane, pozostałe wyrównane do prawej
+            const align: 'center' | 'right' = i === 0 || i === 1 ? 'center' : 'right';
+            doc.text(v, x + 2, Y + 4, { width: cols[i] - 4, align });
             x += cols[i];
         });
         Y += 16;
