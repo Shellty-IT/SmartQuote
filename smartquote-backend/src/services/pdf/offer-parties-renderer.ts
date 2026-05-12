@@ -29,6 +29,19 @@ export class OfferPartiesRenderer {
         return Y + partyBoxHeight + 10;
     }
 
+    renderPartiesWithHeight(
+        doc: PDFKit.PDFDocument,
+        offer: PDFOffer,
+        leftMargin: number,
+        Y: number,
+        partyBoxWidth: number,
+        partyBoxGap: number,
+        boxHeight: number,
+    ): void {
+        this.renderSellerBox(doc, offer, leftMargin, Y, partyBoxWidth, boxHeight);
+        this.renderBuyerBox(doc, offer, leftMargin + partyBoxWidth + partyBoxGap, Y, partyBoxWidth, boxHeight);
+    }
+
     private renderCompanyInfo(doc: PDFKit.PDFDocument, offer: PDFOffer): void {
         const { sizes } = this.config;
         const companyName = txt(offer.user.company || offer.user.name || offer.user.email);

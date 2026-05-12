@@ -135,13 +135,25 @@ export function groupItemsByVariant(items: TableItem[]): Array<{
     return groups;
 }
 
+export function measureTextHeight(
+    doc: PDFKit.PDFDocument,
+    text: string,
+    width: number,
+    fontSize: number,
+    font: string,
+): number {
+    doc.font(font).fontSize(fontSize);
+    return doc.heightOfString(text, { width });
+}
+
 export function renderItemsTable(
     doc: PDFKit.PDFDocument,
     items: TableItem[],
     startY: number,
     accentColor: string,
     W: number,
-    L: number
+    L: number,
+    pageBreakThreshold = 700,
 ): number {
     let Y = startY;
 
@@ -151,25 +163,35 @@ export function renderItemsTable(
     const tW = cols.reduce((a, b) => a + b, 0);
     const tX = L;
 
-    // Nagłówek tabeli
-    doc.rect(tX, Y, tW, 18).fill(accentColor);
-    let x = tX;
-    doc.font('Bold').fontSize(7).fillColor('#fff');
-    headers.forEach((h, i) => {
-        const align: 'center' | 'right' = i === 0 || i === 1 ? 'center' : 'right';
-        doc.text(h, x + 2, Y + 5, { width: cols[i] - 4, align });
-        x += cols[i];
-    });
-    Y += 18;
+    const renderHeader = (): void => {
+        doc.rect(tX, Y, tW, 18).fill(accentColor);
+        let x = tX;
+        doc.font('Bold').fontSize(7).fillColor('#fff');
+        headers.forEach((h, i) => {
+            const align: 'center' | 'right' = i === 0 || i === 1 ? 'center' : 'right';
+            doc.text(h, x + 2, Y + 5, { width: cols[i] - 4, align });
+            x += cols[i];
+        });
+        Y += 18;
+    };
+
+    renderHeader();
 
     items.forEach((item, idx) => {
-        if (Y > 700) {
+        const nameText = txt(item.name);
+        const nameWidth = cols[1] - 4;
+        doc.font('Regular').fontSize(7);
+        const nameHeight = doc.heightOfString(nameText, { width: nameWidth });
+        const rowHeight = Math.max(16, nameHeight + 6);
+
+        if (Y + rowHeight > pageBreakThreshold) {
             doc.addPage();
             Y = 40;
+            renderHeader();
         }
 
         const bg = idx % 2 === 0 ? '#fff' : '#f8fafc';
-        doc.rect(tX, Y, tW, 16).fill(bg).stroke('#e2e8f0');
+        doc.rect(tX, Y, tW, rowHeight).fill(bg).stroke('#e2e8f0');
 
         const quantity = typeof item.quantity === 'number' ? item.quantity : Number(item.quantity);
         const unitPrice = typeof item.unitPrice === 'number' ? item.unitPrice : Number(item.unitPrice);
@@ -179,7 +201,7 @@ export function renderItemsTable(
 
         const row = [
             String(idx + 1),
-            txt(item.name).slice(0, 35),
+            nameText,
             String(quantity),
             item.unit,
             money(unitPrice, ''),
@@ -188,15 +210,15 @@ export function renderItemsTable(
             money(totalNet, ''),
         ];
 
-        x = tX;
+        let x = tX;
         doc.font('Regular').fontSize(7).fillColor('#1e293b');
         row.forEach((v, i) => {
-            // Lp i Nazwa wycentrowane, pozostałe wyrównane do prawej
             const align: 'center' | 'right' = i === 0 || i === 1 ? 'center' : 'right';
-            doc.text(v, x + 2, Y + 4, { width: cols[i] - 4, align });
+            const cellY = Y + Math.floor((rowHeight - 9) / 2);
+            doc.text(v, x + 2, cellY, { width: cols[i] - 4, align });
             x += cols[i];
         });
-        Y += 16;
+        Y += rowHeight;
     });
 
     return Y;

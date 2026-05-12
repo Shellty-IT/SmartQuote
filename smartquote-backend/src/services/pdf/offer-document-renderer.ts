@@ -24,6 +24,15 @@ type VariantGroupInternal = {
     totalGross: Decimal;
 };
 
+const PARTY_BOX_MIN_HEIGHT = 90;
+const PARTY_BOX_LINES_BASE_Y = 32;
+const PARTY_BOX_LINE_HEIGHT = 10;
+const PARTY_BOX_PADDING_BOTTOM = 12;
+
+function estimatePartyBoxHeight(lineCount: number): number {
+    return PARTY_BOX_LINES_BASE_Y + lineCount * PARTY_BOX_LINE_HEIGHT + PARTY_BOX_PADDING_BOTTOM;
+}
+
 export class OfferDocumentRenderer {
     private readonly config = PDF_CONFIG;
 
@@ -32,7 +41,7 @@ export class OfferDocumentRenderer {
 
         offerPartiesRenderer.renderHeader(doc, offer);
         Y = this.renderTitle(doc, offer, Y);
-        Y = offerPartiesRenderer.renderParties(doc, offer, Y);
+        Y = this.renderPartiesDynamic(doc, offer, Y);
         Y = this.renderMetadata(doc, offer, Y);
         Y = this.renderDescription(doc, offer, Y);
         Y = this.renderItems(doc, offer, Y);
@@ -55,6 +64,42 @@ export class OfferDocumentRenderer {
             .text('Nr: ' + offer.number, layout.leftMargin, Y + 16);
 
         return Y + 34;
+    }
+
+    private renderPartiesDynamic(doc: PDFKit.PDFDocument, offer: PDFOffer, Y: number): number {
+        const { layout, dimensions } = this.config;
+        const { partyBoxWidth, partyBoxGap } = dimensions;
+
+        const sellerLines = this.countSellerLines(offer);
+        const buyerLines = this.countBuyerLines(offer);
+        const boxHeight = Math.max(
+            PARTY_BOX_MIN_HEIGHT,
+            estimatePartyBoxHeight(Math.max(sellerLines, buyerLines)),
+        );
+
+        offerPartiesRenderer.renderPartiesWithHeight(
+            doc, offer, layout.leftMargin, Y, partyBoxWidth, partyBoxGap, boxHeight,
+        );
+
+        return Y + boxHeight + 10;
+    }
+
+    private countSellerLines(offer: PDFOffer): number {
+        let lines = 1;
+        if (offer.user.nip) lines++;
+        if (offer.user.address) lines++;
+        if (offer.user.email) lines++;
+        if (offer.user.phone) lines++;
+        return lines;
+    }
+
+    private countBuyerLines(offer: PDFOffer): number {
+        let lines = 1;
+        if (offer.client.nip) lines++;
+        if (offer.client.address) lines++;
+        if (offer.client.city) lines++;
+        if (offer.client.email) lines++;
+        return lines;
     }
 
     private renderMetadata(doc: PDFKit.PDFDocument, offer: PDFOffer, Y: number): number {
@@ -89,9 +134,10 @@ export class OfferDocumentRenderer {
             Y += 16;
         }
         if (offer.description) {
-            doc.font('Regular').fontSize(sizes.normal).fillColor(colors.textLight)
-                .text(txt(offer.description), layout.leftMargin, Y, { width: layout.contentWidth });
-            Y += 20;
+            doc.font('Regular').fontSize(sizes.normal).fillColor(colors.textLight);
+            const descHeight = doc.heightOfString(txt(offer.description), { width: layout.contentWidth });
+            doc.text(txt(offer.description), layout.leftMargin, Y, { width: layout.contentWidth });
+            Y += descHeight + 8;
         }
 
         return Y;
@@ -105,7 +151,15 @@ export class OfferDocumentRenderer {
         for (const group of variantGroups) {
             if (Y > dimensions.pageBreakThreshold) { doc.addPage(); Y = 40; }
             if (hasVariants) { Y = this.renderVariantHeader(doc, group, Y); }
-            Y = renderItemsTable(doc, group.items, Y, colors.primary, layout.contentWidth, layout.leftMargin);
+            Y = renderItemsTable(
+                doc,
+                group.items,
+                Y,
+                colors.primary,
+                layout.contentWidth,
+                layout.leftMargin,
+                dimensions.pageBreakThreshold,
+            );
             if (hasVariants) { Y = this.renderVariantSummary(doc, group, offer.currency, Y); }
             Y += 8;
         }
@@ -152,6 +206,8 @@ export class OfferDocumentRenderer {
         const { summaryOffsetX, summaryBoxWidth, summaryBoxHeight } = dimensions;
         const sumX = layout.leftMargin + layout.contentWidth - summaryOffsetX;
 
+        if (Y > dimensions.pageBreakSoft) { doc.addPage(); Y = 40; }
+
         Y += 4;
         doc.font('Regular').fontSize(sizes.header).fillColor(colors.text).text('Netto:', sumX, Y);
         doc.font('Bold').text(money(offer.totalNet, offer.currency), sumX + 60, Y, { width: 120, align: 'right' });
@@ -175,10 +231,11 @@ export class OfferDocumentRenderer {
 
         doc.font('Bold').fontSize(sizes.header).fillColor(colors.text).text('Warunki:', layout.leftMargin, Y);
         Y += 12;
-        doc.font('Regular').fontSize(sizes.normal).fillColor(colors.textLight)
-            .text(txt(offer.terms), layout.leftMargin, Y, { width: layout.contentWidth });
+        doc.font('Regular').fontSize(sizes.normal).fillColor(colors.textLight);
+        const termsHeight = doc.heightOfString(txt(offer.terms), { width: layout.contentWidth });
+        doc.text(txt(offer.terms), layout.leftMargin, Y, { width: layout.contentWidth });
 
-        return Y + 25;
+        return Y + termsHeight + 13;
     }
 
     private renderSignature(doc: PDFKit.PDFDocument, Y: number): number {
