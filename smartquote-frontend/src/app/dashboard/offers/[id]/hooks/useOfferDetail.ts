@@ -146,8 +146,8 @@ export function useOfferDetail(offerId: string) {
         }
         setIsDownloadingPDF(true);
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
-            const response = await fetch(`${apiUrl}/offers/${offer.id}/pdf`, {
+            const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
+            const response = await fetch(`${apiUrl}/api/offers/${offer.id}/pdf`, {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${token}` },
             });
