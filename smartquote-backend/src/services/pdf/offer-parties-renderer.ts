@@ -13,7 +13,15 @@ export class OfferPartiesRenderer {
 
         const hasLogo = tryRenderLogo(doc, offer.user.logo, layout.leftMargin, 8, 120, 34);
         if (!hasLogo) {
-            doc.font('Bold').fontSize(18).fillColor('#fff').text('SmartQuote', layout.leftMargin, 16);
+            doc.font('Bold').fontSize(13).fillColor('#fff')
+                .text('OFERTA HANDLOWA', layout.leftMargin, 10);
+            doc.font('Regular').fontSize(9).fillColor('#fff')
+                .text('Nr: ' + offer.number, layout.leftMargin, 26);
+        } else {
+            doc.font('Bold').fontSize(13).fillColor('#fff')
+                .text('OFERTA HANDLOWA', layout.leftMargin + 125, 10);
+            doc.font('Regular').fontSize(9).fillColor('#fff')
+                .text('Nr: ' + offer.number, layout.leftMargin + 125, 26);
         }
 
         this.renderCompanyInfo(doc, offer);

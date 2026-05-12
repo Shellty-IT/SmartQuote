@@ -40,8 +40,7 @@ export class OfferDocumentRenderer {
         let Y = 40;
 
         offerPartiesRenderer.renderHeader(doc, offer);
-        Y = this.renderTitle(doc, offer, Y);
-        Y = this.renderPartiesDynamic(doc, offer, Y);
+        Y = this.renderPartiesDynamic(doc, offer, 60);
         Y = this.renderMetadata(doc, offer, Y);
         Y = this.renderDescription(doc, offer, Y);
         Y = this.renderItems(doc, offer, Y);
@@ -51,19 +50,6 @@ export class OfferDocumentRenderer {
         this.renderFooter(doc, Y);
 
         return Y;
-    }
-
-    private renderTitle(doc: PDFKit.PDFDocument, offer: PDFOffer, Y: number): number {
-        const { colors, layout, sizes } = this.config;
-
-        Y = 60;
-        doc.font('Bold').fontSize(sizes.title).fillColor(colors.text)
-            .text('OFERTA HANDLOWA', layout.leftMargin, Y);
-        Y += 6;
-        doc.font('Regular').fontSize(10).fillColor(colors.primary)
-            .text('Nr: ' + offer.number, layout.leftMargin, Y + 16);
-
-        return Y + 34;
     }
 
     private renderPartiesDynamic(doc: PDFKit.PDFDocument, offer: PDFOffer, Y: number): number {
@@ -219,7 +205,8 @@ export class OfferDocumentRenderer {
 
     private renderSummary(doc: PDFKit.PDFDocument, offer: PDFOffer, Y: number): number {
         const { colors, layout, sizes, dimensions } = this.config;
-        const { summaryOffsetX, summaryBoxWidth, summaryBoxHeight } = dimensions;
+        const { summaryBoxWidth, summaryBoxHeight } = dimensions;
+        const summaryOffsetX = summaryBoxWidth;
         const sumX = layout.leftMargin + layout.contentWidth - summaryOffsetX;
 
         if (Y > dimensions.pageBreakSoft) { doc.addPage(); Y = 40; }
@@ -233,8 +220,15 @@ export class OfferDocumentRenderer {
         Y += 18;
 
         doc.rect(sumX, Y, summaryBoxWidth, summaryBoxHeight).fill(colors.primary);
-        doc.font('Bold').fontSize(10).fillColor('#fff').text('Razem do zapłaty:', sumX + 8, Y + 6);
-        doc.text(money(offer.totalGross, offer.currency), sumX + 60, Y + 6, { width: 112, align: 'right' });
+
+        doc.font('Bold').fontSize(7.5).fillColor('#fff')
+            .text('Razem do zapłaty:', sumX + 4, Y + 7);
+
+        doc.font('Bold').fontSize(8).fillColor('#fff')
+            .text(money(offer.totalGross, offer.currency), sumX + 4, Y + 7, {
+                width: summaryBoxWidth - 8,
+                align: 'right',
+            });
 
         return Y + 35;
     }

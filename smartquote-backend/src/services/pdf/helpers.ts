@@ -174,6 +174,18 @@ export function renderItemsTable(
 
     const renderHeader = (): void => {
         doc.rect(tX, Y, tW, 18).fill(accentColor);
+
+        doc.save();
+        doc.strokeColor('#000000').lineWidth(0.4);
+        let xLine = tX;
+        cols.forEach((colW) => {
+            doc.moveTo(xLine, Y).lineTo(xLine, Y + 18).stroke();
+            xLine += colW;
+        });
+        doc.moveTo(xLine, Y).lineTo(xLine, Y + 18).stroke();
+        doc.rect(tX, Y, tW, 18).stroke();
+        doc.restore();
+
         let x = tX;
         doc.font('Bold').fontSize(7).fillColor('#fff');
         headers.forEach((h, i) => {
@@ -188,14 +200,15 @@ export function renderItemsTable(
     };
 
     const renderRowBorders = (rowY: number, rowHeight: number): void => {
-        let x = tX;
         doc.save();
         doc.strokeColor('#000000').lineWidth(0.3);
-        doc.rect(tX, rowY, tW, rowHeight).stroke();
+        let x = tX;
         cols.forEach((colW) => {
             doc.moveTo(x, rowY).lineTo(x, rowY + rowHeight).stroke();
             x += colW;
         });
+        doc.moveTo(x, rowY).lineTo(x, rowY + rowHeight).stroke();
+        doc.rect(tX, rowY, tW, rowHeight).stroke();
         doc.restore();
     };
 
