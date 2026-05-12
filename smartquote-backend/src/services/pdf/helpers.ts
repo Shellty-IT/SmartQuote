@@ -80,13 +80,22 @@ export const dateTime = (d: Date | string | null): string => {
 };
 
 export const statusMap: Record<string, string> = {
-    DRAFT: 'Szkic', SENT: 'Wyslana', VIEWED: 'Wyswietlona', NEGOTIATION: 'Negocjacje',
-    ACCEPTED: 'Zaakceptowana', REJECTED: 'Odrzucona', EXPIRED: 'Wygasla'
+    DRAFT: 'Szkic',
+    SENT: 'Wysłana',
+    VIEWED: 'Wyświetlona',
+    NEGOTIATION: 'Negocjacje',
+    ACCEPTED: 'Zaakceptowana',
+    REJECTED: 'Odrzucona',
+    EXPIRED: 'Wygasła',
 };
 
 export const contractStatusMap: Record<string, string> = {
-    DRAFT: 'Szkic', PENDING_SIGNATURE: 'Do podpisu', ACTIVE: 'Aktywna',
-    COMPLETED: 'Zakonczona', TERMINATED: 'Rozwiazana', EXPIRED: 'Wygasla'
+    DRAFT: 'Szkic',
+    PENDING_SIGNATURE: 'Do podpisu',
+    ACTIVE: 'Aktywna',
+    COMPLETED: 'Zakończona',
+    TERMINATED: 'Rozwiązana',
+    EXPIRED: 'Wygasła',
 };
 
 export function groupItemsByVariant(items: TableItem[]): Array<{
@@ -157,8 +166,8 @@ export function renderItemsTable(
 ): number {
     let Y = startY;
 
-    const cols = [22, 225, 45, 33, 63, 38, 38, 51];
-    const headers = ['Lp', 'Nazwa', 'Ilosc', 'Jm', 'Cena', 'VAT', 'Rabat', 'Netto'];
+    const cols = [22, 210, 38, 33, 58, 38, 38, 78];
+    const headers = ['Lp', 'Nazwa', 'Ilość', 'Jm', 'Cena netto', 'VAT', 'Rabat', 'Wartość netto'];
 
     const tW = cols.reduce((a, b) => a + b, 0);
     const tX = L;
@@ -168,11 +177,26 @@ export function renderItemsTable(
         let x = tX;
         doc.font('Bold').fontSize(7).fillColor('#fff');
         headers.forEach((h, i) => {
-            const align: 'center' | 'right' = i === 0 || i === 1 ? 'center' : 'right';
+            const align: 'center' | 'right' =
+                i === 0 ? 'center' :
+                    i === 1 ? 'center' :
+                        'right';
             doc.text(h, x + 2, Y + 5, { width: cols[i] - 4, align });
             x += cols[i];
         });
         Y += 18;
+    };
+
+    const renderRowBorders = (rowY: number, rowHeight: number): void => {
+        let x = tX;
+        doc.save();
+        doc.strokeColor('#000000').lineWidth(0.3);
+        doc.rect(tX, rowY, tW, rowHeight).stroke();
+        cols.forEach((colW) => {
+            doc.moveTo(x, rowY).lineTo(x, rowY + rowHeight).stroke();
+            x += colW;
+        });
+        doc.restore();
     };
 
     renderHeader();
@@ -191,7 +215,9 @@ export function renderItemsTable(
         }
 
         const bg = idx % 2 === 0 ? '#fff' : '#f8fafc';
-        doc.rect(tX, Y, tW, rowHeight).fill(bg).stroke('#e2e8f0');
+        doc.rect(tX, Y, tW, rowHeight).fill(bg);
+
+        renderRowBorders(Y, rowHeight);
 
         const quantity = typeof item.quantity === 'number' ? item.quantity : Number(item.quantity);
         const unitPrice = typeof item.unitPrice === 'number' ? item.unitPrice : Number(item.unitPrice);
@@ -213,7 +239,10 @@ export function renderItemsTable(
         let x = tX;
         doc.font('Regular').fontSize(7).fillColor('#1e293b');
         row.forEach((v, i) => {
-            const align: 'center' | 'right' = i === 0 || i === 1 ? 'center' : 'right';
+            const align: 'center' | 'right' =
+                i === 0 ? 'center' :
+                    i === 1 ? 'center' :
+                        'right';
             const cellY = Y + Math.floor((rowHeight - 9) / 2);
             doc.text(v, x + 2, cellY, { width: cols[i] - 4, align });
             x += cols[i];

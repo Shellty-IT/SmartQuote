@@ -151,6 +151,14 @@ export class OfferDocumentRenderer {
         for (const group of variantGroups) {
             if (Y > dimensions.pageBreakThreshold) { doc.addPage(); Y = 40; }
             if (hasVariants) { Y = this.renderVariantHeader(doc, group, Y); }
+
+            doc.save();
+            doc.strokeColor('#000000').lineWidth(0.5);
+            doc.moveTo(layout.leftMargin, Y)
+                .lineTo(layout.leftMargin + layout.contentWidth, Y)
+                .stroke();
+            doc.restore();
+
             Y = renderItemsTable(
                 doc,
                 group.items,
@@ -160,6 +168,14 @@ export class OfferDocumentRenderer {
                 layout.leftMargin,
                 dimensions.pageBreakThreshold,
             );
+
+            doc.save();
+            doc.strokeColor('#000000').lineWidth(0.5);
+            doc.moveTo(layout.leftMargin, Y)
+                .lineTo(layout.leftMargin + layout.contentWidth, Y)
+                .stroke();
+            doc.restore();
+
             if (hasVariants) { Y = this.renderVariantSummary(doc, group, offer.currency, Y); }
             Y += 8;
         }
@@ -217,7 +233,7 @@ export class OfferDocumentRenderer {
         Y += 18;
 
         doc.rect(sumX, Y, summaryBoxWidth, summaryBoxHeight).fill(colors.primary);
-        doc.font('Bold').fontSize(10).fillColor('#fff').text('BRUTTO:', sumX + 8, Y + 6);
+        doc.font('Bold').fontSize(10).fillColor('#fff').text('Razem do zapłaty:', sumX + 8, Y + 6);
         doc.text(money(offer.totalGross, offer.currency), sumX + 60, Y + 6, { width: 112, align: 'right' });
 
         return Y + 35;
