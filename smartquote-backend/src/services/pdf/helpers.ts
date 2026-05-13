@@ -189,11 +189,7 @@ export function renderItemsTable(
         let x = tX;
         doc.font('Bold').fontSize(7).fillColor('#fff');
         headers.forEach((h, i) => {
-            const align: 'center' | 'right' =
-                i === 0 ? 'center' :
-                    i === 1 ? 'center' :
-                        'right';
-            doc.text(h, x + 2, Y + 5, { width: cols[i] - 4, align });
+            doc.text(h, x + 2, Y + 5, { width: cols[i] - 4, align: 'center' });
             x += cols[i];
         });
         Y += 18;

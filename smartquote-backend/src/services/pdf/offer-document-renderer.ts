@@ -47,7 +47,7 @@ export class OfferDocumentRenderer {
         Y = this.renderSummary(doc, offer, Y);
         Y = this.renderTerms(doc, offer, Y);
         Y = this.renderSignature(doc, Y);
-        this.renderFooter(doc, Y);
+        this.renderFooter(doc);
 
         return Y;
     }
@@ -138,13 +138,6 @@ export class OfferDocumentRenderer {
             if (Y > dimensions.pageBreakThreshold) { doc.addPage(); Y = 40; }
             if (hasVariants) { Y = this.renderVariantHeader(doc, group, Y); }
 
-            doc.save();
-            doc.strokeColor('#000000').lineWidth(0.5);
-            doc.moveTo(layout.leftMargin, Y)
-                .lineTo(layout.leftMargin + layout.contentWidth, Y)
-                .stroke();
-            doc.restore();
-
             Y = renderItemsTable(
                 doc,
                 group.items,
@@ -154,13 +147,6 @@ export class OfferDocumentRenderer {
                 layout.leftMargin,
                 dimensions.pageBreakThreshold,
             );
-
-            doc.save();
-            doc.strokeColor('#000000').lineWidth(0.5);
-            doc.moveTo(layout.leftMargin, Y)
-                .lineTo(layout.leftMargin + layout.contentWidth, Y)
-                .stroke();
-            doc.restore();
 
             if (hasVariants) { Y = this.renderVariantSummary(doc, group, offer.currency, Y); }
             Y += 8;
@@ -221,16 +207,25 @@ export class OfferDocumentRenderer {
 
         doc.rect(sumX, Y, summaryBoxWidth, summaryBoxHeight).fill(colors.primary);
 
-        doc.font('Bold').fontSize(7.5).fillColor('#fff')
-            .text('Razem do zapłaty:', sumX + 4, Y + 7);
+        doc.save();
+        doc.strokeColor('#000000').lineWidth(0.5);
+        doc.rect(sumX, Y, summaryBoxWidth, summaryBoxHeight).stroke();
+        doc.restore();
 
-        doc.font('Bold').fontSize(8).fillColor('#fff')
-            .text(money(offer.totalGross, offer.currency), sumX + 4, Y + 7, {
-                width: summaryBoxWidth - 8,
+        const labelWidth = 90;
+        const valueWidth = summaryBoxWidth - labelWidth - 8;
+        const textY = Y + Math.floor((summaryBoxHeight - 9) / 2);
+
+        doc.font('Bold').fontSize(7.5).fillColor('#fff')
+            .text('Razem do zapłaty:', sumX + 4, textY, { width: labelWidth });
+
+        doc.font('Bold').fontSize(7.5).fillColor('#fff')
+            .text(money(offer.totalGross, offer.currency), sumX + 4 + labelWidth, textY, {
+                width: valueWidth,
                 align: 'right',
             });
 
-        return Y + 35;
+        return Y + summaryBoxHeight + 13;
     }
 
     private renderTerms(doc: PDFKit.PDFDocument, offer: PDFOffer, Y: number): number {
@@ -258,19 +253,21 @@ export class OfferDocumentRenderer {
         return Y;
     }
 
-    private renderFooter(doc: PDFKit.PDFDocument, Y: number): void {
-        const { colors, layout, dimensions } = this.config;
+    private renderFooter(doc: PDFKit.PDFDocument): void {
+        const { colors, layout, layout: { pageHeight, leftMargin, contentWidth } } = this.config;
 
-        if (Y < dimensions.footerTargetY) Y = dimensions.footerTargetY;
+        const footerY = pageHeight - 30;
 
-        doc.moveTo(layout.leftMargin, Y + 20)
-            .lineTo(layout.leftMargin + layout.contentWidth, Y + 20)
+        doc.moveTo(leftMargin, footerY)
+            .lineTo(leftMargin + contentWidth, footerY)
             .stroke(colors.border);
+
         doc.font('Regular').fontSize(7).fillColor('#94a3b8')
             .text(
                 'Wygenerowano w SmartQuote AI | ' + date(new Date()),
-                layout.leftMargin, Y + 25,
-                { width: layout.contentWidth, align: 'center' },
+                leftMargin,
+                footerY + 5,
+                { width: contentWidth, align: 'center' },
             );
     }
 }
