@@ -20,7 +20,7 @@ interface TableItem {
 export function createDoc(): PDFKit.PDFDocument {
     const doc = new PDFDocument({
         size: 'A4',
-        margins: { top: 40, bottom: 80, left: 40, right: 40 },
+        margins: { top: 40, bottom: 20, left: 40, right: 40 },
         layout: 'portrait',
     });
 
