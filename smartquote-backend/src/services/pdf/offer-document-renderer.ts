@@ -28,7 +28,7 @@ const PARTY_BOX_MIN_HEIGHT = 90;
 const PARTY_BOX_LINES_BASE_Y = 32;
 const PARTY_BOX_LINE_HEIGHT = 10;
 const PARTY_BOX_PADDING_BOTTOM = 12;
-const FOOTER_Y = 820;
+const FOOTER_Y = 800;
 
 function estimatePartyBoxHeight(lineCount: number): number {
     return PARTY_BOX_LINES_BASE_Y + lineCount * PARTY_BOX_LINE_HEIGHT + PARTY_BOX_PADDING_BOTTOM;
