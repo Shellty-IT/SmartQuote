@@ -28,6 +28,8 @@ const PARTY_BOX_MIN_HEIGHT = 90;
 const PARTY_BOX_LINES_BASE_Y = 32;
 const PARTY_BOX_LINE_HEIGHT = 10;
 const PARTY_BOX_PADDING_BOTTOM = 12;
+const FOOTER_HEIGHT = 25;
+const FOOTER_BOTTOM_MARGIN = 20;
 
 function estimatePartyBoxHeight(lineCount: number): number {
     return PARTY_BOX_LINES_BASE_Y + lineCount * PARTY_BOX_LINE_HEIGHT + PARTY_BOX_PADDING_BOTTOM;
@@ -254,19 +256,21 @@ export class OfferDocumentRenderer {
     }
 
     private renderFooter(doc: PDFKit.PDFDocument): void {
-        const { colors, layout, layout: { pageHeight, leftMargin, contentWidth } } = this.config;
+        const { colors, layout } = this.config;
+        const { pageHeight, leftMargin, contentWidth } = layout;
 
-        const footerY = pageHeight - 30;
+        const footerLineY = pageHeight - FOOTER_BOTTOM_MARGIN - FOOTER_HEIGHT;
+        const footerTextY = footerLineY + 5;
 
-        doc.moveTo(leftMargin, footerY)
-            .lineTo(leftMargin + contentWidth, footerY)
+        doc.moveTo(leftMargin, footerLineY)
+            .lineTo(leftMargin + contentWidth, footerLineY)
             .stroke(colors.border);
 
         doc.font('Regular').fontSize(7).fillColor('#94a3b8')
             .text(
                 'Wygenerowano w SmartQuote AI | ' + date(new Date()),
                 leftMargin,
-                footerY + 5,
+                footerTextY,
                 { width: contentWidth, align: 'center' },
             );
     }
