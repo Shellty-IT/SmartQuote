@@ -144,14 +144,11 @@ export async function createAndPublishOffer(
 
     await page.getByRole('button', { name: /dalej/i }).click();
 
-    const createOfferBtn = page.getByRole('button', { name: /utwórz ofertę/i });
-    await createOfferBtn.scrollIntoViewIfNeeded();
-    await createOfferBtn.waitFor({ state: 'visible', timeout: 10000 });
-    await createOfferBtn.click({ force: true });
+    await page.getByRole('button', { name: /utwórz ofertę/i }).click();
 
     await page.waitForURL(
         (url) => /\/dashboard\/offers\/[^/]+$/.test(url.pathname) && !url.pathname.endsWith('/new'),
-        { timeout: 60000 }
+        { timeout: 30000 }
     );
     await page.waitForLoadState('networkidle');
 
@@ -162,8 +159,7 @@ export async function createAndPublishOffer(
 
     const publishBtn = page.getByRole('button', { name: /publikuj/i }).first();
     await publishBtn.waitFor({ state: 'visible', timeout: 10000 });
-    await publishBtn.scrollIntoViewIfNeeded();
-    await publishBtn.click({ force: true });
+    await publishBtn.click();
 
     const publishDialog = page.locator('[role="dialog"]');
     await publishDialog.waitFor({ state: 'visible', timeout: 5000 });
@@ -172,23 +168,23 @@ export async function createAndPublishOffer(
     await generateBtn.waitFor({ state: 'visible', timeout: 5000 });
     await generateBtn.scrollIntoViewIfNeeded();
 
-    const publishResponse = await page.waitForResponse(
+    const responsePromise = page.waitForResponse(
         (resp) =>
             resp.url().includes('/offers/') &&
             resp.url().includes('/publish') &&
-            resp.request().method() === 'POST',
-        { timeout: 30000 }
+            resp.request().method() === 'POST'
     );
 
     await generateBtn.click({ force: true });
 
-    const body = await publishResponse.json();
+    const response = await responsePromise;
+    const body = await response.json();
     const publicUrl = body.data?.publicUrl as string | undefined;
     const publicToken = body.data?.publicToken as string | undefined;
 
     if (!publicUrl && !publicToken) {
         throw new Error(
-            `createAndPublishOffer failed: no publicUrl/publicToken in API response. Status: ${publishResponse.status()}, body: ${JSON.stringify(body).slice(0, 300)}`
+            `createAndPublishOffer failed: no publicUrl/publicToken in API response. Status: ${response.status()}, body: ${JSON.stringify(body).slice(0, 300)}`
         );
     }
 
@@ -290,8 +286,8 @@ export async function createContract(
     );
     await page.waitForLoadState('networkidle');
 
-    const currentUrl = page.url();
-    const idMatch = currentUrl.match(/\/dashboard\/contracts\/([^/]+)$/);
+    const contractUrl = page.url();
+    const idMatch = contractUrl.match(/\/dashboard\/contracts\/([^/]+)$/);
     expect(idMatch).toBeTruthy();
 
     return { contractId: idMatch![1], title };
@@ -419,15 +415,15 @@ export async function drawSignature(page: Page, canvasSelector: string = 'canvas
 
             c.dispatchEvent(createMouseEvent('mousedown', sx, sy));
 
-            const points = [
+            const points: [number, number][] = [
                 [0.3, 0.4], [0.4, 0.6], [0.5, 0.35], [0.6, 0.55],
                 [0.7, 0.4], [0.8, 0.5],
             ];
 
             for (const [px, py] of points) {
                 c.dispatchEvent(createMouseEvent('mousemove',
-                    rect.left + rect.width * px!,
-                    rect.top + rect.height * py!
+                    rect.left + rect.width * px,
+                    rect.top + rect.height * py
                 ));
             }
 
