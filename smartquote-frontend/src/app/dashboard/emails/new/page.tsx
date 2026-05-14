@@ -3,7 +3,6 @@
 
 import { Suspense } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card } from '@/components/ui';
 import { useEmailComposer } from '@/hooks/useEmailComposer';
 import RichTextEditor from '@/components/email/RichTextEditor';
 import { BUILT_IN_TEMPLATES } from '@/types/email.types';

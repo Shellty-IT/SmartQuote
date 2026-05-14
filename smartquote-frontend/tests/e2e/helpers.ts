@@ -167,18 +167,32 @@ export async function createAndPublishOffer(
     const generateBtn = publishDialog.getByRole('button', { name: /generuj link|publikuj|aktywuj/i });
     await generateBtn.waitFor({ state: 'visible', timeout: 5000 });
     await generateBtn.scrollIntoViewIfNeeded();
-    await generateBtn.click({ force: true });
 
-    await page.waitForFunction(
-        () => document.body.innerHTML.includes('/offer/views/'),
-        { timeout: 30000 }
+    const responsePromise = page.waitForResponse(
+        (resp) =>
+            resp.url().includes('/offers/') &&
+            resp.url().includes('/publish') &&
+            resp.request().method() === 'POST'
     );
 
-    const content = await page.content();
-    const tokenMatch = content.match(/\/offer\/view\/([a-zA-Z0-9_-]+)/);
-    expect(tokenMatch).toBeTruthy();
+    await generateBtn.click({ force: true });
 
-    const publicPath = `/offer/view/${tokenMatch![1]}`;
+    const response = await responsePromise;
+    const body = await response.json();
+    const publicUrl = body.data?.publicUrl as string | undefined;
+    const publicToken = body.data?.publicToken as string | undefined;
+
+    if (!publicUrl && !publicToken) {
+        throw new Error(
+            `createAndPublishOffer failed: no publicUrl/publicToken in API response. Status: ${response.status()}, body: ${JSON.stringify(body).slice(0, 300)}`
+        );
+    }
+
+    const tokenMatch = publicUrl?.match(/\/offer\/view\/([a-zA-Z0-9_-]+)/);
+    const token = publicToken || tokenMatch?.[1];
+    expect(token).toBeTruthy();
+
+    const publicPath = `/offer/view/${token}`;
 
     await page.keyboard.press('Escape');
     await page.waitForTimeout(500);
