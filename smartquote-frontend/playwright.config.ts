@@ -1,5 +1,26 @@
-// SmartQuote-AI/playwright.config.ts
+// playwright.config.ts
 import { defineConfig, devices } from '@playwright/test';
+import * as fs from 'fs';
+import * as url from 'url';
+import * as path from 'path';
+
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
+
+const envPath = path.resolve(__dirname, '.env.local');
+if (fs.existsSync(envPath)) {
+    const lines = fs.readFileSync(envPath, 'utf-8').split('\n');
+    for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('#')) continue;
+        const eqIdx = trimmed.indexOf('=');
+        if (eqIdx === -1) continue;
+        const key = trimmed.slice(0, eqIdx).trim();
+        const value = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, '');
+        if (key && !(key in process.env)) {
+            process.env[key] = value;
+        }
+    }
+}
 
 export default defineConfig({
     testDir: './tests/e2e',
