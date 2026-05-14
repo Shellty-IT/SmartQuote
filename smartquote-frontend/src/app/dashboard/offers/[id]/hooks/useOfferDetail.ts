@@ -43,7 +43,7 @@ export function useOfferDetail(offerId: string) {
     const variantData = useMemo(() => {
         if (!offer?.items) return { groups: [], variantNames: [] };
         return groupByVariant(offer.items);
-    }, [offer?.items]);
+    }, [offer]);
 
     const availableTransitions = offer
         ? STATUS_TRANSITIONS[offer.status as OfferStatus] || []
