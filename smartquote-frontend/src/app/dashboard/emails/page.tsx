@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Card, ConfirmDialog, EmptyState } from '@/components/ui';
+import { ConfirmDialog, EmptyState } from '@/components/ui';
 import { useEmailList } from '@/hooks/useEmailList';
 import type { EmailLog, EmailLogStatus } from '@/types/email.types';
 

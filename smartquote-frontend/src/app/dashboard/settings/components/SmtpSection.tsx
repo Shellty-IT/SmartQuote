@@ -25,10 +25,6 @@ export default function SmtpSection() {
     const {
         config,
         isLoading: smtpLoading,
-        isSaving,
-        isTesting,
-        isDeleting,
-        error: smtpError,
         updateConfig,
         testConnection,
         testSavedConnection,
@@ -290,33 +286,141 @@ export default function SmtpSection() {
                         <label className="block text-sm font-medium text-themed-label mb-2">Dostawca poczty</label>
                         <div className="flex flex-wrap gap-2">
                             {Object.keys(PRESETS).map(key => (
-                                <button key={key} className="px-3 py-2 rounded-lg text-sm font-medium border" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)', color: 'var(--muted-text)' }}>
+                                <button
+                                    key={key}
+                                    onClick={() => handlePresetChange(key)}
+                                    className="px-3 py-2 rounded-lg text-sm font-medium border"
+                                    style={{
+                                        backgroundColor: selectedPreset === key ? '#0891b2' : 'var(--card-bg)',
+                                        borderColor: selectedPreset === key ? '#0891b2' : 'var(--card-border)',
+                                        color: selectedPreset === key ? '#fff' : 'var(--muted-text)',
+                                    }}
+                                >
                                     {PRESET_LABELS[key]}
                                 </button>
                             ))}
                         </div>
+                        {PRESETS[selectedPreset]?.note && (
+                            <p className="mt-2 text-xs text-themed-muted">{PRESETS[selectedPreset].note}</p>
+                        )}
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
                             <label className="block text-sm font-medium text-themed-label mb-1">Host SMTP</label>
-                            <input type="text" disabled placeholder="smtp.gmail.com" className="w-full px-3 py-2.5 rounded-xl border input-themed text-sm" />
+                            <input
+                                type="text"
+                                value={form.smtpHost}
+                                onChange={e => handleChange('smtpHost', e.target.value)}
+                                placeholder="smtp.gmail.com"
+                                className="w-full px-3 py-2.5 rounded-xl border input-themed text-sm"
+                            />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-themed-label mb-1">Port</label>
-                            <input type="number" disabled placeholder="587" className="w-full px-3 py-2.5 rounded-xl border input-themed text-sm" />
+                            <input
+                                type="number"
+                                value={form.smtpPort}
+                                onChange={e => handleChange('smtpPort', Number(e.target.value))}
+                                placeholder="587"
+                                className="w-full px-3 py-2.5 rounded-xl border input-themed text-sm"
+                            />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-themed-label mb-1">Użytkownik (login)</label>
-                            <input type="text" disabled placeholder="twoj@email.com" className="w-full px-3 py-2.5 rounded-xl border input-themed text-sm" />
+                            <input
+                                type="text"
+                                value={form.smtpUser}
+                                onChange={e => handleChange('smtpUser', e.target.value)}
+                                placeholder="twoj@email.com"
+                                className="w-full px-3 py-2.5 rounded-xl border input-themed text-sm"
+                            />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-themed-label mb-1">Hasło</label>
-                            <input type="password" disabled placeholder="••••••••" className="w-full px-3 py-2.5 rounded-xl border input-themed text-sm" />
+                            <label className="block text-sm font-medium text-themed-label mb-1">
+                                Hasło {config?.smtpConfigured && <span className="text-xs text-themed-muted">(pozostaw puste aby zachować)</span>}
+                            </label>
+                            <input
+                                type="password"
+                                value={form.smtpPass}
+                                onChange={e => handleChange('smtpPass', e.target.value)}
+                                placeholder={config?.smtpConfigured ? '••••••••' : 'Hasło SMTP'}
+                                className="w-full px-3 py-2.5 rounded-xl border input-themed text-sm"
+                            />
+                        </div>
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-themed-label mb-1">
+                                Adres nadawcy <span className="text-xs text-themed-muted">(opcjonalnie)</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={form.smtpFrom}
+                                onChange={e => handleChange('smtpFrom', e.target.value)}
+                                placeholder={form.smtpUser || 'nadawca@email.com'}
+                                className="w-full px-3 py-2.5 rounded-xl border input-themed text-sm"
+                            />
                         </div>
                     </div>
+
+                    {testResult && (
+                        <div className={`mb-4 p-3 rounded-xl border text-sm ${testResult.success
+                            ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400'
+                            : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400'
+                        }`}>
+                            {testResult.message}
+                        </div>
+                    )}
+
+                    {saveSuccess && (
+                        <div className="mb-4 p-3 rounded-xl border bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-sm text-emerald-700 dark:text-emerald-400">
+                            Konfiguracja zapisana pomyślnie
+                        </div>
+                    )}
+
                     <div className="flex flex-wrap items-center gap-3">
-                        <button disabled className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm" style={{ backgroundColor: '#059669' }}>Testuj połączenie</button>
-                        <button disabled className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm" style={{ backgroundColor: '#0891b2' }}>Zapisz konfigurację</button>
+                        <button
+                            onClick={handleTest}
+                            disabled={!canTest}
+                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm disabled:opacity-50"
+                            style={{ backgroundColor: '#059669' }}
+                        >
+                            Testuj połączenie
+                        </button>
+                        <button
+                            onClick={handleSave}
+                            disabled={!canSave}
+                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm disabled:opacity-50"
+                            style={{ backgroundColor: '#0891b2' }}
+                        >
+                            {saveSuccess ? 'Zapisano!' : 'Zapisz konfigurację'}
+                        </button>
+                        {config?.smtpConfigured && (
+                            deleteConfirm ? (
+                                <>
+                                    <span className="text-sm text-red-600 dark:text-red-400">Na pewno usunąć?</span>
+                                    <button
+                                        onClick={handleDelete}
+                                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm"
+                                        style={{ backgroundColor: '#dc2626' }}
+                                    >
+                                        Tak, usuń
+                                    </button>
+                                    <button
+                                        onClick={() => setDeleteConfirm(false)}
+                                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm border input-themed"
+                                    >
+                                        Anuluj
+                                    </button>
+                                </>
+                            ) : (
+                                <button
+                                    onClick={() => setDeleteConfirm(true)}
+                                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400"
+                                >
+                                    Usuń konfigurację
+                                </button>
+                            )
+                        )}
                     </div>
                 </div>
             </Card>
