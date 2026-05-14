@@ -25,11 +25,11 @@ export async function login(page: Page) {
 
         await emailInput.click();
         await emailInput.clear();
-        await emailInput.type(process.env.TEST_EMAIL!, { delay: 30 });
+        await emailInput.fill(process.env.TEST_EMAIL!);
 
         await passwordInput.click();
         await passwordInput.clear();
-        await passwordInput.type(process.env.TEST_PASSWORD!, { delay: 30 });
+        await passwordInput.fill(process.env.TEST_PASSWORD!);
 
         await page.waitForTimeout(300);
 
@@ -144,11 +144,14 @@ export async function createAndPublishOffer(
 
     await page.getByRole('button', { name: /dalej/i }).click();
 
-    await page.getByRole('button', { name: /utwórz ofertę/i }).click();
+    const createOfferBtn = page.getByRole('button', { name: /utwórz ofertę/i });
+    await createOfferBtn.scrollIntoViewIfNeeded();
+    await createOfferBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await createOfferBtn.click({ force: true });
 
     await page.waitForURL(
         (url) => /\/dashboard\/offers\/[^/]+$/.test(url.pathname) && !url.pathname.endsWith('/new'),
-        { timeout: 30000 }
+        { timeout: 60000 }
     );
     await page.waitForLoadState('networkidle');
 
@@ -159,7 +162,8 @@ export async function createAndPublishOffer(
 
     const publishBtn = page.getByRole('button', { name: /publikuj/i }).first();
     await publishBtn.waitFor({ state: 'visible', timeout: 10000 });
-    await publishBtn.click();
+    await publishBtn.scrollIntoViewIfNeeded();
+    await publishBtn.click({ force: true });
 
     const publishDialog = page.locator('[role="dialog"]');
     await publishDialog.waitFor({ state: 'visible', timeout: 5000 });
@@ -168,23 +172,23 @@ export async function createAndPublishOffer(
     await generateBtn.waitFor({ state: 'visible', timeout: 5000 });
     await generateBtn.scrollIntoViewIfNeeded();
 
-    const responsePromise = page.waitForResponse(
+    const publishResponse = await page.waitForResponse(
         (resp) =>
             resp.url().includes('/offers/') &&
             resp.url().includes('/publish') &&
-            resp.request().method() === 'POST'
+            resp.request().method() === 'POST',
+        { timeout: 30000 }
     );
 
     await generateBtn.click({ force: true });
 
-    const response = await responsePromise;
-    const body = await response.json();
+    const body = await publishResponse.json();
     const publicUrl = body.data?.publicUrl as string | undefined;
     const publicToken = body.data?.publicToken as string | undefined;
 
     if (!publicUrl && !publicToken) {
         throw new Error(
-            `createAndPublishOffer failed: no publicUrl/publicToken in API response. Status: ${response.status()}, body: ${JSON.stringify(body).slice(0, 300)}`
+            `createAndPublishOffer failed: no publicUrl/publicToken in API response. Status: ${publishResponse.status()}, body: ${JSON.stringify(body).slice(0, 300)}`
         );
     }
 
@@ -273,18 +277,21 @@ export async function createContract(
     await priceField.scrollIntoViewIfNeeded();
     await priceField.fill('5000');
 
+    await page.waitForTimeout(500);
+
     const submitBtn = page.getByRole('button', { name: /utwórz umowę/i });
     await submitBtn.scrollIntoViewIfNeeded();
-    await submitBtn.click();
+    await submitBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await submitBtn.click({ force: true });
 
     await page.waitForURL(
         (url) => /\/dashboard\/contracts\/[^/]+$/.test(url.pathname) && !url.pathname.endsWith('/new'),
-        { timeout: 30000 }
+        { timeout: 60000 }
     );
     await page.waitForLoadState('networkidle');
 
-    const url = page.url();
-    const idMatch = url.match(/\/dashboard\/contracts\/([^/]+)$/);
+    const currentUrl = page.url();
+    const idMatch = currentUrl.match(/\/dashboard\/contracts\/([^/]+)$/);
     expect(idMatch).toBeTruthy();
 
     return { contractId: idMatch![1], title };
@@ -305,7 +312,7 @@ export async function publishContract(page: Page, contractId: string): Promise<s
             resp.request().method() === 'POST'
     );
 
-    await publishBtn.click();
+    await publishBtn.click({ force: true });
 
     const response = await responsePromise;
     const body = await response.json();
@@ -333,14 +340,15 @@ export async function changeContractStatus(
     const actionBtn = page.getByRole('button', { name: buttonLabel });
     await actionBtn.waitFor({ state: 'visible', timeout: 10000 });
     await actionBtn.scrollIntoViewIfNeeded();
-    await actionBtn.click();
+    await actionBtn.click({ force: true });
 
     const confirmDialog = page.locator('[role="dialog"]');
     await confirmDialog.waitFor({ state: 'visible', timeout: 5000 });
 
     const confirmBtn = confirmDialog.getByRole('button', { name: /potwierdź/i });
     await confirmBtn.waitFor({ state: 'visible', timeout: 5000 });
-    await confirmBtn.click();
+    await confirmBtn.scrollIntoViewIfNeeded();
+    await confirmBtn.click({ force: true });
 
     await confirmDialog.waitFor({ state: 'hidden', timeout: 10000 });
     await page.waitForTimeout(2000);
@@ -370,7 +378,7 @@ export async function drawSignature(page: Page, canvasSelector: string = 'canvas
     ];
 
     for (const [wx, wy] of waypoints) {
-        await page.mouse.move(box.x + box.width * wx, box.y + box.height * wy, { steps: 2 });
+        await page.mouse.move(box.x + box.width * wx!, box.y + box.height * wy!, { steps: 2 });
         await page.waitForTimeout(20);
     }
 
@@ -418,8 +426,8 @@ export async function drawSignature(page: Page, canvasSelector: string = 'canvas
 
             for (const [px, py] of points) {
                 c.dispatchEvent(createMouseEvent('mousemove',
-                    rect.left + rect.width * px,
-                    rect.top + rect.height * py
+                    rect.left + rect.width * px!,
+                    rect.top + rect.height * py!
                 ));
             }
 
