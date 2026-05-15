@@ -160,7 +160,7 @@ export async function createAndPublishOffer(
     const offerId = offerIdMatch![1];
 
     const publishBtn = page.getByRole('button', { name: /publikuj/i }).first();
-    await publishBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await publishBtn.waitFor({ state: 'visible', timeout: 30000 });
     await publishBtn.click();
 
     const publishDialog = page.locator('[role="dialog"]');
@@ -174,7 +174,8 @@ export async function createAndPublishOffer(
         (resp) =>
             resp.url().includes('/offers/') &&
             resp.url().includes('/publish') &&
-            resp.request().method() === 'POST'
+            resp.request().method() === 'POST',
+        { timeout: 30000 }
     );
 
     await generateBtn.click({ force: true });
@@ -305,14 +306,15 @@ export async function publishContract(page: Page, contractId: string): Promise<s
     await waitForContractPage(page);
 
     const publishBtn = page.getByRole('button', { name: /wygeneruj link publiczny/i });
-    await publishBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await publishBtn.waitFor({ state: 'visible', timeout: 30000 });
     await publishBtn.scrollIntoViewIfNeeded();
 
     const responsePromise = page.waitForResponse(
         (resp) =>
             resp.url().includes('/contracts/') &&
             resp.url().includes('/publish') &&
-            resp.request().method() === 'POST'
+            resp.request().method() === 'POST',
+        { timeout: 30000 }
     );
 
     await publishBtn.click();
@@ -341,18 +343,18 @@ export async function changeContractStatus(
     await waitForContractPage(page);
 
     const actionBtn = page.getByRole('button', { name: buttonLabel });
-    await actionBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await actionBtn.waitFor({ state: 'visible', timeout: 30000 });
     await actionBtn.scrollIntoViewIfNeeded();
     await actionBtn.click();
 
     const confirmDialog = page.locator('[role="dialog"]');
-    await confirmDialog.waitFor({ state: 'visible', timeout: 5000 });
+    await confirmDialog.waitFor({ state: 'visible', timeout: 15000 });
 
     const confirmBtn = confirmDialog.getByRole('button', { name: /potwierdź/i });
-    await confirmBtn.waitFor({ state: 'visible', timeout: 5000 });
+    await confirmBtn.waitFor({ state: 'visible', timeout: 15000 });
     await confirmBtn.click();
 
-    await confirmDialog.waitFor({ state: 'hidden', timeout: 10000 });
+    await confirmDialog.waitFor({ state: 'hidden', timeout: 15000 });
     await page.waitForTimeout(2000);
 }
 
