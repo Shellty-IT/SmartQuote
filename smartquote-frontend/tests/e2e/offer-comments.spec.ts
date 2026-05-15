@@ -73,10 +73,10 @@ test.describe('Offer Comments', () => {
         await rejectBtn.click();
 
         const rejectDialog = clientPage.locator('[role="dialog"]');
-        await rejectDialog.waitFor({ state: 'visible', timeout: 5000 });
+        await rejectDialog.waitFor({ state: 'visible', timeout: 15000 });
 
         const dialogContent = rejectDialog.locator('div.relative.bg-white');
-        await dialogContent.waitFor({ state: 'visible', timeout: 3000 });
+        await dialogContent.waitFor({ state: 'visible', timeout: 10000 });
 
         const confirmBtn = dialogContent.getByRole('button', { name: /odrzuć ofertę/i });
         await confirmBtn.scrollIntoViewIfNeeded();

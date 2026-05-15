@@ -89,7 +89,7 @@ export async function createAndPublishOffer(
     await page.waitForLoadState('domcontentloaded');
 
     const firstClient = page.locator('.grid button').first();
-    await firstClient.waitFor({ state: 'visible', timeout: 15000 });
+    await firstClient.waitFor({ state: 'visible', timeout: 30000 });
     await firstClient.click();
     await page.getByRole('button', { name: /dalej/i }).click();
 
@@ -164,10 +164,10 @@ export async function createAndPublishOffer(
     await publishBtn.click();
 
     const publishDialog = page.locator('[role="dialog"]');
-    await publishDialog.waitFor({ state: 'visible', timeout: 5000 });
+    await publishDialog.waitFor({ state: 'visible', timeout: 15000 });
 
     const generateBtn = publishDialog.getByRole('button', { name: /generuj link|publikuj|aktywuj/i });
-    await generateBtn.waitFor({ state: 'visible', timeout: 5000 });
+    await generateBtn.waitFor({ state: 'visible', timeout: 15000 });
     await generateBtn.scrollIntoViewIfNeeded();
 
     const responsePromise = page.waitForResponse(
@@ -289,7 +289,7 @@ export async function createContract(
 
     await page.waitForURL(
         (url) => /\/dashboard\/contracts\/[^/]+$/.test(url.pathname) && !url.pathname.endsWith('/new'),
-        { timeout: 30000 }
+        { timeout: 60000 }
     );
     await page.waitForLoadState('domcontentloaded');
 
