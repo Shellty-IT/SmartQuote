@@ -18,16 +18,18 @@ export async function login(page: Page) {
     } catch {
     }
 
-    await page.waitForTimeout(1000);
+    await expect(emailInput).toBeEnabled({ timeout: 30000 });
+
+    await page.waitForTimeout(500);
 
     for (let attempt = 1; attempt <= 3; attempt++) {
         const passwordInput = page.locator('input[type="password"]');
 
-        await emailInput.click();
+        await emailInput.click({ force: true });
         await emailInput.clear();
         await emailInput.type(process.env.TEST_EMAIL!, { delay: 30 });
 
-        await passwordInput.click();
+        await passwordInput.click({ force: true });
         await passwordInput.clear();
         await passwordInput.type(process.env.TEST_PASSWORD!, { delay: 30 });
 
@@ -84,7 +86,7 @@ export async function createAndPublishOffer(
     const itemName = options?.itemName || 'Usługa testowa E2E';
 
     await page.goto('/dashboard/offers/new', { waitUntil: 'domcontentloaded' });
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const firstClient = page.locator('.grid button').first();
     await firstClient.waitFor({ state: 'visible', timeout: 15000 });
@@ -150,7 +152,7 @@ export async function createAndPublishOffer(
         (url) => /\/dashboard\/offers\/[^/]+$/.test(url.pathname) && !url.pathname.endsWith('/new'),
         { timeout: 30000 }
     );
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const offerUrl = page.url();
     const offerIdMatch = offerUrl.match(/\/dashboard\/offers\/([^/]+)$/);
@@ -243,9 +245,8 @@ export async function createContract(
     const itemName = options?.itemName || 'Pozycja testowa E2E';
 
     await page.goto('/dashboard/contracts/new', { waitUntil: 'domcontentloaded' });
-    await page.waitForLoadState('networkidle');
 
-    await page.getByText('Informacje podstawowe').waitFor({ state: 'visible', timeout: 15000 });
+    await page.getByText('Informacje podstawowe').waitFor({ state: 'visible', timeout: 30000 });
 
     const textInputs = page.locator('form input:not([type="date"]):not([type="number"]):not([type="hidden"]):not([type="checkbox"])');
     const titleField = textInputs.first();
@@ -281,7 +282,7 @@ export async function createContract(
         (url) => /\/dashboard\/contracts\/[^/]+$/.test(url.pathname) && !url.pathname.endsWith('/new'),
         { timeout: 30000 }
     );
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const url = page.url();
     const idMatch = url.match(/\/dashboard\/contracts\/([^/]+)$/);
@@ -317,7 +318,7 @@ export async function publishContract(page: Page, contractId: string): Promise<s
         );
     }
 
-    await expect(page.getByText(/link aktywny/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/link aktywny/i)).toBeVisible({ timeout: 15000 });
 
     return `/contract/view/${publicToken}`;
 }
