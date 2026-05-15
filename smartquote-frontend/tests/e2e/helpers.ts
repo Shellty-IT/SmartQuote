@@ -255,6 +255,15 @@ export async function createContract(
 
     const clientSelect = page.locator('form select').first();
     await clientSelect.waitFor({ state: 'visible', timeout: 5000 });
+
+    await page.waitForFunction(
+        () => {
+            const select = document.querySelector('form select');
+            return !!select && select.querySelectorAll('option').length > 1;
+        },
+        { timeout: 15000 }
+    );
+
     const clientOptions = clientSelect.locator('option');
     const optionCount = await clientOptions.count();
     if (optionCount > 1) {
