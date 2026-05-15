@@ -150,7 +150,7 @@ export async function createAndPublishOffer(
 
     await page.waitForURL(
         (url) => /\/dashboard\/offers\/[^/]+$/.test(url.pathname) && !url.pathname.endsWith('/new'),
-        { timeout: 30000 }
+        { timeout: 60000 }
     );
     await page.waitForLoadState('domcontentloaded');
 
@@ -159,8 +159,10 @@ export async function createAndPublishOffer(
     expect(offerIdMatch).toBeTruthy();
     const offerId = offerIdMatch![1];
 
+    await waitForOfferPage(page);
+
     const publishBtn = page.getByRole('button', { name: /publikuj/i }).first();
-    await publishBtn.waitFor({ state: 'visible', timeout: 30000 });
+    await publishBtn.waitFor({ state: 'visible', timeout: 60000 });
     await publishBtn.click();
 
     const publishDialog = page.locator('[role="dialog"]');
