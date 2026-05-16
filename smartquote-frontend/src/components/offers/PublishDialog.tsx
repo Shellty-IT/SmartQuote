@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { useOfferPublish, useOfferSendToClient } from '@/hooks/useOffers';
 import { useSmtpConfig } from '@/hooks/useSettings';
 import { useToast } from '@/contexts/ToastContext';
@@ -251,7 +252,7 @@ export default function PublishDialog({
                                         {clientEmail && !smtpReady && !isLoadingSmtp && (
                                             <p className="text-xs text-amber-600 mt-0.5">
                                                 Skonfiguruj skrzynkę pocztową w{' '}
-                                                <a href="/dashboard/settings" className="underline hover:text-amber-700">ustawieniach</a>
+                                                <Link href="/dashboard/settings" className="underline hover:text-amber-700">ustawieniach</Link>
                                             </p>
                                         )}
                                     </div>

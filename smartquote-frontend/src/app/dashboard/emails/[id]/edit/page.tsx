@@ -3,6 +3,7 @@
 
 import { use, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Card } from '@/components/ui';
 import { useEmailComposer } from '@/hooks/useEmailComposer';
 import RichTextEditor from '@/components/email/RichTextEditor';
@@ -94,9 +95,9 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                         <span>{errorMessage}</span>
                     </div>
                     {errorMessage.includes('SMTP') && (
-                        <a href="/dashboard/settings" className="inline-block mt-2 text-xs underline text-red-600 dark:text-red-400">
+                        <Link href="/dashboard/settings" className="inline-block mt-2 text-xs underline text-red-600 dark:text-red-400">
                             Przejdź do ustawień SMTP →
-                        </a>
+                        </Link>
                     )}
                 </div>
             )}

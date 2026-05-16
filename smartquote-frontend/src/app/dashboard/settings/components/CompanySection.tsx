@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import Image from 'next/image';
 import { Card } from '@/components/ui';
 import Button from '@/components/ui/Button';
 import { compressImage } from '@/lib/imageUtils';
@@ -73,9 +74,8 @@ export default function CompanySection({ company, onUpdate }: Props) {
             setSuccess(true);
             setIsEditing(false);
             setTimeout(() => setSuccess(false), 3000);
-        } catch (error: unknown) {
-            console.error('Failed to update company:', error);
-        } finally {
+        } catch {
+} finally {
             setIsSaving(false);
         }
     };
@@ -129,8 +129,8 @@ export default function CompanySection({ company, onUpdate }: Props) {
             setCurrentLogo(base64);
             setSuccess(true);
             setTimeout(() => setSuccess(false), 3000);
-        } catch (error: unknown) {
-            console.error('Failed to process logo:', error);
+        } catch {
+
             setLogoError('Nie udało się przetworzyć logo');
         } finally {
             setIsUploadingLogo(false);
@@ -147,9 +147,8 @@ export default function CompanySection({ company, onUpdate }: Props) {
             setCurrentLogo('');
             setSuccess(true);
             setTimeout(() => setSuccess(false), 3000);
-        } catch (error: unknown) {
-            console.error('Failed to remove logo:', error);
-        } finally {
+        } catch {
+} finally {
             setIsUploadingLogo(false);
         }
     };
@@ -185,7 +184,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                 <div className="flex flex-col sm:flex-row items-center gap-6 mb-8 pb-8 border-b divider-themed">
                     <div
                         onClick={handleLogoClick}
-                        className={`w-28 h-28 rounded-2xl flex items-center justify-center border-2 border-dashed transition-all cursor-pointer group ${
+                        className={`relative w-28 h-28 rounded-2xl flex items-center justify-center border-2 border-dashed transition-all cursor-pointer group ${
                             currentLogo
                                 ? 'border-cyan-300 bg-white'
                                 : 'border-slate-300 hover:border-cyan-400'
@@ -198,8 +197,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                             </svg>
                         ) : currentLogo ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={currentLogo} alt="Logo firmy" className="w-full h-full object-contain rounded-xl p-2" />
+                            <Image src={currentLogo} alt="Logo firmy" fill className="object-contain rounded-xl p-2" unoptimized={currentLogo.startsWith('data:')} />
                         ) : (
                             <div className="text-center">
                                 <svg className="w-8 h-8 text-slate-400 group-hover:text-cyan-500 mx-auto mb-1 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

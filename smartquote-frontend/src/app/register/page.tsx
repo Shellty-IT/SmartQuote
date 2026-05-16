@@ -114,8 +114,8 @@ export default function RegisterPage() {
                 router.push('/?registered=true');
             }, 2000);
 
-        } catch (error) {
-            console.error('Registration error:', error);
+        } catch {
+
             setErrors({ general: 'Wystąpił błąd połączenia z serwerem' });
         } finally {
             setIsLoading(false);

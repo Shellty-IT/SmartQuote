@@ -37,7 +37,7 @@ export function useDashboard(): UseDashboardReturn {
             if (clientsStatsRes.status === 'fulfilled' && clientsStatsRes.value.data) {
                 setClientsStats(clientsStatsRes.value.data);
             } else {
-                console.error('Błąd pobierania statystyk klientów');
+
                 setClientsStats({
                     total: 0,
                     active: 0,
@@ -50,7 +50,7 @@ export function useDashboard(): UseDashboardReturn {
             if (offersStatsRes.status === 'fulfilled' && offersStatsRes.value.data) {
                 setOffersStats(offersStatsRes.value.data);
             } else {
-                console.error('Błąd pobierania statystyk ofert');
+
                 setOffersStats({
                     total: 0,
                     byStatus: {
@@ -71,14 +71,14 @@ export function useDashboard(): UseDashboardReturn {
             if (recentOffersRes.status === 'fulfilled' && recentOffersRes.value.data) {
                 setRecentOffers(recentOffersRes.value.data);
             } else {
-                console.error('Błąd pobierania ostatnich ofert');
+
                 setRecentOffers([]);
             }
 
         } catch (err) {
             const message = err instanceof ApiError ? err.message : 'Błąd pobierania danych dashboard';
             setError(message);
-            console.error('Błąd dashboard:', err);
+
         } finally {
             setLoading(false);
         }
