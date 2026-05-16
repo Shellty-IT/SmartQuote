@@ -3,6 +3,7 @@
 
 import { Suspense } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useEmailComposer } from '@/hooks/useEmailComposer';
 import RichTextEditor from '@/components/email/RichTextEditor';
 import { BUILT_IN_TEMPLATES } from '@/types/email.types';
@@ -168,9 +169,9 @@ function EmailComposerContent() {
                         <span>{errorMessage}</span>
                     </div>
                     {errorMessage.includes('SMTP') && (
-                        <a href="/dashboard/settings" className="inline-block mt-2 text-xs underline text-red-600 dark:text-red-400">
+                        <Link href="/dashboard/settings" className="inline-block mt-2 text-xs underline text-red-600 dark:text-red-400">
                             Przejdź do ustawień SMTP →
-                        </a>
+                        </Link>
                     )}
                 </div>
             )}

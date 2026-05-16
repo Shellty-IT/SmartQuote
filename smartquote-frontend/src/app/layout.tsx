@@ -51,21 +51,14 @@ function ServiceWorkerRegistration() {
             window.addEventListener('load', function() {
               navigator.serviceWorker.register('/sw.js', { scope: '/' })
                 .then(function(reg) {
-                  console.log('✅ SW registered, scope:', reg.scope);
                   reg.addEventListener('updatefound', function() {
                     var newWorker = reg.installing;
                     if (newWorker) {
-                      newWorker.addEventListener('statechange', function() {
-                        if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
-                          console.log('🔄 New SW version available');
-                        }
-                      });
+                      newWorker.addEventListener('statechange', function() { void newWorker.state; });
                     }
                   });
                 })
-                .catch(function(err) {
-                  console.warn('⚠️ SW registration failed:', err);
-                });
+                .catch(function() {});
             });
           }
         `,

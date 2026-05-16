@@ -54,9 +54,9 @@ export default function NotificationsSection({ settings, onUpdate }: Props) {
             await onUpdate({ [key]: value });
             setSuccess(true);
             setTimeout(() => setSuccess(false), 2000);
-        } catch (error: unknown) {
+        } catch {
             setLocalSettings(prev => ({ ...prev, [key]: !value }));
-            console.error('Failed to update notifications:', error);
+
         } finally {
             setIsSaving(false);
         }

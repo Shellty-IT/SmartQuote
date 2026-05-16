@@ -76,9 +76,8 @@ export function GlobalAIChat() {
     const handleClearHistory = async () => {
         try {
             await ai.clearHistory();
-        } catch (error) {
-            console.error('Failed to clear AI history:', error);
-        }
+        } catch {
+}
         clearMessages();
     };
 

@@ -194,7 +194,7 @@ export default function DashboardPage() {
         ai.latestInsights(3)
             .then(setLatestInsights)
             .catch((err: unknown) => {
-                console.error('Failed to load AI insights:', err);
+
             })
             .finally(() => setIsLoadingInsights(false));
     }, []);

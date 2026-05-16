@@ -45,9 +45,8 @@ export function useNotifications(limit: number = 10) {
                 prev.map(n => n.id === id ? { ...n, isRead: true } : n)
             );
             setUnreadCount(prev => Math.max(0, prev - 1));
-        } catch (err: unknown) {
-            console.error('Mark as read failed:', err);
-        }
+        } catch {
+}
     }, []);
 
     const markAllAsRead = useCallback(async () => {
@@ -57,9 +56,8 @@ export function useNotifications(limit: number = 10) {
                 prev.map(n => ({ ...n, isRead: true }))
             );
             setUnreadCount(0);
-        } catch (err: unknown) {
-            console.error('Mark all as read failed:', err);
-        }
+        } catch {
+}
     }, []);
 
     const deleteNotification = useCallback(async (id: string) => {
@@ -73,9 +71,8 @@ export function useNotifications(limit: number = 10) {
                 return prev.filter(n => n.id !== id);
             });
             setTotal(prev => Math.max(0, prev - 1));
-        } catch (err: unknown) {
-            console.error('Delete notification failed:', err);
-        }
+        } catch {
+}
     }, []);
 
     const refresh = useCallback(() => {
@@ -119,9 +116,8 @@ export function useUnreadCount() {
             if (res.success && res.data) {
                 setCount(res.data.count);
             }
-        } catch (err: unknown) {
-            console.error('Unread count fetch failed:', err);
-        }
+        } catch {
+}
     }, []);
 
     const initialized = useRef(false);

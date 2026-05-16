@@ -34,9 +34,8 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
             setSuccess(true);
             setIsEditing(false);
             setTimeout(() => setSuccess(false), 3000);
-        } catch (error: unknown) {
-            console.error('Failed to update profile:', error);
-        } finally {
+        } catch {
+} finally {
             setIsSaving(false);
         }
     };
@@ -76,8 +75,8 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
             setCurrentAvatar(base64);
             setSuccess(true);
             setTimeout(() => setSuccess(false), 3000);
-        } catch (error: unknown) {
-            console.error('Failed to process avatar:', error);
+        } catch {
+
             setAvatarError('Nie udało się przetworzyć zdjęcia');
         } finally {
             setIsUploadingAvatar(false);
@@ -94,9 +93,8 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
             setCurrentAvatar('');
             setSuccess(true);
             setTimeout(() => setSuccess(false), 3000);
-        } catch (error: unknown) {
-            console.error('Failed to remove avatar:', error);
-        } finally {
+        } catch {
+} finally {
             setIsUploadingAvatar(false);
         }
     };

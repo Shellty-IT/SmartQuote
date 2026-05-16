@@ -87,9 +87,8 @@ export function useAI() {
             const data = await ai.getSuggestions() as SuggestionsData;
             setSuggestions(data.suggestions || []);
             setStats(data.stats || null);
-        } catch (error) {
-            console.error('Error fetching suggestions:', error);
-        }
+        } catch {
+}
     }, []);
 
     const generateOffer = useCallback(async (
@@ -100,8 +99,8 @@ export function useAI() {
         try {
             const data = await ai.generateOffer(description, clientId) as GeneratedOffer;
             return data;
-        } catch (error) {
-            console.error('Error generating offer:', error);
+        } catch {
+
             return null;
         } finally {
             setIsLoading(false);
@@ -118,8 +117,8 @@ export function useAI() {
         try {
             const data = await ai.generateEmail(type, clientName, offerTitle, customContext) as { email: string };
             return data.email;
-        } catch (error) {
-            console.error('Error generating email:', error);
+        } catch {
+
             return null;
         } finally {
             setIsLoading(false);
@@ -131,8 +130,8 @@ export function useAI() {
         try {
             const data = await ai.analyzeClient(clientId) as ClientAnalysis;
             return data;
-        } catch (error) {
-            console.error('Error analyzing client:', error);
+        } catch {
+
             return null;
         } finally {
             setIsLoading(false);
@@ -143,9 +142,8 @@ export function useAI() {
         setMessages([]);
         try {
             await ai.clearHistory();
-        } catch (error) {
-            console.error('Error clearing history:', error);
-        }
+        } catch {
+}
     }, []);
 
     return {
