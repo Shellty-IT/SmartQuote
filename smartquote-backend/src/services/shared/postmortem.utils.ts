@@ -1,5 +1,8 @@
 // smartquote_backend/src/services/shared/postmortem.utils.ts
 import { aiService } from '../ai/index';
+import { createModuleLogger } from '../../lib/logger';
+
+const log = createModuleLogger('postmortem');
 
 export function triggerPostMortem(
     userId: string,
@@ -9,9 +12,9 @@ export function triggerPostMortem(
 ): void {
     aiService.generatePostMortem(userId, offerId, outcome)
         .then(() => {
-            console.log(`✅ Post-mortem generated for offer ${offerId} [${outcome}] (${source})`);
+            log.info({ offerId, outcome, source }, 'Post-mortem generated');
         })
         .catch((err: unknown) => {
-            console.error(`❌ Post-mortem failed for offer ${offerId}:`, err);
+            log.error({ err, offerId, outcome, source }, 'Post-mortem failed');
         });
 }

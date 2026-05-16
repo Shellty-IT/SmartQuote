@@ -4,6 +4,7 @@ import prisma from '../lib/prisma';
 import bcrypt from 'bcryptjs';
 import { encrypt, decrypt } from '../utils/crypto';
 import { emailService } from './email';
+import { authCache } from '../lib/auth-cache';
 import { createModuleLogger } from '../lib/logger';
 import type { SmtpConfig } from '../types';
 
@@ -58,6 +59,10 @@ export async function changePassword(
 
     const hashedPassword = await bcrypt.hash(newPassword, 12);
     await prisma.user.update({ where: { id: userId }, data: { password: hashedPassword } });
+
+    authCache.invalidate(userId);
+    logger.info({ userId }, 'Password changed, auth cache invalidated');
+
     return { message: 'Hasło zostało zmienione' };
 }
 

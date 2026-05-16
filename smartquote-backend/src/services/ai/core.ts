@@ -1,6 +1,9 @@
 // smartquote_backend/src/services/ai/core.ts
 import { GoogleGenAI } from '@google/genai';
 import { config } from '../../config';
+import { createModuleLogger } from '../../lib/logger';
+
+const log = createModuleLogger('ai:core');
 
 export const priorityLabels: Record<string, string> = {
     URGENT: 'Pilny',
@@ -139,10 +142,10 @@ export function inferSelectedVariantFromInteractions(
 
 export function initAI(): GoogleGenAI | null {
     if (config.gemini.apiKey) {
-        console.log('✅ AI Service initialized with model:', config.gemini.model);
+        log.info({ model: config.gemini.model }, 'AI Service initialized');
         return new GoogleGenAI({ apiKey: config.gemini.apiKey });
     }
-    console.warn('⚠️ GEMINI_API_KEY not configured. AI features will be disabled.');
+    log.warn('GEMINI_API_KEY not configured — AI features disabled');
     return null;
 }
 

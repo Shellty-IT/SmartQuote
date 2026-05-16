@@ -5,6 +5,10 @@ import { AuthenticatedRequest } from '../types';
 import { ksefBridgeService } from '../services/ksef-bridge.service';
 import { ksefSendSchema, ksefWebhookSchema } from '../validators/ksef-bridge.validator';
 import { successResponse, errorResponse } from '../utils/apiResponse';
+import { config } from '../config';
+import { createModuleLogger } from '../lib/logger';
+
+const log = createModuleLogger('ksef-bridge-ctrl');
 
 export class KsefBridgeController {
     async getPreview(req: AuthenticatedRequest, res: Response) {
@@ -15,7 +19,7 @@ export class KsefBridgeController {
             }
             return successResponse(res, data);
         } catch (error: unknown) {
-            console.error('[KsefBridge] Preview error:', error);
+            log.error({ err: error, offerId: req.params.offerId }, 'Preview error');
             return errorResponse(res, 'PREVIEW_FAILED', 'Nie udało się pobrać danych podglądu', 500);
         }
     }
@@ -32,7 +36,7 @@ export class KsefBridgeController {
             const result = await ksefBridgeService.sendToKsefMaster(offerId, req.user!.id, issueDate, dueDate);
             return successResponse(res, result);
         } catch (error: unknown) {
-            console.error('[KsefBridge] Send error:', error);
+            log.error({ err: error, userId: req.user?.id }, 'Send error');
 
             if (error instanceof Error) {
                 const errorMap: Record<string, { code: string; message: string; status: number }> = {
@@ -80,7 +84,7 @@ export class KsefBridgeController {
     async webhook(req: Request, res: Response) {
         try {
             const apiKey = req.headers['x-api-key'] as string;
-            const expectedKey = process.env.KSEF_MASTER_API_KEY;
+            const expectedKey = config.ksef.masterApiKey;
 
             if (!expectedKey || apiKey !== expectedKey) {
                 return errorResponse(res, 'UNAUTHORIZED', 'Invalid API key', 401);
@@ -96,7 +100,7 @@ export class KsefBridgeController {
             const result = await ksefBridgeService.handleWebhook(smartQuoteId, action, externalId);
             return successResponse(res, result);
         } catch (error: unknown) {
-            console.error('[KsefBridge] Webhook error:', error);
+            log.error({ err: error }, 'Webhook error');
 
             if (error instanceof Error && error.message === 'OFFER_NOT_FOUND') {
                 return errorResponse(res, 'NOT_FOUND', 'Oferta nie znaleziona', 404);

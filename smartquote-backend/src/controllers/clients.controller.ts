@@ -1,86 +1,68 @@
 // src/controllers/clients.controller.ts
-import { Response } from 'express';
-import { AuthenticatedRequest } from '../types';
+import { NextFunction, Response } from 'express';
+import type { AuthenticatedRequest } from '../types';
 import { clientsService } from '../services/clients.service';
-import { successResponse, errorResponse, paginatedResponse } from '../utils/apiResponse';
+import { successResponse, paginatedResponse } from '../utils/apiResponse';
+import { NotFoundError } from '../errors/domain.errors';
 
 export class ClientsController {
-    async create(req: AuthenticatedRequest, res: Response) {
+    async create(req: AuthenticatedRequest, res: Response, next: NextFunction) {
         try {
             const client = await clientsService.create(req.user!.id, req.body);
             return successResponse(res, client, 201);
-        } catch (error) {
-            console.error('[Clients] Create error:', error);
-            return errorResponse(res, 'CREATE_FAILED', 'Nie udało się utworzyć klienta', 500);
+        } catch (err) {
+            return next(err);
         }
     }
 
-    async findById(req: AuthenticatedRequest, res: Response) {
+    async findById(req: AuthenticatedRequest, res: Response, next: NextFunction) {
         try {
             const client = await clientsService.findById(req.params.id, req.user!.id);
-
-            if (!client) {
-                return errorResponse(res, 'NOT_FOUND', 'Klient nie znaleziony', 404);
-            }
-
+            if (!client) throw new NotFoundError('Klient');
             return successResponse(res, client);
-        } catch (error) {
-            console.error('[Clients] FindById error:', error);
-            return errorResponse(res, 'FETCH_FAILED', 'Nie udało się pobrać klienta', 500);
+        } catch (err) {
+            return next(err);
         }
     }
 
-    async findAll(req: AuthenticatedRequest, res: Response) {
+    async findAll(req: AuthenticatedRequest, res: Response, next: NextFunction) {
         try {
             const { clients, total, page, limit } = await clientsService.findAll(
                 req.user!.id,
-                req.query as Record<string, string>
+                req.query as Record<string, string>,
             );
-
             return paginatedResponse(res, clients, total, page, limit);
-        } catch (error) {
-            console.error('[Clients] FindAll error:', error);
-            return errorResponse(res, 'FETCH_FAILED', 'Nie udało się pobrać listy klientów', 500);
+        } catch (err) {
+            return next(err);
         }
     }
 
-    async update(req: AuthenticatedRequest, res: Response) {
+    async update(req: AuthenticatedRequest, res: Response, next: NextFunction) {
         try {
             const client = await clientsService.update(req.params.id, req.user!.id, req.body);
-
-            if (!client) {
-                return errorResponse(res, 'NOT_FOUND', 'Klient nie znaleziony', 404);
-            }
-
+            if (!client) throw new NotFoundError('Klient');
             return successResponse(res, client);
-        } catch (error) {
-            console.error('[Clients] Update error:', error);
-            return errorResponse(res, 'UPDATE_FAILED', 'Nie udało się zaktualizować klienta', 500);
+        } catch (err) {
+            return next(err);
         }
     }
 
-    async delete(req: AuthenticatedRequest, res: Response) {
+    async delete(req: AuthenticatedRequest, res: Response, next: NextFunction) {
         try {
             const client = await clientsService.delete(req.params.id, req.user!.id);
-
-            if (!client) {
-                return errorResponse(res, 'NOT_FOUND', 'Klient nie znaleziony', 404);
-            }
-
+            if (!client) throw new NotFoundError('Klient');
             return successResponse(res, { message: 'Klient usunięty' });
-        } catch (error) {
-            console.error('[Clients] Delete error:', error);
-            return errorResponse(res, 'DELETE_FAILED', 'Nie udało się usunąć klienta', 500);
+        } catch (err) {
+            return next(err);
         }
     }
 
-    async getStats(req: AuthenticatedRequest, res: Response) {
+    async getStats(req: AuthenticatedRequest, res: Response, next: NextFunction) {
         try {
             const stats = await clientsService.getStats(req.user!.id);
             return successResponse(res, stats);
-        } catch (error) {
-            console.error('[Clients] Stats error:', error);
-            return errorResponse(res, 'STATS_FAILED', 'Nie udało się pobrać statystyk', 500);
+        } catch (err) {
+            return next(err);
         }
     }
 }

@@ -1,116 +1,75 @@
-import { Prisma } from '@prisma/client';
-import prisma from '../lib/prisma';
-import { CreateClientInput, UpdateClientInput, PaginationQuery } from '../types';
+// src/services/clients.service.ts
+import { ClientType } from '@prisma/client';
+import { clientsRepository, ClientsFilter } from '../repositories/clients.repository';
+import { NotFoundError } from '../errors/domain.errors';
+import type { CreateClientInput, UpdateClientInput, PaginationQuery } from '../types';
+
+const MAX_PAGE_LIMIT = 100;
+const DEFAULT_PAGE_LIMIT = 20;
+
+function parsePage(raw: string | undefined): number {
+    const n = parseInt(raw ?? '1', 10);
+    return Number.isNaN(n) || n < 1 ? 1 : n;
+}
+
+function parseLimit(raw: string | undefined): number {
+    const n = parseInt(raw ?? String(DEFAULT_PAGE_LIMIT), 10);
+    if (Number.isNaN(n) || n < 1) return DEFAULT_PAGE_LIMIT;
+    return Math.min(n, MAX_PAGE_LIMIT);
+}
+
+type ListClientsQuery = PaginationQuery & {
+    type?: string;
+    isActive?: string;
+};
 
 export class ClientsService {
     async create(userId: string, data: CreateClientInput) {
-        return prisma.client.create({
-            data: {
-                ...data,
-                userId,
-            },
-        });
+        return clientsRepository.create(userId, data);
     }
 
     async findById(id: string, userId: string) {
-        return prisma.client.findFirst({
-            where: { id, userId },
-            include: {
-                _count: {
-                    select: { offers: true, followUps: true },
-                },
-            },
-        });
+        return clientsRepository.findById(id, userId);
     }
 
-    async findAll(userId: string, query: PaginationQuery & { type?: string; isActive?: string }) {
-        const page = parseInt(query.page || '1', 10);
-        const limit = parseInt(query.limit || '20', 10);
+    async findAll(userId: string, query: ListClientsQuery) {
+        const page = parsePage(query.page);
+        const limit = parseLimit(query.limit);
         const skip = (page - 1) * limit;
 
-        const where: Prisma.ClientWhereInput = { userId };
-
-        if (query.search) {
-            where.OR = [
-                { name: { contains: query.search, mode: 'insensitive' } },
-                { email: { contains: query.search, mode: 'insensitive' } },
-                { company: { contains: query.search, mode: 'insensitive' } },
-                { nip: { contains: query.search } },
-            ];
-        }
-
-        if (query.type) {
-            where.type = query.type as any;
-        }
-
-        if (query.isActive !== undefined) {
-            where.isActive = query.isActive === 'true';
-        }
-
-        const orderBy: Prisma.ClientOrderByWithRelationInput = {};
-        const sortBy = query.sortBy || 'createdAt';
-        const sortOrder = query.sortOrder || 'desc';
-        orderBy[sortBy as keyof Prisma.ClientOrderByWithRelationInput] = sortOrder;
+        const filter: ClientsFilter = {
+            userId,
+            skip,
+            take: limit,
+            search: query.search,
+            type: query.type as ClientType | undefined,
+            isActive: query.isActive !== undefined ? query.isActive === 'true' : undefined,
+            sortBy: (query.sortBy as ClientsFilter['sortBy']) ?? 'createdAt',
+            sortOrder: query.sortOrder ?? 'desc',
+        };
 
         const [clients, total] = await Promise.all([
-            prisma.client.findMany({
-                where,
-                orderBy,
-                skip,
-                take: limit,
-                include: {
-                    _count: {
-                        select: { offers: true },
-                    },
-                },
-            }),
-            prisma.client.count({ where }),
+            clientsRepository.findMany(filter),
+            clientsRepository.count(filter),
         ]);
 
         return { clients, total, page, limit };
     }
 
     async update(id: string, userId: string, data: UpdateClientInput) {
-        const existing = await prisma.client.findFirst({
-            where: { id, userId },
-        });
-
-        if (!existing) {
-            return null;
-        }
-
-        return prisma.client.update({
-            where: { id },
-            data,
-        });
+        const exists = await clientsRepository.existsForUser(id, userId);
+        if (!exists) throw new NotFoundError('Klient');
+        return clientsRepository.update(id, data);
     }
 
     async delete(id: string, userId: string) {
-        const existing = await prisma.client.findFirst({
-            where: { id, userId },
-        });
-
-        if (!existing) {
-            return null;
-        }
-
-        return prisma.client.delete({
-            where: { id },
-        });
+        const exists = await clientsRepository.existsForUser(id, userId);
+        if (!exists) throw new NotFoundError('Klient');
+        return clientsRepository.delete(id);
     }
 
     async getStats(userId: string) {
-        const [total, active, withOffers] = await Promise.all([
-            prisma.client.count({ where: { userId } }),
-            prisma.client.count({ where: { userId, isActive: true } }),
-            prisma.client.count({
-                where: {
-                    userId,
-                    offers: { some: {} },
-                },
-            }),
-        ]);
-
+        const [total, active, withOffers] = await clientsRepository.countStats(userId);
         return { total, active, inactive: total - active, withOffers };
     }
 }

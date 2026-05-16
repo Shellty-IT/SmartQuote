@@ -1,12 +1,17 @@
 // src/services/auth.service.ts
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import prisma from '../lib/prisma';
+import { config } from '../config';
+import { ConflictError, NotFoundError, UnauthorizedError } from '../errors/domain.errors';
+import { createModuleLogger } from '../lib/logger';
+
+const log = createModuleLogger('auth');
 
 interface RegisterInput {
     email: string;
     password: string;
-    name: string;
+    name?: string | null;
 }
 
 interface LoginInput {
@@ -14,84 +19,79 @@ interface LoginInput {
     password: string;
 }
 
+interface AuthUser {
+    id: string;
+    email: string;
+    name: string | null;
+    role: string;
+}
+
 interface AuthResponse {
-    user: {
-        id: string;
-        email: string;
-        name: string | null;
-        role: string;
-    };
+    user: AuthUser;
     token: string;
 }
 
-function generateToken(userId: string, email: string): string {
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-        throw new Error('JWT_SECRET is not defined');
-    }
-    return jwt.sign({ userId, email }, secret, { expiresIn: '7d' });
+const TOKEN_EXPIRES_IN: SignOptions['expiresIn'] = '7d';
+
+function signToken(userId: string, email: string): string {
+    return jwt.sign({ id: userId, userId, email }, config.jwtSecret, { expiresIn: TOKEN_EXPIRES_IN });
 }
 
 export async function register(data: RegisterInput): Promise<AuthResponse> {
-    const existingUser = await prisma.user.findUnique({
-        where: { email: data.email.toLowerCase() },
-    });
+    const email = data.email.toLowerCase();
 
+    const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-        throw new Error('EMAIL_EXISTS');
+        throw new ConflictError('Użytkownik z tym adresem email już istnieje');
     }
 
-    const hashedPassword = await bcrypt.hash(data.password, 12);
+    const hashedPassword = await bcrypt.hash(data.password, config.saltRounds);
 
     const user = await prisma.user.create({
         data: {
-            email: data.email.toLowerCase(),
+            email,
             password: hashedPassword,
-            name: data.name,
+            name: data.name ?? null,
         },
     });
 
-    await prisma.userSettings.create({
-        data: { userId: user.id },
+    await prisma.userSettings.create({ data: { userId: user.id } }).catch((err: unknown) => {
+        log.warn({ err, userId: user.id }, 'Failed to create default userSettings');
     });
 
-    const token = generateToken(user.id, user.email);
+    log.info({ userId: user.id, email: user.email }, 'User registered');
 
     return {
-        user: {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-        },
-        token,
+        user: { id: user.id, email: user.email, name: user.name, role: user.role },
+        token: signToken(user.id, user.email),
     };
 }
 
 export async function login(data: LoginInput): Promise<AuthResponse> {
-    const user = await prisma.user.findUnique({
-        where: { email: data.email.toLowerCase() },
-    });
+    const email = data.email.toLowerCase();
+    const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
-        throw new Error('INVALID_CREDENTIALS');
+        log.warn({ email }, 'Login attempt for unknown email');
+        throw new UnauthorizedError('Nieprawidłowy email lub hasło');
     }
 
     const isValid = await bcrypt.compare(data.password, user.password);
     if (!isValid) {
-        throw new Error('INVALID_CREDENTIALS');
+        log.warn({ userId: user.id }, 'Login failed: invalid password');
+        throw new UnauthorizedError('Nieprawidłowy email lub hasło');
     }
 
-    const token = generateToken(user.id, user.email);
+    if (!user.isActive) {
+        log.warn({ userId: user.id }, 'Login attempt for inactive user');
+        throw new UnauthorizedError('Konto jest nieaktywne');
+    }
+
+    log.info({ userId: user.id }, 'User logged in');
 
     return {
-        user: {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-        },
-        token,
+        user: { id: user.id, email: user.email, name: user.name, role: user.role },
+        token: signToken(user.id, user.email),
     };
 }
 
@@ -124,8 +124,13 @@ export async function getMe(userId: string) {
     });
 
     if (!user) {
-        throw new Error('USER_NOT_FOUND');
+        throw new NotFoundError('Użytkownik');
     }
 
-    return user;
+    return {
+        ...user,
+        company: user.companyInfo?.name ?? null,
+    };
 }
+
+export const authService = { register, login, getMe };

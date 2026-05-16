@@ -3,6 +3,7 @@ import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../types';
 import { aiService } from '../services/ai';
 import { successResponse, paginatedResponse } from '../utils/apiResponse';
+import { parseQueryInt } from '../utils/queryParsers';
 import { ValidationError } from '../errors/domain.errors';
 
 export class AIController {
@@ -119,7 +120,7 @@ export class AIController {
     async latestInsights(req: AuthenticatedRequest, res: Response, next: NextFunction) {
         try {
             const userId = req.user!.id;
-            const limit = req.query.limit ? Number(req.query.limit) : 3;
+            const limit = parseQueryInt(req.query.limit as string | undefined, 3, 20);
 
             const result = await aiService.getLatestInsights(userId, limit);
             return successResponse(res, result);

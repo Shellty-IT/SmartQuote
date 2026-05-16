@@ -1,6 +1,9 @@
 // smartquote_backend/src/services/followupReminder.service.ts
 import prisma from '../lib/prisma';
 import { notificationService } from './notification.service';
+import { createModuleLogger } from '../lib/logger';
+
+const log = createModuleLogger('followup-reminder');
 
 interface ProcessResult {
     processed: number;
@@ -72,14 +75,14 @@ class FollowUpReminderService {
 
                     processed++;
                 } catch (err: unknown) {
-                    console.error(`❌ Follow-up reminder failed for ${followUp.id}:`, err);
+                    log.error({ err, followUpId: followUp.id }, 'Follow-up reminder failed');
                     errors++;
                 }
             }
 
-            console.log(`📋 Follow-up reminders: ${processed} sent, ${errors} errors`);
+            log.info({ processed, errors }, 'Follow-up reminder batch completed');
         } catch (err: unknown) {
-            console.error('❌ Follow-up reminder batch error:', err);
+            log.error({ err }, 'Follow-up reminder batch error');
         } finally {
             this.isRunning = false;
             this.lastRunAt = Date.now();

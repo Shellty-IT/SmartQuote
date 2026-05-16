@@ -2,15 +2,24 @@
 import { Request, Response } from 'express';
 import { followUpReminderService } from '../services/followupReminder.service';
 import { successResponse, errorResponse } from '../utils/apiResponse';
+import { config } from '../config';
+import { createModuleLogger } from '../lib/logger';
+
+const log = createModuleLogger('followup-reminder-ctrl');
+
+function checkCronAuth(req: Request, res: Response): boolean {
+    const authHeader = req.headers['x-cron-secret'];
+    const expectedSecret = config.cronSecret;
+    if (expectedSecret && authHeader !== expectedSecret) {
+        errorResponse(res, 'UNAUTHORIZED', 'Invalid cron secret', 401);
+        return false;
+    }
+    return true;
+}
 
 export const triggerReminders = async (req: Request, res: Response) => {
     try {
-        const authHeader = req.headers['x-cron-secret'];
-        const expectedSecret = process.env.CRON_SECRET;
-
-        if (expectedSecret && authHeader !== expectedSecret) {
-            return errorResponse(res, 'UNAUTHORIZED', 'Invalid cron secret', 401);
-        }
+        if (!checkCronAuth(req, res)) return;
 
         const result = await followUpReminderService.processOverdueFollowUps();
 
@@ -20,24 +29,19 @@ export const triggerReminders = async (req: Request, res: Response) => {
             skipped: result.skipped,
         });
     } catch (error: unknown) {
-        console.error('[FollowUpReminder] Trigger error:', error);
+        log.error({ err: error }, 'Trigger error');
         return errorResponse(res, 'INTERNAL_ERROR', 'Błąd przetwarzania przypomnień', 500);
     }
 };
 
 export const getReminderStatus = async (req: Request, res: Response) => {
     try {
-        const authHeader = req.headers['x-cron-secret'];
-        const expectedSecret = process.env.CRON_SECRET;
-
-        if (expectedSecret && authHeader !== expectedSecret) {
-            return errorResponse(res, 'UNAUTHORIZED', 'Invalid cron secret', 401);
-        }
+        if (!checkCronAuth(req, res)) return;
 
         const status = followUpReminderService.getStatus();
         return successResponse(res, status);
     } catch (error: unknown) {
-        console.error('[FollowUpReminder] Status error:', error);
+        log.error({ err: error }, 'Status error');
         return errorResponse(res, 'INTERNAL_ERROR', 'Błąd pobierania statusu', 500);
     }
 };

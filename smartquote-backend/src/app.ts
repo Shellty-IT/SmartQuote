@@ -99,7 +99,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     next();
 });
 
-app.get('/health', async (_req: Request, res: Response) => {
+const healthHandler = async (_req: Request, res: Response) => {
     try {
         await prisma.$queryRaw`SELECT 1`;
         res.status(200).json({
@@ -116,26 +116,10 @@ app.get('/health', async (_req: Request, res: Response) => {
             services: { database: 'error' },
         });
     }
-});
+};
 
-app.get('/api/health', async (_req: Request, res: Response) => {
-    try {
-        await prisma.$queryRaw`SELECT 1`;
-        res.status(200).json({
-            status: 'ok',
-            timestamp: new Date().toISOString(),
-            uptime: process.uptime(),
-            services: { database: 'ok' },
-        });
-    } catch {
-        res.status(503).json({
-            status: 'degraded',
-            timestamp: new Date().toISOString(),
-            uptime: process.uptime(),
-            services: { database: 'error' },
-        });
-    }
-});
+app.get('/health', healthHandler);
+app.get('/api/health', healthHandler);
 
 app.use('/api', routes);
 

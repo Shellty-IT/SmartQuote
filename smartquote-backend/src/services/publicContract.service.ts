@@ -3,6 +3,10 @@ import { createHash } from 'crypto';
 import prisma from '../lib/prisma';
 import { Prisma } from '@prisma/client';
 import { emailService } from './email';
+import { createModuleLogger } from '../lib/logger';
+import { config } from '../config';
+
+const log = createModuleLogger('public-contract');
 
 interface SignContractInput {
     signerName: string;
@@ -168,12 +172,12 @@ export class PublicContractService {
                 } as unknown as Prisma.InputJsonValue,
             },
         }).catch((err: unknown) => {
-            console.error('[PublicContract] Notification error:', err);
+            log.error({ err, contractId: contract.id }, 'Notification error');
         });
 
         const settings = contract.user.settings;
         if (settings?.smtpConfigured && settings.smtpHost && settings.smtpUser && settings.smtpPass) {
-            const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/$/, '');
+            const frontendUrl = config.frontendUrl.replace(/\/$/, '');
             const smtpConfig = {
                 host: settings.smtpHost,
                 port: settings.smtpPort || 587,
@@ -198,7 +202,7 @@ export class PublicContractService {
                 },
                 smtpConfig
             ).catch((err: unknown) => {
-                console.error('[PublicContract] Signature email error:', err);
+                log.error({ err, contractId: contract.id }, 'Signature email error');
             });
         }
 

@@ -3,6 +3,9 @@
 import { Request, Response } from 'express';
 import { publicOfferService } from '../services/publicOffer.service';
 import { successResponse, errorResponse } from '../utils/apiResponse';
+import { createModuleLogger } from '../lib/logger';
+
+const log = createModuleLogger('public-offer-ctrl');
 
 const ERROR_MAP: Record<string, { message: string; status: number }> = {
     NOT_FOUND: { message: 'Oferta nie została znaleziona', status: 404 },
@@ -33,7 +36,7 @@ export class PublicOfferController {
 
             return successResponse(res, result);
         } catch (error) {
-            console.error('[PublicOffer] GetOffer error:', error);
+            log.error({ err: error, token: req.params.token }, 'GetOffer error');
             return errorResponse(res, 'INTERNAL_ERROR', 'Błąd serwera', 500);
         }
     }
@@ -48,7 +51,7 @@ export class PublicOfferController {
 
             return successResponse(res, { registered: true });
         } catch (error) {
-            console.error('[PublicOffer] RegisterView error:', error);
+            log.error({ err: error, token: req.params.token }, 'RegisterView error');
             return errorResponse(res, 'INTERNAL_ERROR', 'Błąd serwera', 500);
         }
     }
@@ -85,7 +88,7 @@ export class PublicOfferController {
 
             return errorResponse(res, 'UNKNOWN_ERROR', 'Nieznany błąd', 400);
         } catch (error) {
-            console.error('[PublicOffer] AcceptOffer error:', error);
+            log.error({ err: error, token: req.params.token }, 'AcceptOffer error');
             return errorResponse(res, 'INTERNAL_ERROR', 'Błąd serwera', 500);
         }
     }
@@ -107,7 +110,7 @@ export class PublicOfferController {
 
             return errorResponse(res, 'UNKNOWN_ERROR', 'Nieznany błąd', 400);
         } catch (error) {
-            console.error('[PublicOffer] RejectOffer error:', error);
+            log.error({ err: error, token: req.params.token }, 'RejectOffer error');
             return errorResponse(res, 'INTERNAL_ERROR', 'Błąd serwera', 500);
         }
     }
@@ -125,7 +128,7 @@ export class PublicOfferController {
 
             return successResponse(res, result.comment, 201);
         } catch (error) {
-            console.error('[PublicOffer] AddComment error:', error);
+            log.error({ err: error, token: req.params.token }, 'AddComment error');
             return errorResponse(res, 'INTERNAL_ERROR', 'Błąd serwera', 500);
         }
     }
@@ -139,7 +142,7 @@ export class PublicOfferController {
 
             return successResponse(res, { tracked: true });
         } catch (error) {
-            console.error('[PublicOffer] TrackSelection error:', error);
+            log.error({ err: error, token: req.params.token }, 'TrackSelection error');
             return errorResponse(res, 'INTERNAL_ERROR', 'Błąd serwera', 500);
         }
     }

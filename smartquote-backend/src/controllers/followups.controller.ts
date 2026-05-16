@@ -5,6 +5,7 @@ import { FollowUpType, FollowUpStatus, Priority } from '@prisma/client';
 import { AuthenticatedRequest } from '../types';
 import followUpsService from '../services/followups.service';
 import { successResponse, errorResponse, paginatedResponse } from '../utils/apiResponse';
+import { parseQueryInt } from '../utils/queryParsers';
 
 // Stałe do walidacji
 const VALID_STATUSES: FollowUpStatus[] = ['PENDING', 'COMPLETED', 'CANCELLED', 'OVERDUE'];
@@ -25,8 +26,8 @@ export const followUpsController = {
             const priorityParam = req.query.priority as string | undefined;
 
             const query = {
-                page: req.query.page ? parseInt(req.query.page as string) : 1,
-                limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
+                page: parseQueryInt(req.query.page as string | undefined, 1),
+                limit: parseQueryInt(req.query.limit as string | undefined, 10, 100),
                 search: req.query.search as string | undefined,
                 status: statusParam && VALID_STATUSES.includes(statusParam as FollowUpStatus)
                     ? statusParam as FollowUpStatus
@@ -45,7 +46,9 @@ export const followUpsController = {
                 sortBy: (req.query.sortBy as string) || 'dueDate',
                 sortOrder: (req.query.sortOrder as 'asc' | 'desc') || 'asc',
                 overdue: req.query.overdue === 'true',
-                upcoming: req.query.upcoming ? parseInt(req.query.upcoming as string) : undefined,
+                upcoming: req.query.upcoming
+                    ? parseQueryInt(req.query.upcoming as string | undefined, 7, 90)
+                    : undefined,
             };
 
             const result = await followUpsService.findAll(userId, query);
@@ -82,8 +85,8 @@ export const followUpsController = {
     async getUpcoming(req: AuthenticatedRequest, res: Response, next: NextFunction) {
         try {
             const userId = req.user!.id;
-            const days = req.query.days ? parseInt(req.query.days as string) : 7;
-            const limit = req.query.limit ? parseInt(req.query.limit as string) : 5;
+            const days = parseQueryInt(req.query.days as string | undefined, 7, 90);
+            const limit = parseQueryInt(req.query.limit as string | undefined, 5, 100);
 
             const followUps = await followUpsService.getUpcoming(userId, days, limit);
 
@@ -99,7 +102,9 @@ export const followUpsController = {
     async getOverdue(req: AuthenticatedRequest, res: Response, next: NextFunction) {
         try {
             const userId = req.user!.id;
-            const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+            const limit = req.query.limit
+                ? parseQueryInt(req.query.limit as string | undefined, 20, 100)
+                : undefined;
 
             const followUps = await followUpsService.getOverdue(userId, limit);
 

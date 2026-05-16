@@ -7,6 +7,7 @@ import { successResponse, paginatedResponse } from '../utils/apiResponse';
 import { mapToPDFUser, mapToPDFClient } from '../services/pdf/data-mapper';
 import { NotFoundError } from '../errors/domain.errors';
 import { ContractStatus } from '@prisma/client';
+import { parseQueryInt } from '../utils/queryParsers';
 
 export class ContractsController {
     async getContracts(req: Request, res: Response, next: NextFunction) {
@@ -16,8 +17,8 @@ export class ContractsController {
 
             const result = await contractsService.getContracts({
                 userId,
-                page: page ? parseInt(page as string) : 1,
-                limit: limit ? parseInt(limit as string) : 10,
+                page: parseQueryInt(page as string | undefined, 1),
+                limit: parseQueryInt(limit as string | undefined, 10, 100),
                 status: status as ContractStatus | undefined,
                 clientId: clientId as string | undefined,
                 search: search as string | undefined,

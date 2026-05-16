@@ -2,6 +2,7 @@
 import { Response } from 'express';
 import { emailComposerService } from '../services/email-composer.service';
 import { successResponse, errorResponse } from '../utils/apiResponse';
+import { parseQueryInt } from '../utils/queryParsers';
 import type { AuthenticatedRequest, EmailLogStatus } from '../types';
 
 export const emailComposerController = {
@@ -101,8 +102,8 @@ export const emailComposerController = {
 
             const result = await emailComposerService.getEmailLogs({
                 userId,
-                page: page ? parseInt(page) : 1,
-                limit: limit ? Math.min(parseInt(limit), 50) : 20,
+                page: parseQueryInt(page, 1),
+                limit: parseQueryInt(limit, 20, 50),
                 status: status as EmailLogStatus | undefined,
                 clientId,
                 offerId,
