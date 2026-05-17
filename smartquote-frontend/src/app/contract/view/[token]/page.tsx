@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, use } from 'react';
+import Image from 'next/image';
 import SignContractDialog from '@/components/publicContract/SignContractDialog';
 
 interface PageProps {
@@ -300,8 +301,7 @@ export default function PublicContractPage({ params }: PageProps) {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
                             {contract.seller.logo && (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img src={contract.seller.logo} alt="" className="w-10 h-10 rounded-lg bg-white/20 object-contain" />
+                                <Image src={contract.seller.logo} alt="" width={40} height={40} className="rounded-lg bg-white/20 object-contain" unoptimized={contract.seller.logo.startsWith('data:')} />
                             )}
                             <div>
                                 <p className="text-white/80 text-sm">{contract.seller.name || 'SmartQuote'}</p>

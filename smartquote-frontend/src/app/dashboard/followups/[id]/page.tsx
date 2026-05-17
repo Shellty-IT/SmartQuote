@@ -51,9 +51,8 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
         try {
             await followUpsApi.complete(followUp.id);
             refetch();
-        } catch (error) {
-            console.error('Error completing follow-up:', error);
-        } finally {
+        } catch {
+} finally {
             setIsCompleting(false);
         }
     };
@@ -64,9 +63,8 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
         try {
             await followUpsApi.delete(followUp.id);
             router.push('/dashboard/followups');
-        } catch (error) {
-            console.error('Error deleting follow-up:', error);
-        } finally {
+        } catch {
+} finally {
             setIsDeleting(false);
         }
     };

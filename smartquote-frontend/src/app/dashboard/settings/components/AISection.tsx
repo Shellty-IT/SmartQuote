@@ -53,9 +53,9 @@ export default function AISection({ settings, onUpdate }: Props) {
             await onUpdate({ aiTone: tone });
             setSuccess(true);
             setTimeout(() => setSuccess(false), 2000);
-        } catch (error: unknown) {
+        } catch {
             setLocalSettings(prev => ({ ...prev, aiTone: previousTone }));
-            console.error('Failed to update AI tone:', error);
+
         } finally {
             setIsSaving(false);
         }
@@ -70,9 +70,9 @@ export default function AISection({ settings, onUpdate }: Props) {
             await onUpdate({ aiAutoSuggestions: value });
             setSuccess(true);
             setTimeout(() => setSuccess(false), 2000);
-        } catch (error: unknown) {
+        } catch {
             setLocalSettings(prev => ({ ...prev, aiAutoSuggestions: !value }));
-            console.error('Failed to update AI suggestions:', error);
+
         } finally {
             setIsSaving(false);
         }

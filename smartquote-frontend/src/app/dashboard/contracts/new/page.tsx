@@ -63,23 +63,28 @@ function NewContractForm() {
         e.preventDefault();
         setLoading(true);
 
-        const response = await createContract({
-            ...formData,
-            paymentDays: Number(formData.paymentDays),
-            items: formData.items.map((item, index) => ({
-                ...item,
-                quantity: Number(item.quantity),
-                unitPrice: Number(item.unitPrice),
-                vatRate: Number(item.vatRate),
-                discount: Number(item.discount),
-                position: index,
-            })),
-        });
+        try {
+            const response = await createContract({
+                ...formData,
+                paymentDays: Number(formData.paymentDays),
+                items: formData.items.map((item, index) => ({
+                    ...item,
+                    quantity: Number(item.quantity),
+                    unitPrice: Number(item.unitPrice),
+                    vatRate: Number(item.vatRate),
+                    discount: Number(item.discount),
+                    position: index,
+                })),
+            });
 
-        if (response.success && response.data) {
-            toast.success('Umowa utworzona', `"${formData.title}" została zapisana`);
-            router.push(`/dashboard/contracts/${response.data.id}`);
-        } else {
+            if (response.success && response.data) {
+                toast.success('Umowa utworzona', `"${formData.title}" została zapisana`);
+                router.push(`/dashboard/contracts/${response.data.id}`);
+            } else {
+                toast.error('Błąd', 'Nie udało się utworzyć umowy');
+                setLoading(false);
+            }
+        } catch {
             toast.error('Błąd', 'Nie udało się utworzyć umowy');
             setLoading(false);
         }

@@ -31,8 +31,8 @@ export function useChatMessages() {
                     timestamp: new Date(m.timestamp),
                 }))
             );
-        } catch (error) {
-            console.error('Failed to load chat messages:', error);
+        } catch {
+
             localStorage.removeItem(STORAGE_KEY);
         }
     }, []);
@@ -41,9 +41,8 @@ export function useChatMessages() {
         if (messages.length > 0) {
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
-            } catch (error) {
-                console.error('Failed to save chat messages:', error);
-            }
+            } catch {
+}
         }
     }, [messages]);
 

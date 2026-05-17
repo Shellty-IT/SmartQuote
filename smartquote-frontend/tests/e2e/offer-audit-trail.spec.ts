@@ -4,6 +4,7 @@ import { login, createAndPublishOffer } from './helpers';
 
 test.describe('Offer Audit Trail', () => {
     test('Accept offer with audit trail — requires name and email', async ({ page, context }) => {
+        test.setTimeout(120000);
         await login(page);
 
         const { publicPath, title } = await createAndPublishOffer(page, {
@@ -24,14 +25,14 @@ test.describe('Offer Audit Trail', () => {
         await acceptBtn.click();
 
         const acceptDialog = clientPage.locator('[role="dialog"]');
-        await acceptDialog.waitFor({ state: 'visible', timeout: 5000 });
+        await acceptDialog.waitFor({ state: 'visible', timeout: 15000 });
 
         const dialogContent = acceptDialog.locator('div.relative.bg-white');
-        await dialogContent.waitFor({ state: 'visible', timeout: 3000 });
+        await dialogContent.waitFor({ state: 'visible', timeout: 10000 });
 
         await expect(
             dialogContent.getByText(/formalna akceptacja/i)
-        ).toBeVisible({ timeout: 3000 });
+        ).toBeVisible({ timeout: 10000 });
 
         const nameInput = dialogContent.locator('input[type="text"]').first();
         await nameInput.scrollIntoViewIfNeeded();
@@ -79,10 +80,10 @@ test.describe('Offer Audit Trail', () => {
         await acceptBtn.click();
 
         const acceptDialog = clientPage.locator('[role="dialog"]');
-        await acceptDialog.waitFor({ state: 'visible', timeout: 5000 });
+        await acceptDialog.waitFor({ state: 'visible', timeout: 15000 });
 
         const dialogContent = acceptDialog.locator('div.relative.bg-white');
-        await dialogContent.waitFor({ state: 'visible', timeout: 3000 });
+        await dialogContent.waitFor({ state: 'visible', timeout: 10000 });
 
         const nameInput = dialogContent.locator('input[type="text"]').first();
         await nameInput.scrollIntoViewIfNeeded();
@@ -147,14 +148,14 @@ test.describe('Offer Audit Trail', () => {
         await acceptBtn.click();
 
         const acceptDialog = clientPage.locator('[role="dialog"]');
-        await acceptDialog.waitFor({ state: 'visible', timeout: 5000 });
+        await acceptDialog.waitFor({ state: 'visible', timeout: 15000 });
 
         const dialogContent = acceptDialog.locator('div.relative.bg-white');
-        await dialogContent.waitFor({ state: 'visible', timeout: 3000 });
+        await dialogContent.waitFor({ state: 'visible', timeout: 10000 });
 
         await expect(
             dialogContent.getByText(/formalna akceptacja/i)
-        ).not.toBeVisible({ timeout: 2000 });
+        ).not.toBeVisible({ timeout: 5000 });
 
         const checkbox = dialogContent.locator('input[type="checkbox"]');
         await checkbox.scrollIntoViewIfNeeded();

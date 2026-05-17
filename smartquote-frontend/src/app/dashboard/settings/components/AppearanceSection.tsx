@@ -25,9 +25,8 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
             await onUpdate({ theme: newTheme } as UpdateSettingsInput);
             setSuccess(true);
             setTimeout(() => setSuccess(false), 2000);
-        } catch (error: unknown) {
-            console.error('Failed to update theme:', error);
-        } finally {
+        } catch {
+} finally {
             setIsSaving(false);
         }
     };
@@ -41,9 +40,9 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
             await onUpdate({ language: value } as UpdateSettingsInput);
             setSuccess(true);
             setTimeout(() => setSuccess(false), 2000);
-        } catch (error: unknown) {
+        } catch {
             setLocalLanguage(previousValue);
-            console.error('Failed to update language:', error);
+
         } finally {
             setIsSaving(false);
         }
