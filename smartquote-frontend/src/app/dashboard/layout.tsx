@@ -1,0 +1,50 @@
+// src/app/dashboard/layout.tsx
+'use client';
+
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import Sidebar from './components/Sidebar';
+import Header from './components/Header';
+import { GlobalAIChat } from '@/components/ai/GlobalAIChat';
+
+export default function DashboardLayout({
+                                            children,
+                                        }: {
+    children: React.ReactNode;
+}) {
+    const { status } = useSession();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            router.push('/');
+        }
+    }, [status, router]);
+
+    if (status === 'loading') {
+        return (
+            <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--background)' }}>
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+                    <p className="text-themed-muted font-medium">Ładowanie...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (status === 'unauthenticated') {
+        return null;
+    }
+
+    return (
+        <div className="min-h-screen" style={{ backgroundColor: 'var(--background)' }}>
+            <Sidebar />
+            <div className="lg:pl-64">
+                <Header />
+                <main>{children}</main>
+            </div>
+            <GlobalAIChat />
+        </div>
+    );
+}

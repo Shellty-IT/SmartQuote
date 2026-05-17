@@ -1,0 +1,416 @@
+// src/app/dashboard/components/Sidebar.tsx
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { usePathname } from 'next/navigation';
+import { signOut } from 'next-auth/react';
+import { useSidebarStats } from '@/hooks/useSidebarStats';
+import { useUnreadCount } from '@/hooks/useNotifications';
+
+export default function Sidebar() {
+    const pathname = usePathname();
+    const { stats, isLoading: loading } = useSidebarStats();
+    const { count: unreadNotifications } = useUnreadCount();
+    const [isMobileOpen, setIsMobileOpen] = useState(false);
+    const prevPathnameRef = useRef(pathname);
+
+    useEffect(() => {
+        if (prevPathnameRef.current !== pathname) {
+            prevPathnameRef.current = pathname;
+            requestAnimationFrame(() => {
+                setIsMobileOpen(false);
+            });
+        }
+    }, [pathname]);
+
+    useEffect(() => {
+        if (isMobileOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isMobileOpen]);
+
+    const navigation = [
+        {
+            name: 'Dashboard',
+            href: '/dashboard',
+            icon: HomeIcon,
+            badge: null,
+            badgeColor: undefined,
+        },
+        {
+            name: 'Oferty',
+            href: '/dashboard/offers',
+            icon: DocumentIcon,
+            badge: stats.offers,
+            badgeColor: 'cyan',
+        },
+        {
+            name: 'Szablony ofert',
+            href: '/dashboard/offer-templates',
+            icon: TemplateIcon,
+            badge: null,
+            badgeColor: undefined,
+        },
+        {
+            name: 'Umowy',
+            href: '/dashboard/contracts',
+            icon: ClipboardIcon,
+            badge: stats.contracts > 0 ? stats.contracts : null,
+            badgeColor: 'green',
+        },
+        {
+            name: 'Klienci',
+            href: '/dashboard/clients',
+            icon: UsersIcon,
+            badge: stats.clients,
+            badgeColor: 'blue',
+        },
+        {
+            name: 'Follow-upy',
+            href: '/dashboard/followups',
+            icon: CalendarIcon,
+            badge: stats.followups > 0 ? stats.followups : null,
+            badgeColor: 'orange',
+        },
+        {
+            name: 'Korespondencja',
+            href: '/dashboard/emails',
+            icon: EnvelopeIcon,
+            badge: null,
+            badgeColor: undefined,
+        },
+        {
+            name: 'Powiadomienia',
+            href: '/dashboard/notifications',
+            icon: BellIcon,
+            badge: unreadNotifications > 0 ? unreadNotifications : null,
+            badgeColor: 'purple',
+        },
+        {
+            name: 'AI Asystent',
+            href: '/dashboard/ai',
+            icon: SparklesIcon,
+            badge: null,
+            badgeColor: undefined,
+        },
+        {
+            name: 'Wnioski AI',
+            href: '/dashboard/ai-insights',
+            icon: LightBulbIcon,
+            badge: null,
+            badgeColor: undefined,
+        },
+    ];
+
+    const bottomNav = [
+        { name: 'Ustawienia', href: '/dashboard/settings', icon: SettingsIcon },
+    ];
+
+    const badgeColors: Record<string, { active: string; inactive: string }> = {
+        cyan: {
+            active: 'bg-cyan-600 text-white dark:bg-cyan-500 dark:text-white',
+            inactive: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-400',
+        },
+        blue: {
+            active: 'bg-blue-600 text-white dark:bg-blue-500 dark:text-white',
+            inactive: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400',
+        },
+        green: {
+            active: 'bg-emerald-600 text-white dark:bg-emerald-500 dark:text-white',
+            inactive: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400',
+        },
+        orange: {
+            active: 'bg-orange-600 text-white dark:bg-orange-500 dark:text-white',
+            inactive: 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400',
+        },
+        purple: {
+            active: 'bg-purple-600 text-white dark:bg-purple-500 dark:text-white',
+            inactive: 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400',
+        },
+    };
+
+    const sidebarContent = (
+        <>
+            <div
+                className="flex h-16 items-center gap-3 px-6 border-b"
+                style={{ borderColor: 'var(--sidebar-divider)' }}
+            >
+                <Image
+                    src="/android-chrome-512x512.png"
+                    alt="SmartQuote AI"
+                    width={48}
+                    height={48}
+                    className="flex-shrink-0"
+                />
+                <div className="flex-1">
+                    <span
+                        className="text-lg font-bold"
+                        style={{ color: 'var(--sidebar-logo-text)' }}
+                    >
+                        SmartQuote
+                    </span>
+                    <span
+                        className="ml-1 text-xs font-medium"
+                        style={{ color: 'var(--sidebar-logo-accent)' }}
+                    >
+                        AI
+                    </span>
+                </div>
+                <button
+                    onClick={() => setIsMobileOpen(false)}
+                    className="p-2 lg:hidden transition-colors"
+                    style={{ color: 'var(--sidebar-text-muted)' }}
+                    aria-label="Zamknij menu"
+                >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <nav className="flex flex-col justify-between h-[calc(100vh-4rem)] px-3 py-4">
+                <div className="space-y-0.5">
+                    {navigation.map((item) => {
+                        const isActive =
+                            pathname === item.href ||
+                            (item.href !== '/dashboard' && pathname.startsWith(item.href + '/'));
+                        const colorConfig = item.badgeColor ? badgeColors[item.badgeColor] : badgeColors.cyan;
+
+                        return (
+                            <Link
+                                key={item.name}
+                                href={item.href}
+                                onClick={() => setIsMobileOpen(false)}
+                                className={`group flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                    isActive ? 'border' : 'border border-transparent'
+                                }`}
+                                style={isActive ? {
+                                    backgroundColor: 'var(--sidebar-active-bg)',
+                                    borderColor: 'var(--sidebar-active-border)',
+                                    color: 'var(--sidebar-active-text)',
+                                } : {
+                                    color: 'var(--sidebar-text-muted)',
+                                }}
+                                onMouseEnter={e => {
+                                    if (!isActive) {
+                                        (e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'var(--sidebar-hover-bg)';
+                                        (e.currentTarget as HTMLAnchorElement).style.color = 'var(--sidebar-text)';
+                                    }
+                                }}
+                                onMouseLeave={e => {
+                                    if (!isActive) {
+                                        (e.currentTarget as HTMLAnchorElement).style.backgroundColor = '';
+                                        (e.currentTarget as HTMLAnchorElement).style.color = 'var(--sidebar-text-muted)';
+                                    }
+                                }}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <item.icon
+                                        className="h-5 w-5 flex-shrink-0"
+                                        style={{
+                                            color: isActive
+                                                ? 'var(--sidebar-active-icon)'
+                                                : 'var(--sidebar-icon)',
+                                        } as React.CSSProperties}
+                                    />
+                                    {item.name}
+                                </div>
+                                {item.badge !== null && item.badge !== undefined && item.badge > 0 && (
+                                    <span
+                                        className={`min-w-[20px] px-1.5 py-0.5 text-xs font-semibold rounded-full text-center transition-all ${
+                                            loading ? 'animate-pulse' : ''
+                                        } ${isActive ? colorConfig.active : colorConfig.inactive}`}
+                                    >
+                                        {loading ? '·' : item.badge}
+                                    </span>
+                                )}
+                            </Link>
+                        );
+                    })}
+                </div>
+
+                <div
+                    className="space-y-0.5 border-t pt-4"
+                    style={{ borderColor: 'var(--sidebar-divider)' }}
+                >
+                    {bottomNav.map((item) => (
+                        <Link
+                            key={item.name}
+                            href={item.href}
+                            onClick={() => setIsMobileOpen(false)}
+                            className="group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200"
+                            style={{ color: 'var(--sidebar-text-muted)' }}
+                            onMouseEnter={e => {
+                                (e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'var(--sidebar-hover-bg)';
+                                (e.currentTarget as HTMLAnchorElement).style.color = 'var(--sidebar-text)';
+                            }}
+                            onMouseLeave={e => {
+                                (e.currentTarget as HTMLAnchorElement).style.backgroundColor = '';
+                                (e.currentTarget as HTMLAnchorElement).style.color = 'var(--sidebar-text-muted)';
+                            }}
+                        >
+                            <item.icon
+                                className="h-5 w-5"
+                                style={{ color: 'var(--sidebar-icon)' } as React.CSSProperties}
+                            />
+                            {item.name}
+                        </Link>
+                    ))}
+                    <button
+                        onClick={() => signOut({ callbackUrl: '/' })}
+                        className="w-full group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-red-500/10 hover:text-red-500 dark:hover:text-red-400"
+                        style={{ color: 'var(--sidebar-text-muted)' }}
+                    >
+                        <LogoutIcon
+                            className="h-5 w-5 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors"
+                            style={{ color: 'var(--sidebar-icon)' } as React.CSSProperties}
+                        />
+                        Wyloguj się
+                    </button>
+                </div>
+            </nav>
+        </>
+    );
+
+    return (
+        <>
+            <button
+                onClick={() => setIsMobileOpen(true)}
+                className="fixed top-4 left-4 z-30 p-2 rounded-xl shadow-lg lg:hidden transition-colors"
+                style={{ backgroundColor: 'var(--sidebar-bg)' }}
+                aria-label="Otwórz menu"
+            >
+                <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    style={{ color: 'var(--sidebar-text)' }}
+                >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+
+            <aside className="hidden lg:block fixed left-0 top-0 z-40 h-screen w-64 sidebar-themed border-r transition-colors duration-300">
+                {sidebarContent}
+            </aside>
+
+            {isMobileOpen && (
+                <>
+                    <div
+                        className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+                        onClick={() => setIsMobileOpen(false)}
+                        aria-hidden="true"
+                    />
+                    <aside className="fixed left-0 top-0 z-50 h-screen w-64 sidebar-themed border-r lg:hidden">
+                        {sidebarContent}
+                    </aside>
+                </>
+            )}
+        </>
+    );
+}
+
+function HomeIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+    return (
+        <svg className={className} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+    );
+}
+
+function DocumentIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+    return (
+        <svg className={className} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+    );
+}
+
+function TemplateIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+    return (
+        <svg className={className} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+        </svg>
+    );
+}
+
+function ClipboardIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+    return (
+        <svg className={className} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+        </svg>
+    );
+}
+
+function UsersIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+    return (
+        <svg className={className} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+    );
+}
+
+function CalendarIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+    return (
+        <svg className={className} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+    );
+}
+
+function EnvelopeIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+    return (
+        <svg className={className} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+    );
+}
+
+function BellIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+    return (
+        <svg className={className} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+    );
+}
+
+function SparklesIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+    return (
+        <svg className={className} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+        </svg>
+    );
+}
+
+function LightBulbIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+    return (
+        <svg className={className} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+        </svg>
+    );
+}
+
+function SettingsIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+    return (
+        <svg className={className} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+    );
+}
+
+function LogoutIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+    return (
+        <svg className={className} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+    );
+}
