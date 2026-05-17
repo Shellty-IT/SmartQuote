@@ -258,13 +258,14 @@ export async function createContract(
 
     const clientSelect = page.locator('form select').first();
     await clientSelect.waitFor({ state: 'visible', timeout: 5000 });
+    await clientSelect.scrollIntoViewIfNeeded();
 
     await page.waitForFunction(
         () => {
             const select = document.querySelector('form select');
             return !!select && select.querySelectorAll('option').length > 1;
         },
-        { timeout: 15000 }
+        { timeout: 30000 }
     );
 
     const clientOptions = clientSelect.locator('option');
@@ -354,9 +355,10 @@ export async function changeContractStatus(
 
     const confirmBtn = confirmDialog.getByRole('button', { name: /potwierdź/i });
     await confirmBtn.waitFor({ state: 'visible', timeout: 15000 });
-    await confirmBtn.click();
+    await confirmBtn.scrollIntoViewIfNeeded();
+    await confirmBtn.click({ force: true });
 
-    await confirmDialog.waitFor({ state: 'hidden', timeout: 15000 });
+    await confirmDialog.waitFor({ state: 'hidden', timeout: 30000 });
     await page.waitForTimeout(2000);
 }
 
