@@ -1,0 +1,151 @@
+// smartquote_backend/src/controllers/publicOffer.controller.ts
+
+import { Request, Response } from 'express';
+import { publicOfferService } from '../services/publicOffer.service';
+import { successResponse, errorResponse } from '../utils/apiResponse';
+import { createModuleLogger } from '../lib/logger';
+
+const log = createModuleLogger('public-offer-ctrl');
+
+const ERROR_MAP: Record<string, { message: string; status: number }> = {
+    NOT_FOUND: { message: 'Oferta nie została znaleziona', status: 404 },
+    ALREADY_DECIDED: { message: 'Oferta została już rozpatrzona', status: 409 },
+    EXPIRED: { message: 'Oferta wygasła', status: 410 },
+};
+
+function handleOfferError(res: Response, errorCode: string): Response {
+    const mapped = ERROR_MAP[errorCode] || { message: 'Nieznany błąd', status: 400 };
+    return errorResponse(res, errorCode, mapped.message, mapped.status);
+}
+
+function extractIp(req: Request): string {
+    return (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim()
+        || req.socket.remoteAddress
+        || 'unknown';
+}
+
+export class PublicOfferController {
+    async getOffer(req: Request<{ token: string }>, res: Response) {
+        try {
+            const token = req.params.token;
+            const result = await publicOfferService.getOfferByToken(token);
+
+            if (!result) {
+                return errorResponse(res, 'OFFER_NOT_FOUND', 'Oferta nie została znaleziona lub link jest nieaktywny', 404);
+            }
+
+            return successResponse(res, result);
+        } catch (error) {
+            log.error({ err: error, token: req.params.token }, 'GetOffer error');
+            return errorResponse(res, 'INTERNAL_ERROR', 'Błąd serwera', 500);
+        }
+    }
+
+    async registerView(req: Request<{ token: string }>, res: Response) {
+        try {
+            const token = req.params.token;
+            const ipAddress = extractIp(req);
+            const userAgent = req.headers['user-agent'] || '';
+
+            await publicOfferService.registerView(token, ipAddress, userAgent);
+
+            return successResponse(res, { registered: true });
+        } catch (error) {
+            log.error({ err: error, token: req.params.token }, 'RegisterView error');
+            return errorResponse(res, 'INTERNAL_ERROR', 'Błąd serwera', 500);
+        }
+    }
+
+    async acceptOffer(req: Request<{ token: string }>, res: Response) {
+        try {
+            const token = req.params.token;
+            const { selectedItems, confirmationChecked, selectedVariant, clientName, clientEmail } = req.body;
+
+            if (!confirmationChecked) {
+                return errorResponse(res, 'CONFIRMATION_REQUIRED', 'Wymagane potwierdzenie akceptacji', 400);
+            }
+
+            const ipAddress = extractIp(req);
+            const userAgent = req.headers['user-agent'] || '';
+
+            const result = await publicOfferService.acceptOffer({
+                token,
+                selectedItems: selectedItems || [],
+                selectedVariant,
+                ipAddress,
+                userAgent,
+                clientName,
+                clientEmail,
+            });
+
+            if ('error' in result && result.error) {
+                return handleOfferError(res, result.error);
+            }
+
+            if ('data' in result) {
+                return successResponse(res, result.data);
+            }
+
+            return errorResponse(res, 'UNKNOWN_ERROR', 'Nieznany błąd', 400);
+        } catch (error) {
+            log.error({ err: error, token: req.params.token }, 'AcceptOffer error');
+            return errorResponse(res, 'INTERNAL_ERROR', 'Błąd serwera', 500);
+        }
+    }
+
+    async rejectOffer(req: Request<{ token: string }>, res: Response) {
+        try {
+            const token = req.params.token;
+            const { reason } = req.body;
+
+            const result = await publicOfferService.rejectOffer(token, reason);
+
+            if ('error' in result && result.error) {
+                return handleOfferError(res, result.error);
+            }
+
+            if ('data' in result) {
+                return successResponse(res, result.data);
+            }
+
+            return errorResponse(res, 'UNKNOWN_ERROR', 'Nieznany błąd', 400);
+        } catch (error) {
+            log.error({ err: error, token: req.params.token }, 'RejectOffer error');
+            return errorResponse(res, 'INTERNAL_ERROR', 'Błąd serwera', 500);
+        }
+    }
+
+    async addComment(req: Request<{ token: string }>, res: Response) {
+        try {
+            const token = req.params.token;
+            const { content } = req.body;
+
+            const result = await publicOfferService.addComment(token, content);
+
+            if (!result) {
+                return errorResponse(res, 'OFFER_NOT_FOUND', 'Nie można dodać komentarza', 404);
+            }
+
+            return successResponse(res, result.comment, 201);
+        } catch (error) {
+            log.error({ err: error, token: req.params.token }, 'AddComment error');
+            return errorResponse(res, 'INTERNAL_ERROR', 'Błąd serwera', 500);
+        }
+    }
+
+    async trackSelection(req: Request<{ token: string }>, res: Response) {
+        try {
+            const token = req.params.token;
+            const { items, selectedVariant } = req.body;
+
+            await publicOfferService.trackSelection(token, items, selectedVariant);
+
+            return successResponse(res, { tracked: true });
+        } catch (error) {
+            log.error({ err: error, token: req.params.token }, 'TrackSelection error');
+            return errorResponse(res, 'INTERNAL_ERROR', 'Błąd serwera', 500);
+        }
+    }
+}
+
+export const publicOfferController = new PublicOfferController();
