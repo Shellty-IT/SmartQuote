@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import { encrypt, decrypt } from '../utils/crypto';
 import { emailService } from './email';
 import { authCache } from '../lib/auth-cache';
+import { ksefBridgeService } from './ksef-bridge.service';
 import { createModuleLogger } from '../lib/logger';
 import type { SmtpConfig } from '../types';
 
@@ -317,11 +318,19 @@ export async function updateCompanyInfo(
         defaultNotes?: string;
     },
 ) {
-    return prisma.companyInfo.upsert({
+    const result = await prisma.companyInfo.upsert({
         where: { userId },
         update: data,
         create: { userId, ...data },
     });
+
+    // Fix #5 – invalidate KSeF availability cache when NIP changes so the
+    // invoice button reflects the new NIP immediately, without waiting for TTL.
+    if ('nip' in data) {
+        ksefBridgeService.invalidateAvailability(userId);
+    }
+
+    return result;
 }
 
 export async function getApiKeys(userId: string) {

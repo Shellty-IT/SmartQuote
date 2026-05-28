@@ -2,7 +2,7 @@
 
 import { Request, Response } from 'express';
 import { AuthenticatedRequest } from '../types';
-import { ksefBridgeService } from '../services/ksef-bridge.service';
+import { ksefBridgeService, verifyWebhookHmac } from '../services/ksef-bridge.service';
 import { ksefSendSchema, ksefWebhookSchema } from '../validators/ksef-bridge.validator';
 import { successResponse, errorResponse } from '../utils/apiResponse';
 import { config } from '../config';
@@ -99,6 +99,28 @@ export class KsefBridgeController {
 
             if (!expectedKey || apiKey !== expectedKey) {
                 return errorResponse(res, 'UNAUTHORIZED', 'Invalid API key', 401);
+            }
+
+            // Fix #4 – HMAC verification: prevents spoofed callbacks and replay attacks.
+            // KSeF Master must include X-Timestamp and X-Signature headers.
+            // Existing deployments without HMAC headers are rejected after this change.
+            const timestamp = req.headers['x-timestamp'] as string | undefined;
+            const signature = req.headers['x-signature'] as string | undefined;
+
+            if (!timestamp || !signature) {
+                log.warn({ ip: req.ip }, 'Webhook missing HMAC headers');
+                return errorResponse(res, 'UNAUTHORIZED', 'Missing HMAC signature headers', 401);
+            }
+
+            // Body must be parsed before schema validation to extract fields for HMAC.
+            const bodyForHmac = req.body as { smartQuoteId?: string; action?: string };
+            if (!bodyForHmac.smartQuoteId || !bodyForHmac.action) {
+                return errorResponse(res, 'VALIDATION_ERROR', 'Missing required fields', 400);
+            }
+
+            if (!verifyWebhookHmac(expectedKey, timestamp, bodyForHmac.smartQuoteId, bodyForHmac.action, signature)) {
+                log.warn({ ip: req.ip, smartQuoteId: bodyForHmac.smartQuoteId }, 'Webhook HMAC verification failed');
+                return errorResponse(res, 'UNAUTHORIZED', 'Invalid HMAC signature', 401);
             }
 
             const parsed = ksefWebhookSchema.safeParse({ body: req.body, query: req.query, params: req.params });

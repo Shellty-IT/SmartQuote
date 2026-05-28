@@ -1,7 +1,11 @@
 // src/services/ksef-bridge.service.ts
 
+import crypto from 'crypto';
 import prisma from '../lib/prisma';
 import { config } from '../config';
+import { createModuleLogger } from '../lib/logger';
+
+const log = createModuleLogger('ksef-bridge');
 
 interface KsefMasterResponse {
     draftId?: string;
@@ -27,8 +31,24 @@ export interface AvailabilityResult {
     companyName?: string;
 }
 
-const AVAILABILITY_TTL_MS = 5 * 60 * 1000;
+// Fix #6 – bounded cache: max 2000 entries, periodic eviction of expired items.
+const AVAILABILITY_CACHE_MAX = 2000;
 const availabilityCache = new Map<string, { result: AvailabilityResult; expiresAt: number }>();
+
+function evictExpiredCache(): void {
+    // Fast-path: only scan when the map has grown large enough to warrant cleanup.
+    if (availabilityCache.size < AVAILABILITY_CACHE_MAX / 2) return;
+    const now = Date.now();
+    for (const [key, entry] of availabilityCache) {
+        if (entry.expiresAt <= now) availabilityCache.delete(key);
+    }
+    // If still over the cap (all entries are fresh), evict oldest by expiry time.
+    if (availabilityCache.size >= AVAILABILITY_CACHE_MAX) {
+        const sorted = [...availabilityCache.entries()].sort((a, b) => a[1].expiresAt - b[1].expiresAt);
+        const toDelete = sorted.slice(0, availabilityCache.size - Math.floor(AVAILABILITY_CACHE_MAX * 0.8));
+        for (const [key] of toDelete) availabilityCache.delete(key);
+    }
+}
 
 function calculateDueDate(paymentDays: number): string {
     const date = new Date();
@@ -36,20 +56,63 @@ function calculateDueDate(paymentDays: number): string {
     return date.toISOString().split('T')[0];
 }
 
+// Fix #4 – HMAC verification for incoming webhooks from KSeF Master.
+// KSeF Master signs: HMAC-SHA256(secret, "${timestamp}.${smartQuoteId}.${action}")
+// and sends X-Timestamp + X-Signature headers. We verify both the signature and
+// that the timestamp is within a 5-minute window (prevents replay attacks).
+export function verifyWebhookHmac(
+    secret: string,
+    timestamp: string,
+    smartQuoteId: string,
+    action: string,
+    signature: string,
+): boolean {
+    try {
+        const MAX_AGE_SECONDS = 5 * 60;
+        const ts = parseInt(timestamp, 10);
+        if (isNaN(ts) || Math.abs(Date.now() / 1000 - ts) > MAX_AGE_SECONDS) {
+            log.warn({ timestamp }, 'Webhook timestamp outside 5-min window');
+            return false;
+        }
+
+        const expected = crypto
+            .createHmac('sha256', secret)
+            .update(`${timestamp}.${smartQuoteId}.${action}`)
+            .digest('hex');
+
+        // Constant-time comparison prevents timing attacks.
+        const sigBuf = Buffer.from(signature, 'hex');
+        const expBuf = Buffer.from(expected, 'hex');
+        if (sigBuf.length !== expBuf.length) return false;
+        return crypto.timingSafeEqual(sigBuf, expBuf);
+    } catch {
+        return false;
+    }
+}
+
 export class KsefBridgeService {
+    // Fix #15 – TTL from config instead of hardcoded constant.
+    private get cacheTtl(): number {
+        return config.ksef.availabilityCacheTtlMs;
+    }
+
     async checkAvailability(userId: string, forceRefresh = false): Promise<AvailabilityResult> {
+        evictExpiredCache(); // Fix #6 – clean up before adding new entries
+
         if (!forceRefresh) {
             const cached = availabilityCache.get(userId);
             if (cached && cached.expiresAt > Date.now()) return cached.result;
         }
 
         const result = await this.computeAvailability(userId);
-        availabilityCache.set(userId, { result, expiresAt: Date.now() + AVAILABILITY_TTL_MS });
+        availabilityCache.set(userId, { result, expiresAt: Date.now() + this.cacheTtl });
         return result;
     }
 
+    // Fix #5 – expose so settings service can call this when NIP changes.
     invalidateAvailability(userId: string): void {
         availabilityCache.delete(userId);
+        log.debug({ userId }, 'KSeF availability cache invalidated');
     }
 
     private async computeAvailability(userId: string): Promise<AvailabilityResult> {
@@ -260,6 +323,7 @@ export class KsefBridgeService {
         return { success: true, draftId: parsed?.draftId };
     }
 
+    // Fix #12 – log errors instead of silently swallowing them.
     private async lookupExistingDraftId(
         smartQuoteId: string,
         masterUrl: string,
@@ -270,10 +334,14 @@ export class KsefBridgeService {
                 `${masterUrl}/api/v1/import/drafts/by-smartquote/${encodeURIComponent(smartQuoteId)}`,
                 { method: 'GET', headers: { 'X-API-Key': apiKey } }
             );
-            if (!res.ok) return undefined;
+            if (!res.ok) {
+                log.warn({ smartQuoteId, status: res.status }, 'Draft ID lookup returned non-OK status');
+                return undefined;
+            }
             const body = (await res.json()) as { draftId?: string };
             return body.draftId;
-        } catch {
+        } catch (err) {
+            log.warn({ err, smartQuoteId }, 'Draft ID lookup failed');
             return undefined;
         }
     }
