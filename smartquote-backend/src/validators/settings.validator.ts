@@ -45,11 +45,20 @@ export const updateCompanyInfoSchema = z.object({
         postalCode: z.string().max(10).optional().nullable(),
         country: z.string().max(100).optional().nullable(),
         phone: z.string().max(20).optional().nullable(),
-        email: z.string().email('Nieprawidłowy email').optional().nullable(),
-        website: z.string().url('Nieprawidłowy URL').optional().nullable(),
+        email: z.preprocess(
+            (v) => (v === '' ? null : v),
+            z.string().email('Nieprawidłowy email').optional().nullable(),
+        ),
+        website: z.preprocess(
+            (v) => (v === '' ? null : v),
+            z.string().url('Nieprawidłowy URL (np. https://www.firma.pl)').optional().nullable(),
+        ),
         bankName: z.string().max(100).optional().nullable(),
         bankAccount: z.string().max(50).optional().nullable(),
-        logo: z.string().url('Nieprawidłowy URL').optional().nullable(),
+        logo: z.preprocess(
+            (v) => (v === '' ? null : v),
+            z.string().url('Nieprawidłowy URL').optional().nullable(),
+        ),
         defaultPaymentDays: z.number().int().min(0).max(365).optional(),
         defaultTerms: z.string().max(5000).optional().nullable(),
         defaultNotes: z.string().max(2000).optional().nullable(),

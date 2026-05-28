@@ -38,6 +38,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
     const [isUploadingLogo, setIsUploadingLogo] = useState(false);
     const [success, setSuccess] = useState(false);
     const [logoError, setLogoError] = useState('');
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
     const [currentLogo, setCurrentLogo] = useState(company.logo || '');
     const [formData, setFormData] = useState<UpdateCompanyInfoInput>({
         name: company.name || '',
@@ -64,18 +65,60 @@ export default function CompanySection({ company, onUpdate }: Props) {
     const handleChange = (field: keyof UpdateCompanyInfoInput, value: string | number) => {
         setFormData(prev => ({ ...prev, [field]: value }));
         setIsEditing(true);
+        if (fieldErrors[field as string]) {
+            setFieldErrors(prev => { const next = { ...prev }; delete next[field as string]; return next; });
+        }
+    };
+
+    const validateForm = (): Record<string, string> => {
+        const errors: Record<string, string> = {};
+        const email = (formData.email as string | undefined)?.trim();
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            errors.email = 'Nieprawidłowy adres email';
+        }
+        const website = (formData.website as string | undefined)?.trim();
+        if (website) {
+            try { new URL(website); } catch { errors.website = 'Nieprawidłowy URL (np. https://www.firma.pl)'; }
+        }
+        return errors;
     };
 
     const handleSave = async () => {
+        const validationErrors = validateForm();
+        if (Object.keys(validationErrors).length > 0) {
+            setFieldErrors(validationErrors);
+            return;
+        }
+        setFieldErrors({});
         setIsSaving(true);
         setSuccess(false);
         try {
-            await onUpdate(formData);
+            const payload: UpdateCompanyInfoInput = {
+                ...formData,
+                email: (formData.email as string | undefined)?.trim() || null,
+                website: (formData.website as string | undefined)?.trim() || null,
+            };
+            await onUpdate(payload);
             setSuccess(true);
             setIsEditing(false);
             setTimeout(() => setSuccess(false), 3000);
-        } catch {
-} finally {
+        } catch (err: unknown) {
+            if (err && typeof err === 'object' && 'details' in err) {
+                const details = (err as { details: unknown }).details;
+                if (Array.isArray(details)) {
+                    const mapped: Record<string, string> = {};
+                    for (const d of details as Array<{ field?: string; message?: string }>) {
+                        if (d.field && d.message) {
+                            mapped[d.field.replace('body.', '')] = d.message;
+                        }
+                    }
+                    if (Object.keys(mapped).length > 0) {
+                        setFieldErrors(mapped);
+                        return;
+                    }
+                }
+            }
+        } finally {
             setIsSaving(false);
         }
     };
@@ -457,10 +500,16 @@ export default function CompanySection({ company, onUpdate }: Props) {
                                 type="email"
                                 value={formData.email || ''}
                                 onChange={(e) => handleChange('email', e.target.value)}
-                                className="w-full pl-10 pr-4 py-2.5 border rounded-xl focus:outline-none transition-colors"
+                                className={`w-full pl-10 pr-4 py-2.5 border rounded-xl focus:outline-none transition-colors ${fieldErrors.email ? 'border-red-400 focus:border-red-400' : ''}`}
                                 placeholder="kontakt@firma.pl"
                             />
                         </div>
+                        {fieldErrors.email && (
+                            <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                                <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                                {fieldErrors.email}
+                            </p>
+                        )}
                     </div>
 
                     <div className="md:col-span-2">
@@ -473,10 +522,16 @@ export default function CompanySection({ company, onUpdate }: Props) {
                                 type="url"
                                 value={formData.website || ''}
                                 onChange={(e) => handleChange('website', e.target.value)}
-                                className="w-full pl-10 pr-4 py-2.5 border rounded-xl focus:outline-none transition-colors"
+                                className={`w-full pl-10 pr-4 py-2.5 border rounded-xl focus:outline-none transition-colors ${fieldErrors.website ? 'border-red-400 focus:border-red-400' : ''}`}
                                 placeholder="https://www.firma.pl"
                             />
                         </div>
+                        {fieldErrors.website && (
+                            <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                                <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                                {fieldErrors.website}
+                            </p>
+                        )}
                     </div>
                 </div>
             </Card>
