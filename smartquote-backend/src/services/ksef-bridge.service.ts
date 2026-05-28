@@ -1,11 +1,34 @@
 // src/services/ksef-bridge.service.ts
 
 import prisma from '../lib/prisma';
+import { config } from '../config';
 
 interface KsefMasterResponse {
     draftId?: string;
     message?: string;
+    success?: boolean;
 }
+
+interface KsefExistsResponse {
+    success: boolean;
+    exists: boolean;
+    companyName?: string;
+    message?: string;
+}
+
+export interface AvailabilityResult {
+    available: boolean;
+    reason?:
+        | 'NO_SELLER_NIP'
+        | 'KSEF_ACCOUNT_NOT_FOUND'
+        | 'KSEF_NOT_CONFIGURED'
+        | 'KSEF_UNREACHABLE';
+    sellerNip?: string;
+    companyName?: string;
+}
+
+const AVAILABILITY_TTL_MS = 5 * 60 * 1000;
+const availabilityCache = new Map<string, { result: AvailabilityResult; expiresAt: number }>();
 
 function calculateDueDate(paymentDays: number): string {
     const date = new Date();
@@ -14,6 +37,58 @@ function calculateDueDate(paymentDays: number): string {
 }
 
 export class KsefBridgeService {
+    async checkAvailability(userId: string, forceRefresh = false): Promise<AvailabilityResult> {
+        if (!forceRefresh) {
+            const cached = availabilityCache.get(userId);
+            if (cached && cached.expiresAt > Date.now()) return cached.result;
+        }
+
+        const result = await this.computeAvailability(userId);
+        availabilityCache.set(userId, { result, expiresAt: Date.now() + AVAILABILITY_TTL_MS });
+        return result;
+    }
+
+    invalidateAvailability(userId: string): void {
+        availabilityCache.delete(userId);
+    }
+
+    private async computeAvailability(userId: string): Promise<AvailabilityResult> {
+        const companyInfo = await prisma.companyInfo.findUnique({
+            where: { userId },
+            select: { nip: true },
+        });
+
+        const nip = companyInfo?.nip?.trim();
+        if (!nip || !/^\d{10}$/.test(nip)) {
+            return { available: false, reason: 'NO_SELLER_NIP' };
+        }
+
+        const { masterUrl, masterApiKey } = config.ksef;
+        if (!masterUrl || !masterApiKey) {
+            return { available: false, reason: 'KSEF_NOT_CONFIGURED', sellerNip: nip };
+        }
+
+        try {
+            const response = await fetch(
+                `${masterUrl}/api/v1/import/companies/exists?nip=${encodeURIComponent(nip)}`,
+                { method: 'GET', headers: { 'X-API-Key': masterApiKey } }
+            );
+
+            if (!response.ok) {
+                return { available: false, reason: 'KSEF_UNREACHABLE', sellerNip: nip };
+            }
+
+            const data = (await response.json()) as KsefExistsResponse;
+            if (!data.exists) {
+                return { available: false, reason: 'KSEF_ACCOUNT_NOT_FOUND', sellerNip: nip };
+            }
+
+            return { available: true, sellerNip: nip, companyName: data.companyName };
+        } catch {
+            return { available: false, reason: 'KSEF_UNREACHABLE', sellerNip: nip };
+        }
+    }
+
     async getPreviewData(offerId: string, userId: string) {
         const offer = await prisma.offer.findFirst({
             where: { id: offerId, userId, status: 'ACCEPTED' },
@@ -102,8 +177,7 @@ export class KsefBridgeService {
         if (!offer.client.nip) throw new Error('BUYER_NIP_MISSING');
         if (offer.items.length === 0) throw new Error('NO_ITEMS');
 
-        const ksefMasterUrl = process.env.KSEF_MASTER_URL;
-        const apiKey = process.env.KSEF_MASTER_API_KEY;
+        const { masterUrl: ksefMasterUrl, masterApiKey: apiKey } = config.ksef;
 
         if (!ksefMasterUrl || !apiKey) throw new Error('KSEF_NOT_CONFIGURED');
 
@@ -154,29 +228,54 @@ export class KsefBridgeService {
             body: JSON.stringify(payload),
         });
 
-        if (!response.ok) {
-            const errorBody = await response.text().catch(() => '');
-            let errorMessage = 'KSEF_MASTER_ERROR';
-            try {
-                const errorJson = JSON.parse(errorBody) as KsefMasterResponse;
-                errorMessage = errorJson.message || errorMessage;
-            } catch {
-                // keep default
-            }
-            throw new Error(errorMessage);
+        let parsed: KsefMasterResponse | null = null;
+        const rawBody = await response.text().catch(() => '');
+        try {
+            parsed = rawBody ? (JSON.parse(rawBody) as KsefMasterResponse) : null;
+        } catch {
+            parsed = null;
         }
 
-        const result = (await response.json()) as KsefMasterResponse;
+        if (response.status === 409) {
+            const draftId = parsed?.draftId ?? (await this.lookupExistingDraftId(offer.id, ksefMasterUrl, apiKey));
+            await prisma.offer.update({
+                where: { id: offerId },
+                data: { invoiceSentAt: new Date(), invoiceExternalId: draftId ?? null },
+            });
+            return { success: true, draftId: draftId ?? undefined, idempotent: true };
+        }
+
+        if (!response.ok) {
+            throw new Error(parsed?.message || 'KSEF_MASTER_ERROR');
+        }
 
         await prisma.offer.update({
             where: { id: offerId },
             data: {
                 invoiceSentAt: new Date(),
-                invoiceExternalId: result.draftId || null,
+                invoiceExternalId: parsed?.draftId || null,
             },
         });
 
-        return { success: true, draftId: result.draftId };
+        return { success: true, draftId: parsed?.draftId };
+    }
+
+    private async lookupExistingDraftId(
+        smartQuoteId: string,
+        masterUrl: string,
+        apiKey: string
+    ): Promise<string | undefined> {
+        try {
+            const res = await fetch(
+                `${masterUrl}/api/v1/import/drafts/by-smartquote/${encodeURIComponent(smartQuoteId)}`,
+                { method: 'GET', headers: { 'X-API-Key': apiKey } }
+            );
+            if (!res.ok) return undefined;
+            const body = (await res.json()) as { draftId?: string };
+            return body.draftId;
+        } catch {
+            return undefined;
+        }
     }
 
     async handleWebhook(
