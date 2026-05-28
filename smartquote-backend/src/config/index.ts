@@ -34,6 +34,7 @@ const configSchema = z.object({
     CRON_SECRET: z.string().optional(),
     KSEF_MASTER_URL: z.string().default('http://localhost:5000'),
     KSEF_MASTER_API_KEY: z.string().default(''),
+    KSEF_AVAILABILITY_CACHE_TTL_MS: z.string().default('300000').transform((v) => parseInt(v, 10)),
 });
 
 function validateConfig() {
@@ -82,6 +83,7 @@ export const config = {
     ksef: {
         masterUrl: env.KSEF_MASTER_URL,
         masterApiKey: env.KSEF_MASTER_API_KEY,
+        availabilityCacheTtlMs: env.KSEF_AVAILABILITY_CACHE_TTL_MS,
     },
 } as const;
 
