@@ -1,10 +1,10 @@
 // src/app/dashboard/offers/[id]/hooks/useOfferDetail.ts
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useOffer, useOfferAnalytics, useOfferComments } from '@/hooks/useOffers';
-import { offersApi, ai } from '@/lib/api';
+import { offersApi, ai, ksefApi } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
 import { getStatusConfig } from '@/lib/utils';
 import { groupByVariant } from '../utils';
@@ -12,6 +12,7 @@ import { STATUS_TRANSITIONS } from '../constants';
 import type { Tab } from '../constants';
 import type { OfferStatus } from '@/types';
 import type { ObserverInsight, ClosingStrategy } from '@/types/ai';
+import type { KsefAvailability } from '@/types/ksef.types';
 
 export function useOfferDetail(offerId: string) {
     const router = useRouter();
@@ -53,8 +54,33 @@ export function useOfferDetail(offerId: string) {
         ? new Date(offer.validUntil) < new Date()
         : false;
 
-    const canGenerateInvoice = offer?.status === 'ACCEPTED' && !offer?.invoiceSentAt;
+    const offerReadyForInvoice = offer?.status === 'ACCEPTED' && !offer?.invoiceSentAt;
     const invoiceAlreadySent = offer?.status === 'ACCEPTED' && !!offer?.invoiceSentAt;
+
+    const [ksefAvailability, setKsefAvailability] = useState<KsefAvailability | null>(null);
+    const [isCheckingKsef, setIsCheckingKsef] = useState(false);
+
+    useEffect(() => {
+        if (!offerReadyForInvoice) return;
+        let cancelled = false;
+        setIsCheckingKsef(true);
+        ksefApi
+            .availability()
+            .then((res) => {
+                if (!cancelled) setKsefAvailability(res);
+            })
+            .catch(() => {
+                if (!cancelled) setKsefAvailability({ available: false, reason: 'KSEF_UNREACHABLE' });
+            })
+            .finally(() => {
+                if (!cancelled) setIsCheckingKsef(false);
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, [offerReadyForInvoice]);
+
+    const canGenerateInvoice = offerReadyForInvoice && ksefAvailability?.available === true;
 
     const handleCopyHash = async (hash: string) => {
         try {
@@ -223,7 +249,10 @@ export function useOfferDetail(offerId: string) {
         ksefModalOpen,
         setKsefModalOpen,
         canGenerateInvoice,
+        offerReadyForInvoice,
         invoiceAlreadySent,
+        ksefAvailability,
+        isCheckingKsef,
         handleKsefSent,
 
         variantData,

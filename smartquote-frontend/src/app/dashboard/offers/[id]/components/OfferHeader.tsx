@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button, Badge } from '@/components/ui';
 import { getStatusConfig } from '@/lib/utils';
 import type { Offer, OfferStatus } from '@/types';
+import type { KsefAvailability, KsefAvailabilityReason } from '@/types/ksef.types';
 import type { VariantData } from '../utils';
 
 interface OfferHeaderProps {
@@ -14,12 +15,22 @@ interface OfferHeaderProps {
     availableTransitions: OfferStatus[];
     isUpdatingStatus: boolean;
     canGenerateInvoice: boolean;
+    offerReadyForInvoice: boolean;
     invoiceAlreadySent: boolean;
+    ksefAvailability: KsefAvailability | null;
+    isCheckingKsef: boolean;
     onStatusChange: (status: OfferStatus) => void;
     onPublishClick: () => void;
     onDuplicate: () => void;
     onKsefClick: () => void;
 }
+
+const KSEF_REASON_MESSAGES: Record<KsefAvailabilityReason, string> = {
+    NO_SELLER_NIP: 'Uzupełnij NIP firmy w ustawieniach, aby wystawiać faktury.',
+    KSEF_ACCOUNT_NOT_FOUND: 'Brak konta w KSeF Master z tym NIPem. Załóż konto w KSeF Master.',
+    KSEF_NOT_CONFIGURED: 'Integracja z KSeF Master nie jest skonfigurowana.',
+    KSEF_UNREACHABLE: 'KSeF Master jest chwilowo niedostępny. Spróbuj ponownie później.',
+};
 
 export function OfferHeader({
                                 offer,
@@ -28,7 +39,10 @@ export function OfferHeader({
                                 availableTransitions,
                                 isUpdatingStatus,
                                 canGenerateInvoice,
+                                offerReadyForInvoice,
                                 invoiceAlreadySent,
+                                ksefAvailability,
+                                isCheckingKsef,
                                 onStatusChange,
                                 onPublishClick,
                                 onDuplicate,
@@ -36,6 +50,15 @@ export function OfferHeader({
                             }: OfferHeaderProps) {
     const router = useRouter();
     const status = getStatusConfig(offer.status);
+
+    const ksefBlockedReason = offerReadyForInvoice && ksefAvailability && !ksefAvailability.available
+        ? KSEF_REASON_MESSAGES[ksefAvailability.reason ?? 'KSEF_UNREACHABLE']
+        : null;
+    const showInvoiceButton = offerReadyForInvoice;
+    const invoiceButtonDisabled = !canGenerateInvoice;
+    const invoiceButtonTitle = isCheckingKsef
+        ? 'Sprawdzanie dostępności KSeF Master…'
+        : ksefBlockedReason ?? 'Wystaw fakturę w KSeF Master';
 
     return (
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-8">
@@ -89,17 +112,20 @@ export function OfferHeader({
             </div>
 
             <div className="flex flex-wrap gap-2">
-                {canGenerateInvoice && (
-                    <Button
-                        variant="outline"
-                        onClick={onKsefClick}
-                        className="border-amber-500/50 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
-                    >
-                        <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        Wystaw fakturę
-                    </Button>
+                {showInvoiceButton && (
+                    <span title={invoiceButtonTitle} className="inline-flex">
+                        <Button
+                            variant="outline"
+                            onClick={onKsefClick}
+                            disabled={invoiceButtonDisabled}
+                            className="border-amber-500/50 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Wystaw fakturę
+                        </Button>
+                    </span>
                 )}
 
                 <Button
