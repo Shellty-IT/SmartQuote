@@ -24,6 +24,17 @@ export class KsefBridgeController {
         }
     }
 
+    async availability(req: AuthenticatedRequest, res: Response) {
+        try {
+            const forceRefresh = req.query.refresh === '1' || req.query.refresh === 'true';
+            const result = await ksefBridgeService.checkAvailability(req.user!.id, forceRefresh);
+            return successResponse(res, result);
+        } catch (error: unknown) {
+            log.error({ err: error, userId: req.user?.id }, 'Availability error');
+            return errorResponse(res, 'AVAILABILITY_FAILED', 'Nie udało się sprawdzić dostępności KSeF Master', 500);
+        }
+    }
+
     async send(req: AuthenticatedRequest, res: Response) {
         try {
             const parsed = ksefSendSchema.safeParse({ body: req.body, query: req.query, params: req.params });

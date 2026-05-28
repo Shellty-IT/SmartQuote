@@ -6,6 +6,7 @@ import { ksefBridgeController } from '../controllers/ksef-bridge.controller';
 
 const router = Router();
 
+router.get('/availability', authenticate, ksefBridgeController.availability);
 router.get('/preview/:offerId', authenticate, ksefBridgeController.getPreview);
 router.post('/send', authenticate, ksefBridgeController.send);
 router.post('/webhook', ksefBridgeController.webhook);

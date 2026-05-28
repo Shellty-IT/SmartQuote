@@ -51,4 +51,18 @@ export interface KsefSendPayload {
 export interface KsefSendResult {
     success: boolean;
     draftId: string;
+    idempotent?: boolean;
+}
+
+export type KsefAvailabilityReason =
+    | 'NO_SELLER_NIP'
+    | 'KSEF_ACCOUNT_NOT_FOUND'
+    | 'KSEF_NOT_CONFIGURED'
+    | 'KSEF_UNREACHABLE';
+
+export interface KsefAvailability {
+    available: boolean;
+    reason?: KsefAvailabilityReason;
+    sellerNip?: string;
+    companyName?: string;
 }

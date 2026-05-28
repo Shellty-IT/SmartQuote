@@ -49,7 +49,10 @@ export default function OfferDetailPage({ params }: PageProps) {
         ksefModalOpen,
         setKsefModalOpen,
         canGenerateInvoice,
+        offerReadyForInvoice,
         invoiceAlreadySent,
+        ksefAvailability,
+        isCheckingKsef,
         handleKsefSent,
         variantData,
         availableTransitions,
@@ -93,7 +96,10 @@ export default function OfferDetailPage({ params }: PageProps) {
                 availableTransitions={availableTransitions}
                 isUpdatingStatus={isUpdatingStatus}
                 canGenerateInvoice={canGenerateInvoice}
+                offerReadyForInvoice={offerReadyForInvoice}
                 invoiceAlreadySent={invoiceAlreadySent}
+                ksefAvailability={ksefAvailability}
+                isCheckingKsef={isCheckingKsef}
                 onStatusChange={handleStatusChange}
                 onPublishClick={() => setPublishDialogOpen(true)}
                 onDuplicate={handleDuplicate}
