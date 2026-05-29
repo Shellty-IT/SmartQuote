@@ -40,11 +40,11 @@ export function CommentsList({ comments }: CommentsListProps) {
                     }`}>
                         <p className="text-sm whitespace-pre-wrap">{comment.content}</p>
                         <div className={`flex items-center gap-2 mt-1 ${comment.author === 'SELLER' ? 'justify-end' : 'justify-start'}`}>
-              <span className={`text-xs ${comment.author === 'SELLER' ? 'text-cyan-100' : 'text-muted-foreground'}`}>
+              <span className={`text-xs ${comment.author === 'SELLER' ? 'text-white/85' : 'text-muted-foreground'}`}>
                 {comment.author === 'SELLER' ? 'Ty' : 'Klient'}
               </span>
-                            <span className={`text-xs ${comment.author === 'SELLER' ? 'text-cyan-200' : 'text-muted-foreground opacity-50'}`}>•</span>
-                            <span className={`text-xs ${comment.author === 'SELLER' ? 'text-cyan-200' : 'text-muted-foreground'}`}>
+                            <span className={`text-xs ${comment.author === 'SELLER' ? 'text-white/70' : 'text-muted-foreground opacity-50'}`}>•</span>
+                            <span className={`text-xs ${comment.author === 'SELLER' ? 'text-white/70' : 'text-muted-foreground'}`}>
                 {formatDateTime(comment.createdAt)}
               </span>
                         </div>

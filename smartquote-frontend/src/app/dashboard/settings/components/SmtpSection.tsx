@@ -262,7 +262,7 @@ export default function SmtpSection() {
                         <p className="text-sm text-muted-foreground">Podłącz własną skrzynkę pocztową do wysyłania maili</p>
                     </div>
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary text-muted-foreground dark:text-muted-foreground text-xs font-medium">
-                        <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground" />
                         Wymaga własnej domeny
                     </span>
                 </div>

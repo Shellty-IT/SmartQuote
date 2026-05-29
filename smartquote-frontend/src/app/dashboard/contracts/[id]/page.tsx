@@ -576,7 +576,7 @@ export default function ContractDetailsPage({ params }: PageProps) {
                         <div className="p-6">
                             <div className="space-y-3">
                                 <div className="flex items-center gap-3 text-sm">
-                                    <div className="w-2 h-2 rounded-full bg-slate-400 flex-shrink-0" />
+                                    <div className="w-2 h-2 rounded-full bg-muted-foreground flex-shrink-0" />
                                     <span className="text-muted-foreground">Utworzono:</span>
                                     <span className="text-foreground">{formatDate(contract.createdAt)}</span>
                                 </div>

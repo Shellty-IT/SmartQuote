@@ -36,7 +36,7 @@ function ToolbarButton({ onClick, isActive, disabled, title, children }: Toolbar
             className={`p-1.5 rounded-md text-sm font-medium transition-colors ${
                 isActive
                     ? 'bg-primary/20 text-primary'
-                    : 'text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-slate-100 hover:bg-secondary dark:hover:bg-secondary'
+                    : 'text-muted-foreground dark:text-muted-foreground hover:text-foreground  hover:bg-secondary dark:hover:bg-secondary'
             } ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
         >
             {children}

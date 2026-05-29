@@ -44,7 +44,7 @@ export function ChatBubble({ message }: ChatBubbleProps) {
                 <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                 <p
                     className={`text-xs mt-1 ${
-                        isUser ? 'text-cyan-100' : 'text-muted-foreground'
+                        isUser ? 'text-white/85' : 'text-muted-foreground'
                     }`}
                 >
                     {message.timestamp.toLocaleTimeString('pl-PL', {

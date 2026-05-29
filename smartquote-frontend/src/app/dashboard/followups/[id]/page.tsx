@@ -13,7 +13,7 @@ import { FollowUpStatus, FollowUpType, Priority } from '@/types';
 const statusConfig: Record<FollowUpStatus, { label: string; color: string; bgColor: string }> = {
     PENDING: { label: 'Oczekujące', color: 'text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]', bgColor: 'bg-[oklch(0.72_0.16_60)/10%] dark:bg-amber-900/30' },
     COMPLETED: { label: 'Wykonane', color: 'text-status-accepted dark:text-green-400', bgColor: 'bg-green-50 dark:bg-green-900/30' },
-    CANCELLED: { label: 'Anulowane', color: 'text-foreground dark:text-slate-300', bgColor: 'bg-secondary dark:bg-secondary/50' },
+    CANCELLED: { label: 'Anulowane', color: 'text-foreground', bgColor: 'bg-secondary dark:bg-secondary/50' },
     OVERDUE: { label: 'Zaległe', color: 'text-destructive', bgColor: 'bg-destructive/10 dark:bg-red-900/30' },
 };
 
@@ -172,7 +172,7 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                                     >
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-full bg-secondary dark:bg-secondary flex items-center justify-center">
-                                                <svg className="w-5 h-5 text-muted-foreground dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg className="w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                                 </svg>
                                             </div>

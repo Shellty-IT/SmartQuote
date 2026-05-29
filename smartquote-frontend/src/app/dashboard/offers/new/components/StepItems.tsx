@@ -41,7 +41,7 @@ export default function StepItems({
                         <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
-                        <span className="text-sm font-medium text-cyan-800">
+                        <span className="text-sm font-medium text-primary">
                             Warianty: {uniqueVariants.join(', ')}
                         </span>
                     </div>

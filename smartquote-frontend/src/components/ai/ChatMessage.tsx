@@ -69,7 +69,7 @@ export function ChatMessage({ message, onSuggestionClick }: ChatMessageProps) {
 
                     <div
                         className={`text-xs mt-2 ${
-                            isUser ? 'text-slate-200' : 'text-muted-foreground'
+                            isUser ? 'text-white/80' : 'text-muted-foreground'
                         }`}
                     >
                         {message.timestamp.toLocaleTimeString('pl-PL', {

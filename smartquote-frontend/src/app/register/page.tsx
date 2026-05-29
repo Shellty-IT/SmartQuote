@@ -319,7 +319,7 @@ export default function RegisterPage() {
  text-white font-semibold rounded-lg shadow-glow
  hover:brightness-110
  focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
-                disabled:opacity-70 disabled:cursor-not-allowed
+ disabled:opacity-70 disabled:cursor-not-allowed
                 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                         >
                             {isLoading ? (
@@ -341,7 +341,7 @@ export default function RegisterPage() {
                             Masz już konto?{' '}
                             <Link
                                 href="/"
-                                className="font-medium text-primary hover:text-primary dark:hover:text-cyan-300 transition-colors"
+                                className="font-medium text-primary hover:text-primary transition-colors"
                             >
                                 Zaloguj się
                             </Link>

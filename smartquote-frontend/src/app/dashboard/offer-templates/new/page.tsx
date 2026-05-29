@@ -124,7 +124,7 @@ export default function NewOfferTemplatePage() {
                 <h2 className="text-lg font-semibold text-foreground mb-4">Podstawowe informacje</h2>
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-foreground dark:text-slate-300 mb-1.5">
+                        <label className="block text-sm font-medium text-foreground mb-1.5">
                             Nazwa szablonu <span className="text-status-rejected">*</span>
                         </label>
                         <input
@@ -136,7 +136,7 @@ export default function NewOfferTemplatePage() {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-foreground dark:text-slate-300 mb-1.5">
+                        <label className="block text-sm font-medium text-foreground mb-1.5">
                             Opis (opcjonalne)
                         </label>
                         <textarea
@@ -149,7 +149,7 @@ export default function NewOfferTemplatePage() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-foreground dark:text-slate-300 mb-1.5">
+                            <label className="block text-sm font-medium text-foreground mb-1.5">
                                 Kategoria (opcjonalne)
                             </label>
                             <input
@@ -161,7 +161,7 @@ export default function NewOfferTemplatePage() {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-foreground dark:text-slate-300 mb-1.5">
+                            <label className="block text-sm font-medium text-foreground mb-1.5">
                                 Domyślne dni płatności
                             </label>
                             <input
@@ -175,7 +175,7 @@ export default function NewOfferTemplatePage() {
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-foreground dark:text-slate-300 mb-1.5">
+                        <label className="block text-sm font-medium text-foreground mb-1.5">
                             Domyślne warunki (opcjonalne)
                         </label>
                         <textarea
@@ -187,7 +187,7 @@ export default function NewOfferTemplatePage() {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-foreground dark:text-slate-300 mb-1.5">
+                        <label className="block text-sm font-medium text-foreground mb-1.5">
                             Domyślne uwagi (opcjonalne)
                         </label>
                         <textarea
