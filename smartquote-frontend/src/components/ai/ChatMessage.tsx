@@ -15,16 +15,16 @@ export function ChatMessage({ message, onSuggestionClick }: ChatMessageProps) {
     if (message.isLoading) {
         return (
             <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center flex-shrink-0">
                     <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
                     </svg>
                 </div>
-                <div className="flex-1 p-4 rounded-2xl rounded-tl-none" style={{ backgroundColor: 'var(--section-bg)' }}>
+                <div className="flex-1 p-4 rounded-2xl rounded-tl-none" style={{ backgroundColor: 'var(--surface-subtle)' }}>
                     <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-cyan-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <div className="w-2 h-2 bg-cyan-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <div className="w-2 h-2 bg-cyan-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                     </div>
                 </div>
             </div>
@@ -37,7 +37,7 @@ export function ChatMessage({ message, onSuggestionClick }: ChatMessageProps) {
                 className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                     isUser
                         ? 'bg-gradient-to-br from-slate-500 to-slate-700'
-                        : 'bg-gradient-to-br from-cyan-500 to-blue-600'
+                        : 'bg-gradient-primary'
                 }`}
             >
                 {isUser ? (
@@ -59,8 +59,8 @@ export function ChatMessage({ message, onSuggestionClick }: ChatMessageProps) {
                             : 'rounded-tl-none'
                     }`}
                     style={{
-                        backgroundColor: isUser ? undefined : 'var(--section-bg)',
-                        color: isUser ? undefined : 'var(--text-primary)',
+                        backgroundColor: isUser ? undefined : 'var(--surface-subtle)',
+                        color: isUser ? undefined : 'var(--primary)',
                     }}
                 >
                     <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">
@@ -69,7 +69,7 @@ export function ChatMessage({ message, onSuggestionClick }: ChatMessageProps) {
 
                     <div
                         className={`text-xs mt-2 ${
-                            isUser ? 'text-slate-200' : 'text-themed-muted'
+                            isUser ? 'text-white/80' : 'text-muted-foreground'
                         }`}
                     >
                         {message.timestamp.toLocaleTimeString('pl-PL', {
@@ -81,7 +81,7 @@ export function ChatMessage({ message, onSuggestionClick }: ChatMessageProps) {
 
                 {!isUser && message.suggestions && message.suggestions.length > 0 && (
                     <div className="mt-3 space-y-2">
-                        <p className="text-xs text-themed-muted font-medium">Sugestie:</p>
+                        <p className="text-xs text-muted-foreground font-medium">Sugestie:</p>
                         <div className="flex flex-wrap gap-2">
                             {message.suggestions.map((suggestion, index) => (
                                 <button
@@ -89,17 +89,17 @@ export function ChatMessage({ message, onSuggestionClick }: ChatMessageProps) {
                                     onClick={() => onSuggestionClick?.(suggestion)}
                                     className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all border"
                                     style={{
-                                        backgroundColor: 'var(--card-bg)',
-                                        borderColor: 'var(--divider)',
-                                        color: 'var(--text-primary)',
+                                        backgroundColor: 'var(--card)',
+                                        borderColor: 'var(--border)',
+                                        color: 'var(--primary)',
                                     }}
                                     onMouseEnter={(e) => {
                                         e.currentTarget.style.borderColor = '#0891b2';
                                         e.currentTarget.style.color = '#0891b2';
                                     }}
                                     onMouseLeave={(e) => {
-                                        e.currentTarget.style.borderColor = 'var(--divider)';
-                                        e.currentTarget.style.color = 'var(--text-primary)';
+                                        e.currentTarget.style.borderColor = 'var(--border)';
+                                        e.currentTarget.style.color = 'var(--primary)';
                                     }}
                                 >
                                     ✨ {suggestion}
@@ -116,17 +116,17 @@ export function ChatMessage({ message, onSuggestionClick }: ChatMessageProps) {
                                 key={index}
                                 className="w-full px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border"
                                 style={{
-                                    backgroundColor: 'var(--card-bg)',
-                                    borderColor: 'var(--divider)',
-                                    color: 'var(--text-primary)',
+                                    backgroundColor: 'var(--card)',
+                                    borderColor: 'var(--border)',
+                                    color: 'var(--primary)',
                                 }}
                                 onMouseEnter={(e) => {
                                     e.currentTarget.style.backgroundColor = 'rgba(8, 145, 178, 0.1)';
                                     e.currentTarget.style.borderColor = '#0891b2';
                                 }}
                                 onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor = 'var(--card-bg)';
-                                    e.currentTarget.style.borderColor = 'var(--divider)';
+                                    e.currentTarget.style.backgroundColor = 'var(--card)';
+                                    e.currentTarget.style.borderColor = 'var(--border)';
                                 }}
                             >
                                 {getActionIcon(action.type)}

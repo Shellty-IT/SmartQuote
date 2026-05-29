@@ -51,7 +51,7 @@ export default function OfferCalculator({
                 </div>
                 <div className="border-t border-slate-700 pt-3">
                     <div className="flex justify-between items-center">
-                        <span className="text-slate-200 font-medium">Suma brutto</span>
+                        <span className="text-white/80 font-medium">Suma brutto</span>
                         <span
                             className="text-2xl font-bold"
                             style={{ color: primaryColor }}

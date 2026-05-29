@@ -152,45 +152,45 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
             <div className="mb-8">
                 <button
                     onClick={() => router.back()}
-                    className="flex items-center gap-2 text-themed-muted hover:opacity-70 mb-4"
+                    className="flex items-center gap-2 text-muted-foreground hover:opacity-70 mb-4"
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     Powrót
                 </button>
-                <h1 className="text-2xl font-bold text-themed">Edytuj szablon</h1>
-                <p className="text-themed-muted mt-1">Modyfikuj szablon oferty</p>
+                <h1 className="text-3xl font-bold tracking-tight">Edytuj szablon</h1>
+                <p className="text-muted-foreground mt-1">Modyfikuj szablon oferty</p>
             </div>
 
-            <Card className="mb-6 p-6">
-                <h2 className="text-lg font-semibold text-themed mb-4">Podstawowe informacje</h2>
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                <h2 className="text-lg font-semibold text-foreground mb-4">Podstawowe informacje</h2>
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-themed mb-1.5">
-                            Nazwa szablonu <span className="text-red-500">*</span>
+                        <label className="block text-sm font-medium text-foreground mb-1.5">
+                            Nazwa szablonu <span className="text-status-rejected">*</span>
                         </label>
                         <input
                             type="text"
                             placeholder="np. WordPress Standard"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="w-full px-4 py-2.5 rounded-lg input-themed text-themed"
+                            className="w-full px-4 py-2.5 rounded-lg border-border bg-card text-foreground text-foreground"
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-themed mb-1.5">Opis (opcjonalne)</label>
+                        <label className="block text-sm font-medium text-foreground mb-1.5">Opis (opcjonalne)</label>
                         <textarea
                             placeholder="Krótki opis szablonu..."
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             rows={2}
-                            className="w-full px-4 py-2.5 rounded-lg input-themed text-themed resize-none"
+                            className="w-full px-4 py-2.5 rounded-lg border-border bg-card text-foreground text-foreground resize-none"
                         />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-themed mb-1.5">
+                            <label className="block text-sm font-medium text-foreground mb-1.5">
                                 Kategoria (opcjonalne)
                             </label>
                             <input
@@ -198,11 +198,11 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                                 placeholder="np. Strony WWW"
                                 value={category}
                                 onChange={(e) => setCategory(e.target.value)}
-                                className="w-full px-4 py-2.5 rounded-lg input-themed text-themed"
+                                className="w-full px-4 py-2.5 rounded-lg border-border bg-card text-foreground text-foreground"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-themed mb-1.5">
+                            <label className="block text-sm font-medium text-foreground mb-1.5">
                                 Domyślne dni płatności
                             </label>
                             <input
@@ -211,12 +211,12 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                                 max={365}
                                 value={defaultPaymentDays}
                                 onChange={(e) => setDefaultPaymentDays(Number(e.target.value))}
-                                className="w-full px-4 py-2.5 rounded-lg input-themed text-themed"
+                                className="w-full px-4 py-2.5 rounded-lg border-border bg-card text-foreground text-foreground"
                             />
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-themed mb-1.5">
+                        <label className="block text-sm font-medium text-foreground mb-1.5">
                             Domyślne warunki (opcjonalne)
                         </label>
                         <textarea
@@ -224,11 +224,11 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                             value={defaultTerms}
                             onChange={(e) => setDefaultTerms(e.target.value)}
                             rows={3}
-                            className="w-full px-4 py-2.5 rounded-lg input-themed text-themed resize-none"
+                            className="w-full px-4 py-2.5 rounded-lg border-border bg-card text-foreground text-foreground resize-none"
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-themed mb-1.5">
+                        <label className="block text-sm font-medium text-foreground mb-1.5">
                             Domyślne uwagi (opcjonalne)
                         </label>
                         <textarea
@@ -236,15 +236,15 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                             value={defaultNotes}
                             onChange={(e) => setDefaultNotes(e.target.value)}
                             rows={2}
-                            className="w-full px-4 py-2.5 rounded-lg input-themed text-themed resize-none"
+                            className="w-full px-4 py-2.5 rounded-lg border-border bg-card text-foreground text-foreground resize-none"
                         />
                     </div>
                 </div>
-            </Card>
+            </div>
 
-            <Card className="mb-6 p-6">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-themed">Pozycje szablonu ({items.length})</h2>
+                    <h2 className="text-lg font-semibold text-foreground">Pozycje szablonu ({items.length})</h2>
                     <Button variant="outline" size="sm" onClick={addItem}>
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -254,13 +254,13 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                 </div>
                 <div className="space-y-4">
                     {items.map((item, index) => (
-                        <div key={item._tempId} className="section-themed rounded-xl p-4 border divider-themed">
+                        <div key={item._tempId} className="bg-surface-subtle rounded-xl p-4 border border-border">
                             <div className="flex items-start justify-between mb-3">
-                                <span className="text-sm font-semibold text-themed">Pozycja {index + 1}</span>
+                                <span className="text-sm font-semibold text-foreground">Pozycja {index + 1}</span>
                                 {items.length > 1 && (
                                     <button
                                         onClick={() => removeItem(item._tempId)}
-                                        className="p-1 rounded-lg hover:bg-red-500/10 text-red-600 dark:text-red-400 transition-colors"
+                                        className="p-1 rounded-lg hover:bg-status-rejected/10 text-status-rejected transition-colors"
                                     >
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -275,7 +275,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                                         placeholder="Nazwa pozycji *"
                                         value={item.name}
                                         onChange={(e) => updateItem(item._tempId, 'name', e.target.value)}
-                                        className="w-full px-3 py-2 rounded-lg input-themed text-themed text-sm"
+                                        className="w-full px-3 py-2 rounded-lg border-border bg-card text-foreground text-foreground text-sm"
                                     />
                                 </div>
                                 <div className="md:col-span-2">
@@ -284,7 +284,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                                         placeholder="Opis (opcjonalnie)"
                                         value={item.description ?? ''}
                                         onChange={(e) => updateItem(item._tempId, 'description', e.target.value || null)}
-                                        className="w-full px-3 py-2 rounded-lg input-themed text-themed text-sm"
+                                        className="w-full px-3 py-2 rounded-lg border-border bg-card text-foreground text-foreground text-sm"
                                     />
                                 </div>
                                 <div>
@@ -295,7 +295,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                                         step={0.01}
                                         value={item.quantity}
                                         onChange={(e) => updateItem(item._tempId, 'quantity', Number(e.target.value))}
-                                        className="w-full px-3 py-2 rounded-lg input-themed text-themed text-sm"
+                                        className="w-full px-3 py-2 rounded-lg border-border bg-card text-foreground text-foreground text-sm"
                                     />
                                 </div>
                                 <div>
@@ -304,7 +304,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                                         placeholder="Jednostka"
                                         value={item.unit}
                                         onChange={(e) => updateItem(item._tempId, 'unit', e.target.value)}
-                                        className="w-full px-3 py-2 rounded-lg input-themed text-themed text-sm"
+                                        className="w-full px-3 py-2 rounded-lg border-border bg-card text-foreground text-foreground text-sm"
                                     />
                                 </div>
                                 <div>
@@ -315,7 +315,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                                         step={0.01}
                                         value={item.unitPrice}
                                         onChange={(e) => updateItem(item._tempId, 'unitPrice', Number(e.target.value))}
-                                        className="w-full px-3 py-2 rounded-lg input-themed text-themed text-sm"
+                                        className="w-full px-3 py-2 rounded-lg border-border bg-card text-foreground text-foreground text-sm"
                                     />
                                 </div>
                                 <div>
@@ -326,7 +326,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                                         max={100}
                                         value={item.vatRate}
                                         onChange={(e) => updateItem(item._tempId, 'vatRate', Number(e.target.value))}
-                                        className="w-full px-3 py-2 rounded-lg input-themed text-themed text-sm"
+                                        className="w-full px-3 py-2 rounded-lg border-border bg-card text-foreground text-foreground text-sm"
                                     />
                                 </div>
                                 <div>
@@ -337,7 +337,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                                         max={100}
                                         value={item.discount}
                                         onChange={(e) => updateItem(item._tempId, 'discount', Number(e.target.value))}
-                                        className="w-full px-3 py-2 rounded-lg input-themed text-themed text-sm"
+                                        className="w-full px-3 py-2 rounded-lg border-border bg-card text-foreground text-foreground text-sm"
                                     />
                                 </div>
                                 <div>
@@ -346,7 +346,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                                         placeholder="Wariant (opcjonalnie)"
                                         value={item.variantName ?? ''}
                                         onChange={(e) => updateItem(item._tempId, 'variantName', e.target.value || null)}
-                                        className="w-full px-3 py-2 rounded-lg input-themed text-themed text-sm"
+                                        className="w-full px-3 py-2 rounded-lg border-border bg-card text-foreground text-foreground text-sm"
                                     />
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -355,9 +355,9 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                                         id={`optional-${item._tempId}`}
                                         checked={item.isOptional}
                                         onChange={(e) => updateItem(item._tempId, 'isOptional', e.target.checked)}
-                                        className="w-4 h-4 rounded border-gray-300"
+                                        className="w-4 h-4 rounded border-border"
                                     />
-                                    <label htmlFor={`optional-${item._tempId}`} className="text-sm text-themed">
+                                    <label htmlFor={`optional-${item._tempId}`} className="text-sm text-foreground">
                                         Pozycja opcjonalna
                                     </label>
                                 </div>
@@ -365,7 +365,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                         </div>
                     ))}
                 </div>
-            </Card>
+            </div>
 
             <div className="flex justify-between">
                 <Button variant="outline" onClick={() => router.back()}>

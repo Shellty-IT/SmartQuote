@@ -71,15 +71,15 @@ export default function EditClientPage({ params }: { params: Promise<{ id: strin
 
     if (clientError || !client) {
         return (
-            <div className="p-4 md:p-8">
-                <Card>
+            <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                     <div className="text-center py-12">
-                        <p className="text-red-600 mb-4">{clientError || 'Nie znaleziono klienta'}</p>
+                        <p className="text-destructive mb-4">{clientError || 'Nie znaleziono klienta'}</p>
                         <Button onClick={() => router.push('/dashboard/clients')}>
                             Wróć do listy
                         </Button>
                     </div>
-                </Card>
+                </div>
             </div>
         );
     }
@@ -89,20 +89,20 @@ export default function EditClientPage({ params }: { params: Promise<{ id: strin
             <div className="mb-8">
                 <button
                     onClick={() => router.back()}
-                    className="flex items-center gap-2 text-themed-muted hover:opacity-70 mb-4"
+                    className="flex items-center gap-2 text-muted-foreground hover:opacity-70 mb-4"
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     Powrót
                 </button>
-                <h1 className="text-2xl font-bold text-themed">Edytuj klienta</h1>
-                <p className="text-themed-muted mt-1">{client.name}</p>
+                <h1 className="text-2xl font-bold text-foreground">Edytuj klienta</h1>
+                <p className="text-muted-foreground mt-1">{client.name}</p>
             </div>
 
             <form onSubmit={handleSubmit}>
-                <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-themed mb-4">Podstawowe informacje</h2>
+                <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Podstawowe informacje</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Select
                             label="Typ klienta"
@@ -146,17 +146,17 @@ export default function EditClientPage({ params }: { params: Promise<{ id: strin
                                 name="isActive"
                                 checked={formData.isActive ?? true}
                                 onChange={handleChange}
-                                className="w-4 h-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
+                                className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
                             />
-                            <label htmlFor="isActive" className="text-sm text-themed-label">
+                            <label htmlFor="isActive" className="text-sm text-muted-foreground">
                                 Klient aktywny
                             </label>
                         </div>
                     </div>
-                </Card>
+                </div>
 
-                <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-themed mb-4">Dane kontaktowe</h2>
+                <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Dane kontaktowe</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Input
                             label="Email"
@@ -180,10 +180,10 @@ export default function EditClientPage({ params }: { params: Promise<{ id: strin
                             error={fieldErrors.website}
                         />
                     </div>
-                </Card>
+                </div>
 
-                <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-themed mb-4">Adres</h2>
+                <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Adres</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="md:col-span-2">
                             <Input
@@ -206,17 +206,17 @@ export default function EditClientPage({ params }: { params: Promise<{ id: strin
                             onChange={handleChange}
                         />
                     </div>
-                </Card>
+                </div>
 
-                <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-themed mb-4">Notatki</h2>
+                <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Notatki</h2>
                     <Textarea
                         name="notes"
                         value={formData.notes || ''}
                         onChange={handleChange}
                         rows={4}
                     />
-                </Card>
+                </div>
 
                 <div className="flex justify-end gap-3">
                     <Button type="button" variant="outline" onClick={() => router.back()}>

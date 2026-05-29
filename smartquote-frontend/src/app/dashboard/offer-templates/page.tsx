@@ -77,11 +77,11 @@ export default function OfferTemplatesPage() {
     const hasFilters = search.length > 0 || category.length > 0;
 
     return (
-        <div className="p-4 md:p-8">
+        <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
                 <div>
-                    <h1 className="text-xl md:text-2xl font-bold text-themed">Szablony ofert</h1>
-                    <p className="text-sm text-themed-muted mt-1">
+                    <h1 className="text-xl md:text-3xl font-bold tracking-tight">Szablony ofert</h1>
+                    <p className="text-sm text-muted-foreground mt-1">
                         Twórz presety pozycji do szybkiego generowania ofert
                     </p>
                 </div>
@@ -98,7 +98,7 @@ export default function OfferTemplatesPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div className="relative">
                     <svg
-                        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-themed-muted pointer-events-none"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -110,13 +110,13 @@ export default function OfferTemplatesPage() {
                         placeholder="Szukaj szablonu..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2.5 rounded-lg input-themed text-sm text-themed"
+                        className="w-full pl-9 pr-4 py-2.5 rounded-lg border-border bg-card text-foreground text-sm text-foreground"
                     />
                 </div>
                 <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-lg input-themed text-sm text-themed"
+                    className="w-full px-4 py-2.5 rounded-lg border-border bg-card text-foreground text-sm text-foreground"
                 >
                     <option value="">Wszystkie kategorie</option>
                     {categories.map((cat) => (
@@ -130,26 +130,26 @@ export default function OfferTemplatesPage() {
             {isLoading ? (
                 <>
                     <div className="hidden lg:block">
-                        <Card className="overflow-hidden">
+                        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
                             <div className="overflow-x-auto">
                                 <table className="w-full">
-                                    <thead className="section-themed border-b divider-themed">
+                                    <thead className="bg-surface-subtle border-b border-border">
                                     <tr>
-                                        <th className="px-6 py-4 text-xs font-semibold text-themed-muted uppercase tracking-wider text-left">Nazwa</th>
-                                        <th className="px-6 py-4 text-xs font-semibold text-themed-muted uppercase tracking-wider text-left">Kategoria</th>
-                                        <th className="px-6 py-4 text-xs font-semibold text-themed-muted uppercase tracking-wider text-center">Pozycje</th>
-                                        <th className="px-6 py-4 text-xs font-semibold text-themed-muted uppercase tracking-wider text-center">Płatność</th>
-                                        <th className="px-6 py-4 text-xs font-semibold text-themed-muted uppercase tracking-wider text-right">Akcje</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-left">Nazwa</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-left">Kategoria</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-center">Pozycje</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-center">Płatność</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-right">Akcje</th>
                                     </tr>
                                     </thead>
-                                    <tbody className="divide-y divider-themed">
+                                    <tbody className="divide-y border-border">
                                     {Array.from({ length: 5 }).map((_, i) => (
                                         <SkeletonTableRow key={i} columns={5} />
                                     ))}
                                     </tbody>
                                 </table>
                             </div>
-                        </Card>
+                        </div>
                     </div>
                     <div className="lg:hidden space-y-3">
                         {Array.from({ length: 4 }).map((_, i) => (
@@ -158,7 +158,7 @@ export default function OfferTemplatesPage() {
                     </div>
                 </>
             ) : templates.length === 0 ? (
-                <Card>
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                     <EmptyState
                         icon={
                             <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -180,30 +180,30 @@ export default function OfferTemplatesPage() {
                                 : undefined
                         }
                     />
-                </Card>
+                </div>
             ) : (
                 <>
                     <div className="hidden lg:block">
-                        <Card className="overflow-hidden">
+                        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
                             <div className="overflow-x-auto">
                                 <table className="w-full">
-                                    <thead className="section-themed border-b divider-themed">
+                                    <thead className="bg-surface-subtle border-b border-border">
                                     <tr>
-                                        <th className="px-6 py-4 text-xs font-semibold text-themed-muted uppercase tracking-wider text-left">Nazwa</th>
-                                        <th className="px-6 py-4 text-xs font-semibold text-themed-muted uppercase tracking-wider text-left">Kategoria</th>
-                                        <th className="px-6 py-4 text-xs font-semibold text-themed-muted uppercase tracking-wider text-center">Pozycje</th>
-                                        <th className="px-6 py-4 text-xs font-semibold text-themed-muted uppercase tracking-wider text-center">Płatność</th>
-                                        <th className="px-6 py-4 text-xs font-semibold text-themed-muted uppercase tracking-wider text-right">Akcje</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-left">Nazwa</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-left">Kategoria</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-center">Pozycje</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-center">Płatność</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-right">Akcje</th>
                                     </tr>
                                     </thead>
-                                    <tbody className="divide-y divider-themed">
+                                    <tbody className="divide-y border-border">
                                     {templates.map((template) => (
-                                        <tr key={template.id} className="hover-themed transition-colors">
+                                        <tr key={template.id} className="hover:bg-secondary/60 transition-colors">
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col">
-                                                    <span className="font-medium text-themed text-sm">{template.name}</span>
+                                                    <span className="font-medium text-foreground text-sm">{template.name}</span>
                                                     {template.description && (
-                                                        <span className="text-xs text-themed-muted truncate max-w-xs">
+                                                        <span className="text-xs text-muted-foreground truncate max-w-xs">
                                                                 {template.description}
                                                             </span>
                                                     )}
@@ -211,20 +211,20 @@ export default function OfferTemplatesPage() {
                                             </td>
                                             <td className="px-6 py-4">
                                                 {template.category ? (
-                                                    <span className="px-2.5 py-1 text-xs rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 font-medium">
+                                                    <span className="px-2.5 py-1 text-xs rounded-full bg-primary/10 text-primary font-medium">
                                                             {template.category}
                                                         </span>
                                                 ) : (
-                                                    <span className="text-xs text-themed-muted">-</span>
+                                                    <span className="text-xs text-muted-foreground">-</span>
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                    <span className="text-sm text-themed font-medium">
+                                                    <span className="text-sm text-foreground font-medium">
                                                         {template.items.length}
                                                     </span>
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                    <span className="text-sm text-themed">
+                                                    <span className="text-sm text-foreground">
                                                         {template.defaultPaymentDays} dni
                                                     </span>
                                             </td>
@@ -232,7 +232,7 @@ export default function OfferTemplatesPage() {
                                                 <div className="flex items-center justify-end gap-2">
                                                     <button
                                                         onClick={() => router.push(`/dashboard/offer-templates/${template.id}`)}
-                                                        className="p-2 rounded-lg hover-themed text-themed-muted transition-colors"
+                                                        className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground transition-colors"
                                                         title="Edytuj"
                                                     >
                                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -241,7 +241,7 @@ export default function OfferTemplatesPage() {
                                                     </button>
                                                     <button
                                                         onClick={() => setDeleteModal(template)}
-                                                        className="p-2 rounded-lg hover:bg-red-500/10 text-red-600 dark:text-red-400 transition-colors"
+                                                        className="p-2 rounded-lg hover:bg-status-rejected/10 text-status-rejected transition-colors"
                                                         title="Usuń"
                                                     >
                                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -255,28 +255,28 @@ export default function OfferTemplatesPage() {
                                     </tbody>
                                 </table>
                             </div>
-                        </Card>
+                        </div>
                     </div>
 
                     <div className="lg:hidden space-y-3">
                         {templates.map((template) => (
-                            <Card key={template.id} className="p-4">
+                            <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                                 <div className="flex items-start justify-between gap-3 mb-3">
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="font-semibold text-themed text-sm truncate">{template.name}</h3>
+                                        <h3 className="font-semibold text-foreground text-sm truncate">{template.name}</h3>
                                         {template.description && (
-                                            <p className="text-xs text-themed-muted mt-0.5 line-clamp-2">
+                                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
                                                 {template.description}
                                             </p>
                                         )}
                                     </div>
                                     {template.category && (
-                                        <span className="px-2 py-0.5 text-xs rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 font-medium shrink-0">
+                                        <span className="px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary font-medium shrink-0">
                                             {template.category}
                                         </span>
                                     )}
                                 </div>
-                                <div className="flex items-center gap-4 text-xs text-themed-muted mb-3">
+                                <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3">
                                     <span>{template.items.length} pozycji</span>
                                     <span>·</span>
                                     <span>{template.defaultPaymentDays} dni płatności</span>
@@ -295,14 +295,14 @@ export default function OfferTemplatesPage() {
                                     </Button>
                                     <button
                                         onClick={() => setDeleteModal(template)}
-                                        className="px-3 py-2 rounded-lg border border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400 text-sm font-medium hover:bg-red-500/20 transition-colors"
+                                        className="px-3 py-2 rounded-lg border border-destructive/30 bg-status-rejected/10 text-status-rejected text-sm font-medium hover:bg-status-rejected/20 transition-colors"
                                     >
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
                                     </button>
                                 </div>
-                            </Card>
+                            </div>
                         ))}
                     </div>
                 </>

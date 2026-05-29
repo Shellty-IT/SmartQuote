@@ -95,26 +95,26 @@ function NewFollowUpForm() {
             <div className="mb-8">
                 <button
                     onClick={() => router.back()}
-                    className="flex items-center gap-2 text-themed-muted hover:text-themed mb-4"
+                    className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4"
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     Powrót
                 </button>
-                <h1 className="text-2xl font-bold text-themed">Nowy follow-up</h1>
-                <p className="text-themed-muted mt-1">Utwórz nowe zadanie lub przypomnienie</p>
+                <h1 className="text-3xl font-bold tracking-tight">Nowy follow-up</h1>
+                <p className="text-muted-foreground mt-1">Utwórz nowe zadanie lub przypomnienie</p>
             </div>
 
             {error && (
-                <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400">
+                <div className="mb-6 p-4 bg-destructive/10 border border-destructive/25 rounded-lg text-destructive">
                     {error}
                 </div>
             )}
 
             <form onSubmit={handleSubmit}>
-                <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-themed mb-4">Podstawowe informacje</h2>
+                <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Podstawowe informacje</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="md:col-span-2">
                             <Input
@@ -163,10 +163,10 @@ function NewFollowUpForm() {
                             required
                         />
                     </div>
-                </Card>
+                </div>
 
-                <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-themed mb-4">Opis</h2>
+                <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Opis</h2>
                     <Textarea
                         name="description"
                         value={formData.description || ''}
@@ -174,10 +174,10 @@ function NewFollowUpForm() {
                         placeholder="Szczegółowy opis zadania..."
                         rows={3}
                     />
-                </Card>
+                </div>
 
-                <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-themed mb-4">Powiązania (opcjonalne)</h2>
+                <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Powiązania (opcjonalne)</h2>
                     <div className="grid grid-cols-1 gap-4">
                         <Select
                             label="Klient"
@@ -210,10 +210,10 @@ function NewFollowUpForm() {
                             ]}
                         />
                     </div>
-                </Card>
+                </div>
 
-                <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-themed mb-4">Notatki</h2>
+                <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Notatki</h2>
                     <Textarea
                         name="notes"
                         value={formData.notes || ''}
@@ -221,7 +221,7 @@ function NewFollowUpForm() {
                         placeholder="Dodatkowe notatki..."
                         rows={3}
                     />
-                </Card>
+                </div>
 
                 <div className="flex flex-col sm:flex-row justify-end gap-3">
                     <Button type="button" variant="outline" onClick={() => router.back()}>
@@ -239,8 +239,8 @@ function NewFollowUpForm() {
 function NewFollowUpLoading() {
     return (
         <div className="flex flex-col items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600"></div>
-            <p className="mt-4 text-themed-muted">Ładowanie...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <p className="mt-4 text-muted-foreground">Ładowanie...</p>
         </div>
     );
 }

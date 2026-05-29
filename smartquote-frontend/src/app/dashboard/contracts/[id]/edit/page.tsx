@@ -129,7 +129,7 @@ export default function EditContractPage({ params }: { params: Promise<{ id: str
     if (contractError || !contract) {
         return (
             <div className="text-center py-12">
-                <p className="text-red-500">{contractError || 'Umowa nie znaleziona'}</p>
+                <p className="text-destructive">{contractError || 'Umowa nie znaleziona'}</p>
                 <Link href="/dashboard/contracts">
                     <Button variant="outline" className="mt-4">
                         Wróć do listy
@@ -150,14 +150,14 @@ export default function EditContractPage({ params }: { params: Promise<{ id: str
                     </Button>
                 </Link>
                 <div>
-                    <h1 className="text-2xl font-bold text-themed">Edytuj umowę</h1>
-                    <p className="text-themed-muted">{contract.number}</p>
+                    <h1 className="text-2xl font-bold text-foreground">Edytuj umowę</h1>
+                    <p className="text-muted-foreground">{contract.number}</p>
                 </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-                <Card className="p-6">
-                    <h2 className="text-lg font-semibold text-themed mb-4">Informacje podstawowe</h2>
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Informacje podstawowe</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Input
                             label="Tytuł umowy *"
@@ -203,11 +203,11 @@ export default function EditContractPage({ params }: { params: Promise<{ id: str
                             rows={3}
                         />
                     </div>
-                </Card>
+                </div>
 
-                <Card className="p-6">
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                     <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-semibold text-themed">Pozycje umowy</h2>
+                        <h2 className="text-lg font-semibold text-foreground">Pozycje umowy</h2>
                         <Button type="button" variant="outline" size="sm" onClick={addItem}>
                             + Dodaj pozycję
                         </Button>
@@ -215,7 +215,7 @@ export default function EditContractPage({ params }: { params: Promise<{ id: str
 
                     <div className="space-y-4">
                         {formData.items.map((item, index) => (
-                            <div key={index} className="card-themed border rounded-lg p-4">
+                            <div key={index} className="bg-card border-border border rounded-lg p-4">
                                 <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
                                     <div className="md:col-span-2">
                                         <Input
@@ -261,10 +261,10 @@ export default function EditContractPage({ params }: { params: Promise<{ id: str
                             </div>
                         ))}
                     </div>
-                </Card>
+                </div>
 
-                <Card className="p-6">
-                    <h2 className="text-lg font-semibold text-themed mb-4">Warunki</h2>
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Warunki</h2>
                     <div className="space-y-4">
                         <Textarea
                             label="Warunki umowy"
@@ -279,7 +279,7 @@ export default function EditContractPage({ params }: { params: Promise<{ id: str
                             rows={3}
                         />
                     </div>
-                </Card>
+                </div>
 
                 <div className="flex justify-end gap-4">
                     <Link href={`/dashboard/contracts/${id}`}>

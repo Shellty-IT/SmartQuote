@@ -47,7 +47,7 @@ export default function NewOfferContent() {
             <div className="mb-8">
                 <button
                     onClick={() => router.back()}
-                    className="flex items-center gap-2 text-themed-muted hover:opacity-70 mb-4"
+                    className="flex items-center gap-2 text-muted-foreground hover:opacity-70 mb-4"
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -56,13 +56,13 @@ export default function NewOfferContent() {
                 </button>
                 <div className="flex items-start justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold text-themed">Nowa oferta</h1>
-                        <p className="text-themed-muted mt-1">Utwórz nową ofertę handlową</p>
+                        <h1 className="text-2xl font-bold text-foreground">Nowa oferta</h1>
+                        <p className="text-muted-foreground mt-1">Utwórz nową ofertę handlową</p>
                     </div>
                     {currentStep === 'items' && (
                         <button
                             onClick={() => setTemplateSelectorOpen(true)}
-                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-cyan-500/40 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-sm font-medium hover:bg-cyan-500/20 transition-colors shrink-0"
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-primary/40 bg-primary/10 text-primary text-sm font-medium hover:bg-primary/15 transition-colors shrink-0"
                         >
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
@@ -75,7 +75,7 @@ export default function NewOfferContent() {
 
             <OfferStepper currentStep={currentStep} onStepClick={goToStep} />
 
-            <Card className="mb-6">
+            <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
                 {currentStep === 'client' && (
                     <StepClient
                         clients={clients}
@@ -111,7 +111,7 @@ export default function NewOfferContent() {
                         uniqueVariants={uniqueVariants}
                     />
                 )}
-            </Card>
+            </div>
 
             <div className="flex justify-between">
                 <Button

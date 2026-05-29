@@ -3,12 +3,20 @@
 
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
-import NotificationBell from '@/components/notifications/NotificationBell';
+import Link from 'next/link';
+import { Search, Sun, Moon, Bell } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useTheme } from '@/app/providers';
+import { useUnreadCount } from '@/hooks/useNotifications';
 import { settingsApi } from '@/lib/api';
+import { getInitials } from '@/lib/utils';
 
 export default function Header() {
     const { data: session } = useSession();
+    const { theme, toggle } = useTheme();
+    const { count: unreadCount } = useUnreadCount();
     const [avatar, setAvatar] = useState<string | null>(null);
+    const [searchOpen, setSearchOpen] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
@@ -21,41 +29,70 @@ export default function Header() {
     }, []);
 
     const displayName = session?.user?.name || 'Użytkownik';
-    const initials = displayName
-        .split(' ')
-        .map((w: string) => w.charAt(0).toUpperCase())
-        .slice(0, 2)
-        .join('');
+    const email = session?.user?.email || '';
+    const initials = getInitials(displayName);
 
     return (
-        <header className="h-16 header-themed border-b flex items-center justify-between px-4 sm:px-8 transition-colors duration-300">
-            <div />
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-xl sm:px-6">
+            {/* Search */}
+            <div className={cn('relative transition-all duration-200', searchOpen ? 'flex-1' : 'flex-1 max-w-sm')}>
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                    placeholder="Szukaj ofert, klientów, umów..."
+                    onFocus={() => setSearchOpen(true)}
+                    onBlur={() => setSearchOpen(false)}
+                    className="h-9 w-full rounded-lg border border-border bg-secondary/60 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-primary focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/30"
+                />
+            </div>
 
-            <div className="flex items-center gap-4">
-                <NotificationBell />
+            {/* Right controls */}
+            <div className="flex shrink-0 items-center gap-2">
+                {/* Theme toggle */}
+                <button
+                    onClick={toggle}
+                    aria-label={theme === 'dark' ? 'Włącz tryb jasny' : 'Włącz tryb ciemny'}
+                    className="grid h-9 w-9 place-items-center rounded-lg border border-border bg-card text-muted-foreground transition hover:text-foreground"
+                >
+                    {theme === 'dark'
+                        ? <Sun className="h-4 w-4" />
+                        : <Moon className="h-4 w-4" />
+                    }
+                </button>
 
-                <div className="flex items-center gap-3 pl-4 border-l divider-themed">
-                    <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 shadow-md shadow-cyan-500/20">
+                {/* Notification bell */}
+                <Link
+                    href="/dashboard/notifications"
+                    className="relative grid h-9 w-9 place-items-center rounded-lg border border-border bg-card text-muted-foreground transition hover:text-foreground"
+                    aria-label="Powiadomienia"
+                >
+                    <Bell className="h-4 w-4" />
+                    {unreadCount > 0 && (
+                        <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-gradient-primary px-1 text-[9px] font-bold leading-none text-white shadow-glow ring-2 ring-background">
+                            {unreadCount > 99 ? '99+' : unreadCount}
+                        </span>
+                    )}
+                </Link>
+
+                {/* Profile chip */}
+                <Link
+                    href="/dashboard/settings"
+                    className="flex items-center gap-2.5 rounded-xl border border-border bg-card px-2 py-1.5 pr-3 shadow-sm transition hover:bg-secondary"
+                >
+                    <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-lg">
                         {avatar ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                                src={avatar}
-                                alt={displayName}
-                                className="w-full h-full object-cover"
-                            />
+                            <img src={avatar} alt={displayName} className="h-full w-full object-cover" />
                         ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white text-sm font-semibold">
+                            <div className="flex h-full w-full items-center justify-center bg-gradient-primary text-[11px] font-bold text-white">
                                 {initials}
                             </div>
                         )}
                     </div>
-                    <div className="hidden sm:block">
-                        <p className="text-sm font-medium text-themed">
-                            {displayName}
-                        </p>
-                        <p className="text-xs text-themed-muted">{session?.user?.email}</p>
+                    <div className="hidden text-right leading-tight sm:block">
+                        <div className="text-xs font-semibold text-foreground">{displayName}</div>
+                        <div className="max-w-[140px] truncate text-[10px] text-muted-foreground">{email}</div>
                     </div>
-                </div>
+                </Link>
             </div>
         </header>
     );

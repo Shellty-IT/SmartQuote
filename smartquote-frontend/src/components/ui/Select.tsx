@@ -1,5 +1,3 @@
-// SmartQuote-AI/src/components/ui/Select.tsx
-
 'use client';
 
 import { forwardRef, SelectHTMLAttributes, ReactNode } from 'react';
@@ -21,28 +19,22 @@ export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 const Select = forwardRef<HTMLSelectElement, SelectProps>(
     ({ className, label, error, options, placeholder, id, children, ...props }, ref) => {
         const selectId = id || props.name;
-
         return (
             <div className="w-full">
                 {label && (
-                    <label
-                        htmlFor={selectId}
-                        className="block text-sm font-medium text-slate-700 mb-1.5"
-                    >
+                    <label htmlFor={selectId} className="mb-1.5 block text-sm font-medium text-foreground">
                         {label}
-                        {props.required && <span className="text-red-500 ml-1">*</span>}
+                        {props.required && <span className="ml-1 text-destructive">*</span>}
                     </label>
                 )}
                 <select
                     ref={ref}
                     id={selectId}
                     className={cn(
-                        'block w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900',
-                        'focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500',
-                        'disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed',
-                        'transition-all duration-200',
-                        error && 'border-red-300 focus:ring-red-500/20 focus:border-red-500',
-                        className
+                        'block h-10 w-full rounded-lg border border-border bg-card px-3 text-sm text-foreground shadow-sm transition-colors focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-60',
+                        error &&
+                            'border-destructive focus-visible:border-destructive focus-visible:ring-destructive/30',
+                        className,
                     )}
                     {...props}
                 >
@@ -51,19 +43,18 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
                             {placeholder}
                         </option>
                     )}
-                    {/* Renderuj options jeśli podano tablicę */}
-                    {options && options.map((option) => (
-                        <option key={option.value} value={option.value}>
-                            {option.label}
-                        </option>
-                    ))}
-                    {/* Lub renderuj children jeśli podano */}
+                    {options &&
+                        options.map((option) => (
+                            <option key={option.value} value={option.value}>
+                                {option.label}
+                            </option>
+                        ))}
                     {children}
                 </select>
-                {error && <p className="mt-1.5 text-sm text-red-600">{error}</p>}
+                {error && <p className="mt-1.5 text-sm text-destructive">{error}</p>}
             </div>
         );
-    }
+    },
 );
 
 Select.displayName = 'Select';

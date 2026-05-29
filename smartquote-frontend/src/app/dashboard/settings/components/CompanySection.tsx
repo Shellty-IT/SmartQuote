@@ -3,7 +3,7 @@
 
 import { useState, useRef } from 'react';
 import Image from 'next/image';
-import { Card } from '@/components/ui';
+
 import Button from '@/components/ui/Button';
 import { compressImage } from '@/lib/imageUtils';
 import type { CompanyInfo, UpdateCompanyInfoInput } from '@/types';
@@ -208,14 +208,14 @@ export default function CompanySection({ company, onUpdate }: Props) {
 
     return (
         <div className="space-y-6">
-            <Card>
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h2 className="text-lg font-semibold text-themed">Dane firmy</h2>
-                        <p className="text-sm text-themed-muted">Informacje wyświetlane na ofertach i umowach</p>
+                        <h2 className="text-lg font-semibold text-foreground">Dane firmy</h2>
+                        <p className="text-sm text-muted-foreground">Informacje wyświetlane na ofertach i umowach</p>
                     </div>
                     {success && (
-                        <div className="flex items-center gap-2 text-emerald-500 text-sm">
+                        <div className="flex items-center gap-2 text-status-accepted text-sm">
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
@@ -224,18 +224,18 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     )}
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center gap-6 mb-8 pb-8 border-b divider-themed">
+                <div className="flex flex-col sm:flex-row items-center gap-6 mb-8 pb-8 border-b border-border">
                     <div
                         onClick={handleLogoClick}
                         className={`relative w-28 h-28 rounded-2xl flex items-center justify-center border-2 border-dashed transition-all cursor-pointer group ${
                             currentLogo
-                                ? 'border-cyan-300 bg-white'
-                                : 'border-slate-300 hover:border-cyan-400'
+                                ? 'border-primary/40 bg-card'
+                                : 'border-border hover:border-primary/50'
                         }`}
-                        style={{ backgroundColor: currentLogo ? '#ffffff' : 'var(--section-bg)' }}
+                        style={{ backgroundColor: currentLogo ? '#ffffff' : 'var(--surface-subtle)' }}
                     >
                         {isUploadingLogo ? (
-                            <svg className="w-8 h-8 text-cyan-500 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <svg className="w-8 h-8 text-primary animate-spin" fill="none" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                             </svg>
@@ -243,10 +243,10 @@ export default function CompanySection({ company, onUpdate }: Props) {
                             <Image src={currentLogo} alt="Logo firmy" fill className="object-contain rounded-xl p-2" unoptimized={currentLogo.startsWith('data:')} />
                         ) : (
                             <div className="text-center">
-                                <svg className="w-8 h-8 text-slate-400 group-hover:text-cyan-500 mx-auto mb-1 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <svg className="w-8 h-8 text-muted-foreground group-hover:text-primary mx-auto mb-1 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                <span className="text-xs text-slate-400 group-hover:text-cyan-500 transition-colors">Dodaj logo</span>
+                                <span className="text-xs text-muted-foreground group-hover:text-primary transition-colors">Dodaj logo</span>
                             </div>
                         )}
                     </div>
@@ -271,7 +271,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                                 <button
                                     onClick={handleRemoveLogo}
                                     disabled={isUploadingLogo}
-                                    className="text-xs font-medium text-red-500 hover:text-red-600 flex items-center gap-1 px-2 py-1 disabled:opacity-50"
+                                    className="text-xs font-medium text-destructive hover:text-destructive flex items-center gap-1 px-2 py-1 disabled:opacity-50"
                                 >
                                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -280,16 +280,16 @@ export default function CompanySection({ company, onUpdate }: Props) {
                                 </button>
                             )}
                         </div>
-                        {logoError && <p className="text-xs text-red-500 mt-2">{logoError}</p>}
-                        <p className="text-xs text-themed-muted mt-2">PNG, JPG lub WEBP do 2MB. Logo widoczne na ofertach i PDF.</p>
+                        {logoError && <p className="text-xs text-destructive mt-2">{logoError}</p>}
+                        <p className="text-xs text-muted-foreground mt-2">PNG, JPG lub WEBP do 2MB. Logo widoczne na ofertach i PDF.</p>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-themed-label mb-2">Nazwa firmy</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Nazwa firmy</label>
                         <div className="relative">
-                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                             </svg>
                             <input
@@ -303,7 +303,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-themed-label mb-2">NIP</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">NIP</label>
                         <input
                             type="text"
                             value={formData.nip || ''}
@@ -314,7 +314,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-themed-label mb-2">REGON</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">REGON</label>
                         <input
                             type="text"
                             value={formData.regon || ''}
@@ -324,16 +324,16 @@ export default function CompanySection({ company, onUpdate }: Props) {
                         />
                     </div>
                 </div>
-            </Card>
+            </div>
 
-            <Card>
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                 <div className="flex items-center gap-2 mb-6">
-                    <svg className="w-5 h-5 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                     </svg>
                     <div>
-                        <h3 className="text-lg font-semibold text-themed">Kolor firmowy</h3>
-                        <p className="text-sm text-themed-muted">Kolor widoczny na publicznej stronie oferty (przyciski, akcenty, linki)</p>
+                        <h3 className="text-lg font-semibold text-foreground">Kolor firmowy</h3>
+                        <p className="text-sm text-muted-foreground">Kolor widoczny na publicznej stronie oferty (przyciski, akcenty, linki)</p>
                     </div>
                 </div>
 
@@ -341,7 +341,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => colorInputRef.current?.click()}
-                            className="w-14 h-14 rounded-xl border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all hover:scale-105 hover:shadow-lg flex-shrink-0"
+                            className="w-14 h-14 rounded-xl border-2 border-border cursor-pointer transition-all hover:scale-105 hover:shadow-lg flex-shrink-0"
                             style={{ backgroundColor: activeColor }}
                         />
                         <input
@@ -352,15 +352,15 @@ export default function CompanySection({ company, onUpdate }: Props) {
                             className="sr-only"
                         />
                         <div>
-                            <p className="text-sm font-mono text-themed">{activeColor.toUpperCase()}</p>
-                            <p className="text-xs text-themed-muted">
+                            <p className="text-sm font-mono text-foreground">{activeColor.toUpperCase()}</p>
+                            <p className="text-xs text-muted-foreground">
                                 {formData.primaryColor ? 'Kolor niestandardowy' : 'Domyślny (cyan)'}
                             </p>
                         </div>
                     </div>
 
                     <div className="flex-1">
-                        <p className="text-xs text-themed-muted mb-2">Szybki wybór:</p>
+                        <p className="text-xs text-muted-foreground mb-2">Szybki wybór:</p>
                         <div className="flex flex-wrap gap-2">
                             {PRESET_COLORS.map((color) => (
                                 <button
@@ -378,7 +378,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                         {formData.primaryColor && (
                             <button
                                 onClick={handleResetColor}
-                                className="text-xs text-themed-muted hover:text-red-500 mt-3 flex items-center gap-1 transition-colors"
+                                className="text-xs text-muted-foreground hover:text-destructive mt-3 flex items-center gap-1 transition-colors"
                             >
                                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -389,8 +389,8 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     </div>
                 </div>
 
-                <div className="mt-6 pt-6 border-t divider-themed">
-                    <p className="text-xs text-themed-muted mb-3">Podgląd:</p>
+                <div className="mt-6 pt-6 border-t border-border">
+                    <p className="text-xs text-muted-foreground mb-3">Podgląd:</p>
                     <div className="flex flex-wrap gap-3">
                         <button
                             className="px-5 py-2.5 rounded-xl text-white text-sm font-semibold transition-colors"
@@ -412,16 +412,16 @@ export default function CompanySection({ company, onUpdate }: Props) {
                         </span>
                     </div>
                 </div>
-            </Card>
+            </div>
 
-            <Card>
-                <h3 className="text-lg font-semibold text-themed mb-6">Adres</h3>
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                <h3 className="mb-5 text-lg font-semibold tracking-tight">Adres</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-themed-label mb-2">Ulica i numer</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Ulica i numer</label>
                         <div className="relative">
-                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
@@ -436,7 +436,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-themed-label mb-2">Kod pocztowy</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Kod pocztowy</label>
                         <input
                             type="text"
                             value={formData.postalCode || ''}
@@ -447,7 +447,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-themed-label mb-2">Miasto</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Miasto</label>
                         <input
                             type="text"
                             value={formData.city || ''}
@@ -458,7 +458,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     </div>
 
                     <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-themed-label mb-2">Kraj</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Kraj</label>
                         <input
                             type="text"
                             value={formData.country || ''}
@@ -468,16 +468,16 @@ export default function CompanySection({ company, onUpdate }: Props) {
                         />
                     </div>
                 </div>
-            </Card>
+            </div>
 
-            <Card>
-                <h3 className="text-lg font-semibold text-themed mb-6">Kontakt</h3>
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                <h3 className="mb-5 text-lg font-semibold tracking-tight">Kontakt</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-sm font-medium text-themed-label mb-2">Telefon</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Telefon</label>
                         <div className="relative">
-                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                             </svg>
                             <input
@@ -491,21 +491,21 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-themed-label mb-2">Email firmowy</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Email firmowy</label>
                         <div className="relative">
-                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
                             <input
                                 type="email"
                                 value={formData.email || ''}
                                 onChange={(e) => handleChange('email', e.target.value)}
-                                className={`w-full pl-10 pr-4 py-2.5 border rounded-xl focus:outline-none transition-colors ${fieldErrors.email ? 'border-red-400 focus:border-red-400' : ''}`}
+                                className={`w-full pl-10 pr-4 py-2.5 border rounded-xl focus:outline-none transition-colors ${fieldErrors.email ? 'border-destructive focus:border-destructive' : ''}`}
                                 placeholder="kontakt@firma.pl"
                             />
                         </div>
                         {fieldErrors.email && (
-                            <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                            <p className="text-xs text-destructive mt-1 flex items-center gap-1">
                                 <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
                                 {fieldErrors.email}
                             </p>
@@ -513,37 +513,37 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     </div>
 
                     <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-themed-label mb-2">Strona internetowa</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Strona internetowa</label>
                         <div className="relative">
-                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                             </svg>
                             <input
                                 type="url"
                                 value={formData.website || ''}
                                 onChange={(e) => handleChange('website', e.target.value)}
-                                className={`w-full pl-10 pr-4 py-2.5 border rounded-xl focus:outline-none transition-colors ${fieldErrors.website ? 'border-red-400 focus:border-red-400' : ''}`}
+                                className={`w-full pl-10 pr-4 py-2.5 border rounded-xl focus:outline-none transition-colors ${fieldErrors.website ? 'border-destructive focus:border-destructive' : ''}`}
                                 placeholder="https://www.firma.pl"
                             />
                         </div>
                         {fieldErrors.website && (
-                            <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                            <p className="text-xs text-destructive mt-1 flex items-center gap-1">
                                 <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
                                 {fieldErrors.website}
                             </p>
                         )}
                     </div>
                 </div>
-            </Card>
+            </div>
 
-            <Card>
-                <h3 className="text-lg font-semibold text-themed mb-6">Dane bankowe</h3>
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                <h3 className="mb-5 text-lg font-semibold tracking-tight">Dane bankowe</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-sm font-medium text-themed-label mb-2">Nazwa banku</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Nazwa banku</label>
                         <div className="relative">
-                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                             </svg>
                             <input
@@ -557,7 +557,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-themed-label mb-2">Numer konta</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Numer konta</label>
                         <input
                             type="text"
                             value={formData.bankAccount || ''}
@@ -567,14 +567,14 @@ export default function CompanySection({ company, onUpdate }: Props) {
                         />
                     </div>
                 </div>
-            </Card>
+            </div>
 
-            <Card>
-                <h3 className="text-lg font-semibold text-themed mb-6">Domyślne wartości dla dokumentów</h3>
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                <h3 className="mb-5 text-lg font-semibold tracking-tight">Domyślne wartości dla dokumentów</h3>
 
                 <div className="space-y-6">
                     <div>
-                        <label className="block text-sm font-medium text-themed-label mb-2">
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">
                             Domyślny termin płatności (dni)
                         </label>
                         <input
@@ -588,9 +588,9 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-themed-label mb-2">Domyślne warunki</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Domyślne warunki</label>
                         <div className="relative">
-                            <svg className="absolute left-3 top-3 w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <svg className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                             <textarea
@@ -604,7 +604,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-themed-label mb-2">Domyślne uwagi</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Domyślne uwagi</label>
                         <textarea
                             value={formData.defaultNotes || ''}
                             onChange={(e) => handleChange('defaultNotes', e.target.value)}
@@ -614,7 +614,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                         />
                     </div>
                 </div>
-            </Card>
+            </div>
 
             {isEditing && (
                 <div className="flex items-center justify-end gap-3">

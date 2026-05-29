@@ -1,7 +1,7 @@
-// src/components/ui/Modal.tsx
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
+import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ModalProps {
@@ -13,23 +13,32 @@ interface ModalProps {
     size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
 }
 
-export default function Modal({
-                                  isOpen,
-                                  onClose,
-                                  title,
-                                  description,
-                                  children,
-                                  size = 'md',
-                              }: ModalProps) {
-    if (!isOpen) return null;
+const sizeMap = {
+    sm: 'max-w-md',
+    md: 'max-w-lg',
+    lg: 'max-w-2xl',
+    xl: 'max-w-4xl',
+    full: 'max-w-6xl',
+} as const;
 
-    const sizes = {
-        sm: 'max-w-md',
-        md: 'max-w-lg',
-        lg: 'max-w-2xl',
-        xl: 'max-w-4xl',
-        full: 'max-w-6xl',
-    };
+export default function Modal({
+    isOpen,
+    onClose,
+    title,
+    description,
+    children,
+    size = 'md',
+}: ModalProps) {
+    useEffect(() => {
+        if (!isOpen) return;
+        const handler = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') onClose();
+        };
+        document.addEventListener('keydown', handler);
+        return () => document.removeEventListener('keydown', handler);
+    }, [isOpen, onClose]);
+
+    if (!isOpen) return null;
 
     const modalId = title ? 'modal-title-' + title.replace(/\s+/g, '-').toLowerCase() : undefined;
 
@@ -41,41 +50,37 @@ export default function Modal({
             aria-labelledby={modalId}
         >
             <div
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
                 aria-hidden="true"
                 onClick={onClose}
             />
-
             <div className="flex min-h-full items-center justify-center p-4">
                 <div
                     className={cn(
-                        'relative w-full card-themed border rounded-2xl shadow-2xl transform transition-all',
-                        sizes[size]
+                        'relative w-full rounded-2xl border border-border bg-card text-card-foreground shadow-elevated transition-all',
+                        sizeMap[size],
                     )}
                     onClick={(e) => e.stopPropagation()}
                 >
                     {(title || description) && (
-                        <div className="px-6 py-4 border-b divider-themed">
+                        <div className="border-b border-border px-6 py-4">
                             {title && (
-                                <h3 id={modalId} className="text-lg font-semibold text-themed">
+                                <h3 id={modalId} className="text-lg font-semibold tracking-tight">
                                     {title}
                                 </h3>
                             )}
                             {description && (
-                                <p className="mt-1 text-sm text-themed-muted">{description}</p>
+                                <p className="mt-1 text-sm text-muted-foreground">{description}</p>
                             )}
                         </div>
                     )}
-
                     <button
                         onClick={onClose}
-                        className="absolute top-4 right-4 p-2 text-themed-muted hover-themed rounded-lg transition-colors"
+                        aria-label="Zamknij"
+                        className="absolute right-4 top-4 rounded-lg p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                     >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <X className="h-4 w-4" />
                     </button>
-
                     <div className="px-6 py-4">{children}</div>
                 </div>
             </div>

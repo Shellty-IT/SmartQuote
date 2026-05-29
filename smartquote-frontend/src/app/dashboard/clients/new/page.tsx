@@ -95,20 +95,20 @@ export default function NewClientPage() {
             <div className="mb-8">
                 <button
                     onClick={() => router.back()}
-                    className="flex items-center gap-2 text-themed-muted hover:opacity-70 mb-4"
+                    className="flex items-center gap-2 text-muted-foreground hover:opacity-70 mb-4"
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     Powrót
                 </button>
-                <h1 className="text-2xl font-bold text-themed">Nowy klient</h1>
-                <p className="text-themed-muted mt-1">Dodaj nowego klienta do swojej bazy</p>
+                <h1 className="text-2xl font-bold text-foreground">Nowy klient</h1>
+                <p className="text-muted-foreground mt-1">Dodaj nowego klienta do swojej bazy</p>
             </div>
 
             <form onSubmit={handleSubmit}>
-                <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-themed mb-4">Podstawowe informacje</h2>
+                <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Podstawowe informacje</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Select
                             label="Typ klienta"
@@ -149,10 +149,10 @@ export default function NewClientPage() {
                             </>
                         )}
                     </div>
-                </Card>
+                </div>
 
-                <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-themed mb-4">Dane kontaktowe</h2>
+                <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Dane kontaktowe</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Input
                             label="Email"
@@ -179,10 +179,10 @@ export default function NewClientPage() {
                             placeholder="https://www.firma.pl"
                         />
                     </div>
-                </Card>
+                </div>
 
-                <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-themed mb-4">Adres</h2>
+                <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Adres</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="md:col-span-2">
                             <Input
@@ -208,10 +208,10 @@ export default function NewClientPage() {
                             placeholder="00-001"
                         />
                     </div>
-                </Card>
+                </div>
 
-                <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-themed mb-4">Notatki</h2>
+                <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Notatki</h2>
                     <Textarea
                         name="notes"
                         value={formData.notes || ''}
@@ -219,7 +219,7 @@ export default function NewClientPage() {
                         placeholder="Dodatkowe informacje o kliencie..."
                         rows={4}
                     />
-                </Card>
+                </div>
 
                 <div className="flex justify-end gap-3">
                     <Button type="button" variant="outline" onClick={() => router.back()}>

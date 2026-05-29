@@ -107,15 +107,15 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
 
     if (fetchError || !followUp) {
         return (
-            <div className="p-4 md:p-8">
-                <Card>
+            <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                     <div className="text-center py-12">
-                        <p className="text-red-600 dark:text-red-400 mb-4">{fetchError || 'Nie znaleziono follow-upa'}</p>
+                        <p className="text-status-rejected mb-4">{fetchError || 'Nie znaleziono follow-upa'}</p>
                         <Button onClick={() => router.push('/dashboard/followups')}>
                             Wróć do listy
                         </Button>
                     </div>
-                </Card>
+                </div>
             </div>
         );
     }
@@ -125,26 +125,26 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
             <div className="mb-8">
                 <button
                     onClick={() => router.back()}
-                    className="flex items-center gap-2 text-themed-muted hover:text-themed mb-4"
+                    className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4"
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     Powrót
                 </button>
-                <h1 className="text-2xl font-bold text-themed">Edytuj follow-up</h1>
-                <p className="text-themed-muted mt-1">Modyfikuj szczegóły zadania</p>
+                <h1 className="text-3xl font-bold tracking-tight">Edytuj follow-up</h1>
+                <p className="text-muted-foreground mt-1">Modyfikuj szczegóły zadania</p>
             </div>
 
             {error && (
-                <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400">
+                <div className="mb-6 p-4 bg-destructive/10 border border-destructive/25 rounded-lg text-destructive">
                     {error}
                 </div>
             )}
 
             <form onSubmit={handleSubmit}>
-                <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-themed mb-4">Podstawowe informacje</h2>
+                <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Podstawowe informacje</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="md:col-span-2">
                             <Input
@@ -204,10 +204,10 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
                             required
                         />
                     </div>
-                </Card>
+                </div>
 
-                <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-themed mb-4">Opis</h2>
+                <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Opis</h2>
                     <Textarea
                         name="description"
                         value={formData.description || ''}
@@ -215,10 +215,10 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
                         placeholder="Szczegółowy opis zadania..."
                         rows={3}
                     />
-                </Card>
+                </div>
 
-                <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-themed mb-4">Powiązania</h2>
+                <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Powiązania</h2>
                     <div className="grid grid-cols-1 gap-4">
                         <Select
                             label="Klient"
@@ -251,10 +251,10 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
                             ]}
                         />
                     </div>
-                </Card>
+                </div>
 
-                <Card className="mb-6">
-                    <h2 className="text-lg font-semibold text-themed mb-4">Notatki</h2>
+                <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Notatki</h2>
                     <Textarea
                         name="notes"
                         value={formData.notes || ''}
@@ -262,7 +262,7 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
                         placeholder="Dodatkowe notatki..."
                         rows={3}
                     />
-                </Card>
+                </div>
 
                 <div className="flex flex-col sm:flex-row justify-end gap-3">
                     <Button type="button" variant="outline" onClick={() => router.back()}>

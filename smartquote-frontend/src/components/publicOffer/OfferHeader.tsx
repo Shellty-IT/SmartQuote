@@ -101,7 +101,7 @@ export default function OfferHeader({
                                 {formatDateLocal(createdAt)}
                             </p>
                             {validUntil && (
-                                <p className={`text-sm font-medium ${expired ? 'text-red-600' : 'text-slate-600'}`}>
+                                <p className={`text-sm font-medium ${expired ? 'text-status-rejected' : 'text-slate-600'}`}>
                                     <span className={expired ? 'text-red-400' : 'text-slate-400'}>
                                         Ważna do:{' '}
                                     </span>

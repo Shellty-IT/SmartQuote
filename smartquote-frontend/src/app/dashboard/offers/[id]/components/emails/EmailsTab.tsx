@@ -14,9 +14,9 @@ interface EmailsTabProps {
 
 function EmailStatusBadge({ status }: { status: EmailLogStatus }) {
     const config: Record<EmailLogStatus, { label: string; classes: string }> = {
-        SENT: { label: 'Wysłano', classes: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' },
-        FAILED: { label: 'Błąd', classes: 'bg-red-500/15 text-red-600 dark:text-red-400' },
-        DRAFT: { label: 'Szkic', classes: 'bg-slate-500/15 text-slate-600 dark:text-slate-400' },
+        SENT: { label: 'Wysłano', classes: 'bg-status-accepted/15 text-status-accepted' },
+        FAILED: { label: 'Błąd', classes: 'bg-destructive/15 text-status-rejected' },
+        DRAFT: { label: 'Szkic', classes: 'bg-secondary text-muted-foreground dark:text-muted-foreground' },
     };
     const { label, classes } = config[status];
     return (
@@ -29,11 +29,11 @@ function EmailStatusBadge({ status }: { status: EmailLogStatus }) {
 function SkeletonRow() {
     return (
         <div className="flex items-start gap-3 p-4 animate-pulse">
-            <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex-shrink-0" />
+            <div className="w-8 h-8 rounded-full bg-secondary dark:bg-secondary flex-shrink-0" />
             <div className="flex-1 space-y-2">
-                <div className="h-3.5 bg-slate-200 dark:bg-slate-700 rounded w-48" />
-                <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-72" />
-                <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-32" />
+                <div className="h-3.5 bg-secondary dark:bg-secondary rounded w-48" />
+                <div className="h-3 bg-secondary dark:bg-secondary rounded w-72" />
+                <div className="h-3 bg-secondary dark:bg-secondary rounded w-32" />
             </div>
         </div>
     );
@@ -74,14 +74,14 @@ export function EmailsTab({ offerId, offerNumber }: EmailsTabProps) {
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <div>
-                    <h3 className="text-sm font-semibold text-themed">Historia korespondencji</h3>
-                    <p className="text-xs text-themed-muted mt-0.5">
+                    <h3 className="text-sm font-semibold text-foreground">Historia korespondencji</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
                         Wiadomości email powiązane z ofertą {offerNumber}
                     </p>
                 </div>
                 <button
                     onClick={() => router.push(`/dashboard/emails/new?offerId=${offerId}`)}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-medium transition-colors"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary hover:brightness-110 text-white text-xs font-medium transition-colors"
                 >
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -90,15 +90,15 @@ export function EmailsTab({ offerId, offerNumber }: EmailsTabProps) {
                 </button>
             </div>
 
-            <div className="card-themed border rounded-xl overflow-hidden">
+            <div className="bg-card border-border border rounded-xl overflow-hidden">
                 {error && (
-                    <div className="p-4 text-sm text-red-600 dark:text-red-400 text-center">
+                    <div className="p-4 text-sm text-status-rejected text-center">
                         {error}
                     </div>
                 )}
 
                 {isLoading ? (
-                    <div className="divide-y divider-themed">
+                    <div className="divide-y border-border">
                         {[1, 2, 3].map(i => <SkeletonRow key={i} />)}
                     </div>
                 ) : items.length === 0 ? (
@@ -112,27 +112,27 @@ export function EmailsTab({ offerId, offerNumber }: EmailsTabProps) {
                         description="Nie wysłano jeszcze żadnych wiadomości email w kontekście tej oferty"
                     />
                 ) : (
-                    <div className="divide-y divider-themed">
+                    <div className="divide-y border-border">
                         {items.map(item => (
                             <div
                                 key={item.id}
                                 onClick={() => router.push(`/dashboard/emails/${item.id}`)}
-                                className="flex items-start gap-3 p-4 hover-themed cursor-pointer transition-colors group"
+                                className="flex items-start gap-3 p-4 hover:bg-secondary/60 cursor-pointer transition-colors group"
                             >
-                                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-cyan-500/10 flex items-center justify-center mt-0.5">
-                                    <svg className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
+                                    <svg className="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                     </svg>
                                 </div>
 
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 flex-wrap">
-                                        <span className="text-sm font-medium text-themed truncate">
+                                        <span className="text-sm font-medium text-foreground truncate">
                                             {item.toName ? item.toName : item.to}
                                         </span>
                                         <EmailStatusBadge status={item.status} />
                                         {item.attachments && item.attachments.length > 0 && (
-                                            <span className="text-xs text-themed-muted flex items-center gap-1">
+                                            <span className="text-xs text-muted-foreground flex items-center gap-1">
                                                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                                                 </svg>
@@ -140,14 +140,14 @@ export function EmailsTab({ offerId, offerNumber }: EmailsTabProps) {
                                             </span>
                                         )}
                                     </div>
-                                    <p className="text-xs text-themed mt-0.5 truncate">{item.subject}</p>
-                                    <p className="text-xs text-themed-muted mt-0.5">{formatDate(item.sentAt)}</p>
+                                    <p className="text-xs text-foreground mt-0.5 truncate">{item.subject}</p>
+                                    <p className="text-xs text-muted-foreground mt-0.5">{formatDate(item.sentAt)}</p>
                                     {item.errorMessage && (
-                                        <p className="text-xs text-red-500 mt-0.5 truncate">{item.errorMessage}</p>
+                                        <p className="text-xs text-destructive mt-0.5 truncate">{item.errorMessage}</p>
                                     )}
                                 </div>
 
-                                <svg className="w-4 h-4 text-themed-muted opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <svg className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                                 </svg>
                             </div>
@@ -160,7 +160,7 @@ export function EmailsTab({ offerId, offerNumber }: EmailsTabProps) {
                 <div className="text-center">
                     <button
                         onClick={() => router.push(`/dashboard/emails?offerId=${offerId}`)}
-                        className="text-xs text-cyan-600 dark:text-cyan-400 hover:underline"
+                        className="text-xs text-primary hover:underline"
                     >
                         Zobacz pełną historię w module Korespondencja →
                     </button>

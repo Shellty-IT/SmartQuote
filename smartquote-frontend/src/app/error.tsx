@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { AlertTriangle } from 'lucide-react';
 
 interface ErrorProps {
     error: Error & { digest?: string };
@@ -16,32 +17,60 @@ export default function GlobalError({ error, reset }: ErrorProps) {
 
     return (
         <html lang="pl">
-            <body className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4">
-                <div className="max-w-md w-full text-center">
-                    <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                        <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                        </svg>
-                    </div>
-                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-                        Wystąpił nieoczekiwany błąd
-                    </h1>
-                    <p className="text-slate-500 dark:text-slate-400 mb-8 text-sm">
-                        Przepraszamy za utrudnienia. Spróbuj odświeżyć stronę lub wróć do dashboardu.
-                    </p>
-                    <div className="flex gap-3 justify-center">
-                        <button
-                            onClick={reset}
-                            className="px-5 py-2.5 bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl text-sm font-medium transition-colors"
-                        >
-                            Spróbuj ponownie
-                        </button>
-                        <a
-                            href="/dashboard"
-                            className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-medium transition-colors"
-                        >
-                            Wróć do dashboardu
-                        </a>
+            <body style={{ backgroundColor: 'oklch(0.985 0.008 240)', color: 'oklch(0.22 0.05 250)' }}>
+                <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+                    <div style={{ maxWidth: '28rem', width: '100%', textAlign: 'center' }}>
+                        <div style={{
+                            width: '4rem', height: '4rem', borderRadius: '1rem',
+                            background: 'oklch(0.6 0.22 25 / 0.12)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            margin: '0 auto 1.5rem',
+                            border: '1px solid oklch(0.6 0.22 25 / 0.25)',
+                        }}>
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="oklch(0.6 0.22 25)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                                <line x1="12" y1="9" x2="12" y2="13"/>
+                                <line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                        </div>
+                        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+                            Wystąpił nieoczekiwany błąd
+                        </h1>
+                        <p style={{ color: 'oklch(0.5 0.04 248)', marginBottom: '2rem', fontSize: '0.875rem' }}>
+                            Przepraszamy za utrudnienia. Spróbuj odświeżyć stronę lub wróć do dashboardu.
+                        </p>
+                        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+                            <button
+                                onClick={reset}
+                                style={{
+                                    padding: '0.625rem 1.25rem',
+                                    background: 'linear-gradient(135deg, oklch(0.62 0.18 248), oklch(0.72 0.16 210))',
+                                    color: 'white',
+                                    borderRadius: '0.75rem',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 600,
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                Spróbuj ponownie
+                            </button>
+                            <a
+                                href="/dashboard"
+                                style={{
+                                    padding: '0.625rem 1.25rem',
+                                    background: 'oklch(0.955 0.018 240)',
+                                    color: 'oklch(0.22 0.05 250)',
+                                    borderRadius: '0.75rem',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 600,
+                                    border: '1px solid oklch(0.92 0.018 240)',
+                                    textDecoration: 'none',
+                                }}
+                            >
+                                Wróć do dashboardu
+                            </a>
+                        </div>
                     </div>
                 </div>
             </body>

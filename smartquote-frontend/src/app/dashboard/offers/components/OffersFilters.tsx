@@ -1,6 +1,6 @@
 // src/app/dashboard/offers/components/OffersFilters.tsx
 
-import { Card, Input } from '@/components/ui';
+import { Search } from 'lucide-react';
 import { STATUS_OPTIONS, SORT_OPTIONS } from '../constants';
 
 interface OffersFiltersProps {
@@ -13,33 +13,30 @@ interface OffersFiltersProps {
 }
 
 export function OffersFilters({
-                                  search,
-                                  status,
-                                  sort,
-                                  onSearchChange,
-                                  onStatusChange,
-                                  onSortChange,
-                              }: OffersFiltersProps) {
+    search,
+    status,
+    sort,
+    onSearchChange,
+    onStatusChange,
+    onSortChange,
+}: OffersFiltersProps) {
     return (
-        <Card className="mb-6">
-            <div className="p-3 md:p-4 flex flex-col gap-3 md:flex-row md:gap-4">
-                <div className="flex-1">
-                    <Input
+        <div className="mb-6 rounded-2xl border border-border bg-card p-4 shadow-card">
+            <div className="flex flex-col gap-3 md:flex-row md:gap-4">
+                <div className="relative flex-1">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <input
                         placeholder="Szukaj po numerze, tytule lub kliencie..."
                         value={search}
                         onChange={(e) => onSearchChange(e.target.value)}
-                        icon={
-                            <svg className="w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        }
+                        className="h-10 w-full rounded-lg border border-border bg-secondary/60 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-primary focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/30"
                     />
                 </div>
                 <div className="flex gap-3">
                     <select
                         value={status}
                         onChange={(e) => onStatusChange(e.target.value)}
-                        className="flex-1 md:w-48 px-3 py-2 text-sm border rounded-lg input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                        className="h-10 flex-1 rounded-lg border border-border bg-card px-3 text-sm text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/30 md:w-44 md:flex-none"
                     >
                         {STATUS_OPTIONS.map((opt) => (
                             <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -48,7 +45,7 @@ export function OffersFilters({
                     <select
                         value={sort}
                         onChange={(e) => onSortChange(e.target.value)}
-                        className="flex-1 md:w-48 px-3 py-2 text-sm border rounded-lg input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                        className="h-10 flex-1 rounded-lg border border-border bg-card px-3 text-sm text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/30 md:w-44 md:flex-none"
                     >
                         {SORT_OPTIONS.map((opt) => (
                             <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -56,6 +53,6 @@ export function OffersFilters({
                     </select>
                 </div>
             </div>
-        </Card>
+        </div>
     );
 }

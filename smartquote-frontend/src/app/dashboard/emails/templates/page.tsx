@@ -38,51 +38,51 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
     return (
         <div className="space-y-4">
             <div>
-                <label className="block text-xs font-medium text-themed-muted mb-1">
-                    Nazwa szablonu <span className="text-red-500">*</span>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">
+                    Nazwa szablonu <span className="text-status-rejected">*</span>
                 </label>
                 <input
                     type="text"
                     value={name}
                     onChange={e => setName(e.target.value)}
                     placeholder="np. Oferta premium"
-                    className={`w-full px-3 py-2 rounded-xl border text-themed text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 bg-white dark:bg-slate-800 ${
-                        errors.name ? 'border-red-400' : 'border-slate-200 dark:border-slate-700'
+                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30 bg-card ${
+                        errors.name ? 'border-destructive' : 'border-border'
                     }`}
                 />
-                {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
+                {errors.name && <p className="mt-1 text-xs text-status-rejected">{errors.name}</p>}
             </div>
             <div>
-                <label className="block text-xs font-medium text-themed-muted mb-1">
-                    Temat wiadomości <span className="text-red-500">*</span>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">
+                    Temat wiadomości <span className="text-status-rejected">*</span>
                 </label>
                 <input
                     type="text"
                     value={subject}
                     onChange={e => setSubject(e.target.value)}
                     placeholder="Temat emaila"
-                    className={`w-full px-3 py-2 rounded-xl border text-themed text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 bg-white dark:bg-slate-800 ${
-                        errors.subject ? 'border-red-400' : 'border-slate-200 dark:border-slate-700'
+                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30 bg-card ${
+                        errors.subject ? 'border-destructive' : 'border-border'
                     }`}
                 />
-                {errors.subject && <p className="mt-1 text-xs text-red-500">{errors.subject}</p>}
+                {errors.subject && <p className="mt-1 text-xs text-status-rejected">{errors.subject}</p>}
             </div>
             <div>
-                <label className="block text-xs font-medium text-themed-muted mb-1">
-                    Treść szablonu <span className="text-red-500">*</span>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">
+                    Treść szablonu <span className="text-status-rejected">*</span>
                 </label>
                 <textarea
                     value={body}
                     onChange={e => setBody(e.target.value)}
                     rows={10}
                     placeholder="Treść wiadomości email..."
-                    className={`w-full px-3 py-2 rounded-xl border text-themed text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 bg-white dark:bg-slate-800 resize-y ${
-                        errors.body ? 'border-red-400' : 'border-slate-200 dark:border-slate-700'
+                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30 bg-card resize-y ${
+                        errors.body ? 'border-destructive' : 'border-border'
                     }`}
                 />
-                {errors.body && <p className="mt-1 text-xs text-red-500">{errors.body}</p>}
-                <p className="mt-1 text-xs text-themed-muted">
-                    Możesz używać zmiennych: <code className="bg-slate-100 dark:bg-slate-800 px-1 rounded">{'{clientName}'}</code>, <code className="bg-slate-100 dark:bg-slate-800 px-1 rounded">{'{offerNumber}'}</code>, <code className="bg-slate-100 dark:bg-slate-800 px-1 rounded">{'{contractNumber}'}</code>
+                {errors.body && <p className="mt-1 text-xs text-status-rejected">{errors.body}</p>}
+                <p className="mt-1 text-xs text-muted-foreground">
+                    Możesz używać zmiennych: <code className="bg-secondary px-1 rounded">{'{clientName}'}</code>, <code className="bg-secondary px-1 rounded">{'{offerNumber}'}</code>, <code className="bg-secondary px-1 rounded">{'{contractNumber}'}</code>
                 </p>
             </div>
             <div className="flex justify-end gap-3 pt-2">
@@ -90,7 +90,7 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
                     type="button"
                     onClick={onCancel}
                     disabled={isSaving}
-                    className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm text-themed hover-themed transition-colors disabled:opacity-60"
+                    className="px-4 py-2 rounded-xl border border-border text-sm text-foreground hover:bg-secondary/60 transition-colors disabled:opacity-60"
                 >
                     Anuluj
                 </button>
@@ -98,7 +98,7 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
                     type="button"
                     onClick={handleSubmit}
                     disabled={isSaving}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-medium transition-colors disabled:opacity-60"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-primary hover:brightness-110 text-white text-sm font-medium transition-colors disabled:opacity-60"
                 >
                     {isSaving && (
                         <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -184,25 +184,25 @@ export default function EmailTemplatesPage() {
         : null;
 
     return (
-        <div className="p-4 md:p-8">
+        <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => router.push('/dashboard/emails')}
-                        className="p-2 text-themed-muted hover-themed rounded-lg transition-colors"
+                        className="p-2 text-muted-foreground hover:bg-secondary/60 rounded-lg transition-colors"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                     </button>
                     <div>
-                        <h1 className="text-2xl font-bold text-themed">Szablony wiadomości</h1>
-                        <p className="text-themed-muted mt-0.5">Zarządzaj szablonami email</p>
+                        <h1 className="text-3xl font-bold tracking-tight">Szablony wiadomości</h1>
+                        <p className="text-muted-foreground mt-0.5">Zarządzaj szablonami email</p>
                     </div>
                 </div>
                 <button
                     onClick={() => { setShowNewForm(true); setEditingId(null); }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-medium transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-primary hover:brightness-110 text-white text-sm font-medium transition-colors"
                 >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -212,49 +212,49 @@ export default function EmailTemplatesPage() {
             </div>
 
             {error && (
-                <div className="mb-4 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm">
+                <div className="mb-4 p-3 rounded-xl bg-destructive/10 border border-destructive/25 text-destructive text-sm">
                     {error}
                 </div>
             )}
 
             {showNewForm && (
-                <Card className="mb-6">
-                    <h2 className="text-sm font-semibold text-themed mb-4">Nowy szablon</h2>
+                <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-sm font-semibold text-foreground mb-4">Nowy szablon</h2>
                     <TemplateForm
                         onSave={handleCreate}
                         onCancel={() => setShowNewForm(false)}
                         isSaving={isSaving}
                     />
-                </Card>
+                </div>
             )}
 
             <div className="space-y-6">
                 <div>
-                    <h2 className="text-xs font-semibold text-themed-muted uppercase tracking-wide mb-3">
+                    <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
                         Wbudowane ({BUILT_IN_TEMPLATES.length})
                     </h2>
                     <div className="space-y-2">
                         {BUILT_IN_TEMPLATES.map(t => (
-                            <div key={t.id} className="card-themed border rounded-xl overflow-hidden">
+                            <div key={t.id} className="bg-card border-border border rounded-xl overflow-hidden">
                                 <div className="flex items-center justify-between p-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0">
-                                            <svg className="w-4 h-4 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+                                            <svg className="w-4 h-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h8" />
                                             </svg>
                                         </div>
                                         <div>
-                                            <p className="text-sm font-medium text-themed">{t.name}</p>
-                                            <p className="text-xs text-themed-muted">{t.subject}</p>
+                                            <p className="text-sm font-medium text-foreground">{t.name}</p>
+                                            <p className="text-xs text-muted-foreground">{t.subject}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-xs text-themed-muted px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800">
+                                        <span className="text-xs text-muted-foreground px-2 py-0.5 rounded-full bg-secondary">
                                             Wbudowany
                                         </span>
                                         <button
                                             onClick={() => setPreviewId(previewId === t.id ? null : t.id)}
-                                            className="p-1.5 text-themed-muted hover:text-cyan-600 dark:hover:text-cyan-400 hover-themed rounded-lg transition-colors"
+                                            className="p-1.5 text-muted-foreground hover:text-primary dark:hover:text-primary hover:bg-secondary/60 rounded-lg transition-colors"
                                             title="Podgląd"
                                         >
                                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -264,7 +264,7 @@ export default function EmailTemplatesPage() {
                                         </button>
                                         <button
                                             onClick={() => router.push('/dashboard/emails/new')}
-                                            className="p-1.5 text-themed-muted hover:text-cyan-600 dark:hover:text-cyan-400 hover-themed rounded-lg transition-colors"
+                                            className="p-1.5 text-muted-foreground hover:text-primary dark:hover:text-primary hover:bg-secondary/60 rounded-lg transition-colors"
                                             title="Użyj szablonu"
                                         >
                                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -274,9 +274,9 @@ export default function EmailTemplatesPage() {
                                     </div>
                                 </div>
                                 {previewId === t.id && (
-                                    <div className="border-t divider-themed p-4">
-                                        <p className="text-xs font-medium text-themed-muted mb-2">Podgląd treści:</p>
-                                        <pre className="text-xs text-themed whitespace-pre-wrap leading-relaxed font-sans bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg">
+                                    <div className="border-t border-border p-4">
+                                        <p className="text-xs font-medium text-muted-foreground mb-2">Podgląd treści:</p>
+                                        <pre className="text-xs text-foreground whitespace-pre-wrap leading-relaxed font-sans bg-surface-subtle/50 p-3 rounded-lg">
                                             {t.body}
                                         </pre>
                                     </div>
@@ -287,14 +287,14 @@ export default function EmailTemplatesPage() {
                 </div>
 
                 <div>
-                    <h2 className="text-xs font-semibold text-themed-muted uppercase tracking-wide mb-3">
+                    <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
                         Moje szablony ({templates.length})
                     </h2>
 
                     {isLoading ? (
                         <div className="space-y-2">
                             {[1, 2].map(i => (
-                                <div key={i} className="h-16 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />
+                                <div key={i} className="h-16 rounded-xl bg-secondary animate-pulse" />
                             ))}
                         </div>
                     ) : templates.length === 0 && !showNewForm ? (
@@ -310,23 +310,23 @@ export default function EmailTemplatesPage() {
                     ) : (
                         <div className="space-y-2">
                             {templates.map(t => (
-                                <div key={t.id} className="card-themed border rounded-xl overflow-hidden">
+                                <div key={t.id} className="bg-card border-border border rounded-xl overflow-hidden">
                                     <div className="flex items-center justify-between p-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center flex-shrink-0">
-                                                <svg className="w-4 h-4 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                                <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                                                 </svg>
                                             </div>
                                             <div>
-                                                <p className="text-sm font-medium text-themed">{t.name}</p>
-                                                <p className="text-xs text-themed-muted">{t.subject}</p>
+                                                <p className="text-sm font-medium text-foreground">{t.name}</p>
+                                                <p className="text-xs text-muted-foreground">{t.subject}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-1">
                                             <button
                                                 onClick={() => setPreviewId(previewId === t.id ? null : t.id)}
-                                                className="p-1.5 text-themed-muted hover:text-cyan-600 dark:hover:text-cyan-400 hover-themed rounded-lg transition-colors"
+                                                className="p-1.5 text-muted-foreground hover:text-primary dark:hover:text-primary hover:bg-secondary/60 rounded-lg transition-colors"
                                                 title="Podgląd"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -336,7 +336,7 @@ export default function EmailTemplatesPage() {
                                             </button>
                                             <button
                                                 onClick={() => { setEditingId(t.id); setShowNewForm(false); setPreviewId(null); }}
-                                                className="p-1.5 text-themed-muted hover:text-cyan-600 dark:hover:text-cyan-400 hover-themed rounded-lg transition-colors"
+                                                className="p-1.5 text-muted-foreground hover:text-primary dark:hover:text-primary hover:bg-secondary/60 rounded-lg transition-colors"
                                                 title="Edytuj"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -345,7 +345,7 @@ export default function EmailTemplatesPage() {
                                             </button>
                                             <button
                                                 onClick={() => setDeleteConfirmId(t.id)}
-                                                className="p-1.5 text-themed-muted hover:text-red-500 dark:hover:text-red-400 hover-themed rounded-lg transition-colors"
+                                                className="p-1.5 text-muted-foreground hover:text-status-rejected dark:hover:text-destructive hover:bg-secondary/60 rounded-lg transition-colors"
                                                 title="Usuń"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -356,7 +356,7 @@ export default function EmailTemplatesPage() {
                                     </div>
 
                                     {editingId === t.id && (
-                                        <div className="border-t divider-themed p-4">
+                                        <div className="border-t border-border p-4">
                                             <TemplateForm
                                                 initial={{ name: t.name, subject: t.subject, body: t.body }}
                                                 onSave={data => handleUpdate(t.id, data)}
@@ -367,9 +367,9 @@ export default function EmailTemplatesPage() {
                                     )}
 
                                     {previewId === t.id && editingId !== t.id && (
-                                        <div className="border-t divider-themed p-4">
-                                            <p className="text-xs font-medium text-themed-muted mb-2">Podgląd treści:</p>
-                                            <pre className="text-xs text-themed whitespace-pre-wrap leading-relaxed font-sans bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg">
+                                        <div className="border-t border-border p-4">
+                                            <p className="text-xs font-medium text-muted-foreground mb-2">Podgląd treści:</p>
+                                            <pre className="text-xs text-foreground whitespace-pre-wrap leading-relaxed font-sans bg-surface-subtle/50 p-3 rounded-lg">
                                                 {t.body}
                                             </pre>
                                         </div>
@@ -381,11 +381,11 @@ export default function EmailTemplatesPage() {
                 </div>
 
                 {builtInPreview && (
-                    <div className="mt-2 p-4 card-themed border rounded-xl">
-                        <p className="text-xs font-medium text-themed-muted mb-2">
+                    <div className="mt-2 p-4 bg-card border-border border rounded-xl">
+                        <p className="text-xs font-medium text-muted-foreground mb-2">
                             Podgląd: {builtInPreview.name}
                         </p>
-                        <pre className="text-xs text-themed whitespace-pre-wrap leading-relaxed font-sans bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg">
+                        <pre className="text-xs text-foreground whitespace-pre-wrap leading-relaxed font-sans bg-surface-subtle/50 p-3 rounded-lg">
                             {builtInPreview.body}
                         </pre>
                     </div>

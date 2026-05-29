@@ -119,7 +119,7 @@ function NewContractForm() {
         return (
             <div className="flex flex-col items-center justify-center py-12">
                 <LoadingSpinner size="lg" />
-                <p className="mt-4 text-themed-muted">Tworzenie umowy z oferty...</p>
+                <p className="mt-4 text-muted-foreground">Tworzenie umowy z oferty...</p>
             </div>
         );
     }
@@ -135,14 +135,14 @@ function NewContractForm() {
                     </Button>
                 </Link>
                 <div>
-                    <h1 className="text-2xl font-bold text-themed">Nowa umowa</h1>
-                    <p className="text-themed-muted">Utwórz nową umowę</p>
+                    <h1 className="text-2xl font-bold text-foreground">Nowa umowa</h1>
+                    <p className="text-muted-foreground">Utwórz nową umowę</p>
                 </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-                <Card className="p-6">
-                    <h2 className="text-lg font-semibold text-themed mb-4">Informacje podstawowe</h2>
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Informacje podstawowe</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Input
                             label="Tytuł umowy *"
@@ -189,11 +189,11 @@ function NewContractForm() {
                             resizable
                         />
                     </div>
-                </Card>
+                </div>
 
-                <Card className="p-6">
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                     <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-semibold text-themed">Pozycje umowy</h2>
+                        <h2 className="text-lg font-semibold text-foreground">Pozycje umowy</h2>
                         <Button type="button" variant="outline" size="sm" onClick={addItem}>
                             + Dodaj pozycję
                         </Button>
@@ -201,7 +201,7 @@ function NewContractForm() {
 
                     <div className="space-y-4">
                         {formData.items.map((item, index) => (
-                            <div key={index} className="card-themed border rounded-lg p-4">
+                            <div key={index} className="bg-card border-border border rounded-lg p-4">
                                 <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
                                     <div className="md:col-span-2">
                                         <Input
@@ -247,10 +247,10 @@ function NewContractForm() {
                             </div>
                         ))}
                     </div>
-                </Card>
+                </div>
 
-                <Card className="p-6">
-                    <h2 className="text-lg font-semibold text-themed mb-4">Warunki</h2>
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Warunki</h2>
                     <div className="space-y-4">
                         <Textarea
                             label="Warunki umowy"
@@ -267,7 +267,7 @@ function NewContractForm() {
                             resizable
                         />
                     </div>
-                </Card>
+                </div>
 
                 <div className="flex justify-end gap-4">
                     <Link href="/dashboard/contracts">
@@ -288,7 +288,7 @@ function NewContractLoading() {
     return (
         <div className="flex flex-col items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
-            <p className="mt-4 text-themed-muted">Ładowanie...</p>
+            <p className="mt-4 text-muted-foreground">Ładowanie...</p>
         </div>
     );
 }

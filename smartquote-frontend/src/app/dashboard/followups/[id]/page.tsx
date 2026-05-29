@@ -11,10 +11,10 @@ import { formatDate } from '@/lib/utils';
 import { FollowUpStatus, FollowUpType, Priority } from '@/types';
 
 const statusConfig: Record<FollowUpStatus, { label: string; color: string; bgColor: string }> = {
-    PENDING: { label: 'Oczekujące', color: 'text-amber-700 dark:text-amber-400', bgColor: 'bg-amber-50 dark:bg-amber-900/30' },
-    COMPLETED: { label: 'Wykonane', color: 'text-green-700 dark:text-green-400', bgColor: 'bg-green-50 dark:bg-green-900/30' },
-    CANCELLED: { label: 'Anulowane', color: 'text-slate-700 dark:text-slate-300', bgColor: 'bg-slate-100 dark:bg-slate-700/50' },
-    OVERDUE: { label: 'Zaległe', color: 'text-red-700 dark:text-red-400', bgColor: 'bg-red-50 dark:bg-red-900/30' },
+    PENDING: { label: 'Oczekujące', color: 'text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]', bgColor: 'bg-[oklch(0.72_0.16_60)/10%] dark:bg-amber-900/30' },
+    COMPLETED: { label: 'Wykonane', color: 'text-status-accepted dark:text-green-400', bgColor: 'bg-green-50 dark:bg-green-900/30' },
+    CANCELLED: { label: 'Anulowane', color: 'text-foreground', bgColor: 'bg-secondary dark:bg-secondary/50' },
+    OVERDUE: { label: 'Zaległe', color: 'text-destructive', bgColor: 'bg-destructive/10 dark:bg-red-900/30' },
 };
 
 const typeConfig: Record<FollowUpType, { label: string; icon: string }> = {
@@ -27,10 +27,10 @@ const typeConfig: Record<FollowUpType, { label: string; icon: string }> = {
 };
 
 const priorityConfig: Record<Priority, { label: string; color: string; bgColor: string }> = {
-    LOW: { label: 'Niski', color: 'text-slate-600 dark:text-slate-400', bgColor: 'bg-slate-100 dark:bg-slate-700/50' },
-    MEDIUM: { label: 'Średni', color: 'text-blue-700 dark:text-blue-400', bgColor: 'bg-blue-50 dark:bg-blue-900/30' },
-    HIGH: { label: 'Wysoki', color: 'text-orange-700 dark:text-orange-400', bgColor: 'bg-orange-50 dark:bg-orange-900/30' },
-    URGENT: { label: 'Pilne', color: 'text-red-700 dark:text-red-400', bgColor: 'bg-red-50 dark:bg-red-900/30' },
+    LOW: { label: 'Niski', color: 'text-muted-foreground dark:text-muted-foreground', bgColor: 'bg-secondary dark:bg-secondary/50' },
+    MEDIUM: { label: 'Średni', color: 'text-primary', bgColor: 'bg-[color-mix(in_oklab,var(--status-open)_10%,transparent)] dark:bg-blue-900/30' },
+    HIGH: { label: 'Wysoki', color: 'text-[oklch(0.55_0.16_45)] dark:text-[oklch(0.78_0.14_45)] dark:text-orange-400', bgColor: 'bg-orange-50 dark:bg-orange-900/30' },
+    URGENT: { label: 'Pilne', color: 'text-destructive', bgColor: 'bg-destructive/10 dark:bg-red-900/30' },
 };
 
 export default function FollowUpDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -73,15 +73,15 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
 
     if (error || !followUp) {
         return (
-            <div className="p-4 md:p-8">
-                <Card>
+            <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                     <div className="text-center py-12">
-                        <p className="text-red-600 dark:text-red-400 mb-4">{error || 'Nie znaleziono follow-upa'}</p>
+                        <p className="text-status-rejected mb-4">{error || 'Nie znaleziono follow-upa'}</p>
                         <Button onClick={() => router.push('/dashboard/followups')}>
                             Wróć do listy
                         </Button>
                     </div>
-                </Card>
+                </div>
             </div>
         );
     }
@@ -91,22 +91,22 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
     const priority = priorityConfig[followUp.priority];
 
     return (
-        <div className="p-4 md:p-8">
+        <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
             <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-8">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => router.push('/dashboard/followups')}
-                        className="p-2 text-themed-muted hover:text-themed hover-themed rounded-lg"
+                        className="p-2 text-muted-foreground hover:text-foreground hover:bg-secondary/60 rounded-lg"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                     </button>
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center text-white text-2xl">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-primary flex items-center justify-center text-white text-2xl">
                         {type.icon}
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-themed">{followUp.title}</h1>
+                        <h1 className="text-3xl font-bold tracking-tight">{followUp.title}</h1>
                         <div className="flex flex-wrap items-center gap-2 mt-1">
                             <Badge className={`${status.bgColor} ${status.color}`}>
                                 {status.label}
@@ -114,7 +114,7 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                             <Badge className={`${priority.bgColor} ${priority.color}`}>
                                 {priority.label}
                             </Badge>
-                            <span className="text-sm text-themed-muted">{type.label}</span>
+                            <span className="text-sm text-muted-foreground">{type.label}</span>
                         </div>
                     </div>
                 </div>
@@ -124,7 +124,7 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                             variant="outline"
                             onClick={handleComplete}
                             isLoading={isCompleting}
-                            className="text-green-600 dark:text-green-400 border-green-300 dark:border-green-700 hover:bg-green-50 dark:hover:bg-green-900/30"
+                            className="text-status-accepted dark:text-green-400 border-green-300 dark:border-green-700 hover:bg-green-50 dark:hover:bg-green-900/30"
                         >
                             <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -138,7 +138,7 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                     <Button
                         variant="outline"
                         onClick={() => setDeleteModal(true)}
-                        className="text-red-600 dark:text-red-400 border-red-300 dark:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/30"
+                        className="text-status-rejected border-destructive/30 dark:border-red-700 hover:bg-destructive/10 dark:hover:bg-red-900/30"
                     >
                         Usuń
                     </Button>
@@ -148,40 +148,40 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-6">
                     {followUp.description && (
-                        <Card>
-                            <h2 className="text-lg font-semibold text-themed mb-4">Opis</h2>
-                            <p className="text-themed whitespace-pre-wrap">{followUp.description}</p>
-                        </Card>
+                        <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                            <h2 className="text-lg font-semibold text-foreground mb-4">Opis</h2>
+                            <p className="text-foreground whitespace-pre-wrap">{followUp.description}</p>
+                        </div>
                     )}
 
                     {followUp.notes && (
-                        <Card>
-                            <h2 className="text-lg font-semibold text-themed mb-4">Notatki</h2>
-                            <p className="text-themed whitespace-pre-wrap">{followUp.notes}</p>
-                        </Card>
+                        <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                            <h2 className="text-lg font-semibold text-foreground mb-4">Notatki</h2>
+                            <p className="text-foreground whitespace-pre-wrap">{followUp.notes}</p>
+                        </div>
                     )}
 
                     {(followUp.client || followUp.offer || followUp.contract) && (
-                        <Card>
-                            <h2 className="text-lg font-semibold text-themed mb-4">Powiązania</h2>
+                        <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                            <h2 className="text-lg font-semibold text-foreground mb-4">Powiązania</h2>
                             <div className="space-y-3">
                                 {followUp.client && (
                                     <div
                                         onClick={() => router.push(`/dashboard/clients/${followUp.client!.id}`)}
-                                        className="flex items-center justify-between p-4 section-themed rounded-xl hover-themed cursor-pointer transition-colors"
+                                        className="flex items-center justify-between p-4 bg-surface-subtle rounded-xl hover:bg-secondary/60 cursor-pointer transition-colors"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
-                                                <svg className="w-5 h-5 text-slate-600 dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <div className="w-10 h-10 rounded-full bg-secondary dark:bg-secondary flex items-center justify-center">
+                                                <svg className="w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                                 </svg>
                                             </div>
                                             <div>
-                                                <p className="text-sm text-themed-muted">Klient</p>
-                                                <p className="font-medium text-themed">{followUp.client.name}</p>
+                                                <p className="text-sm text-muted-foreground">Klient</p>
+                                                <p className="font-medium text-foreground">{followUp.client.name}</p>
                                             </div>
                                         </div>
-                                        <svg className="w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg className="w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                         </svg>
                                     </div>
@@ -189,20 +189,20 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                                 {followUp.offer && (
                                     <div
                                         onClick={() => router.push(`/dashboard/offers/${followUp.offer!.id}`)}
-                                        className="flex items-center justify-between p-4 section-themed rounded-xl hover-themed cursor-pointer transition-colors"
+                                        className="flex items-center justify-between p-4 bg-surface-subtle rounded-xl hover:bg-secondary/60 cursor-pointer transition-colors"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
-                                                <svg className="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center">
+                                                <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                 </svg>
                                             </div>
                                             <div>
-                                                <p className="text-sm text-themed-muted">Oferta</p>
-                                                <p className="font-medium text-themed">{followUp.offer.number} - {followUp.offer.title}</p>
+                                                <p className="text-sm text-muted-foreground">Oferta</p>
+                                                <p className="font-medium text-foreground">{followUp.offer.number} - {followUp.offer.title}</p>
                                             </div>
                                         </div>
-                                        <svg className="w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg className="w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                         </svg>
                                     </div>
@@ -210,81 +210,81 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                                 {followUp.contract && (
                                     <div
                                         onClick={() => router.push(`/dashboard/contracts/${followUp.contract!.id}`)}
-                                        className="flex items-center justify-between p-4 section-themed rounded-xl hover-themed cursor-pointer transition-colors"
+                                        className="flex items-center justify-between p-4 bg-surface-subtle rounded-xl hover:bg-secondary/60 cursor-pointer transition-colors"
                                     >
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                                                <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg className="w-5 h-5 text-status-accepted dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
                                             </div>
                                             <div>
-                                                <p className="text-sm text-themed-muted">Umowa</p>
-                                                <p className="font-medium text-themed">{followUp.contract.number} - {followUp.contract.title}</p>
+                                                <p className="text-sm text-muted-foreground">Umowa</p>
+                                                <p className="font-medium text-foreground">{followUp.contract.number} - {followUp.contract.title}</p>
                                             </div>
                                         </div>
-                                        <svg className="w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg className="w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                         </svg>
                                     </div>
                                 )}
                             </div>
-                        </Card>
+                        </div>
                     )}
                 </div>
 
                 <div className="space-y-6">
-                    <Card>
-                        <h2 className="text-lg font-semibold text-themed mb-4">Szczegóły</h2>
+                    <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                        <h2 className="text-lg font-semibold text-foreground mb-4">Szczegóły</h2>
                         <div className="space-y-4">
                             <div className="flex justify-between">
-                                <span className="text-themed-muted">Termin</span>
-                                <span className={`font-medium ${isOverdue ? 'text-red-600 dark:text-red-400' : 'text-themed'}`}>
+                                <span className="text-muted-foreground">Termin</span>
+                                <span className={`font-medium ${isOverdue ? 'text-status-rejected' : 'text-foreground'}`}>
                   {formatDate(followUp.dueDate)}
                 </span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-themed-muted">Typ</span>
-                                <span className="text-themed">{type.icon} {type.label}</span>
+                                <span className="text-muted-foreground">Typ</span>
+                                <span className="text-foreground">{type.icon} {type.label}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-themed-muted">Priorytet</span>
+                                <span className="text-muted-foreground">Priorytet</span>
                                 <Badge className={`${priority.bgColor} ${priority.color}`}>
                                     {priority.label}
                                 </Badge>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-themed-muted">Status</span>
+                                <span className="text-muted-foreground">Status</span>
                                 <Badge className={`${status.bgColor} ${status.color}`}>
                                     {status.label}
                                 </Badge>
                             </div>
                             {followUp.completedAt && (
                                 <div className="flex justify-between">
-                                    <span className="text-themed-muted">Wykonano</span>
-                                    <span className="text-themed">{formatDate(followUp.completedAt)}</span>
+                                    <span className="text-muted-foreground">Wykonano</span>
+                                    <span className="text-foreground">{formatDate(followUp.completedAt)}</span>
                                 </div>
                             )}
-                            <div className="pt-4 border-t divider-themed">
+                            <div className="pt-4 border-t border-border">
                                 <div className="flex justify-between">
-                                    <span className="text-themed-muted">Utworzono</span>
-                                    <span className="text-themed">{formatDate(followUp.createdAt)}</span>
+                                    <span className="text-muted-foreground">Utworzono</span>
+                                    <span className="text-foreground">{formatDate(followUp.createdAt)}</span>
                                 </div>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-themed-muted">Ostatnia aktualizacja</span>
-                                <span className="text-themed">{formatDate(followUp.updatedAt)}</span>
+                                <span className="text-muted-foreground">Ostatnia aktualizacja</span>
+                                <span className="text-foreground">{formatDate(followUp.updatedAt)}</span>
                             </div>
                         </div>
-                    </Card>
+                    </div>
 
-                    <Card>
-                        <h2 className="text-lg font-semibold text-themed mb-4">Szybkie akcje</h2>
+                    <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                        <h2 className="text-lg font-semibold text-foreground mb-4">Szybkie akcje</h2>
                         <div className="space-y-2">
                             {followUp.status === 'PENDING' && (
                                 <Button
                                     variant="outline"
-                                    className="w-full justify-start text-green-600 dark:text-green-400"
+                                    className="w-full justify-start text-status-accepted dark:text-green-400"
                                     onClick={handleComplete}
                                     isLoading={isCompleting}
                                 >
@@ -317,7 +317,7 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                                 </Button>
                             )}
                         </div>
-                    </Card>
+                    </div>
                 </div>
             </div>
 

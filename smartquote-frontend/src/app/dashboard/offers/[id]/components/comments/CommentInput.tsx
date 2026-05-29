@@ -25,12 +25,12 @@ export function CommentInput({ value, onChange, onSubmit, isSending }: CommentIn
           disabled={isSending}
           placeholder="Odpowiedz klientowi..."
           rows={2}
-          className="flex-1 px-4 py-3 rounded-xl border input-themed resize-none disabled:opacity-50 text-sm"
+          className="flex-1 px-4 py-3 rounded-xl border border-border bg-card text-foreground resize-none disabled:opacity-50 text-sm"
       />
             <button
                 onClick={onSubmit}
                 disabled={!value.trim() || isSending}
-                className="self-end px-4 py-3 rounded-xl bg-cyan-500 text-white hover:bg-cyan-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                className="self-end px-4 py-3 rounded-xl bg-primary text-white hover:brightness-110 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
             >
                 {isSending ? (
                     <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
