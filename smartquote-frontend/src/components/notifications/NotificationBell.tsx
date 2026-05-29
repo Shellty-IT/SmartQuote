@@ -91,7 +91,7 @@ export default function NotificationBell() {
                 </svg>
 
                 {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-[20px] h-5 flex items-center justify-center text-xs font-bold text-white rounded-full px-1 bg-primary/100 animate-pulse">
+                    <span className="absolute -top-1 -right-1 min-w-[20px] h-5 flex items-center justify-center text-xs font-bold text-white rounded-full px-1 bg-primary animate-pulse">
                         {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                 )}
@@ -170,7 +170,7 @@ export default function NotificationBell() {
 
                                                         <div className="flex items-center gap-1 flex-shrink-0">
                                                             {!notification.isRead && (
-                                                                <div className="w-2 h-2 rounded-full bg-primary/100" />
+                                                                <div className="w-2 h-2 rounded-full bg-primary" />
                                                             )}
                                                             <button
                                                                 onClick={(e) => handleDelete(e, notification.id)}

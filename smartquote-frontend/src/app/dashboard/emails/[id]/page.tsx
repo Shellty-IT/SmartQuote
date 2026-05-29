@@ -84,9 +84,9 @@ export default function EmailDetailPage({ params }: PageProps) {
         return (
             <div className="p-4 md:p-8 max-w-3xl mx-auto">
                 <div className="animate-pulse space-y-4">
-                    <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded w-48" />
-                    <div className="h-32 bg-slate-200 dark:bg-slate-700 rounded" />
-                    <div className="h-48 bg-slate-200 dark:bg-slate-700 rounded" />
+                    <div className="h-8 bg-secondary dark:bg-secondary rounded w-48" />
+                    <div className="h-32 bg-secondary dark:bg-secondary rounded" />
+                    <div className="h-48 bg-secondary dark:bg-secondary rounded" />
                 </div>
             </div>
         );
@@ -100,7 +100,7 @@ export default function EmailDetailPage({ params }: PageProps) {
                         <p className="text-status-rejected mb-4">{error || 'Nie znaleziono wiadomości'}</p>
                         <button
                             onClick={() => router.push('/dashboard/emails')}
-                            className="px-4 py-2 rounded-xl bg-cyan-600 text-white text-sm"
+                            className="px-4 py-2 rounded-xl bg-primary text-white text-sm"
                         >
                             Wróć do listy
                         </button>

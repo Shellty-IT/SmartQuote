@@ -410,7 +410,7 @@ export default function FollowUpsPage() {
                                             <span className={`text-sm ${overdue ? 'text-status-rejected font-semibold' : 'text-muted-foreground'}`}>
                                                 {formatDate(followUp.dueDate)}
                                                 {overdue && (
-                                                    <span className="block text-xs text-red-400 mt-0.5">Zaległy!</span>
+                                                    <span className="block text-xs text-destructive mt-0.5">Zaległy!</span>
                                                 )}
                                             </span>
                                         </td>

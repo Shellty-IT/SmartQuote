@@ -107,7 +107,7 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
                     <p className="text-sm text-muted-foreground">Twoje dane osobowe</p>
                 </div>
                 {success && (
-                    <div className="flex items-center gap-2 text-emerald-500 text-sm">
+                    <div className="flex items-center gap-2 text-status-accepted text-sm">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
@@ -126,7 +126,7 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
                             className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
                         />
                     ) : (
-                        <div className="w-24 h-24 rounded-full bg-gradient-to-br bg-gradient-primary flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+                        <div className="w-24 h-24 rounded-full bg-gradient-primary flex items-center justify-center text-white text-3xl font-bold shadow-lg">
                             {profile.name?.charAt(0)?.toUpperCase() || profile.email.charAt(0).toUpperCase()}
                         </div>
                     )}
@@ -182,7 +182,7 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
                                 <button
                                     onClick={handleRemoveAvatar}
                                     disabled={isUploadingAvatar}
-                                    className="text-xs font-medium text-red-500 hover:text-destructive flex items-center gap-1 disabled:opacity-50"
+                                    className="text-xs font-medium text-destructive hover:text-destructive flex items-center gap-1 disabled:opacity-50"
                                 >
                                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -194,7 +194,7 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
                     </div>
 
                     {avatarError && (
-                        <p className="text-xs text-red-500 mt-2">{avatarError}</p>
+                        <p className="text-xs text-destructive mt-2">{avatarError}</p>
                     )}
                     <p className="text-xs text-muted-foreground mt-1">PNG, JPG lub WEBP do 2MB</p>
                 </div>

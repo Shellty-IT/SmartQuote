@@ -61,7 +61,7 @@ export default function AIAssistantPage() {
                     style={{ borderColor: 'var(--border)' }}
                 >
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br bg-gradient-primary flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center shadow-lg shadow-cyan-500/20">
                             <span className="text-white text-lg">✨</span>
                         </div>
                         <div>
@@ -94,7 +94,7 @@ export default function AIAssistantPage() {
                 >
                     {messages.length === 0 ? (
                         <div className="h-full flex flex-col items-center justify-center text-center">
-                            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br bg-gradient-primary flex items-center justify-center mb-6 shadow-xl shadow-cyan-500/20">
+                            <div className="w-20 h-20 rounded-2xl bg-gradient-primary flex items-center justify-center mb-6 shadow-xl shadow-cyan-500/20">
                                 <span className="text-4xl">✨</span>
                             </div>
                             <h2 className="text-xl font-semibold text-foreground mb-2">
@@ -144,7 +144,7 @@ export default function AIAssistantPage() {
                         <button
                             type="submit"
                             disabled={!input.trim() || isLoading}
-                            className="px-5 py-3 bg-gradient-to-r bg-gradient-primary text-white rounded-xl hover:from-cyan-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-cyan-500/25"
+                            className="px-5 py-3 bg-gradient-primary text-white rounded-xl hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-glow ring-1 ring-white/15"
                         >
                             {isLoading ? (
                                 <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">

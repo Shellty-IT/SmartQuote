@@ -78,7 +78,7 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
 
     return (
         <div className="mt-3 rounded-xl ai-bg-card border-border border overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-2.5 bg-gradient-to-r from-cyan-500/15 to-blue-500/10 border-b border-cyan-500/20">
+            <div className="flex items-center justify-between px-4 py-2.5 bg-primary/8 border-b border-border">
                 <div className="flex items-center gap-2">
                     <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
@@ -150,7 +150,7 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
                                     {formatCurrency(result.aiSuggestion.suggestedMin)}
                                 </span>
                                 <div className="flex-1 h-2 rounded-full bg-surface-subtle relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full" />
+                                    <div className="absolute inset-0 bg-gradient-primary rounded-full" />
                                     {currentPrice !== undefined && currentPrice > 0 && result.aiSuggestion.suggestedMax > result.aiSuggestion.suggestedMin && (
                                         <div
                                             className={`absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-white shadow-sm ${
@@ -198,7 +198,7 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
                         </div>
 
                         {result.historicalData.count > 0 && (
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1 border-t border-cyan-500/20">
+                            <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1 border-t border-primary/20">
                                 <span>Śr. historyczna: <strong className="text-foreground">{formatCurrency(result.historicalData.avgPrice)}</strong></span>
                                 <span>Min: <strong className="text-foreground">{formatCurrency(result.historicalData.minPrice)}</strong></span>
                                 <span>Max: <strong className="text-foreground">{formatCurrency(result.historicalData.maxPrice)}</strong></span>
@@ -209,7 +209,7 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
                             <button
                                 type="button"
                                 onClick={() => onPriceSelect(suggestedAvg)}
-                                className="w-full py-2 px-3 rounded-lg bg-primary/100 hover:bg-cyan-600 text-white text-xs font-medium transition-colors"
+                                className="w-full py-2 px-3 rounded-lg bg-primary hover:brightness-110 text-white text-xs font-medium transition-colors"
                             >
                                 Zastosuj sugerowaną cenę: {formatCurrency(suggestedAvg)}
                             </button>

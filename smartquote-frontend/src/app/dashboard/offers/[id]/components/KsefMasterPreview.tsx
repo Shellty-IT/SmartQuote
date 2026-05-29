@@ -155,7 +155,7 @@ export function KsefMasterPreview({ isOpen, onClose, offerId, onSent }: KsefMast
                     )}
 
                     {previewError && (
-                        <div className="rounded-lg bg-destructive/100/10 border border-red-500/25 p-4 text-center">
+                        <div className="rounded-lg bg-destructive/10 border border-destructive/25 p-4 text-center">
                             <p className="text-status-rejected text-sm">{previewError}</p>
                             <button
                                 onClick={loadPreview}
@@ -180,7 +180,7 @@ export function KsefMasterPreview({ isOpen, onClose, offerId, onSent }: KsefMast
                                         {preview.seller.postalCode} {preview.seller.city}
                                     </p>
                                     {!preview.seller.nip && (
-                                        <p className="text-xs text-red-500 mt-2 flex items-center gap-1">
+                                        <p className="text-xs text-destructive mt-2 flex items-center gap-1">
                                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                             </svg>
@@ -200,7 +200,7 @@ export function KsefMasterPreview({ isOpen, onClose, offerId, onSent }: KsefMast
                                         {preview.buyer.postalCode} {preview.buyer.city}
                                     </p>
                                     {!preview.buyer.nip && (
-                                        <p className="text-xs text-red-500 mt-2 flex items-center gap-1">
+                                        <p className="text-xs text-destructive mt-2 flex items-center gap-1">
                                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                             </svg>
@@ -239,7 +239,7 @@ export function KsefMasterPreview({ isOpen, onClose, offerId, onSent }: KsefMast
                                     </div>
                                 </div>
                                 {dueDate && issueDate && new Date(dueDate) < new Date(issueDate) && (
-                                    <p className="text-xs text-red-500 mt-2">
+                                    <p className="text-xs text-destructive mt-2">
                                         Termin płatności nie może być wcześniejszy niż data wystawienia
                                     </p>
                                 )}

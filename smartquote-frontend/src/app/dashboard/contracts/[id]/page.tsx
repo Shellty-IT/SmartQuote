@@ -56,11 +56,11 @@ function StatusTimeline({ currentStatus }: { currentStatus: ContractStatus }) {
                             <div className="flex flex-col items-center">
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all ${
                                     isCompleted
-                                        ? 'bg-status-accepted/100 border-emerald-500 text-white'
+                                        ? 'bg-status-accepted border-status-accepted text-white'
                                         : isCurrent
-                                            ? 'bg-primary/100 border-cyan-500 text-white ring-4 ring-cyan-500/20'
+                                            ? 'bg-primary border-primary text-white ring-4 ring-primary/20'
                                             : isTerminal
-                                                ? 'border-destructive/30 text-red-400 bg-destructive/100/5'
+                                                ? 'border-destructive/30 text-destructive bg-destructive/5'
                                                 : 'border-border text-muted-foreground'
                                 } ${isTerminal && !isCompleted && !isCurrent ? 'opacity-50' : ''}`}
                                      style={!isCompleted && !isCurrent && !isTerminal ? { borderColor: 'var(--border)', backgroundColor: 'var(--card)' } : undefined}
@@ -82,7 +82,7 @@ function StatusTimeline({ currentStatus }: { currentStatus: ContractStatus }) {
 
                             {index < MAIN_STEPS.length - 1 && (
                                 <div className={`flex-1 h-0.5 mx-2 mt-[-1.25rem] rounded-full ${
-                                    isCompleted ? 'bg-status-accepted/100' : ''
+                                    isCompleted ? 'bg-status-accepted' : ''
                                 }`}
                                      style={!isCompleted ? { backgroundColor: 'var(--border)' } : undefined}
                                 />
@@ -93,8 +93,8 @@ function StatusTimeline({ currentStatus }: { currentStatus: ContractStatus }) {
             </div>
 
             {isTerminal && (
-                <div className="mt-4 flex items-center gap-2 px-4 py-2.5 rounded-lg bg-destructive/100/10 border border-red-500/20">
-                    <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="mt-4 flex items-center gap-2 px-4 py-2.5 rounded-lg bg-destructive/10 border border-destructive/20">
+                    <svg className="w-5 h-5 text-destructive flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
                     </svg>
                     <span className="text-sm font-medium text-destructive">
@@ -516,7 +516,7 @@ export default function ContractDetailsPage({ params }: PageProps) {
                             {hasPublicLink ? (
                                 <>
                                     <div className="flex items-center gap-2 mb-3">
-                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-status-accepted/100/15 text-status-accepted border border-status-accepted/25 rounded-full">
+                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-status-accepted/15 text-status-accepted border border-status-accepted/25 rounded-full">
                                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                                             </svg>
@@ -529,7 +529,7 @@ export default function ContractDetailsPage({ params }: PageProps) {
                                         </svg>
                                         Kopiuj link dla klienta
                                     </Button>
-                                    <Button variant="outline" className="w-full text-destructive hover:bg-destructive/100/10" onClick={handleUnpublish} disabled={isPublishing}>
+                                    <Button variant="outline" className="w-full text-destructive hover:bg-destructive/10" onClick={handleUnpublish} disabled={isPublishing}>
                                         <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                                         </svg>
@@ -589,7 +589,7 @@ export default function ContractDetailsPage({ params }: PageProps) {
                                 )}
                                 {contract.signedAt && (
                                     <div className="flex items-center gap-3 text-sm">
-                                        <div className="w-2 h-2 rounded-full bg-status-accepted/100 flex-shrink-0" />
+                                        <div className="w-2 h-2 rounded-full bg-status-accepted flex-shrink-0" />
                                         <span className="text-muted-foreground">Podpisano:</span>
                                         <span className="text-status-accepted font-medium">
                                             {formatDate(contract.signedAt)}
@@ -599,7 +599,7 @@ export default function ContractDetailsPage({ params }: PageProps) {
                                 )}
                                 {contract.startDate && (
                                     <div className="flex items-center gap-3 text-sm">
-                                        <div className="w-2 h-2 rounded-full bg-primary/100 flex-shrink-0" />
+                                        <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
                                         <span className="text-muted-foreground">Rozpoczęcie:</span>
                                         <span className="text-foreground">{formatDate(contract.startDate)}</span>
                                     </div>

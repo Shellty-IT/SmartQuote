@@ -23,7 +23,7 @@ function Toggle({ enabled, onChange, disabled }: ToggleProps) {
             onClick={() => !disabled && onChange(!enabled)}
             disabled={disabled}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${
-                enabled ? 'bg-primary/100' : 'bg-slate-300'
+                enabled ? 'bg-primary' : 'bg-input'
             } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
         >
             <span
@@ -118,7 +118,7 @@ export default function NotificationsSection({ settings, onUpdate }: Props) {
                 </div>
                 <div className="flex items-center gap-2">
                     {success && (
-                        <div className="flex items-center gap-1.5 text-emerald-500 text-sm">
+                        <div className="flex items-center gap-1.5 text-status-accepted text-sm">
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
@@ -126,7 +126,7 @@ export default function NotificationsSection({ settings, onUpdate }: Props) {
                         </div>
                     )}
                     {isSaving && (
-                        <svg className="w-4 h-4 animate-spin text-cyan-500" fill="none" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 animate-spin text-primary" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                         </svg>
@@ -143,7 +143,7 @@ export default function NotificationsSection({ settings, onUpdate }: Props) {
                         }`}
                     >
                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-xl bg-primary/100/10 flex items-center justify-center text-cyan-500">
+                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                                 {item.icon}
                             </div>
                             <div>

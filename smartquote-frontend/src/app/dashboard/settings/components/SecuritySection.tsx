@@ -212,7 +212,7 @@ export default function SecuritySection({ onChangePassword }: Props) {
                         </button>
                     </div>
                     {formData.confirmPassword && !passwordsMatch && (
-                        <p className="text-xs text-red-500 dark:text-red-400 mt-1">Hasła nie są identyczne</p>
+                        <p className="text-xs text-destructive dark:text-destructive mt-1">Hasła nie są identyczne</p>
                     )}
                 </div>
             </div>

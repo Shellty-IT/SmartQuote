@@ -20,7 +20,7 @@ export default function OfferTotals({ totals }: OfferTotalsProps) {
             </div>
             <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-700">
                 <span className="text-slate-200">Suma brutto:</span>
-                <span className="text-2xl font-bold text-cyan-400">{formatCurrency(totals.totalGross)}</span>
+                <span className="text-2xl font-bold text-primary">{formatCurrency(totals.totalGross)}</span>
             </div>
         </div>
     );

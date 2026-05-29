@@ -164,12 +164,12 @@ export default function NotificationsPage() {
     ];
 
     return (
-        <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
+        <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center">
-                        <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    <div className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-primary text-white shadow-glow ring-1 ring-white/15">
+                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                         </svg>
                     </div>
                     <div>
@@ -208,9 +208,9 @@ export default function NotificationsPage() {
                             <button
                                 key={tab.value}
                                 onClick={() => setActiveTab(tab.value)}
-                                className={`px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${
+                                className={`px-4 py-2 text-sm font-semibold rounded-lg whitespace-nowrap transition-all ${
                                     activeTab === tab.value
-                                        ? 'bg-primary/100 text-white'
+                                        ? 'bg-gradient-primary text-white shadow-glow ring-1 ring-white/15'
                                         : 'text-muted-foreground hover:bg-secondary/60'
                                 }`}
                             >
@@ -304,7 +304,7 @@ export default function NotificationsPage() {
                                                         {notification.title}
                                                     </h3>
                                                     {!notification.isRead && (
-                                                        <div className="w-2 h-2 rounded-full bg-primary/100 flex-shrink-0" />
+                                                        <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
                                                     )}
                                                 </div>
                                                 <p className={`text-sm leading-relaxed ${
@@ -380,7 +380,7 @@ export default function NotificationsPage() {
                                     onClick={() => setCurrentPage(item)}
                                     className={`min-w-[32px] h-8 text-sm rounded-lg transition-colors ${
                                         currentPage === item
-                                            ? 'bg-primary/100 text-white'
+                                            ? 'bg-primary text-white'
                                             : 'hover:bg-secondary/60 text-foreground'
                                     }`}
                                 >

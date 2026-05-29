@@ -111,7 +111,7 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
                                         apiKey.isActive
                                             ? 'bg-primary/15 text-primary'
-                                            : 'bg-slate-200 dark:bg-slate-700 text-muted-foreground'
+                                            : 'bg-secondary dark:bg-secondary text-muted-foreground'
                                     }`}>
                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
@@ -135,7 +135,7 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                                                 className="text-muted-foreground hover:text-foreground flex-shrink-0"
                                             >
                                                 {copiedId === apiKey.id ? (
-                                                    <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <svg className="w-4 h-4 text-status-accepted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                                     </svg>
                                                 ) : (
@@ -164,7 +164,7 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                                         onClick={() => onToggle(apiKey.id)}
                                         className={`p-2 rounded-lg transition-colors ${
                                             apiKey.isActive
-                                                ? 'text-primary hover:bg-primary/10 dark:hover:bg-cyan-900/30'
+                                                ? 'text-primary hover:bg-primary/10 '
                                                 : 'text-muted-foreground hover:bg-secondary/60'
                                         }`}
                                         title={apiKey.isActive ? 'Wyłącz' : 'Włącz'}
@@ -184,7 +184,7 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                                             setSelectedKeyId(apiKey.id);
                                             setIsDeleteModalOpen(true);
                                         }}
-                                        className="p-2 rounded-lg text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-destructive/10 dark:hover:bg-red-900/30 transition-colors"
+                                        className="p-2 rounded-lg text-muted-foreground hover:text-destructive dark:hover:text-destructive hover:bg-destructive/10 dark:hover:bg-red-900/30 transition-colors"
                                         title="Usuń"
                                     >
                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -244,7 +244,7 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                                     className="flex-shrink-0 p-2 hover:bg-secondary/60 rounded-lg transition-colors"
                                 >
                                     {copiedId === 'new' ? (
-                                        <svg className="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <svg className="w-5 h-5 text-status-accepted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                         </svg>
                                     ) : (
@@ -308,7 +308,7 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
             >
                 <div className="space-y-4">
                     <div className="flex items-center gap-3 p-4 bg-destructive/10 border border-destructive/25 rounded-lg">
-                        <svg className="w-5 h-5 text-red-500 dark:text-red-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg className="w-5 h-5 text-destructive dark:text-destructive flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
                         </svg>
                         <p className="text-sm text-destructive">

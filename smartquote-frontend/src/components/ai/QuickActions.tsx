@@ -52,7 +52,7 @@ export function QuickActions({ onAction }: QuickActionsProps) {
                     key={index}
                     onClick={() => onAction(action.prompt)}
                     className="flex items-center gap-3 p-4 rounded-xl border bg-card border-border
-                               hover:border-cyan-500 hover:shadow-md transition-all group"
+ hover:border-primary hover:shadow-md transition-all group"
                 >
                     <div className={`p-2 rounded-lg ${action.color} text-white text-lg group-hover:scale-110 transition-transform`}>
                         {action.icon}

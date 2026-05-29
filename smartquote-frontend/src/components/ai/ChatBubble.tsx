@@ -19,7 +19,7 @@ export function ChatBubble({ message }: ChatBubbleProps) {
             <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                     isUser
-                        ? 'bg-gradient-to-r bg-gradient-primary'
+                        ? 'bg-gradient-primary'
                         : 'bg-primary/10'
                 }`}
             >
@@ -37,7 +37,7 @@ export function ChatBubble({ message }: ChatBubbleProps) {
             <div
                 className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
                     isUser
-                        ? 'bg-gradient-to-r bg-gradient-primary text-white rounded-tr-none'
+                        ? 'bg-gradient-primary text-white rounded-tr-none'
                         : 'bg-surface-subtle text-foreground rounded-tl-none'
                 }`}
             >

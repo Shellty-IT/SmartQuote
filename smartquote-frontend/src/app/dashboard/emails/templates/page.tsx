@@ -46,8 +46,8 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
                     value={name}
                     onChange={e => setName(e.target.value)}
                     placeholder="np. Oferta premium"
-                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30 bg-white dark:bg-slate-800 ${
-                        errors.name ? 'border-red-400' : 'border-border'
+                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30 bg-white dark:bg-card ${
+                        errors.name ? 'border-destructive' : 'border-border'
                     }`}
                 />
                 {errors.name && <p className="mt-1 text-xs text-status-rejected">{errors.name}</p>}
@@ -61,8 +61,8 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
                     value={subject}
                     onChange={e => setSubject(e.target.value)}
                     placeholder="Temat emaila"
-                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30 bg-white dark:bg-slate-800 ${
-                        errors.subject ? 'border-red-400' : 'border-border'
+                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30 bg-white dark:bg-card ${
+                        errors.subject ? 'border-destructive' : 'border-border'
                     }`}
                 />
                 {errors.subject && <p className="mt-1 text-xs text-status-rejected">{errors.subject}</p>}
@@ -76,8 +76,8 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
                     onChange={e => setBody(e.target.value)}
                     rows={10}
                     placeholder="Treść wiadomości email..."
-                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30 bg-white dark:bg-slate-800 resize-y ${
-                        errors.body ? 'border-red-400' : 'border-border'
+                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30 bg-white dark:bg-card resize-y ${
+                        errors.body ? 'border-destructive' : 'border-border'
                     }`}
                 />
                 {errors.body && <p className="mt-1 text-xs text-status-rejected">{errors.body}</p>}
@@ -254,7 +254,7 @@ export default function EmailTemplatesPage() {
                                         </span>
                                         <button
                                             onClick={() => setPreviewId(previewId === t.id ? null : t.id)}
-                                            className="p-1.5 text-muted-foreground hover:text-primary dark:hover:text-cyan-400 hover:bg-secondary/60 rounded-lg transition-colors"
+                                            className="p-1.5 text-muted-foreground hover:text-primary dark:hover:text-primary hover:bg-secondary/60 rounded-lg transition-colors"
                                             title="Podgląd"
                                         >
                                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -264,7 +264,7 @@ export default function EmailTemplatesPage() {
                                         </button>
                                         <button
                                             onClick={() => router.push('/dashboard/emails/new')}
-                                            className="p-1.5 text-muted-foreground hover:text-primary dark:hover:text-cyan-400 hover:bg-secondary/60 rounded-lg transition-colors"
+                                            className="p-1.5 text-muted-foreground hover:text-primary dark:hover:text-primary hover:bg-secondary/60 rounded-lg transition-colors"
                                             title="Użyj szablonu"
                                         >
                                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -326,7 +326,7 @@ export default function EmailTemplatesPage() {
                                         <div className="flex items-center gap-1">
                                             <button
                                                 onClick={() => setPreviewId(previewId === t.id ? null : t.id)}
-                                                className="p-1.5 text-muted-foreground hover:text-primary dark:hover:text-cyan-400 hover:bg-secondary/60 rounded-lg transition-colors"
+                                                className="p-1.5 text-muted-foreground hover:text-primary dark:hover:text-primary hover:bg-secondary/60 rounded-lg transition-colors"
                                                 title="Podgląd"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -336,7 +336,7 @@ export default function EmailTemplatesPage() {
                                             </button>
                                             <button
                                                 onClick={() => { setEditingId(t.id); setShowNewForm(false); setPreviewId(null); }}
-                                                className="p-1.5 text-muted-foreground hover:text-primary dark:hover:text-cyan-400 hover:bg-secondary/60 rounded-lg transition-colors"
+                                                className="p-1.5 text-muted-foreground hover:text-primary dark:hover:text-primary hover:bg-secondary/60 rounded-lg transition-colors"
                                                 title="Edytuj"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -345,7 +345,7 @@ export default function EmailTemplatesPage() {
                                             </button>
                                             <button
                                                 onClick={() => setDeleteConfirmId(t.id)}
-                                                className="p-1.5 text-muted-foreground hover:text-status-rejected dark:hover:text-red-400 hover:bg-secondary/60 rounded-lg transition-colors"
+                                                className="p-1.5 text-muted-foreground hover:text-status-rejected dark:hover:text-destructive hover:bg-secondary/60 rounded-lg transition-colors"
                                                 title="Usuń"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

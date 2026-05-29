@@ -62,10 +62,10 @@ export function DetailsTab({
                         <div className="space-y-6">
                             {variantData.groups.map((group, gi) => (
                                 <div key={gi}>
-                                    <div className={`flex items-center gap-2 mb-3 pb-2 border-b ${group.name ? 'border-primary/25 dark:border-cyan-800' : 'border-border'}`}>
+                                    <div className={`flex items-center gap-2 mb-3 pb-2 border-b ${group.name ? 'border-primary/25 ' : 'border-border'}`}>
                                         {group.name ? (
                                             <>
-                                                <div className="w-1 h-5 rounded-full bg-cyan-400" />
+                                                <div className="w-1 h-5 rounded-full bg-primary" />
                                                 <h3 className="text-sm font-semibold text-primary">
                                                     Wariant: {group.name}
                                                 </h3>

@@ -215,7 +215,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                         <p className="text-sm text-muted-foreground">Informacje wyświetlane na ofertach i umowach</p>
                     </div>
                     {success && (
-                        <div className="flex items-center gap-2 text-emerald-500 text-sm">
+                        <div className="flex items-center gap-2 text-status-accepted text-sm">
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
@@ -235,7 +235,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                         style={{ backgroundColor: currentLogo ? '#ffffff' : 'var(--surface-subtle)' }}
                     >
                         {isUploadingLogo ? (
-                            <svg className="w-8 h-8 text-cyan-500 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <svg className="w-8 h-8 text-primary animate-spin" fill="none" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                             </svg>
@@ -271,7 +271,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                                 <button
                                     onClick={handleRemoveLogo}
                                     disabled={isUploadingLogo}
-                                    className="text-xs font-medium text-red-500 hover:text-destructive flex items-center gap-1 px-2 py-1 disabled:opacity-50"
+                                    className="text-xs font-medium text-destructive hover:text-destructive flex items-center gap-1 px-2 py-1 disabled:opacity-50"
                                 >
                                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -280,7 +280,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                                 </button>
                             )}
                         </div>
-                        {logoError && <p className="text-xs text-red-500 mt-2">{logoError}</p>}
+                        {logoError && <p className="text-xs text-destructive mt-2">{logoError}</p>}
                         <p className="text-xs text-muted-foreground mt-2">PNG, JPG lub WEBP do 2MB. Logo widoczne na ofertach i PDF.</p>
                     </div>
                 </div>
@@ -328,7 +328,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
 
             <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                 <div className="flex items-center gap-2 mb-6">
-                    <svg className="w-5 h-5 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                     </svg>
                     <div>
@@ -378,7 +378,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                         {formData.primaryColor && (
                             <button
                                 onClick={handleResetColor}
-                                className="text-xs text-muted-foreground hover:text-red-500 mt-3 flex items-center gap-1 transition-colors"
+                                className="text-xs text-muted-foreground hover:text-destructive mt-3 flex items-center gap-1 transition-colors"
                             >
                                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -500,12 +500,12 @@ export default function CompanySection({ company, onUpdate }: Props) {
                                 type="email"
                                 value={formData.email || ''}
                                 onChange={(e) => handleChange('email', e.target.value)}
-                                className={`w-full pl-10 pr-4 py-2.5 border rounded-xl focus:outline-none transition-colors ${fieldErrors.email ? 'border-red-400 focus:border-red-400' : ''}`}
+                                className={`w-full pl-10 pr-4 py-2.5 border rounded-xl focus:outline-none transition-colors ${fieldErrors.email ? 'border-destructive focus:border-destructive' : ''}`}
                                 placeholder="kontakt@firma.pl"
                             />
                         </div>
                         {fieldErrors.email && (
-                            <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                            <p className="text-xs text-destructive mt-1 flex items-center gap-1">
                                 <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
                                 {fieldErrors.email}
                             </p>
@@ -522,12 +522,12 @@ export default function CompanySection({ company, onUpdate }: Props) {
                                 type="url"
                                 value={formData.website || ''}
                                 onChange={(e) => handleChange('website', e.target.value)}
-                                className={`w-full pl-10 pr-4 py-2.5 border rounded-xl focus:outline-none transition-colors ${fieldErrors.website ? 'border-red-400 focus:border-red-400' : ''}`}
+                                className={`w-full pl-10 pr-4 py-2.5 border rounded-xl focus:outline-none transition-colors ${fieldErrors.website ? 'border-destructive focus:border-destructive' : ''}`}
                                 placeholder="https://www.firma.pl"
                             />
                         </div>
                         {fieldErrors.website && (
-                            <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                            <p className="text-xs text-destructive mt-1 flex items-center gap-1">
                                 <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
                                 {fieldErrors.website}
                             </p>

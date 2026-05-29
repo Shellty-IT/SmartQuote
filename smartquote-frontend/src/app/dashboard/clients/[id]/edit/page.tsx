@@ -146,7 +146,7 @@ export default function EditClientPage({ params }: { params: Promise<{ id: strin
                                 name="isActive"
                                 checked={formData.isActive ?? true}
                                 onChange={handleChange}
-                                className="w-4 h-4 rounded border-border text-primary focus:ring-cyan-500"
+                                className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
                             />
                             <label htmlFor="isActive" className="text-sm text-muted-foreground">
                                 Klient aktywny

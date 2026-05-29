@@ -129,7 +129,7 @@ export default function EditContractPage({ params }: { params: Promise<{ id: str
     if (contractError || !contract) {
         return (
             <div className="text-center py-12">
-                <p className="text-red-500">{contractError || 'Umowa nie znaleziona'}</p>
+                <p className="text-destructive">{contractError || 'Umowa nie znaleziona'}</p>
                 <Link href="/dashboard/contracts">
                     <Button variant="outline" className="mt-4">
                         Wróć do listy

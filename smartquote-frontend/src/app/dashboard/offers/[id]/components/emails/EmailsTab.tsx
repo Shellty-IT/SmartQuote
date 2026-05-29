@@ -14,8 +14,8 @@ interface EmailsTabProps {
 
 function EmailStatusBadge({ status }: { status: EmailLogStatus }) {
     const config: Record<EmailLogStatus, { label: string; classes: string }> = {
-        SENT: { label: 'Wysłano', classes: 'bg-status-accepted/100/15 text-status-accepted' },
-        FAILED: { label: 'Błąd', classes: 'bg-destructive/100/15 text-status-rejected' },
+        SENT: { label: 'Wysłano', classes: 'bg-status-accepted/15 text-status-accepted' },
+        FAILED: { label: 'Błąd', classes: 'bg-destructive/15 text-status-rejected' },
         DRAFT: { label: 'Szkic', classes: 'bg-surface-subtle0/15 text-muted-foreground dark:text-muted-foreground' },
     };
     const { label, classes } = config[status];
@@ -29,11 +29,11 @@ function EmailStatusBadge({ status }: { status: EmailLogStatus }) {
 function SkeletonRow() {
     return (
         <div className="flex items-start gap-3 p-4 animate-pulse">
-            <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex-shrink-0" />
+            <div className="w-8 h-8 rounded-full bg-secondary dark:bg-secondary flex-shrink-0" />
             <div className="flex-1 space-y-2">
-                <div className="h-3.5 bg-slate-200 dark:bg-slate-700 rounded w-48" />
-                <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-72" />
-                <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-32" />
+                <div className="h-3.5 bg-secondary dark:bg-secondary rounded w-48" />
+                <div className="h-3 bg-secondary dark:bg-secondary rounded w-72" />
+                <div className="h-3 bg-secondary dark:bg-secondary rounded w-32" />
             </div>
         </div>
     );
@@ -81,7 +81,7 @@ export function EmailsTab({ offerId, offerNumber }: EmailsTabProps) {
                 </div>
                 <button
                     onClick={() => router.push(`/dashboard/emails/new?offerId=${offerId}`)}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-medium transition-colors"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary hover:brightness-110 text-white text-xs font-medium transition-colors"
                 >
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -119,7 +119,7 @@ export function EmailsTab({ offerId, offerNumber }: EmailsTabProps) {
                                 onClick={() => router.push(`/dashboard/emails/${item.id}`)}
                                 className="flex items-start gap-3 p-4 hover:bg-secondary/60 cursor-pointer transition-colors group"
                             >
-                                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/100/10 flex items-center justify-center mt-0.5">
+                                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
                                     <svg className="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                     </svg>
@@ -143,7 +143,7 @@ export function EmailsTab({ offerId, offerNumber }: EmailsTabProps) {
                                     <p className="text-xs text-foreground mt-0.5 truncate">{item.subject}</p>
                                     <p className="text-xs text-muted-foreground mt-0.5">{formatDate(item.sentAt)}</p>
                                     {item.errorMessage && (
-                                        <p className="text-xs text-red-500 mt-0.5 truncate">{item.errorMessage}</p>
+                                        <p className="text-xs text-destructive mt-0.5 truncate">{item.errorMessage}</p>
                                     )}
                                 </div>
 

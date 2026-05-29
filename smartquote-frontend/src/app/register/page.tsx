@@ -218,7 +218,7 @@ export default function RegisterPage() {
 
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-muted-foreground mb-2">
-                                Adres email <span className="text-red-500">*</span>
+                                Adres email <span className="text-destructive">*</span>
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -249,7 +249,7 @@ export default function RegisterPage() {
 
                         <div>
                             <label htmlFor="password" className="block text-sm font-medium text-muted-foreground mb-2">
-                                Hasło <span className="text-red-500">*</span>
+                                Hasło <span className="text-destructive">*</span>
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -283,7 +283,7 @@ export default function RegisterPage() {
 
                         <div>
                             <label htmlFor="confirmPassword" className="block text-sm font-medium text-muted-foreground mb-2">
-                                Potwierdź hasło <span className="text-red-500">*</span>
+                                Potwierdź hasło <span className="text-destructive">*</span>
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -315,10 +315,10 @@ export default function RegisterPage() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full py-3 px-4 bg-gradient-to-r bg-gradient-primary
-                text-white font-semibold rounded-lg shadow-lg shadow-cyan-500/30
-                hover:from-cyan-600 hover:to-blue-700
-                focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2
+                            className="w-full py-3 px-4 bg-gradient-primary
+ text-white font-semibold rounded-lg shadow-lg shadow-cyan-500/30
+ hover:brightness-110
+                focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
                 disabled:opacity-70 disabled:cursor-not-allowed
                 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                         >

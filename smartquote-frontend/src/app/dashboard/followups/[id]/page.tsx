@@ -13,7 +13,7 @@ import { FollowUpStatus, FollowUpType, Priority } from '@/types';
 const statusConfig: Record<FollowUpStatus, { label: string; color: string; bgColor: string }> = {
     PENDING: { label: 'Oczekujące', color: 'text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]', bgColor: 'bg-[oklch(0.72_0.16_60)/10%] dark:bg-amber-900/30' },
     COMPLETED: { label: 'Wykonane', color: 'text-status-accepted dark:text-green-400', bgColor: 'bg-green-50 dark:bg-green-900/30' },
-    CANCELLED: { label: 'Anulowane', color: 'text-foreground dark:text-slate-300', bgColor: 'bg-secondary dark:bg-slate-700/50' },
+    CANCELLED: { label: 'Anulowane', color: 'text-foreground dark:text-slate-300', bgColor: 'bg-secondary dark:bg-secondary/50' },
     OVERDUE: { label: 'Zaległe', color: 'text-destructive', bgColor: 'bg-destructive/10 dark:bg-red-900/30' },
 };
 
@@ -27,7 +27,7 @@ const typeConfig: Record<FollowUpType, { label: string; icon: string }> = {
 };
 
 const priorityConfig: Record<Priority, { label: string; color: string; bgColor: string }> = {
-    LOW: { label: 'Niski', color: 'text-muted-foreground dark:text-muted-foreground', bgColor: 'bg-secondary dark:bg-slate-700/50' },
+    LOW: { label: 'Niski', color: 'text-muted-foreground dark:text-muted-foreground', bgColor: 'bg-secondary dark:bg-secondary/50' },
     MEDIUM: { label: 'Średni', color: 'text-primary', bgColor: 'bg-[color-mix(in_oklab,var(--status-open)_10%,transparent)] dark:bg-blue-900/30' },
     HIGH: { label: 'Wysoki', color: 'text-[oklch(0.55_0.16_45)] dark:text-[oklch(0.78_0.14_45)] dark:text-orange-400', bgColor: 'bg-orange-50 dark:bg-orange-900/30' },
     URGENT: { label: 'Pilne', color: 'text-destructive', bgColor: 'bg-destructive/10 dark:bg-red-900/30' },
@@ -102,7 +102,7 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                     </button>
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center text-white text-2xl">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-primary flex items-center justify-center text-white text-2xl">
                         {type.icon}
                     </div>
                     <div>
@@ -171,7 +171,7 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                                         className="flex items-center justify-between p-4 bg-surface-subtle rounded-xl hover:bg-secondary/60 cursor-pointer transition-colors"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                                            <div className="w-10 h-10 rounded-full bg-secondary dark:bg-secondary flex items-center justify-center">
                                                 <svg className="w-5 h-5 text-muted-foreground dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                                 </svg>

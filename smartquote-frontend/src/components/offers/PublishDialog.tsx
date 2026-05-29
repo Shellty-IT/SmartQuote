@@ -269,7 +269,7 @@ export default function PublishDialog({
                                 <button
                                     onClick={handlePublish}
                                     disabled={isPublishing || isSending}
-                                    className="flex-1 px-4 py-3 rounded-xl bg-primary/100 text-white font-medium hover:bg-cyan-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                    className="flex-1 px-4 py-3 rounded-xl bg-primary text-white font-medium hover:brightness-110 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                                 >
                                     {isPublishing || isSending ? (
                                         <>
@@ -302,7 +302,7 @@ export default function PublishDialog({
                                     </div>
                                     <button
                                         onClick={handleCopy}
-                                        className="px-4 py-3 rounded-xl font-medium transition-colors flex items-center gap-2 flex-shrink-0 bg-primary/100 text-white hover:bg-cyan-600"
+                                        className="px-4 py-3 rounded-xl font-medium transition-colors flex items-center gap-2 flex-shrink-0 bg-primary text-white hover:brightness-110"
                                     >
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
@@ -381,7 +381,7 @@ export default function PublishDialog({
                                 </button>
                                 <button
                                     onClick={handleClose}
-                                    className="flex-1 px-4 py-3 rounded-xl bg-slate-900 text-white font-medium hover:bg-slate-800 transition-colors"
+                                    className="flex-1 px-4 py-3 rounded-xl bg-slate-900 text-white font-medium hover:bg-card transition-colors"
                                 >
                                     Zamknij
                                 </button>

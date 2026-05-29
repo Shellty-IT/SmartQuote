@@ -71,7 +71,7 @@ export function CloserStrategy({
                     </div>
                     <button
                         onClick={(e) => { e.stopPropagation(); onUseStrategy(strategy.suggestedResponse); }}
-                        className="text-xs px-3 py-1.5 rounded-lg bg-cyan-600 text-white hover:bg-cyan-700 transition-colors"
+                        className="text-xs px-3 py-1.5 rounded-lg bg-primary text-white hover:brightness-110 transition-colors"
                     >
                         Wstaw odpowiedź
                     </button>
@@ -84,7 +84,7 @@ export function CloserStrategy({
         <div className="mb-4 pt-4 border-t border-border">
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                    <svg className="w-4 h-4 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                     </svg>
                     <span className="text-sm font-semibold text-muted-foreground">AI Closer — Strategia negocjacji</span>
@@ -92,7 +92,7 @@ export function CloserStrategy({
                 <button
                     onClick={onLoadCloser}
                     disabled={isLoading}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-medium hover:from-cyan-600 hover:to-blue-600 transition-all disabled:opacity-50"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-primary text-white text-xs font-medium shadow-glow ring-1 ring-white/15 transition hover:brightness-110 disabled:opacity-50"
                 >
                     {isLoading ? (
                         <>
@@ -109,7 +109,7 @@ export function CloserStrategy({
             </div>
 
             {error && (
-                <div className="p-3 rounded-lg bg-destructive/100/10 text-status-rejected text-sm mb-3">{error}</div>
+                <div className="p-3 rounded-lg bg-destructive/10 text-status-rejected text-sm mb-3">{error}</div>
             )}
 
             {closingStrategy && !isLoading && (
@@ -124,8 +124,8 @@ export function CloserStrategy({
                         'aggressive',
                         closingStrategy.aggressive,
                         '🛡️',
-                        'border-red-500/25',
-                        'bg-destructive/100/5'
+                        'border-destructive/25',
+                        'bg-destructive/5'
                     )}
 
                     {renderStrategyCard(
@@ -133,7 +133,7 @@ export function CloserStrategy({
                         closingStrategy.partnership,
                         '🤝',
                         'border-primary/25',
-                        'bg-primary/100/5'
+                        'bg-primary/5'
                     )}
 
                     {renderStrategyCard(
@@ -141,7 +141,7 @@ export function CloserStrategy({
                         closingStrategy.quickClose,
                         '⚡',
                         'border-status-accepted/25',
-                        'bg-status-accepted/100/5'
+                        'bg-status-accepted/5'
                     )}
                 </div>
             )}

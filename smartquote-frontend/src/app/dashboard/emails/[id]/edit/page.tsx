@@ -78,7 +78,7 @@ function EditDraftContent({ draftId }: { draftId: string }) {
             </div>
 
             {successMessage && (
-                <div className="mb-6 p-4 rounded-xl bg-destructive/10 dark:bg-emerald-900/20 border border-destructive/25 dark:border-emerald-800 text-destructive dark:text-emerald-400 text-sm flex items-center gap-2">
+                <div className="mb-6 p-4 rounded-xl bg-destructive/10 dark:bg-emerald-900/20 border border-destructive/25 dark:border-emerald-800 text-destructive dark:text-status-accepted text-sm flex items-center gap-2">
                     <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
@@ -109,7 +109,7 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                         value={selectedTemplateId}
                         onChange={e => handleTemplateSelect(e.target.value)}
                         disabled={isLoadingData}
-                        className="w-full px-3 py-2 rounded-xl border border-border bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30"
+                        className="w-full px-3 py-2 rounded-xl border border-border bg-white dark:bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30"
                     >
                         <option value="">— Własna wiadomość —</option>
                         <optgroup label="Wbudowane">
@@ -136,7 +136,7 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                                 value={clientId}
                                 onChange={e => handleClientChange(e.target.value)}
                                 disabled={isLoadingData}
-                                className="w-full px-3 py-2 rounded-xl border border-border bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30"
+                                className="w-full px-3 py-2 rounded-xl border border-border bg-white dark:bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30"
                             >
                                 <option value="">— Wybierz klienta —</option>
                                 {clients.map(c => (
@@ -156,9 +156,9 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                                     value={to}
                                     onChange={e => setTo(e.target.value)}
                                     placeholder="odbiorca@firma.pl"
-                                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30 bg-white dark:bg-slate-800 ${
+                                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30 bg-white dark:bg-card ${
                                         errors.to
-                                            ? 'border-red-400 dark:border-red-500'
+                                            ? 'border-destructive'
                                             : 'border-border'
                                     }`}
                                 />
@@ -171,7 +171,7 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                                     value={toName}
                                     onChange={e => setToName(e.target.value)}
                                     placeholder="Jan Kowalski"
-                                    className="w-full px-3 py-2 rounded-xl border border-border bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30"
+                                    className="w-full px-3 py-2 rounded-xl border border-border bg-white dark:bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30"
                                 />
                             </div>
                         </div>
@@ -190,9 +190,9 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                                 value={subject}
                                 onChange={e => setSubject(e.target.value)}
                                 placeholder="Temat wiadomości"
-                                className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30 bg-white dark:bg-slate-800 ${
+                                className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30 bg-white dark:bg-card ${
                                     errors.subject
-                                        ? 'border-red-400 dark:border-red-500'
+                                        ? 'border-destructive'
                                         : 'border-border'
                                 }`}
                             />
@@ -222,7 +222,7 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                                     value={offerId}
                                     onChange={e => handleOfferChange(e.target.value)}
                                     disabled={isLoadingData}
-                                    className="w-full px-3 py-2 rounded-xl border border-border bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30"
+                                    className="w-full px-3 py-2 rounded-xl border border-border bg-white dark:bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30"
                                 >
                                     <option value="">— Wybierz ofertę —</option>
                                     {offers.map(o => (
@@ -236,7 +236,7 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                                     value={contractId}
                                     onChange={e => handleContractChange(e.target.value)}
                                     disabled={isLoadingData}
-                                    className="w-full px-3 py-2 rounded-xl border border-border bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30"
+                                    className="w-full px-3 py-2 rounded-xl border border-border bg-white dark:bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30"
                                 >
                                     <option value="">— Wybierz umowę —</option>
                                     {contracts.map(c => (
@@ -252,7 +252,7 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                                     <button
                                         type="button"
                                         onClick={() => handleAddPublicLink('offer_link', selectedOffer.id, `Link do oferty ${selectedOffer.number}`)}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-primary/25 dark:border-cyan-800 text-primary text-xs hover:bg-primary/10 dark:hover:bg-cyan-900/20 transition-colors"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-primary/25 text-primary text-xs hover:bg-primary/10  transition-colors"
                                     >
                                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
