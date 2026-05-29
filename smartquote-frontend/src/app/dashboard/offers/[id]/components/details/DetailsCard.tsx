@@ -1,8 +1,8 @@
 // src/app/dashboard/offers/[id]/components/details/DetailsCard.tsx
 'use client';
 
-import { Card } from '@/components/ui';
 import { formatDate, formatDateTime } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import type { Offer } from '@/types';
 
 interface DetailsCardProps {
@@ -10,66 +10,48 @@ interface DetailsCardProps {
     isExpired: boolean;
 }
 
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+    return (
+        <div className="flex items-center justify-between gap-4 rounded-lg bg-surface-subtle px-3 py-2.5">
+            <span className="text-sm text-muted-foreground">{label}</span>
+            <span className="text-sm font-medium text-right">{children}</span>
+        </div>
+    );
+}
+
 export function DetailsCard({ offer, isExpired }: DetailsCardProps) {
     return (
-        <Card>
-            <h2 className="text-lg font-semibold text-themed mb-4">Szczegóły</h2>
-            <div className="space-y-3">
-                <div className="flex justify-between">
-                    <span className="text-themed-muted">Numer</span>
-                    <span className="font-medium text-themed">{offer.number}</span>
-                </div>
-                <div className="flex justify-between">
-                    <span className="text-themed-muted">Utworzono</span>
-                    <span className="text-themed">{formatDateTime(offer.createdAt)}</span>
-                </div>
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+            <h2 className="mb-4 text-lg font-semibold tracking-tight">Szczegóły</h2>
+            <div className="space-y-2">
+                <Row label="Numer"><span className="font-mono">{offer.number}</span></Row>
+                <Row label="Utworzono">{formatDateTime(offer.createdAt)}</Row>
                 {offer.validUntil && (
-                    <div className="flex justify-between">
-                        <span className="text-themed-muted">Ważna do</span>
-                        <span className={isExpired ? 'text-red-600 dark:text-red-400 font-medium' : 'text-themed'}>
-              {formatDate(offer.validUntil)}
-            </span>
-                    </div>
+                    <Row label="Ważna do">
+                        <span className={cn(isExpired && 'font-semibold text-status-rejected')}>
+                            {formatDate(offer.validUntil)}
+                        </span>
+                    </Row>
                 )}
-                <div className="flex justify-between">
-                    <span className="text-themed-muted">Termin płatności</span>
-                    <span className="text-themed">{offer.paymentDays} dni</span>
-                </div>
-                {offer.sentAt && (
-                    <div className="flex justify-between">
-                        <span className="text-themed-muted">Wysłano</span>
-                        <span className="text-themed">{formatDateTime(offer.sentAt)}</span>
-                    </div>
-                )}
-                {offer.viewedAt && (
-                    <div className="flex justify-between">
-                        <span className="text-themed-muted">Otwarto</span>
-                        <span className="text-themed">{formatDateTime(offer.viewedAt)}</span>
-                    </div>
-                )}
+                <Row label="Termin płatności">{offer.paymentDays} dni</Row>
+                {offer.sentAt && <Row label="Wysłano">{formatDateTime(offer.sentAt)}</Row>}
+                {offer.viewedAt && <Row label="Otwarto">{formatDateTime(offer.viewedAt)}</Row>}
                 {offer.acceptedAt && (
-                    <div className="flex justify-between">
-                        <span className="text-themed-muted">Zaakceptowano</span>
-                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-              {formatDateTime(offer.acceptedAt)}
-            </span>
-                    </div>
+                    <Row label="Zaakceptowano">
+                        <span className="font-semibold text-status-accepted">
+                            {formatDateTime(offer.acceptedAt)}
+                        </span>
+                    </Row>
                 )}
                 {offer.rejectedAt && (
-                    <div className="flex justify-between">
-                        <span className="text-themed-muted">Odrzucono</span>
-                        <span className="text-red-600 dark:text-red-400 font-medium">
-              {formatDateTime(offer.rejectedAt)}
-            </span>
-                    </div>
+                    <Row label="Odrzucono">
+                        <span className="font-semibold text-status-rejected">
+                            {formatDateTime(offer.rejectedAt)}
+                        </span>
+                    </Row>
                 )}
-                {offer.viewCount > 0 && (
-                    <div className="flex justify-between">
-                        <span className="text-themed-muted">Wyświetlenia</span>
-                        <span className="text-themed">{offer.viewCount}</span>
-                    </div>
-                )}
+                {offer.viewCount > 0 && <Row label="Wyświetlenia">{offer.viewCount}</Row>}
             </div>
-        </Card>
+        </div>
     );
 }

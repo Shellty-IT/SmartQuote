@@ -2,8 +2,12 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Button, Badge } from '@/components/ui';
-import { getStatusConfig } from '@/lib/utils';
+import {
+    ArrowLeft, Pencil, Copy, Link as LinkIcon,
+    Mail, FileText, ChevronDown,
+} from 'lucide-react';
+import StatusBadge from '@/components/ui/StatusBadge';
+import { cn } from '@/lib/utils';
 import type { Offer, OfferStatus } from '@/types';
 import type { KsefAvailability, KsefAvailabilityReason } from '@/types/ksef.types';
 import type { VariantData } from '../utils';
@@ -32,160 +36,153 @@ const KSEF_REASON_MESSAGES: Record<KsefAvailabilityReason, string> = {
     KSEF_UNREACHABLE: 'KSeF Master jest chwilowo niedostępny. Spróbuj ponownie później.',
 };
 
+const STATUS_LABELS: Partial<Record<OfferStatus, string>> = {
+    DRAFT: 'Szkic',
+    SENT: 'Wysłana',
+    VIEWED: 'Otwarta',
+    NEGOTIATION: 'Negocjacje',
+    ACCEPTED: 'Zaakceptowana',
+    REJECTED: 'Odrzucona',
+    EXPIRED: 'Wygasła',
+};
+
 export function OfferHeader({
-                                offer,
-                                variantData,
-                                isExpired,
-                                availableTransitions,
-                                isUpdatingStatus,
-                                canGenerateInvoice,
-                                offerReadyForInvoice,
-                                invoiceAlreadySent,
-                                ksefAvailability,
-                                isCheckingKsef,
-                                onStatusChange,
-                                onPublishClick,
-                                onDuplicate,
-                                onKsefClick,
-                            }: OfferHeaderProps) {
+    offer,
+    variantData,
+    isExpired,
+    availableTransitions,
+    isUpdatingStatus,
+    canGenerateInvoice,
+    offerReadyForInvoice,
+    invoiceAlreadySent,
+    ksefAvailability,
+    isCheckingKsef,
+    onStatusChange,
+    onPublishClick,
+    onDuplicate,
+    onKsefClick,
+}: OfferHeaderProps) {
     const router = useRouter();
-    const status = getStatusConfig(offer.status);
 
     const ksefBlockedReason = offerReadyForInvoice && ksefAvailability && !ksefAvailability.available
         ? KSEF_REASON_MESSAGES[ksefAvailability.reason ?? 'KSEF_UNREACHABLE']
         : null;
-    const showInvoiceButton = offerReadyForInvoice;
-    const invoiceButtonDisabled = !canGenerateInvoice;
     const invoiceButtonTitle = isCheckingKsef
         ? 'Sprawdzanie dostępności KSeF Master…'
         : ksefBlockedReason ?? 'Wystaw fakturę w KSeF Master';
 
     return (
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-8">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+            {/* Left: back + title */}
             <div className="flex items-center gap-4">
                 <button
                     onClick={() => router.push('/dashboard/offers')}
-                    className="p-2 text-themed-muted hover-themed rounded-lg"
+                    className="grid h-10 w-10 place-items-center rounded-xl border border-border bg-card text-muted-foreground transition hover:text-foreground"
+                    aria-label="Wróć do listy"
                 >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
+                    <ArrowLeft className="h-4 w-4" />
                 </button>
                 <div>
-                    <div className="flex items-center gap-3 flex-wrap">
-                        <h1 className="text-2xl font-bold text-themed">{offer.title}</h1>
-                        <Badge className={`${status.bgColor} ${status.color}`} size="md">
-                            {status.label}
-                        </Badge>
-                        {isExpired && offer.status !== 'EXPIRED' && (
-                            <Badge variant="danger" size="md">Wygasła</Badge>
-                        )}
+                    <div className="flex flex-wrap items-center gap-2">
+                        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Oferta</div>
+                        <StatusBadge status={offer.status} />
+                        {isExpired && offer.status !== 'EXPIRED' && <StatusBadge status="EXPIRED" />}
                         {offer.isInteractive && (
-                            <Badge className="bg-cyan-500/15 text-cyan-600 dark:text-cyan-400" size="md">
+                            <span className="inline-flex items-center gap-1 rounded-full border border-status-open/25 bg-[color-mix(in_oklab,var(--status-open)_12%,transparent)] px-2 py-0.5 text-[11px] font-semibold text-status-open">
                                 Link aktywny
-                            </Badge>
+                            </span>
                         )}
                         {variantData.variantNames.length > 0 && (
-                            <Badge className="bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300" size="md">
+                            <span className="inline-flex items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
                                 {variantData.variantNames.length} wariant{variantData.variantNames.length > 1 ? 'y' : ''}
-                            </Badge>
+                            </span>
                         )}
                         {offer.requireAuditTrail && (
-                            <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" size="md">
-                                <svg className="w-3.5 h-3.5 mr-1 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                                </svg>
+                            <span className="inline-flex items-center gap-1 rounded-full border border-status-accepted/25 bg-status-accepted/10 px-2 py-0.5 text-[11px] font-semibold text-status-accepted">
                                 Audit Trail
-                            </Badge>
+                            </span>
                         )}
                         {invoiceAlreadySent && (
-                            <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300" size="md">
-                                <svg className="w-3.5 h-3.5 mr-1 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                Faktura wysłana
-                            </Badge>
+                            <span className="inline-flex items-center gap-1 rounded-full border border-[oklch(0.72_0.16_60)/25%] bg-[oklch(0.72_0.16_60)/10%] px-2 py-0.5 text-[11px] font-semibold text-[oklch(0.55_0.14_60)]">
+                                <FileText className="h-3 w-3" /> Faktura wysłana
+                            </span>
                         )}
                     </div>
-                    <p className="text-themed-muted mt-1">{offer.number}</p>
+                    <h1 className="mt-0.5 text-3xl font-bold tracking-tight">{offer.title}</h1>
+                    <p className="mt-0.5 font-mono text-sm text-muted-foreground">{offer.number}</p>
                 </div>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-                {showInvoiceButton && (
+            {/* Right: actions */}
+            <div className="flex flex-wrap items-center gap-2">
+                {/* KSeF invoice */}
+                {offerReadyForInvoice && (
                     <span title={invoiceButtonTitle} className="inline-flex">
-                        <Button
-                            variant="outline"
+                        <button
                             onClick={onKsefClick}
-                            disabled={invoiceButtonDisabled}
-                            className="border-amber-500/50 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={!canGenerateInvoice}
+                            className="inline-flex h-10 items-center gap-2 rounded-xl border border-[oklch(0.72_0.16_60)/50%] bg-[oklch(0.72_0.16_60)/8%] px-4 text-sm font-semibold text-[oklch(0.55_0.14_60)] transition hover:bg-[oklch(0.72_0.16_60)/15%] disabled:pointer-events-none disabled:opacity-50 dark:text-[oklch(0.78_0.14_60)]"
                         >
-                            <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            Wystaw fakturę
-                        </Button>
+                            <FileText className="h-4 w-4" /> Wystaw fakturę
+                        </button>
                     </span>
                 )}
 
-                <Button
-                    variant="outline"
+                {/* Send email */}
+                <button
                     onClick={() => router.push(`/dashboard/emails/new?offerId=${offer.id}`)}
-                    className="border-cyan-500/50 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/10"
+                    className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-semibold text-muted-foreground shadow-sm transition hover:bg-secondary hover:text-foreground"
                 >
-                    <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    Wyślij email
-                </Button>
+                    <Mail className="h-4 w-4" /> Wyślij e-mail
+                </button>
 
-                <Button variant="outline" onClick={onPublishClick}>
-                    <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                    </svg>
-                    {offer.isInteractive ? 'Link' : 'Publikuj link'}
-                </Button>
+                {/* Publish link */}
+                <button
+                    onClick={onPublishClick}
+                    className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-semibold text-muted-foreground shadow-sm transition hover:bg-secondary hover:text-foreground"
+                >
+                    <LinkIcon className="h-4 w-4" /> {offer.isInteractive ? 'Zarządzaj linkiem' : 'Publikuj link'}
+                </button>
 
+                {/* Status change dropdown */}
                 {availableTransitions.length > 0 && (
-                    <div className="relative group">
-                        <Button variant="outline" disabled={isUpdatingStatus}>
-                            Zmień status
-                            <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </Button>
-                        <div className="absolute right-0 mt-2 w-48 card-themed border rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
-                            {availableTransitions.map((newStatus) => {
-                                const statusConfig = getStatusConfig(newStatus);
-                                return (
-                                    <button
-                                        key={newStatus}
-                                        onClick={() => onStatusChange(newStatus)}
-                                        className="w-full px-4 py-2 text-left text-sm hover-themed first:rounded-t-lg last:rounded-b-lg"
-                                    >
-                                        <Badge className={`${statusConfig.bgColor} ${statusConfig.color}`}>
-                                            {statusConfig.label}
-                                        </Badge>
-                                    </button>
-                                );
-                            })}
+                    <div className="group relative">
+                        <button
+                            disabled={isUpdatingStatus}
+                            className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-semibold text-muted-foreground shadow-sm transition hover:bg-secondary hover:text-foreground disabled:opacity-50"
+                        >
+                            Zmień status <ChevronDown className="h-4 w-4" />
+                        </button>
+                        <div className="invisible absolute right-0 z-30 mt-1 w-48 overflow-hidden rounded-xl border border-border bg-popover shadow-elevated opacity-0 transition-all group-hover:visible group-hover:opacity-100">
+                            {availableTransitions.map((s) => (
+                                <button
+                                    key={s}
+                                    onClick={() => onStatusChange(s)}
+                                    className="flex w-full items-center gap-2 px-3 py-2.5 text-sm transition hover:bg-accent"
+                                >
+                                    <StatusBadge status={s} showDot />
+                                    <span className="text-xs text-muted-foreground">{STATUS_LABELS[s]}</span>
+                                </button>
+                            ))}
                         </div>
                     </div>
                 )}
 
-                <Button variant="outline" onClick={onDuplicate}>
-                    <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                    Duplikuj
-                </Button>
+                {/* Duplicate */}
+                <button
+                    onClick={onDuplicate}
+                    className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-semibold text-muted-foreground shadow-sm transition hover:bg-secondary hover:text-foreground"
+                >
+                    <Copy className="h-4 w-4" /> Duplikuj
+                </button>
 
-                <Button onClick={() => router.push(`/dashboard/offers/${offer.id}/edit`)}>
-                    <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                    </svg>
-                    Edytuj
-                </Button>
+                {/* Edit */}
+                <button
+                    onClick={() => router.push(`/dashboard/offers/${offer.id}/edit`)}
+                    className="inline-flex h-10 items-center gap-2 rounded-xl bg-gradient-primary px-4 text-sm font-semibold text-white shadow-glow ring-1 ring-white/15 transition hover:brightness-110"
+                >
+                    <Pencil className="h-4 w-4" /> Edytuj
+                </button>
             </div>
         </div>
     );

@@ -1,7 +1,8 @@
 // src/app/dashboard/offers/components/OfferTableRow.tsx
 
-import { Badge } from '@/components/ui';
-import { formatDate, formatCurrency, getStatusConfig, getInitials } from '@/lib/utils';
+import { Eye, Pencil, Copy, Trash2, Link as LinkIcon } from 'lucide-react';
+import StatusBadge from '@/components/ui/StatusBadge';
+import { formatDate, formatCurrency, getInitials, cn } from '@/lib/utils';
 import type { Offer } from '@/types';
 
 interface OfferTableRowProps {
@@ -14,137 +15,108 @@ interface OfferTableRowProps {
 }
 
 export function OfferTableRow({ offer, onView, onEdit, onDuplicate, onDelete, onCopyLink }: OfferTableRowProps) {
-    const statusConfig = getStatusConfig(offer.status);
     const isExpired =
         offer.validUntil &&
         new Date(offer.validUntil) < new Date() &&
-        offer.status !== 'EXPIRED' &&
-        offer.status !== 'ACCEPTED' &&
-        offer.status !== 'REJECTED';
+        !['EXPIRED', 'ACCEPTED', 'REJECTED'].includes(offer.status);
 
     const hasInvoice = !!offer.invoiceSentAt;
 
     return (
         <tr
-            className="hover-themed transition-colors cursor-pointer"
+            className="cursor-pointer border-b border-border transition-colors hover:bg-secondary/40"
             onClick={onView}
         >
-            <td className="px-6 py-4">
+            {/* Title + number */}
+            <td className="px-4 py-3">
                 <div className="flex items-center gap-2">
                     <div>
-                        <p className="font-medium text-themed">{offer.title}</p>
-                        <p className="text-sm text-themed-muted">{offer.number}</p>
+                        <p className="font-semibold leading-tight">{offer.title}</p>
+                        <p className="font-mono text-xs text-muted-foreground">{offer.number}</p>
                     </div>
                     {hasInvoice && (
                         <span
-                            className="shrink-0 w-5 h-5 rounded bg-amber-500/15 flex items-center justify-center"
+                            className="shrink-0 rounded bg-[oklch(0.72_0.16_60)/15%] p-0.5"
                             title="Faktura wysłana do KSeF Master"
                         >
-                            <svg className="w-3 h-3 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <svg className="h-3 w-3 text-[oklch(0.55_0.14_60)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                         </span>
                     )}
                 </div>
             </td>
-            <td className="px-6 py-4">
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-600 to-blue-700 flex items-center justify-center text-white text-xs font-semibold">
+
+            {/* Client */}
+            <td className="px-4 py-3">
+                <div className="flex items-center gap-2.5">
+                    <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-gradient-primary text-[10px] font-bold text-white">
                         {getInitials(offer.client?.name || '?')}
                     </div>
-                    <div>
-                        <p className="text-sm font-medium text-themed">
-                            {offer.client?.name || 'Nieznany'}
-                        </p>
-                    </div>
+                    <span className="text-sm font-medium">{offer.client?.name || 'Nieznany'}</span>
                 </div>
             </td>
-            <td className="px-6 py-4">
+
+            {/* Status */}
+            <td className="px-4 py-3">
                 <div className="flex items-center gap-2">
-                    <Badge className={`${statusConfig.bgColor} ${statusConfig.color}`}>
-                        {statusConfig.label}
-                    </Badge>
-                    {isExpired && (
-                        <Badge variant="danger" size="sm">Wygasła</Badge>
-                    )}
+                    <StatusBadge status={offer.status} />
+                    {isExpired && <StatusBadge status="EXPIRED" />}
                 </div>
             </td>
-            <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+
+            {/* Public link */}
+            <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                 {offer.publicToken ? (
-                    <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/25">
-                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
-                            Link aktywny
+                    <div className="flex items-center gap-1.5">
+                        <span className="inline-flex items-center gap-1 rounded-full border border-status-open/25 bg-[color-mix(in_oklab,var(--status-open)_12%,transparent)] px-2 py-0.5 text-[11px] font-semibold text-status-open">
+                            <span className="h-1.5 w-1.5 rounded-full bg-status-open" />
+                            Aktywny
                         </span>
                         <button
                             onClick={onCopyLink}
-                            className="p-1 text-themed-muted hover:text-cyan-600 dark:hover:text-cyan-400 rounded transition-colors"
+                            className="rounded p-1 text-muted-foreground transition hover:text-primary"
                             title="Kopiuj link"
                         >
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                            </svg>
+                            <LinkIcon className="h-3.5 w-3.5" />
                         </button>
                     </div>
                 ) : (
-                    <span className="text-xs text-themed-muted">—</span>
+                    <span className="text-xs text-muted-foreground">—</span>
                 )}
             </td>
-            <td className="px-6 py-4 text-right">
-                <p className="font-semibold text-themed">
-                    {formatCurrency(Number(offer.totalGross))}
-                </p>
-                <p className="text-xs text-themed-muted">
-                    netto: {formatCurrency(Number(offer.totalNet))}
-                </p>
+
+            {/* Value */}
+            <td className="px-4 py-3 text-right">
+                <p className="font-semibold tabular-nums">{formatCurrency(Number(offer.totalGross))}</p>
+                <p className="text-xs text-muted-foreground tabular-nums">netto: {formatCurrency(Number(offer.totalNet))}</p>
             </td>
-            <td className="px-6 py-4">
-                <span className={isExpired ? 'text-red-600 dark:text-red-400 font-medium' : 'text-themed-muted'}>
-                    {offer.validUntil ? formatDate(offer.validUntil) : '-'}
+
+            {/* Valid until */}
+            <td className="px-4 py-3">
+                <span className={cn('text-sm', isExpired ? 'font-semibold text-status-rejected' : 'text-muted-foreground')}>
+                    {offer.validUntil ? formatDate(offer.validUntil) : '—'}
                 </span>
             </td>
-            <td className="px-6 py-4 text-right">
-                <div
-                    className="flex items-center justify-end gap-1"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <button
-                        onClick={onView}
-                        className="p-2 text-themed-muted hover:text-themed hover-themed rounded-lg transition-colors"
-                        title="Szczegóły"
-                    >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                    </button>
-                    <button
-                        onClick={onEdit}
-                        className="p-2 text-themed-muted hover:text-themed hover-themed rounded-lg transition-colors"
-                        title="Edytuj"
-                    >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
-                    </button>
-                    <button
-                        onClick={onDuplicate}
-                        className="p-2 text-themed-muted hover:text-themed hover-themed rounded-lg transition-colors"
-                        title="Duplikuj"
-                    >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                    </button>
-                    <button
-                        onClick={onDelete}
-                        className="p-2 text-themed-muted hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                        title="Usuń"
-                    >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                    </button>
+
+            {/* Actions */}
+            <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-end gap-0.5">
+                    {[
+                        { Icon: Eye,    fn: onView,      title: 'Szczegóły', hover: 'hover:text-primary' },
+                        { Icon: Pencil, fn: onEdit,      title: 'Edytuj',    hover: 'hover:text-primary' },
+                        { Icon: Copy,   fn: onDuplicate, title: 'Duplikuj',  hover: 'hover:text-primary' },
+                        { Icon: Trash2, fn: onDelete,    title: 'Usuń',      hover: 'hover:text-destructive hover:bg-destructive/10' },
+                    ].map(({ Icon, fn, title, hover }) => (
+                        <button
+                            key={title}
+                            onClick={fn}
+                            title={title}
+                            className={cn('rounded-lg p-2 text-muted-foreground transition-colors', hover)}
+                        >
+                            <Icon className="h-4 w-4" />
+                        </button>
+                    ))}
                 </div>
             </td>
         </tr>

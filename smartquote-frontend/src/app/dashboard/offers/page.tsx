@@ -2,7 +2,8 @@
 'use client';
 
 import Link from 'next/link';
-import { Button, Card, ConfirmDialog } from '@/components/ui';
+import { Plus, RefreshCw, FileText } from 'lucide-react';
+import { Button, ConfirmDialog } from '@/components/ui';
 import { SkeletonTableRow, SkeletonMobileCard } from '@/components/ui/Skeleton';
 import { useOffersPage } from './hooks/useOffersPage';
 import { TABLE_HEADERS } from './constants';
@@ -44,18 +45,16 @@ export default function OffersPage() {
     } = useOffersPage();
 
     return (
-        <div className="p-4 md:p-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
+        <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
+            <div className="flex flex-wrap items-end justify-between gap-4">
                 <div>
-                    <h1 className="text-xl md:text-2xl font-bold text-themed">Oferty</h1>
-                    <p className="text-sm text-themed-muted mt-1">Zarządzaj swoimi ofertami handlowymi</p>
+                    <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">CRM</div>
+                    <h1 className="mt-1 text-3xl font-bold tracking-tight">Oferty</h1>
+                    <p className="mt-1 text-sm text-muted-foreground">Zarządzaj ofertami handlowymi</p>
                 </div>
                 <Link href="/dashboard/offers/new">
-                    <Button className="w-full sm:w-auto">
-                        <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                        Nowa oferta
+                    <Button>
+                        <Plus className="h-4 w-4" /> Nowa oferta
                     </Button>
                 </Link>
             </div>
@@ -112,69 +111,59 @@ export default function OffersPage() {
                     </div>
                 </>
             ) : error ? (
-                <Card>
-                    <div className="text-center py-12">
-                        <p className="text-red-600 dark:text-red-400">{error}</p>
-                        <Button variant="outline" onClick={refresh} className="mt-4">
-                            Spróbuj ponownie
-                        </Button>
-                    </div>
-                </Card>
+                <div className="rounded-2xl border border-border bg-card p-12 text-center shadow-card">
+                    <p className="text-destructive">{error}</p>
+                    <Button variant="outline" onClick={refresh} className="mt-4 gap-2">
+                        <RefreshCw className="h-4 w-4" /> Spróbuj ponownie
+                    </Button>
+                </div>
             ) : offers.length === 0 ? (
-                <Card>
-                    <div className="text-center py-12">
-                        <div className="w-16 h-16 section-themed rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-8 h-8 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                        </div>
-                        <h3 className="text-lg font-semibold text-themed mb-2">
-                            {hasFilters ? 'Brak wyników' : 'Brak ofert'}
-                        </h3>
-                        <p className="text-themed-muted mb-4">
-                            {hasFilters
-                                ? 'Spróbuj zmienić kryteria wyszukiwania'
-                                : 'Stwórz swoją pierwszą ofertę handlową'}
-                        </p>
-                        {!hasFilters && (
-                            <Link href="/dashboard/offers/new">
-                                <Button>Stwórz ofertę</Button>
-                            </Link>
-                        )}
-                    </div>
-                </Card>
+                <div className="rounded-2xl border border-border bg-card py-16 text-center shadow-card">
+                    <FileText className="mx-auto mb-4 h-12 w-12 text-muted-foreground/40" strokeWidth={1.5} />
+                    <h3 className="text-lg font-semibold tracking-tight">
+                        {hasFilters ? 'Brak wyników' : 'Brak ofert'}
+                    </h3>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        {hasFilters ? 'Spróbuj zmienić kryteria wyszukiwania' : 'Stwórz swoją pierwszą ofertę handlową'}
+                    </p>
+                    {!hasFilters && (
+                        <Link href="/dashboard/offers/new" className="mt-4 inline-block">
+                            <Button><Plus className="h-4 w-4" /> Stwórz ofertę</Button>
+                        </Link>
+                    )}
+                </div>
             ) : (
                 <>
                     <div className="hidden lg:block">
-                        <Card className="overflow-hidden">
+                        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
                             <div className="overflow-x-auto">
                                 <table className="w-full">
-                                    <thead className="section-themed border-b divider-themed">
-                                    <tr>
-                                        {TABLE_HEADERS.map((h) => (
-                                            <th
-                                                key={h.label}
-                                                className={`px-6 py-4 text-xs font-semibold text-themed-muted uppercase tracking-wider ${
-                                                    h.align === 'right' ? 'text-right' : 'text-left'
-                                                }`}
-                                            >
-                                                {h.label}
-                                            </th>
-                                        ))}
-                                    </tr>
+                                    <thead className="border-b border-border bg-surface-subtle">
+                                        <tr>
+                                            {TABLE_HEADERS.map((h) => (
+                                                <th
+                                                    key={h.label}
+                                                    className={`px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground ${
+                                                        h.align === 'right' ? 'text-right' : 'text-left'
+                                                    }`}
+                                                >
+                                                    {h.label}
+                                                </th>
+                                            ))}
+                                        </tr>
                                     </thead>
-                                    <tbody className="divide-y divider-themed">
-                                    {offers.map((offer) => (
-                                        <OfferTableRow
-                                            key={offer.id}
-                                            offer={offer}
-                                            onView={() => navigateToOffer(offer.id)}
-                                            onEdit={() => navigateToEdit(offer.id)}
-                                            onDuplicate={() => handleDuplicate(offer)}
-                                            onDelete={() => setDeleteModal(offer)}
-                                            onCopyLink={() => handleCopyLink(offer)}
-                                        />
-                                    ))}
+                                    <tbody>
+                                        {offers.map((offer) => (
+                                            <OfferTableRow
+                                                key={offer.id}
+                                                offer={offer}
+                                                onView={() => navigateToOffer(offer.id)}
+                                                onEdit={() => navigateToEdit(offer.id)}
+                                                onDuplicate={() => handleDuplicate(offer)}
+                                                onDelete={() => setDeleteModal(offer)}
+                                                onCopyLink={() => handleCopyLink(offer)}
+                                            />
+                                        ))}
                                     </tbody>
                                 </table>
                             </div>
@@ -184,7 +173,7 @@ export default function OffersPage() {
                                 total={total}
                                 onPageChange={setPage}
                             />
-                        </Card>
+                        </div>
                     </div>
 
                     <div className="lg:hidden space-y-3">
