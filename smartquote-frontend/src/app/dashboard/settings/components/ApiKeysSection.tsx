@@ -270,7 +270,7 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                                 type="text"
                                 value={newKeyName}
                                 onChange={e => setNewKeyName(e.target.value)}
-                                className="w-full px-4 py-2.5 border rounded-lg border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30/20 focus:border-primary"
+                                className="w-full px-4 py-2.5 border rounded-lg border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-primary"
                                 placeholder="np. Integracja CRM"
                                 autoFocus
                             />

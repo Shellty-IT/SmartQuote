@@ -32,13 +32,13 @@ function toApiItem(item: TemplateItem): CreateOfferTemplateItemInput {
 }
 
 const textareaClass =
-    'w-full px-4 py-2.5 rounded-lg border border-border dark:border-border bg-white dark:bg-card text-foreground dark:text-slate-100 placeholder:text-muted-foreground dark:placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30/20 focus:border-primary transition-all duration-200 resize-y';
+    'w-full px-4 py-2.5 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-primary transition-all duration-200 resize-y';
 
 const inputClass =
-    'w-full px-4 py-2.5 rounded-lg border border-border dark:border-border bg-white dark:bg-card text-foreground dark:text-slate-100 placeholder:text-muted-foreground dark:placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30/20 focus:border-primary transition-all duration-200';
+    'w-full px-4 py-2.5 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-primary transition-all duration-200';
 
 const inputSmClass =
-    'w-full px-3 py-2 rounded-lg border border-border dark:border-border bg-white dark:bg-card text-foreground dark:text-slate-100 placeholder:text-muted-foreground dark:placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30/20 focus:border-primary transition-all duration-200 text-sm';
+    'w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-primary transition-all duration-200 text-sm';
 
 export default function NewOfferTemplatePage() {
     const router = useRouter();

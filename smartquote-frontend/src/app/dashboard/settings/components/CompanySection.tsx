@@ -229,7 +229,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                         onClick={handleLogoClick}
                         className={`relative w-28 h-28 rounded-2xl flex items-center justify-center border-2 border-dashed transition-all cursor-pointer group ${
                             currentLogo
-                                ? 'border-cyan-300 bg-white'
+                                ? 'border-cyan-300 bg-card'
                                 : 'border-border hover:border-cyan-400'
                         }`}
                         style={{ backgroundColor: currentLogo ? '#ffffff' : 'var(--surface-subtle)' }}

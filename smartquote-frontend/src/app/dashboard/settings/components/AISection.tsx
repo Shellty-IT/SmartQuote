@@ -27,7 +27,7 @@ function Toggle({ enabled, onChange, disabled }: ToggleProps) {
             } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
         >
             <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform duration-300 ${
+                className={`inline-block h-4 w-4 transform rounded-full bg-card shadow-sm transition-transform duration-300 ${
                     enabled ? 'translate-x-6' : 'translate-x-1'
                 }`}
             />

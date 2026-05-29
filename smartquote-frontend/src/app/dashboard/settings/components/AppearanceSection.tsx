@@ -56,8 +56,8 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
             preview: {
                 bg: 'bg-gradient-to-br from-slate-50 to-cyan-50',
                 sidebar: 'bg-slate-900',
-                header: 'bg-white',
-                card: 'bg-white border-border',
+                header: 'bg-card',
+                card: 'bg-card border-border',
                 text: 'bg-input',
                 accent: 'bg-primary',
             },
@@ -142,9 +142,9 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
                                 <div className="flex gap-2 h-24 rounded-lg overflow-hidden border border-black/10">
                                     <div className={`w-10 ${t.preview.sidebar} flex flex-col items-center pt-3 gap-2`}>
                                         <div className="w-5 h-5 rounded bg-primary/30" />
-                                        <div className="w-5 h-1 rounded bg-white/20" />
-                                        <div className="w-5 h-1 rounded bg-white/20" />
-                                        <div className="w-5 h-1 rounded bg-white/20" />
+                                        <div className="w-5 h-1 rounded bg-card/20" />
+                                        <div className="w-5 h-1 rounded bg-card/20" />
+                                        <div className="w-5 h-1 rounded bg-card/20" />
                                     </div>
                                     <div className="flex-1 flex flex-col">
                                         <div className={`h-6 ${t.preview.header} border-b border-black/5 flex items-center px-2`}>

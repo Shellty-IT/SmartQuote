@@ -131,7 +131,7 @@ export default function AIAssistantPage() {
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={handleKeyDown}
                                 placeholder="Napisz wiadomość... (Enter aby wysłać, Shift+Enter nowa linia)"
-                                className="w-full px-4 py-3 rounded-xl border resize-none transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30/20"
+                                className="w-full px-4 py-3 rounded-xl border resize-none transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30"
                                 style={{
                                     backgroundColor: 'var(--card)',
                                     borderColor: 'var(--border)',

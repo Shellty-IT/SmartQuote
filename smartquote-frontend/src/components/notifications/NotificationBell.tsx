@@ -12,7 +12,7 @@ const typeConfig: Record<NotificationType, { icon: string; colorClass: string }>
     OFFER_REJECTED: { icon: '❌', colorClass: 'bg-destructive/10 text-destructive' },
     OFFER_COMMENT: { icon: '💬', colorClass: 'bg-primary/10 text-primary' },
     AI_INSIGHT: { icon: '✨', colorClass: 'bg-[oklch(0.7_0.16_300)/15%] text-[oklch(0.55_0.18_300)] dark:text-[oklch(0.78_0.14_300)]' },
-    FOLLOW_UP_REMINDER: { icon: '⏰', colorClass: 'bg-[oklch(0.72_0.16_60)/10%]0/15 text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]' },
+    FOLLOW_UP_REMINDER: { icon: '⏰', colorClass: 'bg-[oklch(0.72_0.16_60)/15%] text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]' },
     CONTRACT_SIGNED: { icon: '✍️', colorClass: 'bg-status-accepted/15 text-status-accepted' },
     SYSTEM: { icon: '⚙️', colorClass: 'bg-secondary text-secondary-foreground' },
 };

@@ -134,7 +134,7 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
                     <button
                         onClick={handleAvatarClick}
                         disabled={isUploadingAvatar}
-                        className="absolute bottom-0 right-0 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center text-muted-foreground hover:text-primary hover:scale-110 transition-all disabled:opacity-50"
+                        className="absolute bottom-0 right-0 w-8 h-8 bg-card rounded-full shadow-lg flex items-center justify-center text-muted-foreground hover:text-primary hover:scale-110 transition-all disabled:opacity-50"
                     >
                         {isUploadingAvatar ? (
                             <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">

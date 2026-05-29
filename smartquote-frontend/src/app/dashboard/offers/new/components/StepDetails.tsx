@@ -29,7 +29,7 @@ export default function StepDetails({ details, onUpdate }: StepDetailsProps) {
                         placeholder="Krótki opis zakresu oferty..."
                         rows={4}
                         style={{ resize: 'vertical', minHeight: '100px' }}
-                        className="w-full px-3 py-2 rounded-xl border border-border bg-white dark:bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
+                        className="w-full px-3 py-2 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
                     />
                 </div>
 
@@ -58,7 +58,7 @@ export default function StepDetails({ details, onUpdate }: StepDetailsProps) {
                         onChange={(e) => onUpdate('terms', e.target.value)}
                         rows={2}
                         style={{ resize: 'vertical', minHeight: '70px' }}
-                        className="w-full px-3 py-2 rounded-xl border border-border bg-white dark:bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
+                        className="w-full px-3 py-2 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
                     />
                 </div>
 
@@ -70,7 +70,7 @@ export default function StepDetails({ details, onUpdate }: StepDetailsProps) {
                         placeholder="Notatki widoczne tylko dla Ciebie..."
                         rows={2}
                         style={{ resize: 'vertical', minHeight: '70px' }}
-                        className="w-full px-3 py-2 rounded-xl border border-border bg-white dark:bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
+                        className="w-full px-3 py-2 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
                     />
                 </div>
 

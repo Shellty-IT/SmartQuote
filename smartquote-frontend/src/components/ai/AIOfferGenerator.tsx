@@ -131,7 +131,7 @@ export function AIOfferGenerator({
                                 </div>
 
                                 {generatedOffer.notes && (
-                                    <div className="mt-4 p-3 bg-[oklch(0.72_0.16_60)/10%]0/10 text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)] rounded text-sm">
+                                    <div className="mt-4 p-3 bg-[oklch(0.72_0.16_60)/10%] text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)] rounded text-sm">
                                         📝 {generatedOffer.notes}
                                     </div>
                                 )}

@@ -38,7 +38,7 @@ export default function DashboardError({ error, reset }: ErrorProps) {
                     </button>
                     <Link
                         href="/dashboard"
-                        className="px-4 py-2 bg-secondary hover:bg-secondary dark:bg-card dark:hover:bg-secondary text-foreground dark:text-slate-300 rounded-xl text-sm font-medium transition-colors"
+                        className="px-4 py-2 bg-secondary hover:bg-secondary dark:hover:bg-secondary text-foreground dark:text-slate-300 rounded-xl text-sm font-medium transition-colors"
                     >
                         Dashboard
                     </Link>

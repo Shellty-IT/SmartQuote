@@ -15,7 +15,7 @@ function EmailStatusBadge({ status }: { status: EmailLogStatus }) {
     const config: Record<EmailLogStatus, { label: string; classes: string }> = {
         SENT: { label: 'Wysłano', classes: 'bg-status-accepted/15 text-status-accepted' },
         FAILED: { label: 'Błąd wysyłki', classes: 'bg-status-rejected/15 text-status-rejected' },
-        DRAFT: { label: 'Szkic', classes: 'bg-surface-subtle0/15 text-muted-foreground dark:text-muted-foreground' },
+        DRAFT: { label: 'Szkic', classes: 'bg-secondary text-muted-foreground dark:text-muted-foreground' },
     };
     const { label, classes } = config[status];
     return (

@@ -19,7 +19,7 @@ export function ChatHeader({
     return (
         <div className="flex items-center justify-between px-4 py-3 bg-gradient-primary">
             <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 bg-white/20 rounded-full">
+                <div className="flex items-center justify-center w-8 h-8 bg-card/20 rounded-full">
                     <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
@@ -35,7 +35,7 @@ export function ChatHeader({
             <div className="flex items-center gap-1">
                 <button
                     onClick={onClearHistory}
-                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                    className="p-2 hover:bg-card/10 rounded-lg transition-colors"
                     title="Wyczyść historię"
                 >
                     <svg className="w-4 h-4 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -44,7 +44,7 @@ export function ChatHeader({
                 </button>
                 <button
                     onClick={onToggleMinimize}
-                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                    className="p-2 hover:bg-card/10 rounded-lg transition-colors"
                 >
                     {isMinimized ? (
                         <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -58,7 +58,7 @@ export function ChatHeader({
                 </button>
                 <button
                     onClick={onClose}
-                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                    className="p-2 hover:bg-card/10 rounded-lg transition-colors"
                 >
                     <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

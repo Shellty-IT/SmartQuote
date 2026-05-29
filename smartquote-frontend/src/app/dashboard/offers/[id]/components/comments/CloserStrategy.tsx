@@ -40,7 +40,7 @@ export function CloserStrategy({
                     {strategy.riskLevel && (
                         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                             strategy.riskLevel === 'low' ? 'bg-status-accepted/10 text-status-accepted' :
-                                strategy.riskLevel === 'medium' ? 'bg-[oklch(0.72_0.16_60)/10%]0/10 text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]' :
+                                strategy.riskLevel === 'medium' ? 'bg-[oklch(0.72_0.16_60)/10%] text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]' :
                                     'bg-destructive/10 text-destructive'
                         }`}>
               Ryzyko: {strategy.riskLevel === 'low' ? 'niskie' : strategy.riskLevel === 'medium' ? 'średnie' : 'wysokie'}

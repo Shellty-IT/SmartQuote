@@ -11,9 +11,9 @@ import { FollowUp, FollowUpStatus, FollowUpType, Priority } from '@/types';
 import { useToast } from '@/contexts/ToastContext';
 
 const statusConfig: Record<FollowUpStatus, { label: string; color: string; bgColor: string }> = {
-    PENDING: { label: 'Oczekujące', color: 'text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]', bgColor: 'bg-[oklch(0.72_0.16_60)/10%]0/15' },
+    PENDING: { label: 'Oczekujące', color: 'text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]', bgColor: 'bg-[oklch(0.72_0.16_60)/15%]' },
     COMPLETED: { label: 'Wykonane', color: 'text-status-accepted', bgColor: 'bg-status-accepted/15' },
-    CANCELLED: { label: 'Anulowane', color: 'text-muted-foreground', bgColor: 'bg-surface-subtle0/15' },
+    CANCELLED: { label: 'Anulowane', color: 'text-muted-foreground', bgColor: 'bg-secondary' },
     OVERDUE: { label: 'Zaległe', color: 'text-status-rejected', bgColor: 'bg-status-rejected/15' },
 };
 
@@ -27,8 +27,8 @@ const typeConfig: Record<FollowUpType, { label: string; icon: string }> = {
 };
 
 const priorityConfig: Record<Priority, { label: string; color: string; bgColor: string }> = {
-    LOW: { label: 'Niski', color: 'text-muted-foreground', bgColor: 'bg-surface-subtle0/15' },
-    MEDIUM: { label: 'Średni', color: 'text-status-open', bgColor: 'bg-[color-mix(in_oklab,var(--status-open)_10%,transparent)]0/15' },
+    LOW: { label: 'Niski', color: 'text-muted-foreground', bgColor: 'bg-secondary' },
+    MEDIUM: { label: 'Średni', color: 'text-status-open', bgColor: 'bg-[color-mix(in_oklab,var(--status-open)_15%,transparent)]' },
     HIGH: { label: 'Wysoki', color: 'text-[oklch(0.55_0.16_45)] dark:text-[oklch(0.78_0.14_45)]', bgColor: 'bg-orange-500/15' },
     URGENT: { label: 'Pilne', color: 'text-status-rejected', bgColor: 'bg-status-rejected/15' },
 };
@@ -127,7 +127,7 @@ export default function FollowUpsPage() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-muted-foreground">Oczekujące</p>
-                                <p className="text-3xl font-bold tracking-tight">{stats.byStatus?.PENDING || 0}</p>
+                                <p className="text-2xl font-bold tracking-tight">{stats.byStatus?.PENDING || 0}</p>
                             </div>
                             <div
                                 className="w-10 h-10 rounded-lg flex items-center justify-center"
@@ -145,7 +145,7 @@ export default function FollowUpsPage() {
                             </div>
                             <div
                                 className="w-10 h-10 rounded-lg flex items-center justify-center"
-                                style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)' }}
+                                style={{ backgroundColor: 'color-mix(in oklab, var(--status-rejected) 15%, transparent)' }}
                             >
                                 <span className="text-xl">🚨</span>
                             </div>
@@ -155,11 +155,11 @@ export default function FollowUpsPage() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-muted-foreground">Na dziś</p>
-                                <p className="text-2xl font-bold text-blue-500">{stats.todayDue || 0}</p>
+                                <p className="text-2xl font-bold text-status-open">{stats.todayDue || 0}</p>
                             </div>
                             <div
                                 className="w-10 h-10 rounded-lg flex items-center justify-center"
-                                style={{ backgroundColor: 'rgba(59, 130, 246, 0.15)' }}
+                                style={{ backgroundColor: 'color-mix(in oklab, var(--status-open) 15%, transparent)' }}
                             >
                                 <span className="text-xl">📅</span>
                             </div>
@@ -173,7 +173,7 @@ export default function FollowUpsPage() {
                             </div>
                             <div
                                 className="w-10 h-10 rounded-lg flex items-center justify-center"
-                                style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)' }}
+                                style={{ backgroundColor: 'color-mix(in oklab, var(--status-accepted) 15%, transparent)' }}
                             >
                                 <span className="text-xl">✅</span>
                             </div>
@@ -197,7 +197,7 @@ export default function FollowUpsPage() {
                         />
                     </div>
                     <select
-                        className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30/20"
+                        className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30"
                         style={{
                             backgroundColor: 'var(--card)',
                             borderColor: 'var(--border)',
@@ -213,7 +213,7 @@ export default function FollowUpsPage() {
                         <option value="CANCELLED">Anulowane</option>
                     </select>
                     <select
-                        className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30/20"
+                        className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30"
                         style={{
                             backgroundColor: 'var(--card)',
                             borderColor: 'var(--border)',
@@ -231,7 +231,7 @@ export default function FollowUpsPage() {
                         <option value="OTHER">Inne</option>
                     </select>
                     <select
-                        className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30/20"
+                        className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30"
                         style={{
                             backgroundColor: 'var(--card)',
                             borderColor: 'var(--border)',

@@ -162,7 +162,7 @@ export default function PublishDialog({
         >
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true" />
 
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
+            <div className="relative bg-card rounded-2xl shadow-2xl w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
                 <div className="p-6">
                     <div className="flex items-center gap-3 mb-6">
                         <div className="w-12 h-12 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0">
@@ -226,7 +226,7 @@ export default function PublishDialog({
                                 </div>
                             )}
 
-                            <div className="mb-6 p-4 rounded-xl border border-border bg-white">
+                            <div className="mb-6 p-4 rounded-xl border border-border bg-card">
                                 <label className={`flex items-start gap-3 ${canSendEmail ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}>
                                     <input
                                         type="checkbox"

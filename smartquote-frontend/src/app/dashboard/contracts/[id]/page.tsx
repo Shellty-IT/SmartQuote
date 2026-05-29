@@ -379,7 +379,7 @@ export default function ContractDetailsPage({ params }: PageProps) {
                         <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
                             <div className="px-6 py-4 bg-gradient-to-r from-emerald-600 to-teal-600">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                                    <div className="w-10 h-10 rounded-full bg-card/20 backdrop-blur-sm flex items-center justify-center">
                                         <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                         </svg>
@@ -418,7 +418,7 @@ export default function ContractDetailsPage({ params }: PageProps) {
 
                                     <div>
                                         <label className="text-xs font-medium text-muted-foreground mb-2 block">Podpis</label>
-                                        <div className="border border-border rounded-lg p-4 bg-white flex items-center justify-center">
+                                        <div className="border border-border rounded-lg p-4 bg-card flex items-center justify-center">
                                             {/* eslint-disable-next-line @next/next/no-img-element */}
                                             <img
                                                 src={contract.signatureLog.signatureImage}
@@ -453,7 +453,7 @@ export default function ContractDetailsPage({ params }: PageProps) {
                                 </div>
                             ) : (
                                 <div className="p-8 text-center">
-                                    <div className="w-16 h-16 rounded-full bg-[oklch(0.72_0.16_60)/10%]0/10 flex items-center justify-center mx-auto mb-4">
+                                    <div className="w-16 h-16 rounded-full bg-[oklch(0.72_0.16_60)/10%] flex items-center justify-center mx-auto mb-4">
                                         <svg className="w-8 h-8 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
@@ -582,7 +582,7 @@ export default function ContractDetailsPage({ params }: PageProps) {
                                 </div>
                                 {contract.sentAt && (
                                     <div className="flex items-center gap-3 text-sm">
-                                        <div className="w-2 h-2 rounded-full bg-[color-mix(in_oklab,var(--status-open)_10%,transparent)]0 flex-shrink-0" />
+                                        <div className="w-2 h-2 rounded-full bg-status-open flex-shrink-0" />
                                         <span className="text-muted-foreground">Wysłano:</span>
                                         <span className="text-foreground">{formatDate(contract.sentAt)}</span>
                                     </div>
@@ -606,7 +606,7 @@ export default function ContractDetailsPage({ params }: PageProps) {
                                 )}
                                 {contract.endDate && (
                                     <div className="flex items-center gap-3 text-sm">
-                                        <div className="w-2 h-2 rounded-full bg-[oklch(0.72_0.16_60)/10%]0 flex-shrink-0" />
+                                        <div className="w-2 h-2 rounded-full bg-[oklch(0.72_0.16_60)/15%] flex-shrink-0" />
                                         <span className="text-muted-foreground">Zakończenie:</span>
                                         <span className="text-foreground">{formatDate(contract.endDate)}</span>
                                     </div>

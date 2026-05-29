@@ -46,7 +46,7 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
                     value={name}
                     onChange={e => setName(e.target.value)}
                     placeholder="np. Oferta premium"
-                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30 bg-white dark:bg-card ${
+                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30 bg-card ${
                         errors.name ? 'border-destructive' : 'border-border'
                     }`}
                 />
@@ -61,7 +61,7 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
                     value={subject}
                     onChange={e => setSubject(e.target.value)}
                     placeholder="Temat emaila"
-                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30 bg-white dark:bg-card ${
+                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30 bg-card ${
                         errors.subject ? 'border-destructive' : 'border-border'
                     }`}
                 />
@@ -76,7 +76,7 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
                     onChange={e => setBody(e.target.value)}
                     rows={10}
                     placeholder="Treść wiadomości email..."
-                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30 bg-white dark:bg-card resize-y ${
+                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30 bg-card resize-y ${
                         errors.body ? 'border-destructive' : 'border-border'
                     }`}
                 />

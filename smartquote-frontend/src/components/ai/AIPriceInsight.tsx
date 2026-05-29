@@ -50,7 +50,7 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
         : false;
 
     const confidenceConfig = {
-        low: { label: 'Niska', color: 'bg-[oklch(0.72_0.16_60)/10%]0/10 text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]' },
+        low: { label: 'Niska', color: 'bg-[oklch(0.72_0.16_60)/10%] text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]' },
         medium: { label: 'Średnia', color: 'bg-primary/10 text-primary' },
         high: { label: 'Wysoka', color: 'bg-status-accepted/10 text-status-accepted' },
     };
@@ -154,7 +154,7 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
                                     {currentPrice !== undefined && currentPrice > 0 && result.aiSuggestion.suggestedMax > result.aiSuggestion.suggestedMin && (
                                         <div
                                             className={`absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-white shadow-sm ${
-                                                isPriceLow ? 'bg-[oklch(0.72_0.16_60)/10%]0' : isPriceHigh ? 'bg-[oklch(0.72_0.16_60)/10%]0' : 'bg-status-accepted'
+                                                isPriceLow ? 'bg-[oklch(0.72_0.16_60)/15%]' : isPriceHigh ? 'bg-[oklch(0.72_0.16_60)/15%]' : 'bg-status-accepted'
                                             }`}
                                             style={{
                                                 left: `${Math.max(0, Math.min(100, ((currentPrice - result.aiSuggestion.suggestedMin) / (result.aiSuggestion.suggestedMax - result.aiSuggestion.suggestedMin)) * 100))}%`,
@@ -170,7 +170,7 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
 
                         {currentPrice !== undefined && currentPrice > 0 && (isPriceLow || isPriceHigh) && (
                             <div className={`flex items-start gap-2 p-2.5 rounded-lg text-xs ${
-                                isPriceLow ? 'bg-[oklch(0.72_0.16_60)/10%]0/10 text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]' : 'bg-[color-mix(in_oklab,var(--status-open)_10%,transparent)]0/10 text-status-open'
+                                isPriceLow ? 'bg-[oklch(0.72_0.16_60)/10%] text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]' : 'bg-[color-mix(in_oklab,var(--status-open)_10%,transparent)] text-status-open'
                             }`}>
                                 <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
@@ -185,7 +185,7 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
                         )}
 
                         {result.aiSuggestion.marginWarning && (
-                            <div className="flex items-start gap-2 p-2.5 rounded-lg bg-[oklch(0.72_0.16_60)/10%]0/10 text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)] text-xs">
+                            <div className="flex items-start gap-2 p-2.5 rounded-lg bg-[oklch(0.72_0.16_60)/10%] text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)] text-xs">
                                 <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
                                 </svg>
