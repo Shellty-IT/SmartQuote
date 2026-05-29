@@ -54,8 +54,8 @@ function AttachmentBadges({ attachments }: { attachments: EmailLog['attachments'
                         key={i}
                         className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded border"
                         style={{
-                            borderColor: 'var(--divider)',
-                            backgroundColor: 'var(--section-bg)',
+                            borderColor: 'var(--border)',
+                            backgroundColor: 'var(--surface-subtle)',
                             color: 'var(--foreground)',
                         }}
                     >
@@ -91,8 +91,8 @@ function EmailListItem({
         <div
             className="flex items-start gap-4 p-4 rounded-xl transition-colors cursor-pointer group border mb-2 mx-2"
             style={{
-                backgroundColor: 'var(--card-bg)',
-                borderColor: 'var(--card-border)',
+                backgroundColor: 'var(--card)',
+                borderColor: 'var(--border)',
             }}
             onClick={() => router.push(`/dashboard/emails/${item.id}`)}
         >
@@ -112,12 +112,12 @@ function EmailListItem({
                     </span>
                     <EmailStatusBadge status={item.status} />
                 </div>
-                <p className="text-sm font-medium mt-0.5 truncate" style={{ color: 'var(--text-foreground)' }}>
+                <p className="text-sm font-medium mt-0.5 truncate" style={{ color: 'var(--foreground)' }}>
                     {item.subject}
                 </p>
                 <AttachmentBadges attachments={item.attachments} />
                 <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-                    <span className="text-xs" style={{ color: 'var(--muted-text)' }}>{formatDate(item.sentAt)}</span>
+                    <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{formatDate(item.sentAt)}</span>
                     {item.offer && (
                         <span className="text-xs font-medium" style={{ color: '#0891b2' }}>
                             Oferta: {item.offer.number}
@@ -129,7 +129,7 @@ function EmailListItem({
                         </span>
                     )}
                     {item.client && (
-                        <span className="text-xs font-medium" style={{ color: 'var(--muted-text)' }}>{item.client.name}</span>
+                        <span className="text-xs font-medium" style={{ color: 'var(--muted-foreground)' }}>{item.client.name}</span>
                     )}
                     {item.errorMessage && (
                         <span className="text-xs text-status-rejected truncate max-w-xs" title={item.errorMessage}>
@@ -145,7 +145,7 @@ function EmailListItem({
                         href={`/dashboard/emails/${item.id}/edit`}
                         onClick={e => e.stopPropagation()}
                         className="p-1.5 rounded-lg transition-colors hover:bg-secondary/60"
-                        style={{ color: 'var(--muted-text)' }}
+                        style={{ color: 'var(--muted-foreground)' }}
                         title="Edytuj szkic"
                     >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -156,7 +156,7 @@ function EmailListItem({
                 <button
                     onClick={e => { e.stopPropagation(); onDelete(item.id); }}
                     className="p-1.5 rounded-lg transition-colors hover:bg-secondary/60 hover:text-status-rejected"
-                    style={{ color: 'var(--muted-text)' }}
+                    style={{ color: 'var(--muted-foreground)' }}
                     title="Usuń"
                 >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -170,12 +170,12 @@ function EmailListItem({
 
 function SkeletonRow() {
     return (
-        <div className="flex items-start gap-4 p-4 mx-2 mb-2 rounded-xl border" style={{ borderColor: 'var(--card-border)', backgroundColor: 'var(--card-bg)' }}>
-            <div className="w-9 h-9 rounded-full animate-pulse flex-shrink-0" style={{ backgroundColor: 'var(--hover-bg)' }} />
+        <div className="flex items-start gap-4 p-4 mx-2 mb-2 rounded-xl border" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}>
+            <div className="w-9 h-9 rounded-full animate-pulse flex-shrink-0" style={{ backgroundColor: 'var(--secondary)' }} />
             <div className="flex-1 space-y-2">
-                <div className="h-4 rounded animate-pulse w-48" style={{ backgroundColor: 'var(--hover-bg)' }} />
-                <div className="h-3 rounded animate-pulse w-72" style={{ backgroundColor: 'var(--hover-bg)' }} />
-                <div className="h-3 rounded animate-pulse w-32" style={{ backgroundColor: 'var(--hover-bg)' }} />
+                <div className="h-4 rounded animate-pulse w-48" style={{ backgroundColor: 'var(--secondary)' }} />
+                <div className="h-3 rounded animate-pulse w-72" style={{ backgroundColor: 'var(--secondary)' }} />
+                <div className="h-3 rounded animate-pulse w-32" style={{ backgroundColor: 'var(--secondary)' }} />
             </div>
         </div>
     );
@@ -282,7 +282,7 @@ export default function EmailsPage() {
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
                 <div
                     className="flex gap-1.5 rounded-xl p-1.5 w-fit"
-                    style={{ backgroundColor: 'var(--section-bg)', border: '1px solid var(--divider)' }}
+                    style={{ backgroundColor: 'var(--surface-subtle)', border: '1px solid var(--border)' }}
                 >
                     {tabs.map(tab => {
                         const style = TAB_STYLES[tab.id];
@@ -295,7 +295,7 @@ export default function EmailsPage() {
                                 style={
                                     isActive
                                         ? { backgroundColor: style.active.bg, color: style.active.text, boxShadow: '0 1px 4px rgba(0,0,0,0.18)' }
-                                        : { backgroundColor: 'transparent', color: 'var(--muted-text)' }
+                                        : { backgroundColor: 'transparent', color: 'var(--muted-foreground)' }
                                 }
                             >
                                 {tab.icon}
@@ -306,7 +306,7 @@ export default function EmailsPage() {
                 </div>
 
                 <div className="relative flex-1 max-w-sm">
-                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--muted-text)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--muted-foreground)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     <input
@@ -316,9 +316,9 @@ export default function EmailsPage() {
                         onChange={e => setSearch(e.target.value)}
                         className="w-full pl-9 pr-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 transition-colors"
                         style={{
-                            backgroundColor: 'var(--input-bg)',
-                            borderColor: 'var(--input-border)',
-                            color: 'var(--input-text)',
+                            backgroundColor: 'var(--card)',
+                            borderColor: 'var(--border)',
+                            color: 'var(--foreground)',
                         }}
                     />
                 </div>
@@ -332,10 +332,10 @@ export default function EmailsPage() {
                     className="px-5 py-3 border-b"
                     style={{ backgroundColor: 'var(--border-b border-border bg-surface-subtle)', borderColor: 'var(--rounded-2xl border border-border bg-card-border)' }}
                 >
-                    <h2 className="text-sm font-semibold" style={{ color: 'var(--text-foreground)' }}>
+                    <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
                         {TAB_STYLES[activeTab].label}
                         {meta.total > 0 && (
-                            <span className="ml-2 text-xs font-normal" style={{ color: 'var(--muted-text)' }}>
+                            <span className="ml-2 text-xs font-normal" style={{ color: 'var(--muted-foreground)' }}>
                                 ({meta.total})
                             </span>
                         )}
@@ -373,9 +373,9 @@ export default function EmailsPage() {
                 {!isLoading && meta.totalPages > 1 && (
                     <div
                         className="flex items-center justify-between px-5 py-3 border-t"
-                        style={{ borderColor: 'var(--divider)' }}
+                        style={{ borderColor: 'var(--border)' }}
                     >
-                        <p className="text-sm" style={{ color: 'var(--muted-text)' }}>
+                        <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
                             Strona {meta.page} z {meta.totalPages} ({meta.total} wiadomości)
                         </p>
                         <div className="flex gap-2">
@@ -383,7 +383,7 @@ export default function EmailsPage() {
                                 onClick={() => setPage(p => Math.max(1, p - 1))}
                                 disabled={page === 1}
                                 className="px-3 py-1.5 rounded-lg border text-sm transition-colors disabled:opacity-40 hover:bg-secondary/60"
-                                style={{ borderColor: 'var(--card-border)', color: 'var(--foreground)' }}
+                                style={{ borderColor: 'var(--border)', color: 'var(--foreground)' }}
                             >
                                 Poprzednia
                             </button>
@@ -391,7 +391,7 @@ export default function EmailsPage() {
                                 onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
                                 disabled={page === meta.totalPages}
                                 className="px-3 py-1.5 rounded-lg border text-sm transition-colors disabled:opacity-40 hover:bg-secondary/60"
-                                style={{ borderColor: 'var(--card-border)', color: 'var(--foreground)' }}
+                                style={{ borderColor: 'var(--border)', color: 'var(--foreground)' }}
                             >
                                 Następna
                             </button>

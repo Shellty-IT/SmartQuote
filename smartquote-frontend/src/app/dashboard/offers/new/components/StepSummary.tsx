@@ -65,12 +65,12 @@ export default function StepSummary({
                 </div>
 
                 {details.requireAuditTrail && (
-                    <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 dark:bg-emerald-500/10">
+                    <div className="p-4 rounded-xl border border-emerald-500/30 bg-status-accepted/100/10 dark:bg-status-accepted/100/10">
                         <div className="flex items-center gap-2 mb-1">
                             <svg className="w-4 h-4 text-status-accepted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                             </svg>
-                            <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+                            <span className="text-sm font-medium text-status-accepted dark:text-emerald-300">
                                 Formalne potwierdzenie akceptacji włączone
                             </span>
                         </div>
@@ -81,11 +81,11 @@ export default function StepSummary({
                 )}
 
                 {uniqueVariants.length > 0 && (
-                    <div className="p-4 rounded-xl border border-cyan-500/30 bg-cyan-500/10 dark:bg-cyan-500/10">
-                        <h3 className="text-sm font-medium text-cyan-700 dark:text-cyan-300 mb-1">Warianty oferty</h3>
+                    <div className="p-4 rounded-xl border border-cyan-500/30 bg-primary/100/10 dark:bg-primary/100/10">
+                        <h3 className="text-sm font-medium text-primary dark:text-cyan-300 mb-1">Warianty oferty</h3>
                         <div className="flex flex-wrap gap-2 mt-2">
                             {uniqueVariants.map((v) => (
-                                <span key={v} className="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 text-sm font-medium">
+                                <span key={v} className="px-3 py-1 rounded-full bg-primary/100/20 text-primary dark:text-cyan-300 text-sm font-medium">
                                     {v}
                                 </span>
                             ))}
@@ -112,7 +112,7 @@ export default function StepSummary({
                                                 </span>
                                             )}
                                             {item.variantName.trim() && (
-                                                <span className="text-xs px-1.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 font-medium">
+                                                <span className="text-xs px-1.5 py-0.5 rounded-full bg-primary/100/20 text-primary dark:text-cyan-300 font-medium">
                                                     {item.variantName.trim()}
                                                 </span>
                                             )}

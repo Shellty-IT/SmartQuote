@@ -35,8 +35,8 @@ function ToolbarButton({ onClick, isActive, disabled, title, children }: Toolbar
             title={title}
             className={`p-1.5 rounded-md text-sm font-medium transition-colors ${
                 isActive
-                    ? 'bg-cyan-500/20 text-primary'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700'
+                    ? 'bg-primary/100/20 text-primary'
+                    : 'text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-slate-100 hover:bg-secondary dark:hover:bg-slate-700'
             } ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
         >
             {children}
@@ -171,7 +171,7 @@ export default function RichTextEditor({
             </div>
 
             <div className="rich-editor-resize" onMouseDown={handleResizeMouseDown} title="Przeciągnij, aby zmienić rozmiar">
-                <svg className="w-4 h-3 text-slate-400 dark:text-slate-500" viewBox="0 0 16 10" fill="currentColor">
+                <svg className="w-4 h-3 text-muted-foreground dark:text-muted-foreground" viewBox="0 0 16 10" fill="currentColor">
                     <rect x="0" y="1" width="16" height="1.5" rx="0.75" />
                     <rect x="0" y="4.25" width="16" height="1.5" rx="0.75" />
                     <rect x="0" y="7.5" width="16" height="1.5" rx="0.75" />

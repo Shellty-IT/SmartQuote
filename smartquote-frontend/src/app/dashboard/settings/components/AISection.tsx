@@ -23,7 +23,7 @@ function Toggle({ enabled, onChange, disabled }: ToggleProps) {
             onClick={() => !disabled && onChange(!enabled)}
             disabled={disabled}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${
-                enabled ? 'bg-cyan-500' : 'bg-slate-300'
+                enabled ? 'bg-primary/100' : 'bg-slate-300'
             } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
         >
             <span
@@ -137,8 +137,8 @@ export default function AISection({ settings, onUpdate }: Props) {
                                     : 'tone-hover'
                             } ${isSaving ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                             style={{
-                                borderColor: localSettings.aiTone === tone.id ? 'var(--tone-active-border)' : 'var(--card-border)',
-                                backgroundColor: localSettings.aiTone === tone.id ? 'var(--tone-active-bg)' : 'transparent',
+                                borderColor: localSettings.aiTone === tone.id ? 'var(--primary)' : 'var(--border)',
+                                backgroundColor: localSettings.aiTone === tone.id ? 'var(--accent)' : 'transparent',
                             }}
                         >
                             <div className="flex items-center justify-between mb-2">
@@ -153,8 +153,8 @@ export default function AISection({ settings, onUpdate }: Props) {
                             <div
                                 className="flex items-start gap-2 p-3 rounded-lg border"
                                 style={{
-                                    backgroundColor: 'var(--ai-example-bg)',
-                                    borderColor: 'var(--card-border)',
+                                    backgroundColor: 'var(--surface-subtle)',
+                                    borderColor: 'var(--border)',
                                 }}
                             >
                                 <svg className="w-4 h-4 text-cyan-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -214,14 +214,14 @@ export default function AISection({ settings, onUpdate }: Props) {
             <div
                 className="rounded-2xl border p-6 transition-colors duration-300"
                 style={{
-                    background: `linear-gradient(135deg, var(--ai-info-from), var(--ai-info-to))`,
-                    borderColor: 'var(--ai-card-border)',
+                    background: `linear-gradient(135deg, var(--surface-subtle), var(--surface-subtle))`,
+                    borderColor: 'var(--border)',
                 }}
             >
                 <div className="flex items-start gap-4">
                     <div
                         className="w-12 h-12 rounded-xl shadow-sm flex items-center justify-center flex-shrink-0"
-                        style={{ backgroundColor: 'var(--card-bg)' }}
+                        style={{ backgroundColor: 'var(--card)' }}
                     >
                         <svg className="w-6 h-6 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />

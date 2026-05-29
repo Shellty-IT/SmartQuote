@@ -44,7 +44,7 @@ export default function StepClient({ clients, selectedClient, onSelectClient }: 
                         onClick={() => onSelectClient(client)}
                         className={`flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all ${
                             selectedClient?.id === client.id
-                                ? 'border-cyan-500 bg-cyan-500/10'
+                                ? 'border-cyan-500 bg-primary/100/10'
                                 : 'bg-card border-border border hover:bg-secondary/60'
                         }`}
                     >

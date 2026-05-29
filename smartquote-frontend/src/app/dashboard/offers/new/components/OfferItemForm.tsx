@@ -39,7 +39,7 @@ export default function OfferItemForm({
                         Pozycja {index + 1}
                     </span>
                     {item.variantName.trim() && (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-100 text-cyan-700 font-medium">
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-primary/15 text-primary font-medium">
                             {item.variantName.trim()}
                         </span>
                     )}
@@ -146,7 +146,7 @@ export default function OfferItemForm({
                         type="checkbox"
                         checked={item.isOptional}
                         onChange={(e) => onUpdate(index, 'isOptional', e.target.checked)}
-                        className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-cyan-500"
+                        className="w-4 h-4 rounded border-border text-primary focus:ring-cyan-500"
                     />
                     <div>
                         <span className="text-sm font-medium text-foreground">

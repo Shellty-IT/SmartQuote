@@ -72,7 +72,7 @@ export default function SecuritySection({ onChangePassword }: Props) {
                     <p className="text-sm text-muted-foreground">Zaktualizuj hasło do konta</p>
                 </div>
                 {success && (
-                    <div className="flex items-center gap-2 text-green-600 dark:text-green-400 text-sm">
+                    <div className="flex items-center gap-2 text-status-accepted dark:text-green-400 text-sm">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
@@ -82,7 +82,7 @@ export default function SecuritySection({ onChangePassword }: Props) {
             </div>
 
             {error && (
-                <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-3 text-red-700 dark:text-red-400">
+                <div className="mb-6 p-4 bg-destructive/10 border border-destructive/25 rounded-lg flex items-center gap-3 text-destructive">
                     <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
@@ -164,8 +164,8 @@ export default function SecuritySection({ onChangePassword }: Props) {
                                     key={req}
                                     className={`text-xs px-2 py-1 rounded-full ${
                                         passwordErrors.includes(req)
-                                            ? 'bg-red-100 dark:bg-red-900/30 text-status-rejected'
-                                            : 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                                            ? 'bg-destructive/15 text-status-rejected'
+                                            : 'bg-green-100 dark:bg-green-900/30 text-status-accepted dark:text-green-400'
                                     }`}
                                 >
                   {passwordErrors.includes(req) ? '✗' : '✓'} {req}
@@ -189,7 +189,7 @@ export default function SecuritySection({ onChangePassword }: Props) {
                             onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                             className={`w-full pl-10 pr-12 py-2.5 border rounded-lg border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30/20 focus:border-primary ${
                                 formData.confirmPassword && !passwordsMatch
-                                    ? 'border-red-300 dark:border-red-700'
+                                    ? 'border-destructive/30 dark:border-red-700'
                                     : ''
                             }`}
                             placeholder="••••••••"

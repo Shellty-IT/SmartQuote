@@ -137,7 +137,7 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
             </div>
 
             {error && (
-                <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400">
+                <div className="mb-6 p-4 bg-destructive/10 border border-destructive/25 rounded-lg text-destructive">
                     {error}
                 </div>
             )}

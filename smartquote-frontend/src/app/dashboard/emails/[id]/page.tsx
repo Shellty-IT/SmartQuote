@@ -15,7 +15,7 @@ function EmailStatusBadge({ status }: { status: EmailLogStatus }) {
     const config: Record<EmailLogStatus, { label: string; classes: string }> = {
         SENT: { label: 'Wysłano', classes: 'bg-status-accepted/15 text-status-accepted' },
         FAILED: { label: 'Błąd wysyłki', classes: 'bg-status-rejected/15 text-status-rejected' },
-        DRAFT: { label: 'Szkic', classes: 'bg-slate-500/15 text-slate-600 dark:text-slate-400' },
+        DRAFT: { label: 'Szkic', classes: 'bg-surface-subtle0/15 text-muted-foreground dark:text-muted-foreground' },
     };
     const { label, classes } = config[status];
     return (
@@ -34,7 +34,7 @@ function AttachmentItem({ att }: { att: EmailAttachment }) {
         contract_link: 'Link umowy',
     };
     return (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-subtle/50 border border-border">
             {isPdf ? (
                 <svg className="w-4 h-4 text-status-rejected flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />

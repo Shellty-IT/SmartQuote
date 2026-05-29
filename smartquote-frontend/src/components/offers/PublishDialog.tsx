@@ -165,20 +165,20 @@ export default function PublishDialog({
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
                 <div className="p-6">
                     <div className="flex items-center gap-3 mb-6">
-                        <div className="w-12 h-12 rounded-full bg-cyan-100 flex items-center justify-center flex-shrink-0">
+                        <div className="w-12 h-12 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0">
                             <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                             </svg>
                         </div>
                         <div>
-                            <h2 id="publish-dialog-title" className="text-xl font-bold text-slate-900">
+                            <h2 id="publish-dialog-title" className="text-xl font-bold text-foreground">
                                 Interaktywny link do oferty
                             </h2>
-                            <p className="text-sm text-slate-500">{offerNumber}</p>
+                            <p className="text-sm text-muted-foreground">{offerNumber}</p>
                         </div>
                         <button
                             onClick={handleClose}
-                            className="ml-auto p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                            className="ml-auto p-2 text-muted-foreground hover:text-muted-foreground hover:bg-secondary rounded-lg transition-colors"
                             aria-label="Zamknij"
                         >
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -188,21 +188,21 @@ export default function PublishDialog({
                     </div>
 
                     {displayError && (
-                        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700" role="alert">
+                        <div className="mb-4 p-3 bg-destructive/10 border border-destructive/25 rounded-xl text-sm text-destructive" role="alert">
                             {displayError}
                         </div>
                     )}
 
                     {!wasPublished ? (
                         <div>
-                            <div className="bg-slate-50 rounded-xl p-4 mb-6">
-                                <p className="text-sm text-slate-700 leading-relaxed">
+                            <div className="bg-surface-subtle rounded-xl p-4 mb-6">
+                                <p className="text-sm text-foreground leading-relaxed">
                                     Wygeneruj interaktywny link, który możesz wysłać klientowi.
                                     Klient będzie mógł:
                                 </p>
                                 <ul className="mt-3 space-y-2">
                                     {['Przeglądać pozycje oferty', 'Wybierać opcjonalne pozycje i zmieniać ilości', 'Zadawać pytania przez komentarze', 'Zaakceptować lub odrzucić ofertę'].map((text) => (
-                                        <li key={text} className="flex items-center gap-2 text-sm text-slate-600">
+                                        <li key={text} className="flex items-center gap-2 text-sm text-muted-foreground">
                                             <svg className="w-4 h-4 text-primary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                             </svg>
@@ -213,11 +213,11 @@ export default function PublishDialog({
                             </div>
 
                             {validUntil && (
-                                <div className={`flex items-center gap-2 p-3 rounded-xl mb-4 ${isExpired ? 'bg-red-50 border border-red-200' : 'bg-blue-50 border border-blue-200'}`}>
+                                <div className={`flex items-center gap-2 p-3 rounded-xl mb-4 ${isExpired ? 'bg-destructive/10 border border-destructive/25' : 'bg-[color-mix(in_oklab,var(--status-open)_10%,transparent)] border border-[color-mix(in_oklab,var(--status-open)_25%,transparent)]'}`}>
                                     <svg className={`w-5 h-5 flex-shrink-0 ${isExpired ? 'text-status-rejected' : 'text-blue-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    <p className={`text-sm ${isExpired ? 'text-red-700' : 'text-blue-700'}`}>
+                                    <p className={`text-sm ${isExpired ? 'text-destructive' : 'text-status-open'}`}>
                                         {isExpired
                                             ? 'Uwaga: Oferta wygasła. Klient zobaczy informację o wygaśnięciu.'
                                             : `Link będzie aktywny do ${new Date(validUntil).toLocaleDateString('pl-PL', { day: '2-digit', month: 'long', year: 'numeric' })}`
@@ -226,33 +226,33 @@ export default function PublishDialog({
                                 </div>
                             )}
 
-                            <div className="mb-6 p-4 rounded-xl border border-slate-200 bg-white">
+                            <div className="mb-6 p-4 rounded-xl border border-border bg-white">
                                 <label className={`flex items-start gap-3 ${canSendEmail ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}>
                                     <input
                                         type="checkbox"
                                         checked={sendEmail}
                                         onChange={(e) => setSendEmail(e.target.checked)}
                                         disabled={!canSendEmail || isLoadingSmtp}
-                                        className="mt-0.5 w-4 h-4 text-primary border-slate-300 rounded focus:ring-ring/30"
+                                        className="mt-0.5 w-4 h-4 text-primary border-border rounded focus:ring-ring/30"
                                     />
                                     <div>
-                                        <span className="text-sm font-medium text-slate-900">
+                                        <span className="text-sm font-medium text-foreground">
                                             Wyślij link mailem do klienta
                                         </span>
                                         {clientEmail && canSendEmail && (
-                                            <p className="text-xs text-slate-500 mt-0.5">
+                                            <p className="text-xs text-muted-foreground mt-0.5">
                                                 Na adres: {clientEmail}
                                             </p>
                                         )}
                                         {!clientEmail && (
-                                            <p className="text-xs text-amber-600 mt-0.5">
+                                            <p className="text-xs text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)] mt-0.5">
                                                 Klient nie ma podanego adresu email
                                             </p>
                                         )}
                                         {clientEmail && !smtpReady && !isLoadingSmtp && (
-                                            <p className="text-xs text-amber-600 mt-0.5">
+                                            <p className="text-xs text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)] mt-0.5">
                                                 Skonfiguruj skrzynkę pocztową w{' '}
-                                                <Link href="/dashboard/settings" className="underline hover:text-amber-700">ustawieniach</Link>
+                                                <Link href="/dashboard/settings" className="underline hover:text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]">ustawieniach</Link>
                                             </p>
                                         )}
                                     </div>
@@ -262,14 +262,14 @@ export default function PublishDialog({
                             <div className="flex flex-col-reverse sm:flex-row gap-3">
                                 <button
                                     onClick={handleClose}
-                                    className="flex-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-colors"
+                                    className="flex-1 px-4 py-3 rounded-xl border border-border text-foreground font-medium hover:bg-surface-subtle transition-colors"
                                 >
                                     Anuluj
                                 </button>
                                 <button
                                     onClick={handlePublish}
                                     disabled={isPublishing || isSending}
-                                    className="flex-1 px-4 py-3 rounded-xl bg-cyan-500 text-white font-medium hover:bg-cyan-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                    className="flex-1 px-4 py-3 rounded-xl bg-primary/100 text-white font-medium hover:bg-cyan-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                                 >
                                     {isPublishing || isSending ? (
                                         <>
@@ -293,16 +293,16 @@ export default function PublishDialog({
                     ) : (
                         <div>
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                <label className="block text-sm font-medium text-foreground mb-2">
                                     Link do oferty
                                 </label>
                                 <div className="flex gap-2">
-                                    <div className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 break-all select-all">
+                                    <div className="flex-1 px-4 py-3 bg-surface-subtle border border-border rounded-xl text-sm text-foreground break-all select-all">
                                         {publicUrl}
                                     </div>
                                     <button
                                         onClick={handleCopy}
-                                        className="px-4 py-3 rounded-xl font-medium transition-colors flex items-center gap-2 flex-shrink-0 bg-cyan-500 text-white hover:bg-cyan-600"
+                                        className="px-4 py-3 rounded-xl font-medium transition-colors flex items-center gap-2 flex-shrink-0 bg-primary/100 text-white hover:bg-cyan-600"
                                     >
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
@@ -313,12 +313,12 @@ export default function PublishDialog({
                             </div>
 
                             {emailSent && emailSentTo && (
-                                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-4">
+                                <div className="bg-status-accepted/10 border border-status-accepted/25 rounded-xl p-4 mb-4">
                                     <div className="flex items-start gap-2">
                                         <svg className="w-5 h-5 text-status-accepted flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-                                        <p className="text-sm text-emerald-700">
+                                        <p className="text-sm text-status-accepted">
                                             Email z linkiem został wysłany na adres <strong>{emailSentTo}</strong>
                                         </p>
                                     </div>
@@ -329,7 +329,7 @@ export default function PublishDialog({
                                 <button
                                     onClick={handleSendEmail}
                                     disabled={isSending}
-                                    className="w-full mb-4 px-4 py-3 rounded-xl border border-cyan-200 bg-cyan-50 text-cyan-700 font-medium hover:bg-cyan-100 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                    className="w-full mb-4 px-4 py-3 rounded-xl border border-primary/25 bg-primary/10 text-primary font-medium hover:bg-primary/15 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                                 >
                                     {isSending ? (
                                         <>
@@ -351,8 +351,8 @@ export default function PublishDialog({
                             )}
 
                             {!emailSent && !canSendEmail && (
-                                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4">
-                                    <p className="text-sm text-slate-500">
+                                <div className="bg-surface-subtle border border-border rounded-xl p-4 mb-4">
+                                    <p className="text-sm text-muted-foreground">
                                         {!clientEmail
                                             ? 'Klient nie ma podanego adresu email — skopiuj link i wyślij ręcznie.'
                                             : 'Skonfiguruj skrzynkę pocztową w ustawieniach, aby wysyłać oferty mailem.'
@@ -365,7 +365,7 @@ export default function PublishDialog({
                                 <button
                                     onClick={handleUnpublish}
                                     disabled={isUnpublishing}
-                                    className="px-4 py-3 rounded-xl border border-red-200 text-status-rejected font-medium hover:bg-red-50 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                    className="px-4 py-3 rounded-xl border border-destructive/25 text-status-rejected font-medium hover:bg-destructive/10 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                                 >
                                     {isUnpublishing ? (
                                         <>

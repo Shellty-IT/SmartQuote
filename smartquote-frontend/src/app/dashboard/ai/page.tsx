@@ -54,11 +54,11 @@ export default function AIAssistantPage() {
         <div className="h-[calc(100vh-120px)] flex flex-col lg:flex-row gap-4 lg:gap-6 p-4 sm:p-6 lg:p-8">
             <div
                 className="flex-1 flex flex-col rounded-2xl border overflow-hidden"
-                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--divider)' }}
+                style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
             >
                 <div
                     className="flex items-center justify-between px-4 sm:px-6 py-4 border-b"
-                    style={{ borderColor: 'var(--divider)' }}
+                    style={{ borderColor: 'var(--border)' }}
                 >
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br bg-gradient-primary flex items-center justify-center shadow-lg shadow-cyan-500/20">
@@ -80,7 +80,7 @@ export default function AIAssistantPage() {
                             }}
                             onMouseLeave={(e) => {
                                 e.currentTarget.style.backgroundColor = 'transparent';
-                                e.currentTarget.style.color = 'var(--muted-text)';
+                                e.currentTarget.style.color = 'var(--muted-foreground)';
                             }}
                         >
                             🗑️ Wyczyść
@@ -90,7 +90,7 @@ export default function AIAssistantPage() {
 
                 <div
                     className="flex-1 overflow-y-auto p-4 sm:p-6"
-                    style={{ backgroundColor: 'var(--section-bg)' }}
+                    style={{ backgroundColor: 'var(--surface-subtle)' }}
                 >
                     {messages.length === 0 ? (
                         <div className="h-full flex flex-col items-center justify-center text-center">
@@ -122,7 +122,7 @@ export default function AIAssistantPage() {
 
                 <div
                     className="px-4 sm:px-6 py-4 border-t"
-                    style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--divider)' }}
+                    style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
                 >
                     <form onSubmit={handleSubmit} className="flex gap-3">
                         <div className="flex-1">
@@ -133,9 +133,9 @@ export default function AIAssistantPage() {
                                 placeholder="Napisz wiadomość... (Enter aby wysłać, Shift+Enter nowa linia)"
                                 className="w-full px-4 py-3 rounded-xl border resize-none transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30/20"
                                 style={{
-                                    backgroundColor: 'var(--input-bg)',
-                                    borderColor: 'var(--divider)',
-                                    color: 'var(--input-text)',
+                                    backgroundColor: 'var(--card)',
+                                    borderColor: 'var(--border)',
+                                    color: 'var(--foreground)',
                                 }}
                                 rows={1}
                                 disabled={isLoading}
@@ -165,7 +165,7 @@ export default function AIAssistantPage() {
                 {stats && (
                     <div
                         className="rounded-2xl border p-4"
-                        style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--divider)' }}
+                        style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
                     >
                         <div className="flex items-center gap-2 mb-4">
                             <span className="text-lg">📊</span>
@@ -174,28 +174,28 @@ export default function AIAssistantPage() {
                         <div className="grid grid-cols-2 gap-3">
                             <div
                                 className="text-center p-3 rounded-xl"
-                                style={{ backgroundColor: 'var(--section-bg)' }}
+                                style={{ backgroundColor: 'var(--surface-subtle)' }}
                             >
                                 <div className="text-2xl font-bold text-primary">{stats.totalClients}</div>
                                 <div className="text-xs text-muted-foreground">Klienci</div>
                             </div>
                             <div
                                 className="text-center p-3 rounded-xl"
-                                style={{ backgroundColor: 'var(--section-bg)' }}
+                                style={{ backgroundColor: 'var(--surface-subtle)' }}
                             >
                                 <div className="text-2xl font-bold text-status-accepted">{stats.activeOffers}</div>
                                 <div className="text-xs text-muted-foreground">Aktywne oferty</div>
                             </div>
                             <div
                                 className="text-center p-3 rounded-xl"
-                                style={{ backgroundColor: 'var(--section-bg)' }}
+                                style={{ backgroundColor: 'var(--surface-subtle)' }}
                             >
                                 <div className="text-2xl font-bold text-amber-500">{stats.pendingFollowUps}</div>
                                 <div className="text-xs text-muted-foreground">Zaległe zadania</div>
                             </div>
                             <div
                                 className="text-center p-3 rounded-xl"
-                                style={{ backgroundColor: 'var(--section-bg)' }}
+                                style={{ backgroundColor: 'var(--surface-subtle)' }}
                             >
                                 <div className="text-xl font-bold text-violet-500">
                                     {(stats.monthlyRevenue / 1000).toFixed(0)}k
@@ -209,7 +209,7 @@ export default function AIAssistantPage() {
                 {suggestions.length > 0 && (
                     <div
                         className="rounded-2xl border p-4 flex-1 overflow-y-auto"
-                        style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--divider)' }}
+                        style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
                     >
                         <h3 className="font-semibold text-foreground mb-4">Inteligentne sugestie</h3>
                         <div className="space-y-3">
@@ -226,7 +226,7 @@ export default function AIAssistantPage() {
 
                 <div
                     className="rounded-2xl border p-4"
-                    style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--divider)' }}
+                    style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
                 >
                     <h3 className="font-semibold text-foreground mb-3">Wskazówki</h3>
                     <ul className="text-xs text-muted-foreground space-y-2.5">

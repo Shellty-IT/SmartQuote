@@ -25,7 +25,7 @@ interface AuditTrailCardProps {
 export function AuditTrailCard({ auditLog, requireAuditTrail, onCopyHash }: AuditTrailCardProps) {
     if (auditLog) {
         return (
-            <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800 overflow-hidden">
+            <div className="rounded-2xl border border-status-accepted/25 overflow-hidden">
                 <div className="bg-gradient-to-r from-emerald-500 to-cyan-500 px-5 py-3.5">
                     <div className="flex items-center gap-2.5">
                         <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -37,8 +37,8 @@ export function AuditTrailCard({ auditLog, requireAuditTrail, onCopyHash }: Audi
                 </div>
 
                 <div className="p-5 bg-card border-border space-y-4">
-                    <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
-                        <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center flex-shrink-0">
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-status-accepted/10 dark:bg-emerald-950/30 border border-status-accepted/25">
+                        <div className="w-10 h-10 rounded-full bg-status-accepted/15 dark:bg-emerald-900/50 flex items-center justify-center flex-shrink-0">
                             <svg className="w-5 h-5 text-status-accepted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                             </svg>
@@ -60,7 +60,7 @@ export function AuditTrailCard({ auditLog, requireAuditTrail, onCopyHash }: Audi
                         {auditLog.selectedVariant && (
                             <div className="flex justify-between items-center">
                                 <span className="text-xs text-muted-foreground">Wybrany wariant</span>
-                                <span className="text-xs px-2.5 py-1 rounded-full bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300 font-medium">
+                                <span className="text-xs px-2.5 py-1 rounded-full bg-primary/15 dark:bg-cyan-900/40 text-primary dark:text-cyan-300 font-medium">
                   {auditLog.selectedVariant}
                 </span>
                             </div>
@@ -121,8 +121,8 @@ export function AuditTrailCard({ auditLog, requireAuditTrail, onCopyHash }: Audi
 
     if (requireAuditTrail) {
         return (
-            <div className="rounded-2xl border border-amber-200 dark:border-amber-800 overflow-hidden">
-                <div className="p-4 bg-amber-50 dark:bg-amber-950/30">
+            <div className="rounded-2xl border border-[oklch(0.72_0.16_60)/25%] dark:border-amber-800 overflow-hidden">
+                <div className="p-4 bg-[oklch(0.72_0.16_60)/10%] dark:bg-amber-950/30">
                     <div className="flex items-center gap-2.5">
                         <svg className="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />

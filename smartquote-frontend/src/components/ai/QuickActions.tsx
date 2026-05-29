@@ -10,7 +10,7 @@ const quickActions = [
         icon: '📄',
         label: 'Stwórz ofertę',
         prompt: 'Pomóż mi stworzyć nową ofertę handlową',
-        color: 'bg-blue-500',
+        color: 'bg-[color-mix(in_oklab,var(--status-open)_10%,transparent)]0',
     },
     {
         icon: '✉️',

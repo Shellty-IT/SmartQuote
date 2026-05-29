@@ -36,7 +36,7 @@ export default function StepItems({
             </div>
 
             {uniqueVariants.length > 0 && (
-                <div className="mb-4 p-3 bg-gradient-to-r from-cyan-50 to-blue-50 border border-cyan-200 rounded-xl">
+                <div className="mb-4 p-3 bg-gradient-to-r from-cyan-50 to-blue-50 border border-primary/25 rounded-xl">
                     <div className="flex items-center gap-2 mb-1">
                         <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />

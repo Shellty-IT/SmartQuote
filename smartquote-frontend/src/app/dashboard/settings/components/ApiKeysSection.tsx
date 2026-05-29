@@ -110,7 +110,7 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                                 <div className="flex items-center gap-4">
                                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
                                         apiKey.isActive
-                                            ? 'bg-cyan-100 dark:bg-cyan-900/30 text-primary'
+                                            ? 'bg-primary/15 text-primary'
                                             : 'bg-slate-200 dark:bg-slate-700 text-muted-foreground'
                                     }`}>
                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -164,7 +164,7 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                                         onClick={() => onToggle(apiKey.id)}
                                         className={`p-2 rounded-lg transition-colors ${
                                             apiKey.isActive
-                                                ? 'text-primary hover:bg-cyan-50 dark:hover:bg-cyan-900/30'
+                                                ? 'text-primary hover:bg-primary/10 dark:hover:bg-cyan-900/30'
                                                 : 'text-muted-foreground hover:bg-secondary/60'
                                         }`}
                                         title={apiKey.isActive ? 'Wyłącz' : 'Włącz'}
@@ -184,7 +184,7 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                                             setSelectedKeyId(apiKey.id);
                                             setIsDeleteModalOpen(true);
                                         }}
-                                        className="p-2 rounded-lg text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                                        className="p-2 rounded-lg text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-destructive/10 dark:hover:bg-red-900/30 transition-colors"
                                         title="Usuń"
                                     >
                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -205,7 +205,7 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                     </svg>
                     <div>
                         <h3 className="font-medium text-amber-800 dark:text-amber-300 mb-1">Bezpieczeństwo kluczy API</h3>
-                        <ul className="text-sm text-amber-700 dark:text-amber-400 space-y-1">
+                        <ul className="text-sm text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)] space-y-1">
                             <li>• Klucz jest pokazywany tylko raz przy tworzeniu</li>
                             <li>• Nie udostępniaj kluczy osobom trzecim</li>
                             <li>• Regularnie rotuj klucze dla bezpieczeństwa</li>
@@ -222,8 +222,8 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
             >
                 {newKeyResult ? (
                     <div className="space-y-4">
-                        <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg">
-                            <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 mb-2">
+                        <div className="p-4 bg-status-accepted/10 border border-status-accepted/25 rounded-lg">
+                            <div className="flex items-center gap-2 text-status-accepted mb-2">
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                 </svg>
@@ -307,11 +307,11 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                 title="Usuń klucz API"
             >
                 <div className="space-y-4">
-                    <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <div className="flex items-center gap-3 p-4 bg-destructive/10 border border-destructive/25 rounded-lg">
                         <svg className="w-5 h-5 text-red-500 dark:text-red-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
                         </svg>
-                        <p className="text-sm text-red-700 dark:text-red-400">
+                        <p className="text-sm text-destructive">
                             Usunięcie klucza jest nieodwracalne. Wszystkie integracje używające tego klucza przestaną działać.
                         </p>
                     </div>

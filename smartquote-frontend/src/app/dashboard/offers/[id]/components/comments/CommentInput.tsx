@@ -30,7 +30,7 @@ export function CommentInput({ value, onChange, onSubmit, isSending }: CommentIn
             <button
                 onClick={onSubmit}
                 disabled={!value.trim() || isSending}
-                className="self-end px-4 py-3 rounded-xl bg-cyan-500 text-white hover:bg-cyan-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                className="self-end px-4 py-3 rounded-xl bg-primary/100 text-white hover:bg-cyan-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
             >
                 {isSending ? (
                     <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">

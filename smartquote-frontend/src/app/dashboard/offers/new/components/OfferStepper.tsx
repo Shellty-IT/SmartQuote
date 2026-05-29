@@ -33,7 +33,7 @@ export default function OfferStepper({ currentStep, onStepClick }: OfferStepperP
                                         isActive
                                             ? 'bg-gradient-to-br bg-gradient-primary text-white shadow-lg shadow-cyan-500/30'
                                             : isCompleted
-                                                ? 'bg-emerald-500 text-white'
+                                                ? 'bg-status-accepted/100 text-white'
                                                 : 'bg-card border-border border text-muted-foreground'
                                     }`}
                                 >

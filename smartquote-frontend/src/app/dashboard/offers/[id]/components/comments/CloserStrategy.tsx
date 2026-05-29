@@ -40,7 +40,7 @@ export function CloserStrategy({
                     {strategy.riskLevel && (
                         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                             strategy.riskLevel === 'low' ? 'bg-status-accepted/10 text-status-accepted' :
-                                strategy.riskLevel === 'medium' ? 'bg-amber-500/10 text-amber-600' :
+                                strategy.riskLevel === 'medium' ? 'bg-[oklch(0.72_0.16_60)/10%]0/10 text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]' :
                                     'bg-destructive/10 text-destructive'
                         }`}>
               Ryzyko: {strategy.riskLevel === 'low' ? 'niskie' : strategy.riskLevel === 'medium' ? 'średnie' : 'wysokie'}
@@ -109,7 +109,7 @@ export function CloserStrategy({
             </div>
 
             {error && (
-                <div className="p-3 rounded-lg bg-red-500/10 text-status-rejected text-sm mb-3">{error}</div>
+                <div className="p-3 rounded-lg bg-destructive/100/10 text-status-rejected text-sm mb-3">{error}</div>
             )}
 
             {closingStrategy && !isLoading && (
@@ -125,7 +125,7 @@ export function CloserStrategy({
                         closingStrategy.aggressive,
                         '🛡️',
                         'border-red-500/25',
-                        'bg-red-500/5'
+                        'bg-destructive/100/5'
                     )}
 
                     {renderStrategyCard(
@@ -133,15 +133,15 @@ export function CloserStrategy({
                         closingStrategy.partnership,
                         '🤝',
                         'border-primary/25',
-                        'bg-cyan-500/5'
+                        'bg-primary/100/5'
                     )}
 
                     {renderStrategyCard(
                         'quickClose',
                         closingStrategy.quickClose,
                         '⚡',
-                        'border-emerald-500/25',
-                        'bg-emerald-500/5'
+                        'border-status-accepted/25',
+                        'bg-status-accepted/100/5'
                     )}
                 </div>
             )}

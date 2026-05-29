@@ -35,7 +35,7 @@ export function CommentsList({ comments }: CommentsListProps) {
                 >
                     <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                         comment.author === 'SELLER'
-                            ? 'bg-cyan-500 text-white rounded-br-sm'
+                            ? 'bg-primary/100 text-white rounded-br-sm'
                             : 'bg-surface-subtle text-foreground rounded-bl-sm'
                     }`}>
                         <p className="text-sm whitespace-pre-wrap">{comment.content}</p>

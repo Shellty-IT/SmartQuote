@@ -74,7 +74,7 @@ export default function EditClientPage({ params }: { params: Promise<{ id: strin
             <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
                 <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                     <div className="text-center py-12">
-                        <p className="text-red-600 mb-4">{clientError || 'Nie znaleziono klienta'}</p>
+                        <p className="text-destructive mb-4">{clientError || 'Nie znaleziono klienta'}</p>
                         <Button onClick={() => router.push('/dashboard/clients')}>
                             Wróć do listy
                         </Button>
@@ -146,7 +146,7 @@ export default function EditClientPage({ params }: { params: Promise<{ id: strin
                                 name="isActive"
                                 checked={formData.isActive ?? true}
                                 onChange={handleChange}
-                                className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-cyan-500"
+                                className="w-4 h-4 rounded border-border text-primary focus:ring-cyan-500"
                             />
                             <label htmlFor="isActive" className="text-sm text-muted-foreground">
                                 Klient aktywny

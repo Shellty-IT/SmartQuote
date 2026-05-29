@@ -49,7 +49,7 @@ export function ObserverSection({ observerInsight, isLoading, error, onLoadObser
             </div>
 
             {error && (
-                <div className="p-3 rounded-lg bg-red-500/10 text-status-rejected text-sm mb-4">{error}</div>
+                <div className="p-3 rounded-lg bg-destructive/100/10 text-status-rejected text-sm mb-4">{error}</div>
             )}
 
             {!observerInsight && !isLoading && !error && (
@@ -118,7 +118,7 @@ export function ObserverSection({ observerInsight, isLoading, error, onLoadObser
                                 <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Obawy klienta</h4>
                                 <div className="flex flex-wrap gap-1.5">
                                     {observerInsight.concerns.map((concern, idx) => (
-                                        <span key={idx} className="text-xs px-2 py-1 rounded-full bg-amber-500/15 text-[oklch(0.55_0.14_60)] border border-amber-500/25">
+                                        <span key={idx} className="text-xs px-2 py-1 rounded-full bg-[oklch(0.72_0.16_60)/10%]0/15 text-[oklch(0.55_0.14_60)] border border-amber-500/25">
                       {concern}
                     </span>
                                     ))}

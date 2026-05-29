@@ -28,7 +28,7 @@ export function ClientSelectionCard({ items }: ClientSelectionCardProps) {
                     <div
                         key={index}
                         className={`flex justify-between items-center py-2 px-3 rounded-lg ${
-                            item.isSelected ? 'bg-emerald-500/10' : 'bg-surface-subtle'
+                            item.isSelected ? 'bg-status-accepted/100/10' : 'bg-surface-subtle'
                         }`}
                     >
                         <div className="flex items-center gap-2">

@@ -117,7 +117,7 @@ export function KsefMasterPreview({ isOpen, onClose, offerId, onSent }: KsefMast
             <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-card border-border rounded-xl shadow-2xl">
                 <div className="sticky top-0 z-10 bg-card border-border border-b border-border px-6 py-4 flex items-center justify-between rounded-t-xl">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-amber-500/15 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-lg bg-[oklch(0.72_0.16_60)/10%]0/15 flex items-center justify-center">
                             <svg className="w-5 h-5 text-[oklch(0.55_0.14_60)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
@@ -155,7 +155,7 @@ export function KsefMasterPreview({ isOpen, onClose, offerId, onSent }: KsefMast
                     )}
 
                     {previewError && (
-                        <div className="rounded-lg bg-red-500/10 border border-red-500/25 p-4 text-center">
+                        <div className="rounded-lg bg-destructive/100/10 border border-red-500/25 p-4 text-center">
                             <p className="text-status-rejected text-sm">{previewError}</p>
                             <button
                                 onClick={loadPreview}
@@ -307,16 +307,16 @@ export function KsefMasterPreview({ isOpen, onClose, offerId, onSent }: KsefMast
                                 </div>
                             </div>
 
-                            <div className="rounded-lg bg-amber-500/10 border border-amber-500/25 p-4">
+                            <div className="rounded-lg bg-[oklch(0.72_0.16_60)/10%]0/10 border border-amber-500/25 p-4">
                                 <div className="flex gap-3">
                                     <svg className="w-5 h-5 text-[oklch(0.55_0.14_60)] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     <div>
-                                        <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                                        <p className="text-sm font-medium text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)] dark:text-amber-300">
                                             Dane zostaną przesłane do poczekalni KSeF Master
                                         </p>
-                                        <p className="text-xs text-amber-600/80 dark:text-amber-400/80 mt-1">
+                                        <p className="text-xs text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]/80 dark:text-amber-400/80 mt-1">
                                             Faktura nie zostanie wystawiona automatycznie — wymaga zatwierdzenia w KSeF Master.
                                         </p>
                                     </div>

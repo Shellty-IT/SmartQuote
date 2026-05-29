@@ -11,9 +11,9 @@ import { FollowUp, FollowUpStatus, FollowUpType, Priority } from '@/types';
 import { useToast } from '@/contexts/ToastContext';
 
 const statusConfig: Record<FollowUpStatus, { label: string; color: string; bgColor: string }> = {
-    PENDING: { label: 'Oczekujące', color: 'text-amber-600', bgColor: 'bg-amber-500/15' },
+    PENDING: { label: 'Oczekujące', color: 'text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]', bgColor: 'bg-[oklch(0.72_0.16_60)/10%]0/15' },
     COMPLETED: { label: 'Wykonane', color: 'text-status-accepted', bgColor: 'bg-status-accepted/15' },
-    CANCELLED: { label: 'Anulowane', color: 'text-slate-500', bgColor: 'bg-slate-500/15' },
+    CANCELLED: { label: 'Anulowane', color: 'text-muted-foreground', bgColor: 'bg-surface-subtle0/15' },
     OVERDUE: { label: 'Zaległe', color: 'text-status-rejected', bgColor: 'bg-status-rejected/15' },
 };
 
@@ -27,9 +27,9 @@ const typeConfig: Record<FollowUpType, { label: string; icon: string }> = {
 };
 
 const priorityConfig: Record<Priority, { label: string; color: string; bgColor: string }> = {
-    LOW: { label: 'Niski', color: 'text-slate-500', bgColor: 'bg-slate-500/15' },
-    MEDIUM: { label: 'Średni', color: 'text-blue-600', bgColor: 'bg-blue-500/15' },
-    HIGH: { label: 'Wysoki', color: 'text-orange-600', bgColor: 'bg-orange-500/15' },
+    LOW: { label: 'Niski', color: 'text-muted-foreground', bgColor: 'bg-surface-subtle0/15' },
+    MEDIUM: { label: 'Średni', color: 'text-status-open', bgColor: 'bg-[color-mix(in_oklab,var(--status-open)_10%,transparent)]0/15' },
+    HIGH: { label: 'Wysoki', color: 'text-[oklch(0.55_0.16_45)] dark:text-[oklch(0.78_0.14_45)]', bgColor: 'bg-orange-500/15' },
     URGENT: { label: 'Pilne', color: 'text-status-rejected', bgColor: 'bg-status-rejected/15' },
 };
 
@@ -131,7 +131,7 @@ export default function FollowUpsPage() {
                             </div>
                             <div
                                 className="w-10 h-10 rounded-lg flex items-center justify-center"
-                                style={{ backgroundColor: 'var(--tone-active-bg)' }}
+                                style={{ backgroundColor: 'var(--accent)' }}
                             >
                                 <span className="text-xl">⏳</span>
                             </div>
@@ -199,9 +199,9 @@ export default function FollowUpsPage() {
                     <select
                         className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30/20"
                         style={{
-                            backgroundColor: 'var(--input-bg)',
-                            borderColor: 'var(--divider)',
-                            color: 'var(--input-text)',
+                            backgroundColor: 'var(--card)',
+                            borderColor: 'var(--border)',
+                            color: 'var(--foreground)',
                         }}
                         value={filters.status || ''}
                         onChange={(e) => setFilters({ status: e.target.value, page: 1 })}
@@ -215,9 +215,9 @@ export default function FollowUpsPage() {
                     <select
                         className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30/20"
                         style={{
-                            backgroundColor: 'var(--input-bg)',
-                            borderColor: 'var(--divider)',
-                            color: 'var(--input-text)',
+                            backgroundColor: 'var(--card)',
+                            borderColor: 'var(--border)',
+                            color: 'var(--foreground)',
                         }}
                         value={filters.type || ''}
                         onChange={(e) => setFilters({ type: e.target.value, page: 1 })}
@@ -233,9 +233,9 @@ export default function FollowUpsPage() {
                     <select
                         className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30/20"
                         style={{
-                            backgroundColor: 'var(--input-bg)',
-                            borderColor: 'var(--divider)',
-                            color: 'var(--input-text)',
+                            backgroundColor: 'var(--card)',
+                            borderColor: 'var(--border)',
+                            color: 'var(--foreground)',
                         }}
                         value={filters.priority || ''}
                         onChange={(e) => setFilters({ priority: e.target.value, page: 1 })}
@@ -249,8 +249,8 @@ export default function FollowUpsPage() {
                     <label
                         className="flex items-center gap-2 px-4 py-2.5 border rounded-lg cursor-pointer transition-colors"
                         style={{
-                            backgroundColor: 'var(--card-bg)',
-                            borderColor: 'var(--divider)',
+                            backgroundColor: 'var(--card)',
+                            borderColor: 'var(--border)',
                         }}
                     >
                         <input
@@ -285,7 +285,7 @@ export default function FollowUpsPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                            <tr className="border-b" style={{ borderColor: 'var(--divider)', backgroundColor: 'var(--section-bg)' }}>
+                            <tr className="border-b" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface-subtle)' }}>
                                 <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Follow-up</th>
                                 <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground hidden md:table-cell">Powiązanie</th>
                                 <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground hidden sm:table-cell">Typ</th>
@@ -335,7 +335,7 @@ export default function FollowUpsPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                            <tr className="border-b" style={{ borderColor: 'var(--divider)', backgroundColor: 'var(--section-bg)' }}>
+                            <tr className="border-b" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface-subtle)' }}>
                                 <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Follow-up</th>
                                 <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground hidden md:table-cell">Powiązanie</th>
                                 <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground hidden sm:table-cell">Typ</th>
@@ -359,7 +359,7 @@ export default function FollowUpsPage() {
                                             overdue ? 'border-l-4 border-l-red-500' : ''
                                         }`}
                                         style={{
-                                            borderBottomColor: 'var(--divider)',
+                                            borderBottomColor: 'var(--border)',
                                             backgroundColor: overdue ? 'rgba(239, 68, 68, 0.04)' : undefined,
                                         }}
                                         onClick={() => router.push(`/dashboard/followups/${followUp.id}`)}
@@ -433,7 +433,7 @@ export default function FollowUpsPage() {
                                                         }}
                                                         onMouseLeave={(e) => {
                                                             e.currentTarget.style.backgroundColor = 'transparent';
-                                                            e.currentTarget.style.color = 'var(--muted-text)';
+                                                            e.currentTarget.style.color = 'var(--muted-foreground)';
                                                         }}
                                                         title="Oznacz jako wykonane"
                                                     >
@@ -454,12 +454,12 @@ export default function FollowUpsPage() {
                                                     className="p-2 text-muted-foreground rounded-lg transition-colors"
                                                     style={{ backgroundColor: 'transparent' }}
                                                     onMouseEnter={(e) => {
-                                                        e.currentTarget.style.backgroundColor = 'var(--tone-active-bg)';
-                                                        e.currentTarget.style.color = 'var(--accent-gradient-from)';
+                                                        e.currentTarget.style.backgroundColor = 'var(--accent)';
+                                                        e.currentTarget.style.color = 'var(--primary)';
                                                     }}
                                                     onMouseLeave={(e) => {
                                                         e.currentTarget.style.backgroundColor = 'transparent';
-                                                        e.currentTarget.style.color = 'var(--muted-text)';
+                                                        e.currentTarget.style.color = 'var(--muted-foreground)';
                                                     }}
                                                 >
                                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -476,7 +476,7 @@ export default function FollowUpsPage() {
                                                     }}
                                                     onMouseLeave={(e) => {
                                                         e.currentTarget.style.backgroundColor = 'transparent';
-                                                        e.currentTarget.style.color = 'var(--muted-text)';
+                                                        e.currentTarget.style.color = 'var(--muted-foreground)';
                                                     }}
                                                 >
                                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -493,7 +493,7 @@ export default function FollowUpsPage() {
                     </div>
 
                     {totalPages > 1 && (
-                        <div className="px-6 py-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4" style={{ borderColor: 'var(--divider)' }}>
+                        <div className="px-6 py-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4" style={{ borderColor: 'var(--border)' }}>
                             <p className="text-sm text-muted-foreground">
                                 Pokazano {followUps.length} z {total} follow-upów
                             </p>

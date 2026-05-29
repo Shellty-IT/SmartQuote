@@ -50,7 +50,7 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
             <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
                 <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                     <div className="text-center py-12">
-                        <p className="text-red-600 mb-4">{offerError || 'Nie znaleziono oferty'}</p>
+                        <p className="text-destructive mb-4">{offerError || 'Nie znaleziono oferty'}</p>
                         <Button onClick={() => router.push('/dashboard/offers')}>
                             Wróć do listy
                         </Button>

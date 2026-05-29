@@ -13,14 +13,14 @@ type FilterTab = 'all' | 'unread' | 'read';
 const PER_PAGE = 20;
 
 const typeConfig: Record<NotificationType, { icon: string; label: string; colorClass: string }> = {
-    OFFER_VIEWED: { icon: '👁️', label: 'Wyświetlenie oferty', colorClass: 'bg-blue-500/15 text-blue-700' },
-    OFFER_ACCEPTED: { icon: '✅', label: 'Akceptacja oferty', colorClass: 'bg-status-accepted/15 text-emerald-700' },
-    OFFER_REJECTED: { icon: '❌', label: 'Odrzucenie oferty', colorClass: 'bg-status-rejected/15 text-red-700' },
-    OFFER_COMMENT: { icon: '💬', label: 'Komentarz', colorClass: 'bg-primary/10 text-cyan-700' },
-    AI_INSIGHT: { icon: '✨', label: 'Wgląd AI', colorClass: 'bg-purple-500/15 text-purple-700' },
-    FOLLOW_UP_REMINDER: { icon: '⏰', label: 'Follow-up', colorClass: 'bg-amber-500/15 text-amber-700' },
-    CONTRACT_SIGNED: { icon: '✍️', label: 'Podpis umowy', colorClass: 'bg-status-accepted/15 text-emerald-700' },
-    SYSTEM: { icon: '⚙️', label: 'Systemowe', colorClass: 'bg-slate-500/15 text-slate-700' },
+    OFFER_VIEWED: { icon: '👁️', label: 'Wyświetlenie oferty', colorClass: 'bg-[color-mix(in_oklab,var(--status-open)_15%,transparent)] text-status-open' },
+    OFFER_ACCEPTED: { icon: '✅', label: 'Akceptacja oferty', colorClass: 'bg-status-accepted/15 text-status-accepted' },
+    OFFER_REJECTED: { icon: '❌', label: 'Odrzucenie oferty', colorClass: 'bg-status-rejected/15 text-status-rejected' },
+    OFFER_COMMENT: { icon: '💬', label: 'Komentarz', colorClass: 'bg-primary/10 text-primary' },
+    AI_INSIGHT: { icon: '✨', label: 'Wgląd AI', colorClass: 'bg-[oklch(0.7_0.16_300)/15%] text-[oklch(0.55_0.18_300)] dark:text-[oklch(0.78_0.14_300)]' },
+    FOLLOW_UP_REMINDER: { icon: '⏰', label: 'Follow-up', colorClass: 'bg-[oklch(0.72_0.16_60)/15%] text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]' },
+    CONTRACT_SIGNED: { icon: '✍️', label: 'Podpis umowy', colorClass: 'bg-status-accepted/15 text-status-accepted' },
+    SYSTEM: { icon: '⚙️', label: 'Systemowe', colorClass: 'bg-secondary text-muted-foreground' },
 };
 
 const typeOptions = [
@@ -210,7 +210,7 @@ export default function NotificationsPage() {
                                 onClick={() => setActiveTab(tab.value)}
                                 className={`px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${
                                     activeTab === tab.value
-                                        ? 'bg-cyan-500 text-white'
+                                        ? 'bg-primary/100 text-white'
                                         : 'text-muted-foreground hover:bg-secondary/60'
                                 }`}
                             >
@@ -225,9 +225,9 @@ export default function NotificationsPage() {
                             onChange={(e) => setTypeFilter(e.target.value)}
                             className="w-full sm:w-auto px-3 py-2 text-sm border rounded-lg outline-none transition-colors"
                             style={{
-                                backgroundColor: 'var(--input-bg)',
-                                color: 'var(--input-text)',
-                                borderColor: 'var(--input-border)',
+                                backgroundColor: 'var(--card)',
+                                color: 'var(--foreground)',
+                                borderColor: 'var(--border)',
                             }}
                         >
                             {typeOptions.map(opt => (
@@ -243,11 +243,11 @@ export default function NotificationsPage() {
                     {Array.from({ length: 5 }).map((_, i) => (
                         <div key={i} className="bg-card border-border border rounded-xl p-4 animate-pulse">
                             <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-lg flex-shrink-0" style={{ backgroundColor: 'var(--hover-bg)' }} />
+                                <div className="w-10 h-10 rounded-lg flex-shrink-0" style={{ backgroundColor: 'var(--secondary)' }} />
                                 <div className="flex-1 space-y-2">
-                                    <div className="h-4 w-3/4 rounded" style={{ backgroundColor: 'var(--hover-bg)' }} />
-                                    <div className="h-3 w-1/2 rounded" style={{ backgroundColor: 'var(--hover-bg)' }} />
-                                    <div className="h-3 w-1/4 rounded" style={{ backgroundColor: 'var(--hover-bg)' }} />
+                                    <div className="h-4 w-3/4 rounded" style={{ backgroundColor: 'var(--secondary)' }} />
+                                    <div className="h-3 w-1/2 rounded" style={{ backgroundColor: 'var(--secondary)' }} />
+                                    <div className="h-3 w-1/4 rounded" style={{ backgroundColor: 'var(--secondary)' }} />
                                 </div>
                             </div>
                         </div>
@@ -304,7 +304,7 @@ export default function NotificationsPage() {
                                                         {notification.title}
                                                     </h3>
                                                     {!notification.isRead && (
-                                                        <div className="w-2 h-2 rounded-full bg-cyan-500 flex-shrink-0" />
+                                                        <div className="w-2 h-2 rounded-full bg-primary/100 flex-shrink-0" />
                                                     )}
                                                 </div>
                                                 <p className={`text-sm leading-relaxed ${
@@ -380,7 +380,7 @@ export default function NotificationsPage() {
                                     onClick={() => setCurrentPage(item)}
                                     className={`min-w-[32px] h-8 text-sm rounded-lg transition-colors ${
                                         currentPage === item
-                                            ? 'bg-cyan-500 text-white'
+                                            ? 'bg-primary/100 text-white'
                                             : 'hover:bg-secondary/60 text-foreground'
                                     }`}
                                 >

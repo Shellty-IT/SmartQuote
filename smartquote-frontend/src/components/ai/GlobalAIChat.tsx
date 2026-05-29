@@ -128,7 +128,7 @@ export function GlobalAIChat() {
                         )}
 
                         <span
-                            className="absolute inset-0 rounded-full bg-cyan-500 animate-ping opacity-25 pointer-events-none"
+                            className="absolute inset-0 rounded-full bg-primary/100 animate-ping opacity-25 pointer-events-none"
                             aria-hidden="true"
                         />
                     </motion.button>

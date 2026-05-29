@@ -341,7 +341,7 @@ export default function RegisterPage() {
                             Masz już konto?{' '}
                             <Link
                                 href="/"
-                                className="font-medium text-primary hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors"
+                                className="font-medium text-primary hover:text-primary dark:hover:text-cyan-300 transition-colors"
                             >
                                 Zaloguj się
                             </Link>

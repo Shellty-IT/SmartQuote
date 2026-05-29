@@ -47,7 +47,7 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
                             {hasVariant && (
                                 <span
                                     className="text-xs px-2 py-0.5 rounded-full font-medium"
-                                    style={{ backgroundColor: 'var(--tone-active-bg)', color: 'var(--accent-gradient-from)' }}
+                                    style={{ backgroundColor: 'var(--accent)', color: 'var(--primary)' }}
                                 >
                                     {insight.insights.selectedVariant}
                                 </span>
@@ -79,7 +79,7 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
                             router.push(`/dashboard/offers/${insight.offerId}`);
                         }}
                         className="text-xs font-medium px-2.5 py-1 rounded-lg transition-colors hover:opacity-80"
-                        style={{ backgroundColor: 'var(--tone-active-bg)', color: 'var(--accent-gradient-from)' }}
+                        style={{ backgroundColor: 'var(--accent)', color: 'var(--primary)' }}
                     >
                         Oferta →
                     </button>
@@ -93,7 +93,7 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
             </div>
 
             {expanded && (
-                <div className="px-4 sm:px-6 pb-5 pt-2 border-t space-y-4" style={{ borderColor: 'var(--divider)' }}>
+                <div className="px-4 sm:px-6 pb-5 pt-2 border-t space-y-4" style={{ borderColor: 'var(--border)' }}>
                     {insight.insights.summary && (
                         <div>
                             <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Podsumowanie</h4>
@@ -107,7 +107,7 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
                             <div className="space-y-1.5">
                                 {keyLessons.map((lesson, idx) => (
                                     <div key={idx} className="flex items-start gap-2">
-                                        <svg className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--accent-gradient-from)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <svg className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--primary)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
                                         </svg>
                                         <span className="text-sm text-foreground leading-relaxed">{lesson}</span>
@@ -120,8 +120,8 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
                     {hasPricing && (
                         <div>
                             <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Analiza cenowa</h4>
-                            <div className="flex items-start gap-2 rounded-xl p-3" style={{ backgroundColor: 'var(--tone-active-bg)' }}>
-                                <svg className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--accent-gradient-from)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <div className="flex items-start gap-2 rounded-xl p-3" style={{ backgroundColor: 'var(--accent)' }}>
+                                <svg className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--primary)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <span className="text-sm text-foreground leading-relaxed">{insight.insights.pricingInsight}</span>
@@ -149,10 +149,10 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
                         <div>
                             <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Wariant</h4>
                             <div className="flex items-center gap-2">
-                                <svg className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--accent-gradient-from)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <svg className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--primary)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
                                 </svg>
-                                <span className="text-sm font-medium" style={{ color: 'var(--accent-gradient-from)' }}>
+                                <span className="text-sm font-medium" style={{ color: 'var(--primary)' }}>
                                     {insight.insights.selectedVariant}
                                 </span>
                                 {insight.insights.availableVariants && insight.insights.availableVariants.length > 0 && (
@@ -167,7 +167,7 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
                     {hasVariantHistory && (
                         <div>
                             <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Trend wariantów</h4>
-                            <div className="rounded-xl p-3" style={{ backgroundColor: 'var(--tone-active-bg)' }}>
+                            <div className="rounded-xl p-3" style={{ backgroundColor: 'var(--accent)' }}>
                                 <div className="flex flex-wrap gap-2">
                                     {Object.entries(insight.insights.variantHistory!.distribution).map(([variant, count]) => {
                                         const total = insight.insights.variantHistory?.totalAcceptedWithVariant || 1;
@@ -178,8 +178,8 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
                                                 key={variant}
                                                 className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-medium"
                                                 style={{
-                                                    backgroundColor: isSelected ? 'var(--accent-gradient-from)' : 'var(--divider)',
-                                                    color: isSelected ? '#ffffff' : 'var(--muted-text)',
+                                                    backgroundColor: isSelected ? 'var(--primary)' : 'var(--border)',
+                                                    color: isSelected ? '#ffffff' : 'var(--muted-foreground)',
                                                 }}
                                             >
                                                 <span>{variant}</span>
@@ -307,9 +307,9 @@ export default function AIInsightsPage() {
                                     onKeyDown={handleKeyDown}
                                     className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm transition-colors"
                                     style={{
-                                        backgroundColor: 'var(--input-bg)',
-                                        borderColor: 'var(--divider)',
-                                        color: 'var(--input-text)',
+                                        backgroundColor: 'var(--card)',
+                                        borderColor: 'var(--border)',
+                                        color: 'var(--foreground)',
                                     }}
                                 />
                                 <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -338,9 +338,9 @@ export default function AIInsightsPage() {
                                                     : 'text-muted-foreground hover:opacity-80'
                                             }`}
                                             style={isActive ? {
-                                                backgroundColor: filter === 'REJECTED' ? '#ef4444' : filter === 'ACCEPTED' ? '#10b981' : 'var(--accent-gradient-from)',
+                                                backgroundColor: filter === 'REJECTED' ? '#ef4444' : filter === 'ACCEPTED' ? '#10b981' : 'var(--primary)',
                                             } : {
-                                                backgroundColor: 'var(--tone-active-bg)',
+                                                backgroundColor: 'var(--accent)',
                                             }}
                                         >
                                             {labels[filter]}
@@ -356,9 +356,9 @@ export default function AIInsightsPage() {
                                     onChange={(e) => setDateFrom(e.target.value)}
                                     className="px-3 py-1.5 rounded-lg border text-xs"
                                     style={{
-                                        backgroundColor: 'var(--input-bg)',
-                                        borderColor: 'var(--divider)',
-                                        color: 'var(--input-text)',
+                                        backgroundColor: 'var(--card)',
+                                        borderColor: 'var(--border)',
+                                        color: 'var(--foreground)',
                                     }}
                                 />
                                 <span className="text-xs text-muted-foreground">—</span>
@@ -368,9 +368,9 @@ export default function AIInsightsPage() {
                                     onChange={(e) => setDateTo(e.target.value)}
                                     className="px-3 py-1.5 rounded-lg border text-xs"
                                     style={{
-                                        backgroundColor: 'var(--input-bg)',
-                                        borderColor: 'var(--divider)',
-                                        color: 'var(--input-text)',
+                                        backgroundColor: 'var(--card)',
+                                        borderColor: 'var(--border)',
+                                        color: 'var(--foreground)',
                                     }}
                                 />
                             </div>
@@ -379,7 +379,7 @@ export default function AIInsightsPage() {
                                 <button
                                     onClick={clearFilters}
                                     className="text-xs font-medium transition-colors hover:opacity-80"
-                                    style={{ color: 'var(--accent-gradient-from)' }}
+                                    style={{ color: 'var(--primary)' }}
                                 >
                                     Wyczyść filtry
                                 </button>

@@ -230,9 +230,9 @@ export default function CompanySection({ company, onUpdate }: Props) {
                         className={`relative w-28 h-28 rounded-2xl flex items-center justify-center border-2 border-dashed transition-all cursor-pointer group ${
                             currentLogo
                                 ? 'border-cyan-300 bg-white'
-                                : 'border-slate-300 hover:border-cyan-400'
+                                : 'border-border hover:border-cyan-400'
                         }`}
-                        style={{ backgroundColor: currentLogo ? '#ffffff' : 'var(--section-bg)' }}
+                        style={{ backgroundColor: currentLogo ? '#ffffff' : 'var(--surface-subtle)' }}
                     >
                         {isUploadingLogo ? (
                             <svg className="w-8 h-8 text-cyan-500 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -243,10 +243,10 @@ export default function CompanySection({ company, onUpdate }: Props) {
                             <Image src={currentLogo} alt="Logo firmy" fill className="object-contain rounded-xl p-2" unoptimized={currentLogo.startsWith('data:')} />
                         ) : (
                             <div className="text-center">
-                                <svg className="w-8 h-8 text-slate-400 group-hover:text-primary mx-auto mb-1 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <svg className="w-8 h-8 text-muted-foreground group-hover:text-primary mx-auto mb-1 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                <span className="text-xs text-slate-400 group-hover:text-primary transition-colors">Dodaj logo</span>
+                                <span className="text-xs text-muted-foreground group-hover:text-primary transition-colors">Dodaj logo</span>
                             </div>
                         )}
                     </div>
@@ -271,7 +271,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                                 <button
                                     onClick={handleRemoveLogo}
                                     disabled={isUploadingLogo}
-                                    className="text-xs font-medium text-red-500 hover:text-red-600 flex items-center gap-1 px-2 py-1 disabled:opacity-50"
+                                    className="text-xs font-medium text-red-500 hover:text-destructive flex items-center gap-1 px-2 py-1 disabled:opacity-50"
                                 >
                                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -341,7 +341,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => colorInputRef.current?.click()}
-                            className="w-14 h-14 rounded-xl border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all hover:scale-105 hover:shadow-lg flex-shrink-0"
+                            className="w-14 h-14 rounded-xl border-2 border-border cursor-pointer transition-all hover:scale-105 hover:shadow-lg flex-shrink-0"
                             style={{ backgroundColor: activeColor }}
                         />
                         <input

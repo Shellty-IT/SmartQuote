@@ -57,9 +57,9 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
                 bg: 'bg-gradient-to-br from-slate-50 to-cyan-50',
                 sidebar: 'bg-slate-900',
                 header: 'bg-white',
-                card: 'bg-white border-slate-200',
+                card: 'bg-white border-border',
                 text: 'bg-slate-300',
-                accent: 'bg-cyan-500',
+                accent: 'bg-primary/100',
             },
             icon: (
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -77,7 +77,7 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
                 header: 'bg-[#111827]',
                 card: 'bg-[#111827] border-slate-700',
                 text: 'bg-slate-600',
-                accent: 'bg-cyan-500',
+                accent: 'bg-primary/100',
             },
             icon: (
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -127,11 +127,11 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
                             className={`relative rounded-2xl border-2 transition-all duration-300 text-left overflow-hidden group ${
                                 theme === t.id
                                     ? 'border-primary shadow-lg shadow-cyan-500/20'
-                                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                                    : 'border-border hover:border-border dark:hover:border-slate-600'
                             } ${isSaving ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                         >
                             {theme === t.id && (
-                                <div className="absolute top-3 right-3 z-10 w-6 h-6 bg-cyan-500 rounded-full flex items-center justify-center">
+                                <div className="absolute top-3 right-3 z-10 w-6 h-6 bg-primary/100 rounded-full flex items-center justify-center">
                                     <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                     </svg>
@@ -141,7 +141,7 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
                             <div className={`p-3 ${t.preview.bg} relative overflow-hidden`}>
                                 <div className="flex gap-2 h-24 rounded-lg overflow-hidden border border-black/10">
                                     <div className={`w-10 ${t.preview.sidebar} flex flex-col items-center pt-3 gap-2`}>
-                                        <div className="w-5 h-5 rounded bg-cyan-500/30" />
+                                        <div className="w-5 h-5 rounded bg-primary/100/30" />
                                         <div className="w-5 h-1 rounded bg-white/20" />
                                         <div className="w-5 h-1 rounded bg-white/20" />
                                         <div className="w-5 h-1 rounded bg-white/20" />
@@ -165,8 +165,8 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
                                 <div className="flex items-center gap-3">
                                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
                                         theme === t.id
-                                            ? 'bg-cyan-500 text-white'
-                                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                                            ? 'bg-primary/100 text-white'
+                                            : 'bg-secondary text-muted-foreground dark:text-muted-foreground'
                                     }`}>
                                         {t.icon}
                                     </div>
@@ -197,8 +197,8 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
                                 disabled={isSaving}
                                 className={`flex items-center gap-3 px-5 py-3.5 rounded-xl border-2 transition-all ${
                                     isActive
-                                        ? 'border-primary bg-cyan-500/10 text-cyan-700 dark:text-cyan-400'
-                                        : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700/50'
+                                        ? 'border-primary bg-primary/100/10 text-primary'
+                                        : 'border-border bg-surface-subtle text-foreground dark:text-slate-300 hover:border-border dark:hover:border-slate-600 hover:bg-secondary dark:hover:bg-slate-700/50'
                                 } ${isSaving ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                             >
                                 <span className="text-2xl">{lang.flag}</span>

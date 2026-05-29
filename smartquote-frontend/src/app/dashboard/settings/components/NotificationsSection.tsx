@@ -23,7 +23,7 @@ function Toggle({ enabled, onChange, disabled }: ToggleProps) {
             onClick={() => !disabled && onChange(!enabled)}
             disabled={disabled}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${
-                enabled ? 'bg-cyan-500' : 'bg-slate-300'
+                enabled ? 'bg-primary/100' : 'bg-slate-300'
             } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
         >
             <span
@@ -143,7 +143,7 @@ export default function NotificationsSection({ settings, onUpdate }: Props) {
                         }`}
                     >
                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-500">
+                            <div className="w-10 h-10 rounded-xl bg-primary/100/10 flex items-center justify-center text-cyan-500">
                                 {item.icon}
                             </div>
                             <div>
@@ -161,13 +161,13 @@ export default function NotificationsSection({ settings, onUpdate }: Props) {
             </div>
 
             <div className="mt-6 pt-6 border-t border-border">
-                <div className="flex items-start gap-3 p-4 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                <div className="flex items-start gap-3 p-4 bg-[oklch(0.72_0.16_60)/10%]0/10 rounded-xl border border-amber-500/20">
                     <svg className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
                     <div>
-                        <p className="text-sm font-medium text-amber-700">Wskazówka</p>
-                        <p className="text-sm text-amber-600">
+                        <p className="text-sm font-medium text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]">Wskazówka</p>
+                        <p className="text-sm text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]">
                             Powiadomienia email są wysyłane tylko gdy jesteś offline.
                             Gdy korzystasz z aplikacji, zobaczysz powiadomienia w interfejsie.
                         </p>

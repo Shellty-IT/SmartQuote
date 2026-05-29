@@ -10,10 +10,10 @@ const typeConfig: Record<NotificationType, { icon: string; colorClass: string }>
     OFFER_VIEWED: { icon: '👁️', colorClass: 'bg-primary/10 text-primary' },
     OFFER_ACCEPTED: { icon: '✅', colorClass: 'bg-status-accepted/10 text-status-accepted' },
     OFFER_REJECTED: { icon: '❌', colorClass: 'bg-destructive/10 text-destructive' },
-    OFFER_COMMENT: { icon: '💬', colorClass: 'bg-primary/10 text-cyan-700' },
-    AI_INSIGHT: { icon: '✨', colorClass: 'bg-purple-500/15 text-purple-700' },
-    FOLLOW_UP_REMINDER: { icon: '⏰', colorClass: 'bg-amber-500/15 text-amber-700' },
-    CONTRACT_SIGNED: { icon: '✍️', colorClass: 'bg-status-accepted/15 text-emerald-700' },
+    OFFER_COMMENT: { icon: '💬', colorClass: 'bg-primary/10 text-primary' },
+    AI_INSIGHT: { icon: '✨', colorClass: 'bg-[oklch(0.7_0.16_300)/15%] text-[oklch(0.55_0.18_300)] dark:text-[oklch(0.78_0.14_300)]' },
+    FOLLOW_UP_REMINDER: { icon: '⏰', colorClass: 'bg-[oklch(0.72_0.16_60)/10%]0/15 text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]' },
+    CONTRACT_SIGNED: { icon: '✍️', colorClass: 'bg-status-accepted/15 text-status-accepted' },
     SYSTEM: { icon: '⚙️', colorClass: 'bg-secondary text-secondary-foreground' },
 };
 
@@ -91,7 +91,7 @@ export default function NotificationBell() {
                 </svg>
 
                 {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-[20px] h-5 flex items-center justify-center text-xs font-bold text-white rounded-full px-1 bg-cyan-500 animate-pulse">
+                    <span className="absolute -top-1 -right-1 min-w-[20px] h-5 flex items-center justify-center text-xs font-bold text-white rounded-full px-1 bg-primary/100 animate-pulse">
                         {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                 )}
@@ -104,7 +104,7 @@ export default function NotificationBell() {
                             <div className="flex items-center gap-2">
                                 <h3 className="font-semibold text-foreground">Powiadomienia</h3>
                                 {unreadCount > 0 && (
-                                    <span className="px-2 py-0.5 text-xs font-medium bg-primary/10 text-cyan-700 rounded-full">
+                                    <span className="px-2 py-0.5 text-xs font-medium bg-primary/10 text-primary rounded-full">
                                         {unreadCount} nowych
                                     </span>
                                 )}
@@ -112,7 +112,7 @@ export default function NotificationBell() {
                             {unreadCount > 0 && (
                                 <button
                                     onClick={handleMarkAllRead}
-                                    className="text-xs font-medium text-primary hover:text-cyan-700 transition-colors"
+                                    className="text-xs font-medium text-primary hover:text-primary transition-colors"
                                 >
                                     Oznacz wszystkie
                                 </button>
@@ -170,7 +170,7 @@ export default function NotificationBell() {
 
                                                         <div className="flex items-center gap-1 flex-shrink-0">
                                                             {!notification.isRead && (
-                                                                <div className="w-2 h-2 rounded-full bg-cyan-500" />
+                                                                <div className="w-2 h-2 rounded-full bg-primary/100" />
                                                             )}
                                                             <button
                                                                 onClick={(e) => handleDelete(e, notification.id)}
@@ -209,7 +209,7 @@ export default function NotificationBell() {
                                     setIsOpen(false);
                                     router.push('/dashboard/notifications');
                                 }}
-                                className="text-sm font-medium text-primary hover:text-cyan-700 transition-colors"
+                                className="text-sm font-medium text-primary hover:text-primary transition-colors"
                             >
                                 Zobacz wszystkie →
                             </button>

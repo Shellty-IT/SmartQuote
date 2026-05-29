@@ -134,7 +134,7 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
                     <button
                         onClick={handleAvatarClick}
                         disabled={isUploadingAvatar}
-                        className="absolute bottom-0 right-0 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center text-slate-600 hover:text-primary hover:scale-110 transition-all disabled:opacity-50"
+                        className="absolute bottom-0 right-0 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center text-muted-foreground hover:text-primary hover:scale-110 transition-all disabled:opacity-50"
                     >
                         {isUploadingAvatar ? (
                             <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -169,7 +169,7 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
                         <button
                             onClick={handleAvatarClick}
                             disabled={isUploadingAvatar}
-                            className="text-xs font-medium text-primary hover:text-cyan-700 flex items-center gap-1 disabled:opacity-50"
+                            className="text-xs font-medium text-primary hover:text-primary flex items-center gap-1 disabled:opacity-50"
                         >
                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -182,7 +182,7 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
                                 <button
                                     onClick={handleRemoveAvatar}
                                     disabled={isUploadingAvatar}
-                                    className="text-xs font-medium text-red-500 hover:text-red-600 flex items-center gap-1 disabled:opacity-50"
+                                    className="text-xs font-medium text-red-500 hover:text-destructive flex items-center gap-1 disabled:opacity-50"
                                 >
                                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

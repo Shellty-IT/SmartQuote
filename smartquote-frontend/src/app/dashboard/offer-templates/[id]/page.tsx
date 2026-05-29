@@ -355,7 +355,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                                         id={`optional-${item._tempId}`}
                                         checked={item.isOptional}
                                         onChange={(e) => updateItem(item._tempId, 'isOptional', e.target.checked)}
-                                        className="w-4 h-4 rounded border-gray-300"
+                                        className="w-4 h-4 rounded border-border"
                                     />
                                     <label htmlFor={`optional-${item._tempId}`} className="text-sm text-foreground">
                                         Pozycja opcjonalna

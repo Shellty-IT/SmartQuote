@@ -196,23 +196,23 @@ export default function SmtpSection() {
                         <h2 className="text-lg font-semibold text-foreground">Adres nadawcy</h2>
                         <p className="text-sm text-muted-foreground">Twój adres email widoczny dla odbiorców wiadomości</p>
                     </div>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-medium">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-accepted/15 text-status-accepted text-xs font-medium">
+                        <span className="w-1.5 h-1.5 rounded-full bg-status-accepted/100" />
                         Aktywne
                     </span>
                 </div>
 
-                <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-start gap-2">
+                <div className="mb-4 p-3 bg-destructive/10 border border-destructive/25 rounded-xl flex items-start gap-2">
                     <svg className="w-4 h-4 flex-shrink-0 mt-0.5 text-status-rejected" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="text-sm text-red-700 dark:text-red-400">
+                    <span className="text-sm text-destructive">
                         Maile są wysyłane przez SmartQuote AI. Odbiorca zobaczy Twój adres jako nadawcę i może odpowiedzieć bezpośrednio na Twój email.
                     </span>
                 </div>
 
                 {senderError && (
-                    <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-700 dark:text-red-400">
+                    <div className="mb-4 p-3 bg-destructive/10 border border-destructive/25 rounded-xl text-sm text-destructive">
                         {senderError}
                     </div>
                 )}
@@ -261,20 +261,20 @@ export default function SmtpSection() {
                         <h2 className="text-lg font-semibold text-foreground">Własny serwer SMTP</h2>
                         <p className="text-sm text-muted-foreground">Podłącz własną skrzynkę pocztową do wysyłania maili</p>
                     </div>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-xs font-medium">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary text-muted-foreground dark:text-muted-foreground text-xs font-medium">
                         <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
                         Wymaga własnej domeny
                     </span>
                 </div>
 
-                <div className="mb-6 p-4 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
+                <div className="mb-6 p-4 rounded-xl border border-destructive/25 bg-destructive/10">
                     <div className="flex items-start gap-3">
                         <svg className="w-5 h-5 text-status-rejected flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <div>
-                            <p className="text-sm font-bold text-red-700 dark:text-red-400">Funkcja tymczasowo niedostępna</p>
-                            <p className="text-sm mt-1 text-red-700 dark:text-red-400">
+                            <p className="text-sm font-bold text-destructive">Funkcja tymczasowo niedostępna</p>
+                            <p className="text-sm mt-1 text-destructive">
                                 Własny serwer SMTP wymaga zweryfikowanej domeny. Ta funkcja zostanie aktywowana gdy aplikacja będzie działać na dedykowanym serwerze z własną domeną. Do tego czasu maile są wysyłane przez SmartQuote AI.
                             </p>
                         </div>
@@ -291,9 +291,9 @@ export default function SmtpSection() {
                                     onClick={() => handlePresetChange(key)}
                                     className="px-3 py-2 rounded-lg text-sm font-medium border"
                                     style={{
-                                        backgroundColor: selectedPreset === key ? '#0891b2' : 'var(--card-bg)',
-                                        borderColor: selectedPreset === key ? '#0891b2' : 'var(--card-border)',
-                                        color: selectedPreset === key ? '#fff' : 'var(--muted-text)',
+                                        backgroundColor: selectedPreset === key ? '#0891b2' : 'var(--card)',
+                                        borderColor: selectedPreset === key ? '#0891b2' : 'var(--border)',
+                                        color: selectedPreset === key ? '#fff' : 'var(--muted-foreground)',
                                     }}
                                 >
                                     {PRESET_LABELS[key]}
@@ -364,15 +364,15 @@ export default function SmtpSection() {
 
                     {testResult && (
                         <div className={`mb-4 p-3 rounded-xl border text-sm ${testResult.success
-                            ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400'
-                            : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400'
+                            ? 'bg-status-accepted/10 border-status-accepted/25 text-status-accepted'
+                            : 'bg-destructive/10 border-destructive/25 text-destructive'
                         }`}>
                             {testResult.message}
                         </div>
                     )}
 
                     {saveSuccess && (
-                        <div className="mb-4 p-3 rounded-xl border bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-sm text-emerald-700 dark:text-emerald-400">
+                        <div className="mb-4 p-3 rounded-xl border bg-status-accepted/10 border-status-accepted/25 text-sm text-status-accepted">
                             Konfiguracja zapisana pomyślnie
                         </div>
                     )}
@@ -415,7 +415,7 @@ export default function SmtpSection() {
                             ) : (
                                 <button
                                     onClick={() => setDeleteConfirm(true)}
-                                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm border border-red-200 dark:border-red-800 text-status-rejected"
+                                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm border border-destructive/25 text-status-rejected"
                                 >
                                     Usuń konfigurację
                                 </button>

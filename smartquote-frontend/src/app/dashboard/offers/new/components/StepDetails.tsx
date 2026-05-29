@@ -29,7 +29,7 @@ export default function StepDetails({ details, onUpdate }: StepDetailsProps) {
                         placeholder="Krótki opis zakresu oferty..."
                         rows={4}
                         style={{ resize: 'vertical', minHeight: '100px' }}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 placeholder:text-slate-400"
+                        className="w-full px-3 py-2 rounded-xl border border-border bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 placeholder:text-muted-foreground"
                     />
                 </div>
 
@@ -58,7 +58,7 @@ export default function StepDetails({ details, onUpdate }: StepDetailsProps) {
                         onChange={(e) => onUpdate('terms', e.target.value)}
                         rows={2}
                         style={{ resize: 'vertical', minHeight: '70px' }}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 placeholder:text-slate-400"
+                        className="w-full px-3 py-2 rounded-xl border border-border bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 placeholder:text-muted-foreground"
                     />
                 </div>
 
@@ -70,7 +70,7 @@ export default function StepDetails({ details, onUpdate }: StepDetailsProps) {
                         placeholder="Notatki widoczne tylko dla Ciebie..."
                         rows={2}
                         style={{ resize: 'vertical', minHeight: '70px' }}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 placeholder:text-slate-400"
+                        className="w-full px-3 py-2 rounded-xl border border-border bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 placeholder:text-muted-foreground"
                     />
                 </div>
 
@@ -80,7 +80,7 @@ export default function StepDetails({ details, onUpdate }: StepDetailsProps) {
                             type="checkbox"
                             checked={details.requireAuditTrail}
                             onChange={(e) => onUpdate('requireAuditTrail', e.target.checked)}
-                            className="mt-0.5 w-5 h-5 rounded border-slate-300 text-primary focus:ring-cyan-500"
+                            className="mt-0.5 w-5 h-5 rounded border-border text-primary focus:ring-cyan-500"
                         />
                         <div>
                             <div className="flex items-center gap-2">

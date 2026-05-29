@@ -11,10 +11,10 @@ import { formatDate } from '@/lib/utils';
 import { FollowUpStatus, FollowUpType, Priority } from '@/types';
 
 const statusConfig: Record<FollowUpStatus, { label: string; color: string; bgColor: string }> = {
-    PENDING: { label: 'Oczekujące', color: 'text-amber-700 dark:text-amber-400', bgColor: 'bg-amber-50 dark:bg-amber-900/30' },
-    COMPLETED: { label: 'Wykonane', color: 'text-green-700 dark:text-green-400', bgColor: 'bg-green-50 dark:bg-green-900/30' },
-    CANCELLED: { label: 'Anulowane', color: 'text-slate-700 dark:text-slate-300', bgColor: 'bg-slate-100 dark:bg-slate-700/50' },
-    OVERDUE: { label: 'Zaległe', color: 'text-red-700 dark:text-red-400', bgColor: 'bg-red-50 dark:bg-red-900/30' },
+    PENDING: { label: 'Oczekujące', color: 'text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]', bgColor: 'bg-[oklch(0.72_0.16_60)/10%] dark:bg-amber-900/30' },
+    COMPLETED: { label: 'Wykonane', color: 'text-status-accepted dark:text-green-400', bgColor: 'bg-green-50 dark:bg-green-900/30' },
+    CANCELLED: { label: 'Anulowane', color: 'text-foreground dark:text-slate-300', bgColor: 'bg-secondary dark:bg-slate-700/50' },
+    OVERDUE: { label: 'Zaległe', color: 'text-destructive', bgColor: 'bg-destructive/10 dark:bg-red-900/30' },
 };
 
 const typeConfig: Record<FollowUpType, { label: string; icon: string }> = {
@@ -27,10 +27,10 @@ const typeConfig: Record<FollowUpType, { label: string; icon: string }> = {
 };
 
 const priorityConfig: Record<Priority, { label: string; color: string; bgColor: string }> = {
-    LOW: { label: 'Niski', color: 'text-slate-600 dark:text-slate-400', bgColor: 'bg-slate-100 dark:bg-slate-700/50' },
-    MEDIUM: { label: 'Średni', color: 'text-blue-700 dark:text-blue-400', bgColor: 'bg-blue-50 dark:bg-blue-900/30' },
-    HIGH: { label: 'Wysoki', color: 'text-orange-700 dark:text-orange-400', bgColor: 'bg-orange-50 dark:bg-orange-900/30' },
-    URGENT: { label: 'Pilne', color: 'text-red-700 dark:text-red-400', bgColor: 'bg-red-50 dark:bg-red-900/30' },
+    LOW: { label: 'Niski', color: 'text-muted-foreground dark:text-muted-foreground', bgColor: 'bg-secondary dark:bg-slate-700/50' },
+    MEDIUM: { label: 'Średni', color: 'text-primary', bgColor: 'bg-[color-mix(in_oklab,var(--status-open)_10%,transparent)] dark:bg-blue-900/30' },
+    HIGH: { label: 'Wysoki', color: 'text-[oklch(0.55_0.16_45)] dark:text-[oklch(0.78_0.14_45)] dark:text-orange-400', bgColor: 'bg-orange-50 dark:bg-orange-900/30' },
+    URGENT: { label: 'Pilne', color: 'text-destructive', bgColor: 'bg-destructive/10 dark:bg-red-900/30' },
 };
 
 export default function FollowUpDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -124,7 +124,7 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                             variant="outline"
                             onClick={handleComplete}
                             isLoading={isCompleting}
-                            className="text-green-600 dark:text-green-400 border-green-300 dark:border-green-700 hover:bg-green-50 dark:hover:bg-green-900/30"
+                            className="text-status-accepted dark:text-green-400 border-green-300 dark:border-green-700 hover:bg-green-50 dark:hover:bg-green-900/30"
                         >
                             <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -138,7 +138,7 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                     <Button
                         variant="outline"
                         onClick={() => setDeleteModal(true)}
-                        className="text-status-rejected border-red-300 dark:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/30"
+                        className="text-status-rejected border-destructive/30 dark:border-red-700 hover:bg-destructive/10 dark:hover:bg-red-900/30"
                     >
                         Usuń
                     </Button>
@@ -172,7 +172,7 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                                     >
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
-                                                <svg className="w-5 h-5 text-slate-600 dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg className="w-5 h-5 text-muted-foreground dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                                 </svg>
                                             </div>
@@ -192,7 +192,7 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                                         className="flex items-center justify-between p-4 bg-surface-subtle rounded-xl hover:bg-secondary/60 cursor-pointer transition-colors"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
+                                            <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center">
                                                 <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                 </svg>
@@ -214,7 +214,7 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                                     >
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                                                <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg className="w-5 h-5 text-status-accepted dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
                                             </div>
@@ -284,7 +284,7 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                             {followUp.status === 'PENDING' && (
                                 <Button
                                     variant="outline"
-                                    className="w-full justify-start text-green-600 dark:text-green-400"
+                                    className="w-full justify-start text-status-accepted dark:text-green-400"
                                     onClick={handleComplete}
                                     isLoading={isCompleting}
                                 >

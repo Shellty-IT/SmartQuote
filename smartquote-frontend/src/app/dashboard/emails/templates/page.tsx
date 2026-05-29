@@ -47,7 +47,7 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
                     onChange={e => setName(e.target.value)}
                     placeholder="np. Oferta premium"
                     className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30 bg-white dark:bg-slate-800 ${
-                        errors.name ? 'border-red-400' : 'border-slate-200 dark:border-slate-700'
+                        errors.name ? 'border-red-400' : 'border-border'
                     }`}
                 />
                 {errors.name && <p className="mt-1 text-xs text-status-rejected">{errors.name}</p>}
@@ -62,7 +62,7 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
                     onChange={e => setSubject(e.target.value)}
                     placeholder="Temat emaila"
                     className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30 bg-white dark:bg-slate-800 ${
-                        errors.subject ? 'border-red-400' : 'border-slate-200 dark:border-slate-700'
+                        errors.subject ? 'border-red-400' : 'border-border'
                     }`}
                 />
                 {errors.subject && <p className="mt-1 text-xs text-status-rejected">{errors.subject}</p>}
@@ -77,12 +77,12 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
                     rows={10}
                     placeholder="Treść wiadomości email..."
                     className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30 bg-white dark:bg-slate-800 resize-y ${
-                        errors.body ? 'border-red-400' : 'border-slate-200 dark:border-slate-700'
+                        errors.body ? 'border-red-400' : 'border-border'
                     }`}
                 />
                 {errors.body && <p className="mt-1 text-xs text-status-rejected">{errors.body}</p>}
                 <p className="mt-1 text-xs text-muted-foreground">
-                    Możesz używać zmiennych: <code className="bg-slate-100 dark:bg-slate-800 px-1 rounded">{'{clientName}'}</code>, <code className="bg-slate-100 dark:bg-slate-800 px-1 rounded">{'{offerNumber}'}</code>, <code className="bg-slate-100 dark:bg-slate-800 px-1 rounded">{'{contractNumber}'}</code>
+                    Możesz używać zmiennych: <code className="bg-secondary px-1 rounded">{'{clientName}'}</code>, <code className="bg-secondary px-1 rounded">{'{offerNumber}'}</code>, <code className="bg-secondary px-1 rounded">{'{contractNumber}'}</code>
                 </p>
             </div>
             <div className="flex justify-end gap-3 pt-2">
@@ -90,7 +90,7 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
                     type="button"
                     onClick={onCancel}
                     disabled={isSaving}
-                    className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm text-foreground hover:bg-secondary/60 transition-colors disabled:opacity-60"
+                    className="px-4 py-2 rounded-xl border border-border text-sm text-foreground hover:bg-secondary/60 transition-colors disabled:opacity-60"
                 >
                     Anuluj
                 </button>
@@ -212,7 +212,7 @@ export default function EmailTemplatesPage() {
             </div>
 
             {error && (
-                <div className="mb-4 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm">
+                <div className="mb-4 p-3 rounded-xl bg-destructive/10 border border-destructive/25 text-destructive text-sm">
                     {error}
                 </div>
             )}
@@ -238,7 +238,7 @@ export default function EmailTemplatesPage() {
                             <div key={t.id} className="bg-card border-border border rounded-xl overflow-hidden">
                                 <div className="flex items-center justify-between p-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0">
+                                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
                                             <svg className="w-4 h-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h8" />
                                             </svg>
@@ -249,7 +249,7 @@ export default function EmailTemplatesPage() {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-xs text-muted-foreground px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800">
+                                        <span className="text-xs text-muted-foreground px-2 py-0.5 rounded-full bg-secondary">
                                             Wbudowany
                                         </span>
                                         <button
@@ -276,7 +276,7 @@ export default function EmailTemplatesPage() {
                                 {previewId === t.id && (
                                     <div className="border-t border-border p-4">
                                         <p className="text-xs font-medium text-muted-foreground mb-2">Podgląd treści:</p>
-                                        <pre className="text-xs text-foreground whitespace-pre-wrap leading-relaxed font-sans bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg">
+                                        <pre className="text-xs text-foreground whitespace-pre-wrap leading-relaxed font-sans bg-surface-subtle/50 p-3 rounded-lg">
                                             {t.body}
                                         </pre>
                                     </div>
@@ -294,7 +294,7 @@ export default function EmailTemplatesPage() {
                     {isLoading ? (
                         <div className="space-y-2">
                             {[1, 2].map(i => (
-                                <div key={i} className="h-16 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />
+                                <div key={i} className="h-16 rounded-xl bg-secondary animate-pulse" />
                             ))}
                         </div>
                     ) : templates.length === 0 && !showNewForm ? (
@@ -369,7 +369,7 @@ export default function EmailTemplatesPage() {
                                     {previewId === t.id && editingId !== t.id && (
                                         <div className="border-t border-border p-4">
                                             <p className="text-xs font-medium text-muted-foreground mb-2">Podgląd treści:</p>
-                                            <pre className="text-xs text-foreground whitespace-pre-wrap leading-relaxed font-sans bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg">
+                                            <pre className="text-xs text-foreground whitespace-pre-wrap leading-relaxed font-sans bg-surface-subtle/50 p-3 rounded-lg">
                                                 {t.body}
                                             </pre>
                                         </div>
@@ -385,7 +385,7 @@ export default function EmailTemplatesPage() {
                         <p className="text-xs font-medium text-muted-foreground mb-2">
                             Podgląd: {builtInPreview.name}
                         </p>
-                        <pre className="text-xs text-foreground whitespace-pre-wrap leading-relaxed font-sans bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg">
+                        <pre className="text-xs text-foreground whitespace-pre-wrap leading-relaxed font-sans bg-surface-subtle/50 p-3 rounded-lg">
                             {builtInPreview.body}
                         </pre>
                     </div>

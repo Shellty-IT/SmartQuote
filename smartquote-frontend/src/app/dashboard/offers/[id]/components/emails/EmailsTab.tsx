@@ -14,9 +14,9 @@ interface EmailsTabProps {
 
 function EmailStatusBadge({ status }: { status: EmailLogStatus }) {
     const config: Record<EmailLogStatus, { label: string; classes: string }> = {
-        SENT: { label: 'Wysłano', classes: 'bg-emerald-500/15 text-status-accepted' },
-        FAILED: { label: 'Błąd', classes: 'bg-red-500/15 text-status-rejected' },
-        DRAFT: { label: 'Szkic', classes: 'bg-slate-500/15 text-slate-600 dark:text-slate-400' },
+        SENT: { label: 'Wysłano', classes: 'bg-status-accepted/100/15 text-status-accepted' },
+        FAILED: { label: 'Błąd', classes: 'bg-destructive/100/15 text-status-rejected' },
+        DRAFT: { label: 'Szkic', classes: 'bg-surface-subtle0/15 text-muted-foreground dark:text-muted-foreground' },
     };
     const { label, classes } = config[status];
     return (
@@ -119,7 +119,7 @@ export function EmailsTab({ offerId, offerNumber }: EmailsTabProps) {
                                 onClick={() => router.push(`/dashboard/emails/${item.id}`)}
                                 className="flex items-start gap-3 p-4 hover:bg-secondary/60 cursor-pointer transition-colors group"
                             >
-                                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-cyan-500/10 flex items-center justify-center mt-0.5">
+                                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/100/10 flex items-center justify-center mt-0.5">
                                     <svg className="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                     </svg>

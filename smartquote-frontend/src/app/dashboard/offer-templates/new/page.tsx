@@ -32,13 +32,13 @@ function toApiItem(item: TemplateItem): CreateOfferTemplateItemInput {
 }
 
 const textareaClass =
-    'w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-ring/30/20 focus:border-primary transition-all duration-200 resize-y';
+    'w-full px-4 py-2.5 rounded-lg border border-border dark:border-slate-600 bg-white dark:bg-slate-800 text-foreground dark:text-slate-100 placeholder:text-muted-foreground dark:placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30/20 focus:border-primary transition-all duration-200 resize-y';
 
 const inputClass =
-    'w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-ring/30/20 focus:border-primary transition-all duration-200';
+    'w-full px-4 py-2.5 rounded-lg border border-border dark:border-slate-600 bg-white dark:bg-slate-800 text-foreground dark:text-slate-100 placeholder:text-muted-foreground dark:placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30/20 focus:border-primary transition-all duration-200';
 
 const inputSmClass =
-    'w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-ring/30/20 focus:border-primary transition-all duration-200 text-sm';
+    'w-full px-3 py-2 rounded-lg border border-border dark:border-slate-600 bg-white dark:bg-slate-800 text-foreground dark:text-slate-100 placeholder:text-muted-foreground dark:placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30/20 focus:border-primary transition-all duration-200 text-sm';
 
 export default function NewOfferTemplatePage() {
     const router = useRouter();
@@ -124,7 +124,7 @@ export default function NewOfferTemplatePage() {
                 <h2 className="text-lg font-semibold text-foreground mb-4">Podstawowe informacje</h2>
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                        <label className="block text-sm font-medium text-foreground dark:text-slate-300 mb-1.5">
                             Nazwa szablonu <span className="text-status-rejected">*</span>
                         </label>
                         <input
@@ -136,7 +136,7 @@ export default function NewOfferTemplatePage() {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                        <label className="block text-sm font-medium text-foreground dark:text-slate-300 mb-1.5">
                             Opis (opcjonalne)
                         </label>
                         <textarea
@@ -149,7 +149,7 @@ export default function NewOfferTemplatePage() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                            <label className="block text-sm font-medium text-foreground dark:text-slate-300 mb-1.5">
                                 Kategoria (opcjonalne)
                             </label>
                             <input
@@ -161,7 +161,7 @@ export default function NewOfferTemplatePage() {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                            <label className="block text-sm font-medium text-foreground dark:text-slate-300 mb-1.5">
                                 Domyślne dni płatności
                             </label>
                             <input
@@ -175,7 +175,7 @@ export default function NewOfferTemplatePage() {
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                        <label className="block text-sm font-medium text-foreground dark:text-slate-300 mb-1.5">
                             Domyślne warunki (opcjonalne)
                         </label>
                         <textarea
@@ -187,7 +187,7 @@ export default function NewOfferTemplatePage() {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                        <label className="block text-sm font-medium text-foreground dark:text-slate-300 mb-1.5">
                             Domyślne uwagi (opcjonalne)
                         </label>
                         <textarea
@@ -314,7 +314,7 @@ export default function NewOfferTemplatePage() {
                                         id={`optional-${item._tempId}`}
                                         checked={item.isOptional}
                                         onChange={(e) => updateItem(item._tempId, 'isOptional', e.target.checked)}
-                                        className="w-4 h-4 rounded border-gray-300"
+                                        className="w-4 h-4 rounded border-border"
                                     />
                                     <label htmlFor={`optional-${item._tempId}`} className="text-sm text-foreground">
                                         Pozycja opcjonalna
