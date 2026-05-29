@@ -45,8 +45,8 @@ export default function Header() {
                 />
             </div>
 
-            {/* Right controls */}
-            <div className="flex shrink-0 items-center gap-2">
+            {/* Right controls — ml-auto pushes to right edge regardless of search width */}
+            <div className="ml-auto flex shrink-0 items-center gap-2">
                 {/* Theme toggle */}
                 <button
                     onClick={toggle}
