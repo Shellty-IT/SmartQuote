@@ -8,7 +8,7 @@ import { contractsApi } from '@/lib/api';
 import { Button, ConfirmDialog } from '@/components/ui';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatCurrency, formatDate, getContractStatusConfig } from '@/lib/utils';
 import { useToast } from '@/contexts/ToastContext';
 import type { ContractStatus } from '@/types';
 

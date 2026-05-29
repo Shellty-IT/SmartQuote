@@ -260,7 +260,7 @@ export default function OfferTemplatesPage() {
 
                     <div className="lg:hidden space-y-3">
                         {templates.map((template) => (
-                            <Card key={template.id} className="p-4">
+                            <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                                 <div className="flex items-start justify-between gap-3 mb-3">
                                     <div className="flex-1 min-w-0">
                                         <h3 className="font-semibold text-foreground text-sm truncate">{template.name}</h3>

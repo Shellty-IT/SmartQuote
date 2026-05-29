@@ -123,7 +123,7 @@ export default function FollowUpsPage() {
                 </div>
             ) : stats ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <Card className="!p-4">
+                    <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-muted-foreground">Oczekujące</p>
@@ -137,7 +137,7 @@ export default function FollowUpsPage() {
                             </div>
                         </div>
                     </div>
-                    <Card className="!p-4">
+                    <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-muted-foreground">Zaległe</p>
@@ -151,7 +151,7 @@ export default function FollowUpsPage() {
                             </div>
                         </div>
                     </div>
-                    <Card className="!p-4">
+                    <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-muted-foreground">Na dziś</p>
@@ -165,7 +165,7 @@ export default function FollowUpsPage() {
                             </div>
                         </div>
                     </div>
-                    <Card className="!p-4">
+                    <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-muted-foreground">Wykonane (miesiąc)</p>

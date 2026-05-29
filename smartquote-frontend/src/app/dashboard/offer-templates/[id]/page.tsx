@@ -163,7 +163,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                 <p className="text-muted-foreground mt-1">Modyfikuj szablon oferty</p>
             </div>
 
-            <Card className="mb-6 p-6">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                 <h2 className="text-lg font-semibold text-foreground mb-4">Podstawowe informacje</h2>
                 <div className="space-y-4">
                     <div>
@@ -242,7 +242,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                 </div>
             </div>
 
-            <Card className="mb-6 p-6">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-semibold text-foreground">Pozycje szablonu ({items.length})</h2>
                     <Button variant="outline" size="sm" onClick={addItem}>
