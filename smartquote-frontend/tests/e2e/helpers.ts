@@ -256,10 +256,9 @@ export async function createContract(
     await titleField.waitFor({ state: 'visible', timeout: 5000 });
     await titleField.fill(title);
 
-    const clientSelect = page.locator('form select').first();
-    await clientSelect.waitFor({ state: 'visible', timeout: 5000 });
-    await clientSelect.scrollIntoViewIfNeeded();
-
+    // Wait for client options to be populated BEFORE grabbing a locator reference.
+    // On mobile-safari the async fetch causes a re-render that detaches any
+    // previously-captured DOM node, so we must wait for a stable state first.
     await page.waitForFunction(
         () => {
             const select = document.querySelector('form select');
@@ -267,6 +266,10 @@ export async function createContract(
         },
         { timeout: 30000 }
     );
+
+    // Fresh locator after the DOM has settled — safe to use on mobile.
+    const clientSelect = page.locator('form select').first();
+    await clientSelect.waitFor({ state: 'visible', timeout: 5000 });
 
     const clientOptions = clientSelect.locator('option');
     const optionCount = await clientOptions.count();
