@@ -61,7 +61,7 @@ export default function AIAssistantPage() {
                     style={{ borderColor: 'var(--border)' }}
                 >
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow">
                             <span className="text-white text-lg">✨</span>
                         </div>
                         <div>
@@ -94,7 +94,7 @@ export default function AIAssistantPage() {
                 >
                     {messages.length === 0 ? (
                         <div className="h-full flex flex-col items-center justify-center text-center">
-                            <div className="w-20 h-20 rounded-2xl bg-gradient-primary flex items-center justify-center mb-6 shadow-xl shadow-cyan-500/20">
+                            <div className="w-20 h-20 rounded-2xl bg-gradient-primary flex items-center justify-center mb-6 shadow-glow">
                                 <span className="text-4xl">✨</span>
                             </div>
                             <h2 className="text-xl font-semibold text-foreground mb-2">

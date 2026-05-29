@@ -316,9 +316,9 @@ export default function RegisterPage() {
                             type="submit"
                             disabled={isLoading}
                             className="w-full py-3 px-4 bg-gradient-primary
- text-white font-semibold rounded-lg shadow-lg shadow-cyan-500/30
+ text-white font-semibold rounded-lg shadow-glow
  hover:brightness-110
-                focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+ focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
                 disabled:opacity-70 disabled:cursor-not-allowed
                 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                         >

@@ -252,7 +252,7 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                                     <button
                                         type="button"
                                         onClick={() => handleAddPublicLink('offer_link', selectedOffer.id, `Link do oferty ${selectedOffer.number}`)}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-primary/25 text-primary text-xs hover:bg-primary/10  transition-colors"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-primary/25 text-primary text-xs hover:bg-primary/10 transition-colors"
                                     >
                                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />

@@ -126,7 +126,7 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
                             disabled={isSaving}
                             className={`relative rounded-2xl border-2 transition-all duration-300 text-left overflow-hidden group ${
                                 theme === t.id
-                                    ? 'border-primary shadow-lg shadow-cyan-500/20'
+                                    ? 'border-primary shadow-glow'
                                     : 'border-border hover:border-border dark:hover:border-border'
                             } ${isSaving ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                         >
