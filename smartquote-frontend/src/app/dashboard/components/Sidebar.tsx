@@ -25,21 +25,24 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/app/providers';
+import { useTranslations } from '@/i18n';
 import { useSidebarStats } from '@/hooks/useSidebarStats';
 import { useUnreadCount } from '@/hooks/useNotifications';
 
-const NAV_ITEMS = [
-    { label: 'Dashboard',        href: '/dashboard',                icon: LayoutDashboard, stat: null,       badgeTone: 'default' as const },
-    { label: 'Oferty',           href: '/dashboard/offers',         icon: FileText,        stat: 'offers',   badgeTone: 'primary' as const },
-    { label: 'Szablony ofert',   href: '/dashboard/offer-templates',icon: FileStack,       stat: null,       badgeTone: 'default' as const },
-    { label: 'Umowy',            href: '/dashboard/contracts',      icon: ScrollText,      stat: 'contracts',badgeTone: 'success' as const },
-    { label: 'Klienci',          href: '/dashboard/clients',        icon: Users,           stat: 'clients',  badgeTone: 'info'    as const },
-    { label: 'Follow-upy',       href: '/dashboard/followups',      icon: CalendarClock,   stat: 'followups',badgeTone: 'warning' as const },
-    { label: 'Korespondencja',   href: '/dashboard/emails',         icon: Mail,            stat: null,       badgeTone: 'default' as const },
-    { label: 'Powiadomienia',    href: '/dashboard/notifications',  icon: Bell,            stat: 'notif',    badgeTone: 'violet'  as const },
-    { label: 'AI Asystent',      href: '/dashboard/ai',             icon: Sparkles,        stat: null,       badgeTone: 'default' as const },
-    { label: 'Wnioski AI',       href: '/dashboard/ai-insights',    icon: Lightbulb,       stat: null,       badgeTone: 'default' as const },
-] as const;
+type NavKey = 'dashboard' | 'offers' | 'offerTemplates' | 'contracts' | 'clients' | 'followups' | 'correspondence' | 'notifications' | 'aiAssistant' | 'aiInsights';
+
+const NAV_ITEMS: { key: NavKey; href: string; icon: React.ElementType; stat: string | null; badgeTone: 'default' | 'primary' | 'success' | 'info' | 'warning' | 'violet' }[] = [
+    { key: 'dashboard',      href: '/dashboard',                 icon: LayoutDashboard, stat: null,        badgeTone: 'default' },
+    { key: 'offers',         href: '/dashboard/offers',          icon: FileText,        stat: 'offers',    badgeTone: 'primary' },
+    { key: 'offerTemplates', href: '/dashboard/offer-templates', icon: FileStack,       stat: null,        badgeTone: 'default' },
+    { key: 'contracts',      href: '/dashboard/contracts',       icon: ScrollText,      stat: 'contracts', badgeTone: 'success' },
+    { key: 'clients',        href: '/dashboard/clients',         icon: Users,           stat: 'clients',   badgeTone: 'info'    },
+    { key: 'followups',      href: '/dashboard/followups',       icon: CalendarClock,   stat: 'followups', badgeTone: 'warning' },
+    { key: 'correspondence', href: '/dashboard/emails',          icon: Mail,            stat: null,        badgeTone: 'default' },
+    { key: 'notifications',  href: '/dashboard/notifications',   icon: Bell,            stat: 'notif',     badgeTone: 'violet'  },
+    { key: 'aiAssistant',    href: '/dashboard/ai',              icon: Sparkles,        stat: null,        badgeTone: 'default' },
+    { key: 'aiInsights',     href: '/dashboard/ai-insights',     icon: Lightbulb,       stat: null,        badgeTone: 'default' },
+];
 
 const BADGE_TONE: Record<string, string> = {
     primary: 'bg-gradient-primary text-white',
@@ -55,6 +58,8 @@ export default function Sidebar() {
     const { theme, toggle } = useTheme();
     const { stats, isLoading } = useSidebarStats();
     const { count: unreadNotifications } = useUnreadCount();
+    const tr = useTranslations('sidebar');
+    const commonTr = useTranslations('common');
     const [collapsed, setCollapsed] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
     const prevPathname = useRef(pathname);
@@ -109,7 +114,7 @@ export default function Sidebar() {
             <nav className="scrollbar-thin flex-1 space-y-0.5 overflow-y-auto px-3 py-3">
                 {!collapsed && (
                     <div className="px-3 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/70">
-                        Przestrzeń robocza
+                        {tr.workspace}
                     </div>
                 )}
                 {NAV_ITEMS.map((item) => {
@@ -141,7 +146,7 @@ export default function Sidebar() {
                             />
                             {!collapsed && (
                                 <>
-                                    <span className="flex-1 truncate">{item.label}</span>
+                                    <span className="flex-1 truncate">{tr.nav[item.key]}</span>
                                     {badge !== null && (
                                         <span className={cn(
                                             'rounded-full px-2 py-0.5 text-[10px] font-semibold tabular-nums',
@@ -163,7 +168,7 @@ export default function Sidebar() {
                 {/* Theme toggle */}
                 <button
                     onClick={toggle}
-                    aria-label={theme === 'dark' ? 'Włącz tryb jasny' : 'Włącz tryb ciemny'}
+                    aria-label={theme === 'dark' ? commonTr.enableLightMode : commonTr.enableDarkMode}
                     className={cn(
                         'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground/80 transition-all hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
                         collapsed && 'justify-center px-2'
@@ -174,7 +179,7 @@ export default function Sidebar() {
                         : <Moon className="h-[18px] w-[18px] shrink-0" strokeWidth={2} />
                     }
                     {!collapsed && (
-                        <span>{theme === 'dark' ? 'Tryb jasny' : 'Tryb ciemny'}</span>
+                        <span>{theme === 'dark' ? commonTr.lightMode : commonTr.darkMode}</span>
                     )}
                 </button>
 
@@ -188,7 +193,7 @@ export default function Sidebar() {
                     )}
                 >
                     <Settings className="h-[18px] w-[18px] shrink-0" strokeWidth={2} />
-                    {!collapsed && <span>Ustawienia</span>}
+                    {!collapsed && <span>{commonTr.settings}</span>}
                 </Link>
 
                 <button
@@ -199,7 +204,7 @@ export default function Sidebar() {
                     )}
                 >
                     <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={2} />
-                    {!collapsed && <span>Wyloguj się</span>}
+                    {!collapsed && <span>{commonTr.logout}</span>}
                 </button>
             </div>
 
@@ -207,7 +212,7 @@ export default function Sidebar() {
             <button
                 onClick={() => setCollapsed((c) => !c)}
                 className="absolute -right-3 top-20 hidden lg:grid h-6 w-6 place-items-center rounded-full border border-border bg-card text-muted-foreground shadow-card transition hover:text-primary"
-                aria-label="Zwiń / rozwiń panel"
+                aria-label={commonTr.collapsePanel}
             >
                 <ChevronsLeft
                     className={cn('h-3.5 w-3.5 transition-transform', collapsed && 'rotate-180')}
@@ -222,7 +227,7 @@ export default function Sidebar() {
             <button
                 onClick={() => setMobileOpen(true)}
                 className="fixed left-4 top-4 z-30 grid h-10 w-10 place-items-center rounded-xl border border-border bg-card shadow-card lg:hidden"
-                aria-label="Otwórz menu"
+                aria-label={commonTr.openMenu}
             >
                 <svg className="h-5 w-5 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -251,7 +256,7 @@ export default function Sidebar() {
                         <button
                             onClick={() => setMobileOpen(false)}
                             className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-secondary"
-                            aria-label="Zamknij menu"
+                            aria-label={commonTr.closeMenu}
                         >
                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

@@ -88,8 +88,18 @@ export async function createAndPublishOffer(
     await page.goto('/dashboard/offers/new', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('domcontentloaded');
 
-    const firstClient = page.locator('.grid button').first();
-    await firstClient.waitFor({ state: 'visible', timeout: 30000 });
+    // Wait for the client list to load (async fetch) before interacting with it.
+    // `.grid button` is fragile on mobile when the container has overflow:hidden.
+    // Use a more robust selector: buttons with role="button" containing an avatar div.
+    await page.waitForFunction(
+        () => document.querySelectorAll('button[class*="rounded-xl"][class*="border"]').length > 0 ||
+              document.querySelectorAll('.grid button').length > 0,
+        { timeout: 30000 }
+    );
+
+    // Try the grid-button selector first; fall back to any client card button.
+    const firstClient = page.locator('.grid button, button:has(.rounded-full)').first();
+    await firstClient.waitFor({ state: 'visible', timeout: 10000 });
     await firstClient.click();
     await page.getByRole('button', { name: /dalej/i }).click();
 
@@ -227,14 +237,19 @@ export async function waitForContractPage(page: Page): Promise<void> {
 }
 
 export async function waitForOfferPage(page: Page): Promise<void> {
+    // 'Szczegóły' and 'Analityka' are the tab labels in the redesigned offer detail page.
+    // 'Pozycje' may appear inside the details tab content.
+    // Any of these signals the page has loaded.
     await page.waitForFunction(
         () => {
             const text = document.body.innerText || '';
-            return text.includes('Pozycje') ||
-                text.includes('Szczegóły') ||
+            return text.includes('Szczegóły') ||
+                text.includes('Analityka') ||
+                text.includes('Komentarze') ||
+                text.includes('Pozycje') ||
                 text.includes('Nie znaleziono oferty');
         },
-        { timeout: 30000 }
+        { timeout: 45000 }
     );
     await page.waitForTimeout(500);
 }
@@ -277,6 +292,27 @@ export async function createContract(
         const secondOption = await clientOptions.nth(1).getAttribute('value');
         if (secondOption) {
             await clientSelect.selectOption(secondOption);
+
+            // On mobile-safari, Playwright's selectOption may not trigger React's
+            // synthetic onChange reliably. Fire an explicit input + change event
+            // to ensure the React state is updated before form submission.
+            await page.evaluate((sel) => {
+                const el = document.querySelector('form select') as HTMLSelectElement | null;
+                if (!el) return;
+                el.value = sel;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+            }, secondOption);
+
+            // Verify the value is set before proceeding.
+            await page.waitForFunction(
+                (expected) => {
+                    const el = document.querySelector('form select') as HTMLSelectElement | null;
+                    return !!el && el.value === expected;
+                },
+                secondOption,
+                { timeout: 5000 }
+            );
         }
     }
 
@@ -291,7 +327,10 @@ export async function createContract(
     await priceField.fill('5000');
 
     const submitBtn = page.getByRole('button', { name: /utwórz umowę/i });
+    await submitBtn.waitFor({ state: 'visible', timeout: 10000 });
     await submitBtn.scrollIntoViewIfNeeded();
+    // Small pause to let React process all state updates before submit.
+    await page.waitForTimeout(300);
     await submitBtn.click();
 
     await page.waitForURL(

@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Search, Sun, Moon, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/app/providers';
+import { useTranslations } from '@/i18n';
 import { useUnreadCount } from '@/hooks/useNotifications';
 import { settingsApi } from '@/lib/api';
 import { getInitials } from '@/lib/utils';
@@ -15,6 +16,7 @@ export default function Header() {
     const { data: session } = useSession();
     const { theme, toggle } = useTheme();
     const { count: unreadCount } = useUnreadCount();
+    const commonTr = useTranslations('common');
     const [avatar, setAvatar] = useState<string | null>(null);
     const [searchOpen, setSearchOpen] = useState(false);
 
@@ -38,7 +40,7 @@ export default function Header() {
             <div className={cn('relative transition-all duration-200', searchOpen ? 'flex-1' : 'flex-1 max-w-sm')}>
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
-                    placeholder="Szukaj ofert, klientów, umów..."
+                    placeholder={commonTr.search}
                     onFocus={() => setSearchOpen(true)}
                     onBlur={() => setSearchOpen(false)}
                     className="h-9 w-full rounded-lg border border-border bg-secondary/60 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-primary focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/30"
@@ -50,7 +52,7 @@ export default function Header() {
                 {/* Theme toggle */}
                 <button
                     onClick={toggle}
-                    aria-label={theme === 'dark' ? 'Włącz tryb jasny' : 'Włącz tryb ciemny'}
+                    aria-label={theme === 'dark' ? commonTr.enableLightMode : commonTr.enableDarkMode}
                     className="grid h-9 w-9 place-items-center rounded-lg border border-border bg-card text-muted-foreground transition hover:text-foreground"
                 >
                     {theme === 'dark'
@@ -63,7 +65,7 @@ export default function Header() {
                 <Link
                     href="/dashboard/notifications"
                     className="relative grid h-9 w-9 place-items-center rounded-lg border border-border bg-card text-muted-foreground transition hover:text-foreground"
-                    aria-label="Powiadomienia"
+                    aria-label={commonTr.notifications}
                 >
                     <Bell className="h-4 w-4" />
                     {unreadCount > 0 && (

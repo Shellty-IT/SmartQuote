@@ -4,6 +4,7 @@
 import { useState } from 'react';
 
 import { useTheme } from '@/app/providers';
+import { useLanguage, useTranslations } from '@/i18n';
 import type { UserSettings, UpdateSettingsInput } from '@/types';
 
 interface Props {
@@ -13,6 +14,9 @@ interface Props {
 
 export default function AppearanceSection({ settings, onUpdate }: Props) {
     const { theme, setTheme } = useTheme();
+    const { setLanguage } = useLanguage();
+    const tr = useTranslations('settings');
+    const commonTr = useTranslations('common');
     const [isSaving, setIsSaving] = useState(false);
     const [success, setSuccess] = useState(false);
     const [localLanguage, setLocalLanguage] = useState(settings.language);
@@ -26,7 +30,7 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
             setSuccess(true);
             setTimeout(() => setSuccess(false), 2000);
         } catch {
-} finally {
+        } finally {
             setIsSaving(false);
         }
     };
@@ -38,11 +42,11 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
         setSuccess(false);
         try {
             await onUpdate({ language: value } as UpdateSettingsInput);
+            setLanguage(value);
             setSuccess(true);
             setTimeout(() => setSuccess(false), 2000);
         } catch {
             setLocalLanguage(previousValue);
-
         } finally {
             setIsSaving(false);
         }
@@ -51,8 +55,8 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
     const themes = [
         {
             id: 'light' as const,
-            label: 'Jasny',
-            description: 'Klasyczny jasny motyw w odcieniach błękitu',
+            label: tr.appearance.lightTheme,
+            description: tr.appearance.lightThemeDesc,
             preview: {
                 bg: 'bg-gradient-to-br from-slate-50 to-cyan-50',
                 sidebar: 'bg-slate-900',
@@ -69,8 +73,8 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
         },
         {
             id: 'dark' as const,
-            label: 'Ciemny',
-            description: 'Elegancki ciemny motyw w odcieniach granatu',
+            label: tr.appearance.darkTheme,
+            description: tr.appearance.darkThemeDesc,
             preview: {
                 bg: 'bg-gradient-to-br from-[#0b1120] to-[#111827]',
                 sidebar: 'bg-[#050a18]',
@@ -97,8 +101,8 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
             <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h2 className="text-lg font-semibold text-foreground">Motyw</h2>
-                        <p className="text-sm text-muted-foreground">Wybierz preferowany wygląd aplikacji</p>
+                        <h2 className="text-lg font-semibold text-foreground">{tr.appearance.themeTitle}</h2>
+                        <p className="text-sm text-muted-foreground">{tr.appearance.themeSubtitle}</p>
                     </div>
                     <div className="flex items-center gap-2">
                         {success && (
@@ -106,7 +110,7 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                 </svg>
-                                <span>Zapisano</span>
+                                <span>{commonTr.saved}</span>
                             </div>
                         )}
                         {isSaving && (
@@ -183,8 +187,8 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
 
             <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                 <div className="mb-6">
-                    <h2 className="text-lg font-semibold text-foreground">Język</h2>
-                    <p className="text-sm text-muted-foreground">Wybierz język interfejsu</p>
+                    <h2 className="text-lg font-semibold text-foreground">{tr.appearance.languageTitle}</h2>
+                    <p className="text-sm text-muted-foreground">{tr.appearance.languageSubtitle}</p>
                 </div>
 
                 <div className="flex gap-4 flex-wrap">
@@ -219,7 +223,7 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
                     <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
                     </svg>
-                    <p>Zmiana języka wpłynie na cały interfejs aplikacji po odświeżeniu strony.</p>
+                    <p>{tr.appearance.languageHint}</p>
                 </div>
             </div>
         </div>
