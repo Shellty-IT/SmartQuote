@@ -117,7 +117,7 @@ export default function SignContractDialog({
 
                     <div>
                         <label htmlFor="signer-name" className="block text-sm font-medium text-slate-700 mb-1">
-                            Imię i nazwisko <span className="text-red-500">*</span>
+                            Imię i nazwisko <span className="text-status-rejected">*</span>
                         </label>
                         <input
                             id="signer-name"
@@ -131,7 +131,7 @@ export default function SignContractDialog({
 
                     <div>
                         <label htmlFor="signer-email" className="block text-sm font-medium text-slate-700 mb-1">
-                            Email <span className="text-red-500">*</span>
+                            Email <span className="text-status-rejected">*</span>
                         </label>
                         <input
                             id="signer-email"
@@ -147,7 +147,7 @@ export default function SignContractDialog({
                     <div>
                         <div className="flex items-center justify-between mb-1">
                             <label className="block text-sm font-medium text-slate-700">
-                                Podpis <span className="text-red-500">*</span>
+                                Podpis <span className="text-status-rejected">*</span>
                             </label>
                             <button
                                 type="button"

@@ -36,7 +36,7 @@ export function ChatInput({ value, onChange, onSend, isLoading, isVisible }: Cha
                     onKeyDown={handleKeyDown}
                     placeholder="Napisz wiadomość..."
                     rows={1}
-                    className="flex-1 resize-none rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 border-border bg-card text-foreground"
+                    className="flex-1 resize-none rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30 border-border bg-card text-foreground"
                     style={{ maxHeight: '120px' }}
                 />
                 <Button

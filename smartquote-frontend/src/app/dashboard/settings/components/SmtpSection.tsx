@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSmtpConfig, useSenderEmail } from '@/hooks/useSettings';
-import { Card } from '@/components/ui';
+
 
 const PRESETS: Record<string, { host: string; port: number; note: string }> = {
     gmail: { host: 'smtp.gmail.com', port: 587, note: 'Wymaga hasła aplikacji Google' },
@@ -224,7 +224,7 @@ export default function SmtpSection() {
                         value={senderEmailInput}
                         onChange={e => setSenderEmailInput(e.target.value)}
                         placeholder="twoj@email.com"
-                        className="w-full px-3 py-2.5 rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2.5 rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-transparent text-sm"
                     />
                     <p className="mt-1 text-xs text-muted-foreground">
                         Np. skorupa7@o2.pl — odbiorca zobaczy ten adres jako nadawcę i będzie mógł odpowiedzieć.
@@ -283,7 +283,7 @@ export default function SmtpSection() {
 
                 <div className="opacity-40 pointer-events-none select-none">
                     <div className="mb-6">
-                        <label className="block text-sm font-medium text-muted-foreground mb-2">Dostawca poczty</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Dostawca poczty</label>
                         <div className="flex flex-wrap gap-2">
                             {Object.keys(PRESETS).map(key => (
                                 <button

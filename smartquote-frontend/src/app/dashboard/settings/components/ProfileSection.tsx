@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Card } from '@/components/ui';
+
 import Button from '@/components/ui/Button';
 import { compressImage } from '@/lib/imageUtils';
 import type { UserProfile, UpdateProfileInput } from '@/types';
@@ -202,7 +202,7 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
 
             <div className="space-y-6">
                 <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-2">
+                    <label className="mb-1.5 block text-sm font-medium text-foreground">
                         Imię i nazwisko
                     </label>
                     <div className="relative">
@@ -223,7 +223,7 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-2">
+                    <label className="mb-1.5 block text-sm font-medium text-foreground">
                         Email
                     </label>
                     <div className="relative">
@@ -241,7 +241,7 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-2">
+                    <label className="mb-1.5 block text-sm font-medium text-foreground">
                         Telefon
                     </label>
                     <div className="relative">

@@ -106,7 +106,7 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                         {type.icon}
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">{followUp.title}</h1>
+                        <h1 className="text-3xl font-bold tracking-tight">{followUp.title}</h1>
                         <div className="flex flex-wrap items-center gap-2 mt-1">
                             <Badge className={`${status.bgColor} ${status.color}`}>
                                 {status.label}

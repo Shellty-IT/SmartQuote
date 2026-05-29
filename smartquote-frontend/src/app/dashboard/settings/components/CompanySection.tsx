@@ -3,7 +3,7 @@
 
 import { useState, useRef } from 'react';
 import Image from 'next/image';
-import { Card } from '@/components/ui';
+
 import Button from '@/components/ui/Button';
 import { compressImage } from '@/lib/imageUtils';
 import type { CompanyInfo, UpdateCompanyInfoInput } from '@/types';
@@ -287,7 +287,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-muted-foreground mb-2">Nazwa firmy</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Nazwa firmy</label>
                         <div className="relative">
                             <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -303,7 +303,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-muted-foreground mb-2">NIP</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">NIP</label>
                         <input
                             type="text"
                             value={formData.nip || ''}
@@ -314,7 +314,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-muted-foreground mb-2">REGON</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">REGON</label>
                         <input
                             type="text"
                             value={formData.regon || ''}
@@ -415,11 +415,11 @@ export default function CompanySection({ company, onUpdate }: Props) {
             </div>
 
             <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                <h3 className="text-lg font-semibold text-foreground mb-6">Adres</h3>
+                <h3 className="mb-5 text-lg font-semibold tracking-tight">Adres</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-muted-foreground mb-2">Ulica i numer</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Ulica i numer</label>
                         <div className="relative">
                             <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -436,7 +436,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-muted-foreground mb-2">Kod pocztowy</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Kod pocztowy</label>
                         <input
                             type="text"
                             value={formData.postalCode || ''}
@@ -447,7 +447,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-muted-foreground mb-2">Miasto</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Miasto</label>
                         <input
                             type="text"
                             value={formData.city || ''}
@@ -458,7 +458,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     </div>
 
                     <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-muted-foreground mb-2">Kraj</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Kraj</label>
                         <input
                             type="text"
                             value={formData.country || ''}
@@ -471,11 +471,11 @@ export default function CompanySection({ company, onUpdate }: Props) {
             </div>
 
             <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                <h3 className="text-lg font-semibold text-foreground mb-6">Kontakt</h3>
+                <h3 className="mb-5 text-lg font-semibold tracking-tight">Kontakt</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-sm font-medium text-muted-foreground mb-2">Telefon</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Telefon</label>
                         <div className="relative">
                             <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -491,7 +491,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-muted-foreground mb-2">Email firmowy</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Email firmowy</label>
                         <div className="relative">
                             <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -513,7 +513,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     </div>
 
                     <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-muted-foreground mb-2">Strona internetowa</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Strona internetowa</label>
                         <div className="relative">
                             <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
@@ -537,11 +537,11 @@ export default function CompanySection({ company, onUpdate }: Props) {
             </div>
 
             <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                <h3 className="text-lg font-semibold text-foreground mb-6">Dane bankowe</h3>
+                <h3 className="mb-5 text-lg font-semibold tracking-tight">Dane bankowe</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-sm font-medium text-muted-foreground mb-2">Nazwa banku</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Nazwa banku</label>
                         <div className="relative">
                             <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -557,7 +557,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-muted-foreground mb-2">Numer konta</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Numer konta</label>
                         <input
                             type="text"
                             value={formData.bankAccount || ''}
@@ -570,11 +570,11 @@ export default function CompanySection({ company, onUpdate }: Props) {
             </div>
 
             <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                <h3 className="text-lg font-semibold text-foreground mb-6">Domyślne wartości dla dokumentów</h3>
+                <h3 className="mb-5 text-lg font-semibold tracking-tight">Domyślne wartości dla dokumentów</h3>
 
                 <div className="space-y-6">
                     <div>
-                        <label className="block text-sm font-medium text-muted-foreground mb-2">
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">
                             Domyślny termin płatności (dni)
                         </label>
                         <input
@@ -588,7 +588,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-muted-foreground mb-2">Domyślne warunki</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Domyślne warunki</label>
                         <div className="relative">
                             <svg className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -604,7 +604,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-muted-foreground mb-2">Domyślne uwagi</label>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">Domyślne uwagi</label>
                         <textarea
                             value={formData.defaultNotes || ''}
                             onChange={(e) => handleChange('defaultNotes', e.target.value)}

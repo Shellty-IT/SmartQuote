@@ -203,7 +203,7 @@ export default function PublishDialog({
                                 <ul className="mt-3 space-y-2">
                                     {['Przeglądać pozycje oferty', 'Wybierać opcjonalne pozycje i zmieniać ilości', 'Zadawać pytania przez komentarze', 'Zaakceptować lub odrzucić ofertę'].map((text) => (
                                         <li key={text} className="flex items-center gap-2 text-sm text-slate-600">
-                                            <svg className="w-4 h-4 text-cyan-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <svg className="w-4 h-4 text-primary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                             </svg>
                                             {text}
@@ -214,7 +214,7 @@ export default function PublishDialog({
 
                             {validUntil && (
                                 <div className={`flex items-center gap-2 p-3 rounded-xl mb-4 ${isExpired ? 'bg-red-50 border border-red-200' : 'bg-blue-50 border border-blue-200'}`}>
-                                    <svg className={`w-5 h-5 flex-shrink-0 ${isExpired ? 'text-red-500' : 'text-blue-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <svg className={`w-5 h-5 flex-shrink-0 ${isExpired ? 'text-status-rejected' : 'text-blue-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     <p className={`text-sm ${isExpired ? 'text-red-700' : 'text-blue-700'}`}>
@@ -233,7 +233,7 @@ export default function PublishDialog({
                                         checked={sendEmail}
                                         onChange={(e) => setSendEmail(e.target.checked)}
                                         disabled={!canSendEmail || isLoadingSmtp}
-                                        className="mt-0.5 w-4 h-4 text-cyan-500 border-slate-300 rounded focus:ring-cyan-500"
+                                        className="mt-0.5 w-4 h-4 text-primary border-slate-300 rounded focus:ring-ring/30"
                                     />
                                     <div>
                                         <span className="text-sm font-medium text-slate-900">
@@ -315,7 +315,7 @@ export default function PublishDialog({
                             {emailSent && emailSentTo && (
                                 <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-4">
                                     <div className="flex items-start gap-2">
-                                        <svg className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <svg className="w-5 h-5 text-status-accepted flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                         <p className="text-sm text-emerald-700">
@@ -365,7 +365,7 @@ export default function PublishDialog({
                                 <button
                                     onClick={handleUnpublish}
                                     disabled={isUnpublishing}
-                                    className="px-4 py-3 rounded-xl border border-red-200 text-red-600 font-medium hover:bg-red-50 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                    className="px-4 py-3 rounded-xl border border-red-200 text-status-rejected font-medium hover:bg-red-50 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                                 >
                                     {isUnpublishing ? (
                                         <>

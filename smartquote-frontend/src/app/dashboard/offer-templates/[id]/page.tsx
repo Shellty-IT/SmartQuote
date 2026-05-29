@@ -159,7 +159,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                     </svg>
                     Powrót
                 </button>
-                <h1 className="text-2xl font-bold text-foreground">Edytuj szablon</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Edytuj szablon</h1>
                 <p className="text-muted-foreground mt-1">Modyfikuj szablon oferty</p>
             </div>
 
@@ -168,7 +168,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                 <div className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-foreground mb-1.5">
-                            Nazwa szablonu <span className="text-red-500">*</span>
+                            Nazwa szablonu <span className="text-status-rejected">*</span>
                         </label>
                         <input
                             type="text"
@@ -260,7 +260,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                                 {items.length > 1 && (
                                     <button
                                         onClick={() => removeItem(item._tempId)}
-                                        className="p-1 rounded-lg hover:bg-red-500/10 text-status-rejected transition-colors"
+                                        className="p-1 rounded-lg hover:bg-status-rejected/10 text-status-rejected transition-colors"
                                     >
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

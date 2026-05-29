@@ -32,13 +32,13 @@ function toApiItem(item: TemplateItem): CreateOfferTemplateItemInput {
 }
 
 const textareaClass =
-    'w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all duration-200 resize-y';
+    'w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-ring/30/20 focus:border-primary transition-all duration-200 resize-y';
 
 const inputClass =
-    'w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all duration-200';
+    'w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-ring/30/20 focus:border-primary transition-all duration-200';
 
 const inputSmClass =
-    'w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all duration-200 text-sm';
+    'w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-ring/30/20 focus:border-primary transition-all duration-200 text-sm';
 
 export default function NewOfferTemplatePage() {
     const router = useRouter();
@@ -116,7 +116,7 @@ export default function NewOfferTemplatePage() {
                     </svg>
                     Powrót
                 </button>
-                <h1 className="text-2xl font-bold text-foreground">Nowy szablon oferty</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Nowy szablon oferty</h1>
                 <p className="text-muted-foreground mt-1">Utwórz preset pozycji do wielokrotnego użycia</p>
             </div>
 
@@ -125,7 +125,7 @@ export default function NewOfferTemplatePage() {
                 <div className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                            Nazwa szablonu <span className="text-red-500">*</span>
+                            Nazwa szablonu <span className="text-status-rejected">*</span>
                         </label>
                         <input
                             type="text"
@@ -219,7 +219,7 @@ export default function NewOfferTemplatePage() {
                                 {items.length > 1 && (
                                     <button
                                         onClick={() => removeItem(item._tempId)}
-                                        className="p-1 rounded-lg hover:bg-red-500/10 text-status-rejected transition-colors"
+                                        className="p-1 rounded-lg hover:bg-status-rejected/10 text-status-rejected transition-colors"
                                     >
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

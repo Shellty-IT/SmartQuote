@@ -16,7 +16,7 @@ interface PageProps {
 
 function AttachmentTypeLabel({ type }: { type: EmailAttachment['type'] }) {
     const labels: Record<EmailAttachment['type'], { text: string; color: string }> = {
-        offer_pdf: { text: 'PDF oferty', color: 'text-red-500' },
+        offer_pdf: { text: 'PDF oferty', color: 'text-status-rejected' },
         contract_pdf: { text: 'PDF umowy', color: 'text-status-accepted' },
         offer_link: { text: 'Link oferty', color: 'text-primary' },
         contract_link: { text: 'Link umowy', color: 'text-status-accepted' },
@@ -72,7 +72,7 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                     </svg>
                 </button>
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground">Edytuj szkic</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">Edytuj szkic</h1>
                     <p className="text-muted-foreground mt-0.5">Dokończ i wyślij wiadomość</p>
                 </div>
             </div>
@@ -109,7 +109,7 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                         value={selectedTemplateId}
                         onChange={e => handleTemplateSelect(e.target.value)}
                         disabled={isLoadingData}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30"
                     >
                         <option value="">— Własna wiadomość —</option>
                         <optgroup label="Wbudowane">
@@ -136,7 +136,7 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                                 value={clientId}
                                 onChange={e => handleClientChange(e.target.value)}
                                 disabled={isLoadingData}
-                                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
+                                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30"
                             >
                                 <option value="">— Wybierz klienta —</option>
                                 {clients.map(c => (
@@ -149,20 +149,20 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label className="block text-xs font-medium text-muted-foreground mb-1">
-                                    Adres email <span className="text-red-500">*</span>
+                                    Adres email <span className="text-status-rejected">*</span>
                                 </label>
                                 <input
                                     type="email"
                                     value={to}
                                     onChange={e => setTo(e.target.value)}
                                     placeholder="odbiorca@firma.pl"
-                                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 bg-white dark:bg-slate-800 ${
+                                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30 bg-white dark:bg-slate-800 ${
                                         errors.to
                                             ? 'border-red-400 dark:border-red-500'
                                             : 'border-slate-200 dark:border-slate-700'
                                     }`}
                                 />
-                                {errors.to && <p className="mt-1 text-xs text-red-500">{errors.to}</p>}
+                                {errors.to && <p className="mt-1 text-xs text-status-rejected">{errors.to}</p>}
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-muted-foreground mb-1">Imię i nazwisko (opcjonalnie)</label>
@@ -171,7 +171,7 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                                     value={toName}
                                     onChange={e => setToName(e.target.value)}
                                     placeholder="Jan Kowalski"
-                                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
+                                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30"
                                 />
                             </div>
                         </div>
@@ -183,31 +183,31 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                     <div className="space-y-3">
                         <div>
                             <label className="block text-xs font-medium text-muted-foreground mb-1">
-                                Temat <span className="text-red-500">*</span>
+                                Temat <span className="text-status-rejected">*</span>
                             </label>
                             <input
                                 type="text"
                                 value={subject}
                                 onChange={e => setSubject(e.target.value)}
                                 placeholder="Temat wiadomości"
-                                className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 bg-white dark:bg-slate-800 ${
+                                className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30 bg-white dark:bg-slate-800 ${
                                     errors.subject
                                         ? 'border-red-400 dark:border-red-500'
                                         : 'border-slate-200 dark:border-slate-700'
                                 }`}
                             />
-                            {errors.subject && <p className="mt-1 text-xs text-red-500">{errors.subject}</p>}
+                            {errors.subject && <p className="mt-1 text-xs text-status-rejected">{errors.subject}</p>}
                         </div>
                         <div>
                             <label className="block text-xs font-medium text-muted-foreground mb-1">
-                                Treść <span className="text-red-500">*</span>
+                                Treść <span className="text-status-rejected">*</span>
                             </label>
                             <RichTextEditor
                                 value={body}
                                 onChange={setBody}
                                 placeholder="Wpisz treść wiadomości..."
                             />
-                            {errors.body && <p className="mt-1 text-xs text-red-500">{errors.body}</p>}
+                            {errors.body && <p className="mt-1 text-xs text-status-rejected">{errors.body}</p>}
                         </div>
                     </div>
                 </div>
@@ -222,7 +222,7 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                                     value={offerId}
                                     onChange={e => handleOfferChange(e.target.value)}
                                     disabled={isLoadingData}
-                                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
+                                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30"
                                 >
                                     <option value="">— Wybierz ofertę —</option>
                                     {offers.map(o => (
@@ -236,7 +236,7 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                                     value={contractId}
                                     onChange={e => handleContractChange(e.target.value)}
                                     disabled={isLoadingData}
-                                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
+                                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30"
                                 >
                                     <option value="">— Wybierz umowę —</option>
                                     {contracts.map(c => (
@@ -287,7 +287,7 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                                         <button
                                             type="button"
                                             onClick={() => handleRemoveAttachment(i)}
-                                            className="p-1 text-muted-foreground hover:text-red-500 transition-colors"
+                                            className="p-1 text-muted-foreground hover:text-status-rejected transition-colors"
                                         >
                                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -323,7 +323,7 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                         type="button"
                         onClick={handleSend}
                         disabled={isSending || isSavingDraft}
-                        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-medium transition-colors disabled:opacity-60"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-primary hover:brightness-110 text-white text-sm font-medium transition-colors disabled:opacity-60"
                     >
                         {isSending ? (
                             <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -348,7 +348,7 @@ export default function EditDraftPage({ params }: PageProps) {
     return (
         <Suspense fallback={
             <div className="p-8 flex items-center justify-center">
-                <svg className="w-6 h-6 animate-spin text-cyan-500" fill="none" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 animate-spin text-primary" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                 </svg>

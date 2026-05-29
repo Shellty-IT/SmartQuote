@@ -6,7 +6,9 @@ import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Mail, Lock, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { checkBackendHealth } from '@/lib/api';
+import { cn } from '@/lib/utils';
 
 type BackendStatus = 'checking' | 'waking' | 'ready' | 'error';
 
@@ -33,14 +35,9 @@ export default function LoginPage() {
             for (let i = 0; i < maxAttempts; i++) {
                 const ok = await checkBackendHealth();
                 if (cancelled) return;
-                if (ok) {
-                    setBackendStatus('ready');
-                    return;
-                }
+                if (ok) { setBackendStatus('ready'); return; }
                 setWakeAttempt(i + 1);
-                if (i === 0) {
-                    setBackendStatus('waking');
-                }
+                if (i === 0) setBackendStatus('waking');
                 if (i < maxAttempts - 1) {
                     await new Promise<void>(r => setTimeout(r, 5000));
                     if (cancelled) return;
@@ -50,21 +47,14 @@ export default function LoginPage() {
         };
 
         void runCheck();
-
-        return () => {
-            cancelled = true;
-        };
+        return () => { cancelled = true; };
     }, [retryCount]);
 
     useEffect(() => {
         if (backendStatus !== 'waking' && backendStatus !== 'checking') return;
-
         const interval = setInterval(() => {
-            setElapsedSeconds(
-                Math.floor((Date.now() - wakeStartTimeRef.current) / 1000),
-            );
+            setElapsedSeconds(Math.floor((Date.now() - wakeStartTimeRef.current) / 1000));
         }, 1000);
-
         return () => clearInterval(interval);
     }, [backendStatus]);
 
@@ -78,207 +68,102 @@ export default function LoginPage() {
     const handleLogin = async () => {
         setError('');
         setIsLoading(true);
-
         try {
-            const result = await signIn('credentials', {
-                email,
-                password,
-                redirect: false,
-            });
-
-            if (result?.error) {
-                setError('Nieprawidłowy email lub hasło');
-                setIsLoading(false);
-                return;
-            }
-
-            if (result?.ok) {
-                router.push('/dashboard');
-            }
+            const result = await signIn('credentials', { email, password, redirect: false });
+            if (result?.error) { setError('Nieprawidłowy adres email lub hasło'); setIsLoading(false); return; }
+            if (result?.ok) router.push('/dashboard');
         } catch {
             setError('Wystąpił błąd podczas logowania. Spróbuj ponownie.');
             setIsLoading(false);
         }
     };
 
-    const isFormDisabled =
-        isLoading || backendStatus === 'checking' || backendStatus === 'waking';
+    const isFormDisabled = isLoading || backendStatus === 'checking' || backendStatus === 'waking';
 
-    const statusConfig: Record<
-        BackendStatus,
-        { icon: ReactNode; text: string; color: string; bg: string }
-    > = {
-        checking: {
-            icon: (
-                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-            ),
-            text: 'Sprawdzanie połączenia...',
-            color: 'text-blue-600',
-            bg: 'bg-blue-50 border-blue-200',
-        },
-        waking: {
-            icon: (
-                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-            ),
-            text: `Budzenie serwera... (${elapsedSeconds}s)`,
-            color: 'text-blue-700',
-            bg: 'bg-blue-50 border-blue-200',
-        },
-        ready: {
-            icon: (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-            ),
-            text: 'Serwer gotowy',
-            color: 'text-blue-800',
-            bg: 'bg-blue-100 border-blue-300',
-        },
-        error: {
-            icon: (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                          d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            ),
-            text: 'Nie można połączyć z serwerem',
-            color: 'text-red-700',
-            bg: 'bg-red-50 border-red-200',
-        },
+    const statusBanner: Record<BackendStatus, { icon: ReactNode; text: string; cls: string }> = {
+        checking: { icon: <Loader2 className="h-4 w-4 animate-spin" />, text: 'Sprawdzanie połączenia...', cls: 'bg-primary/10 text-primary border-primary/20' },
+        waking: { icon: <Loader2 className="h-4 w-4 animate-spin" />, text: `Budzenie serwera… (${elapsedSeconds}s)`, cls: 'bg-primary/10 text-primary border-primary/20' },
+        ready: { icon: <CheckCircle2 className="h-4 w-4" />, text: 'Serwer gotowy', cls: 'bg-status-accepted/10 text-status-accepted border-status-accepted/20' },
+        error: { icon: <AlertCircle className="h-4 w-4" />, text: 'Brak połączenia z serwerem', cls: 'bg-destructive/10 text-destructive border-destructive/20' },
     };
 
-    const currentStatus = statusConfig[backendStatus];
+    const banner = statusBanner[backendStatus];
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-cyan-50 dark:from-slate-900 dark:to-slate-800 px-4">
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-40 -right-40 w-80 h-80 bg-cyan-200 dark:bg-cyan-900 rounded-full opacity-20 blur-3xl" />
-                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-200 dark:bg-blue-900 rounded-full opacity-20 blur-3xl" />
-            </div>
+        <div className="relative flex min-h-screen items-center justify-center bg-background px-4">
+            {/* Mesh background */}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-mesh opacity-60" />
 
             <div className="relative w-full max-w-md">
-                <div className="bg-card border-border border rounded-2xl shadow-xl shadow-cyan-500/10 p-8">
-                    <div className="text-center mb-8">
-                        <Image
-                            src="/android-chrome-512x512.png"
-                            alt="SmartQuote AI"
-                            width={64}
-                            height={64}
-                            className="mx-auto mb-4"
-                            priority
-                        />
-                        <h1 className="text-2xl font-bold text-foreground">SmartQuote AI</h1>
-                        <p className="text-muted-foreground mt-2">Zaloguj się do swojego konta</p>
+                {/* Card */}
+                <div className="rounded-2xl border border-border bg-card p-8 shadow-elevated">
+                    {/* Logo + brand */}
+                    <div className="mb-8 text-center">
+                        <div className="mx-auto mb-4 grid h-16 w-16 place-items-center overflow-hidden rounded-2xl bg-gradient-primary shadow-glow ring-1 ring-white/20">
+                            <Image src="/logo.svg" alt="SmartQuote" width={40} height={40} className="object-contain" priority />
+                        </div>
+                        <h1 className="text-2xl font-bold tracking-tight">SmartQuote</h1>
+                        <p className="mt-1 text-sm text-muted-foreground">Zaloguj się do panelu CRM</p>
                     </div>
 
-                    <div className={`mb-6 p-3 rounded-lg border flex items-center gap-3 transition-all duration-500 ${currentStatus.bg}`}>
-                        <div className={currentStatus.color}>{currentStatus.icon}</div>
-                        <div className="flex-1 min-w-0">
-                            <p className={`text-sm font-medium ${currentStatus.color}`}>{currentStatus.text}</p>
-                            {backendStatus === 'waking' && (
-                                <p className="text-xs text-blue-600 mt-0.5">
-                                    Darmowy serwer wymaga rozruchu — to może potrwać do 60s
-                                </p>
-                            )}
-                        </div>
+                    {/* Backend status banner */}
+                    <div className={cn('mb-6 flex items-center gap-3 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all', banner.cls)}>
+                        {banner.icon}
+                        <span className="flex-1">{banner.text}</span>
+                        {backendStatus === 'waking' && (
+                            <span className="text-xs opacity-70">do 60s</span>
+                        )}
                         {backendStatus === 'error' && (
-                            <button
-                                onClick={handleRetry}
-                                className="text-xs font-medium text-red-600 hover:text-red-700 underline flex-shrink-0"
-                            >
-                                Ponów
-                            </button>
+                            <button onClick={handleRetry} className="shrink-0 text-xs underline opacity-80 hover:opacity-100">Ponów</button>
                         )}
                     </div>
 
+                    {/* Wake progress */}
                     {backendStatus === 'waking' && (
-                        <div className="mb-6">
-                            <div className="h-1.5 bg-blue-100 rounded-full overflow-hidden">
-                                <div
-                                    className="h-full bg-gradient-to-r from-blue-400 to-blue-500 rounded-full transition-all duration-1000 ease-out"
-                                    style={{ width: `${Math.min((wakeAttempt / 12) * 100, 95)}%` }}
-                                />
-                            </div>
+                        <div className="mb-6 h-1.5 overflow-hidden rounded-full bg-secondary">
+                            <div
+                                className="h-full rounded-full bg-gradient-primary transition-all duration-1000"
+                                style={{ width: `${Math.min((wakeAttempt / 12) * 100, 95)}%` }}
+                            />
                         </div>
                     )}
 
+                    {/* Error */}
                     {error && (
-                        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-3">
-                            <svg className="w-5 h-5 text-red-500 dark:text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span className="text-red-700 dark:text-red-400 text-sm">{error}</span>
+                        <div className="mb-5 flex items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-sm text-destructive">
+                            <AlertCircle className="h-4 w-4 shrink-0" />
+                            {error}
                         </div>
                     )}
 
-                    <form
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            void handleLogin();
-                        }}
-                        className="space-y-5"
-                    >
+                    {/* Form */}
+                    <form onSubmit={(e) => { e.preventDefault(); void handleLogin(); }} className="space-y-4">
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-muted-foreground mb-2">
+                            <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-foreground">
                                 Adres email
                             </label>
                             <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                              d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                                    </svg>
-                                </div>
+                                <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                 <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    autoComplete="email"
-                                    required
-                                    value={email}
-                                    onChange={e => setEmail(e.target.value)}
-                                    disabled={isFormDisabled}
-                                    className="block w-full pl-10 pr-4 py-3 border rounded-lg border-border bg-card text-foreground
-                                    focus:ring-2 focus:ring-cyan-500 focus:border-transparent
-                                    disabled:opacity-50 transition-all duration-200"
+                                    id="email" name="email" type="email" autoComplete="email" required
+                                    value={email} onChange={e => setEmail(e.target.value)} disabled={isFormDisabled}
                                     placeholder="jan@firma.pl"
+                                    className="h-11 w-full rounded-lg border border-border bg-card pl-9 pr-4 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/30 disabled:opacity-50"
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-muted-foreground mb-2">
+                            <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-foreground">
                                 Hasło
                             </label>
                             <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                    </svg>
-                                </div>
+                                <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                 <input
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    autoComplete="current-password"
-                                    required
-                                    value={password}
-                                    onChange={e => setPassword(e.target.value)}
-                                    disabled={isFormDisabled}
-                                    className="block w-full pl-10 pr-4 py-3 border rounded-lg border-border bg-card text-foreground
-                                    focus:ring-2 focus:ring-cyan-500 focus:border-transparent
-                                    disabled:opacity-50 transition-all duration-200"
+                                    id="password" name="password" type="password" autoComplete="current-password" required
+                                    value={password} onChange={e => setPassword(e.target.value)} disabled={isFormDisabled}
                                     placeholder="••••••••"
+                                    className="h-11 w-full rounded-lg border border-border bg-card pl-9 pr-4 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/30 disabled:opacity-50"
                                 />
                             </div>
                         </div>
@@ -286,47 +171,30 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={isFormDisabled}
-                            className="w-full py-3 px-4 bg-gradient-to-r bg-gradient-primary
-                            text-white font-semibold rounded-lg shadow-lg shadow-cyan-500/30
-                            hover:from-cyan-600 hover:to-blue-700
-                            focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2
-                            disabled:opacity-70 disabled:cursor-not-allowed
-                            transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                            className="mt-2 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-primary text-sm font-semibold text-white shadow-glow ring-1 ring-white/15 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            {isLoading ? (
-                                <span className="inline-flex items-center justify-center gap-2">
-                                    <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                        <path className="opacity-75" fill="currentColor"
-                                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                    </svg>
-                                    Logowanie...
-                                </span>
-                            ) : backendStatus !== 'ready' ? (
-                                'Oczekiwanie na serwer...'
-                            ) : (
-                                'Zaloguj się'
-                            )}
+                            {isLoading
+                                ? <><Loader2 className="h-4 w-4 animate-spin" /> Logowanie…</>
+                                : backendStatus !== 'ready'
+                                    ? 'Oczekiwanie na serwer…'
+                                    : 'Zaloguj się'
+                            }
                         </button>
                     </form>
 
-                    <div className="mt-6 text-center">
-                        <p className="text-sm text-muted-foreground">
-                            Nie masz konta?{' '}
-                            <Link
-                                href="/register"
-                                className="font-medium text-primary hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors"
-                            >
-                                Zarejestruj się
-                            </Link>
-                        </p>
+                    <div className="mt-6 text-center text-sm text-muted-foreground">
+                        Nie masz konta?{' '}
+                        <Link href="/register" className="font-semibold text-primary hover:underline">
+                            Zarejestruj się
+                        </Link>
                     </div>
                 </div>
 
-                <p className="text-center text-xs text-muted-foreground mt-6">
-                    © 2026 SmartQuote AI by <a href="https://shellty-it.github.io/" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
-                    Shellty
-                </a>
+                <p className="mt-6 text-center text-xs text-muted-foreground">
+                    © 2026 SmartQuote AI by{' '}
+                    <a href="https://shellty-it.github.io/" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
+                        Shellty IT
+                    </a>
                 </p>
             </div>
         </div>

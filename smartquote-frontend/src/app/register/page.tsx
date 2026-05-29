@@ -124,32 +124,30 @@ export default function RegisterPage() {
 
     if (success) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-cyan-50 dark:from-slate-900 dark:to-slate-800 px-4">
+            <div className="relative flex min-h-screen items-center justify-center bg-background px-4">
                 <div className="bg-card border-border border rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 rounded-full bg-gradient-primary shadow-glow flex items-center justify-center mx-auto mb-4">
                         <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                     </div>
                     <h2 className="text-2xl font-bold text-foreground mb-2">Konto utworzone!</h2>
                     <p className="text-muted-foreground mb-4">Za chwilę zostaniesz przekierowany do logowania...</p>
-                    <div className="w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto" />
+                    <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-cyan-50 dark:from-slate-900 dark:to-slate-800 px-4">
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-40 -right-40 w-80 h-80 bg-cyan-200 dark:bg-cyan-900 rounded-full opacity-20 blur-3xl" />
-                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-200 dark:bg-blue-900 rounded-full opacity-20 blur-3xl" />
+        <div className="relative flex min-h-screen items-center justify-center bg-background px-4">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-mesh opacity-60">
             </div>
 
             <div className="relative w-full max-w-md">
-                <div className="bg-card border-border border rounded-2xl shadow-xl shadow-cyan-500/10 p-8">
+                <div className="rounded-2xl border border-border bg-card p-8 shadow-elevated">
                     <div className="text-center mb-8">
-                        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br bg-gradient-primary rounded-xl mb-4 shadow-lg shadow-cyan-500/30">
+                        <div className="mx-auto mb-4 grid h-16 w-16 place-items-center overflow-hidden rounded-2xl bg-gradient-primary shadow-glow ring-1 ring-white/20">
                             <svg
                                 className="w-8 h-8 text-white"
                                 fill="none"
@@ -169,9 +167,9 @@ export default function RegisterPage() {
                     </div>
 
                     {errors.general && (
-                        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-3">
+                        <div className="mb-6 p-4 bg-destructive/10 border border-destructive/25 rounded-lg flex items-center gap-3">
                             <svg
-                                className="w-5 h-5 text-red-500 dark:text-red-400 flex-shrink-0"
+                                className="w-5 h-5 text-destructive flex-shrink-0"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -183,7 +181,7 @@ export default function RegisterPage() {
                                     d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                                 />
                             </svg>
-                            <span className="text-red-700 dark:text-red-400 text-sm">{errors.general}</span>
+                            <span className="text-destructive text-sm">{errors.general}</span>
                         </div>
                     )}
 
@@ -207,9 +205,9 @@ export default function RegisterPage() {
                                     onChange={handleChange}
                                     disabled={isLoading}
                                     className={`block w-full pl-10 pr-4 py-3 border rounded-lg border-border bg-card text-foreground
-                    focus:ring-2 focus:ring-cyan-500 focus:border-transparent
+                    focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/30
                     disabled:opacity-50 transition-all duration-200
-                    ${errors.name ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20' : ''}`}
+                    ${errors.name ? 'border-destructive bg-destructive/5' : ''}`}
                                     placeholder="Jan Kowalski"
                                 />
                             </div>
@@ -238,9 +236,9 @@ export default function RegisterPage() {
                                     onChange={handleChange}
                                     disabled={isLoading}
                                     className={`block w-full pl-10 pr-4 py-3 border rounded-lg border-border bg-card text-foreground
-                    focus:ring-2 focus:ring-cyan-500 focus:border-transparent
+                    focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/30
                     disabled:opacity-50 transition-all duration-200
-                    ${errors.email ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20' : ''}`}
+                    ${errors.email ? 'border-destructive bg-destructive/5' : ''}`}
                                     placeholder="jan@firma.pl"
                                 />
                             </div>
@@ -269,9 +267,9 @@ export default function RegisterPage() {
                                     onChange={handleChange}
                                     disabled={isLoading}
                                     className={`block w-full pl-10 pr-4 py-3 border rounded-lg border-border bg-card text-foreground
-                    focus:ring-2 focus:ring-cyan-500 focus:border-transparent
+                    focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/30
                     disabled:opacity-50 transition-all duration-200
-                    ${errors.password ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20' : ''}`}
+                    ${errors.password ? 'border-destructive bg-destructive/5' : ''}`}
                                     placeholder="Min. 8 znaków"
                                 />
                             </div>
@@ -303,9 +301,9 @@ export default function RegisterPage() {
                                     onChange={handleChange}
                                     disabled={isLoading}
                                     className={`block w-full pl-10 pr-4 py-3 border rounded-lg border-border bg-card text-foreground
-                    focus:ring-2 focus:ring-cyan-500 focus:border-transparent
+                    focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/30
                     disabled:opacity-50 transition-all duration-200
-                    ${errors.confirmPassword ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20' : ''}`}
+                    ${errors.confirmPassword ? 'border-destructive bg-destructive/5' : ''}`}
                                     placeholder="Powtórz hasło"
                                 />
                             </div>

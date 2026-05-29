@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Card } from '@/components/ui';
+
 import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import type { ApiKey, CreateApiKeyInput } from '@/types';
@@ -263,14 +263,14 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                 ) : (
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-muted-foreground mb-2">
+                            <label className="mb-1.5 block text-sm font-medium text-foreground">
                                 Nazwa klucza
                             </label>
                             <input
                                 type="text"
                                 value={newKeyName}
                                 onChange={e => setNewKeyName(e.target.value)}
-                                className="w-full px-4 py-2.5 border rounded-lg border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500"
+                                className="w-full px-4 py-2.5 border rounded-lg border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30/20 focus:border-primary"
                                 placeholder="np. Integracja CRM"
                                 autoFocus
                             />

@@ -34,7 +34,7 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
             >
                 <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
                     <span className={`flex-shrink-0 w-3 h-3 rounded-full mt-1 sm:mt-0 ${
-                        insight.outcome === 'ACCEPTED' ? 'bg-emerald-500' : 'bg-red-500'
+                        insight.outcome === 'ACCEPTED' ? 'bg-status-accepted' : 'bg-status-rejected'
                     }`} />
                     <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
@@ -283,7 +283,7 @@ export default function AIInsightsPage() {
                                 </svg>
                             </div>
                             <div>
-                                <h1 className="text-xl sm:text-2xl font-bold text-foreground">Wnioski AI</h1>
+                                <h1 className="text-xl sm:text-3xl font-bold tracking-tight">Wnioski AI</h1>
                                 <p className="text-sm text-muted-foreground">
                                     Analiza zakończonych ofert — {meta.total} {meta.total === 1 ? 'wniosek' : meta.total < 5 ? 'wnioski' : 'wniosków'}
                                 </p>

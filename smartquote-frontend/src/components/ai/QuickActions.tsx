@@ -34,7 +34,7 @@ const quickActions = [
         icon: '📅',
         label: 'Zaległe zadania',
         prompt: 'Jakie mam zaległe follow-upy i zadania do wykonania?',
-        color: 'bg-red-500',
+        color: 'bg-status-rejected',
     },
     {
         icon: '💡',

@@ -132,7 +132,7 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
                     </svg>
                     Powrót
                 </button>
-                <h1 className="text-2xl font-bold text-foreground">Edytuj follow-up</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Edytuj follow-up</h1>
                 <p className="text-muted-foreground mt-1">Modyfikuj szczegóły zadania</p>
             </div>
 

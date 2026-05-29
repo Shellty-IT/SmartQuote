@@ -102,7 +102,7 @@ function NewFollowUpForm() {
                     </svg>
                     Powrót
                 </button>
-                <h1 className="text-2xl font-bold text-foreground">Nowy follow-up</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Nowy follow-up</h1>
                 <p className="text-muted-foreground mt-1">Utwórz nowe zadanie lub przypomnienie</p>
             </div>
 

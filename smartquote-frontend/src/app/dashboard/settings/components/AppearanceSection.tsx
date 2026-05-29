@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Card } from '@/components/ui';
+
 import { useTheme } from '@/app/providers';
 import type { UserSettings, UpdateSettingsInput } from '@/types';
 
@@ -126,7 +126,7 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
                             disabled={isSaving}
                             className={`relative rounded-2xl border-2 transition-all duration-300 text-left overflow-hidden group ${
                                 theme === t.id
-                                    ? 'border-cyan-500 shadow-lg shadow-cyan-500/20'
+                                    ? 'border-primary shadow-lg shadow-cyan-500/20'
                                     : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                             } ${isSaving ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                         >
@@ -197,7 +197,7 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
                                 disabled={isSaving}
                                 className={`flex items-center gap-3 px-5 py-3.5 rounded-xl border-2 transition-all ${
                                     isActive
-                                        ? 'border-cyan-500 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400'
+                                        ? 'border-primary bg-cyan-500/10 text-cyan-700 dark:text-cyan-400'
                                         : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700/50'
                                 } ${isSaving ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                             >

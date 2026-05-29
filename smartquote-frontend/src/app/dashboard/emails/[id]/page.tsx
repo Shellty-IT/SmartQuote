@@ -13,8 +13,8 @@ interface PageProps {
 
 function EmailStatusBadge({ status }: { status: EmailLogStatus }) {
     const config: Record<EmailLogStatus, { label: string; classes: string }> = {
-        SENT: { label: 'Wysłano', classes: 'bg-emerald-500/15 text-status-accepted' },
-        FAILED: { label: 'Błąd wysyłki', classes: 'bg-red-500/15 text-status-rejected' },
+        SENT: { label: 'Wysłano', classes: 'bg-status-accepted/15 text-status-accepted' },
+        FAILED: { label: 'Błąd wysyłki', classes: 'bg-status-rejected/15 text-status-rejected' },
         DRAFT: { label: 'Szkic', classes: 'bg-slate-500/15 text-slate-600 dark:text-slate-400' },
     };
     const { label, classes } = config[status];
@@ -36,11 +36,11 @@ function AttachmentItem({ att }: { att: EmailAttachment }) {
     return (
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
             {isPdf ? (
-                <svg className="w-4 h-4 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-4 h-4 text-status-rejected flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
                 </svg>
             ) : (
-                <svg className="w-4 h-4 text-cyan-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-4 h-4 text-primary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                 </svg>
             )}
@@ -131,7 +131,7 @@ export default function EmailDetailPage({ params }: PageProps) {
                 {log.status === 'DRAFT' && (
                     <button
                         onClick={() => router.push(`/dashboard/emails/${id}/edit`)}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-medium transition-colors"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-primary hover:brightness-110 text-white text-sm font-medium transition-colors"
                     >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />

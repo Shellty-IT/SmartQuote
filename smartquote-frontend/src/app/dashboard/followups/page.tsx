@@ -12,9 +12,9 @@ import { useToast } from '@/contexts/ToastContext';
 
 const statusConfig: Record<FollowUpStatus, { label: string; color: string; bgColor: string }> = {
     PENDING: { label: 'Oczekujące', color: 'text-amber-600', bgColor: 'bg-amber-500/15' },
-    COMPLETED: { label: 'Wykonane', color: 'text-status-accepted', bgColor: 'bg-emerald-500/15' },
+    COMPLETED: { label: 'Wykonane', color: 'text-status-accepted', bgColor: 'bg-status-accepted/15' },
     CANCELLED: { label: 'Anulowane', color: 'text-slate-500', bgColor: 'bg-slate-500/15' },
-    OVERDUE: { label: 'Zaległe', color: 'text-red-600', bgColor: 'bg-red-500/15' },
+    OVERDUE: { label: 'Zaległe', color: 'text-status-rejected', bgColor: 'bg-status-rejected/15' },
 };
 
 const typeConfig: Record<FollowUpType, { label: string; icon: string }> = {
@@ -30,7 +30,7 @@ const priorityConfig: Record<Priority, { label: string; color: string; bgColor: 
     LOW: { label: 'Niski', color: 'text-slate-500', bgColor: 'bg-slate-500/15' },
     MEDIUM: { label: 'Średni', color: 'text-blue-600', bgColor: 'bg-blue-500/15' },
     HIGH: { label: 'Wysoki', color: 'text-orange-600', bgColor: 'bg-orange-500/15' },
-    URGENT: { label: 'Pilne', color: 'text-red-600', bgColor: 'bg-red-500/15' },
+    URGENT: { label: 'Pilne', color: 'text-status-rejected', bgColor: 'bg-status-rejected/15' },
 };
 
 export default function FollowUpsPage() {
@@ -104,7 +104,7 @@ export default function FollowUpsPage() {
         <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground">Follow-upy</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">Follow-upy</h1>
                     <p className="text-muted-foreground mt-1">Zarządzaj zadaniami i przypomnieniami</p>
                 </div>
                 <Button onClick={() => router.push('/dashboard/followups/new')}>
@@ -127,7 +127,7 @@ export default function FollowUpsPage() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-muted-foreground">Oczekujące</p>
-                                <p className="text-2xl font-bold text-foreground">{stats.byStatus?.PENDING || 0}</p>
+                                <p className="text-3xl font-bold tracking-tight">{stats.byStatus?.PENDING || 0}</p>
                             </div>
                             <div
                                 className="w-10 h-10 rounded-lg flex items-center justify-center"
@@ -141,7 +141,7 @@ export default function FollowUpsPage() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-muted-foreground">Zaległe</p>
-                                <p className="text-2xl font-bold text-red-500">{stats.overdue || 0}</p>
+                                <p className="text-2xl font-bold text-status-rejected">{stats.overdue || 0}</p>
                             </div>
                             <div
                                 className="w-10 h-10 rounded-lg flex items-center justify-center"
@@ -169,7 +169,7 @@ export default function FollowUpsPage() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-muted-foreground">Wykonane (miesiąc)</p>
-                                <p className="text-2xl font-bold text-emerald-500">{stats.completedThisMonth || 0}</p>
+                                <p className="text-2xl font-bold text-status-accepted">{stats.completedThisMonth || 0}</p>
                             </div>
                             <div
                                 className="w-10 h-10 rounded-lg flex items-center justify-center"
@@ -197,7 +197,7 @@ export default function FollowUpsPage() {
                         />
                     </div>
                     <select
-                        className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                        className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30/20"
                         style={{
                             backgroundColor: 'var(--input-bg)',
                             borderColor: 'var(--divider)',
@@ -213,7 +213,7 @@ export default function FollowUpsPage() {
                         <option value="CANCELLED">Anulowane</option>
                     </select>
                     <select
-                        className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                        className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30/20"
                         style={{
                             backgroundColor: 'var(--input-bg)',
                             borderColor: 'var(--divider)',
@@ -231,7 +231,7 @@ export default function FollowUpsPage() {
                         <option value="OTHER">Inne</option>
                     </select>
                     <select
-                        className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                        className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30/20"
                         style={{
                             backgroundColor: 'var(--input-bg)',
                             borderColor: 'var(--divider)',
@@ -286,13 +286,13 @@ export default function FollowUpsPage() {
                         <table className="w-full">
                             <thead>
                             <tr className="border-b" style={{ borderColor: 'var(--divider)', backgroundColor: 'var(--section-bg)' }}>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Follow-up</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Powiązanie</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Typ</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">Priorytet</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Termin</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Status</th>
-                                <th className="px-6 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Akcje</th>
+                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Follow-up</th>
+                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground hidden md:table-cell">Powiązanie</th>
+                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground hidden sm:table-cell">Typ</th>
+                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground hidden lg:table-cell">Priorytet</th>
+                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Termin</th>
+                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground hidden sm:table-cell">Status</th>
+                                <th className="px-6 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Akcje</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -336,13 +336,13 @@ export default function FollowUpsPage() {
                         <table className="w-full">
                             <thead>
                             <tr className="border-b" style={{ borderColor: 'var(--divider)', backgroundColor: 'var(--section-bg)' }}>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Follow-up</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Powiązanie</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Typ</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">Priorytet</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Termin</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Status</th>
-                                <th className="px-6 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Akcje</th>
+                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Follow-up</th>
+                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground hidden md:table-cell">Powiązanie</th>
+                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground hidden sm:table-cell">Typ</th>
+                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground hidden lg:table-cell">Priorytet</th>
+                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Termin</th>
+                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground hidden sm:table-cell">Status</th>
+                                <th className="px-6 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Akcje</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -355,7 +355,7 @@ export default function FollowUpsPage() {
                                 return (
                                     <tr
                                         key={followUp.id}
-                                        className={`border-b hover:bg-secondary/60 transition-colors cursor-pointer ${
+                                        className={`border-b cursor-pointer border-b border-border transition-colors hover:bg-secondary/40 ${
                                             overdue ? 'border-l-4 border-l-red-500' : ''
                                         }`}
                                         style={{
@@ -367,7 +367,7 @@ export default function FollowUpsPage() {
                                         <td className="px-6 py-4">
                                             <div className="flex items-start gap-2">
                                                 {overdue && (
-                                                    <span className="text-red-500 animate-pulse flex-shrink-0 mt-0.5" title="Zaległy!">⚠️</span>
+                                                    <span className="text-status-rejected animate-pulse flex-shrink-0 mt-0.5" title="Zaległy!">⚠️</span>
                                                 )}
                                                 <div>
                                                     <p className="font-medium text-foreground">{followUp.title}</p>
@@ -407,7 +407,7 @@ export default function FollowUpsPage() {
                                             </Badge>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className={`text-sm ${overdue ? 'text-red-500 font-semibold' : 'text-muted-foreground'}`}>
+                                            <span className={`text-sm ${overdue ? 'text-status-rejected font-semibold' : 'text-muted-foreground'}`}>
                                                 {formatDate(followUp.dueDate)}
                                                 {overdue && (
                                                     <span className="block text-xs text-red-400 mt-0.5">Zaległy!</span>

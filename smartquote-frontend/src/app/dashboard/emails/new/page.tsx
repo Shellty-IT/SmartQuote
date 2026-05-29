@@ -47,7 +47,7 @@ function FormLabel({ children, required }: { children: React.ReactNode; required
     return (
         <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--label-text)' }}>
             {children}
-            {required && <span className="text-red-500 ml-0.5">*</span>}
+            {required && <span className="text-status-rejected ml-0.5">*</span>}
         </label>
     );
 }
@@ -146,7 +146,7 @@ function EmailComposerContent() {
                     </svg>
                 </button>
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground">Nowa wiadomość</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">Nowa wiadomość</h1>
                     <p className="text-muted-foreground mt-0.5">Napisz i wyślij wiadomość do klienta</p>
                 </div>
             </div>
@@ -219,7 +219,7 @@ function EmailComposerContent() {
                                     placeholder="odbiorca@firma.pl"
                                     hasError={!!errors.to}
                                 />
-                                {errors.to && <p className="mt-1 text-xs text-red-500">{errors.to}</p>}
+                                {errors.to && <p className="mt-1 text-xs text-status-rejected">{errors.to}</p>}
                             </div>
                             <div>
                                 <FormLabel>Imię i nazwisko (opcjonalnie)</FormLabel>
@@ -243,7 +243,7 @@ function EmailComposerContent() {
                                 placeholder="Temat wiadomości"
                                 hasError={!!errors.subject}
                             />
-                            {errors.subject && <p className="mt-1 text-xs text-red-500">{errors.subject}</p>}
+                            {errors.subject && <p className="mt-1 text-xs text-status-rejected">{errors.subject}</p>}
                         </div>
                         <div>
                             <FormLabel required>Treść</FormLabel>
@@ -252,7 +252,7 @@ function EmailComposerContent() {
                                 onChange={setBody}
                                 placeholder="Wpisz treść wiadomości..."
                             />
-                            {errors.body && <p className="mt-1 text-xs text-red-500">{errors.body}</p>}
+                            {errors.body && <p className="mt-1 text-xs text-status-rejected">{errors.body}</p>}
                         </div>
                     </div>
                 </SectionCard>
@@ -348,7 +348,7 @@ function EmailComposerContent() {
                                         <button
                                             type="button"
                                             onClick={() => handleRemoveAttachment(i)}
-                                            className="p-1 rounded-lg transition-colors hover:text-red-500"
+                                            className="p-1 rounded-lg transition-colors hover:text-status-rejected"
                                             style={{ color: 'var(--muted-text)' }}
                                         >
                                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -390,7 +390,7 @@ function EmailComposerContent() {
                         type="button"
                         onClick={handleSend}
                         disabled={isSending || isSavingDraft}
-                        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-medium transition-colors disabled:opacity-60"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-primary hover:brightness-110 text-white text-sm font-medium transition-colors disabled:opacity-60"
                     >
                         {isSending ? (
                             <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -414,7 +414,7 @@ export default function NewEmailPage() {
     return (
         <Suspense fallback={
             <div className="p-8 flex items-center justify-center">
-                <svg className="w-6 h-6 animate-spin text-cyan-500" fill="none" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 animate-spin text-primary" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                 </svg>

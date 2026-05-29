@@ -39,48 +39,48 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
         <div className="space-y-4">
             <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-1">
-                    Nazwa szablonu <span className="text-red-500">*</span>
+                    Nazwa szablonu <span className="text-status-rejected">*</span>
                 </label>
                 <input
                     type="text"
                     value={name}
                     onChange={e => setName(e.target.value)}
                     placeholder="np. Oferta premium"
-                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 bg-white dark:bg-slate-800 ${
+                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30 bg-white dark:bg-slate-800 ${
                         errors.name ? 'border-red-400' : 'border-slate-200 dark:border-slate-700'
                     }`}
                 />
-                {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
+                {errors.name && <p className="mt-1 text-xs text-status-rejected">{errors.name}</p>}
             </div>
             <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-1">
-                    Temat wiadomości <span className="text-red-500">*</span>
+                    Temat wiadomości <span className="text-status-rejected">*</span>
                 </label>
                 <input
                     type="text"
                     value={subject}
                     onChange={e => setSubject(e.target.value)}
                     placeholder="Temat emaila"
-                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 bg-white dark:bg-slate-800 ${
+                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30 bg-white dark:bg-slate-800 ${
                         errors.subject ? 'border-red-400' : 'border-slate-200 dark:border-slate-700'
                     }`}
                 />
-                {errors.subject && <p className="mt-1 text-xs text-red-500">{errors.subject}</p>}
+                {errors.subject && <p className="mt-1 text-xs text-status-rejected">{errors.subject}</p>}
             </div>
             <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-1">
-                    Treść szablonu <span className="text-red-500">*</span>
+                    Treść szablonu <span className="text-status-rejected">*</span>
                 </label>
                 <textarea
                     value={body}
                     onChange={e => setBody(e.target.value)}
                     rows={10}
                     placeholder="Treść wiadomości email..."
-                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 bg-white dark:bg-slate-800 resize-y ${
+                    className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30/30 bg-white dark:bg-slate-800 resize-y ${
                         errors.body ? 'border-red-400' : 'border-slate-200 dark:border-slate-700'
                     }`}
                 />
-                {errors.body && <p className="mt-1 text-xs text-red-500">{errors.body}</p>}
+                {errors.body && <p className="mt-1 text-xs text-status-rejected">{errors.body}</p>}
                 <p className="mt-1 text-xs text-muted-foreground">
                     Możesz używać zmiennych: <code className="bg-slate-100 dark:bg-slate-800 px-1 rounded">{'{clientName}'}</code>, <code className="bg-slate-100 dark:bg-slate-800 px-1 rounded">{'{offerNumber}'}</code>, <code className="bg-slate-100 dark:bg-slate-800 px-1 rounded">{'{contractNumber}'}</code>
                 </p>
@@ -98,7 +98,7 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
                     type="button"
                     onClick={handleSubmit}
                     disabled={isSaving}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-medium transition-colors disabled:opacity-60"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-primary hover:brightness-110 text-white text-sm font-medium transition-colors disabled:opacity-60"
                 >
                     {isSaving && (
                         <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -196,13 +196,13 @@ export default function EmailTemplatesPage() {
                         </svg>
                     </button>
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">Szablony wiadomości</h1>
+                        <h1 className="text-3xl font-bold tracking-tight">Szablony wiadomości</h1>
                         <p className="text-muted-foreground mt-0.5">Zarządzaj szablonami email</p>
                     </div>
                 </div>
                 <button
                     onClick={() => { setShowNewForm(true); setEditingId(null); }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-medium transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-primary hover:brightness-110 text-white text-sm font-medium transition-colors"
                 >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -313,7 +313,7 @@ export default function EmailTemplatesPage() {
                                 <div key={t.id} className="bg-card border-border border rounded-xl overflow-hidden">
                                     <div className="flex items-center justify-between p-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center flex-shrink-0">
+                                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                                                 <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                                                 </svg>
@@ -345,7 +345,7 @@ export default function EmailTemplatesPage() {
                                             </button>
                                             <button
                                                 onClick={() => setDeleteConfirmId(t.id)}
-                                                className="p-1.5 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-secondary/60 rounded-lg transition-colors"
+                                                className="p-1.5 text-muted-foreground hover:text-status-rejected dark:hover:text-red-400 hover:bg-secondary/60 rounded-lg transition-colors"
                                                 title="Usuń"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

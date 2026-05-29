@@ -14,12 +14,12 @@ const PER_PAGE = 20;
 
 const typeConfig: Record<NotificationType, { icon: string; label: string; colorClass: string }> = {
     OFFER_VIEWED: { icon: '👁️', label: 'Wyświetlenie oferty', colorClass: 'bg-blue-500/15 text-blue-700' },
-    OFFER_ACCEPTED: { icon: '✅', label: 'Akceptacja oferty', colorClass: 'bg-emerald-500/15 text-emerald-700' },
-    OFFER_REJECTED: { icon: '❌', label: 'Odrzucenie oferty', colorClass: 'bg-red-500/15 text-red-700' },
+    OFFER_ACCEPTED: { icon: '✅', label: 'Akceptacja oferty', colorClass: 'bg-status-accepted/15 text-emerald-700' },
+    OFFER_REJECTED: { icon: '❌', label: 'Odrzucenie oferty', colorClass: 'bg-status-rejected/15 text-red-700' },
     OFFER_COMMENT: { icon: '💬', label: 'Komentarz', colorClass: 'bg-primary/10 text-cyan-700' },
     AI_INSIGHT: { icon: '✨', label: 'Wgląd AI', colorClass: 'bg-purple-500/15 text-purple-700' },
     FOLLOW_UP_REMINDER: { icon: '⏰', label: 'Follow-up', colorClass: 'bg-amber-500/15 text-amber-700' },
-    CONTRACT_SIGNED: { icon: '✍️', label: 'Podpis umowy', colorClass: 'bg-emerald-500/15 text-emerald-700' },
+    CONTRACT_SIGNED: { icon: '✍️', label: 'Podpis umowy', colorClass: 'bg-status-accepted/15 text-emerald-700' },
     SYSTEM: { icon: '⚙️', label: 'Systemowe', colorClass: 'bg-slate-500/15 text-slate-700' },
 };
 
@@ -173,7 +173,7 @@ export default function NotificationsPage() {
                         </svg>
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">Powiadomienia</h1>
+                        <h1 className="text-3xl font-bold tracking-tight">Powiadomienia</h1>
                         <p className="text-sm text-muted-foreground">
                             {allNotifications.length} łącznie • {unreadCount} nieprzeczytanych
                         </p>
@@ -341,7 +341,7 @@ export default function NotificationsPage() {
                                                 )}
                                                 <button
                                                     onClick={(e) => handleDelete(e, notification.id)}
-                                                    className="p-1.5 text-muted-foreground hover:text-red-500 rounded-lg transition-colors"
+                                                    className="p-1.5 text-muted-foreground hover:text-status-rejected rounded-lg transition-colors"
                                                     title="Usuń"
                                                 >
                                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

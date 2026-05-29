@@ -80,7 +80,7 @@ export default function OfferTemplatesPage() {
         <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
                 <div>
-                    <h1 className="text-xl md:text-2xl font-bold text-foreground">Szablony ofert</h1>
+                    <h1 className="text-xl md:text-3xl font-bold tracking-tight">Szablony ofert</h1>
                     <p className="text-sm text-muted-foreground mt-1">
                         Twórz presety pozycji do szybkiego generowania ofert
                     </p>
@@ -135,11 +135,11 @@ export default function OfferTemplatesPage() {
                                 <table className="w-full">
                                     <thead className="bg-surface-subtle border-b border-border">
                                     <tr>
-                                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-left">Nazwa</th>
-                                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-left">Kategoria</th>
-                                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-center">Pozycje</th>
-                                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-center">Płatność</th>
-                                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right">Akcje</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-left">Nazwa</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-left">Kategoria</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-center">Pozycje</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-center">Płatność</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-right">Akcje</th>
                                     </tr>
                                     </thead>
                                     <tbody className="divide-y border-border">
@@ -189,11 +189,11 @@ export default function OfferTemplatesPage() {
                                 <table className="w-full">
                                     <thead className="bg-surface-subtle border-b border-border">
                                     <tr>
-                                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-left">Nazwa</th>
-                                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-left">Kategoria</th>
-                                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-center">Pozycje</th>
-                                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-center">Płatność</th>
-                                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right">Akcje</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-left">Nazwa</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-left">Kategoria</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-center">Pozycje</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-center">Płatność</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-right">Akcje</th>
                                     </tr>
                                     </thead>
                                     <tbody className="divide-y border-border">
@@ -241,7 +241,7 @@ export default function OfferTemplatesPage() {
                                                     </button>
                                                     <button
                                                         onClick={() => setDeleteModal(template)}
-                                                        className="p-2 rounded-lg hover:bg-red-500/10 text-status-rejected transition-colors"
+                                                        className="p-2 rounded-lg hover:bg-status-rejected/10 text-status-rejected transition-colors"
                                                         title="Usuń"
                                                     >
                                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -295,7 +295,7 @@ export default function OfferTemplatesPage() {
                                     </Button>
                                     <button
                                         onClick={() => setDeleteModal(template)}
-                                        className="px-3 py-2 rounded-lg border border-red-500/30 bg-red-500/10 text-status-rejected text-sm font-medium hover:bg-red-500/20 transition-colors"
+                                        className="px-3 py-2 rounded-lg border border-red-500/30 bg-status-rejected/10 text-status-rejected text-sm font-medium hover:bg-status-rejected/20 transition-colors"
                                     >
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

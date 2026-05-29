@@ -144,7 +144,7 @@ export default function TemplateSelector({ isOpen, onClose, onSelect }: Template
                                     onClick={() => setSelected(template.id)}
                                     className={`w-full text-left p-4 rounded-xl border transition-all duration-150 ${
                                         isSelected
-                                            ? 'border-cyan-500 bg-cyan-500/10'
+                                            ? 'border-cyan-500 bg-primary/10'
                                             : 'border-transparent bg-surface-subtle hover:border-cyan-500/40'
                                     }`}
                                 >
@@ -199,7 +199,7 @@ export default function TemplateSelector({ isOpen, onClose, onSelect }: Template
                     <button
                         onClick={handleConfirm}
                         disabled={!selected}
-                        className="px-4 py-2 rounded-lg text-sm font-medium bg-cyan-600 hover:bg-cyan-700 text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="px-4 py-2 rounded-lg text-sm font-medium bg-gradient-primary hover:brightness-110 text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         Wstaw pozycje
                     </button>

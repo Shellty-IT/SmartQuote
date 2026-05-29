@@ -154,7 +154,7 @@ export default function AcceptDialog({
                                         onChange={(e) => setAuditName(e.target.value)}
                                         placeholder="Jan Kowalski"
                                         disabled={isLoading}
-                                        className="w-full px-3 py-2 rounded-lg border border-cyan-300 bg-white text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent disabled:opacity-50"
+                                        className="w-full px-3 py-2 rounded-lg border border-cyan-300 bg-white text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-transparent disabled:opacity-50"
                                     />
                                 </div>
                                 <div>
@@ -167,9 +167,9 @@ export default function AcceptDialog({
                                         onChange={(e) => setAuditEmail(e.target.value)}
                                         placeholder="jan@firma.pl"
                                         disabled={isLoading}
-                                        className="w-full px-3 py-2 rounded-lg border border-cyan-300 bg-white text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent disabled:opacity-50"
+                                        className="w-full px-3 py-2 rounded-lg border border-cyan-300 bg-white text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-transparent disabled:opacity-50"
                                     />
-                                    <p className="text-xs text-cyan-500 mt-1">
+                                    <p className="text-xs text-primary mt-1">
                                         Na ten adres wyślemy potwierdzenie z hashem cyfrowym
                                     </p>
                                 </div>

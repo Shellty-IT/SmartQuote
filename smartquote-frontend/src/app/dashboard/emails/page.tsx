@@ -155,7 +155,7 @@ function EmailListItem({
                 )}
                 <button
                     onClick={e => { e.stopPropagation(); onDelete(item.id); }}
-                    className="p-1.5 rounded-lg transition-colors hover:bg-secondary/60 hover:text-red-500"
+                    className="p-1.5 rounded-lg transition-colors hover:bg-secondary/60 hover:text-status-rejected"
                     style={{ color: 'var(--muted-text)' }}
                     title="Usuń"
                 >
@@ -253,7 +253,7 @@ export default function EmailsPage() {
         <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground">Korespondencja</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">Korespondencja</h1>
                     <p className="text-muted-foreground mt-1">Historia wiadomości email i szkice</p>
                 </div>
                 <div className="flex gap-2">
@@ -269,7 +269,7 @@ export default function EmailsPage() {
                     </Link>
                     <Link
                         href="/dashboard/emails/new"
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-medium transition-colors"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-primary hover:brightness-110 text-white text-sm font-medium transition-colors"
                     >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />

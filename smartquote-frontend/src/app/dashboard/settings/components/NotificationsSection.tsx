@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Card } from '@/components/ui';
+
 import type { UserSettings, UpdateSettingsInput } from '@/types';
 
 interface Props {

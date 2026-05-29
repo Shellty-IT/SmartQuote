@@ -10,7 +10,7 @@ export function ErrorAlert({ message, onDismiss }: ErrorAlertProps) {
     return (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
             <svg
-                className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"
+                className="w-5 h-5 text-status-rejected flex-shrink-0 mt-0.5"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -26,7 +26,7 @@ export function ErrorAlert({ message, onDismiss }: ErrorAlertProps) {
                 <p className="text-sm font-medium text-red-800">{message}</p>
                 <button
                     onClick={onDismiss}
-                    className="text-xs text-red-600 hover:text-red-700 mt-1 underline"
+                    className="text-xs text-status-rejected hover:text-red-700 mt-1 underline"
                 >
                     Zamknij
                 </button>

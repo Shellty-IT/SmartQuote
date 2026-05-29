@@ -13,7 +13,7 @@ const typeConfig: Record<NotificationType, { icon: string; colorClass: string }>
     OFFER_COMMENT: { icon: '💬', colorClass: 'bg-primary/10 text-cyan-700' },
     AI_INSIGHT: { icon: '✨', colorClass: 'bg-purple-500/15 text-purple-700' },
     FOLLOW_UP_REMINDER: { icon: '⏰', colorClass: 'bg-amber-500/15 text-amber-700' },
-    CONTRACT_SIGNED: { icon: '✍️', colorClass: 'bg-emerald-500/15 text-emerald-700' },
+    CONTRACT_SIGNED: { icon: '✍️', colorClass: 'bg-status-accepted/15 text-emerald-700' },
     SYSTEM: { icon: '⚙️', colorClass: 'bg-secondary text-secondary-foreground' },
 };
 
@@ -123,7 +123,7 @@ export default function NotificationBell() {
                     <div className="max-h-[460px] overflow-y-auto">
                         {isLoading ? (
                             <div className="p-8 text-center">
-                                <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto" />
+                                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
                             </div>
                         ) : notifications.length === 0 ? (
                             <div className="p-8 text-center">
@@ -174,7 +174,7 @@ export default function NotificationBell() {
                                                             )}
                                                             <button
                                                                 onClick={(e) => handleDelete(e, notification.id)}
-                                                                className="p-1 text-muted-foreground hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all rounded"
+                                                                className="p-1 text-muted-foreground hover:text-status-rejected opacity-0 group-hover:opacity-100 transition-all rounded"
                                                                 title="Usuń"
                                                             >
                                                                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

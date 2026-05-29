@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Card } from '@/components/ui';
+
 import Button from '@/components/ui/Button';
 import type { ChangePasswordInput } from '@/types';
 
@@ -92,7 +92,7 @@ export default function SecuritySection({ onChangePassword }: Props) {
 
             <div className="space-y-6">
                 <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-2">
+                    <label className="mb-1.5 block text-sm font-medium text-foreground">
                         Obecne hasło
                     </label>
                     <div className="relative">
@@ -103,7 +103,7 @@ export default function SecuritySection({ onChangePassword }: Props) {
                             type={showCurrentPassword ? 'text' : 'password'}
                             value={formData.currentPassword}
                             onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
-                            className="w-full pl-10 pr-12 py-2.5 border rounded-lg border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500"
+                            className="w-full pl-10 pr-12 py-2.5 border rounded-lg border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30/20 focus:border-primary"
                             placeholder="••••••••"
                         />
                         <button
@@ -126,7 +126,7 @@ export default function SecuritySection({ onChangePassword }: Props) {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-2">
+                    <label className="mb-1.5 block text-sm font-medium text-foreground">
                         Nowe hasło
                     </label>
                     <div className="relative">
@@ -137,7 +137,7 @@ export default function SecuritySection({ onChangePassword }: Props) {
                             type={showNewPassword ? 'text' : 'password'}
                             value={formData.newPassword}
                             onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
-                            className="w-full pl-10 pr-12 py-2.5 border rounded-lg border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500"
+                            className="w-full pl-10 pr-12 py-2.5 border rounded-lg border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30/20 focus:border-primary"
                             placeholder="••••••••"
                         />
                         <button
@@ -176,7 +176,7 @@ export default function SecuritySection({ onChangePassword }: Props) {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-2">
+                    <label className="mb-1.5 block text-sm font-medium text-foreground">
                         Potwierdź nowe hasło
                     </label>
                     <div className="relative">
@@ -187,7 +187,7 @@ export default function SecuritySection({ onChangePassword }: Props) {
                             type={showConfirmPassword ? 'text' : 'password'}
                             value={formData.confirmPassword}
                             onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                            className={`w-full pl-10 pr-12 py-2.5 border rounded-lg border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 ${
+                            className={`w-full pl-10 pr-12 py-2.5 border rounded-lg border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30/20 focus:border-primary ${
                                 formData.confirmPassword && !passwordsMatch
                                     ? 'border-red-300 dark:border-red-700'
                                     : ''

@@ -131,7 +131,7 @@ export default function AIAssistantPage() {
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={handleKeyDown}
                                 placeholder="Napisz wiadomość... (Enter aby wysłać, Shift+Enter nowa linia)"
-                                className="w-full px-4 py-3 rounded-xl border resize-none transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                                className="w-full px-4 py-3 rounded-xl border resize-none transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30/20"
                                 style={{
                                     backgroundColor: 'var(--input-bg)',
                                     borderColor: 'var(--divider)',
@@ -176,14 +176,14 @@ export default function AIAssistantPage() {
                                 className="text-center p-3 rounded-xl"
                                 style={{ backgroundColor: 'var(--section-bg)' }}
                             >
-                                <div className="text-2xl font-bold text-cyan-500">{stats.totalClients}</div>
+                                <div className="text-2xl font-bold text-primary">{stats.totalClients}</div>
                                 <div className="text-xs text-muted-foreground">Klienci</div>
                             </div>
                             <div
                                 className="text-center p-3 rounded-xl"
                                 style={{ backgroundColor: 'var(--section-bg)' }}
                             >
-                                <div className="text-2xl font-bold text-emerald-500">{stats.activeOffers}</div>
+                                <div className="text-2xl font-bold text-status-accepted">{stats.activeOffers}</div>
                                 <div className="text-xs text-muted-foreground">Aktywne oferty</div>
                             </div>
                             <div

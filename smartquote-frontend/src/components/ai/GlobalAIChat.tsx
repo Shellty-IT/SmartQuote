@@ -121,7 +121,7 @@ export function GlobalAIChat() {
                             <motion.span
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
-                                className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full z-20"
+                                className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-status-rejected text-white text-xs font-bold rounded-full z-20"
                             >
                                 {unreadCount > 9 ? '9+' : unreadCount}
                             </motion.span>
