@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFollowUps, useFollowUpStats } from '@/hooks/useFollowUps';
-import { Button, Card, Input, Badge, EmptyState, ConfirmDialog } from '@/components/ui';
+import { Button, Input, Badge, EmptyState, ConfirmDialog } from '@/components/ui';
 import { SkeletonStatsCardWithIcon, SkeletonTableRow } from '@/components/ui/Skeleton';
 import { formatDate } from '@/lib/utils';
 import { FollowUp, FollowUpStatus, FollowUpType, Priority } from '@/types';

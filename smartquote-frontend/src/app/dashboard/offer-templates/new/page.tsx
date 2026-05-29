@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Card } from '@/components/ui';
+import { Button } from '@/components/ui';
 import { offerTemplatesApi, ApiError } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
 import type { CreateOfferTemplateInput, CreateOfferTemplateItemInput } from '@/types';

@@ -3,7 +3,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Button, Card } from '@/components/ui';
+import { Button } from '@/components/ui';
 import { formatCurrency } from '@/lib/utils';
 import { ksefApi } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';

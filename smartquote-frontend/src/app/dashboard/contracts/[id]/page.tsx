@@ -218,9 +218,7 @@ export default function ContractDetailsPage({ params }: PageProps) {
                 </Link>
             </div>
         );
-    }
-
-    const statusConfig = getContractStatusConfig(contract.status);
+    }
     const availableActions = STATUS_ACTIONS[contract.status] || [];
     const hasPublicLink = !!contract.publicToken;
 

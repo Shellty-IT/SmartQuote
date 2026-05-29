@@ -5,7 +5,7 @@ import { useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFollowUp } from '@/hooks/useFollowUps';
 import { followUpsApi } from '@/lib/api';
-import { Button, Card, Badge, ConfirmDialog } from '@/components/ui';
+import { Button, Badge, ConfirmDialog } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { formatDate } from '@/lib/utils';
 import { FollowUpStatus, FollowUpType, Priority } from '@/types';

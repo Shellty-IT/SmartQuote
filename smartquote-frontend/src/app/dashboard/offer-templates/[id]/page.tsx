@@ -3,7 +3,7 @@
 
 import { use, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Card } from '@/components/ui';
+import { Button } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { offerTemplatesApi, ApiError } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';

@@ -5,7 +5,7 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useClient } from '@/hooks/useClients';
 import { clientsApi, ApiError } from '@/lib/api';
-import { Button, Input, Select, Textarea, Card } from '@/components/ui';
+import { Button, Input, Select, Textarea } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { UpdateClientInput } from '@/types';
 import { useToast } from '@/contexts/ToastContext';

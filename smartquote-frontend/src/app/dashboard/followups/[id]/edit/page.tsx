@@ -8,7 +8,7 @@ import { followUpsApi } from '@/lib/api';
 import { useClients } from '@/hooks/useClients';
 import { useOffers } from '@/hooks/useOffers';
 import { useContracts } from '@/hooks/useContracts';
-import { Button, Input, Select, Textarea, Card } from '@/components/ui';
+import { Button, Input, Select, Textarea } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { UpdateFollowUpData } from '@/types';
 

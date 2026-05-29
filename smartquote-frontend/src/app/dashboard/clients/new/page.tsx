@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { clientsApi } from '@/lib/api';
-import { Button, Input, Select, Textarea, Card } from '@/components/ui';
+import { Button, Input, Select, Textarea } from '@/components/ui';
 import { CreateClientInput } from '@/types';
 import { useToast } from '@/contexts/ToastContext';
 

@@ -1,7 +1,7 @@
 // src/app/dashboard/offers/[id]/components/analytics/AnalyticsStats.tsx
 'use client';
 
-import { Card, Badge } from '@/components/ui';
+import { Badge } from '@/components/ui';
 import { formatDateTime } from '@/lib/utils';
 
 interface AnalyticsStatsProps {

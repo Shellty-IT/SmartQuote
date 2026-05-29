@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, ConfirmDialog, EmptyState } from '@/components/ui';
+import { ConfirmDialog, EmptyState } from '@/components/ui';
 import { emailsApi } from '@/lib/api/emails.api';
 import { BUILT_IN_TEMPLATES } from '@/types/email.types';
 import type { EmailTemplate } from '@/types/email.types';

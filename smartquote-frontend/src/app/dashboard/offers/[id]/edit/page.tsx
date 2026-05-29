@@ -3,7 +3,7 @@
 
 import React, { use } from 'react';
 import { useOffer } from '@/hooks/useOffers';
-import { Button, Card } from '@/components/ui';
+import { Button } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { useOfferForm } from '../../hooks';
 import OfferStepper from '../../new/components/OfferStepper';

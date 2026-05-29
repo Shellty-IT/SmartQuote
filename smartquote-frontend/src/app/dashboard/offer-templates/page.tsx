@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Button, Card, ConfirmDialog } from '@/components/ui';
+import { Button, ConfirmDialog } from '@/components/ui';
 import EmptyState from '@/components/ui/EmptyState';
 import { SkeletonTableRow, SkeletonMobileCard } from '@/components/ui/Skeleton';
 import { offerTemplatesApi, ApiError } from '@/lib/api';
@@ -260,7 +260,7 @@ export default function OfferTemplatesPage() {
 
                     <div className="lg:hidden space-y-3">
                         {templates.map((template) => (
-                            <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                            <div key={template.id} className="rounded-2xl border border-border bg-card p-6 shadow-card">
                                 <div className="flex items-start justify-between gap-3 mb-3">
                                     <div className="flex-1 min-w-0">
                                         <h3 className="font-semibold text-foreground text-sm truncate">{template.name}</h3>

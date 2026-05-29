@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useContract, useContracts } from '@/hooks/useContracts';
 import { useClients } from '@/hooks/useClients';
-import { Button, Card, Input, Select, Textarea, LoadingSpinner } from '@/components/ui';
+import { Button, Input, Select, Textarea, LoadingSpinner } from '@/components/ui';
 import { Client, ContractItem } from '@/types';
 import { useToast } from '@/contexts/ToastContext';
 
