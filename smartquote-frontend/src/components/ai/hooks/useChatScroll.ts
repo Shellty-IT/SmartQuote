@@ -8,9 +8,10 @@ export function useChatScroll(dependencies: unknown[]) {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, []);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         scrollToBottom();
-    }, dependencies);
+    }, dependencies); // dynamic deps array is intentional — caller controls when to scroll
 
     return { messagesEndRef, scrollToBottom };
 }

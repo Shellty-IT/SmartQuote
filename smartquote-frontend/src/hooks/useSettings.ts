@@ -19,8 +19,6 @@ import type {
     UpdateSmtpConfigInput,
     TestSmtpConnectionInput,
     TestSmtpConnectionResult,
-    SenderEmailData,
-    UpdateSenderEmailInput,
 } from '@/types';
 
 export function useSettings() {

@@ -48,9 +48,8 @@ export function useContracts(params: UseContractsParams = {}) {
                     });
                 }
             }
-        } catch (err: unknown) {
+        } catch {
             setError('Nie udało się pobrać umów');
-
         } finally {
             setLoading(false);
         }
@@ -128,9 +127,8 @@ export function useContract(id: string) {
             if (response.success && response.data) {
                 setContract(response.data);
             }
-        } catch (err: unknown) {
+        } catch {
             setError('Nie udało się pobrać umowy');
-
         } finally {
             setLoading(false);
         }
@@ -156,9 +154,8 @@ export function useContractsStats() {
                 if (response.success && response.data) {
                     setStats(response.data);
                 }
-            } catch (err: unknown) {
+            } catch {
                 setError('Nie udało się pobrać statystyk');
-
             } finally {
                 setLoading(false);
             }
