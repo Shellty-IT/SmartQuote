@@ -125,14 +125,14 @@ export default function RegisterPage() {
     if (success) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-cyan-50 dark:from-slate-900 dark:to-slate-800 px-4">
-                <div className="card-themed border rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+                <div className="bg-card border-border border rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
                     <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                     </div>
-                    <h2 className="text-2xl font-bold text-themed mb-2">Konto utworzone!</h2>
-                    <p className="text-themed-muted mb-4">Za chwilę zostaniesz przekierowany do logowania...</p>
+                    <h2 className="text-2xl font-bold text-foreground mb-2">Konto utworzone!</h2>
+                    <p className="text-muted-foreground mb-4">Za chwilę zostaniesz przekierowany do logowania...</p>
                     <div className="w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto" />
                 </div>
             </div>
@@ -147,9 +147,9 @@ export default function RegisterPage() {
             </div>
 
             <div className="relative w-full max-w-md">
-                <div className="card-themed border rounded-2xl shadow-xl shadow-cyan-500/10 p-8">
+                <div className="bg-card border-border border rounded-2xl shadow-xl shadow-cyan-500/10 p-8">
                     <div className="text-center mb-8">
-                        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl mb-4 shadow-lg shadow-cyan-500/30">
+                        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br bg-gradient-primary rounded-xl mb-4 shadow-lg shadow-cyan-500/30">
                             <svg
                                 className="w-8 h-8 text-white"
                                 fill="none"
@@ -164,8 +164,8 @@ export default function RegisterPage() {
                                 />
                             </svg>
                         </div>
-                        <h1 className="text-2xl font-bold text-themed">Utwórz konto</h1>
-                        <p className="text-themed-muted mt-2">Dołącz do SmartQuote AI</p>
+                        <h1 className="text-2xl font-bold text-foreground">Utwórz konto</h1>
+                        <p className="text-muted-foreground mt-2">Dołącz do SmartQuote AI</p>
                     </div>
 
                     {errors.general && (
@@ -189,12 +189,12 @@ export default function RegisterPage() {
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
-                            <label htmlFor="name" className="block text-sm font-medium text-themed-label mb-2">
-                                Imię i nazwisko <span className="text-themed-muted">(opcjonalne)</span>
+                            <label htmlFor="name" className="block text-sm font-medium text-muted-foreground mb-2">
+                                Imię i nazwisko <span className="text-muted-foreground">(opcjonalne)</span>
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg className="w-5 h-5 text-themed-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                     </svg>
                                 </div>
@@ -206,7 +206,7 @@ export default function RegisterPage() {
                                     value={formData.name}
                                     onChange={handleChange}
                                     disabled={isLoading}
-                                    className={`block w-full pl-10 pr-4 py-3 border rounded-lg input-themed
+                                    className={`block w-full pl-10 pr-4 py-3 border rounded-lg border-border bg-card text-foreground
                     focus:ring-2 focus:ring-cyan-500 focus:border-transparent
                     disabled:opacity-50 transition-all duration-200
                     ${errors.name ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20' : ''}`}
@@ -214,17 +214,17 @@ export default function RegisterPage() {
                                 />
                             </div>
                             {errors.name && (
-                                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.name}</p>
+                                <p className="mt-1 text-sm text-status-rejected">{errors.name}</p>
                             )}
                         </div>
 
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-themed-label mb-2">
+                            <label htmlFor="email" className="block text-sm font-medium text-muted-foreground mb-2">
                                 Adres email <span className="text-red-500">*</span>
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg className="w-5 h-5 text-themed-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                                     </svg>
                                 </div>
@@ -237,7 +237,7 @@ export default function RegisterPage() {
                                     value={formData.email}
                                     onChange={handleChange}
                                     disabled={isLoading}
-                                    className={`block w-full pl-10 pr-4 py-3 border rounded-lg input-themed
+                                    className={`block w-full pl-10 pr-4 py-3 border rounded-lg border-border bg-card text-foreground
                     focus:ring-2 focus:ring-cyan-500 focus:border-transparent
                     disabled:opacity-50 transition-all duration-200
                     ${errors.email ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20' : ''}`}
@@ -245,17 +245,17 @@ export default function RegisterPage() {
                                 />
                             </div>
                             {errors.email && (
-                                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>
+                                <p className="mt-1 text-sm text-status-rejected">{errors.email}</p>
                             )}
                         </div>
 
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-themed-label mb-2">
+                            <label htmlFor="password" className="block text-sm font-medium text-muted-foreground mb-2">
                                 Hasło <span className="text-red-500">*</span>
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg className="w-5 h-5 text-themed-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                     </svg>
                                 </div>
@@ -268,7 +268,7 @@ export default function RegisterPage() {
                                     value={formData.password}
                                     onChange={handleChange}
                                     disabled={isLoading}
-                                    className={`block w-full pl-10 pr-4 py-3 border rounded-lg input-themed
+                                    className={`block w-full pl-10 pr-4 py-3 border rounded-lg border-border bg-card text-foreground
                     focus:ring-2 focus:ring-cyan-500 focus:border-transparent
                     disabled:opacity-50 transition-all duration-200
                     ${errors.password ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20' : ''}`}
@@ -276,20 +276,20 @@ export default function RegisterPage() {
                                 />
                             </div>
                             {errors.password && (
-                                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password}</p>
+                                <p className="mt-1 text-sm text-status-rejected">{errors.password}</p>
                             )}
-                            <p className="mt-1 text-xs text-themed-muted">
+                            <p className="mt-1 text-xs text-muted-foreground">
                                 Min. 8 znaków, wielka i mała litera, cyfra
                             </p>
                         </div>
 
                         <div>
-                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-themed-label mb-2">
+                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-muted-foreground mb-2">
                                 Potwierdź hasło <span className="text-red-500">*</span>
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg className="w-5 h-5 text-themed-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </div>
@@ -302,7 +302,7 @@ export default function RegisterPage() {
                                     value={formData.confirmPassword}
                                     onChange={handleChange}
                                     disabled={isLoading}
-                                    className={`block w-full pl-10 pr-4 py-3 border rounded-lg input-themed
+                                    className={`block w-full pl-10 pr-4 py-3 border rounded-lg border-border bg-card text-foreground
                     focus:ring-2 focus:ring-cyan-500 focus:border-transparent
                     disabled:opacity-50 transition-all duration-200
                     ${errors.confirmPassword ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20' : ''}`}
@@ -310,14 +310,14 @@ export default function RegisterPage() {
                                 />
                             </div>
                             {errors.confirmPassword && (
-                                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.confirmPassword}</p>
+                                <p className="mt-1 text-sm text-status-rejected">{errors.confirmPassword}</p>
                             )}
                         </div>
 
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full py-3 px-4 bg-gradient-to-r from-cyan-500 to-blue-600
+                            className="w-full py-3 px-4 bg-gradient-to-r bg-gradient-primary
                 text-white font-semibold rounded-lg shadow-lg shadow-cyan-500/30
                 hover:from-cyan-600 hover:to-blue-700
                 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2
@@ -339,11 +339,11 @@ export default function RegisterPage() {
                     </form>
 
                     <div className="mt-6 text-center">
-                        <p className="text-sm text-themed-muted">
+                        <p className="text-sm text-muted-foreground">
                             Masz już konto?{' '}
                             <Link
                                 href="/"
-                                className="font-medium text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors"
+                                className="font-medium text-primary hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors"
                             >
                                 Zaloguj się
                             </Link>
@@ -351,11 +351,11 @@ export default function RegisterPage() {
                     </div>
                 </div>
 
-                <p className="text-center text-xs text-themed-muted mt-6">
+                <p className="text-center text-xs text-muted-foreground mt-6">
                     Rejestrując się, akceptujesz{' '}
-                    <a href="#" className="underline hover:text-themed">Regulamin</a>
+                    <a href="#" className="underline hover:text-foreground">Regulamin</a>
                     {' '}i{' '}
-                    <a href="#" className="underline hover:text-themed">Politykę Prywatności</a>
+                    <a href="#" className="underline hover:text-foreground">Politykę Prywatności</a>
                 </p>
             </div>
         </div>

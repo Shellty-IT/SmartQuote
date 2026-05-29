@@ -111,7 +111,7 @@ export default function OfferItemRow({
                                     </span>
                                 )}
                                 {discount > 0 && isSelected && (
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-600">
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-status-accepted">
                                         -{discount}%
                                     </span>
                                 )}

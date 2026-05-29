@@ -101,11 +101,11 @@ export default function AISection({ settings, onUpdate }: Props) {
 
     return (
         <div className="space-y-6">
-            <Card>
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h2 className="text-lg font-semibold text-themed">Ton AI Asystenta</h2>
-                        <p className="text-sm text-themed-muted">Jak AI powinien formułować odpowiedzi</p>
+                        <h2 className="text-lg font-semibold text-foreground">Ton AI Asystenta</h2>
+                        <p className="text-sm text-muted-foreground">Jak AI powinien formułować odpowiedzi</p>
                     </div>
                     <div className="flex items-center gap-2">
                         {success && (
@@ -142,14 +142,14 @@ export default function AISection({ settings, onUpdate }: Props) {
                             }}
                         >
                             <div className="flex items-center justify-between mb-2">
-                                <span className="font-medium text-themed">{tone.label}</span>
+                                <span className="font-medium text-foreground">{tone.label}</span>
                                 {localSettings.aiTone === tone.id && (
                                     <svg className="w-4 h-4 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                     </svg>
                                 )}
                             </div>
-                            <p className="text-sm text-themed-muted mb-3">{tone.description}</p>
+                            <p className="text-sm text-muted-foreground mb-3">{tone.description}</p>
                             <div
                                 className="flex items-start gap-2 p-3 rounded-lg border"
                                 style={{
@@ -160,24 +160,24 @@ export default function AISection({ settings, onUpdate }: Props) {
                                 <svg className="w-4 h-4 text-cyan-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                 </svg>
-                                <p className="text-sm text-themed-muted italic">&quot;{tone.example}&quot;</p>
+                                <p className="text-sm text-muted-foreground italic">&quot;{tone.example}&quot;</p>
                             </div>
                         </button>
                     ))}
                 </div>
-            </Card>
+            </div>
 
-            <Card>
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br bg-gradient-primary flex items-center justify-center shadow-lg shadow-cyan-500/20">
                             <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
                             </svg>
                         </div>
                         <div>
-                            <h3 className="font-medium text-themed">Automatyczne sugestie AI</h3>
-                            <p className="text-sm text-themed-muted">
+                            <h3 className="font-medium text-foreground">Automatyczne sugestie AI</h3>
+                            <p className="text-sm text-muted-foreground">
                                 AI będzie proaktywnie sugerować akcje i ulepszenia
                             </p>
                         </div>
@@ -190,8 +190,8 @@ export default function AISection({ settings, onUpdate }: Props) {
                 </div>
 
                 {localSettings.aiAutoSuggestions && (
-                    <div className="mt-6 pt-6 border-t divider-themed">
-                        <p className="text-sm text-themed-muted mb-3">AI będzie sugerować:</p>
+                    <div className="mt-6 pt-6 border-t border-border">
+                        <p className="text-sm text-muted-foreground mb-3">AI będzie sugerować:</p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {[
                                 'Ulepszenia treści ofert',
@@ -199,7 +199,7 @@ export default function AISection({ settings, onUpdate }: Props) {
                                 'Podobnych klientów',
                                 'Szablony emaili',
                             ].map((item) => (
-                                <div key={item} className="flex items-center gap-2 text-sm text-themed">
+                                <div key={item} className="flex items-center gap-2 text-sm text-foreground">
                                     <svg className="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                     </svg>
@@ -209,7 +209,7 @@ export default function AISection({ settings, onUpdate }: Props) {
                         </div>
                     </div>
                 )}
-            </Card>
+            </div>
 
             <div
                 className="rounded-2xl border p-6 transition-colors duration-300"
@@ -228,8 +228,8 @@ export default function AISection({ settings, onUpdate }: Props) {
                         </svg>
                     </div>
                     <div>
-                        <h3 className="font-medium text-themed mb-1">O AI Asystencie</h3>
-                        <p className="text-sm text-themed-muted leading-relaxed">
+                        <h3 className="font-medium text-foreground mb-1">O AI Asystencie</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
                             AI Asystent wykorzystuje zaawansowane modele językowe do pomocy w tworzeniu
                             ofert, generowaniu emaili i analizie danych klientów. Twoje dane są bezpieczne
                             i nie są wykorzystywane do trenowania modeli.

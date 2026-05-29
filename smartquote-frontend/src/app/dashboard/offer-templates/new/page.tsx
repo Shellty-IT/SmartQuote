@@ -109,19 +109,19 @@ export default function NewOfferTemplatePage() {
             <div className="mb-8">
                 <button
                     onClick={() => router.back()}
-                    className="flex items-center gap-2 text-themed-muted hover:opacity-70 mb-4"
+                    className="flex items-center gap-2 text-muted-foreground hover:opacity-70 mb-4"
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     Powrót
                 </button>
-                <h1 className="text-2xl font-bold text-themed">Nowy szablon oferty</h1>
-                <p className="text-themed-muted mt-1">Utwórz preset pozycji do wielokrotnego użycia</p>
+                <h1 className="text-2xl font-bold text-foreground">Nowy szablon oferty</h1>
+                <p className="text-muted-foreground mt-1">Utwórz preset pozycji do wielokrotnego użycia</p>
             </div>
 
             <Card className="mb-6 p-6">
-                <h2 className="text-lg font-semibold text-themed mb-4">Podstawowe informacje</h2>
+                <h2 className="text-lg font-semibold text-foreground mb-4">Podstawowe informacje</h2>
                 <div className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
@@ -199,11 +199,11 @@ export default function NewOfferTemplatePage() {
                         />
                     </div>
                 </div>
-            </Card>
+            </div>
 
             <Card className="mb-6 p-6">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-themed">Pozycje szablonu ({items.length})</h2>
+                    <h2 className="text-lg font-semibold text-foreground">Pozycje szablonu ({items.length})</h2>
                     <Button variant="outline" size="sm" onClick={addItem}>
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -213,13 +213,13 @@ export default function NewOfferTemplatePage() {
                 </div>
                 <div className="space-y-4">
                     {items.map((item, index) => (
-                        <div key={item._tempId} className="section-themed rounded-xl p-4 border divider-themed">
+                        <div key={item._tempId} className="bg-surface-subtle rounded-xl p-4 border border-border">
                             <div className="flex items-start justify-between mb-3">
-                                <span className="text-sm font-semibold text-themed">Pozycja {index + 1}</span>
+                                <span className="text-sm font-semibold text-foreground">Pozycja {index + 1}</span>
                                 {items.length > 1 && (
                                     <button
                                         onClick={() => removeItem(item._tempId)}
-                                        className="p-1 rounded-lg hover:bg-red-500/10 text-red-600 dark:text-red-400 transition-colors"
+                                        className="p-1 rounded-lg hover:bg-red-500/10 text-status-rejected transition-colors"
                                     >
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -316,7 +316,7 @@ export default function NewOfferTemplatePage() {
                                         onChange={(e) => updateItem(item._tempId, 'isOptional', e.target.checked)}
                                         className="w-4 h-4 rounded border-gray-300"
                                     />
-                                    <label htmlFor={`optional-${item._tempId}`} className="text-sm text-themed">
+                                    <label htmlFor={`optional-${item._tempId}`} className="text-sm text-foreground">
                                         Pozycja opcjonalna
                                     </label>
                                 </div>
@@ -324,7 +324,7 @@ export default function NewOfferTemplatePage() {
                         </div>
                     ))}
                 </div>
-            </Card>
+            </div>
 
             <div className="flex justify-between">
                 <Button variant="outline" onClick={() => router.back()}>

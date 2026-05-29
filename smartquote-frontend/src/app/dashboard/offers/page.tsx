@@ -78,15 +78,15 @@ export default function OffersPage() {
             {isLoading ? (
                 <>
                     <div className="hidden lg:block">
-                        <Card className="overflow-hidden">
+                        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
                             <div className="overflow-x-auto">
                                 <table className="w-full">
-                                    <thead className="section-themed border-b divider-themed">
+                                    <thead className="bg-surface-subtle border-b border-border">
                                     <tr>
                                         {TABLE_HEADERS.map((h) => (
                                             <th
                                                 key={h.label}
-                                                className={`px-6 py-4 text-xs font-semibold text-themed-muted uppercase tracking-wider ${
+                                                className={`px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider ${
                                                     h.align === 'right' ? 'text-right' : 'text-left'
                                                 }`}
                                             >
@@ -95,14 +95,14 @@ export default function OffersPage() {
                                         ))}
                                     </tr>
                                     </thead>
-                                    <tbody className="divide-y divider-themed">
+                                    <tbody className="divide-y border-border">
                                     {Array.from({ length: 6 }).map((_, i) => (
                                         <SkeletonTableRow key={i} columns={7} />
                                     ))}
                                     </tbody>
                                 </table>
                             </div>
-                        </Card>
+                        </div>
                     </div>
                     <div className="lg:hidden space-y-3">
                         {Array.from({ length: 4 }).map((_, i) => (

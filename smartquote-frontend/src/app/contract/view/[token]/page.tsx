@@ -253,7 +253,7 @@ export default function PublicContractPage({ params }: PageProps) {
                     </div>
                     <div>
                         <p className="font-semibold text-emerald-800">Umowa została podpisana!</p>
-                        <p className="text-sm text-emerald-600">Potwierdzenie zostanie wysłane na podany adres email.</p>
+                        <p className="text-sm text-status-accepted">Potwierdzenie zostanie wysłane na podany adres email.</p>
                     </div>
                 </div>
             )}
@@ -362,7 +362,7 @@ export default function PublicContractPage({ params }: PageProps) {
                     </div>
                     <div>
                         <p className="text-xs font-medium text-slate-400 uppercase">Data podpisania</p>
-                        <p className={`text-sm font-semibold mt-1 ${contract.signedAt ? 'text-emerald-600' : 'text-slate-900'}`}>
+                        <p className={`text-sm font-semibold mt-1 ${contract.signedAt ? 'text-status-accepted' : 'text-slate-900'}`}>
                             {formatDate(contract.signedAt)}
                         </p>
                     </div>
@@ -414,7 +414,7 @@ export default function PublicContractPage({ params }: PageProps) {
                     </div>
                     <div className="flex justify-between text-base pt-2 border-t border-slate-200">
                         <span className="font-bold text-slate-900">RAZEM BRUTTO:</span>
-                        <span className="font-bold text-emerald-600 text-lg">{formatCurrency(contract.totalGross, contract.currency)}</span>
+                        <span className="font-bold text-status-accepted text-lg">{formatCurrency(contract.totalGross, contract.currency)}</span>
                     </div>
                 </div>
             </div>
@@ -487,7 +487,7 @@ export default function PublicContractPage({ params }: PageProps) {
                                     title="Kopiuj hash"
                                 >
                                     {hashCopied ? (
-                                        <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <svg className="w-5 h-5 text-status-accepted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                         </svg>
                                     ) : copyError ? (

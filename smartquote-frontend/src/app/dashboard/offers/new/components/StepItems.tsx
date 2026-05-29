@@ -26,7 +26,7 @@ export default function StepItems({
     return (
         <div>
             <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-themed">Pozycje oferty</h2>
+                <h2 className="text-lg font-semibold text-foreground">Pozycje oferty</h2>
                 <Button variant="outline" size="sm" onClick={onAddItem}>
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -38,14 +38,14 @@ export default function StepItems({
             {uniqueVariants.length > 0 && (
                 <div className="mb-4 p-3 bg-gradient-to-r from-cyan-50 to-blue-50 border border-cyan-200 rounded-xl">
                     <div className="flex items-center gap-2 mb-1">
-                        <svg className="w-4 h-4 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                         <span className="text-sm font-medium text-cyan-800">
                             Warianty: {uniqueVariants.join(', ')}
                         </span>
                     </div>
-                    <p className="text-xs text-cyan-600">
+                    <p className="text-xs text-primary">
                         Pozycje bez wariantu są wspólne dla wszystkich wariantów. Klient wybierze jeden wariant.
                     </p>
                 </div>

@@ -105,7 +105,7 @@ export default function AcceptDialog({
                 <div className="p-6">
                     <div className="flex items-center gap-3 mb-6">
                         <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                            <svg className="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <svg className="w-6 h-6 text-status-accepted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
                         </div>
@@ -132,14 +132,14 @@ export default function AcceptDialog({
                     {requireAuditTrail && (
                         <div className="bg-cyan-50 border border-cyan-200 rounded-xl p-4 mb-4">
                             <div className="flex items-center gap-2 mb-3">
-                                <svg className="w-4 h-4 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                 </svg>
                                 <span className="text-sm font-medium text-cyan-800">
                                     Formalna akceptacja — potwierdź swoje dane
                                 </span>
                             </div>
-                            <p className="text-xs text-cyan-600 mb-3">
+                            <p className="text-xs text-primary mb-3">
                                 Ta oferta wymaga formalnego potwierdzenia. Twoje dane, adres IP i cyfrowy
                                 odcisk treści (SHA-256) zostaną zapisane. Otrzymasz email z potwierdzeniem.
                             </p>
@@ -216,7 +216,7 @@ export default function AcceptDialog({
                             checked={confirmed}
                             onChange={(e) => setConfirmed(e.target.checked)}
                             disabled={isLoading}
-                            className="mt-0.5 w-5 h-5 rounded border-amber-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                            className="mt-0.5 w-5 h-5 rounded border-amber-300 text-status-accepted focus:ring-emerald-500 cursor-pointer"
                         />
                         <span className="text-sm text-amber-900 leading-relaxed">
                             Potwierdzam akceptację niniejszej oferty i zapoznałem/am się z jej warunkami.

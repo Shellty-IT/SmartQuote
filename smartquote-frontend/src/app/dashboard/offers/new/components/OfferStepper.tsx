@@ -31,10 +31,10 @@ export default function OfferStepper({ currentStep, onStepClick }: OfferStepperP
                                 <div
                                     className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
                                         isActive
-                                            ? 'bg-gradient-to-br from-cyan-600 to-blue-700 text-white shadow-lg shadow-cyan-500/30'
+                                            ? 'bg-gradient-to-br bg-gradient-primary text-white shadow-lg shadow-cyan-500/30'
                                             : isCompleted
                                                 ? 'bg-emerald-500 text-white'
-                                                : 'card-themed border text-themed-muted'
+                                                : 'bg-card border-border border text-muted-foreground'
                                     }`}
                                 >
                                     {isCompleted ? (
@@ -47,14 +47,14 @@ export default function OfferStepper({ currentStep, onStepClick }: OfferStepperP
                                 </div>
                                 <span
                                     className={`hidden md:block text-sm font-medium ${
-                                        isActive ? 'text-themed' : 'text-themed-muted'
+                                        isActive ? 'text-foreground' : 'text-muted-foreground'
                                     }`}
                                 >
                                     {step.label}
                                 </span>
                             </button>
                             {index < STEPS.length - 1 && (
-                                <div className="flex-1 h-0.5 mx-2 md:mx-4 section-themed" />
+                                <div className="flex-1 h-0.5 mx-2 md:mx-4 bg-surface-subtle" />
                             )}
                         </div>
                     );

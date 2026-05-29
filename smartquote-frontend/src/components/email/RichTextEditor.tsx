@@ -35,7 +35,7 @@ function ToolbarButton({ onClick, isActive, disabled, title, children }: Toolbar
             title={title}
             className={`p-1.5 rounded-md text-sm font-medium transition-colors ${
                 isActive
-                    ? 'bg-cyan-500/20 text-cyan-600 dark:text-cyan-400'
+                    ? 'bg-cyan-500/20 text-primary'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700'
             } ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
         >
@@ -66,7 +66,7 @@ export default function RichTextEditor({
             Underline,
             Link.configure({
                 openOnClick: false,
-                HTMLAttributes: { class: 'text-cyan-600 underline' },
+                HTMLAttributes: { class: 'text-primary underline' },
             }),
             Placeholder.configure({
                 placeholder,

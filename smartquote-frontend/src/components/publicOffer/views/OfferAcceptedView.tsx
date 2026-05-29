@@ -30,7 +30,7 @@ export default function OfferAcceptedView({
         <div className="max-w-2xl mx-auto text-center py-16 px-4">
             <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-emerald-100 flex items-center justify-center">
                 <svg
-                    className="w-10 h-10 text-emerald-600"
+                    className="w-10 h-10 text-status-accepted"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -73,7 +73,7 @@ export default function OfferAcceptedView({
                 <div className="mt-8 bg-white rounded-xl border border-emerald-200 p-6 text-left max-w-lg mx-auto">
                     <div className="flex items-center gap-2 mb-4">
                         <svg
-                            className="w-5 h-5 text-emerald-600"
+                            className="w-5 h-5 text-status-accepted"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"

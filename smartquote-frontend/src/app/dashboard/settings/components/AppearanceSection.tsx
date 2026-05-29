@@ -94,15 +94,15 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
 
     return (
         <div className="space-y-6">
-            <Card>
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h2 className="text-lg font-semibold text-themed">Motyw</h2>
-                        <p className="text-sm text-themed-muted">Wybierz preferowany wygląd aplikacji</p>
+                        <h2 className="text-lg font-semibold text-foreground">Motyw</h2>
+                        <p className="text-sm text-muted-foreground">Wybierz preferowany wygląd aplikacji</p>
                     </div>
                     <div className="flex items-center gap-2">
                         {success && (
-                            <div className="flex items-center gap-1.5 text-emerald-600 text-sm">
+                            <div className="flex items-center gap-1.5 text-status-accepted text-sm">
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                 </svg>
@@ -171,20 +171,20 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
                                         {t.icon}
                                     </div>
                                     <div>
-                                        <p className="font-semibold text-themed">{t.label}</p>
-                                        <p className="text-xs text-themed-muted">{t.description}</p>
+                                        <p className="font-semibold text-foreground">{t.label}</p>
+                                        <p className="text-xs text-muted-foreground">{t.description}</p>
                                     </div>
                                 </div>
                             </div>
                         </button>
                     ))}
                 </div>
-            </Card>
+            </div>
 
-            <Card>
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                 <div className="mb-6">
-                    <h2 className="text-lg font-semibold text-themed">Język</h2>
-                    <p className="text-sm text-themed-muted">Wybierz język interfejsu</p>
+                    <h2 className="text-lg font-semibold text-foreground">Język</h2>
+                    <p className="text-sm text-muted-foreground">Wybierz język interfejsu</p>
                 </div>
 
                 <div className="flex gap-4 flex-wrap">
@@ -215,13 +215,13 @@ export default function AppearanceSection({ settings, onUpdate }: Props) {
                     })}
                 </div>
 
-                <div className="mt-4 flex items-start gap-2 text-sm text-themed-muted">
+                <div className="mt-4 flex items-start gap-2 text-sm text-muted-foreground">
                     <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
                     </svg>
                     <p>Zmiana języka wpłynie na cały interfejs aplikacji po odświeżeniu strony.</p>
                 </div>
-            </Card>
+            </div>
         </div>
     );
 }

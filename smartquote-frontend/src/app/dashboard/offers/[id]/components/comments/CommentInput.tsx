@@ -25,7 +25,7 @@ export function CommentInput({ value, onChange, onSubmit, isSending }: CommentIn
           disabled={isSending}
           placeholder="Odpowiedz klientowi..."
           rows={2}
-          className="flex-1 px-4 py-3 rounded-xl border input-themed resize-none disabled:opacity-50 text-sm"
+          className="flex-1 px-4 py-3 rounded-xl border border-border bg-card text-foreground resize-none disabled:opacity-50 text-sm"
       />
             <button
                 onClick={onSubmit}

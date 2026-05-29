@@ -17,10 +17,10 @@ const iconMap = {
 };
 
 const colorMap = {
-    warning: 'badge-warning border',
-    info: 'badge-info border',
+    warning: 'bg-amber-500/10 text-amber-600 border',
+    info: 'bg-primary/10 text-primary border',
     tip: 'bg-purple-500/15 text-purple-700 border border-purple-300/30',
-    success: 'badge-success border',
+    success: 'bg-status-accepted/10 text-status-accepted border',
 };
 
 export function SuggestionCard({ suggestion, onPrompt }: SuggestionCardProps) {

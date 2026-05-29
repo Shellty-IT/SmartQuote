@@ -12,7 +12,7 @@ import { useToast } from '@/contexts/ToastContext';
 
 const statusConfig: Record<FollowUpStatus, { label: string; color: string; bgColor: string }> = {
     PENDING: { label: 'Oczekujące', color: 'text-amber-600', bgColor: 'bg-amber-500/15' },
-    COMPLETED: { label: 'Wykonane', color: 'text-emerald-600', bgColor: 'bg-emerald-500/15' },
+    COMPLETED: { label: 'Wykonane', color: 'text-status-accepted', bgColor: 'bg-emerald-500/15' },
     CANCELLED: { label: 'Anulowane', color: 'text-slate-500', bgColor: 'bg-slate-500/15' },
     OVERDUE: { label: 'Zaległe', color: 'text-red-600', bgColor: 'bg-red-500/15' },
 };
@@ -101,11 +101,11 @@ export default function FollowUpsPage() {
     };
 
     return (
-        <div className="p-4 md:p-8">
+        <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h1 className="text-2xl font-bold text-themed">Follow-upy</h1>
-                    <p className="text-themed-muted mt-1">Zarządzaj zadaniami i przypomnieniami</p>
+                    <h1 className="text-2xl font-bold text-foreground">Follow-upy</h1>
+                    <p className="text-muted-foreground mt-1">Zarządzaj zadaniami i przypomnieniami</p>
                 </div>
                 <Button onClick={() => router.push('/dashboard/followups/new')}>
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -126,8 +126,8 @@ export default function FollowUpsPage() {
                     <Card className="!p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-themed-muted">Oczekujące</p>
-                                <p className="text-2xl font-bold text-themed">{stats.byStatus?.PENDING || 0}</p>
+                                <p className="text-sm text-muted-foreground">Oczekujące</p>
+                                <p className="text-2xl font-bold text-foreground">{stats.byStatus?.PENDING || 0}</p>
                             </div>
                             <div
                                 className="w-10 h-10 rounded-lg flex items-center justify-center"
@@ -136,11 +136,11 @@ export default function FollowUpsPage() {
                                 <span className="text-xl">⏳</span>
                             </div>
                         </div>
-                    </Card>
+                    </div>
                     <Card className="!p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-themed-muted">Zaległe</p>
+                                <p className="text-sm text-muted-foreground">Zaległe</p>
                                 <p className="text-2xl font-bold text-red-500">{stats.overdue || 0}</p>
                             </div>
                             <div
@@ -150,11 +150,11 @@ export default function FollowUpsPage() {
                                 <span className="text-xl">🚨</span>
                             </div>
                         </div>
-                    </Card>
+                    </div>
                     <Card className="!p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-themed-muted">Na dziś</p>
+                                <p className="text-sm text-muted-foreground">Na dziś</p>
                                 <p className="text-2xl font-bold text-blue-500">{stats.todayDue || 0}</p>
                             </div>
                             <div
@@ -164,11 +164,11 @@ export default function FollowUpsPage() {
                                 <span className="text-xl">📅</span>
                             </div>
                         </div>
-                    </Card>
+                    </div>
                     <Card className="!p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-themed-muted">Wykonane (miesiąc)</p>
+                                <p className="text-sm text-muted-foreground">Wykonane (miesiąc)</p>
                                 <p className="text-2xl font-bold text-emerald-500">{stats.completedThisMonth || 0}</p>
                             </div>
                             <div
@@ -178,11 +178,11 @@ export default function FollowUpsPage() {
                                 <span className="text-xl">✅</span>
                             </div>
                         </div>
-                    </Card>
+                    </div>
                 </div>
             ) : null}
 
-            <Card className="mb-6">
+            <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
                 <div className="flex flex-wrap gap-4">
                     <div className="flex-1 min-w-[200px]">
                         <Input
@@ -257,12 +257,12 @@ export default function FollowUpsPage() {
                             type="checkbox"
                             checked={filters.overdue || false}
                             onChange={(e) => setFilters({ overdue: e.target.checked || undefined, page: 1 })}
-                            className="w-4 h-4 text-cyan-600 rounded"
+                            className="w-4 h-4 text-primary rounded"
                         />
-                        <span className="text-themed text-sm">Tylko zaległe</span>
+                        <span className="text-foreground text-sm">Tylko zaległe</span>
                     </label>
                 </div>
-            </Card>
+            </div>
 
             {error && (
                 <div
@@ -281,18 +281,18 @@ export default function FollowUpsPage() {
             )}
 
             {loading && followUps.length === 0 ? (
-                <Card padding="none">
+                <div className="rounded-2xl border border-border bg-card shadow-card">
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
                             <tr className="border-b" style={{ borderColor: 'var(--divider)', backgroundColor: 'var(--section-bg)' }}>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Follow-up</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider hidden md:table-cell">Powiązanie</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider hidden sm:table-cell">Typ</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider hidden lg:table-cell">Priorytet</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Termin</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider hidden sm:table-cell">Status</th>
-                                <th className="px-6 py-3 text-right text-xs font-semibold text-themed-muted uppercase tracking-wider">Akcje</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Follow-up</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Powiązanie</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Typ</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">Priorytet</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Termin</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Status</th>
+                                <th className="px-6 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Akcje</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -302,9 +302,9 @@ export default function FollowUpsPage() {
                             </tbody>
                         </table>
                     </div>
-                </Card>
+                </div>
             ) : followUps.length === 0 ? (
-                <Card>
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                     <EmptyState
                         icon={
                             hasFilters ? (
@@ -329,20 +329,20 @@ export default function FollowUpsPage() {
                                 : { label: 'Nowy follow-up', onClick: () => router.push('/dashboard/followups/new') }
                         }
                     />
-                </Card>
+                </div>
             ) : (
-                <Card padding="none">
+                <div className="rounded-2xl border border-border bg-card shadow-card">
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
                             <tr className="border-b" style={{ borderColor: 'var(--divider)', backgroundColor: 'var(--section-bg)' }}>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Follow-up</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider hidden md:table-cell">Powiązanie</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider hidden sm:table-cell">Typ</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider hidden lg:table-cell">Priorytet</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider">Termin</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-themed-muted uppercase tracking-wider hidden sm:table-cell">Status</th>
-                                <th className="px-6 py-3 text-right text-xs font-semibold text-themed-muted uppercase tracking-wider">Akcje</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Follow-up</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Powiązanie</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Typ</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">Priorytet</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Termin</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Status</th>
+                                <th className="px-6 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Akcje</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -355,7 +355,7 @@ export default function FollowUpsPage() {
                                 return (
                                     <tr
                                         key={followUp.id}
-                                        className={`border-b hover-themed transition-colors cursor-pointer ${
+                                        className={`border-b hover:bg-secondary/60 transition-colors cursor-pointer ${
                                             overdue ? 'border-l-4 border-l-red-500' : ''
                                         }`}
                                         style={{
@@ -370,9 +370,9 @@ export default function FollowUpsPage() {
                                                     <span className="text-red-500 animate-pulse flex-shrink-0 mt-0.5" title="Zaległy!">⚠️</span>
                                                 )}
                                                 <div>
-                                                    <p className="font-medium text-themed">{followUp.title}</p>
+                                                    <p className="font-medium text-foreground">{followUp.title}</p>
                                                     {followUp.description && (
-                                                        <p className="text-sm text-themed-muted truncate max-w-xs">
+                                                        <p className="text-sm text-muted-foreground truncate max-w-xs">
                                                             {followUp.description}
                                                         </p>
                                                     )}
@@ -382,23 +382,23 @@ export default function FollowUpsPage() {
                                         <td className="px-6 py-4 hidden md:table-cell">
                                             <div className="text-sm">
                                                 {followUp.client && (
-                                                    <p className="text-themed">{followUp.client.name}</p>
+                                                    <p className="text-foreground">{followUp.client.name}</p>
                                                 )}
                                                 {followUp.offer && (
-                                                    <p className="text-themed-muted">Oferta: {followUp.offer.number}</p>
+                                                    <p className="text-muted-foreground">Oferta: {followUp.offer.number}</p>
                                                 )}
                                                 {followUp.contract && (
-                                                    <p className="text-themed-muted">Umowa: {followUp.contract.number}</p>
+                                                    <p className="text-muted-foreground">Umowa: {followUp.contract.number}</p>
                                                 )}
                                                 {!followUp.client && !followUp.offer && !followUp.contract && (
-                                                    <span className="text-themed-muted">-</span>
+                                                    <span className="text-muted-foreground">-</span>
                                                 )}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 hidden sm:table-cell">
                                             <span className="inline-flex items-center gap-1.5">
                                                 <span>{type.icon}</span>
-                                                <span className="text-sm text-themed">{type.label}</span>
+                                                <span className="text-sm text-foreground">{type.label}</span>
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 hidden lg:table-cell">
@@ -407,7 +407,7 @@ export default function FollowUpsPage() {
                                             </Badge>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className={`text-sm ${overdue ? 'text-red-500 font-semibold' : 'text-themed-muted'}`}>
+                                            <span className={`text-sm ${overdue ? 'text-red-500 font-semibold' : 'text-muted-foreground'}`}>
                                                 {formatDate(followUp.dueDate)}
                                                 {overdue && (
                                                     <span className="block text-xs text-red-400 mt-0.5">Zaległy!</span>
@@ -425,7 +425,7 @@ export default function FollowUpsPage() {
                                                     <button
                                                         onClick={() => handleComplete(followUp)}
                                                         disabled={completingId === followUp.id}
-                                                        className="p-2 text-themed-muted rounded-lg transition-colors disabled:opacity-50"
+                                                        className="p-2 text-muted-foreground rounded-lg transition-colors disabled:opacity-50"
                                                         style={{ backgroundColor: 'transparent' }}
                                                         onMouseEnter={(e) => {
                                                             e.currentTarget.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
@@ -451,7 +451,7 @@ export default function FollowUpsPage() {
                                                 )}
                                                 <button
                                                     onClick={() => router.push(`/dashboard/followups/${followUp.id}/edit`)}
-                                                    className="p-2 text-themed-muted rounded-lg transition-colors"
+                                                    className="p-2 text-muted-foreground rounded-lg transition-colors"
                                                     style={{ backgroundColor: 'transparent' }}
                                                     onMouseEnter={(e) => {
                                                         e.currentTarget.style.backgroundColor = 'var(--tone-active-bg)';
@@ -468,7 +468,7 @@ export default function FollowUpsPage() {
                                                 </button>
                                                 <button
                                                     onClick={() => setDeleteModal({ isOpen: true, followUp })}
-                                                    className="p-2 text-themed-muted rounded-lg transition-colors"
+                                                    className="p-2 text-muted-foreground rounded-lg transition-colors"
                                                     style={{ backgroundColor: 'transparent' }}
                                                     onMouseEnter={(e) => {
                                                         e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
@@ -494,7 +494,7 @@ export default function FollowUpsPage() {
 
                     {totalPages > 1 && (
                         <div className="px-6 py-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4" style={{ borderColor: 'var(--divider)' }}>
-                            <p className="text-sm text-themed-muted">
+                            <p className="text-sm text-muted-foreground">
                                 Pokazano {followUps.length} z {total} follow-upów
                             </p>
                             <div className="flex gap-2">
@@ -517,7 +517,7 @@ export default function FollowUpsPage() {
                             </div>
                         </div>
                     )}
-                </Card>
+                </div>
             )}
 
             <ConfirmDialog

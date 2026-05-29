@@ -65,11 +65,11 @@ export default function SecuritySection({ onChangePassword }: Props) {
     };
 
     return (
-        <Card>
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h2 className="text-lg font-semibold text-themed">Zmiana hasła</h2>
-                    <p className="text-sm text-themed-muted">Zaktualizuj hasło do konta</p>
+                    <h2 className="text-lg font-semibold text-foreground">Zmiana hasła</h2>
+                    <p className="text-sm text-muted-foreground">Zaktualizuj hasło do konta</p>
                 </div>
                 {success && (
                     <div className="flex items-center gap-2 text-green-600 dark:text-green-400 text-sm">
@@ -92,24 +92,24 @@ export default function SecuritySection({ onChangePassword }: Props) {
 
             <div className="space-y-6">
                 <div>
-                    <label className="block text-sm font-medium text-themed-label mb-2">
+                    <label className="block text-sm font-medium text-muted-foreground mb-2">
                         Obecne hasło
                     </label>
                     <div className="relative">
-                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                         <input
                             type={showCurrentPassword ? 'text' : 'password'}
                             value={formData.currentPassword}
                             onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
-                            className="w-full pl-10 pr-12 py-2.5 border rounded-lg input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500"
+                            className="w-full pl-10 pr-12 py-2.5 border rounded-lg border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500"
                             placeholder="••••••••"
                         />
                         <button
                             type="button"
                             onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-themed-muted hover:text-themed"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                         >
                             {showCurrentPassword ? (
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -126,24 +126,24 @@ export default function SecuritySection({ onChangePassword }: Props) {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-themed-label mb-2">
+                    <label className="block text-sm font-medium text-muted-foreground mb-2">
                         Nowe hasło
                     </label>
                     <div className="relative">
-                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                         <input
                             type={showNewPassword ? 'text' : 'password'}
                             value={formData.newPassword}
                             onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
-                            className="w-full pl-10 pr-12 py-2.5 border rounded-lg input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500"
+                            className="w-full pl-10 pr-12 py-2.5 border rounded-lg border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500"
                             placeholder="••••••••"
                         />
                         <button
                             type="button"
                             onClick={() => setShowNewPassword(!showNewPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-themed-muted hover:text-themed"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                         >
                             {showNewPassword ? (
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -164,7 +164,7 @@ export default function SecuritySection({ onChangePassword }: Props) {
                                     key={req}
                                     className={`text-xs px-2 py-1 rounded-full ${
                                         passwordErrors.includes(req)
-                                            ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                                            ? 'bg-red-100 dark:bg-red-900/30 text-status-rejected'
                                             : 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
                                     }`}
                                 >
@@ -176,18 +176,18 @@ export default function SecuritySection({ onChangePassword }: Props) {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-themed-label mb-2">
+                    <label className="block text-sm font-medium text-muted-foreground mb-2">
                         Potwierdź nowe hasło
                     </label>
                     <div className="relative">
-                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                         <input
                             type={showConfirmPassword ? 'text' : 'password'}
                             value={formData.confirmPassword}
                             onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                            className={`w-full pl-10 pr-12 py-2.5 border rounded-lg input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 ${
+                            className={`w-full pl-10 pr-12 py-2.5 border rounded-lg border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 ${
                                 formData.confirmPassword && !passwordsMatch
                                     ? 'border-red-300 dark:border-red-700'
                                     : ''
@@ -197,7 +197,7 @@ export default function SecuritySection({ onChangePassword }: Props) {
                         <button
                             type="button"
                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-themed-muted hover:text-themed"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                         >
                             {showConfirmPassword ? (
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -217,7 +217,7 @@ export default function SecuritySection({ onChangePassword }: Props) {
                 </div>
             </div>
 
-            <div className="flex justify-end mt-8 pt-6 border-t divider-themed">
+            <div className="flex justify-end mt-8 pt-6 border-t border-border">
                 <Button onClick={handleSubmit} disabled={!canSubmit || isSaving}>
                     {isSaving ? (
                         <>
@@ -232,6 +232,6 @@ export default function SecuritySection({ onChangePassword }: Props) {
                     )}
                 </Button>
             </div>
-        </Card>
+        </div>
     );
 }

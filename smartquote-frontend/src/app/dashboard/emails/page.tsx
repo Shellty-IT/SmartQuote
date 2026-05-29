@@ -59,7 +59,7 @@ function AttachmentBadges({ attachments }: { attachments: EmailLog['attachments'
                             color: 'var(--foreground)',
                         }}
                     >
-                        <svg className="w-3 h-3 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg className="w-3 h-3 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                         </svg>
                         {att.name}
@@ -112,7 +112,7 @@ function EmailListItem({
                     </span>
                     <EmailStatusBadge status={item.status} />
                 </div>
-                <p className="text-sm font-medium mt-0.5 truncate" style={{ color: 'var(--dash-section-title)' }}>
+                <p className="text-sm font-medium mt-0.5 truncate" style={{ color: 'var(--text-foreground)' }}>
                     {item.subject}
                 </p>
                 <AttachmentBadges attachments={item.attachments} />
@@ -132,7 +132,7 @@ function EmailListItem({
                         <span className="text-xs font-medium" style={{ color: 'var(--muted-text)' }}>{item.client.name}</span>
                     )}
                     {item.errorMessage && (
-                        <span className="text-xs text-red-600 dark:text-red-400 truncate max-w-xs" title={item.errorMessage}>
+                        <span className="text-xs text-status-rejected truncate max-w-xs" title={item.errorMessage}>
                             {item.errorMessage}
                         </span>
                     )}
@@ -144,7 +144,7 @@ function EmailListItem({
                     <Link
                         href={`/dashboard/emails/${item.id}/edit`}
                         onClick={e => e.stopPropagation()}
-                        className="p-1.5 rounded-lg transition-colors hover-themed"
+                        className="p-1.5 rounded-lg transition-colors hover:bg-secondary/60"
                         style={{ color: 'var(--muted-text)' }}
                         title="Edytuj szkic"
                     >
@@ -155,7 +155,7 @@ function EmailListItem({
                 )}
                 <button
                     onClick={e => { e.stopPropagation(); onDelete(item.id); }}
-                    className="p-1.5 rounded-lg transition-colors hover-themed hover:text-red-500"
+                    className="p-1.5 rounded-lg transition-colors hover:bg-secondary/60 hover:text-red-500"
                     style={{ color: 'var(--muted-text)' }}
                     title="Usuń"
                 >
@@ -250,11 +250,11 @@ export default function EmailsPage() {
     ];
 
     return (
-        <div className="p-4 md:p-8">
+        <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h1 className="text-2xl font-bold text-themed">Korespondencja</h1>
-                    <p className="text-themed-muted mt-1">Historia wiadomości email i szkice</p>
+                    <h1 className="text-2xl font-bold text-foreground">Korespondencja</h1>
+                    <p className="text-muted-foreground mt-1">Historia wiadomości email i szkice</p>
                 </div>
                 <div className="flex gap-2">
                     <Link
@@ -326,13 +326,13 @@ export default function EmailsPage() {
 
             <div
                 className="rounded-2xl border overflow-hidden"
-                style={{ backgroundColor: 'var(--dash-section-bg)', borderColor: 'var(--dash-section-border)' }}
+                style={{ backgroundColor: 'var(--rounded-2xl border border-border bg-card-bg)', borderColor: 'var(--rounded-2xl border border-border bg-card-border)' }}
             >
                 <div
                     className="px-5 py-3 border-b"
-                    style={{ backgroundColor: 'var(--dash-section-header)', borderColor: 'var(--dash-section-border)' }}
+                    style={{ backgroundColor: 'var(--border-b border-border bg-surface-subtle)', borderColor: 'var(--rounded-2xl border border-border bg-card-border)' }}
                 >
-                    <h2 className="text-sm font-semibold" style={{ color: 'var(--dash-section-title)' }}>
+                    <h2 className="text-sm font-semibold" style={{ color: 'var(--text-foreground)' }}>
                         {TAB_STYLES[activeTab].label}
                         {meta.total > 0 && (
                             <span className="ml-2 text-xs font-normal" style={{ color: 'var(--muted-text)' }}>
@@ -343,7 +343,7 @@ export default function EmailsPage() {
                 </div>
 
                 {error && (
-                    <div className="p-4 text-red-600 dark:text-red-400 text-sm text-center">{error}</div>
+                    <div className="p-4 text-status-rejected text-sm text-center">{error}</div>
                 )}
 
                 <div className="py-3">
@@ -382,7 +382,7 @@ export default function EmailsPage() {
                             <button
                                 onClick={() => setPage(p => Math.max(1, p - 1))}
                                 disabled={page === 1}
-                                className="px-3 py-1.5 rounded-lg border text-sm transition-colors disabled:opacity-40 hover-themed"
+                                className="px-3 py-1.5 rounded-lg border text-sm transition-colors disabled:opacity-40 hover:bg-secondary/60"
                                 style={{ borderColor: 'var(--card-border)', color: 'var(--foreground)' }}
                             >
                                 Poprzednia
@@ -390,7 +390,7 @@ export default function EmailsPage() {
                             <button
                                 onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
                                 disabled={page === meta.totalPages}
-                                className="px-3 py-1.5 rounded-lg border text-sm transition-colors disabled:opacity-40 hover-themed"
+                                className="px-3 py-1.5 rounded-lg border text-sm transition-colors disabled:opacity-40 hover:bg-secondary/60"
                                 style={{ borderColor: 'var(--card-border)', color: 'var(--foreground)' }}
                             >
                                 Następna

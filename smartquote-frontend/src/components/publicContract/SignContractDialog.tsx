@@ -102,7 +102,7 @@ export default function SignContractDialog({
                     </div>
                     <p className="text-sm text-slate-600 mt-2">
                         {contractTitle} —{' '}
-                        <span className="font-semibold text-emerald-600">
+                        <span className="font-semibold text-status-accepted">
               {formatCurrency(totalGross, currency)}
             </span>
                     </p>

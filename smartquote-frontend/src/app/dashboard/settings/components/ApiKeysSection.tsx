@@ -64,11 +64,11 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
 
     return (
         <div className="space-y-6">
-            <Card>
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h2 className="text-lg font-semibold text-themed">Klucze API</h2>
-                        <p className="text-sm text-themed-muted">Zarządzaj dostępem do API</p>
+                        <h2 className="text-lg font-semibold text-foreground">Klucze API</h2>
+                        <p className="text-sm text-muted-foreground">Zarządzaj dostępem do API</p>
                     </div>
                     <Button onClick={() => setIsCreateModalOpen(true)}>
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -80,13 +80,13 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
 
                 {apiKeys.length === 0 ? (
                     <div className="text-center py-12">
-                        <div className="w-16 h-16 section-themed rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-8 h-8 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <div className="w-16 h-16 bg-surface-subtle rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-8 h-8 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
                             </svg>
                         </div>
-                        <h3 className="text-lg font-medium text-themed mb-2">Brak kluczy API</h3>
-                        <p className="text-themed-muted mb-4">
+                        <h3 className="text-lg font-medium text-foreground mb-2">Brak kluczy API</h3>
+                        <p className="text-muted-foreground mb-4">
                             Utwórz klucz API, aby zintegrować SmartQuote z innymi aplikacjami
                         </p>
                         <Button onClick={() => setIsCreateModalOpen(true)}>
@@ -103,15 +103,15 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                                 key={apiKey.id}
                                 className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border gap-4 ${
                                     apiKey.isActive
-                                        ? 'card-themed'
-                                        : 'section-themed border-transparent'
+                                        ? 'bg-card border-border'
+                                        : 'bg-surface-subtle border-transparent'
                                 }`}
                             >
                                 <div className="flex items-center gap-4">
                                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
                                         apiKey.isActive
-                                            ? 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400'
-                                            : 'bg-slate-200 dark:bg-slate-700 text-themed-muted'
+                                            ? 'bg-cyan-100 dark:bg-cyan-900/30 text-primary'
+                                            : 'bg-slate-200 dark:bg-slate-700 text-muted-foreground'
                                     }`}>
                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
@@ -119,20 +119,20 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                                     </div>
                                     <div className="min-w-0">
                                         <div className="flex items-center gap-2 flex-wrap">
-                                            <p className="font-medium text-themed">{apiKey.name}</p>
+                                            <p className="font-medium text-foreground">{apiKey.name}</p>
                                             {!apiKey.isActive && (
-                                                <span className="text-xs px-2 py-0.5 section-themed text-themed-muted rounded-full">
+                                                <span className="text-xs px-2 py-0.5 bg-surface-subtle text-muted-foreground rounded-full">
                                                     Wyłączony
                                                 </span>
                                             )}
                                         </div>
                                         <div className="flex items-center gap-3 mt-1">
-                                            <code className="text-sm text-themed-muted font-mono truncate max-w-[200px]">
+                                            <code className="text-sm text-muted-foreground font-mono truncate max-w-[200px]">
                                                 {apiKey.key}
                                             </code>
                                             <button
                                                 onClick={() => handleCopy(apiKey.key, apiKey.id)}
-                                                className="text-themed-muted hover:text-themed flex-shrink-0"
+                                                className="text-muted-foreground hover:text-foreground flex-shrink-0"
                                             >
                                                 {copiedId === apiKey.id ? (
                                                     <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -145,7 +145,7 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                                                 )}
                                             </button>
                                         </div>
-                                        <div className="flex items-center gap-4 mt-2 text-xs text-themed-muted flex-wrap">
+                                        <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground flex-wrap">
                                             <span>Utworzono: {new Date(apiKey.createdAt).toLocaleDateString('pl-PL')}</span>
                                             {apiKey.lastUsedAt && (
                                                 <span className="flex items-center gap-1">
@@ -164,8 +164,8 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                                         onClick={() => onToggle(apiKey.id)}
                                         className={`p-2 rounded-lg transition-colors ${
                                             apiKey.isActive
-                                                ? 'text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/30'
-                                                : 'text-themed-muted hover-themed'
+                                                ? 'text-primary hover:bg-cyan-50 dark:hover:bg-cyan-900/30'
+                                                : 'text-muted-foreground hover:bg-secondary/60'
                                         }`}
                                         title={apiKey.isActive ? 'Wyłącz' : 'Włącz'}
                                     >
@@ -184,7 +184,7 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                                             setSelectedKeyId(apiKey.id);
                                             setIsDeleteModalOpen(true);
                                         }}
-                                        className="p-2 rounded-lg text-themed-muted hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                                        className="p-2 rounded-lg text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
                                         title="Usuń"
                                     >
                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -196,11 +196,11 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                         ))}
                     </div>
                 )}
-            </Card>
+            </div>
 
             <Card className="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
                 <div className="flex items-start gap-3">
-                    <svg className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-5 h-5 text-[oklch(0.55_0.14_60)] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
                     </svg>
                     <div>
@@ -213,7 +213,7 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                         </ul>
                     </div>
                 </div>
-            </Card>
+            </div>
 
             <Modal
                 isOpen={isCreateModalOpen}
@@ -229,26 +229,26 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                                 </svg>
                                 <span className="font-medium">Klucz został utworzony</span>
                             </div>
-                            <p className="text-sm text-emerald-600 dark:text-emerald-400">
+                            <p className="text-sm text-status-accepted">
                                 Skopiuj klucz teraz — nie będzie widoczny ponownie!
                             </p>
                         </div>
 
-                        <div className="p-4 section-themed rounded-lg">
+                        <div className="p-4 bg-surface-subtle rounded-lg">
                             <div className="flex items-center justify-between gap-4">
-                                <code className="text-sm font-mono text-themed break-all">
+                                <code className="text-sm font-mono text-foreground break-all">
                                     {newKeyResult}
                                 </code>
                                 <button
                                     onClick={() => handleCopy(newKeyResult, 'new')}
-                                    className="flex-shrink-0 p-2 hover-themed rounded-lg transition-colors"
+                                    className="flex-shrink-0 p-2 hover:bg-secondary/60 rounded-lg transition-colors"
                                 >
                                     {copiedId === 'new' ? (
                                         <svg className="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                         </svg>
                                     ) : (
-                                        <svg className="w-5 h-5 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                        <svg className="w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
                                         </svg>
                                     )}
@@ -263,18 +263,18 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                 ) : (
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-themed-label mb-2">
+                            <label className="block text-sm font-medium text-muted-foreground mb-2">
                                 Nazwa klucza
                             </label>
                             <input
                                 type="text"
                                 value={newKeyName}
                                 onChange={e => setNewKeyName(e.target.value)}
-                                className="w-full px-4 py-2.5 border rounded-lg input-themed focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500"
+                                className="w-full px-4 py-2.5 border rounded-lg border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500"
                                 placeholder="np. Integracja CRM"
                                 autoFocus
                             />
-                            <p className="text-xs text-themed-muted mt-1">
+                            <p className="text-xs text-muted-foreground mt-1">
                                 Nazwa pomoże Ci zidentyfikować gdzie używasz tego klucza
                             </p>
                         </div>

@@ -50,9 +50,9 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
         : false;
 
     const confidenceConfig = {
-        low: { label: 'Niska', color: 'badge-warning' },
-        medium: { label: 'Średnia', color: 'badge-info' },
-        high: { label: 'Wysoka', color: 'badge-success' },
+        low: { label: 'Niska', color: 'bg-amber-500/10 text-amber-600' },
+        medium: { label: 'Średnia', color: 'bg-primary/10 text-primary' },
+        high: { label: 'Wysoka', color: 'bg-status-accepted/10 text-status-accepted' },
     };
 
     if (!isOpen) {
@@ -63,8 +63,8 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
                 disabled={!canAnalyze || isLoading}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     canAnalyze
-                        ? 'ai-card-themed border text-cyan-600 hover:opacity-80'
-                        : 'card-themed border text-themed-muted cursor-not-allowed opacity-60'
+                        ? 'ai-bg-card border-border border text-primary hover:opacity-80'
+                        : 'bg-card border-border border text-muted-foreground cursor-not-allowed opacity-60'
                 }`}
                 title={canAnalyze ? 'Sprawdź sugestię cenową AI' : 'Wpisz nazwę pozycji (min. 3 znaki)'}
             >
@@ -77,13 +77,13 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
     }
 
     return (
-        <div className="mt-3 rounded-xl ai-card-themed border overflow-hidden">
+        <div className="mt-3 rounded-xl ai-bg-card border-border border overflow-hidden">
             <div className="flex items-center justify-between px-4 py-2.5 bg-gradient-to-r from-cyan-500/15 to-blue-500/10 border-b border-cyan-500/20">
                 <div className="flex items-center gap-2">
-                    <svg className="w-4 h-4 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                     </svg>
-                    <span className="text-sm font-semibold text-cyan-600">AI Price Insight</span>
+                    <span className="text-sm font-semibold text-primary">AI Price Insight</span>
                     {result && (
                         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${confidenceConfig[result.aiSuggestion.confidence].color}`}>
                             {confidenceConfig[result.aiSuggestion.confidence].label}
@@ -95,7 +95,7 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
                         type="button"
                         onClick={handleAnalyze}
                         disabled={isLoading || !canAnalyze}
-                        className="p-1 text-cyan-600 hover:text-cyan-500 disabled:opacity-50"
+                        className="p-1 text-primary hover:text-primary disabled:opacity-50"
                         title="Odśwież analizę"
                     >
                         <svg className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -105,7 +105,7 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
                     <button
                         type="button"
                         onClick={() => { setIsOpen(false); setResult(null); setError(null); }}
-                        className="p-1 text-themed-muted hover:opacity-70"
+                        className="p-1 text-muted-foreground hover:opacity-70"
                     >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -117,7 +117,7 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
             <div className="p-4">
                 {isLoading && (
                     <div className="flex items-center justify-center py-6">
-                        <div className="flex items-center gap-3 text-cyan-600">
+                        <div className="flex items-center gap-3 text-primary">
                             <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
@@ -140,16 +140,16 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
                     <div className="space-y-4">
                         <div>
                             <div className="flex items-baseline justify-between mb-2">
-                                <span className="text-xs font-medium text-themed-muted uppercase tracking-wide">Sugerowana cena netto</span>
-                                <span className="text-xs text-themed-muted">
+                                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Sugerowana cena netto</span>
+                                <span className="text-xs text-muted-foreground">
                                     na podstawie {result.historicalData.count} pozycji
                                 </span>
                             </div>
                             <div className="flex items-center gap-3">
-                                <span className="text-lg font-bold text-cyan-600">
+                                <span className="text-lg font-bold text-primary">
                                     {formatCurrency(result.aiSuggestion.suggestedMin)}
                                 </span>
-                                <div className="flex-1 h-2 rounded-full section-themed relative overflow-hidden">
+                                <div className="flex-1 h-2 rounded-full bg-surface-subtle relative overflow-hidden">
                                     <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full" />
                                     {currentPrice !== undefined && currentPrice > 0 && result.aiSuggestion.suggestedMax > result.aiSuggestion.suggestedMin && (
                                         <div
@@ -193,15 +193,15 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
                             </div>
                         )}
 
-                        <div className="text-xs text-themed-muted leading-relaxed card-themed border rounded-lg p-3">
+                        <div className="text-xs text-muted-foreground leading-relaxed bg-card border-border border rounded-lg p-3">
                             {result.aiSuggestion.marketAnalysis}
                         </div>
 
                         {result.historicalData.count > 0 && (
-                            <div className="flex items-center gap-4 text-xs text-themed-muted pt-1 border-t border-cyan-500/20">
-                                <span>Śr. historyczna: <strong className="text-themed">{formatCurrency(result.historicalData.avgPrice)}</strong></span>
-                                <span>Min: <strong className="text-themed">{formatCurrency(result.historicalData.minPrice)}</strong></span>
-                                <span>Max: <strong className="text-themed">{formatCurrency(result.historicalData.maxPrice)}</strong></span>
+                            <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1 border-t border-cyan-500/20">
+                                <span>Śr. historyczna: <strong className="text-foreground">{formatCurrency(result.historicalData.avgPrice)}</strong></span>
+                                <span>Min: <strong className="text-foreground">{formatCurrency(result.historicalData.minPrice)}</strong></span>
+                                <span>Max: <strong className="text-foreground">{formatCurrency(result.historicalData.maxPrice)}</strong></span>
                             </div>
                         )}
 

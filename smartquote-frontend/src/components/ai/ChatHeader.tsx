@@ -17,7 +17,7 @@ export function ChatHeader({
                                onClose,
                            }: ChatHeaderProps) {
     return (
-        <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-cyan-500 to-blue-600">
+        <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r bg-gradient-primary">
             <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-8 h-8 bg-white/20 rounded-full">
                     <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

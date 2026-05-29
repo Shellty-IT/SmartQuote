@@ -47,15 +47,15 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
 
     if (offerError || !offer) {
         return (
-            <div className="p-4 md:p-8">
-                <Card>
+            <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                     <div className="text-center py-12">
                         <p className="text-red-600 mb-4">{offerError || 'Nie znaleziono oferty'}</p>
                         <Button onClick={() => router.push('/dashboard/offers')}>
                             Wróć do listy
                         </Button>
                     </div>
-                </Card>
+                </div>
             </div>
         );
     }
@@ -65,20 +65,20 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
             <div className="mb-8">
                 <button
                     onClick={() => router.back()}
-                    className="flex items-center gap-2 text-themed-muted hover:opacity-70 mb-4"
+                    className="flex items-center gap-2 text-muted-foreground hover:opacity-70 mb-4"
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     Powrót
                 </button>
-                <h1 className="text-2xl font-bold text-themed">Edytuj ofertę</h1>
-                <p className="text-themed-muted mt-1">{offer.number}</p>
+                <h1 className="text-2xl font-bold text-foreground">Edytuj ofertę</h1>
+                <p className="text-muted-foreground mt-1">{offer.number}</p>
             </div>
 
             <OfferStepper currentStep={currentStep} onStepClick={goToStep} />
 
-            <Card className="mb-6">
+            <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
                 {currentStep === 'client' && (
                     <StepClient
                         clients={clients}
@@ -114,7 +114,7 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
                         uniqueVariants={uniqueVariants}
                     />
                 )}
-            </Card>
+            </div>
 
             <div className="flex justify-between">
                 <Button

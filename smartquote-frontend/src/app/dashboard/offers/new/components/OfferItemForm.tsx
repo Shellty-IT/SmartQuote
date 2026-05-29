@@ -29,13 +29,13 @@ export default function OfferItemForm({
         <div
             className={`p-4 rounded-xl space-y-4 ${
                 item.variantName.trim()
-                    ? 'section-themed border-l-4 border-l-cyan-400'
-                    : 'section-themed'
+                    ? 'bg-surface-subtle border-l-4 border-l-cyan-400'
+                    : 'bg-surface-subtle'
             }`}
         >
             <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-themed-muted">
+                    <span className="text-sm font-medium text-muted-foreground">
                         Pozycja {index + 1}
                     </span>
                     {item.variantName.trim() && (
@@ -47,7 +47,7 @@ export default function OfferItemForm({
                 {canRemove && (
                     <button
                         onClick={() => onRemove(index)}
-                        className="p-1 text-themed-muted hover:text-red-500 transition-colors"
+                        className="p-1 text-muted-foreground hover:text-red-500 transition-colors"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -140,19 +140,19 @@ export default function OfferItemForm({
                 />
             </div>
 
-            <div className="p-3 card-themed border rounded-lg">
+            <div className="p-3 bg-card border-border border rounded-lg">
                 <label className="flex items-center gap-3 cursor-pointer">
                     <input
                         type="checkbox"
                         checked={item.isOptional}
                         onChange={(e) => onUpdate(index, 'isOptional', e.target.checked)}
-                        className="w-4 h-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
+                        className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-cyan-500"
                     />
                     <div>
-                        <span className="text-sm font-medium text-themed">
+                        <span className="text-sm font-medium text-foreground">
                             Pozycja opcjonalna
                         </span>
-                        <p className="text-xs text-themed-muted">
+                        <p className="text-xs text-muted-foreground">
                             Klient może odznaczyć tę pozycję lub zmienić ilość
                         </p>
                     </div>
@@ -180,14 +180,14 @@ export default function OfferItemForm({
                 )}
             </div>
 
-            <div className="flex justify-end gap-4 pt-2 border-t divider-themed">
-                <span className="text-sm text-themed-muted">
+            <div className="flex justify-end gap-4 pt-2 border-t border-border">
+                <span className="text-sm text-muted-foreground">
                     Netto: <strong>{formatCurrency(itemTotals.totalNet)}</strong>
                 </span>
-                <span className="text-sm text-themed-muted">
+                <span className="text-sm text-muted-foreground">
                     VAT: <strong>{formatCurrency(itemTotals.totalVat)}</strong>
                 </span>
-                <span className="text-sm text-themed">
+                <span className="text-sm text-foreground">
                     Brutto: <strong>{formatCurrency(itemTotals.totalGross)}</strong>
                 </span>
             </div>

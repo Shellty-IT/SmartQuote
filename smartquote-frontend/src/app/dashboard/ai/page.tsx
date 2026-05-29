@@ -61,18 +61,18 @@ export default function AIAssistantPage() {
                     style={{ borderColor: 'var(--divider)' }}
                 >
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br bg-gradient-primary flex items-center justify-center shadow-lg shadow-cyan-500/20">
                             <span className="text-white text-lg">✨</span>
                         </div>
                         <div>
-                            <h1 className="text-lg font-semibold text-themed">SmartQuote AI</h1>
-                            <p className="text-xs text-themed-muted">Twój inteligentny asystent sprzedaży</p>
+                            <h1 className="text-lg font-semibold text-foreground">SmartQuote AI</h1>
+                            <p className="text-xs text-muted-foreground">Twój inteligentny asystent sprzedaży</p>
                         </div>
                     </div>
                     {messages.length > 0 && (
                         <button
                             onClick={clearMessages}
-                            className="px-3 py-1.5 text-sm text-themed-muted rounded-lg transition-colors"
+                            className="px-3 py-1.5 text-sm text-muted-foreground rounded-lg transition-colors"
                             style={{ backgroundColor: 'transparent' }}
                             onMouseEnter={(e) => {
                                 e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
@@ -94,13 +94,13 @@ export default function AIAssistantPage() {
                 >
                     {messages.length === 0 ? (
                         <div className="h-full flex flex-col items-center justify-center text-center">
-                            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center mb-6 shadow-xl shadow-cyan-500/20">
+                            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br bg-gradient-primary flex items-center justify-center mb-6 shadow-xl shadow-cyan-500/20">
                                 <span className="text-4xl">✨</span>
                             </div>
-                            <h2 className="text-xl font-semibold text-themed mb-2">
+                            <h2 className="text-xl font-semibold text-foreground mb-2">
                                 Witaj w SmartQuote AI!
                             </h2>
-                            <p className="text-themed-muted max-w-md mb-8">
+                            <p className="text-muted-foreground max-w-md mb-8">
                                 Jestem Twoim inteligentnym asystentem. Mogę pomóc Ci tworzyć oferty,
                                 analizować klientów, pisać emaile i wiele więcej.
                             </p>
@@ -144,7 +144,7 @@ export default function AIAssistantPage() {
                         <button
                             type="submit"
                             disabled={!input.trim() || isLoading}
-                            className="px-5 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl hover:from-cyan-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-cyan-500/25"
+                            className="px-5 py-3 bg-gradient-to-r bg-gradient-primary text-white rounded-xl hover:from-cyan-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-cyan-500/25"
                         >
                             {isLoading ? (
                                 <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -169,7 +169,7 @@ export default function AIAssistantPage() {
                     >
                         <div className="flex items-center gap-2 mb-4">
                             <span className="text-lg">📊</span>
-                            <h3 className="font-semibold text-themed">Podsumowanie</h3>
+                            <h3 className="font-semibold text-foreground">Podsumowanie</h3>
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <div
@@ -177,21 +177,21 @@ export default function AIAssistantPage() {
                                 style={{ backgroundColor: 'var(--section-bg)' }}
                             >
                                 <div className="text-2xl font-bold text-cyan-500">{stats.totalClients}</div>
-                                <div className="text-xs text-themed-muted">Klienci</div>
+                                <div className="text-xs text-muted-foreground">Klienci</div>
                             </div>
                             <div
                                 className="text-center p-3 rounded-xl"
                                 style={{ backgroundColor: 'var(--section-bg)' }}
                             >
                                 <div className="text-2xl font-bold text-emerald-500">{stats.activeOffers}</div>
-                                <div className="text-xs text-themed-muted">Aktywne oferty</div>
+                                <div className="text-xs text-muted-foreground">Aktywne oferty</div>
                             </div>
                             <div
                                 className="text-center p-3 rounded-xl"
                                 style={{ backgroundColor: 'var(--section-bg)' }}
                             >
                                 <div className="text-2xl font-bold text-amber-500">{stats.pendingFollowUps}</div>
-                                <div className="text-xs text-themed-muted">Zaległe zadania</div>
+                                <div className="text-xs text-muted-foreground">Zaległe zadania</div>
                             </div>
                             <div
                                 className="text-center p-3 rounded-xl"
@@ -200,7 +200,7 @@ export default function AIAssistantPage() {
                                 <div className="text-xl font-bold text-violet-500">
                                     {(stats.monthlyRevenue / 1000).toFixed(0)}k
                                 </div>
-                                <div className="text-xs text-themed-muted">Przychód (mies.)</div>
+                                <div className="text-xs text-muted-foreground">Przychód (mies.)</div>
                             </div>
                         </div>
                     </div>
@@ -211,7 +211,7 @@ export default function AIAssistantPage() {
                         className="rounded-2xl border p-4 flex-1 overflow-y-auto"
                         style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--divider)' }}
                     >
-                        <h3 className="font-semibold text-themed mb-4">Inteligentne sugestie</h3>
+                        <h3 className="font-semibold text-foreground mb-4">Inteligentne sugestie</h3>
                         <div className="space-y-3">
                             {suggestions.map((suggestion, index) => (
                                 <SuggestionCard
@@ -228,8 +228,8 @@ export default function AIAssistantPage() {
                     className="rounded-2xl border p-4"
                     style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--divider)' }}
                 >
-                    <h3 className="font-semibold text-themed mb-3">Wskazówki</h3>
-                    <ul className="text-xs text-themed-muted space-y-2.5">
+                    <h3 className="font-semibold text-foreground mb-3">Wskazówki</h3>
+                    <ul className="text-xs text-muted-foreground space-y-2.5">
                         <li className="flex items-start gap-2">
                             <span className="flex-shrink-0">💡</span>
                             <span>Opisz potrzebę klienta, a stworzę ofertę</span>

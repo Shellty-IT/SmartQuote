@@ -45,8 +45,8 @@ export function CommentsTab({
                             }: CommentsTabProps) {
     return (
         <div className="max-w-2xl space-y-6">
-            <Card>
-                <h2 className="text-lg font-semibold text-themed mb-4">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                <h2 className="text-lg font-semibold text-foreground mb-4">
                     Komentarze ({comments.length})
                 </h2>
 
@@ -68,7 +68,7 @@ export function CommentsTab({
                     onSubmit={onSubmitComment}
                     isSending={isSending}
                 />
-            </Card>
+            </div>
         </div>
     );
 }

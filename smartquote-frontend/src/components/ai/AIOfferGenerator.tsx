@@ -60,13 +60,13 @@ export function AIOfferGenerator({
             {step === 'input' ? (
                 <div className="space-y-4">
                     {clientName && (
-                        <div className="p-3 ai-card-themed border rounded-lg text-sm">
+                        <div className="p-3 ai-bg-card border-border border rounded-lg text-sm">
                             Tworzysz ofertę dla: <strong>{clientName}</strong>
                         </div>
                     )}
 
                     <div>
-                        <label className="block text-sm font-medium text-themed-label mb-2">
+                        <label className="block text-sm font-medium text-muted-foreground mb-2">
                             Opisz potrzeby klienta i oczekiwany zakres oferty
                         </label>
                         <Textarea
@@ -75,7 +75,7 @@ export function AIOfferGenerator({
                             placeholder="Np. Klient potrzebuje strony internetowej dla małej firmy. Chce stronę z 5 podstronami, formularzem kontaktowym, integracją z Google Analytics. Budżet około 5000-7000 PLN."
                             rows={6}
                         />
-                        <p className="mt-2 text-xs text-themed-muted">
+                        <p className="mt-2 text-xs text-muted-foreground">
                             Im więcej szczegółów podasz, tym lepsza będzie wygenerowana oferta.
                         </p>
                     </div>
@@ -103,26 +103,26 @@ export function AIOfferGenerator({
                 <div className="space-y-4">
                     {generatedOffer && (
                         <>
-                            <div className="p-4 section-themed rounded-lg">
-                                <h3 className="font-semibold text-lg text-themed mb-4">{generatedOffer.title}</h3>
+                            <div className="p-4 bg-surface-subtle rounded-lg">
+                                <h3 className="font-semibold text-lg text-foreground mb-4">{generatedOffer.title}</h3>
 
                                 <div className="space-y-3">
                                     {generatedOffer.items.map((item, index) => (
                                         <div
                                             key={index}
-                                            className="flex justify-between items-center p-3 card-themed border rounded"
+                                            className="flex justify-between items-center p-3 bg-card border-border border rounded"
                                         >
                                             <div>
-                                                <div className="font-medium text-themed">{item.name}</div>
+                                                <div className="font-medium text-foreground">{item.name}</div>
                                                 {item.description && (
-                                                    <div className="text-sm text-themed-muted">{item.description}</div>
+                                                    <div className="text-sm text-muted-foreground">{item.description}</div>
                                                 )}
                                             </div>
                                             <div className="text-right">
-                                                <div className="font-semibold text-themed">
+                                                <div className="font-semibold text-foreground">
                                                     {item.unitPrice.toLocaleString('pl-PL')} PLN
                                                 </div>
-                                                <div className="text-xs text-themed-muted">
+                                                <div className="text-xs text-muted-foreground">
                                                     {item.quantity} {item.unit} × VAT {item.vatRate}%
                                                 </div>
                                             </div>
@@ -131,12 +131,12 @@ export function AIOfferGenerator({
                                 </div>
 
                                 {generatedOffer.notes && (
-                                    <div className="mt-4 p-3 badge-warning rounded text-sm">
+                                    <div className="mt-4 p-3 bg-amber-500/10 text-amber-600 rounded text-sm">
                                         📝 {generatedOffer.notes}
                                     </div>
                                 )}
 
-                                <div className="mt-4 text-right text-sm text-themed-muted">
+                                <div className="mt-4 text-right text-sm text-muted-foreground">
                                     Ważność: {generatedOffer.validDays} dni
                                 </div>
                             </div>

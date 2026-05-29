@@ -7,14 +7,14 @@ import { useNotifications } from '@/hooks/useNotifications';
 import type { Notification, NotificationType } from '@/types';
 
 const typeConfig: Record<NotificationType, { icon: string; colorClass: string }> = {
-    OFFER_VIEWED: { icon: '👁️', colorClass: 'badge-info' },
-    OFFER_ACCEPTED: { icon: '✅', colorClass: 'badge-success' },
-    OFFER_REJECTED: { icon: '❌', colorClass: 'badge-danger' },
-    OFFER_COMMENT: { icon: '💬', colorClass: 'bg-cyan-500/15 text-cyan-700' },
+    OFFER_VIEWED: { icon: '👁️', colorClass: 'bg-primary/10 text-primary' },
+    OFFER_ACCEPTED: { icon: '✅', colorClass: 'bg-status-accepted/10 text-status-accepted' },
+    OFFER_REJECTED: { icon: '❌', colorClass: 'bg-destructive/10 text-destructive' },
+    OFFER_COMMENT: { icon: '💬', colorClass: 'bg-primary/10 text-cyan-700' },
     AI_INSIGHT: { icon: '✨', colorClass: 'bg-purple-500/15 text-purple-700' },
     FOLLOW_UP_REMINDER: { icon: '⏰', colorClass: 'bg-amber-500/15 text-amber-700' },
     CONTRACT_SIGNED: { icon: '✍️', colorClass: 'bg-emerald-500/15 text-emerald-700' },
-    SYSTEM: { icon: '⚙️', colorClass: 'badge-themed' },
+    SYSTEM: { icon: '⚙️', colorClass: 'bg-secondary text-secondary-foreground' },
 };
 
 function timeAgo(dateStr: string): string {
@@ -79,7 +79,7 @@ export default function NotificationBell() {
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative p-2 text-themed-muted hover-themed rounded-lg transition-colors"
+                className="relative p-2 text-muted-foreground hover:bg-secondary/60 rounded-lg transition-colors"
             >
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
@@ -98,13 +98,13 @@ export default function NotificationBell() {
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-[420px] max-w-[calc(100vw-2rem)] card-themed border rounded-xl shadow-xl z-50 overflow-hidden">
-                    <div className="px-4 py-3 section-themed border-b divider-themed">
+                <div className="absolute right-0 mt-2 w-[420px] max-w-[calc(100vw-2rem)] bg-card border-border border rounded-xl shadow-xl z-50 overflow-hidden">
+                    <div className="px-4 py-3 bg-surface-subtle border-b border-border">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                                <h3 className="font-semibold text-themed">Powiadomienia</h3>
+                                <h3 className="font-semibold text-foreground">Powiadomienia</h3>
                                 {unreadCount > 0 && (
-                                    <span className="px-2 py-0.5 text-xs font-medium bg-cyan-500/15 text-cyan-700 rounded-full">
+                                    <span className="px-2 py-0.5 text-xs font-medium bg-primary/10 text-cyan-700 rounded-full">
                                         {unreadCount} nowych
                                     </span>
                                 )}
@@ -112,7 +112,7 @@ export default function NotificationBell() {
                             {unreadCount > 0 && (
                                 <button
                                     onClick={handleMarkAllRead}
-                                    className="text-xs font-medium text-cyan-600 hover:text-cyan-700 transition-colors"
+                                    className="text-xs font-medium text-primary hover:text-cyan-700 transition-colors"
                                 >
                                     Oznacz wszystkie
                                 </button>
@@ -127,16 +127,16 @@ export default function NotificationBell() {
                             </div>
                         ) : notifications.length === 0 ? (
                             <div className="p-8 text-center">
-                                <div className="w-12 h-12 section-themed rounded-full flex items-center justify-center mx-auto mb-3">
-                                    <svg className="w-6 h-6 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div className="w-12 h-12 bg-surface-subtle rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <svg className="w-6 h-6 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                                     </svg>
                                 </div>
-                                <p className="text-themed font-medium">Brak powiadomień</p>
-                                <p className="text-sm text-themed-muted mt-1">Wszystko na bieżąco!</p>
+                                <p className="text-foreground font-medium">Brak powiadomień</p>
+                                <p className="text-sm text-muted-foreground mt-1">Wszystko na bieżąco!</p>
                             </div>
                         ) : (
-                            <div className="divide-y divider-themed">
+                            <div className="divide-y border-border">
                                 {notifications.map((notification) => {
                                     const cfg = typeConfig[notification.type] || typeConfig.SYSTEM;
 
@@ -149,8 +149,8 @@ export default function NotificationBell() {
                                             onKeyDown={(e) => { if (e.key === 'Enter') handleNotificationClick(notification); }}
                                             className={`w-full px-4 py-3 text-left transition-colors group cursor-pointer ${
                                                 notification.isRead
-                                                    ? 'card-themed hover-themed'
-                                                    : 'section-themed hover-themed'
+                                                    ? 'bg-card border-border hover:bg-secondary/60'
+                                                    : 'bg-surface-subtle hover:bg-secondary/60'
                                             }`}
                                         >
                                             <div className="flex items-start gap-3">
@@ -162,8 +162,8 @@ export default function NotificationBell() {
                                                     <div className="flex items-start justify-between gap-2">
                                                         <p className={`text-sm leading-tight ${
                                                             notification.isRead
-                                                                ? 'font-medium text-themed-muted'
-                                                                : 'font-semibold text-themed'
+                                                                ? 'font-medium text-muted-foreground'
+                                                                : 'font-semibold text-foreground'
                                                         }`}>
                                                             {notification.title}
                                                         </p>
@@ -174,7 +174,7 @@ export default function NotificationBell() {
                                                             )}
                                                             <button
                                                                 onClick={(e) => handleDelete(e, notification.id)}
-                                                                className="p-1 text-themed-muted hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all rounded"
+                                                                className="p-1 text-muted-foreground hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all rounded"
                                                                 title="Usuń"
                                                             >
                                                                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -185,12 +185,12 @@ export default function NotificationBell() {
                                                     </div>
 
                                                     <p className={`text-xs mt-0.5 leading-relaxed line-clamp-2 ${
-                                                        notification.isRead ? 'text-themed-muted' : 'text-themed'
+                                                        notification.isRead ? 'text-muted-foreground' : 'text-foreground'
                                                     }`}>
                                                         {notification.message}
                                                     </p>
 
-                                                    <p className="text-xs text-themed-muted mt-1">
+                                                    <p className="text-xs text-muted-foreground mt-1">
                                                         {timeAgo(notification.createdAt)}
                                                     </p>
                                                 </div>
@@ -203,13 +203,13 @@ export default function NotificationBell() {
                     </div>
 
                     {notifications.length > 0 && (
-                        <div className="px-4 py-3 section-themed border-t divider-themed text-center">
+                        <div className="px-4 py-3 bg-surface-subtle border-t border-border text-center">
                             <button
                                 onClick={() => {
                                     setIsOpen(false);
                                     router.push('/dashboard/notifications');
                                 }}
-                                className="text-sm font-medium text-cyan-600 hover:text-cyan-700 transition-colors"
+                                className="text-sm font-medium text-primary hover:text-cyan-700 transition-colors"
                             >
                                 Zobacz wszystkie →
                             </button>

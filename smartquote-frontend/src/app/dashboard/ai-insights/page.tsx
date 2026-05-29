@@ -27,9 +27,9 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
     );
 
     return (
-        <div className="rounded-2xl border overflow-hidden dash-section transition-all">
+        <div className="rounded-2xl border overflow-hidden rounded-2xl border border-border bg-card transition-all">
             <div
-                className="flex items-start sm:items-center justify-between gap-3 px-4 sm:px-6 py-4 cursor-pointer hover-themed transition-colors"
+                className="flex items-start sm:items-center justify-between gap-3 px-4 sm:px-6 py-4 cursor-pointer hover:bg-secondary/60 transition-colors"
                 onClick={() => setExpanded(!expanded)}
             >
                 <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
@@ -38,9 +38,9 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
                     }`} />
                     <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-sm font-bold text-themed">{insight.offerNumber}</span>
+                            <span className="text-sm font-bold text-foreground">{insight.offerNumber}</span>
                             <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
-                                insight.outcome === 'ACCEPTED' ? 'badge-success' : 'badge-danger'
+                                insight.outcome === 'ACCEPTED' ? 'bg-status-accepted/10 text-status-accepted' : 'bg-destructive/10 text-destructive'
                             }`}>
                                 {insight.outcome === 'ACCEPTED' ? 'Wygrana' : 'Przegrana'}
                             </span>
@@ -53,8 +53,8 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
                                 </span>
                             )}
                         </div>
-                        <p className="text-sm text-themed-muted truncate mt-0.5">{insight.offerTitle}</p>
-                        <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-themed-muted">
+                        <p className="text-sm text-muted-foreground truncate mt-0.5">{insight.offerTitle}</p>
+                        <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-muted-foreground">
                             <span>{insight.clientName}</span>
                             {insight.clientCompany && (
                                 <>
@@ -63,7 +63,7 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
                                 </>
                             )}
                             <span className="opacity-30">•</span>
-                            <span className="font-semibold text-themed">
+                            <span className="font-semibold text-foreground">
                                 {formatCurrency(insight.offerValue)}
                             </span>
                             <span className="opacity-30">•</span>
@@ -84,7 +84,7 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
                         Oferta →
                     </button>
                     <svg
-                        className={`w-5 h-5 text-themed-muted transition-transform ${expanded ? 'rotate-180' : ''}`}
+                        className={`w-5 h-5 text-muted-foreground transition-transform ${expanded ? 'rotate-180' : ''}`}
                         fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
                     >
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -96,21 +96,21 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
                 <div className="px-4 sm:px-6 pb-5 pt-2 border-t space-y-4" style={{ borderColor: 'var(--divider)' }}>
                     {insight.insights.summary && (
                         <div>
-                            <h4 className="text-xs font-semibold text-themed-label uppercase tracking-wide mb-1.5">Podsumowanie</h4>
-                            <p className="text-sm text-themed-muted leading-relaxed">{insight.insights.summary}</p>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Podsumowanie</h4>
+                            <p className="text-sm text-muted-foreground leading-relaxed">{insight.insights.summary}</p>
                         </div>
                     )}
 
                     {keyLessons.length > 0 && (
                         <div>
-                            <h4 className="text-xs font-semibold text-themed-label uppercase tracking-wide mb-1.5">Kluczowe wnioski</h4>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Kluczowe wnioski</h4>
                             <div className="space-y-1.5">
                                 {keyLessons.map((lesson, idx) => (
                                     <div key={idx} className="flex items-start gap-2">
                                         <svg className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--accent-gradient-from)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
                                         </svg>
-                                        <span className="text-sm text-themed leading-relaxed">{lesson}</span>
+                                        <span className="text-sm text-foreground leading-relaxed">{lesson}</span>
                                     </div>
                                 ))}
                             </div>
@@ -119,26 +119,26 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
 
                     {hasPricing && (
                         <div>
-                            <h4 className="text-xs font-semibold text-themed-label uppercase tracking-wide mb-1.5">Analiza cenowa</h4>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Analiza cenowa</h4>
                             <div className="flex items-start gap-2 rounded-xl p-3" style={{ backgroundColor: 'var(--tone-active-bg)' }}>
                                 <svg className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--accent-gradient-from)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <span className="text-sm text-themed leading-relaxed">{insight.insights.pricingInsight}</span>
+                                <span className="text-sm text-foreground leading-relaxed">{insight.insights.pricingInsight}</span>
                             </div>
                         </div>
                     )}
 
                     {improvementSuggestions.length > 0 && (
                         <div>
-                            <h4 className="text-xs font-semibold text-themed-label uppercase tracking-wide mb-1.5">Sugestie usprawnień</h4>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Sugestie usprawnień</h4>
                             <div className="space-y-1.5">
                                 {improvementSuggestions.map((suggestion, idx) => (
                                     <div key={idx} className="flex items-start gap-2">
                                         <svg className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
                                         </svg>
-                                        <span className="text-sm text-themed-muted leading-relaxed">{suggestion}</span>
+                                        <span className="text-sm text-muted-foreground leading-relaxed">{suggestion}</span>
                                     </div>
                                 ))}
                             </div>
@@ -147,7 +147,7 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
 
                     {hasVariant && (
                         <div>
-                            <h4 className="text-xs font-semibold text-themed-label uppercase tracking-wide mb-1.5">Wariant</h4>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Wariant</h4>
                             <div className="flex items-center gap-2">
                                 <svg className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--accent-gradient-from)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
@@ -156,7 +156,7 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
                                     {insight.insights.selectedVariant}
                                 </span>
                                 {insight.insights.availableVariants && insight.insights.availableVariants.length > 0 && (
-                                    <span className="text-xs text-themed-muted">
+                                    <span className="text-xs text-muted-foreground">
                                         (z {insight.insights.availableVariants.length}: {insight.insights.availableVariants.join(', ')})
                                     </span>
                                 )}
@@ -166,7 +166,7 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
 
                     {hasVariantHistory && (
                         <div>
-                            <h4 className="text-xs font-semibold text-themed-label uppercase tracking-wide mb-1.5">Trend wariantów</h4>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Trend wariantów</h4>
                             <div className="rounded-xl p-3" style={{ backgroundColor: 'var(--tone-active-bg)' }}>
                                 <div className="flex flex-wrap gap-2">
                                     {Object.entries(insight.insights.variantHistory!.distribution).map(([variant, count]) => {
@@ -189,7 +189,7 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
                                         );
                                     })}
                                 </div>
-                                <p className="text-xs text-themed-muted mt-2">
+                                <p className="text-xs text-muted-foreground mt-2">
                                     Na podstawie {insight.insights.variantHistory!.totalAcceptedWithVariant} zaakceptowanych ofert z wariantami
                                 </p>
                             </div>
@@ -198,8 +198,8 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
 
                     {hasIndustryNote && (
                         <div>
-                            <h4 className="text-xs font-semibold text-themed-label uppercase tracking-wide mb-1.5">Notatka branżowa</h4>
-                            <p className="text-sm text-themed-muted leading-relaxed italic">{insight.insights.industryNote}</p>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Notatka branżowa</h4>
+                            <p className="text-sm text-muted-foreground leading-relaxed italic">{insight.insights.industryNote}</p>
                         </div>
                     )}
                 </div>
@@ -277,14 +277,14 @@ export default function AIInsightsPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                     <div>
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br bg-gradient-primary flex items-center justify-center shadow-lg">
                                 <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
                                 </svg>
                             </div>
                             <div>
-                                <h1 className="text-xl sm:text-2xl font-bold text-themed">Wnioski AI</h1>
-                                <p className="text-sm text-themed-muted">
+                                <h1 className="text-xl sm:text-2xl font-bold text-foreground">Wnioski AI</h1>
+                                <p className="text-sm text-muted-foreground">
                                     Analiza zakończonych ofert — {meta.total} {meta.total === 1 ? 'wniosek' : meta.total < 5 ? 'wnioski' : 'wniosków'}
                                 </p>
                             </div>
@@ -295,7 +295,7 @@ export default function AIInsightsPage() {
                     </Button>
                 </div>
 
-                <div className="rounded-2xl border overflow-hidden dash-section mb-6">
+                <div className="rounded-2xl border overflow-hidden rounded-2xl border border-border bg-card mb-6">
                     <div className="p-4 sm:p-5 space-y-4">
                         <div className="flex flex-col sm:flex-row gap-3">
                             <div className="flex-1 relative">
@@ -312,7 +312,7 @@ export default function AIInsightsPage() {
                                         color: 'var(--input-text)',
                                     }}
                                 />
-                                <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-themed-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
@@ -335,7 +335,7 @@ export default function AIInsightsPage() {
                                             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                                                 isActive
                                                     ? 'text-white shadow-sm'
-                                                    : 'text-themed-muted hover:opacity-80'
+                                                    : 'text-muted-foreground hover:opacity-80'
                                             }`}
                                             style={isActive ? {
                                                 backgroundColor: filter === 'REJECTED' ? '#ef4444' : filter === 'ACCEPTED' ? '#10b981' : 'var(--accent-gradient-from)',
@@ -361,7 +361,7 @@ export default function AIInsightsPage() {
                                         color: 'var(--input-text)',
                                     }}
                                 />
-                                <span className="text-xs text-themed-muted">—</span>
+                                <span className="text-xs text-muted-foreground">—</span>
                                 <input
                                     type="date"
                                     value={dateTo}
@@ -395,7 +395,7 @@ export default function AIInsightsPage() {
                         ))}
                     </div>
                 ) : insights.length === 0 ? (
-                    <div className="rounded-2xl border dash-section">
+                    <div className="rounded-2xl border rounded-2xl border border-border bg-card">
                         <EmptyState
                             icon={
                                 hasActiveFilters ? (
@@ -431,7 +431,7 @@ export default function AIInsightsPage() {
 
                         {meta.totalPages > 1 && (
                             <div className="flex items-center justify-between mt-6 px-2">
-                                <p className="text-xs text-themed-muted">
+                                <p className="text-xs text-muted-foreground">
                                     Strona {meta.page} z {meta.totalPages} ({meta.total} wyników)
                                 </p>
                                 <div className="flex gap-2">

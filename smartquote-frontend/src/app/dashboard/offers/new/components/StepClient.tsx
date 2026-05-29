@@ -25,7 +25,7 @@ export default function StepClient({ clients, selectedClient, onSelectClient }: 
 
     return (
         <div>
-            <h2 className="text-lg font-semibold text-themed mb-4">Wybierz klienta</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-4">Wybierz klienta</h2>
             <Input
                 placeholder="Szukaj klienta..."
                 value={clientSearch}
@@ -45,15 +45,15 @@ export default function StepClient({ clients, selectedClient, onSelectClient }: 
                         className={`flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all ${
                             selectedClient?.id === client.id
                                 ? 'border-cyan-500 bg-cyan-500/10'
-                                : 'card-themed border hover-themed'
+                                : 'bg-card border-border border hover:bg-secondary/60'
                         }`}
                     >
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-600 to-blue-700 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br bg-gradient-primary flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
                             {getInitials(client.name)}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="font-medium text-themed truncate">{client.name}</p>
-                            <p className="text-sm text-themed-muted truncate">
+                            <p className="font-medium text-foreground truncate">{client.name}</p>
+                            <p className="text-sm text-muted-foreground truncate">
                                 {client.email || client.phone || 'Brak kontaktu'}
                             </p>
                         </div>
@@ -67,7 +67,7 @@ export default function StepClient({ clients, selectedClient, onSelectClient }: 
             </div>
             {filteredClients.length === 0 && (
                 <div className="text-center py-8">
-                    <p className="text-themed-muted mb-4">Nie znaleziono klientów</p>
+                    <p className="text-muted-foreground mb-4">Nie znaleziono klientów</p>
                     <Button variant="outline" onClick={() => router.push('/dashboard/clients/new')}>
                         Dodaj nowego klienta
                     </Button>

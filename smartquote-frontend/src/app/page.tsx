@@ -165,7 +165,7 @@ export default function LoginPage() {
             </div>
 
             <div className="relative w-full max-w-md">
-                <div className="card-themed border rounded-2xl shadow-xl shadow-cyan-500/10 p-8">
+                <div className="bg-card border-border border rounded-2xl shadow-xl shadow-cyan-500/10 p-8">
                     <div className="text-center mb-8">
                         <Image
                             src="/android-chrome-512x512.png"
@@ -175,8 +175,8 @@ export default function LoginPage() {
                             className="mx-auto mb-4"
                             priority
                         />
-                        <h1 className="text-2xl font-bold text-themed">SmartQuote AI</h1>
-                        <p className="text-themed-muted mt-2">Zaloguj się do swojego konta</p>
+                        <h1 className="text-2xl font-bold text-foreground">SmartQuote AI</h1>
+                        <p className="text-muted-foreground mt-2">Zaloguj się do swojego konta</p>
                     </div>
 
                     <div className={`mb-6 p-3 rounded-lg border flex items-center gap-3 transition-all duration-500 ${currentStatus.bg}`}>
@@ -228,12 +228,12 @@ export default function LoginPage() {
                         className="space-y-5"
                     >
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-themed-label mb-2">
+                            <label htmlFor="email" className="block text-sm font-medium text-muted-foreground mb-2">
                                 Adres email
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg className="w-5 h-5 text-themed-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                               d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                                     </svg>
@@ -247,7 +247,7 @@ export default function LoginPage() {
                                     value={email}
                                     onChange={e => setEmail(e.target.value)}
                                     disabled={isFormDisabled}
-                                    className="block w-full pl-10 pr-4 py-3 border rounded-lg input-themed
+                                    className="block w-full pl-10 pr-4 py-3 border rounded-lg border-border bg-card text-foreground
                                     focus:ring-2 focus:ring-cyan-500 focus:border-transparent
                                     disabled:opacity-50 transition-all duration-200"
                                     placeholder="jan@firma.pl"
@@ -256,12 +256,12 @@ export default function LoginPage() {
                         </div>
 
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-themed-label mb-2">
+                            <label htmlFor="password" className="block text-sm font-medium text-muted-foreground mb-2">
                                 Hasło
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg className="w-5 h-5 text-themed-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                               d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                     </svg>
@@ -275,7 +275,7 @@ export default function LoginPage() {
                                     value={password}
                                     onChange={e => setPassword(e.target.value)}
                                     disabled={isFormDisabled}
-                                    className="block w-full pl-10 pr-4 py-3 border rounded-lg input-themed
+                                    className="block w-full pl-10 pr-4 py-3 border rounded-lg border-border bg-card text-foreground
                                     focus:ring-2 focus:ring-cyan-500 focus:border-transparent
                                     disabled:opacity-50 transition-all duration-200"
                                     placeholder="••••••••"
@@ -286,7 +286,7 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={isFormDisabled}
-                            className="w-full py-3 px-4 bg-gradient-to-r from-cyan-500 to-blue-600
+                            className="w-full py-3 px-4 bg-gradient-to-r bg-gradient-primary
                             text-white font-semibold rounded-lg shadow-lg shadow-cyan-500/30
                             hover:from-cyan-600 hover:to-blue-700
                             focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2
@@ -311,11 +311,11 @@ export default function LoginPage() {
                     </form>
 
                     <div className="mt-6 text-center">
-                        <p className="text-sm text-themed-muted">
+                        <p className="text-sm text-muted-foreground">
                             Nie masz konta?{' '}
                             <Link
                                 href="/register"
-                                className="font-medium text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors"
+                                className="font-medium text-primary hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors"
                             >
                                 Zarejestruj się
                             </Link>
@@ -323,8 +323,8 @@ export default function LoginPage() {
                     </div>
                 </div>
 
-                <p className="text-center text-xs text-themed-muted mt-6">
-                    © 2026 SmartQuote AI by <a href="https://shellty-it.github.io/" target="_blank" rel="noopener noreferrer" className="underline hover:text-themed">
+                <p className="text-center text-xs text-muted-foreground mt-6">
+                    © 2026 SmartQuote AI by <a href="https://shellty-it.github.io/" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
                     Shellty
                 </a>
                 </p>

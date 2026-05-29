@@ -13,8 +13,8 @@ interface PageProps {
 
 function EmailStatusBadge({ status }: { status: EmailLogStatus }) {
     const config: Record<EmailLogStatus, { label: string; classes: string }> = {
-        SENT: { label: 'Wysłano', classes: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' },
-        FAILED: { label: 'Błąd wysyłki', classes: 'bg-red-500/15 text-red-600 dark:text-red-400' },
+        SENT: { label: 'Wysłano', classes: 'bg-emerald-500/15 text-status-accepted' },
+        FAILED: { label: 'Błąd wysyłki', classes: 'bg-red-500/15 text-status-rejected' },
         DRAFT: { label: 'Szkic', classes: 'bg-slate-500/15 text-slate-600 dark:text-slate-400' },
     };
     const { label, classes } = config[status];
@@ -45,8 +45,8 @@ function AttachmentItem({ att }: { att: EmailAttachment }) {
                 </svg>
             )}
             <div>
-                <p className="text-xs font-medium text-themed">{att.name}</p>
-                <p className="text-xs text-themed-muted">{typeLabels[att.type]}</p>
+                <p className="text-xs font-medium text-foreground">{att.name}</p>
+                <p className="text-xs text-muted-foreground">{typeLabels[att.type]}</p>
             </div>
         </div>
     );
@@ -95,9 +95,9 @@ export default function EmailDetailPage({ params }: PageProps) {
     if (error || !log) {
         return (
             <div className="p-4 md:p-8 max-w-3xl mx-auto">
-                <Card>
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                     <div className="text-center py-12">
-                        <p className="text-red-600 dark:text-red-400 mb-4">{error || 'Nie znaleziono wiadomości'}</p>
+                        <p className="text-status-rejected mb-4">{error || 'Nie znaleziono wiadomości'}</p>
                         <button
                             onClick={() => router.push('/dashboard/emails')}
                             className="px-4 py-2 rounded-xl bg-cyan-600 text-white text-sm"
@@ -105,7 +105,7 @@ export default function EmailDetailPage({ params }: PageProps) {
                             Wróć do listy
                         </button>
                     </div>
-                </Card>
+                </div>
             </div>
         );
     }
@@ -115,7 +115,7 @@ export default function EmailDetailPage({ params }: PageProps) {
             <div className="flex items-center gap-4 mb-8">
                 <button
                     onClick={() => router.push('/dashboard/emails')}
-                    className="p-2 text-themed-muted hover-themed rounded-lg transition-colors"
+                    className="p-2 text-muted-foreground hover:bg-secondary/60 rounded-lg transition-colors"
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -123,10 +123,10 @@ export default function EmailDetailPage({ params }: PageProps) {
                 </button>
                 <div className="flex-1">
                     <div className="flex items-center gap-3 flex-wrap">
-                        <h1 className="text-xl font-bold text-themed">{log.subject}</h1>
+                        <h1 className="text-xl font-bold text-foreground">{log.subject}</h1>
                         <EmailStatusBadge status={log.status} />
                     </div>
-                    <p className="text-themed-muted text-sm mt-0.5">{formatDate(log.sentAt)}</p>
+                    <p className="text-muted-foreground text-sm mt-0.5">{formatDate(log.sentAt)}</p>
                 </div>
                 {log.status === 'DRAFT' && (
                     <button
@@ -142,26 +142,26 @@ export default function EmailDetailPage({ params }: PageProps) {
             </div>
 
             <div className="space-y-4">
-                <Card>
-                    <h2 className="text-xs font-semibold text-themed-muted uppercase tracking-wide mb-3">Szczegóły</h2>
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Szczegóły</h2>
                     <dl className="space-y-2">
                         <div className="flex gap-4">
-                            <dt className="text-sm text-themed-muted w-20 flex-shrink-0">Do:</dt>
-                            <dd className="text-sm text-themed">
+                            <dt className="text-sm text-muted-foreground w-20 flex-shrink-0">Do:</dt>
+                            <dd className="text-sm text-foreground">
                                 {log.toName ? `${log.toName} <${log.to}>` : log.to}
                             </dd>
                         </div>
                         <div className="flex gap-4">
-                            <dt className="text-sm text-themed-muted w-20 flex-shrink-0">Temat:</dt>
-                            <dd className="text-sm text-themed">{log.subject}</dd>
+                            <dt className="text-sm text-muted-foreground w-20 flex-shrink-0">Temat:</dt>
+                            <dd className="text-sm text-foreground">{log.subject}</dd>
                         </div>
                         {log.client && (
                             <div className="flex gap-4">
-                                <dt className="text-sm text-themed-muted w-20 flex-shrink-0">Klient:</dt>
-                                <dd className="text-sm text-themed">
+                                <dt className="text-sm text-muted-foreground w-20 flex-shrink-0">Klient:</dt>
+                                <dd className="text-sm text-foreground">
                                     <button
                                         onClick={() => router.push(`/dashboard/clients/${log.client!.id}`)}
-                                        className="text-cyan-600 dark:text-cyan-400 hover:underline"
+                                        className="text-primary hover:underline"
                                     >
                                         {log.client.name}
                                     </button>
@@ -170,11 +170,11 @@ export default function EmailDetailPage({ params }: PageProps) {
                         )}
                         {log.offer && (
                             <div className="flex gap-4">
-                                <dt className="text-sm text-themed-muted w-20 flex-shrink-0">Oferta:</dt>
-                                <dd className="text-sm text-themed">
+                                <dt className="text-sm text-muted-foreground w-20 flex-shrink-0">Oferta:</dt>
+                                <dd className="text-sm text-foreground">
                                     <button
                                         onClick={() => router.push(`/dashboard/offers/${log.offer!.id}`)}
-                                        className="text-cyan-600 dark:text-cyan-400 hover:underline"
+                                        className="text-primary hover:underline"
                                     >
                                         {log.offer.number} — {log.offer.title}
                                     </button>
@@ -183,11 +183,11 @@ export default function EmailDetailPage({ params }: PageProps) {
                         )}
                         {log.contract && (
                             <div className="flex gap-4">
-                                <dt className="text-sm text-themed-muted w-20 flex-shrink-0">Umowa:</dt>
-                                <dd className="text-sm text-themed">
+                                <dt className="text-sm text-muted-foreground w-20 flex-shrink-0">Umowa:</dt>
+                                <dd className="text-sm text-foreground">
                                     <button
                                         onClick={() => router.push(`/dashboard/contracts/${log.contract!.id}`)}
-                                        className="text-emerald-600 dark:text-emerald-400 hover:underline"
+                                        className="text-status-accepted hover:underline"
                                     >
                                         {log.contract.number} — {log.contract.title}
                                     </button>
@@ -196,23 +196,23 @@ export default function EmailDetailPage({ params }: PageProps) {
                         )}
                         {log.errorMessage && (
                             <div className="flex gap-4">
-                                <dt className="text-sm text-themed-muted w-20 flex-shrink-0">Błąd:</dt>
-                                <dd className="text-sm text-red-600 dark:text-red-400">{log.errorMessage}</dd>
+                                <dt className="text-sm text-muted-foreground w-20 flex-shrink-0">Błąd:</dt>
+                                <dd className="text-sm text-status-rejected">{log.errorMessage}</dd>
                             </div>
                         )}
                     </dl>
-                </Card>
+                </div>
 
-                <Card>
-                    <h2 className="text-xs font-semibold text-themed-muted uppercase tracking-wide mb-3">Treść wiadomości</h2>
-                    <div className="prose prose-sm max-w-none text-themed whitespace-pre-wrap leading-relaxed">
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Treść wiadomości</h2>
+                    <div className="prose prose-sm max-w-none text-foreground whitespace-pre-wrap leading-relaxed">
                         {log.body}
                     </div>
-                </Card>
+                </div>
 
                 {log.attachments && log.attachments.length > 0 && (
-                    <Card>
-                        <h2 className="text-xs font-semibold text-themed-muted uppercase tracking-wide mb-3">
+                    <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
                             Załączniki ({log.attachments.length})
                         </h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -220,7 +220,7 @@ export default function EmailDetailPage({ params }: PageProps) {
                                 <AttachmentItem key={i} att={att} />
                             ))}
                         </div>
-                    </Card>
+                    </div>
                 )}
             </div>
         </div>
