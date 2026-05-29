@@ -2,12 +2,13 @@
 'use client';
 
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 
 interface StatusData {
     label: string;
     value: number;
-    color: string;
-    bgColor: string;
+    color: string;   // bg-* class for the bar
+    pctColor?: string; // bar color override for the mini bar
 }
 
 interface StatsChartProps {
@@ -16,62 +17,55 @@ interface StatsChartProps {
 }
 
 export default function StatsChart({ data, total }: StatsChartProps) {
-    const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
-    const maxValue = Math.max(...data.map(d => d.value), 1);
+    const [hovered, setHovered] = useState<number | null>(null);
 
     return (
         <div className="space-y-5">
-            <div className="flex items-center gap-2 overflow-hidden rounded-xl h-3">
-                {data.map((item, index) => {
-                    const percentage = total > 0 ? (item.value / total) * 100 : 0;
-                    if (percentage === 0) return null;
+            {/* Stacked bar */}
+            <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-secondary">
+                {data.map((item, i) => {
+                    const pct = total > 0 ? (item.value / total) * 100 : 0;
+                    if (pct === 0) return null;
                     return (
                         <div
-                            key={index}
-                            className={`h-full transition-all duration-500 first:rounded-l-xl last:rounded-r-xl ${item.color} ${
-                                hoveredIndex === index ? 'opacity-100 scale-y-125' : hoveredIndex !== null ? 'opacity-60' : 'opacity-90'
-                            }`}
-                            style={{ width: `${percentage}%`, minWidth: percentage > 0 ? '4px' : '0' }}
-                            onMouseEnter={() => setHoveredIndex(index)}
-                            onMouseLeave={() => setHoveredIndex(null)}
+                            key={i}
+                            className={cn('h-full transition-all', item.color, hovered === i ? 'brightness-110' : '')}
+                            style={{ width: `${pct}%` }}
+                            onMouseEnter={() => setHovered(i)}
+                            onMouseLeave={() => setHovered(null)}
                         />
                     );
                 })}
-                {total === 0 && (
-                    <div className="h-full w-full rounded-xl" style={{ backgroundColor: 'var(--divider)' }} />
-                )}
             </div>
 
-            <div className="space-y-3">
-                {data.map((item, index) => {
-                    const percentage = total > 0 ? Math.round((item.value / total) * 100) : 0;
-                    const barWidth = maxValue > 0 ? (item.value / maxValue) * 100 : 0;
-
+            {/* Legend grid */}
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                {data.map((item, i) => {
+                    const pct = total > 0 ? Math.round((item.value / total) * 100) : 0;
                     return (
                         <div
-                            key={index}
-                            className={`group transition-all duration-200 rounded-lg px-3 py-2 -mx-3 ${
-                                hoveredIndex === index ? 'scale-[1.01]' : ''
-                            }`}
-                            style={{ backgroundColor: hoveredIndex === index ? 'var(--hover-bg)' : 'transparent' }}
-                            onMouseEnter={() => setHoveredIndex(index)}
-                            onMouseLeave={() => setHoveredIndex(null)}
+                            key={i}
+                            className={cn(
+                                'rounded-xl border border-border bg-surface-subtle p-3 transition-shadow',
+                                hovered === i && 'shadow-card',
+                            )}
+                            onMouseEnter={() => setHovered(i)}
+                            onMouseLeave={() => setHovered(null)}
                         >
-                            <div className="flex items-center justify-between mb-1.5">
+                            <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <div className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
-                                    <span className="text-sm text-themed">{item.label}</span>
+                                    <span className={cn('h-2 w-2 shrink-0 rounded-full', item.color)} />
+                                    <span className="text-sm font-medium">{item.label}</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm font-bold text-themed">{item.value}</span>
-                                    <span className="text-xs text-themed-muted w-8 text-right">{percentage}%</span>
+                                <div className="flex items-baseline gap-1.5 tabular-nums">
+                                    <span className="text-sm font-semibold">{item.value}</span>
+                                    <span className="text-xs text-muted-foreground">{pct}%</span>
                                 </div>
                             </div>
-                            <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--divider)' }}>
+                            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
                                 <div
-                                    className={`h-full rounded-full transition-all duration-700 ease-out ${item.color}`}
-                                    style={{ width: `${barWidth}%` }}
+                                    className={cn('h-full rounded-full transition-all duration-500', item.color)}
+                                    style={{ width: `${Math.max(pct, pct > 0 ? 2 : 0)}%` }}
                                 />
                             </div>
                         </div>

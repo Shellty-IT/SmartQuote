@@ -1,8 +1,9 @@
-// src/components/ui/ConfirmDialog.tsx
 'use client';
 
+import { AlertTriangle, AlertCircle, Info } from 'lucide-react';
 import Modal from './Modal';
-import Button from './Button';
+import LegacyButton from './Button';
+import { cn } from '@/lib/utils';
 
 interface ConfirmDialogProps {
     isOpen: boolean;
@@ -16,58 +17,55 @@ interface ConfirmDialogProps {
     isLoading?: boolean;
 }
 
-export default function ConfirmDialog({
-                                          isOpen,
-                                          onClose,
-                                          onConfirm,
-                                          title,
-                                          description,
-                                          confirmLabel = 'Potwierdź',
-                                          cancelLabel = 'Anuluj',
-                                          variant = 'danger',
-                                          isLoading = false,
-                                      }: ConfirmDialogProps) {
-    const icons = {
-        danger: (
-            <div className="w-12 h-12 rounded-full bg-red-500/15 flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-            </div>
-        ),
-        warning: (
-            <div className="w-12 h-12 rounded-full bg-amber-500/15 flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-        ),
-        info: (
-            <div className="w-12 h-12 rounded-full bg-blue-500/15 flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-        ),
-    };
+const iconConfig = {
+    danger: {
+        Icon: AlertCircle,
+        iconClass: 'text-destructive',
+        bgClass: 'bg-destructive/10',
+    },
+    warning: {
+        Icon: AlertTriangle,
+        iconClass: 'text-[oklch(0.65_0.18_60)]',
+        bgClass: 'bg-[oklch(0.65_0.18_60)]/10',
+    },
+    info: {
+        Icon: Info,
+        iconClass: 'text-primary',
+        bgClass: 'bg-primary/10',
+    },
+};
 
+export default function ConfirmDialog({
+    isOpen,
+    onClose,
+    onConfirm,
+    title,
+    description,
+    confirmLabel = 'Potwierdź',
+    cancelLabel = 'Anuluj',
+    variant = 'danger',
+    isLoading = false,
+}: ConfirmDialogProps) {
+    const { Icon, iconClass, bgClass } = iconConfig[variant];
     return (
         <Modal isOpen={isOpen} onClose={onClose} size="sm">
             <div className="text-center">
-                {icons[variant]}
-                <h3 className="text-lg font-semibold text-themed mb-2">{title}</h3>
-                {description && <p className="text-sm text-themed-muted mb-6">{description}</p>}
-                <div className="flex gap-3 justify-center">
-                    <Button variant="outline" onClick={onClose} disabled={isLoading}>
+                <div className={cn('mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full', bgClass)}>
+                    <Icon className={cn('h-6 w-6', iconClass)} />
+                </div>
+                <h3 className="mb-2 text-lg font-semibold tracking-tight">{title}</h3>
+                {description && <p className="mb-6 text-sm text-muted-foreground">{description}</p>}
+                <div className="flex justify-center gap-3">
+                    <LegacyButton variant="outline" onClick={onClose} disabled={isLoading}>
                         {cancelLabel}
-                    </Button>
-                    <Button
+                    </LegacyButton>
+                    <LegacyButton
                         variant={variant === 'danger' ? 'danger' : 'primary'}
                         onClick={onConfirm}
                         isLoading={isLoading}
                     >
                         {confirmLabel}
-                    </Button>
+                    </LegacyButton>
                 </div>
             </div>
         </Modal>

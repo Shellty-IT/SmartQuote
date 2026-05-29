@@ -11,15 +11,26 @@ type Theme = 'light' | 'dark';
 interface ThemeContextType {
     theme: Theme;
     setTheme: (theme: Theme) => void;
+    toggle: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextType>({
     theme: 'light',
     setTheme: () => {},
+    toggle: () => {},
 });
 
 export function useTheme() {
     return useContext(ThemeContext);
+}
+
+function applyTheme(t: Theme) {
+    const root = document.documentElement;
+    if (t === 'dark') {
+        root.classList.add('dark');
+    } else {
+        root.classList.remove('dark');
+    }
 }
 
 function ThemeProvider({ children }: { children: ReactNode }) {
@@ -33,10 +44,9 @@ function ThemeProvider({ children }: { children: ReactNode }) {
 
         requestAnimationFrame(() => {
             const saved = localStorage.getItem('smartquote-theme') as Theme | null;
-            if (saved === 'light' || saved === 'dark') {
-                setThemeState(saved);
-                document.documentElement.setAttribute('data-theme', saved);
-            }
+            const resolved: Theme = (saved === 'light' || saved === 'dark') ? saved : 'light';
+            setThemeState(resolved);
+            applyTheme(resolved);
             setMounted(true);
         });
     }, []);
@@ -44,7 +54,16 @@ function ThemeProvider({ children }: { children: ReactNode }) {
     const setTheme = useCallback((newTheme: Theme) => {
         setThemeState(newTheme);
         localStorage.setItem('smartquote-theme', newTheme);
-        document.documentElement.setAttribute('data-theme', newTheme);
+        applyTheme(newTheme);
+    }, []);
+
+    const toggle = useCallback(() => {
+        setThemeState((prev) => {
+            const next: Theme = prev === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('smartquote-theme', next);
+            applyTheme(next);
+            return next;
+        });
     }, []);
 
     if (!mounted) {
@@ -52,7 +71,7 @@ function ThemeProvider({ children }: { children: ReactNode }) {
     }
 
     return (
-        <ThemeContext.Provider value={{ theme, setTheme }}>
+        <ThemeContext.Provider value={{ theme, setTheme, toggle }}>
             {children}
         </ThemeContext.Provider>
     );

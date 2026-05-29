@@ -1,73 +1,78 @@
 // src/app/dashboard/components/KPICard.tsx
 'use client';
 
+import { cn } from '@/lib/utils';
+
 interface KPICardProps {
     title: string;
     value: string;
     change: string;
     changeType: 'positive' | 'negative' | 'neutral';
     icon: React.ReactNode;
-    iconBg: string;
+    accent: string; // tailwind gradient class pair, e.g. "from-[oklch(…)] to-[oklch(…)]"
     description?: string;
     onClick?: () => void;
 }
 
-export default function KPICard({ title, value, change, changeType, icon, iconBg, description, onClick }: KPICardProps) {
-    const changeColors = {
-        positive: 'text-emerald-500 bg-emerald-500/10',
-        negative: 'text-red-500 bg-red-500/10',
-        neutral: 'text-themed-muted bg-slate-500/10',
-    };
-
-    const changeIcons = {
-        positive: (
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-            </svg>
-        ),
-        negative: (
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
-        ),
-        neutral: (
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 12h14" />
-            </svg>
-        ),
+export default function KPICard({
+    title,
+    value,
+    change,
+    changeType,
+    icon,
+    accent,
+    description,
+    onClick,
+}: KPICardProps) {
+    const deltaClasses = {
+        positive:
+            'bg-[color-mix(in_oklab,var(--status-accepted)_15%,transparent)] text-status-accepted ring-1 ring-inset ring-[color-mix(in_oklab,var(--status-accepted)_28%,transparent)]',
+        negative:
+            'bg-[color-mix(in_oklab,var(--status-rejected)_15%,transparent)] text-status-rejected ring-1 ring-inset ring-[color-mix(in_oklab,var(--status-rejected)_28%,transparent)]',
+        neutral: 'bg-secondary text-muted-foreground ring-1 ring-inset ring-border',
     };
 
     return (
         <div
             onClick={onClick}
-            className={`group relative rounded-2xl p-5 sm:p-6 border transition-all duration-300 card-themed
-                hover:shadow-lg hover:scale-[1.02] ${onClick ? 'cursor-pointer' : ''}`}
-            style={{
-                borderColor: 'var(--kpi-card-border)',
-                backgroundColor: 'var(--kpi-card-bg)',
-            }}
+            className={cn(
+                'group relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-card transition-all',
+                onClick && 'cursor-pointer hover:shadow-elevated',
+            )}
         >
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-cyan-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            {/* decorative glow blob */}
+            <div
+                className={cn(
+                    'absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gradient-to-br opacity-20 blur-2xl transition-opacity group-hover:opacity-30',
+                    accent,
+                )}
+            />
 
-            <div className="relative">
-                <div className="flex items-start justify-between mb-4">
-                    <div className={`flex items-center justify-center w-11 h-11 rounded-xl ${iconBg} transition-transform duration-300 group-hover:scale-110`}>
-                        {icon}
-                    </div>
-                    <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${changeColors[changeType]}`}>
-                        {changeIcons[changeType]}
-                        <span className="hidden sm:inline">{change}</span>
-                        <span className="sm:hidden">{change.split(' ')[0]}</span>
-                    </div>
-                </div>
-
-                <div className="space-y-1">
-                    <p className="text-xs sm:text-sm font-medium text-themed-muted">{title}</p>
-                    <p className="text-2xl sm:text-3xl font-bold text-themed tracking-tight">{value}</p>
-                    {description && (
-                        <p className="text-xs text-themed-muted mt-1">{description}</p>
+            <div className="relative flex items-start justify-between">
+                <div
+                    className={cn(
+                        'grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br text-white shadow-lg',
+                        accent,
                     )}
+                >
+                    {icon}
                 </div>
+
+                <span className={cn('rounded-full px-2 py-1 text-[10px] font-semibold', deltaClasses[changeType])}>
+                    {change}
+                </span>
+            </div>
+
+            <div className="relative mt-5">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                    {title}
+                </div>
+                <div className="mt-1.5 text-3xl font-bold tracking-tight tabular-nums">
+                    {value}
+                </div>
+                {description && (
+                    <div className="mt-1 text-xs text-muted-foreground">{description}</div>
+                )}
             </div>
         </div>
     );
