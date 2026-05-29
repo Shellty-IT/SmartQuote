@@ -20,11 +20,12 @@ import DashboardSkeleton from './components/DashboardSkeleton';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { SkeletonInsightCard } from '@/components/ui/Skeleton';
 import { formatCurrency, formatRelativeTime, getInitials, cn } from '@/lib/utils';
+import { useTranslations } from '@/i18n';
 import type { LatestInsightItem } from '@/types/ai';
 
-/* ─── InsightCard ─────────────────────────────────────────────── */
 function InsightCard({ insight, onClick }: { insight: LatestInsightItem; onClick: () => void }) {
     const [expanded, setExpanded] = useState(false);
+    const tr = useTranslations('dashboard');
     const keyLessons = insight.insights.keyLessons || [];
     const hasVariant = !!insight.insights.selectedVariant;
     const hasMore = keyLessons.length > 1 || hasVariant || !!insight.insights.pricingInsight;
@@ -56,7 +57,7 @@ function InsightCard({ insight, onClick }: { insight: LatestInsightItem; onClick
 
             {hasVariant && !expanded && (
                 <div className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-primary">
-                    <Sparkles className="h-3 w-3" /> Wariant: {insight.insights.selectedVariant}
+                    <Sparkles className="h-3 w-3" /> {tr.variant}: {insight.insights.selectedVariant}
                 </div>
             )}
 
@@ -70,7 +71,7 @@ function InsightCard({ insight, onClick }: { insight: LatestInsightItem; onClick
                     ))}
                     {hasVariant && (
                         <div className="flex items-center gap-1.5 text-[11px] font-medium text-primary">
-                            <Sparkles className="h-3 w-3" /> Wariant: {insight.insights.selectedVariant}
+                            <Sparkles className="h-3 w-3" /> {tr.variant}: {insight.insights.selectedVariant}
                         </div>
                     )}
                     {insight.insights.pricingInsight && (
@@ -87,7 +88,7 @@ function InsightCard({ insight, onClick }: { insight: LatestInsightItem; onClick
                             className="font-medium text-primary hover:underline"
                             onClick={(e) => { e.stopPropagation(); setExpanded(v => !v); }}
                         >
-                            {expanded ? 'Zwiń' : 'Więcej'}
+                            {expanded ? tr.collapse : tr.more}
                         </button>
                     )}
                     <span>{formatRelativeTime(insight.createdAt)}</span>
@@ -97,10 +98,11 @@ function InsightCard({ insight, onClick }: { insight: LatestInsightItem; onClick
     );
 }
 
-/* ─── Page ─────────────────────────────────────────────────────── */
 export default function DashboardPage() {
     const { data: session } = useSession();
     const router = useRouter();
+    const tr = useTranslations('dashboard');
+    const commonTr = useTranslations('common');
 
     const { stats: offersStats, isLoading: isLoadingOffersStats } = useOffersStats();
     const { stats: clientsStats, isLoading: isLoadingClientsStats } = useClientsStats();
@@ -115,7 +117,7 @@ export default function DashboardPage() {
             .finally(() => setIsLoadingInsights(false));
     }, []);
 
-    const userName = session?.user?.name || session?.user?.email?.split('@')[0] || 'Użytkownik';
+    const userName = session?.user?.name || session?.user?.email?.split('@')[0] || 'User';
 
     const activeOffers = offersStats?.total
         ? offersStats.total - (offersStats.byStatus?.REJECTED?.count || 0) - (offersStats.byStatus?.EXPIRED?.count || 0)
@@ -130,122 +132,116 @@ export default function DashboardPage() {
     }
 
     const statusDistribution = [
-        { label: 'Szkice',       value: offersStats?.byStatus?.DRAFT?.count || 0,       color: 'bg-status-draft' },
-        { label: 'Wysłane',      value: offersStats?.byStatus?.SENT?.count || 0,        color: 'bg-[oklch(0.65_0.16_245)]' },
-        { label: 'Otwarte',      value: offersStats?.byStatus?.VIEWED?.count || 0,      color: 'bg-[oklch(0.72_0.14_200)]' },
-        { label: 'Negocjacje',   value: offersStats?.byStatus?.NEGOTIATION?.count || 0, color: 'bg-[oklch(0.72_0.16_60)]' },
-        { label: 'Zaakceptowane',value: offersStats?.byStatus?.ACCEPTED?.count || 0,    color: 'bg-status-accepted' },
-        { label: 'Odrzucone',    value: offersStats?.byStatus?.REJECTED?.count || 0,    color: 'bg-status-rejected' },
+        { label: tr.statusDraft,       value: offersStats?.byStatus?.DRAFT?.count || 0,       color: 'bg-status-draft' },
+        { label: tr.statusSent,        value: offersStats?.byStatus?.SENT?.count || 0,         color: 'bg-[oklch(0.65_0.16_245)]' },
+        { label: tr.statusOpen,        value: offersStats?.byStatus?.VIEWED?.count || 0,       color: 'bg-[oklch(0.72_0.14_200)]' },
+        { label: tr.statusNegotiation, value: offersStats?.byStatus?.NEGOTIATION?.count || 0,  color: 'bg-[oklch(0.72_0.16_60)]' },
+        { label: tr.statusAccepted,    value: offersStats?.byStatus?.ACCEPTED?.count || 0,     color: 'bg-status-accepted' },
+        { label: tr.statusRejected,    value: offersStats?.byStatus?.REJECTED?.count || 0,     color: 'bg-status-rejected' },
     ];
 
     const quickActions = [
-        { icon: Plus,         label: 'Nowa oferta',    sub: 'Utwórz ofertę dla klienta', href: '/dashboard/offers/new',    primary: true },
-        { icon: UserPlus,     label: 'Dodaj klienta',  sub: 'Nowy kontrahent',            href: '/dashboard/clients/new',   primary: false },
-        { icon: Sparkles,     label: 'AI Asystent',    sub: 'Porozmawiaj z AI',           href: '/dashboard/ai',            primary: false },
-        { icon: CalendarClock,label: 'Follow-upy',     sub: 'Zaplanowane zadania',        href: '/dashboard/followups',     primary: false },
-        { icon: Mail,         label: 'Korespondencja', sub: 'Skrzynka odbiorcza',         href: '/dashboard/emails',        primary: false },
+        { icon: Plus,          label: tr.actions.newOffer,       sub: tr.actions.newOfferSub,       href: '/dashboard/offers/new',    primary: true },
+        { icon: UserPlus,      label: tr.actions.addClient,      sub: tr.actions.addClientSub,      href: '/dashboard/clients/new',   primary: false },
+        { icon: Sparkles,      label: tr.actions.ai,             sub: tr.actions.aiSub,             href: '/dashboard/ai',            primary: false },
+        { icon: CalendarClock, label: tr.actions.followups,      sub: tr.actions.followupsSub,      href: '/dashboard/followups',     primary: false },
+        { icon: Mail,          label: tr.actions.correspondence, sub: tr.actions.correspondenceSub, href: '/dashboard/emails',        primary: false },
     ];
+
+    const insightCount = latestInsights.length;
+    const insightCountLabel = insightCount === 1 ? tr.aiNewSingle : tr.aiNew;
 
     return (
         <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
-            {/* Page header */}
             <div className="flex flex-wrap items-end justify-between gap-4">
                 <div>
                     <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                        Dashboard
+                        {tr.breadcrumb}
                     </div>
                     <h1 className="mt-1 text-3xl font-bold tracking-tight">
-                        Witaj, {userName}!
+                        {tr.welcomePrefix}{userName}{tr.welcomeSuffix}
                     </h1>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        Oto przegląd Twojej aktywności sprzedażowej.
-                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">{tr.subtitle}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                     <button
                         onClick={() => router.push('/dashboard/clients/new')}
                         className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-semibold shadow-sm transition hover:bg-secondary"
                     >
-                        <UserPlus className="h-4 w-4" /> Dodaj klienta
+                        <UserPlus className="h-4 w-4" /> {tr.addClient}
                     </button>
                     <button
                         onClick={() => router.push('/dashboard/offers/new')}
                         className="inline-flex h-10 items-center gap-2 rounded-xl bg-gradient-primary px-4 text-sm font-semibold text-white shadow-glow ring-1 ring-white/15 transition hover:brightness-110"
                     >
-                        <Plus className="h-4 w-4" /> Nowa oferta
+                        <Plus className="h-4 w-4" /> {tr.newOffer}
                     </button>
                 </div>
             </div>
 
-            {/* KPI cards */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <KPICard
-                    title="Aktywne oferty"
+                    title={tr.kpi.activeOffers}
                     value={String(activeOffers)}
-                    change={`− ${offersStats?.byStatus?.DRAFT?.count || 0} szkiców`}
+                    change={`− ${offersStats?.byStatus?.DRAFT?.count || 0} ${tr.kpi.drafts}`}
                     changeType="neutral"
-                    description="bez odrzuconych i wygasłych"
+                    description={tr.kpi.activeOffersDesc}
                     icon={<FileText className="h-5 w-5" strokeWidth={2.2} />}
                     accent="from-[oklch(0.65_0.18_245)] to-[oklch(0.72_0.14_215)]"
                     onClick={() => router.push('/dashboard/offers')}
                 />
                 <KPICard
-                    title="Wartość pipeline"
+                    title={tr.kpi.pipeline}
                     value={formatCurrency(pipelineValue).replace(/\s*PLN/, '')}
-                    change={`↑ ${formatCurrency(offersStats?.acceptedValue || 0).replace(/\s*PLN/, '')} zakc.`}
+                    change={`↑ ${formatCurrency(offersStats?.acceptedValue || 0).replace(/\s*PLN/, '')} ${tr.kpi.accepted}`}
                     changeType="positive"
-                    description="PLN łącznie"
+                    description={tr.kpi.pipelineDesc}
                     icon={<TrendingUp className="h-5 w-5" strokeWidth={2.2} />}
                     accent="from-[oklch(0.68_0.15_165)] to-[oklch(0.72_0.13_200)]"
                     onClick={() => router.push('/dashboard/offers')}
                 />
                 <KPICard
-                    title="Konwersja"
+                    title={tr.kpi.conversion}
                     value={`${conversionRate}%`}
-                    change={`↑ ${offersStats?.byStatus?.ACCEPTED?.count || 0} zakc.`}
+                    change={`↑ ${offersStats?.byStatus?.ACCEPTED?.count || 0} ${tr.kpi.accepted}`}
                     changeType={conversionRate >= 30 ? 'positive' : conversionRate >= 15 ? 'neutral' : 'negative'}
-                    description={`z ${offersStats?.total || 0} ofert`}
+                    description={tr.kpi.conversionDesc.replace('{n}', String(offersStats?.total || 0))}
                     icon={<Target className="h-5 w-5" strokeWidth={2.2} />}
                     accent="from-[oklch(0.65_0.18_260)] to-[oklch(0.72_0.14_230)]"
                 />
                 <KPICard
-                    title="Klienci"
+                    title={tr.kpi.clients}
                     value={String(clientsStats?.total || 0)}
-                    change={`${clientsStats?.withOffers || 0} z ofertami`}
+                    change={`${clientsStats?.withOffers || 0} ${tr.kpi.withOffers}`}
                     changeType="neutral"
-                    description={`${clientsStats?.active || 0} aktywnych`}
+                    description={tr.kpi.clientsDesc.replace('{n}', String(clientsStats?.active || 0))}
                     icon={<Users className="h-5 w-5" strokeWidth={2.2} />}
                     accent="from-[oklch(0.7_0.15_50)] to-[oklch(0.72_0.16_25)]"
                     onClick={() => router.push('/dashboard/clients')}
                 />
             </div>
 
-            {/* Row 2: recent offers + AI insights */}
             <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
-                {/* Recent offers */}
                 <div className="xl:col-span-2 rounded-2xl border border-border bg-card shadow-card">
                     <div className="flex items-center justify-between border-b border-border px-6 py-5">
                         <div>
-                            <h2 className="text-lg font-semibold tracking-tight">Ostatnie oferty</h2>
-                            <p className="text-xs text-muted-foreground">Twoja aktywność z ostatnich dni</p>
+                            <h2 className="text-lg font-semibold tracking-tight">{tr.recentOffers}</h2>
+                            <p className="text-xs text-muted-foreground">{tr.recentActivity}</p>
                         </div>
-                        <Link
-                            href="/dashboard/offers"
-                            className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
-                        >
-                            Wszystkie <ArrowUpRight className="h-4 w-4" />
+                        <Link href="/dashboard/offers" className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
+                            {tr.seeAll} <ArrowUpRight className="h-4 w-4" />
                         </Link>
                     </div>
 
                     {recentOffers.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-14 text-center">
                             <FileText className="mb-3 h-10 w-10 text-muted-foreground/40" strokeWidth={1.5} />
-                            <p className="text-sm text-muted-foreground mb-3">Brak ofert</p>
+                            <p className="text-sm text-muted-foreground mb-3">{tr.noOffers}</p>
                             <button
                                 onClick={() => router.push('/dashboard/offers/new')}
                                 className="inline-flex h-9 items-center gap-2 rounded-xl bg-gradient-primary px-4 text-sm font-semibold text-white shadow-glow ring-1 ring-white/15 transition hover:brightness-110"
                             >
-                                <Plus className="h-4 w-4" /> Utwórz pierwszą
+                                <Plus className="h-4 w-4" /> {tr.createFirst}
                             </button>
                         </div>
                     ) : (
@@ -265,7 +261,7 @@ export default function DashboardPage() {
                                             <StatusBadge status={offer.status} showDot={false} />
                                         </div>
                                         <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-                                            <span>{offer.client?.name || 'Brak klienta'}</span>
+                                            <span>{offer.client?.name || commonTr.noClient}</span>
                                             <span className="text-border">•</span>
                                             <span className="font-mono">{offer.number}</span>
                                         </div>
@@ -285,7 +281,6 @@ export default function DashboardPage() {
                     )}
                 </div>
 
-                {/* AI insights */}
                 <div className="rounded-2xl border border-border bg-gradient-to-br from-[oklch(0.97_0.03_240)] to-[oklch(0.95_0.05_215)] p-1 shadow-card dark:from-[oklch(0.22_0.05_245)] dark:to-[oklch(0.2_0.04_220)]">
                     <div className="rounded-[15px] bg-card/60 p-5 backdrop-blur-sm h-full">
                         <div className="flex items-center justify-between">
@@ -294,17 +289,14 @@ export default function DashboardPage() {
                                     <Sparkles className="h-4 w-4" />
                                 </div>
                                 <div>
-                                    <h2 className="text-sm font-semibold">Wnioski AI</h2>
+                                    <h2 className="text-sm font-semibold">{tr.aiInsights}</h2>
                                     <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                                        {latestInsights.length} {latestInsights.length === 1 ? 'nowy' : 'nowych'}
+                                        {insightCount} {insightCountLabel}
                                     </div>
                                 </div>
                             </div>
-                            <Link
-                                href="/dashboard/ai-insights"
-                                className="text-xs font-semibold text-primary hover:underline"
-                            >
-                                Wszystkie →
+                            <Link href="/dashboard/ai-insights" className="text-xs font-semibold text-primary hover:underline">
+                                {tr.aiSeeAll}
                             </Link>
                         </div>
                         <div className="mt-4 space-y-2.5">
@@ -313,10 +305,8 @@ export default function DashboardPage() {
                             ) : latestInsights.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-10 text-center">
                                     <Lightbulb className="mb-3 h-10 w-10 text-muted-foreground/40" strokeWidth={1.5} />
-                                    <p className="text-sm font-medium">Brak wniosków</p>
-                                    <p className="mt-1 text-xs text-muted-foreground">
-                                        Pojawią się po zakończeniu ofert
-                                    </p>
+                                    <p className="text-sm font-medium">{tr.noInsights}</p>
+                                    <p className="mt-1 text-xs text-muted-foreground">{tr.insightsAppear}</p>
                                 </div>
                             ) : (
                                 latestInsights.map((insight) => (
@@ -332,14 +322,14 @@ export default function DashboardPage() {
                 </div>
             </div>
 
-            {/* Row 3: status distribution + quick actions */}
             <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
-                {/* Status distribution */}
                 <div className="xl:col-span-2 rounded-2xl border border-border bg-card p-6 shadow-card">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h2 className="text-lg font-semibold tracking-tight">Rozkład statusów ofert</h2>
-                            <p className="text-xs text-muted-foreground">{offersStats?.total || 0} ofert łącznie</p>
+                            <h2 className="text-lg font-semibold tracking-tight">{tr.statusDistribution}</h2>
+                            <p className="text-xs text-muted-foreground">
+                                {tr.totalOffers.replace('{n}', String(offersStats?.total || 0))}
+                            </p>
                         </div>
                     </div>
                     <div className="mt-5">
@@ -347,9 +337,8 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                {/* Quick actions */}
                 <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                    <h2 className="text-lg font-semibold tracking-tight">Szybkie akcje</h2>
+                    <h2 className="text-lg font-semibold tracking-tight">{tr.quickActions}</h2>
                     <div className="mt-4 space-y-2">
                         {quickActions.map((action) => {
                             const Icon = action.icon;

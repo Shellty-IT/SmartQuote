@@ -16,36 +16,14 @@ import StatusBadge from '@/components/ui/StatusBadge';
 import { formatCurrency, formatDate, getInitials, cn } from '@/lib/utils';
 import type { ContractStatus, Contract } from '@/types';
 import { useToast } from '@/contexts/ToastContext';
-
-const STATUS_OPTIONS = [
-    { value: '', label: 'Wszystkie statusy' },
-    { value: 'DRAFT', label: 'Szkic' },
-    { value: 'PENDING_SIGNATURE', label: 'Do podpisu' },
-    { value: 'ACTIVE', label: 'Aktywna' },
-    { value: 'COMPLETED', label: 'Zakończona' },
-    { value: 'TERMINATED', label: 'Rozwiązana' },
-    { value: 'EXPIRED', label: 'Wygasła' },
-];
-
-const SORT_OPTIONS = [
-    { value: 'createdAt:desc', label: 'Najnowsze' },
-    { value: 'createdAt:asc', label: 'Najstarsze' },
-    { value: 'totalGross:desc', label: 'Wartość malejąco' },
-    { value: 'totalGross:asc', label: 'Wartość rosnąco' },
-];
-
-const TH = ['Umowa', 'Klient', 'Status', 'Dystrybucja', 'Wartość', 'Daty', ''];
-
-const STAT_CARDS = [
-    { key: 'total', label: 'Wszystkie', accent: 'from-[oklch(0.65_0.18_245)] to-[oklch(0.72_0.14_215)]' },
-    { key: 'active', label: 'Aktywne', accent: 'from-[oklch(0.68_0.15_165)] to-[oklch(0.72_0.13_200)]' },
-    { key: 'pending', label: 'Do podpisu', accent: 'from-[oklch(0.72_0.16_60)] to-[oklch(0.72_0.14_40)]' },
-    { key: 'value', label: 'Wartość aktywnych', accent: 'from-[oklch(0.7_0.15_50)] to-[oklch(0.72_0.16_25)]' },
-] as const;
+import { useTranslations } from '@/i18n';
 
 export default function ContractsPage() {
     const router = useRouter();
     const toast = useToast();
+    const tr = useTranslations('contracts');
+    const commonTr = useTranslations('common');
+
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState<ContractStatus | ''>('');
     const [sort, setSort] = useState('createdAt:desc');
@@ -60,15 +38,41 @@ export default function ContractsPage() {
     });
     const { stats, loading: statsLoading } = useContractsStats();
 
+    const STATUS_OPTIONS = [
+        { value: '', label: tr.filters.allStatuses },
+        { value: 'DRAFT', label: tr.statuses.DRAFT },
+        { value: 'PENDING_SIGNATURE', label: tr.statuses.PENDING_SIGNATURE },
+        { value: 'ACTIVE', label: tr.statuses.ACTIVE },
+        { value: 'COMPLETED', label: tr.statuses.COMPLETED },
+        { value: 'TERMINATED', label: tr.statuses.TERMINATED },
+        { value: 'EXPIRED', label: tr.statuses.EXPIRED },
+    ];
+
+    const SORT_OPTIONS = [
+        { value: 'createdAt:desc', label: tr.sortNewest },
+        { value: 'createdAt:asc', label: tr.sortOldest },
+        { value: 'totalGross:desc', label: tr.sortValueDesc },
+        { value: 'totalGross:asc', label: tr.sortValueAsc },
+    ];
+
+    const STAT_CARDS = [
+        { key: 'total', label: tr.stats.all, accent: 'from-[oklch(0.65_0.18_245)] to-[oklch(0.72_0.14_215)]' },
+        { key: 'active', label: tr.stats.active, accent: 'from-[oklch(0.68_0.15_165)] to-[oklch(0.72_0.13_200)]' },
+        { key: 'pending', label: tr.stats.pending, accent: 'from-[oklch(0.72_0.16_60)] to-[oklch(0.72_0.14_40)]' },
+        { key: 'value', label: tr.stats.value, accent: 'from-[oklch(0.7_0.15_50)] to-[oklch(0.72_0.16_25)]' },
+    ] as const;
+
+    const TH = [tr.table.contract, tr.table.client, tr.table.status, tr.table.distribution, tr.table.value, tr.table.dates, ''];
+
     const handleDelete = async () => {
         if (!deleteModal) return;
         setIsDeleting(true);
         try {
             await deleteContract(deleteModal.id);
-            toast.success('Umowa usunięta', `"${deleteModal.title}" została usunięta`);
+            toast.success(tr.deleted, `"${deleteModal.title}" została usunięta`);
             setDeleteModal(null);
         } catch {
-            toast.error('Błąd', 'Nie udało się usunąć umowy');
+            toast.error('Błąd', tr.deleteError);
         } finally {
             setIsDeleting(false);
         }
@@ -80,9 +84,9 @@ export default function ContractsPage() {
         const base = (process.env.NEXT_PUBLIC_FRONTEND_URL || window.location.origin).replace(/\/$/, '');
         try {
             await navigator.clipboard.writeText(`${base}/contract/view/${contract.publicToken}`);
-            toast.info('Link skopiowany', 'Link do umowy skopiowany do schowka');
+            toast.info(commonTr.linkCopied, tr.linkCopied);
         } catch {
-            toast.error('Błąd', 'Nie udało się skopiować linku');
+            toast.error('Błąd', tr.linkError);
         }
     };
 
@@ -98,21 +102,19 @@ export default function ContractsPage() {
 
     return (
         <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
-            {/* Header */}
             <div className="flex flex-wrap items-end justify-between gap-4">
                 <div>
-                    <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">CRM</div>
-                    <h1 className="mt-1 text-3xl font-bold tracking-tight">Umowy</h1>
-                    <p className="mt-1 text-sm text-muted-foreground">Zarządzaj umowami z klientami</p>
+                    <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{tr.breadcrumb}</div>
+                    <h1 className="mt-1 text-3xl font-bold tracking-tight">{tr.title}</h1>
+                    <p className="mt-1 text-sm text-muted-foreground">{tr.subtitle}</p>
                 </div>
                 <Link href="/dashboard/contracts/new">
                     <button className="inline-flex h-10 items-center gap-2 rounded-xl bg-gradient-primary px-4 text-sm font-semibold text-white shadow-glow ring-1 ring-white/15 transition hover:brightness-110">
-                        <Plus className="h-4 w-4" /> Nowa umowa
+                        <Plus className="h-4 w-4" /> {tr.newContract}
                     </button>
                 </Link>
             </div>
 
-            {/* Stats */}
             {statsLoading ? (
                 <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
                     {Array.from({ length: 4 }).map((_, i) => <SkeletonKPICard key={i} />)}
@@ -129,13 +131,12 @@ export default function ContractsPage() {
                 </div>
             ) : null}
 
-            {/* Filters */}
             <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
                 <div className="flex flex-col gap-3 md:flex-row md:gap-4">
                     <div className="relative flex-1">
                         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <input
-                            placeholder="Szukaj po numerze, tytule lub kliencie..."
+                            placeholder={tr.filters.search}
                             value={search}
                             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                             className="h-10 w-full rounded-lg border border-border bg-secondary/60 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-primary focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/30"
@@ -152,7 +153,6 @@ export default function ContractsPage() {
                 </div>
             </div>
 
-            {/* Table */}
             {loading ? (
                 <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
                     <div className="overflow-x-auto">
@@ -168,19 +168,19 @@ export default function ContractsPage() {
                 <div className="rounded-2xl border border-border bg-card p-12 text-center shadow-card">
                     <p className="text-destructive">{error}</p>
                     <button onClick={refetch} className="mt-4 inline-flex h-9 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-semibold transition hover:bg-secondary">
-                        <RefreshCw className="h-4 w-4" /> Spróbuj ponownie
+                        <RefreshCw className="h-4 w-4" /> {commonTr.retry}
                     </button>
                 </div>
             ) : contracts.length === 0 ? (
                 <div className="rounded-2xl border border-border bg-card py-16 text-center shadow-card">
                     <ScrollText className="mx-auto mb-4 h-10 w-10 text-muted-foreground/40" strokeWidth={1.5} />
-                    <h3 className="text-lg font-semibold tracking-tight">{hasFilters ? 'Brak wyników' : 'Brak umów'}</h3>
+                    <h3 className="text-lg font-semibold tracking-tight">{hasFilters ? tr.noResults : tr.noContracts}</h3>
                     <p className="mt-1 text-sm text-muted-foreground">
-                        {hasFilters ? 'Spróbuj zmienić kryteria' : 'Utwórz pierwszą umowę lub wygeneruj ją z oferty'}
+                        {hasFilters ? tr.changeFilters : tr.createFirst}
                     </p>
                     {!hasFilters && (
                         <Link href="/dashboard/contracts/new" className="mt-4 inline-flex h-9 items-center gap-2 rounded-xl bg-gradient-primary px-4 text-sm font-semibold text-white shadow-glow ring-1 ring-white/15 hover:brightness-110">
-                            <Plus className="h-4 w-4" /> Nowa umowa
+                            <Plus className="h-4 w-4" /> {tr.newContract}
                         </Link>
                     )}
                 </div>
@@ -207,7 +207,7 @@ export default function ContractsPage() {
                                                 <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-gradient-primary text-[10px] font-bold text-white">
                                                     {getInitials(contract.client?.name || '?')}
                                                 </div>
-                                                <p className="text-sm font-medium">{contract.client?.name || 'Nieznany'}</p>
+                                                <p className="text-sm font-medium">{contract.client?.name || commonTr.unknown}</p>
                                             </div>
                                         </td>
                                         <td className="px-4 py-3"><StatusBadge status={contract.status} /></td>
@@ -215,7 +215,7 @@ export default function ContractsPage() {
                                             {contract.publicToken ? (
                                                 <div className="flex items-center gap-1.5">
                                                     <span className="inline-flex items-center gap-1 rounded-full border border-status-accepted/25 bg-status-accepted/10 px-2 py-0.5 text-[11px] font-semibold text-status-accepted">
-                                                        <LinkIcon className="h-3 w-3" /> Aktywny
+                                                        <LinkIcon className="h-3 w-3" /> {tr.activeLink}
                                                     </span>
                                                     <button onClick={(e) => handleCopyLink(e, contract)} className="rounded p-1 text-muted-foreground hover:text-primary"><Copy className="h-3.5 w-3.5" /></button>
                                                 </div>
@@ -223,19 +223,19 @@ export default function ContractsPage() {
                                         </td>
                                         <td className="px-4 py-3 text-right">
                                             <p className="font-semibold tabular-nums">{formatCurrency(Number(contract.totalGross))}</p>
-                                            <p className="text-xs text-muted-foreground">netto: {formatCurrency(Number(contract.totalNet))}</p>
+                                            <p className="text-xs text-muted-foreground">{tr.net} {formatCurrency(Number(contract.totalNet))}</p>
                                         </td>
                                         <td className="px-4 py-3 text-sm text-muted-foreground">
                                             {contract.signedAt
-                                                ? <span className="font-medium text-status-accepted">Podpisana {formatDate(contract.signedAt)}</span>
+                                                ? <span className="font-medium text-status-accepted">{tr.signed} {formatDate(contract.signedAt)}</span>
                                                 : contract.startDate
-                                                    ? <span>Od: {formatDate(contract.startDate)}{contract.endDate ? ` — ${formatDate(contract.endDate)}` : ''}</span>
+                                                    ? <span>{tr.from} {formatDate(contract.startDate)}{contract.endDate ? ` — ${formatDate(contract.endDate)}` : ''}</span>
                                                     : formatDate(contract.createdAt)}
                                         </td>
                                         <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                                             <div className="flex items-center justify-end gap-0.5">
-                                                <button onClick={() => router.push(`/dashboard/contracts/${contract.id}/edit`)} title="Edytuj" className="rounded-lg p-2 text-muted-foreground hover:text-primary"><Pencil className="h-4 w-4" /></button>
-                                                <button onClick={() => setDeleteModal(contract)} title="Usuń" className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
+                                                <button onClick={() => router.push(`/dashboard/contracts/${contract.id}/edit`)} title={commonTr.edit} className="rounded-lg p-2 text-muted-foreground hover:text-primary"><Pencil className="h-4 w-4" /></button>
+                                                <button onClick={() => setDeleteModal(contract)} title={commonTr.delete} className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -245,7 +245,9 @@ export default function ContractsPage() {
                     </div>
                     {totalPages > 1 && (
                         <div className="flex items-center justify-between border-t border-border px-6 py-4">
-                            <p className="text-sm text-muted-foreground">Strona {page} z {totalPages}</p>
+                            <p className="text-sm text-muted-foreground">
+                                {tr.page.replace('{page}', String(page)).replace('{total}', String(totalPages))}
+                            </p>
                             <div className="flex gap-2">
                                 <button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card transition hover:bg-secondary disabled:pointer-events-none disabled:opacity-40"><ChevronLeft className="h-4 w-4" /></button>
                                 <button disabled={page === totalPages} onClick={() => setPage(p => p + 1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card transition hover:bg-secondary disabled:pointer-events-none disabled:opacity-40"><ChevronRight className="h-4 w-4" /></button>
@@ -259,9 +261,9 @@ export default function ContractsPage() {
                 isOpen={!!deleteModal}
                 onClose={() => setDeleteModal(null)}
                 onConfirm={handleDelete}
-                title="Usuń umowę"
-                description={`Czy na pewno chcesz usunąć umowę "${deleteModal?.title}"? Ta operacja jest nieodwracalna.`}
-                confirmLabel="Usuń"
+                title={tr.delete.title}
+                description={tr.delete.description.replace('{title}', deleteModal?.title || '')}
+                confirmLabel={tr.delete.confirm}
                 isLoading={isDeleting}
             />
         </div>

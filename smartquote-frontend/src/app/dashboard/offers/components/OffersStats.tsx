@@ -1,9 +1,11 @@
 // src/app/dashboard/offers/components/OffersStats.tsx
+'use client';
 
 import { SkeletonKPICard } from '@/components/ui/Skeleton';
 import { formatCurrency } from '@/lib/utils';
 import { FileText, CheckCircle2, Clock, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from '@/i18n';
 import type { OffersStats as OffersStatsData } from '@/types';
 
 interface OffersStatsProps {
@@ -13,34 +15,16 @@ interface OffersStatsProps {
     pendingCount: number;
 }
 
-const STAT_CARDS = [
-    {
-        key: 'total',
-        label: 'Wszystkie',
-        icon: FileText,
-        accent: 'from-[oklch(0.65_0.18_245)] to-[oklch(0.72_0.14_215)]',
-    },
-    {
-        key: 'accepted',
-        label: 'Zaakceptowane',
-        icon: CheckCircle2,
-        accent: 'from-[oklch(0.68_0.15_165)] to-[oklch(0.72_0.13_200)]',
-    },
-    {
-        key: 'pending',
-        label: 'Oczekujące',
-        icon: Clock,
-        accent: 'from-[oklch(0.72_0.16_60)] to-[oklch(0.72_0.14_40)]',
-    },
-    {
-        key: 'value',
-        label: 'Łączna wartość',
-        icon: TrendingUp,
-        accent: 'from-[oklch(0.7_0.15_50)] to-[oklch(0.72_0.16_25)]',
-    },
-] as const;
-
 export function OffersStats({ stats, statsLoading, acceptedCount, pendingCount }: OffersStatsProps) {
+    const tr = useTranslations('offers');
+
+    const STAT_CARDS = [
+        { key: 'total',    label: tr.stats.all,        icon: FileText,    accent: 'from-[oklch(0.65_0.18_245)] to-[oklch(0.72_0.14_215)]' },
+        { key: 'accepted', label: tr.stats.accepted,   icon: CheckCircle2, accent: 'from-[oklch(0.68_0.15_165)] to-[oklch(0.72_0.13_200)]' },
+        { key: 'pending',  label: tr.stats.pending,    icon: Clock,       accent: 'from-[oklch(0.72_0.16_60)] to-[oklch(0.72_0.14_40)]' },
+        { key: 'value',    label: tr.stats.totalValue, icon: TrendingUp,  accent: 'from-[oklch(0.7_0.15_50)] to-[oklch(0.72_0.16_25)]' },
+    ] as const;
+
     if (statsLoading) {
         return (
             <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">

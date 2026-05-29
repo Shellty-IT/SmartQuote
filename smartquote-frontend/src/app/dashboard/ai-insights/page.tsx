@@ -8,6 +8,7 @@ import { Button, EmptyState } from '@/components/ui';
 import { SkeletonInsightCard } from '@/components/ui/Skeleton';
 import { formatCurrency, formatRelativeTime } from '@/lib/utils';
 import { useToast } from '@/contexts/ToastContext';
+import { useTranslations } from '@/i18n';
 import type { InsightsListItem } from '@/types/ai';
 
 type OutcomeFilter = 'ALL' | 'ACCEPTED' | 'REJECTED';
@@ -15,16 +16,14 @@ type OutcomeFilter = 'ALL' | 'ACCEPTED' | 'REJECTED';
 function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
     const [expanded, setExpanded] = useState(false);
     const router = useRouter();
+    const tr = useTranslations('aiInsights');
 
     const keyLessons = insight.insights.keyLessons || [];
     const improvementSuggestions = insight.insights.improvementSuggestions || [];
     const hasVariant = !!insight.insights.selectedVariant;
     const hasPricing = !!insight.insights.pricingInsight;
     const hasIndustryNote = !!insight.insights.industryNote;
-    const hasVariantHistory = !!(
-        insight.insights.variantHistory &&
-        insight.insights.variantHistory.totalAcceptedWithVariant > 0
-    );
+    const hasVariantHistory = !!(insight.insights.variantHistory && insight.insights.variantHistory.totalAcceptedWithVariant > 0);
 
     return (
         <div className="rounded-2xl border overflow-hidden rounded-2xl border border-border bg-card transition-all">
@@ -33,22 +32,15 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
                 onClick={() => setExpanded(!expanded)}
             >
                 <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-                    <span className={`flex-shrink-0 w-3 h-3 rounded-full mt-1 sm:mt-0 ${
-                        insight.outcome === 'ACCEPTED' ? 'bg-status-accepted' : 'bg-status-rejected'
-                    }`} />
+                    <span className={`flex-shrink-0 w-3 h-3 rounded-full mt-1 sm:mt-0 ${insight.outcome === 'ACCEPTED' ? 'bg-status-accepted' : 'bg-status-rejected'}`} />
                     <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
                             <span className="text-sm font-bold text-foreground">{insight.offerNumber}</span>
-                            <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
-                                insight.outcome === 'ACCEPTED' ? 'bg-status-accepted/10 text-status-accepted' : 'bg-destructive/10 text-destructive'
-                            }`}>
-                                {insight.outcome === 'ACCEPTED' ? 'Wygrana' : 'Przegrana'}
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${insight.outcome === 'ACCEPTED' ? 'bg-status-accepted/10 text-status-accepted' : 'bg-destructive/10 text-destructive'}`}>
+                                {insight.outcome === 'ACCEPTED' ? tr.outcomes.ACCEPTED : tr.outcomes.REJECTED}
                             </span>
                             {hasVariant && (
-                                <span
-                                    className="text-xs px-2 py-0.5 rounded-full font-medium"
-                                    style={{ backgroundColor: 'var(--accent)', color: 'var(--primary)' }}
-                                >
+                                <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: 'var(--accent)', color: 'var(--primary)' }}>
                                     {insight.insights.selectedVariant}
                                 </span>
                             )}
@@ -56,37 +48,23 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
                         <p className="text-sm text-muted-foreground truncate mt-0.5">{insight.offerTitle}</p>
                         <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-muted-foreground">
                             <span>{insight.clientName}</span>
-                            {insight.clientCompany && (
-                                <>
-                                    <span className="opacity-30">•</span>
-                                    <span>{insight.clientCompany}</span>
-                                </>
-                            )}
+                            {insight.clientCompany && (<><span className="opacity-30">•</span><span>{insight.clientCompany}</span></>)}
                             <span className="opacity-30">•</span>
-                            <span className="font-semibold text-foreground">
-                                {formatCurrency(insight.offerValue)}
-                            </span>
+                            <span className="font-semibold text-foreground">{formatCurrency(insight.offerValue)}</span>
                             <span className="opacity-30">•</span>
                             <span>{formatRelativeTime(insight.createdAt)}</span>
                         </div>
                     </div>
                 </div>
-
                 <div className="flex items-center gap-2 flex-shrink-0">
                     <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            router.push(`/dashboard/offers/${insight.offerId}`);
-                        }}
+                        onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/offers/${insight.offerId}`); }}
                         className="text-xs font-medium px-2.5 py-1 rounded-lg transition-colors hover:opacity-80"
                         style={{ backgroundColor: 'var(--accent)', color: 'var(--primary)' }}
                     >
-                        Oferta →
+                        {tr.offerBtn}
                     </button>
-                    <svg
-                        className={`w-5 h-5 text-muted-foreground transition-transform ${expanded ? 'rotate-180' : ''}`}
-                        fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-                    >
+                    <svg className={`w-5 h-5 text-muted-foreground transition-transform ${expanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                     </svg>
                 </div>
@@ -96,14 +74,13 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
                 <div className="px-4 sm:px-6 pb-5 pt-2 border-t space-y-4" style={{ borderColor: 'var(--border)' }}>
                     {insight.insights.summary && (
                         <div>
-                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Podsumowanie</h4>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">{tr.sections.summary}</h4>
                             <p className="text-sm text-muted-foreground leading-relaxed">{insight.insights.summary}</p>
                         </div>
                     )}
-
                     {keyLessons.length > 0 && (
                         <div>
-                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Kluczowe wnioski</h4>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">{tr.sections.keyLessons}</h4>
                             <div className="space-y-1.5">
                                 {keyLessons.map((lesson, idx) => (
                                     <div key={idx} className="flex items-start gap-2">
@@ -116,10 +93,9 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
                             </div>
                         </div>
                     )}
-
                     {hasPricing && (
                         <div>
-                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Analiza cenowa</h4>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">{tr.sections.pricing}</h4>
                             <div className="flex items-start gap-2 rounded-xl p-3" style={{ backgroundColor: 'var(--accent)' }}>
                                 <svg className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--primary)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -128,10 +104,9 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
                             </div>
                         </div>
                     )}
-
                     {improvementSuggestions.length > 0 && (
                         <div>
-                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Sugestie usprawnień</h4>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">{tr.sections.suggestions}</h4>
                             <div className="space-y-1.5">
                                 {improvementSuggestions.map((suggestion, idx) => (
                                     <div key={idx} className="flex items-start gap-2">
@@ -144,29 +119,23 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
                             </div>
                         </div>
                     )}
-
                     {hasVariant && (
                         <div>
-                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Wariant</h4>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">{tr.sections.variant}</h4>
                             <div className="flex items-center gap-2">
                                 <svg className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--primary)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
                                 </svg>
-                                <span className="text-sm font-medium" style={{ color: 'var(--primary)' }}>
-                                    {insight.insights.selectedVariant}
-                                </span>
+                                <span className="text-sm font-medium" style={{ color: 'var(--primary)' }}>{insight.insights.selectedVariant}</span>
                                 {insight.insights.availableVariants && insight.insights.availableVariants.length > 0 && (
-                                    <span className="text-xs text-muted-foreground">
-                                        (z {insight.insights.availableVariants.length}: {insight.insights.availableVariants.join(', ')})
-                                    </span>
+                                    <span className="text-xs text-muted-foreground">(z {insight.insights.availableVariants.length}: {insight.insights.availableVariants.join(', ')})</span>
                                 )}
                             </div>
                         </div>
                     )}
-
                     {hasVariantHistory && (
                         <div>
-                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Trend wariantów</h4>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">{tr.sections.variantTrend}</h4>
                             <div className="rounded-xl p-3" style={{ backgroundColor: 'var(--accent)' }}>
                                 <div className="flex flex-wrap gap-2">
                                     {Object.entries(insight.insights.variantHistory!.distribution).map(([variant, count]) => {
@@ -174,14 +143,7 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
                                         const pct = Math.round((count / total) * 100);
                                         const isSelected = variant === insight.insights.selectedVariant;
                                         return (
-                                            <div
-                                                key={variant}
-                                                className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-medium"
-                                                style={{
-                                                    backgroundColor: isSelected ? 'var(--primary)' : 'var(--border)',
-                                                    color: isSelected ? '#ffffff' : 'var(--muted-foreground)',
-                                                }}
-                                            >
+                                            <div key={variant} className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-medium" style={{ backgroundColor: isSelected ? 'var(--primary)' : 'var(--border)', color: isSelected ? '#ffffff' : 'var(--muted-foreground)' }}>
                                                 <span>{variant}</span>
                                                 <span className="font-bold">{pct}%</span>
                                                 <span className="opacity-60">(n={count})</span>
@@ -190,15 +152,14 @@ function InsightDetailCard({ insight }: { insight: InsightsListItem }) {
                                     })}
                                 </div>
                                 <p className="text-xs text-muted-foreground mt-2">
-                                    Na podstawie {insight.insights.variantHistory!.totalAcceptedWithVariant} zaakceptowanych ofert z wariantami
+                                    {tr.basedOn.replace('{n}', String(insight.insights.variantHistory!.totalAcceptedWithVariant))}
                                 </p>
                             </div>
                         </div>
                     )}
-
                     {hasIndustryNote && (
                         <div>
-                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Notatka branżowa</h4>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">{tr.sections.industryNote}</h4>
                             <p className="text-sm text-muted-foreground leading-relaxed italic">{insight.insights.industryNote}</p>
                         </div>
                     )}
@@ -212,14 +173,12 @@ export default function AIInsightsPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const toast = useToast();
+    const tr = useTranslations('aiInsights');
 
     const [insights, setInsights] = useState<InsightsListItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [meta, setMeta] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
-
-    const [outcomeFilter, setOutcomeFilter] = useState<OutcomeFilter>(
-        (searchParams.get('outcome') as OutcomeFilter) || 'ALL'
-    );
+    const [outcomeFilter, setOutcomeFilter] = useState<OutcomeFilter>((searchParams.get('outcome') as OutcomeFilter) || 'ALL');
     const [search, setSearch] = useState(searchParams.get('search') || '');
     const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
     const [dateFrom, setDateFrom] = useState(searchParams.get('dateFrom') || '');
@@ -228,15 +187,11 @@ export default function AIInsightsPage() {
     const fetchInsights = useCallback(async (page: number = 1) => {
         setIsLoading(true);
         try {
-            const params: Record<string, string | number | boolean | undefined> = {
-                page,
-                limit: 10,
-            };
+            const params: Record<string, string | number | boolean | undefined> = { page, limit: 10 };
             if (outcomeFilter !== 'ALL') params.outcome = outcomeFilter;
             if (search) params.search = search;
             if (dateFrom) params.dateFrom = dateFrom;
             if (dateTo) params.dateTo = dateTo;
-
             const result = await ai.insightsList(params);
             setInsights(result.data);
             setMeta(result.meta);
@@ -247,19 +202,7 @@ export default function AIInsightsPage() {
         }
     }, [outcomeFilter, search, dateFrom, dateTo, toast]);
 
-    useEffect(() => {
-        fetchInsights(1);
-    }, [fetchInsights]);
-
-    const handleSearch = () => {
-        setSearch(searchInput);
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            handleSearch();
-        }
-    };
+    useEffect(() => { fetchInsights(1); }, [fetchInsights]);
 
     const clearFilters = () => {
         setOutcomeFilter('ALL');
@@ -270,6 +213,18 @@ export default function AIInsightsPage() {
     };
 
     const hasActiveFilters = outcomeFilter !== 'ALL' || search || dateFrom || dateTo;
+
+    const subtitleCount = meta.total === 1
+        ? tr.counts.replace('{n}', String(meta.total))
+        : meta.total < 5
+            ? tr.countsPlural.replace('{n}', String(meta.total))
+            : tr.countsManyPlural.replace('{n}', String(meta.total));
+
+    const filterLabels: Record<OutcomeFilter, string> = {
+        ALL: tr.filters.all,
+        ACCEPTED: tr.filters.won,
+        REJECTED: tr.filters.lost,
+    };
 
     return (
         <div className="min-h-screen">
@@ -283,16 +238,12 @@ export default function AIInsightsPage() {
                                 </svg>
                             </div>
                             <div>
-                                <h1 className="text-xl sm:text-3xl font-bold tracking-tight">Wnioski AI</h1>
-                                <p className="text-sm text-muted-foreground">
-                                    Analiza zakończonych ofert — {meta.total} {meta.total === 1 ? 'wniosek' : meta.total < 5 ? 'wnioski' : 'wniosków'}
-                                </p>
+                                <h1 className="text-xl sm:text-3xl font-bold tracking-tight">{tr.title}</h1>
+                                <p className="text-sm text-muted-foreground">{tr.subtitle} — {subtitleCount}</p>
                             </div>
                         </div>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => router.push('/dashboard')}>
-                        ← Dashboard
-                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => router.push('/dashboard')}>{tr.backToDashboard}</Button>
                 </div>
 
                 <div className="rounded-2xl border overflow-hidden rounded-2xl border border-border bg-card mb-6">
@@ -301,87 +252,46 @@ export default function AIInsightsPage() {
                             <div className="flex-1 relative">
                                 <input
                                     type="text"
-                                    placeholder="Szukaj po tytule, numerze lub kliencie..."
+                                    placeholder={tr.searchPlaceholder}
                                     value={searchInput}
                                     onChange={(e) => setSearchInput(e.target.value)}
-                                    onKeyDown={handleKeyDown}
+                                    onKeyDown={(e) => { if (e.key === 'Enter') setSearch(searchInput); }}
                                     className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm transition-colors"
-                                    style={{
-                                        backgroundColor: 'var(--card)',
-                                        borderColor: 'var(--border)',
-                                        color: 'var(--foreground)',
-                                    }}
+                                    style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
                                 />
                                 <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
-                            <Button size="sm" onClick={handleSearch}>Szukaj</Button>
+                            <Button size="sm" onClick={() => setSearch(searchInput)}>{tr.searchBtn}</Button>
                         </div>
 
                         <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
                             <div className="flex gap-1.5">
                                 {(['ALL', 'ACCEPTED', 'REJECTED'] as const).map((filter) => {
-                                    const labels: Record<OutcomeFilter, string> = {
-                                        ALL: 'Wszystkie',
-                                        ACCEPTED: 'Wygrane',
-                                        REJECTED: 'Przegrane',
-                                    };
                                     const isActive = outcomeFilter === filter;
                                     return (
                                         <button
                                             key={filter}
                                             onClick={() => setOutcomeFilter(filter)}
-                                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                                                isActive
-                                                    ? 'text-white shadow-sm'
-                                                    : 'text-muted-foreground hover:opacity-80'
-                                            }`}
-                                            style={isActive ? {
-                                                backgroundColor: filter === 'REJECTED' ? '#ef4444' : filter === 'ACCEPTED' ? '#10b981' : 'var(--primary)',
-                                            } : {
-                                                backgroundColor: 'var(--accent)',
-                                            }}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${isActive ? 'text-white shadow-sm' : 'text-muted-foreground hover:opacity-80'}`}
+                                            style={isActive ? { backgroundColor: filter === 'REJECTED' ? '#ef4444' : filter === 'ACCEPTED' ? '#10b981' : 'var(--primary)' } : { backgroundColor: 'var(--accent)' }}
                                         >
-                                            {labels[filter]}
+                                            {filterLabels[filter]}
                                         </button>
                                     );
                                 })}
                             </div>
 
                             <div className="flex gap-2 sm:ml-auto items-center">
-                                <input
-                                    type="date"
-                                    value={dateFrom}
-                                    onChange={(e) => setDateFrom(e.target.value)}
-                                    className="px-3 py-1.5 rounded-lg border text-xs"
-                                    style={{
-                                        backgroundColor: 'var(--card)',
-                                        borderColor: 'var(--border)',
-                                        color: 'var(--foreground)',
-                                    }}
-                                />
+                                <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="px-3 py-1.5 rounded-lg border text-xs" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }} />
                                 <span className="text-xs text-muted-foreground">—</span>
-                                <input
-                                    type="date"
-                                    value={dateTo}
-                                    onChange={(e) => setDateTo(e.target.value)}
-                                    className="px-3 py-1.5 rounded-lg border text-xs"
-                                    style={{
-                                        backgroundColor: 'var(--card)',
-                                        borderColor: 'var(--border)',
-                                        color: 'var(--foreground)',
-                                    }}
-                                />
+                                <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="px-3 py-1.5 rounded-lg border text-xs" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }} />
                             </div>
 
                             {hasActiveFilters && (
-                                <button
-                                    onClick={clearFilters}
-                                    className="text-xs font-medium transition-colors hover:opacity-80"
-                                    style={{ color: 'var(--primary)' }}
-                                >
-                                    Wyczyść filtry
+                                <button onClick={clearFilters} className="text-xs font-medium transition-colors hover:opacity-80" style={{ color: 'var(--primary)' }}>
+                                    {tr.clearFilters}
                                 </button>
                             )}
                         </div>
@@ -390,67 +300,37 @@ export default function AIInsightsPage() {
 
                 {isLoading ? (
                     <div className="space-y-3">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                            <SkeletonInsightCard key={i} />
-                        ))}
+                        {Array.from({ length: 5 }).map((_, i) => <SkeletonInsightCard key={i} />)}
                     </div>
                 ) : insights.length === 0 ? (
                     <div className="rounded-2xl border rounded-2xl border border-border bg-card">
                         <EmptyState
-                            icon={
-                                hasActiveFilters ? (
-                                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                ) : (
-                                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-                                    </svg>
-                                )
-                            }
-                            title={hasActiveFilters ? 'Brak wyników' : 'Brak wniosków AI'}
-                            description={
-                                hasActiveFilters
-                                    ? 'Spróbuj zmienić filtry wyszukiwania'
-                                    : 'Wnioski pojawią się automatycznie po zaakceptowaniu lub odrzuceniu ofert przez klientów'
-                            }
-                            action={
-                                hasActiveFilters
-                                    ? { label: 'Wyczyść filtry', onClick: clearFilters }
-                                    : { label: 'Przejdź do ofert', onClick: () => router.push('/dashboard/offers') }
+                            icon={hasActiveFilters ? (
+                                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                            ) : (
+                                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" /></svg>
+                            )}
+                            title={hasActiveFilters ? tr.noResults : tr.noInsights}
+                            description={hasActiveFilters ? tr.noResultsDesc : tr.noInsightsDesc}
+                            action={hasActiveFilters
+                                ? { label: tr.clearFilters, onClick: clearFilters }
+                                : { label: tr.goToOffers, onClick: () => router.push('/dashboard/offers') }
                             }
                         />
                     </div>
                 ) : (
                     <>
                         <div className="space-y-3">
-                            {insights.map((insight) => (
-                                <InsightDetailCard key={insight.id} insight={insight} />
-                            ))}
+                            {insights.map((insight) => <InsightDetailCard key={insight.id} insight={insight} />)}
                         </div>
-
                         {meta.totalPages > 1 && (
                             <div className="flex items-center justify-between mt-6 px-2">
                                 <p className="text-xs text-muted-foreground">
-                                    Strona {meta.page} z {meta.totalPages} ({meta.total} wyników)
+                                    {tr.page.replace('{page}', String(meta.page)).replace('{total}', String(meta.totalPages)).replace('{count}', String(meta.total))}
                                 </p>
                                 <div className="flex gap-2">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => fetchInsights(meta.page - 1)}
-                                        disabled={meta.page <= 1}
-                                    >
-                                        ← Poprzednia
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => fetchInsights(meta.page + 1)}
-                                        disabled={meta.page >= meta.totalPages}
-                                    >
-                                        Następna →
-                                    </Button>
+                                    <Button variant="outline" size="sm" onClick={() => fetchInsights(meta.page - 1)} disabled={meta.page <= 1}>{tr.prevPage}</Button>
+                                    <Button variant="outline" size="sm" onClick={() => fetchInsights(meta.page + 1)} disabled={meta.page >= meta.totalPages}>{tr.nextPage}</Button>
                                 </div>
                             </div>
                         )}

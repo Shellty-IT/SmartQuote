@@ -6,12 +6,12 @@ import { Plus, RefreshCw, FileText } from 'lucide-react';
 import { Button, ConfirmDialog } from '@/components/ui';
 import { SkeletonTableRow, SkeletonMobileCard } from '@/components/ui/Skeleton';
 import { useOffersPage } from './hooks/useOffersPage';
-import { TABLE_HEADERS } from './constants';
 import { OffersStats } from './components/OffersStats';
 import { OffersFilters } from './components/OffersFilters';
 import { OfferTableRow } from './components/OfferTableRow';
 import { OfferMobileCard } from './components/OfferMobileCard';
 import { OffersDesktopPagination, OffersMobilePagination } from './components/OffersPagination';
+import { useTranslations } from '@/i18n';
 
 export default function OffersPage() {
     const {
@@ -44,17 +44,30 @@ export default function OffersPage() {
         navigateToEdit,
     } = useOffersPage();
 
+    const tr = useTranslations('offers');
+    const commonTr = useTranslations('common');
+
+    const tableHeaders = [
+        { label: tr.table.offer,        align: 'left' as const },
+        { label: tr.table.client,       align: 'left' as const },
+        { label: tr.table.status,       align: 'left' as const },
+        { label: tr.table.distribution, align: 'left' as const },
+        { label: tr.table.value,        align: 'right' as const },
+        { label: tr.table.validUntil,   align: 'left' as const },
+        { label: tr.table.actions,      align: 'right' as const },
+    ];
+
     return (
         <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
             <div className="flex flex-wrap items-end justify-between gap-4">
                 <div>
-                    <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">CRM</div>
-                    <h1 className="mt-1 text-3xl font-bold tracking-tight">Oferty</h1>
-                    <p className="mt-1 text-sm text-muted-foreground">Zarządzaj ofertami handlowymi</p>
+                    <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{tr.breadcrumb}</div>
+                    <h1 className="mt-1 text-3xl font-bold tracking-tight">{tr.title}</h1>
+                    <p className="mt-1 text-sm text-muted-foreground">{tr.subtitle}</p>
                 </div>
                 <Link href="/dashboard/offers/new">
                     <Button>
-                        <Plus className="h-4 w-4" /> Nowa oferta
+                        <Plus className="h-4 w-4" /> {tr.newOffer}
                     </Button>
                 </Link>
             </div>
@@ -83,7 +96,7 @@ export default function OffersPage() {
                                 <table className="w-full">
                                     <thead className="bg-surface-subtle border-b border-border">
                                     <tr>
-                                        {TABLE_HEADERS.map((h) => (
+                                        {tableHeaders.map((h) => (
                                             <th
                                                 key={h.label}
                                                 className={`px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider ${
@@ -114,21 +127,21 @@ export default function OffersPage() {
                 <div className="rounded-2xl border border-border bg-card p-12 text-center shadow-card">
                     <p className="text-destructive">{error}</p>
                     <Button variant="outline" onClick={refresh} className="mt-4 gap-2">
-                        <RefreshCw className="h-4 w-4" /> Spróbuj ponownie
+                        <RefreshCw className="h-4 w-4" /> {commonTr.retry}
                     </Button>
                 </div>
             ) : offers.length === 0 ? (
                 <div className="rounded-2xl border border-border bg-card py-16 text-center shadow-card">
                     <FileText className="mx-auto mb-4 h-12 w-12 text-muted-foreground/40" strokeWidth={1.5} />
                     <h3 className="text-lg font-semibold tracking-tight">
-                        {hasFilters ? 'Brak wyników' : 'Brak ofert'}
+                        {hasFilters ? tr.noResults : tr.noOffers}
                     </h3>
                     <p className="mt-1 text-sm text-muted-foreground">
-                        {hasFilters ? 'Spróbuj zmienić kryteria wyszukiwania' : 'Stwórz swoją pierwszą ofertę handlową'}
+                        {hasFilters ? tr.changeFilters : tr.createFirst}
                     </p>
                     {!hasFilters && (
                         <Link href="/dashboard/offers/new" className="mt-4 inline-block">
-                            <Button><Plus className="h-4 w-4" /> Stwórz ofertę</Button>
+                            <Button><Plus className="h-4 w-4" /> {tr.createOffer}</Button>
                         </Link>
                     )}
                 </div>
@@ -140,7 +153,7 @@ export default function OffersPage() {
                                 <table className="w-full">
                                     <thead className="border-b border-border bg-surface-subtle">
                                         <tr>
-                                            {TABLE_HEADERS.map((h) => (
+                                            {tableHeaders.map((h) => (
                                                 <th
                                                     key={h.label}
                                                     className={`px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground ${
@@ -202,9 +215,11 @@ export default function OffersPage() {
                 isOpen={!!deleteModal}
                 onClose={() => setDeleteModal(null)}
                 onConfirm={handleDelete}
-                title="Usuń ofertę"
-                description={`Czy na pewno chcesz usunąć ofertę "${deleteModal?.title}" (${deleteModal?.number})? Ta operacja jest nieodwracalna.`}
-                confirmLabel="Usuń"
+                title={tr.delete.title}
+                description={tr.delete.description
+                    .replace('{title}', deleteModal?.title || '')
+                    .replace('{number}', deleteModal?.number || '')}
+                confirmLabel={tr.delete.confirm}
                 isLoading={isDeleting}
             />
         </div>
