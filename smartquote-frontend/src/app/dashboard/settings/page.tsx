@@ -6,6 +6,7 @@ import { ChevronRight, User, Shield, Building2, Bell, Mail, Palette, Sparkles, K
 import { useSettings } from '@/hooks/useSettings';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { cn } from '@/lib/utils';
+import { useTranslations } from '@/i18n';
 
 import ProfileSection from './components/ProfileSection';
 import SecuritySection from './components/SecuritySection';
@@ -18,20 +19,33 @@ import ApiKeysSection from './components/ApiKeysSection';
 
 type SettingsTab = 'profile' | 'security' | 'company' | 'notifications' | 'smtp' | 'appearance' | 'ai' | 'api-keys';
 
-const TABS: { id: SettingsTab; label: string; description: string; icon: React.ElementType }[] = [
-    { id: 'profile',       label: 'Profil',              description: 'Dane osobowe i avatar',        icon: User },
-    { id: 'security',      label: 'Bezpieczeństwo',      description: 'Hasło i zabezpieczenia',       icon: Shield },
-    { id: 'company',       label: 'Firma',               description: 'Dane firmy na dokumentach',    icon: Building2 },
-    { id: 'notifications', label: 'Powiadomienia',       description: 'E-mail i przypomnienia',       icon: Bell },
-    { id: 'smtp',          label: 'Skrzynka pocztowa',   description: 'Konfiguracja SMTP',            icon: Mail },
-    { id: 'appearance',    label: 'Wygląd',              description: 'Motyw i język',                icon: Palette },
-    { id: 'ai',            label: 'AI Asystent',         description: 'Konfiguracja AI',              icon: Sparkles },
-    { id: 'api-keys',      label: 'Klucze API',          description: 'Integracje zewnętrzne',        icon: Key },
-];
+const TAB_ICONS: Record<SettingsTab, React.ElementType> = {
+    profile: User,
+    security: Shield,
+    company: Building2,
+    notifications: Bell,
+    smtp: Mail,
+    appearance: Palette,
+    ai: Sparkles,
+    'api-keys': Key,
+};
 
 export default function SettingsPage() {
     const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
     const { settings, isLoading, error, refetch, ...actions } = useSettings();
+    const tr = useTranslations('settings');
+    const commonTr = useTranslations('common');
+
+    const TABS = [
+        { id: 'profile' as SettingsTab,       ...tr.tabs.profile },
+        { id: 'security' as SettingsTab,      ...tr.tabs.security },
+        { id: 'company' as SettingsTab,       ...tr.tabs.company },
+        { id: 'notifications' as SettingsTab, ...tr.tabs.notifications },
+        { id: 'smtp' as SettingsTab,          ...tr.tabs.smtp },
+        { id: 'appearance' as SettingsTab,    ...tr.tabs.appearance },
+        { id: 'ai' as SettingsTab,            ...tr.tabs.ai },
+        { id: 'api-keys' as SettingsTab,      ...tr.tabs.apiKeys },
+    ];
 
     if (isLoading) return <PageLoader />;
 
@@ -41,7 +55,7 @@ export default function SettingsPage() {
                 <div className="rounded-2xl border border-border bg-card p-12 text-center shadow-card">
                     <p className="mb-4 text-destructive">{error}</p>
                     <button onClick={refetch} className="text-sm font-semibold text-primary hover:underline">
-                        Spróbuj ponownie
+                        {commonTr.retry}
                     </button>
                 </div>
             </div>
@@ -68,9 +82,9 @@ export default function SettingsPage() {
         <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
             {/* Header */}
             <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Konto</div>
-                <h1 className="mt-1 text-3xl font-bold tracking-tight">Ustawienia</h1>
-                <p className="mt-1 text-sm text-muted-foreground">Zarządzaj kontem i preferencjami</p>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{tr.breadcrumb}</div>
+                <h1 className="mt-1 text-3xl font-bold tracking-tight">{tr.title}</h1>
+                <p className="mt-1 text-sm text-muted-foreground">{tr.subtitle}</p>
             </div>
 
             {/* Desktop: sidebar + content */}
@@ -79,7 +93,7 @@ export default function SettingsPage() {
                 <div className="w-64 shrink-0">
                     <nav className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
                         {TABS.map((tab) => {
-                            const Icon = tab.icon;
+                            const Icon = TAB_ICONS[tab.id];
                             const active = activeTab === tab.id;
                             return (
                                 <button
@@ -112,7 +126,7 @@ export default function SettingsPage() {
             <div className="md:hidden space-y-4">
                 <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-2">
                     {TABS.map((tab) => {
-                        const Icon = tab.icon;
+                        const Icon = TAB_ICONS[tab.id];
                         const active = activeTab === tab.id;
                         return (
                             <button

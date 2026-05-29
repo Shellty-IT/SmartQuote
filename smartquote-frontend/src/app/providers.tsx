@@ -7,6 +7,39 @@ import { AIChatProvider } from '@/contexts/AIChatContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 
 type Theme = 'light' | 'dark';
+type Language = 'pl' | 'en';
+
+interface LanguageContextType {
+    language: Language;
+    setLanguage: (lang: Language) => void;
+}
+
+export const LanguageContext = createContext<LanguageContextType>({
+    language: 'pl',
+    setLanguage: () => {},
+});
+
+function LanguageProvider({ children }: { children: ReactNode }) {
+    const [language, setLanguageState] = useState<Language>('pl');
+
+    useEffect(() => {
+        const saved = localStorage.getItem('smartquote-lang') as Language | null;
+        if (saved === 'pl' || saved === 'en') {
+            setLanguageState(saved);
+        }
+    }, []);
+
+    const setLanguage = useCallback((lang: Language) => {
+        setLanguageState(lang);
+        localStorage.setItem('smartquote-lang', lang);
+    }, []);
+
+    return (
+        <LanguageContext.Provider value={{ language, setLanguage }}>
+            {children}
+        </LanguageContext.Provider>
+    );
+}
 
 interface ThemeContextType {
     theme: Theme;
@@ -81,11 +114,13 @@ export function Providers({ children }: { children: ReactNode }) {
     return (
         <SessionProvider>
             <ThemeProvider>
-                <ToastProvider>
-                    <AIChatProvider>
-                        {children}
-                    </AIChatProvider>
-                </ToastProvider>
+                <LanguageProvider>
+                    <ToastProvider>
+                        <AIChatProvider>
+                            {children}
+                        </AIChatProvider>
+                    </ToastProvider>
+                </LanguageProvider>
             </ThemeProvider>
         </SessionProvider>
     );

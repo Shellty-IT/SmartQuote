@@ -7,10 +7,12 @@ import { useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import { GlobalAIChat } from '@/components/ai/GlobalAIChat';
+import { useTranslations } from '@/i18n';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const { status } = useSession();
     const router = useRouter();
+    const commonTr = useTranslations('common');
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -23,7 +25,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="flex min-h-screen items-center justify-center bg-background">
                 <div className="flex flex-col items-center gap-4">
                     <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                    <p className="text-sm font-medium text-muted-foreground">Ładowanie...</p>
+                    <p className="text-sm font-medium text-muted-foreground">{commonTr.loading}</p>
                 </div>
             </div>
         );
