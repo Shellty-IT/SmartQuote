@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 
+import { useTranslations } from '@/i18n';
 import type { UserSettings, UpdateSettingsInput } from '@/types';
 
 interface Props {
@@ -10,32 +11,22 @@ interface Props {
     onUpdate: (data: UpdateSettingsInput) => Promise<UserSettings>;
 }
 
-interface ToggleProps {
-    enabled: boolean;
-    onChange: (enabled: boolean) => void;
-    disabled?: boolean;
-}
-
-function Toggle({ enabled, onChange, disabled }: ToggleProps) {
+function Toggle({ enabled, onChange, disabled }: { enabled: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
     return (
         <button
             type="button"
             onClick={() => !disabled && onChange(!enabled)}
             disabled={disabled}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${
-                enabled ? 'bg-primary' : 'bg-input'
-            } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${enabled ? 'bg-primary' : 'bg-input'} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
         >
-            <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-card shadow-sm transition-transform duration-300 ${
-                    enabled ? 'translate-x-6' : 'translate-x-1'
-                }`}
-            />
+            <span className={`inline-block h-4 w-4 transform rounded-full bg-card shadow-sm transition-transform duration-300 ${enabled ? 'translate-x-6' : 'translate-x-1'}`} />
         </button>
     );
 }
 
 export default function AISection({ settings, onUpdate }: Props) {
+    const tr = useTranslations('settings');
+    const commonTr = useTranslations('common');
     const [isSaving, setIsSaving] = useState(false);
     const [success, setSuccess] = useState(false);
     const [localSettings, setLocalSettings] = useState({
@@ -48,14 +39,12 @@ export default function AISection({ settings, onUpdate }: Props) {
         setLocalSettings(prev => ({ ...prev, aiTone: tone }));
         setIsSaving(true);
         setSuccess(false);
-
         try {
             await onUpdate({ aiTone: tone });
             setSuccess(true);
             setTimeout(() => setSuccess(false), 2000);
         } catch {
             setLocalSettings(prev => ({ ...prev, aiTone: previousTone }));
-
         } finally {
             setIsSaving(false);
         }
@@ -65,47 +54,32 @@ export default function AISection({ settings, onUpdate }: Props) {
         setLocalSettings(prev => ({ ...prev, aiAutoSuggestions: value }));
         setIsSaving(true);
         setSuccess(false);
-
         try {
             await onUpdate({ aiAutoSuggestions: value });
             setSuccess(true);
             setTimeout(() => setSuccess(false), 2000);
         } catch {
             setLocalSettings(prev => ({ ...prev, aiAutoSuggestions: !value }));
-
         } finally {
             setIsSaving(false);
         }
     };
 
     const tones = [
-        {
-            id: 'professional' as const,
-            label: 'Profesjonalny',
-            description: 'Formalny i rzeczowy ton komunikacji',
-            example: 'Szanowny Panie, w nawiązaniu do naszej rozmowy...',
-        },
-        {
-            id: 'friendly' as const,
-            label: 'Przyjazny',
-            description: 'Ciepły i bezpośredni styl',
-            example: 'Cześć! Cieszę się, że mogę Ci pomóc...',
-        },
-        {
-            id: 'formal' as const,
-            label: 'Formalny',
-            description: 'Bardzo oficjalny, dla korporacji',
-            example: 'Szanowni Państwo, uprzejmie informuję...',
-        },
+        { id: 'professional' as const, label: tr.ai.professionalLabel, description: tr.ai.professionalDesc, example: tr.ai.professionalExample },
+        { id: 'friendly' as const, label: tr.ai.friendlyLabel, description: tr.ai.friendlyDesc, example: tr.ai.friendlyExample },
+        { id: 'formal' as const, label: tr.ai.formalLabel, description: tr.ai.formalDesc, example: tr.ai.formalExample },
     ];
+
+    const suggestions = [tr.ai.suggestOffer, tr.ai.suggestFollowup, tr.ai.suggestClients, tr.ai.suggestEmail];
 
     return (
         <div className="space-y-6">
             <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h2 className="text-lg font-semibold text-foreground">Ton AI Asystenta</h2>
-                        <p className="text-sm text-muted-foreground">Jak AI powinien formułować odpowiedzi</p>
+                        <h2 className="text-lg font-semibold text-foreground">{tr.ai.toneTitle}</h2>
+                        <p className="text-sm text-muted-foreground">{tr.ai.toneSubtitle}</p>
                     </div>
                     <div className="flex items-center gap-2">
                         {success && (
@@ -113,7 +87,7 @@ export default function AISection({ settings, onUpdate }: Props) {
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                 </svg>
-                                <span>Zapisano</span>
+                                <span>{commonTr.saved}</span>
                             </div>
                         )}
                         {isSaving && (
@@ -131,11 +105,7 @@ export default function AISection({ settings, onUpdate }: Props) {
                             key={tone.id}
                             onClick={() => handleToneChange(tone.id)}
                             disabled={isSaving}
-                            className={`w-full p-4 rounded-xl border-2 text-left transition-all duration-200 ${
-                                localSettings.aiTone === tone.id
-                                    ? 'tone-active'
-                                    : 'tone-hover'
-                            } ${isSaving ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                            className={`w-full p-4 rounded-xl border-2 text-left transition-all duration-200 ${isSaving ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                             style={{
                                 borderColor: localSettings.aiTone === tone.id ? 'var(--primary)' : 'var(--border)',
                                 backgroundColor: localSettings.aiTone === tone.id ? 'var(--accent)' : 'transparent',
@@ -150,13 +120,7 @@ export default function AISection({ settings, onUpdate }: Props) {
                                 )}
                             </div>
                             <p className="text-sm text-muted-foreground mb-3">{tone.description}</p>
-                            <div
-                                className="flex items-start gap-2 p-3 rounded-lg border"
-                                style={{
-                                    backgroundColor: 'var(--surface-subtle)',
-                                    borderColor: 'var(--border)',
-                                }}
-                            >
+                            <div className="flex items-start gap-2 p-3 rounded-lg border" style={{ backgroundColor: 'var(--surface-subtle)', borderColor: 'var(--border)' }}>
                                 <svg className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                 </svg>
@@ -176,29 +140,18 @@ export default function AISection({ settings, onUpdate }: Props) {
                             </svg>
                         </div>
                         <div>
-                            <h3 className="font-medium text-foreground">Automatyczne sugestie AI</h3>
-                            <p className="text-sm text-muted-foreground">
-                                AI będzie proaktywnie sugerować akcje i ulepszenia
-                            </p>
+                            <h3 className="font-medium text-foreground">{tr.ai.autoTitle}</h3>
+                            <p className="text-sm text-muted-foreground">{tr.ai.autoDesc}</p>
                         </div>
                     </div>
-                    <Toggle
-                        enabled={localSettings.aiAutoSuggestions}
-                        onChange={handleToggle}
-                        disabled={isSaving}
-                    />
+                    <Toggle enabled={localSettings.aiAutoSuggestions} onChange={handleToggle} disabled={isSaving} />
                 </div>
 
                 {localSettings.aiAutoSuggestions && (
                     <div className="mt-6 pt-6 border-t border-border">
-                        <p className="text-sm text-muted-foreground mb-3">AI będzie sugerować:</p>
+                        <p className="text-sm text-muted-foreground mb-3">{tr.ai.suggestsTitle}</p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {[
-                                'Ulepszenia treści ofert',
-                                'Optymalne terminy follow-up',
-                                'Podobnych klientów',
-                                'Szablony emaili',
-                            ].map((item) => (
+                            {suggestions.map((item) => (
                                 <div key={item} className="flex items-center gap-2 text-sm text-foreground">
                                     <svg className="w-4 h-4 text-status-accepted flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -211,29 +164,16 @@ export default function AISection({ settings, onUpdate }: Props) {
                 )}
             </div>
 
-            <div
-                className="rounded-2xl border p-6 transition-colors duration-300"
-                style={{
-                    background: `linear-gradient(135deg, var(--surface-subtle), var(--surface-subtle))`,
-                    borderColor: 'var(--border)',
-                }}
-            >
+            <div className="rounded-2xl border p-6 transition-colors duration-300" style={{ background: 'linear-gradient(135deg, var(--surface-subtle), var(--surface-subtle))', borderColor: 'var(--border)' }}>
                 <div className="flex items-start gap-4">
-                    <div
-                        className="w-12 h-12 rounded-xl shadow-sm flex items-center justify-center flex-shrink-0"
-                        style={{ backgroundColor: 'var(--card)' }}
-                    >
+                    <div className="w-12 h-12 rounded-xl shadow-sm flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'var(--card)' }}>
                         <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                     </div>
                     <div>
-                        <h3 className="font-medium text-foreground mb-1">O AI Asystencie</h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                            AI Asystent wykorzystuje zaawansowane modele językowe do pomocy w tworzeniu
-                            ofert, generowaniu emaili i analizie danych klientów. Twoje dane są bezpieczne
-                            i nie są wykorzystywane do trenowania modeli.
-                        </p>
+                        <h3 className="font-medium text-foreground mb-1">{tr.ai.aboutTitle}</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{tr.ai.aboutDesc}</p>
                     </div>
                 </div>
             </div>

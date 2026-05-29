@@ -75,7 +75,7 @@ export default function RegisterPage() {
                     });
                     setErrors(fieldErrors);
                 } else {
-                    setErrors({ general: data.error?.message || 'Błąd rejestracji' });
+                    setErrors({ general: data.error?.message || tr.register.errors.registrationError });
                 }
                 return;
             }
@@ -241,7 +241,7 @@ export default function RegisterPage() {
                 <p className="text-center text-xs text-muted-foreground mt-6">
                     {tr.register.agreeing}{' '}
                     <a href="#" className="underline hover:text-foreground">{tr.register.terms}</a>
-                    {' '}{tr.register.agreeing.includes('akceptujesz') ? 'i' : 'and'}{' '}
+                    {tr.register.andWord}
                     <a href="#" className="underline hover:text-foreground">{tr.register.privacy}</a>
                 </p>
             </div>

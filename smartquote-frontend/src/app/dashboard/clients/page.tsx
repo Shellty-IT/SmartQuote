@@ -38,10 +38,10 @@ export default function ClientsPage() {
         setIsDeleting(true);
         try {
             await deleteClient(deleteModal.client.id);
-            toast.success(tr.deleted, `"${deleteModal.client.name}" został usunięty`);
+            toast.success(tr.deleted);
             setDeleteModal({ isOpen: false, client: null });
         } catch {
-            toast.error('Błąd', tr.deleteError);
+            toast.error(commonTr.errorTitle, tr.deleteError);
         } finally {
             setIsDeleting(false);
         }

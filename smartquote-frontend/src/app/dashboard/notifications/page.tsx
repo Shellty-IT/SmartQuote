@@ -27,6 +27,7 @@ export default function NotificationsPage() {
     const router = useRouter();
     const toast = useToast();
     const tr = useTranslations('notifications');
+    const commonTr = useTranslations('common');
 
     const [allNotifications, setAllNotifications] = useState<Notification[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -75,11 +76,11 @@ export default function NotificationsPage() {
             const res = await notificationsApi.list({ page: 1, limit: 200 });
             if (res.success && res.data) setAllNotifications(res.data);
         } catch {
-            toast.error('Błąd', 'Nie udało się pobrać powiadomień');
+            toast.error(commonTr.errorTitle, tr.fetchError);
         } finally {
             setIsLoading(false);
         }
-    }, [toast]);
+    }, [toast, commonTr.errorTitle, tr.fetchError]);
 
     useEffect(() => { fetchNotifications(); }, [fetchNotifications]);
     useEffect(() => { setCurrentPage(1); }, [activeTab, typeFilter]);
@@ -102,7 +103,7 @@ export default function NotificationsPage() {
             await notificationsApi.markAsRead(id);
             setAllNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
         } catch {
-            toast.error('Błąd', 'Nie udało się oznaczyć jako przeczytane');
+            toast.error(commonTr.errorTitle, tr.markReadError);
         }
     };
 
@@ -110,9 +111,9 @@ export default function NotificationsPage() {
         try {
             await notificationsApi.markAllAsRead();
             setAllNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-            toast.success('Oznaczono', tr.markedAll);
+            toast.success(tr.markedAllTitle, tr.markedAll);
         } catch {
-            toast.error('Błąd', 'Nie udało się oznaczyć powiadomień');
+            toast.error(commonTr.errorTitle, tr.markAllError);
         }
     };
 
@@ -121,9 +122,9 @@ export default function NotificationsPage() {
         try {
             await notificationsApi.delete(id);
             setAllNotifications(prev => prev.filter(n => n.id !== id));
-            toast.success('Usunięto', tr.deleted);
+            toast.success(tr.deletedTitle, tr.deleted);
         } catch {
-            toast.error('Błąd', 'Nie udało się usunąć powiadomienia');
+            toast.error(commonTr.errorTitle, tr.deleteError);
         }
     };
 

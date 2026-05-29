@@ -196,11 +196,11 @@ export default function AIInsightsPage() {
             setInsights(result.data);
             setMeta(result.meta);
         } catch {
-            toast.error('Błąd', 'Nie udało się pobrać wniosków AI');
+            toast.error(tr.fetchError);
         } finally {
             setIsLoading(false);
         }
-    }, [outcomeFilter, search, dateFrom, dateTo, toast]);
+    }, [outcomeFilter, search, dateFrom, dateTo, toast, tr.fetchError]);
 
     useEffect(() => { fetchInsights(1); }, [fetchInsights]);
 

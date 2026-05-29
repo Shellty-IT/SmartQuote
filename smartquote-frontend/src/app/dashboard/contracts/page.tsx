@@ -69,10 +69,10 @@ export default function ContractsPage() {
         setIsDeleting(true);
         try {
             await deleteContract(deleteModal.id);
-            toast.success(tr.deleted, `"${deleteModal.title}" została usunięta`);
+            toast.success(tr.deleted);
             setDeleteModal(null);
         } catch {
-            toast.error('Błąd', tr.deleteError);
+            toast.error(commonTr.errorTitle, tr.deleteError);
         } finally {
             setIsDeleting(false);
         }
@@ -86,7 +86,7 @@ export default function ContractsPage() {
             await navigator.clipboard.writeText(`${base}/contract/view/${contract.publicToken}`);
             toast.info(commonTr.linkCopied, tr.linkCopied);
         } catch {
-            toast.error('Błąd', tr.linkError);
+            toast.error(commonTr.errorTitle, tr.linkError);
         }
     };
 

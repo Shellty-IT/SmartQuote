@@ -76,10 +76,10 @@ export default function FollowUpsPage() {
         setIsDeleting(true);
         try {
             await deleteFollowUp(deleteModal.followUp.id);
-            toast.success(tr.deleted, `"${deleteModal.followUp.title}" został usunięty`);
+            toast.success(tr.deleted);
             setDeleteModal({ isOpen: false, followUp: null });
         } catch {
-            toast.error('Błąd', tr.deleteError);
+            toast.error(commonTr.errorTitle, tr.deleteError);
         } finally {
             setIsDeleting(false);
         }
@@ -89,9 +89,9 @@ export default function FollowUpsPage() {
         setCompletingId(followUp.id);
         try {
             await completeFollowUp(followUp.id);
-            toast.success(tr.done, `"${followUp.title}" został oznaczony jako wykonany`);
+            toast.success(tr.done);
         } catch {
-            toast.error('Błąd', tr.doneError);
+            toast.error(commonTr.errorTitle, tr.doneError);
         } finally {
             setCompletingId(null);
         }
