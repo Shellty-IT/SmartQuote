@@ -2,7 +2,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from '@/i18n';
 
 interface SelectedItem {
     readonly name: string;
@@ -51,7 +50,6 @@ export default function AcceptDialog({
                                          requireAuditTrail = false,
                                          primaryColor = '#0891b2',
                                      }: AcceptDialogProps) {
-    const tr = useTranslations('offerPublic');
     const [confirmed, setConfirmed] = useState(false);
     const [auditName, setAuditName] = useState('');
     const [auditEmail, setAuditEmail] = useState('');
@@ -113,17 +111,17 @@ export default function AcceptDialog({
                         </div>
                         <div>
                             <h2 id="accept-dialog-title" className="text-xl font-bold text-slate-900">
-                                {tr.acceptDialog.title}
+                                Potwierdzenie akceptacji
                             </h2>
                             <p className="text-sm text-slate-500">
-                                {offerNumber}
+                                Oferta {offerNumber}
                             </p>
                         </div>
                     </div>
 
                     <div className="bg-slate-50 rounded-xl p-4 mb-4">
                         <p className="text-xs uppercase tracking-wider text-slate-400 font-medium mb-1">
-                            {tr.acceptDialog.subtitle}
+                            Akceptujący
                         </p>
                         <p className="font-medium text-slate-900">{clientName}</p>
                         {clientCompany && clientCompany !== clientName && (
@@ -138,40 +136,41 @@ export default function AcceptDialog({
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                 </svg>
                                 <span className="text-sm font-medium text-primary">
-                                    {tr.acceptDialog.formalDesc.split('.')[0]}
+                                    Formalna akceptacja — potwierdź swoje dane
                                 </span>
                             </div>
                             <p className="text-xs text-primary mb-3">
-                                {tr.acceptDialog.formalDesc}
+                                Ta oferta wymaga formalnego potwierdzenia. Twoje dane, adres IP i cyfrowy
+                                odcisk treści (SHA-256) zostaną zapisane. Otrzymasz email z potwierdzeniem.
                             </p>
                             <div className="space-y-3">
                                 <div>
                                     <label className="block text-xs font-medium text-primary mb-1">
-                                        {tr.acceptDialog.nameLabel} *
+                                        Imię i nazwisko *
                                     </label>
                                     <input
                                         type="text"
                                         value={auditName}
                                         onChange={(e) => setAuditName(e.target.value)}
-                                        placeholder={tr.acceptDialog.namePlaceholder}
+                                        placeholder="Jan Kowalski"
                                         disabled={isLoading}
                                         className="w-full px-3 py-2 rounded-lg border border-primary/40 bg-white text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-transparent disabled:opacity-50"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-primary mb-1">
-                                        {tr.acceptDialog.emailLabel} *
+                                        Adres email *
                                     </label>
                                     <input
                                         type="email"
                                         value={auditEmail}
                                         onChange={(e) => setAuditEmail(e.target.value)}
-                                        placeholder={tr.acceptDialog.emailPlaceholder}
+                                        placeholder="jan@firma.pl"
                                         disabled={isLoading}
                                         className="w-full px-3 py-2 rounded-lg border border-primary/40 bg-white text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-transparent disabled:opacity-50"
                                     />
                                     <p className="text-xs text-primary mt-1">
-                                        {tr.acceptDialog.emailHint}
+                                        Na ten adres wyślemy potwierdzenie z hashem cyfrowym
                                     </p>
                                 </div>
                             </div>
@@ -180,7 +179,7 @@ export default function AcceptDialog({
 
                     <div className="bg-slate-50 rounded-xl p-4 mb-4">
                         <p className="text-xs uppercase tracking-wider text-slate-400 font-medium mb-3">
-                            {tr.acceptDialog.selectedItems}
+                            Wybrane pozycje
                         </p>
                         <div className="space-y-2">
                             {selectedItems.map((item, index) => (
@@ -201,7 +200,7 @@ export default function AcceptDialog({
 
                     <div className="bg-slate-900 rounded-xl p-4 mb-6">
                         <div className="flex justify-between items-center">
-                            <span className="text-slate-300 font-medium">{tr.acceptDialog.grossAmount}</span>
+                            <span className="text-slate-300 font-medium">Kwota brutto</span>
                             <span
                                 className="text-2xl font-bold"
                                 style={{ color: primaryColor }}
@@ -220,7 +219,11 @@ export default function AcceptDialog({
                             className="mt-0.5 w-5 h-5 rounded border-amber-300 text-status-accepted focus:ring-emerald-500 cursor-pointer"
                         />
                         <span className="text-sm text-amber-900 leading-relaxed">
-                            {tr.acceptDialog.consent}
+                            Potwierdzam akceptację niniejszej oferty i zapoznałem/am się z jej warunkami.
+                            Rozumiem, że akceptacja jest wiążąca.
+                            {requireAuditTrail && (
+                                <> Wyrażam zgodę na zapisanie moich danych w celu potwierdzenia akceptacji.</>
+                            )}
                         </span>
                     </label>
 
@@ -230,7 +233,7 @@ export default function AcceptDialog({
                             disabled={isLoading}
                             className="flex-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-colors disabled:opacity-50"
                         >
-                            {tr.acceptDialog.cancel}
+                            Anuluj
                         </button>
                         <button
                             onClick={handleConfirm}
@@ -243,14 +246,14 @@ export default function AcceptDialog({
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                     </svg>
-                                    {tr.acceptDialog.processing}
+                                    Przetwarzanie...
                                 </>
                             ) : (
                                 <>
                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                     </svg>
-                                    {tr.acceptDialog.confirm}
+                                    Zatwierdź akceptację
                                 </>
                             )}
                         </button>

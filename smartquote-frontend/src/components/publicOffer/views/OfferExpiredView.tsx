@@ -1,8 +1,6 @@
 // src/components/publicOffer/views/OfferExpiredView.tsx
 'use client';
 
-import { useTranslations } from '@/i18n';
-
 interface OfferExpiredViewProps {
     offerNumber: string;
     sellerEmail?: string;
@@ -14,7 +12,6 @@ export default function OfferExpiredView({
                                              sellerEmail,
                                              primaryColor,
                                          }: OfferExpiredViewProps) {
-    const termsTr = useTranslations('offerDetail');
     return (
         <div className="max-w-2xl mx-auto text-center py-16 px-4">
             <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-amber-100 flex items-center justify-center">
@@ -38,7 +35,7 @@ export default function OfferExpiredView({
             </h1>
 
             <p className="text-lg text-slate-600 mb-2">
-                {termsTr.details.validUntil}{' '}
+                Termin ważności oferty{' '}
                 <span className="font-semibold">{offerNumber}</span> minął.
             </p>
 

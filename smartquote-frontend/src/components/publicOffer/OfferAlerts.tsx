@@ -1,15 +1,12 @@
 // src/components/publicOffer/OfferAlerts.tsx
 'use client';
 
-import { useTranslations } from '@/i18n';
-
 interface ErrorAlertProps {
     message: string;
     onDismiss: () => void;
 }
 
 export function ErrorAlert({ message, onDismiss }: ErrorAlertProps) {
-    const alertTr = useTranslations('common');
     return (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
             <svg
@@ -30,7 +27,9 @@ export function ErrorAlert({ message, onDismiss }: ErrorAlertProps) {
                 <button
                     onClick={onDismiss}
                     className="text-xs text-status-rejected hover:text-red-700 mt-1 underline"
-                >{alertTr.close}</button>
+                >
+                    Zamknij
+                </button>
             </div>
         </div>
     );
