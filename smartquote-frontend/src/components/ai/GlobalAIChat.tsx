@@ -20,7 +20,7 @@ export function GlobalAIChat() {
 
     const { data: session } = useSession();
     const { messages, addMessage, clearMessages } = useChatMessages();
-    const { messagesEndRef } = useChatScroll([messages, isOpen, isMinimized]);
+    const { messagesEndRef } = useChatScroll(messages, isOpen, isMinimized);
 
     const handleSend = async () => {
         if (!input.trim() || isLoading) return;

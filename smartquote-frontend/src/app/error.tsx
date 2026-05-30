@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { AlertTriangle } from 'lucide-react';
 
 interface ErrorProps {
     error: Error & { digest?: string };

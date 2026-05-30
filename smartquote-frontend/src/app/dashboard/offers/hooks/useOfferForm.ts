@@ -197,7 +197,7 @@ export function useOfferForm(options?: { initialData?: Offer }) {
                     .replace('{name}', template.name)
             );
         },
-        [offerDetails.paymentDays, toast]
+        [offerDetails.paymentDays, toast, tr.toasts.templateApplied, tr.toasts.templateAppliedDesc]
     );
 
     const canProceed = useCallback(() => {
