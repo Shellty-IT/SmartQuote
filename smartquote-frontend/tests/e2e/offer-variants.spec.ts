@@ -82,7 +82,7 @@ test.describe('Offer Variants', () => {
         const clientPage = await context.newPage();
         await clientPage.goto(publicPath, { waitUntil: 'networkidle' });
 
-        await expect(clientPage.getByText(/2 wariant/i)).toBeVisible({ timeout: 10000 });
+        await expect(clientPage.getByText('Wybierz wariant')).toBeVisible({ timeout: 10000 });
 
         const standardBtn = clientPage.getByRole('button', { name: 'Standard' });
         await standardBtn.click();
