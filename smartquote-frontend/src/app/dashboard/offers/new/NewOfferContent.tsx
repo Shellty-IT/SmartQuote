@@ -101,14 +101,14 @@ export default function NewOfferContent() {
 
                 <div className="flex gap-3">
                     {currentStep === 'summary' ? (
-                        <Button onClick={handleSubmit} isLoading={isSubmitting}>
+                        <Button data-testid="offer-create-button" onClick={handleSubmit} isLoading={isSubmitting}>
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
                             {tr.create}
                         </Button>
                     ) : (
-                        <Button onClick={goNext} disabled={!canProceed()}>
+                        <Button data-testid="offer-next-button" onClick={goNext} disabled={!canProceed()}>
                             {tr.next}
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />

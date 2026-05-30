@@ -62,6 +62,7 @@ export default function OfferItemForm({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                     <Input
+                        data-testid={`offer-item-name-${index}`}
                         label={f.name}
                         value={item.name}
                         onChange={(e) => onUpdate(index, 'name', e.target.value)}
@@ -95,6 +96,7 @@ export default function OfferItemForm({
                     options={UNITS}
                 />
                 <Input
+                    data-testid={`offer-item-price-${index}`}
                     label={f.netPrice}
                     type="number"
                     value={item.unitPrice}
@@ -120,6 +122,7 @@ export default function OfferItemForm({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
+                    data-testid={`offer-item-variant-${index}`}
                     label={f.variant}
                     value={item.variantName}
                     onChange={(e) => onUpdate(index, 'variantName', e.target.value)}

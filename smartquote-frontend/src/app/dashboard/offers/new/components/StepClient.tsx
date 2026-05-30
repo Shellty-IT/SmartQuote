@@ -44,6 +44,7 @@ export default function StepClient({ clients, selectedClient, onSelectClient }: 
                 {filteredClients.map((client) => (
                     <button
                         key={client.id}
+                        data-testid="offer-client-card"
                         onClick={() => onSelectClient(client)}
                         className={`flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all ${
                             selectedClient?.id === client.id

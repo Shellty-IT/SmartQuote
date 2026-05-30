@@ -118,6 +118,7 @@ export function OfferHeader({
                 </button>
 
                 <button
+                    data-testid="offer-publish-button"
                     onClick={onPublishClick}
                     className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-semibold text-muted-foreground shadow-sm transition hover:bg-secondary hover:text-foreground"
                 >

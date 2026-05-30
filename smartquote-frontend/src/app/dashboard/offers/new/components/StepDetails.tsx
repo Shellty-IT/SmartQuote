@@ -19,6 +19,7 @@ export default function StepDetails({ details, onUpdate }: StepDetailsProps) {
             <h2 className="text-lg font-semibold text-foreground mb-4">{d.title}</h2>
             <div className="space-y-4">
                 <Input
+                    data-testid="offer-title-input"
                     label={d.offerTitle}
                     value={details.title}
                     onChange={(e) => onUpdate('title', e.target.value)}
@@ -82,6 +83,7 @@ export default function StepDetails({ details, onUpdate }: StepDetailsProps) {
                 <div className="p-4 bg-card border-border border rounded-xl">
                     <label className="flex items-start gap-3 cursor-pointer">
                         <input
+                            data-testid="offer-audit-trail-checkbox"
                             type="checkbox"
                             checked={details.requireAuditTrail}
                             onChange={(e) => onUpdate('requireAuditTrail', e.target.checked)}

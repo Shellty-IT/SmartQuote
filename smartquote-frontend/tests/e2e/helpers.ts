@@ -92,75 +92,60 @@ export async function createAndPublishOffer(
     await page.goto('/dashboard/offers/new', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('domcontentloaded');
 
-    // Wait for the client list to load (async fetch) before interacting with it.
-    // `.grid button` is fragile on mobile when the container has overflow:hidden.
-    // Use a more robust selector: buttons with role="button" containing an avatar div.
-    await page.waitForFunction(
-        () => document.querySelectorAll('button[class*="rounded-xl"][class*="border"]').length > 0 ||
-              document.querySelectorAll('.grid button').length > 0,
-        { timeout: 30000 }
-    );
-
-    // Try the grid-button selector first; fall back to any client card button.
-    const firstClient = page.locator('.grid button, button:has(.rounded-full)').first();
+    const firstClient = page.getByTestId('offer-client-card').first();
     await firstClient.waitFor({ state: 'visible', timeout: 10000 });
     await firstClient.click();
-    await page.getByRole('button', { name: /dalej/i }).click();
+    await page.getByTestId('offer-next-button').click();
 
-    const titleInput = page.getByPlaceholder('np. System CRM dla firmy X');
+    const titleInput = page.getByTestId('offer-title-input');
     await titleInput.waitFor({ state: 'visible', timeout: 5000 });
     await titleInput.fill(title);
 
     if (options?.requireAuditTrail) {
-        const auditLabel = page.locator('label').filter({ hasText: 'Formalne potwierdzenie akceptacji' });
-        await auditLabel.scrollIntoViewIfNeeded();
-        await auditLabel.click();
+        const auditCheckbox = page.getByTestId('offer-audit-trail-checkbox');
+        await auditCheckbox.scrollIntoViewIfNeeded();
+        await auditCheckbox.check({ force: true });
     }
 
-    await page.getByRole('button', { name: /dalej/i }).click();
+    await page.getByTestId('offer-next-button').click();
 
-    const itemNameInput = page.getByPlaceholder('np. Wdrożenie systemu CRM');
+    const itemNameInput = page.getByTestId('offer-item-name-0');
     await itemNameInput.waitFor({ state: 'visible', timeout: 5000 });
     await itemNameInput.fill(itemName);
 
     if (options?.variants && options.variants.length > 0) {
-        const firstVariantInput = page.getByPlaceholder('np. Basic, Standard, Premium').first();
+        const firstVariantInput = page.getByTestId('offer-item-variant-0');
         await firstVariantInput.scrollIntoViewIfNeeded();
         await firstVariantInput.fill(options.variants[0].name);
 
-        const numberInputs = page.locator('input[type="number"]');
-        const firstPriceInput = numberInputs.nth(1);
+        const firstPriceInput = page.getByTestId('offer-item-price-0');
         await firstPriceInput.scrollIntoViewIfNeeded();
         await firstPriceInput.fill(String(options.variants[0].price));
 
         for (let i = 1; i < options.variants.length; i++) {
             const variant = options.variants[i];
 
-            const addBtn = page.getByRole('button', { name: /dodaj pozycję/i });
+            const addBtn = page.getByTestId('offer-add-item-button');
             await addBtn.scrollIntoViewIfNeeded();
             await addBtn.click();
-            await page.waitForTimeout(500);
 
-            const allNameInputs = page.getByPlaceholder('np. Wdrożenie systemu CRM');
-            const newNameInput = allNameInputs.nth(i);
+            const newNameInput = page.getByTestId(`offer-item-name-${i}`);
             await newNameInput.waitFor({ state: 'visible', timeout: 5000 });
             await newNameInput.fill(variant.itemName);
 
-            const allVariantInputs = page.getByPlaceholder('np. Basic, Standard, Premium');
-            const newVariantInput = allVariantInputs.nth(i);
+            const newVariantInput = page.getByTestId(`offer-item-variant-${i}`);
             await newVariantInput.scrollIntoViewIfNeeded();
             await newVariantInput.fill(variant.name);
 
-            const allNumberInputs = page.locator('input[type="number"]');
-            const newPriceInput = allNumberInputs.nth(i * 3 + 1);
+            const newPriceInput = page.getByTestId(`offer-item-price-${i}`);
             await newPriceInput.scrollIntoViewIfNeeded();
             await newPriceInput.fill(String(variant.price));
         }
     }
 
-    await page.getByRole('button', { name: /dalej/i }).click();
+    await page.getByTestId('offer-next-button').click();
 
-    await page.getByRole('button', { name: /utwórz ofertę/i }).click();
+    await page.getByTestId('offer-create-button').click();
 
     await page.waitForURL(
         (url) => /\/dashboard\/offers\/[^/]+$/.test(url.pathname) && !url.pathname.endsWith('/new'),
@@ -175,14 +160,14 @@ export async function createAndPublishOffer(
 
     await waitForOfferPage(page);
 
-    const publishBtn = page.getByRole('button', { name: /publikuj/i }).first();
+    const publishBtn = page.getByTestId('offer-publish-button').first();
     await publishBtn.waitFor({ state: 'visible', timeout: 60000 });
     await publishBtn.click();
 
     const publishDialog = page.locator('[role="dialog"]');
     await publishDialog.waitFor({ state: 'visible', timeout: 15000 });
 
-    const generateBtn = publishDialog.getByRole('button', { name: /generuj link|publikuj|aktywuj/i });
+    const generateBtn = publishDialog.getByTestId('offer-generate-link-button');
     await generateBtn.waitFor({ state: 'visible', timeout: 15000 });
     await generateBtn.scrollIntoViewIfNeeded();
 

@@ -268,6 +268,7 @@ export default function PublishDialog({
                                     {tr.cancel}
                                 </button>
                                 <button
+                                    data-testid="offer-generate-link-button"
                                     onClick={handlePublish}
                                     disabled={isPublishing || isSending}
                                     className="flex-1 px-4 py-3 rounded-xl bg-primary text-white font-medium hover:brightness-110 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"

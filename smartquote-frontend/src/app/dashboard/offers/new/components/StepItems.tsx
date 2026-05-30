@@ -32,7 +32,7 @@ export default function StepItems({
         <div>
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-foreground">{i.title}</h2>
-                <Button variant="outline" size="sm" onClick={onAddItem}>
+                <Button data-testid="offer-add-item-button" variant="outline" size="sm" onClick={onAddItem}>
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
