@@ -22,6 +22,9 @@ if (fs.existsSync(envPath)) {
     }
 }
 
+const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000';
+const baseOrigin = new URL(baseURL).origin;
+
 export default defineConfig({
     testDir: './tests/e2e',
     fullyParallel: false,
@@ -34,7 +37,18 @@ export default defineConfig({
         timeout: 15_000,
     },
     use: {
-        baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
+        baseURL,
+        storageState: {
+            cookies: [],
+            origins: [
+                {
+                    origin: baseOrigin,
+                    localStorage: [
+                        { name: 'smartquote-lang', value: 'pl' },
+                    ],
+                },
+            ],
+        },
         trace: 'on-first-retry',
         screenshot: 'only-on-failure',
         video: 'on-first-retry',

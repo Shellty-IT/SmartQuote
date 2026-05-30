@@ -2,6 +2,10 @@
 import { Page, expect } from '@playwright/test';
 
 export async function login(page: Page) {
+    await page.addInitScript(() => {
+        localStorage.setItem('smartquote-lang', 'pl');
+    });
+
     await page.goto('/', { timeout: 120000 });
     await page.waitForLoadState('domcontentloaded');
 
