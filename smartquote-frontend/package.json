@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "test:e2e": "playwright test",
+    "test:e2e:ci": "playwright test --project=chromium",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
     "generate-icons": "npx tsx scripts/generate-icons.ts"
