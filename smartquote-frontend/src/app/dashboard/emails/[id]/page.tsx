@@ -3,7 +3,6 @@
 
 import { use, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card } from '@/components/ui';
 import { emailsApi } from '@/lib/api/emails.api';
 import type { EmailLog, EmailLogStatus, EmailAttachment } from '@/types/email.types';
 import { useTranslations } from '@/i18n';
@@ -77,7 +76,7 @@ export default function EmailDetailPage({ params }: PageProps) {
             }
         };
         load();
-    }, [id]);
+    }, [id, commonTr.errorTitle]);
 
     const formatDate = (dateStr: string) =>
         new Date(dateStr).toLocaleString('pl-PL', {

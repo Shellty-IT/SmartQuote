@@ -41,7 +41,7 @@ export default function OfferTemplatesPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [search, category, toast]);
+    }, [search, category, toast, commonTr.errorTitle]);
 
     const loadCategories = useCallback(async () => {
         try {

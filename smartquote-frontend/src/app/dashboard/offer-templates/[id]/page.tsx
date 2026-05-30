@@ -78,7 +78,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
         } finally {
             setIsLoading(false);
         }
-    }, [id, toast, router]);
+    }, [id, toast, router, commonTr.errorTitle]);
 
     useEffect(() => {
         loadTemplate();

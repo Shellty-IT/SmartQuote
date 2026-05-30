@@ -72,7 +72,6 @@ export default function OfferDetailPage({ params }: PageProps) {
     } = useOfferDetail(id);
 
     const tr = useTranslations('offerDetail');
-    const commonTr = useTranslations('common');
 
     if (isLoading) return <PageLoader />;
 
