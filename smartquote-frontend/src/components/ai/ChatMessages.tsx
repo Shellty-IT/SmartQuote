@@ -2,6 +2,7 @@
 import React from 'react';
 import { useSession } from 'next-auth/react';
 import { ChatBubble } from './ChatBubble';
+import { useTranslations } from '@/i18n';
 import type { ChatMessage } from './hooks/useChatMessages';
 
 interface ChatMessagesProps {
@@ -43,10 +44,11 @@ function EmptyState({
     userName?: string | null;
     onSuggestionClick: (suggestion: string) => void;
 }) {
+    const tr = useTranslations('aiChat');
     const suggestions = [
-        'Pomóż mi stworzyć ofertę',
-        'Podsumuj dzisiejsze zadania',
-        'Zaległe follow-upy',
+        tr.suggestions.createOffer,
+        tr.suggestions.summarizeDay,
+        tr.suggestions.overdueFollowups,
     ];
 
     return (
@@ -58,10 +60,10 @@ function EmptyState({
                     </svg>
                 </div>
                 <h4 className="font-medium text-foreground mb-1">
-                    Cześć{userName ? `, ${userName.split(' ')[0]}` : ''}!
+                    {tr.greeting}{userName ? `, ${userName.split(' ')[0]}` : ''}!
                 </h4>
                 <p className="text-sm text-muted-foreground max-w-[250px]">
-                    Jak mogę Ci dzisiaj pomóc?
+                    {tr.greetingQuestion}
                 </p>
             </div>
 

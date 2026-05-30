@@ -7,7 +7,7 @@ export const ksefApi = {
     async getPreview(offerId: string): Promise<KsefPreviewData> {
         const response = await api.get<KsefPreviewData>(`/ksef/preview/${offerId}`);
         if (!response.data) {
-            throw new Error('Brak danych podglądu');
+            throw new Error('No preview data');
         }
         return response.data;
     },

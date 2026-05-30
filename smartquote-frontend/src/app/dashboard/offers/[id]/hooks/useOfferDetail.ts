@@ -7,7 +7,7 @@ import { useOffer, useOfferAnalytics, useOfferComments } from '@/hooks/useOffers
 import { offersApi, ai, ksefApi } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
 import { useTranslations } from '@/i18n';
-import { getStatusConfig } from '@/lib/utils';
+
 import { groupByVariant } from '../utils';
 import { STATUS_TRANSITIONS } from '../constants';
 import type { Tab } from '../constants';
@@ -20,6 +20,7 @@ export function useOfferDetail(offerId: string) {
     const toast = useToast();
     const tr = useTranslations('offerDetail');
     const commonTr = useTranslations('common');
+    const statusTr = useTranslations('statuses');
     const { data: session } = useSession();
     const { offer, isLoading, error, refresh } = useOffer(offerId);
     const { analytics, refresh: refreshAnalytics } = useOfferAnalytics(offerId);
@@ -131,8 +132,7 @@ export function useOfferDetail(offerId: string) {
         try {
             await offersApi.update(offer.id, { status: newStatus });
             await refresh();
-            const statusConfig = getStatusConfig(newStatus);
-            toast.success(tr.toasts.statusChanged, statusConfig.label);
+            toast.success(tr.toasts.statusChanged, (statusTr as Record<string, string>)[newStatus] ?? newStatus);
         } catch {
             toast.error(commonTr.errorTitle, tr.toasts.statusError);
         } finally {

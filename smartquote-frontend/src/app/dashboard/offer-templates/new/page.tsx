@@ -117,14 +117,14 @@ export default function NewOfferTemplatePage() {
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    Powrót
+                    {tr.back}
                 </button>
                 <h1 className="text-3xl font-bold tracking-tight">{tr.newTitle}</h1>
                 <p className="text-muted-foreground mt-1">{tr.newSubtitle}</p>
             </div>
 
             <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                <h2 className="text-lg font-semibold text-foreground mb-4">Podstawowe informacje</h2>
+                <h2 className="text-lg font-semibold text-foreground mb-4">{tr.basicInfo}</h2>
                 <div className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-foreground mb-1.5">
@@ -140,7 +140,7 @@ export default function NewOfferTemplatePage() {
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-foreground mb-1.5">
-                            Opis (opcjonalne)
+                            {tr.descLabel}
                         </label>
                         <textarea
                             placeholder={tr.descLabel}
@@ -153,7 +153,7 @@ export default function NewOfferTemplatePage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-foreground mb-1.5">
-                                Kategoria (opcjonalne)
+                                {tr.categoryLabel}
                             </label>
                             <input
                                 type="text"
@@ -165,7 +165,7 @@ export default function NewOfferTemplatePage() {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-foreground mb-1.5">
-                                Domyślne dni płatności
+                                {tr.paymentDaysLabel}
                             </label>
                             <input
                                 type="number"
@@ -179,7 +179,7 @@ export default function NewOfferTemplatePage() {
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-foreground mb-1.5">
-                            Domyślne warunki (opcjonalne)
+                            {tr.termsLabel}
                         </label>
                         <textarea
                             placeholder={tr.termsLabel}
@@ -191,7 +191,7 @@ export default function NewOfferTemplatePage() {
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-foreground mb-1.5">
-                            Domyślne uwagi (opcjonalne)
+                            {tr.notesLabel}
                         </label>
                         <textarea
                             placeholder={tr.notesLabel}
@@ -211,14 +211,14 @@ export default function NewOfferTemplatePage() {
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                         </svg>
-                        Dodaj pozycję
+                        {tr.addItem}
                     </Button>
                 </div>
                 <div className="space-y-4">
                     {items.map((item, index) => (
                         <div key={item._tempId} className="bg-surface-subtle rounded-xl p-4 border border-border">
                             <div className="flex items-start justify-between mb-3">
-                                <span className="text-sm font-semibold text-foreground">Pozycja {index + 1}</span>
+                                <span className="text-sm font-semibold text-foreground">{tr.itemTitle.replace('{n}', String(index + 1))}</span>
                                 {items.length > 1 && (
                                     <button
                                         onClick={() => removeItem(item._tempId)}

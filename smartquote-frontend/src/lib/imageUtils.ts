@@ -7,12 +7,12 @@ export function compressImage(
 ): Promise<string> {
     return new Promise((resolve, reject) => {
         if (!file.type.startsWith('image/')) {
-            reject(new Error('Wybierz plik graficzny'));
+            reject(new Error('Please select an image file'));
             return;
         }
 
         if (file.size > 5 * 1024 * 1024) {
-            reject(new Error('Plik jest za duży (max 5MB)'));
+            reject(new Error('File too large (max 5MB)'));
             return;
         }
 
@@ -49,11 +49,11 @@ export function compressImage(
                 resolve(dataUrl);
             };
 
-            img.onerror = () => reject(new Error('Nie udało się załadować obrazka'));
+            img.onerror = () => reject(new Error('Failed to load image'));
             img.src = event.target?.result as string;
         };
 
-        reader.onerror = () => reject(new Error('Nie udało się odczytać pliku'));
+        reader.onerror = () => reject(new Error('Failed to read file'));
         reader.readAsDataURL(file);
     });
 }

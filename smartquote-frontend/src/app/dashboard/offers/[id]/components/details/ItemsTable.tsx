@@ -2,6 +2,7 @@
 'use client';
 
 import { formatCurrency } from '@/lib/utils';
+import { useTranslations } from '@/i18n';
 import type { OfferItem } from '@/types';
 
 interface ItemsTableProps {
@@ -9,16 +10,17 @@ interface ItemsTableProps {
 }
 
 export function ItemsTable({ items }: ItemsTableProps) {
+    const tr = useTranslations('offerDetail');
     return (
         <div className="overflow-x-auto">
             <table className="w-full">
                 <thead>
                 <tr className="border-b border-border">
-                    <th className="pb-3 text-left text-xs font-semibold text-muted-foreground uppercase">Pozycja</th>
-                    <th className="pb-3 text-right text-xs font-semibold text-muted-foreground uppercase">Ilość</th>
-                    <th className="pb-3 text-right text-xs font-semibold text-muted-foreground uppercase">Cena</th>
-                    <th className="pb-3 text-right text-xs font-semibold text-muted-foreground uppercase">VAT</th>
-                    <th className="pb-3 text-right text-xs font-semibold text-muted-foreground uppercase">Wartość</th>
+                    <th className="pb-3 text-left text-xs font-semibold text-muted-foreground uppercase">{tr.items.name}</th>
+                    <th className="pb-3 text-right text-xs font-semibold text-muted-foreground uppercase">{tr.items.qty}</th>
+                    <th className="pb-3 text-right text-xs font-semibold text-muted-foreground uppercase">{tr.items.price}</th>
+                    <th className="pb-3 text-right text-xs font-semibold text-muted-foreground uppercase">{tr.items.vat}</th>
+                    <th className="pb-3 text-right text-xs font-semibold text-muted-foreground uppercase">{tr.items.value}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -29,7 +31,7 @@ export function ItemsTable({ items }: ItemsTableProps) {
                                 <p className="font-medium text-foreground">{item.name}</p>
                                 {item.isOptional && (
                                     <span className="text-xs px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
-                      Opcjonalna
+                      {tr.items.optional}
                     </span>
                                 )}
                             </div>

@@ -83,7 +83,7 @@ export default function NewClientPage() {
             };
 
             await clientsApi.create(cleanData);
-            toast.success(t.toasts.addedTitle, `"${formData.name}" został dodany do bazy`);
+            toast.success(t.toasts.addedTitle, t.toasts.addedDesc.replace('{name}', formData.name));
             router.push('/dashboard/clients');
         } catch {
             toast.error(t.toasts.error, t.toasts.addError);
@@ -192,7 +192,7 @@ export default function NewClientPage() {
                                 name="address"
                                 value={formData.address || ''}
                                 onChange={handleChange}
-                                placeholder="ul. Przykładowa 123"
+                                placeholder="e.g. 123 Main St"
                             />
                         </div>
                         <Input

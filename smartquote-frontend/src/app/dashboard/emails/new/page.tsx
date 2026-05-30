@@ -172,7 +172,7 @@ function EmailComposerContent() {
                     </div>
                     {errorMessage.includes('SMTP') && (
                         <Link href="/dashboard/settings" className="inline-block mt-2 text-xs underline text-status-rejected">
-                            Przejdź do ustawień SMTP →
+                            {composerTr.smtpLink}
                         </Link>
                     )}
                 </div>
@@ -181,7 +181,7 @@ function EmailComposerContent() {
             <div className="space-y-5">
                 <SectionCard title={composerTr.templateSection} accent="#7dd3fc">
                     <StyledSelect value={selectedTemplateId} onChange={handleTemplateSelect} disabled={isLoadingData}>
-                        <option value="">— Własna wiadomość —</option>
+                        <option value="">{composerTr.templateOwn}</option>
                         <optgroup label={composerTr.templateBuiltIn}>
                             {BUILT_IN_TEMPLATES.map(t => (
                                 <option key={t.id} value={t.id}>{t.name}</option>
@@ -400,7 +400,7 @@ function EmailComposerContent() {
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                             </svg>
                         )}
-                        Wyślij wiadomość
+                        {composerTr.send}
                     </button>
                 </div>
             </div>

@@ -214,7 +214,7 @@ export default function EmailDetailPage({ params }: PageProps) {
                 {log.attachments && log.attachments.length > 0 && (
                     <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                         <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                            Załączniki ({log.attachments.length})
+                            {tr.attachmentsSection} ({log.attachments.length})
                         </h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             {log.attachments.map((att, i) => (

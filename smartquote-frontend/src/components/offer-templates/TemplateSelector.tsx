@@ -166,13 +166,8 @@ export default function TemplateSelector({ isOpen, onClose, onSelect }: Template
                                                 </p>
                                             )}
                                             <p className="text-xs text-muted-foreground mt-1">
-                                                {template.items.length}{' '}
-                                                {template.items.length === 1
-                                                    ? 'pozycja'
-                                                    : template.items.length < 5
-                                                        ? 'pozycje'
-                                                        : 'pozycji'}{' '}
-                                                · {template.defaultPaymentDays} dni płatności
+                                                {tr.items.replace('{n}', String(template.items.length))}{' '}
+                                                · {tr.paymentDays.replace('{n}', String(template.defaultPaymentDays))}
                                             </p>
                                         </div>
                                         {isSelected && (

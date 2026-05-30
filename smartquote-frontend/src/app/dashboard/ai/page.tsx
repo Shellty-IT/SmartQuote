@@ -69,7 +69,7 @@ export default function AIAssistantPage() {
                         </div>
                         <div>
                             <h1 className="text-lg font-semibold text-foreground">SmartQuote AI</h1>
-                            <p className="text-xs text-muted-foreground">Twój inteligentny asystent sprzedaży</p>
+                            <p className="text-xs text-muted-foreground">{tr.subtitle}</p>
                         </div>
                     </div>
                     {messages.length > 0 && (
@@ -86,7 +86,7 @@ export default function AIAssistantPage() {
                                 e.currentTarget.style.color = 'var(--muted-foreground)';
                             }}
                         >
-                            🗑️ Wyczyść
+                            🗑️ {tr.clear}
                         </button>
                     )}
                 </div>
@@ -101,7 +101,7 @@ export default function AIAssistantPage() {
                                 <span className="text-4xl">✨</span>
                             </div>
                             <h2 className="text-xl font-semibold text-foreground mb-2">
-                                Witaj w SmartQuote AI!
+                                {tr.welcome}
                             </h2>
                             <p className="text-muted-foreground max-w-md mb-8">
                                 {tr.welcomeDesc}
@@ -193,7 +193,7 @@ export default function AIAssistantPage() {
                                 style={{ backgroundColor: 'var(--surface-subtle)' }}
                             >
                                 <div className="text-2xl font-bold text-amber-500">{stats.pendingFollowUps}</div>
-                                <div className="text-xs text-muted-foreground">Zaległe zadania</div>
+                                <div className="text-xs text-muted-foreground">{tr.stats.overdueFollowups}</div>
                             </div>
                             <div
                                 className="text-center p-3 rounded-xl"
@@ -202,7 +202,7 @@ export default function AIAssistantPage() {
                                 <div className="text-xl font-bold text-violet-500">
                                     {(stats.monthlyRevenue / 1000).toFixed(0)}k
                                 </div>
-                                <div className="text-xs text-muted-foreground">Przychód (mies.)</div>
+                                <div className="text-xs text-muted-foreground">{tr.stats.monthlyRevenue}</div>
                             </div>
                         </div>
                     </div>
@@ -213,7 +213,7 @@ export default function AIAssistantPage() {
                         className="rounded-2xl border p-4 flex-1 overflow-y-auto"
                         style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
                     >
-                        <h3 className="font-semibold text-foreground mb-4">Inteligentne sugestie</h3>
+                        <h3 className="font-semibold text-foreground mb-4">{tr.suggestions.title}</h3>
                         <div className="space-y-3">
                             {suggestions.map((suggestion, index) => (
                                 <SuggestionCard
@@ -230,7 +230,7 @@ export default function AIAssistantPage() {
                     className="rounded-2xl border p-4"
                     style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
                 >
-                    <h3 className="font-semibold text-foreground mb-3">Wskazówki</h3>
+                    <h3 className="font-semibold text-foreground mb-3">{tr.suggestions.tips}</h3>
                     <ul className="text-xs text-muted-foreground space-y-2.5">
                         <li className="flex items-start gap-2">
                             <span className="flex-shrink-0">💡</span>
@@ -238,15 +238,15 @@ export default function AIAssistantPage() {
                         </li>
                         <li className="flex items-start gap-2">
                             <span className="flex-shrink-0">📧</span>
-                            <span>Poproś o email — dobiorę ton i treść</span>
+                            <span>{tr.suggestions.writeEmail}</span>
                         </li>
                         <li className="flex items-start gap-2">
                             <span className="flex-shrink-0">📊</span>
-                            <span>Zapytaj o statystyki i analizy</span>
+                            <span>{tr.suggestions.analyzeStats}</span>
                         </li>
                         <li className="flex items-start gap-2">
                             <span className="flex-shrink-0">🎯</span>
-                            <span>Poproś o sugestie follow-upów</span>
+                            <span>{tr.suggestions.followupSuggestions}</span>
                         </li>
                     </ul>
                 </div>

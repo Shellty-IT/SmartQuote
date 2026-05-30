@@ -81,7 +81,7 @@ function NewContractForm() {
             });
 
             if (response.success && response.data) {
-                toast.success(t.toasts.created, `"${formData.title}" została zapisana`);
+                toast.success(t.toasts.created, t.toasts.createdDesc.replace('{name}', formData.title));
                 router.push(`/dashboard/contracts/${response.data.id}`);
             } else {
                 toast.error(t.toasts.error, t.toasts.createError);

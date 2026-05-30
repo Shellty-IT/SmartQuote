@@ -231,7 +231,7 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
 
                 <div className="space-y-6">
                     <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                        <h2 className="text-lg font-semibold text-foreground mb-4">Szczegóły</h2>
+                        <h2 className="text-lg font-semibold text-foreground mb-4">{tr.detailsSection}</h2>
                         <div className="space-y-4">
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">{followupsNewTr.dueDateLabel}</span>
@@ -240,42 +240,42 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                 </span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">Typ</span>
+                                <span className="text-muted-foreground">{tr.typeLabel}</span>
                                 <span className="text-foreground">{typeIcon} {typeLabel}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">Priorytet</span>
+                                <span className="text-muted-foreground">{tr.priorityLabel}</span>
                                 <Badge className={`${priority.bgColor} ${priority.color}`}>
                                     {priorityLabel}
                                 </Badge>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">Status</span>
+                                <span className="text-muted-foreground">{tr.statusLabel}</span>
                                 <Badge className={`${status.bgColor} ${status.color}`}>
                                     {statusLabel}
                                 </Badge>
                             </div>
                             {followUp.completedAt && (
                                 <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Wykonano</span>
+                                    <span className="text-muted-foreground">{tr.completedAtLabel}</span>
                                     <span className="text-foreground">{formatDate(followUp.completedAt)}</span>
                                 </div>
                             )}
                             <div className="pt-4 border-t border-border">
                                 <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Utworzono</span>
+                                    <span className="text-muted-foreground">{tr.createdAtLabel}</span>
                                     <span className="text-foreground">{formatDate(followUp.createdAt)}</span>
                                 </div>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">Ostatnia aktualizacja</span>
+                                <span className="text-muted-foreground">{tr.updatedAtLabel}</span>
                                 <span className="text-foreground">{formatDate(followUp.updatedAt)}</span>
                             </div>
                         </div>
                     </div>
 
                     <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                        <h2 className="text-lg font-semibold text-foreground mb-4">Szybkie akcje</h2>
+                        <h2 className="text-lg font-semibold text-foreground mb-4">{tr.quickActions}</h2>
                         <div className="space-y-2">
                             {followUp.status === 'PENDING' && (
                                 <Button
@@ -316,7 +316,7 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                 onClose={() => setDeleteModal(false)}
                 onConfirm={handleDelete}
                 title={tr.delete.title}
-                description={`Czy na pewno chcesz usunąć follow-up "${followUp.title}"? Ta operacja jest nieodwracalna.`}
+                description={tr.delete.description.replace('{title}', followUp.title)}
                 confirmLabel={commonTr.delete}
                 isLoading={isDeleting}
             />

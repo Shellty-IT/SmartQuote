@@ -338,7 +338,7 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                             </svg>
                         )}
-                        Wyślij wiadomość
+                        {tr.send}
                     </button>
                 </div>
             </div>

@@ -282,7 +282,7 @@ export default function OfferTemplatesPage() {
                                 <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3">
                                     <span>{template.items.length} pozycji</span>
                                     <span>·</span>
-                                    <span>{tr.paymentDays.replace("{n}", String(template.defaultPaymentDays))} płatności</span>
+                                    <span>{tr.itemsDays.replace("{n}", String(template.defaultPaymentDays))}</span>
                                 </div>
                                 <div className="flex gap-2">
                                     <Button

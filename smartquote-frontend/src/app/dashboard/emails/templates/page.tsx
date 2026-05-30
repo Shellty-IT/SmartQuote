@@ -85,7 +85,7 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
                 />
                 {errors.body && <p className="mt-1 text-xs text-status-rejected">{errors.body}</p>}
                 <p className="mt-1 text-xs text-muted-foreground">
-                    Możesz używać zmiennych: <code className="bg-secondary px-1 rounded">{'{clientName}'}</code>, <code className="bg-secondary px-1 rounded">{'{offerNumber}'}</code>, <code className="bg-secondary px-1 rounded">{'{contractNumber}'}</code>
+                    {tr.formVariablesHint} <code className="bg-secondary px-1 rounded">{'{clientName}'}</code>, <code className="bg-secondary px-1 rounded">{'{offerNumber}'}</code>, <code className="bg-secondary px-1 rounded">{'{contractNumber}'}</code>
                 </p>
             </div>
             <div className="flex justify-end gap-3 pt-2">
