@@ -43,6 +43,7 @@ generated/
 .next/
 next-env.d.ts
 *.tsbuildinfo
+.swc/
 
 # ---- Testing ----
 coverage/
@@ -54,6 +55,10 @@ test-results/
 .env
 .env.*
 !.env.example
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # ---- Logs ----
 logs/
