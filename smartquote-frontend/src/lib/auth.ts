@@ -11,11 +11,11 @@ export const authOptions: NextAuthOptions = {
             name: 'Credentials',
             credentials: {
                 email: { label: 'Email', type: 'email' },
-                password: { label: 'Hasło', type: 'password' },
+                password: { label: 'Password', type: 'password' },
             },
             async authorize(credentials) {
                 if (!credentials?.email || !credentials?.password) {
-                    throw new Error('Wprowadź email i hasło');
+                    throw new Error('Enter email and password');
                 }
 
                 try {
@@ -45,7 +45,7 @@ export const authOptions: NextAuthOptions = {
                         accessToken: data.data.token,
                     };
                 } catch (error) {
-                    const message = error instanceof Error ? error.message : 'Nieprawidłowy email lub hasło';
+                    const message = error instanceof Error ? error.message : 'Invalid email or password';
                     throw new Error(message);
                 }
             },

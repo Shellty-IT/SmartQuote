@@ -8,7 +8,7 @@ import { contractsApi } from '@/lib/api';
 import { Button, ConfirmDialog } from '@/components/ui';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
-import { formatCurrency, formatDate, getContractStatusConfig } from '@/lib/utils';
+import { formatCurrency, formatDate } from '@/lib/utils';
 import { useToast } from '@/contexts/ToastContext';
 import type { ContractStatus } from '@/types';
 import { useTranslations } from '@/i18n';
@@ -103,6 +103,7 @@ export default function ContractDetailsPage({ params }: PageProps) {
     const { id } = use(params);
     const toast = useToast();
     const t = useTranslations('contractDetailPage');
+    const statusTr = useTranslations('statuses');
     const { contract, loading, error, refetch } = useContract(id);
     const [statusConfirm, setStatusConfirm] = useState<{ next: ContractStatus; label: string; description: string } | null>(null);
     const [isChangingStatus, setIsChangingStatus] = useState(false);
@@ -131,8 +132,7 @@ export default function ContractDetailsPage({ params }: PageProps) {
         setIsChangingStatus(true);
         try {
             await contractsApi.updateStatus(contract.id, statusConfirm.next);
-            const newStatusConfig = getContractStatusConfig(statusConfirm.next);
-            toast.success(t.toasts.statusChanged, `Umowa: ${newStatusConfig.label}`);
+            toast.success(t.toasts.statusChanged, (statusTr as Record<string, string>)[statusConfirm.next] ?? statusConfirm.next);
             setStatusConfirm(null);
             await refetch();
         } catch {

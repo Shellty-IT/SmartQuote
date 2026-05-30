@@ -67,7 +67,7 @@ export function useClients(initialFilters: ClientFilters = {}): UseClientsResult
         const response = await clientsApi.create(data);
         await fetchClients();
         if (!response.data) {
-            throw new Error('Nie udało się utworzyć klienta');
+            throw new Error('Failed to create client');
         }
         return response.data;
     }, [fetchClients]);
@@ -76,7 +76,7 @@ export function useClients(initialFilters: ClientFilters = {}): UseClientsResult
         const response = await clientsApi.update(id, data);
         await fetchClients();
         if (!response.data) {
-            throw new Error('Nie udało się zaktualizować klienta');
+            throw new Error('Failed to update client');
         }
         return response.data;
     }, [fetchClients]);

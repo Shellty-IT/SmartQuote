@@ -49,7 +49,7 @@ export function useContracts(params: UseContractsParams = {}) {
                 }
             }
         } catch {
-            setError('Nie udało się pobrać umów');
+            setError('Failed to load contracts');
         } finally {
             setLoading(false);
         }
@@ -128,7 +128,7 @@ export function useContract(id: string) {
                 setContract(response.data);
             }
         } catch {
-            setError('Nie udało się pobrać umowy');
+            setError('Failed to load contract');
         } finally {
             setLoading(false);
         }
@@ -155,7 +155,7 @@ export function useContractsStats() {
                     setStats(response.data);
                 }
             } catch {
-                setError('Nie udało się pobrać statystyk');
+                setError('Failed to load stats');
             } finally {
                 setLoading(false);
             }

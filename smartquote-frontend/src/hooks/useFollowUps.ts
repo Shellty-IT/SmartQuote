@@ -171,7 +171,7 @@ export function useFollowUpStats() {
             if (response.success) {
                 setStats(response.data ?? null);
             } else {
-                setError(response.error?.message || 'Błąd pobierania statystyk');
+                setError(response.error?.message || 'Failed to load stats');
             }
         } catch (err) {
             if (err instanceof Error) {

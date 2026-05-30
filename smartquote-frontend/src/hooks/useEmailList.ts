@@ -68,7 +68,7 @@ export function useEmailList() {
             setDeleteConfirmId(null);
             await load();
         } catch {
-            setError('Nie udało się usunąć wiadomości');
+            setError('Failed to delete message');
         } finally {
             setIsDeleting(false);
         }

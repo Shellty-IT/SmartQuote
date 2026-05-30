@@ -24,7 +24,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
     title: 'SmartQuote AI',
-    description: 'Inteligentny system CRM z asystentem AI do zarządzania sprzedażą',
+    description: 'Intelligent CRM system with AI assistant for sales management',
     manifest: '/site.webmanifest',
     appleWebApp: {
         capable: true,

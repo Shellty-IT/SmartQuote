@@ -63,7 +63,7 @@ export function useEmailComposer(draftId?: string) {
                 if (contractsRes.data) setContracts(contractsRes.data);
                 if (templatesRes.data) setUserTemplates(templatesRes.data);
             } catch {
-                setErrorMessage('Nie udało się załadować danych');
+                setErrorMessage('Failed to load data');
             } finally {
                 setIsLoadingData(false);
             }
@@ -82,14 +82,14 @@ export function useEmailComposer(draftId?: string) {
             setOfferId(preOfferId);
             const offer = offers.find(o => o.id === preOfferId);
             if (offer) {
-                setSubject(`Oferta handlowa — ${offer.number}`);
+                setSubject(`Commercial offer — ${offer.number}`);
                 setAttachments(prev => {
                     const hasPdf = prev.some(a => a.type === 'offer_pdf' && a.resourceId === preOfferId);
                     if (!hasPdf) {
                         return [...prev, {
                             type: 'offer_pdf' as const,
                             resourceId: preOfferId,
-                            name: `Oferta ${offer.number}.pdf`,
+                            name: `Offer ${offer.number}.pdf`,
                         }];
                     }
                     return prev;
@@ -115,14 +115,14 @@ export function useEmailComposer(draftId?: string) {
             setContractId(preContractId);
             const contract = contracts.find(c => c.id === preContractId);
             if (contract) {
-                setSubject(`Umowa — ${contract.number}`);
+                setSubject(`Contract — ${contract.number}`);
                 setAttachments(prev => {
                     const hasPdf = prev.some(a => a.type === 'contract_pdf' && a.resourceId === preContractId);
                     if (!hasPdf) {
                         return [...prev, {
                             type: 'contract_pdf' as const,
                             resourceId: preContractId,
-                            name: `Umowa ${contract.number}.pdf`,
+                            name: `Contract ${contract.number}.pdf`,
                         }];
                     }
                     return prev;
@@ -148,7 +148,7 @@ export function useEmailComposer(draftId?: string) {
                 setAttachments(draft.attachments ?? []);
                 setSelectedTemplateId(draft.templateId ?? '');
             } catch {
-                setErrorMessage('Nie udało się załadować szkicu');
+                setErrorMessage('Failed to load draft');
             }
         };
         load();
@@ -183,7 +183,7 @@ export function useEmailComposer(draftId?: string) {
             return [...filtered, {
                 type: 'offer_pdf' as const,
                 resourceId: id,
-                name: `Oferta ${offer.number}.pdf`,
+                name: `Offer ${offer.number}.pdf`,
             }];
         });
     }, [offers, clientId]);
@@ -202,7 +202,7 @@ export function useEmailComposer(draftId?: string) {
             return [...filtered, {
                 type: 'contract_pdf' as const,
                 resourceId: id,
-                name: `Umowa ${contract.number}.pdf`,
+                name: `Contract ${contract.number}.pdf`,
             }];
         });
     }, [contracts]);
@@ -244,12 +244,12 @@ export function useEmailComposer(draftId?: string) {
     const validate = useCallback((): boolean => {
         const newErrors: ComposerErrors = {};
         if (!to.trim()) {
-            newErrors.to = 'Adres email odbiorcy jest wymagany';
+            newErrors.to = 'Recipient email is required';
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to.trim())) {
-            newErrors.to = 'Nieprawidłowy adres email';
+            newErrors.to = 'Invalid email address';
         }
-        if (!subject.trim()) newErrors.subject = 'Temat jest wymagany';
-        if (!body.trim()) newErrors.body = 'Treść wiadomości jest wymagana';
+        if (!subject.trim()) newErrors.subject = 'Subject is required';
+        if (!body.trim()) newErrors.body = 'Message body is required';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     }, [to, subject, body]);
@@ -282,11 +282,11 @@ export function useEmailComposer(draftId?: string) {
             if (!res.data) throw new Error('No response from server');
 
             if (res.data.status === 'FAILED') {
-                setErrorMessage('Wiadomość nie została wysłana. Sprawdź konfigurację SMTP w ustawieniach.');
+                setErrorMessage('Message was not sent. Check your SMTP configuration in settings.');
                 return;
             }
 
-            setSuccessMessage('Wiadomość została wysłana pomyślnie!');
+            setSuccessMessage('Message sent successfully!');
             setTimeout(() => router.push('/dashboard/emails'), 1500);
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : 'Send error';
@@ -302,7 +302,7 @@ export function useEmailComposer(draftId?: string) {
 
     const handleSaveDraft = useCallback(async () => {
         if (!to.trim() && !subject.trim() && !body.trim()) {
-            setErrorMessage('Wypełnij przynajmniej jedno pole aby zapisać szkic');
+            setErrorMessage('Fill in at least one field to save as draft');
             return;
         }
         setIsSavingDraft(true);
@@ -322,7 +322,7 @@ export function useEmailComposer(draftId?: string) {
             } else {
                 await emailsApi.send(buildPayload(true));
             }
-            setSuccessMessage('Szkic zapisany');
+            setSuccessMessage('Draft saved');
             setTimeout(() => router.push('/dashboard/emails'), 1200);
         } catch (err: unknown) {
             setErrorMessage(err instanceof Error ? err.message : 'Failed to save draft');

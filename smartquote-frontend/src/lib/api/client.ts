@@ -98,7 +98,7 @@ class ApiClient {
 
         if (!response.ok) {
             throw new ApiError(
-                data.error?.message || 'Wystąpił błąd',
+                data.error?.message || 'An error occurred',
                 data.error?.code || 'UNKNOWN_ERROR',
                 response.status,
                 data.error?.details
@@ -124,7 +124,7 @@ class ApiClient {
 
         if (!response.ok) {
             throw new ApiError(
-                data.error?.message || 'Wystąpił błąd',
+                data.error?.message || 'An error occurred',
                 data.error?.code || 'UNKNOWN_ERROR',
                 response.status,
                 data.error?.details
@@ -175,7 +175,7 @@ class ApiClient {
         const response = await fetch(url, { headers });
 
         if (!response.ok) {
-            throw new ApiError('Nie udało się pobrać pliku', 'DOWNLOAD_ERROR', response.status);
+            throw new ApiError('Failed to download file', 'DOWNLOAD_ERROR', response.status);
         }
 
         return response.blob();
@@ -201,7 +201,7 @@ class ApiClient {
 
         if (!response.ok) {
             throw new ApiError(
-                data.error?.message || 'Wystąpił błąd',
+                data.error?.message || 'An error occurred',
                 data.error?.code || 'UPLOAD_ERROR',
                 response.status,
                 data.error?.details

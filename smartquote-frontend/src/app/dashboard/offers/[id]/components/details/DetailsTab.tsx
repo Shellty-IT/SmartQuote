@@ -102,12 +102,12 @@ export function DetailsTab({
                                     <span className="font-medium text-foreground">{formatCurrency(Number(offer.totalVat))}</span>
                                 </div>
                                 <div className="flex justify-between text-lg pt-2 border-t border-border">
-                                    <span className="font-semibold text-foreground">Suma brutto:</span>
+                                    <span className="font-semibold text-foreground">{detailsTr.total}</span>
                                     <span className="font-bold text-primary">{formatCurrency(Number(offer.totalGross))}</span>
                                 </div>
                                 {variantData.variantNames.length > 0 && (
                                     <p className="text-xs text-muted-foreground text-right">
-                                        * wspólne + pierwszy wariant
+                                        * {detailsTr.sharedPlusFirst}
                                     </p>
                                 )}
                             </div>
@@ -117,7 +117,7 @@ export function DetailsTab({
 
                 {offer.terms && (
                     <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                        <h2 className="text-lg font-semibold text-foreground mb-3">Warunki płatności</h2>
+                        <h2 className="text-lg font-semibold text-foreground mb-3">{detailsTr.paymentTerms}</h2>
                         <p className="text-foreground whitespace-pre-wrap">{offer.terms}</p>
                     </div>
                 )}

@@ -44,7 +44,7 @@ export const defaultOfferDetails: OfferDetails = {
     description: '',
     validUntil: '',
     notes: '',
-    terms: 'Płatność przelewem w ciągu 14 dni od wystawienia faktury.',
+    terms: 'Payment by bank transfer within 14 days of invoice issuance.',
     paymentDays: 14,
     requireAuditTrail: false,
 };

@@ -68,7 +68,7 @@ export function useSidebarStats() {
                 followups: followupsCount,
             });
         } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Błąd pobierania statystyk';
+            const message = err instanceof ApiError ? err.message : 'Failed to load stats';
             setError(message);
         } finally {
             setIsLoading(false);

@@ -1,6 +1,7 @@
 // src/components/ai/ChatInput.tsx
 import React, { useRef, useEffect } from 'react';
 import Button from '@/components/ui/Button';
+import { useTranslations } from '@/i18n';
 
 interface ChatInputProps {
     value: string;
@@ -11,6 +12,7 @@ interface ChatInputProps {
 }
 
 export function ChatInput({ value, onChange, onSend, isLoading, isVisible }: ChatInputProps) {
+    const tr = useTranslations('aiChat');
     const inputRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
@@ -34,7 +36,7 @@ export function ChatInput({ value, onChange, onSend, isLoading, isVisible }: Cha
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Napisz wiadomość..."
+                    placeholder={tr.inputPlaceholder}
                     rows={1}
                     className="flex-1 resize-none rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30 border-border bg-card text-foreground"
                     style={{ maxHeight: '120px' }}

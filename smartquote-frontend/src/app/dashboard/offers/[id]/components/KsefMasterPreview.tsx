@@ -39,7 +39,7 @@ export function KsefMasterPreview({ isOpen, onClose, offerId, onSent }: KsefMast
             setIssueDate(data.suggestedIssueDate);
             setDueDate(data.suggestedDueDate);
         } catch (err) {
-            setPreviewError(err instanceof Error ? err.message : 'Nie udało się pobrać danych');
+            setPreviewError(err instanceof Error ? err.message : 'Failed to load data');
         } finally {
             setIsLoadingPreview(false);
         }
@@ -79,7 +79,7 @@ export function KsefMasterPreview({ isOpen, onClose, offerId, onSent }: KsefMast
             onSent();
             onClose();
         } catch (err) {
-            const message = err instanceof Error ? err.message : 'Nie udało się przesłać danych';
+            const message = err instanceof Error ? err.message : 'Failed to submit data';
             toast.error(commonTr.errorTitle, message);
         } finally {
             setIsSending(false);

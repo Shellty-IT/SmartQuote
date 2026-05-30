@@ -17,6 +17,7 @@ export default function Header() {
     const { theme, toggle } = useTheme();
     const { count: unreadCount } = useUnreadCount();
     const commonTr = useTranslations('common');
+    const settingsTr = useTranslations('settings');
     const [avatar, setAvatar] = useState<string | null>(null);
     const [searchOpen, setSearchOpen] = useState(false);
 
@@ -30,7 +31,7 @@ export default function Header() {
         return () => { cancelled = true; };
     }, []);
 
-    const displayName = session?.user?.name || 'Użytkownik';
+    const displayName = session?.user?.name || settingsTr.profile.userFallback;
     const email = session?.user?.email || '';
     const initials = getInitials(displayName);
 

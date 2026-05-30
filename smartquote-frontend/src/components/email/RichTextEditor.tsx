@@ -47,7 +47,7 @@ function ToolbarButton({ onClick, isActive, disabled, title, children }: Toolbar
 export default function RichTextEditor({
                                            value,
                                            onChange,
-                                           placeholder = 'Wpisz treść wiadomości...',
+                                           placeholder = 'Write your message...',
                                            minHeight = 280,
                                        }: RichTextEditorProps) {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -138,11 +138,11 @@ export default function RichTextEditor({
                 <ToolbarButton onClick={() => editor.chain().focus().toggleItalic().run()} isActive={editor.isActive('italic')} title="Kursywa (Ctrl+I)">
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4v3h2.21l-3.42 8H6v3h8v-3h-2.21l3.42-8H18V4z"/></svg>
                 </ToolbarButton>
-                <ToolbarButton onClick={() => editor.chain().focus().toggleUnderline().run()} isActive={editor.isActive('underline')} title="Podkreślenie (Ctrl+U)">
+                <ToolbarButton onClick={() => editor.chain().focus().toggleUnderline().run()} isActive={editor.isActive('underline')} title="Underline (Ctrl+U)">
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17c3.31 0 6-2.69 6-6V3h-2.5v8c0 1.93-1.57 3.5-3.5 3.5S8.5 12.93 8.5 11V3H6v8c0 3.31 2.69 6 6 6zm-7 2v2h14v-2H5z"/></svg>
                 </ToolbarButton>
                 <div className="w-px h-5 bg-secondary dark:bg-secondary mx-1" />
-                <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} isActive={editor.isActive('heading', { level: 2 })} title="Nagłówek">
+                <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} isActive={editor.isActive('heading', { level: 2 })} title="Heading">
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4v3h5.5v12h3V7H19V4z"/></svg>
                 </ToolbarButton>
                 <div className="w-px h-5 bg-secondary dark:bg-secondary mx-1" />
@@ -157,7 +157,7 @@ export default function RichTextEditor({
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
                 </ToolbarButton>
                 <div className="w-px h-5 bg-secondary dark:bg-secondary mx-1" />
-                <ToolbarButton onClick={() => editor.chain().focus().clearNodes().unsetAllMarks().run()} title="Wyczyść formatowanie">
+                <ToolbarButton onClick={() => editor.chain().focus().clearNodes().unsetAllMarks().run()} title="Clear formatting">
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M6 13.5V21h2v-3h2.31l5.19 3H18l-5.41-3.13A4.997 4.997 0 0015 13c0-2.76-2.24-5-5-5H6v1.5l-3-3 3-3V5h10v2h2V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v3.5l-2 2 2 2V13.5zm2-3.5h2c1.65 0 3 1.35 3 3s-1.35 3-3 3H8v-6z"/></svg>
                 </ToolbarButton>
             </div>
@@ -170,7 +170,7 @@ export default function RichTextEditor({
                 <EditorContent editor={editor} />
             </div>
 
-            <div className="rich-editor-resize" onMouseDown={handleResizeMouseDown} title="Przeciągnij, aby zmienić rozmiar">
+            <div className="rich-editor-resize" onMouseDown={handleResizeMouseDown} title="Drag to resize">
                 <svg className="w-4 h-3 text-muted-foreground dark:text-muted-foreground" viewBox="0 0 16 10" fill="currentColor">
                     <rect x="0" y="1" width="16" height="1.5" rx="0.75" />
                     <rect x="0" y="4.25" width="16" height="1.5" rx="0.75" />

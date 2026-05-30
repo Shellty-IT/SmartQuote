@@ -133,10 +133,10 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    Powrót
+                    {tr.back}
                 </button>
                 <h1 className="text-3xl font-bold tracking-tight">{commonTr.edit}</h1>
-                <p className="text-muted-foreground mt-1">Modyfikuj szczegóły zadania</p>
+                <p className="text-muted-foreground mt-1">{tr.editSubtitle}</p>
             </div>
 
             {error && (
@@ -147,7 +147,7 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
 
             <form onSubmit={handleSubmit}>
                 <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
-                    <h2 className="text-lg font-semibold text-foreground mb-4">Podstawowe informacje</h2>
+                    <h2 className="text-lg font-semibold text-foreground mb-4">{tr.basicInfo}</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="md:col-span-2">
                             <Input
@@ -161,40 +161,40 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
                             />
                         </div>
                         <Select
-                            label="Typ"
+                            label={tr.typeLabel}
                             name="type"
                             value={formData.type || ''}
                             onChange={handleChange}
                             options={[
-                                { value: 'CALL', label: '📞 Telefon' },
-                                { value: 'EMAIL', label: '✉️ Email' },
-                                { value: 'MEETING', label: '🤝 Spotkanie' },
-                                { value: 'TASK', label: '✅ Zadanie' },
-                                { value: 'REMINDER', label: '🔔 Przypomnienie' },
-                                { value: 'OTHER', label: '📌 Inne' },
+                                { value: 'CALL', label: tr.types.CALL },
+                                { value: 'EMAIL', label: tr.types.EMAIL },
+                                { value: 'MEETING', label: tr.types.MEETING },
+                                { value: 'TASK', label: tr.types.TASK },
+                                { value: 'REMINDER', label: tr.types.REMINDER },
+                                { value: 'OTHER', label: tr.types.OTHER },
                             ]}
                         />
                         <Select
-                            label="Status"
+                            label={followupsTr.statusLabel}
                             name="status"
                             value={formData.status || ''}
                             onChange={handleChange}
                             options={[
-                                { value: 'PENDING', label: 'Oczekujące' },
-                                { value: 'COMPLETED', label: 'Wykonane' },
+                                { value: 'PENDING', label: followupsTr.statuses.PENDING },
+                                { value: 'COMPLETED', label: followupsTr.statuses.COMPLETED },
                                 { value: 'CANCELLED', label: followupsTr.statuses.CANCELLED },
                             ]}
                         />
                         <Select
-                            label="Priorytet"
+                            label={tr.priorityLabel}
                             name="priority"
                             value={formData.priority || ''}
                             onChange={handleChange}
                             options={[
-                                { value: 'LOW', label: 'Niski' },
-                                { value: 'MEDIUM', label: 'Średni' },
-                                { value: 'HIGH', label: 'Wysoki' },
-                                { value: 'URGENT', label: 'Pilne' },
+                                { value: 'LOW', label: followupsTr.priorities.LOW },
+                                { value: 'MEDIUM', label: followupsTr.priorities.MEDIUM },
+                                { value: 'HIGH', label: followupsTr.priorities.HIGH },
+                                { value: 'URGENT', label: followupsTr.priorities.URGENT },
                             ]}
                         />
                         <Input
@@ -210,12 +210,12 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
                 </div>
 
                 <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
-                    <h2 className="text-lg font-semibold text-foreground mb-4">Opis</h2>
+                    <h2 className="text-lg font-semibold text-foreground mb-4">{tr.descSection}</h2>
                     <Textarea
                         name="description"
                         value={formData.description || ''}
                         onChange={handleChange}
-                        placeholder="Szczegółowy opis zadania..."
+                        placeholder={tr.descPlaceholder}
                         rows={3}
                     />
                 </div>
