@@ -1,15 +1,12 @@
 // src/components/publicOffer/OfferTerms.tsx
 'use client';
 
-import { useTranslations } from '@/i18n';
-
 interface OfferTermsProps {
     terms: string;
     paymentDays?: number;
 }
 
 export default function OfferTerms({ terms, paymentDays }: OfferTermsProps) {
-    const termsTr = useTranslations('offerDetail');
     if (!terms) return null;
 
     return (
@@ -24,7 +21,7 @@ export default function OfferTerms({ terms, paymentDays }: OfferTermsProps) {
 
             {paymentDays && paymentDays > 0 && (
                 <p className="text-sm text-slate-500 mt-3">
-                    {termsTr.details.paymentDays}{' '}
+                    Termin płatności:{' '}
                     <span className="font-medium text-slate-700">
                         {paymentDays} dni
                     </span>
