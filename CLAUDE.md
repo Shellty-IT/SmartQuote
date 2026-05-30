@@ -217,7 +217,16 @@ NEXTAUTH_SECRET=...   # min 32 chars — generate: openssl rand -base64 32
 
 ## Pending
 
-<!-- Fill in manually -->
+### Fixes to implement
+
+- **English language in dark mode** — language toggle button text is invisible
+  (not readable) in dark theme after switching to English; fix contrast/color
+  of the language switcher button label in dark mode
+- **User avatar in top-right corner** — user profile picture should appear in
+  the top-right corner of the dashboard; company logo belongs on the invoice
+  PDF only (not in the app header)
+- **Login / auth pages in dark mode** — review and fix styling/contrast of the
+  login and registration pages in dark theme
 
 ## Git & Commit Rules
 
