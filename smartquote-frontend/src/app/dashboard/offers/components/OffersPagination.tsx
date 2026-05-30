@@ -2,6 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from '@/i18n';
 
 interface OffersPaginationProps {
     page: number;
@@ -41,14 +42,17 @@ function PageBtn({ active, disabled, onClick, children }: {
 }
 
 export function OffersDesktopPagination({ page, totalPages, total, onPageChange }: OffersPaginationProps) {
+    const tr = useTranslations('offers');
     if (totalPages <= 1) return null;
     const visible = getVisiblePages(page, totalPages);
     const perPage = 10;
+    const start = (page - 1) * perPage + 1;
+    const end = Math.min(page * perPage, total);
 
     return (
         <div className="flex items-center justify-between border-t border-border px-6 py-4">
             <p className="text-sm text-muted-foreground">
-                {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} z {total} ofert
+                {tr.paginationFull.replace('{start}', String(start)).replace('{end}', String(end)).replace('{total}', String(total))}
             </p>
             <div className="flex items-center gap-1">
                 <PageBtn disabled={page === 1} onClick={() => onPageChange(page - 1)}>
@@ -68,13 +72,16 @@ export function OffersDesktopPagination({ page, totalPages, total, onPageChange 
 }
 
 export function OffersMobilePagination({ page, totalPages, total, onPageChange }: OffersPaginationProps) {
+    const tr = useTranslations('offers');
     if (totalPages <= 1) return null;
     const perPage = 10;
+    const start = (page - 1) * perPage + 1;
+    const end = Math.min(page * perPage, total);
 
     return (
         <div className="flex items-center justify-between pt-3">
             <p className="text-xs text-muted-foreground">
-                {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} z {total}
+                {tr.paginationShort.replace('{start}', String(start)).replace('{end}', String(end)).replace('{total}', String(total))}
             </p>
             <div className="flex items-center gap-2">
                 <button

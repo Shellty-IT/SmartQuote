@@ -1,6 +1,8 @@
 // src/components/publicOffer/views/OfferExpiredView.tsx
 'use client';
 
+import { useTranslations } from '@/i18n';
+
 interface OfferExpiredViewProps {
     offerNumber: string;
     sellerEmail?: string;
@@ -12,6 +14,7 @@ export default function OfferExpiredView({
                                              sellerEmail,
                                              primaryColor,
                                          }: OfferExpiredViewProps) {
+    const tr = useTranslations('offerPublic');
     return (
         <div className="max-w-2xl mx-auto text-center py-16 px-4">
             <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-amber-100 flex items-center justify-center">
@@ -31,16 +34,15 @@ export default function OfferExpiredView({
             </div>
 
             <h1 className="text-3xl font-bold text-slate-900 mb-3">
-                Oferta wygasła
+                {tr.expiredTitle}
             </h1>
 
             <p className="text-lg text-slate-600 mb-2">
-                Termin ważności oferty{' '}
-                <span className="font-semibold">{offerNumber}</span> minął.
+                {tr.expiredDesc.replace('{number}', offerNumber)}
             </p>
 
             <p className="text-slate-500">
-                Skontaktuj się ze sprzedawcą, aby uzyskać aktualną ofertę.
+                {tr.expiredContact}
             </p>
 
             {sellerEmail && (
@@ -62,7 +64,7 @@ export default function OfferExpiredView({
                             d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                         />
                     </svg>
-                    Napisz do sprzedawcy
+                    {tr.emailSeller}
                 </a>
             )}
         </div>

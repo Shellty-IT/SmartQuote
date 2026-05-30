@@ -1,7 +1,6 @@
 // src/app/dashboard/offers/[id]/components/details/DetailsTab.tsx
 'use client';
 
-import { Card } from '@/components/ui';
 import { formatCurrency } from '@/lib/utils';
 import type { Offer } from '@/types';
 import type { VariantData } from '../../utils';
@@ -48,7 +47,7 @@ export function DetailsTab({
             <div className="lg:col-span-2 space-y-6">
                 {offer.description && (
                     <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                        <h2 className="text-lg font-semibold text-foreground mb-3">Opis</h2>
+                        <h2 className="text-lg font-semibold text-foreground mb-3">{detailsTr.description}</h2>
                         <p className="text-foreground whitespace-pre-wrap">{offer.description}</p>
                     </div>
                 )}

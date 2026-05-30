@@ -2,6 +2,7 @@
 'use client';
 
 import type { PublicOfferData } from '@/types';
+import { useTranslations, useLanguage } from '@/i18n';
 
 interface OfferHeaderProps {
     seller: PublicOfferData['offer']['seller'];
@@ -15,8 +16,8 @@ interface OfferHeaderProps {
     primaryColor?: string;
 }
 
-function formatDateLocal(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString('pl-PL', {
+function formatDateLocal(dateStr: string, lang: string): string {
+    return new Date(dateStr).toLocaleDateString(lang === 'en' ? 'en-GB' : 'pl-PL', {
         day: '2-digit',
         month: 'long',
         year: 'numeric',
@@ -34,6 +35,8 @@ export default function OfferHeader({
                                         expired,
                                         primaryColor = '#0891b2',
                                     }: OfferHeaderProps) {
+    const { language } = useLanguage();
+    const tr = useTranslations('offerPublic');
     return (
         <div className="space-y-4">
             <div className="bg-white rounded-xl border border-slate-200 p-6 md:p-8">
@@ -93,22 +96,22 @@ export default function OfferHeader({
                     </div>
 
                     <div className="text-left md:text-right flex-shrink-0">
-                        <p className="text-xs text-slate-400 uppercase tracking-wider font-medium">Oferta</p>
+                        <p className="text-xs text-slate-400 uppercase tracking-wider font-medium">{tr.headerLabel}</p>
                         <p className="text-xl font-bold mt-1" style={{ color: primaryColor }}>{offerNumber}</p>
                         <div className="mt-3 space-y-1">
                             <p className="text-sm text-slate-600">
-                                <span className="text-slate-400">Wystawiona: </span>
-                                {formatDateLocal(createdAt)}
+                                <span className="text-slate-400">{tr.issuedLabel} </span>
+                                {formatDateLocal(createdAt, language)}
                             </p>
                             {validUntil && (
                                 <p className={`text-sm font-medium ${expired ? 'text-status-rejected' : 'text-slate-600'}`}>
                                     <span className={expired ? 'text-red-400' : 'text-slate-400'}>
-                                        Ważna do:{' '}
+                                        {tr.validUntilLabel}{' '}
                                     </span>
-                                    {formatDateLocal(validUntil)}
+                                    {formatDateLocal(validUntil, language)}
                                     {expired && (
                                         <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                                            Wygasła
+                                            {tr.expiredBadge}
                                         </span>
                                     )}
                                 </p>
@@ -120,7 +123,7 @@ export default function OfferHeader({
 
             <div className="bg-white rounded-xl border border-slate-200 p-6">
                 <p className="text-xs uppercase tracking-wider text-slate-400 font-medium mb-2">
-                    Przygotowana dla
+                    {tr.preparedFor}
                 </p>
                 <p className="text-lg font-semibold text-slate-900">{client.name}</p>
                 {client.company && client.company !== client.name && (

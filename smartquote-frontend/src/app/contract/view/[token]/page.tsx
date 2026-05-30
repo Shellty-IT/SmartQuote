@@ -145,7 +145,7 @@ export default function PublicContractPage({ params }: PageProps) {
         } finally {
             if (showSpinner) setIsLoading(false);
         }
-    }, [token]);
+    }, [token, tr.loadError, tr.serverError]);
 
     useEffect(() => {
         if (token) loadContract(true);
@@ -218,8 +218,8 @@ export default function PublicContractPage({ params }: PageProps) {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
-                <h1 className="text-2xl font-bold text-slate-900 mb-3">Umowa nie znaleziona</h1>
-                <p className="text-slate-500">Link do umowy jest nieprawidłowy, nieaktywny lub umowa została usunięta.</p>
+                <h1 className="text-2xl font-bold text-slate-900 mb-3">{tr.notFound}</h1>
+                <p className="text-slate-500">{tr.notFoundDesc}</p>
             </div>
         );
     }
@@ -325,7 +325,7 @@ export default function PublicContractPage({ params }: PageProps) {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
                         <div className="bg-slate-50 rounded-xl p-4">
-                            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Wykonawca</h3>
+                            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">{tr.contractor}</h3>
                             <p className="font-semibold text-slate-900">{contract.seller.name}</p>
                             {contract.seller.nip && <p className="text-sm text-slate-600">NIP: {contract.seller.nip}</p>}
                             {contract.seller.address && <p className="text-sm text-slate-600">{contract.seller.address}</p>}
@@ -334,7 +334,7 @@ export default function PublicContractPage({ params }: PageProps) {
                             {contract.seller.phone && <p className="text-sm text-slate-600">{contract.seller.phone}</p>}
                         </div>
                         <div className="bg-slate-50 rounded-xl p-4">
-                            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Zleceniodawca</h3>
+                            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">{tr.orderingParty}</h3>
                             <p className="font-semibold text-slate-900">{contract.client.name}</p>
                             {contract.client.company && <p className="text-sm text-slate-600">{contract.client.company}</p>}
                             {contract.client.nip && <p className="text-sm text-slate-600">NIP: {contract.client.nip}</p>}
@@ -353,11 +353,11 @@ export default function PublicContractPage({ params }: PageProps) {
                         <p className="text-sm font-semibold text-slate-900 mt-1">{formatDate(contract.createdAt)}</p>
                     </div>
                     <div>
-                        <p className="text-xs font-medium text-slate-400 uppercase">Obowiązuje od</p>
+                        <p className="text-xs font-medium text-slate-400 uppercase">{tr.validFrom}</p>
                         <p className="text-sm font-semibold text-slate-900 mt-1">{formatDate(contract.startDate)}</p>
                     </div>
                     <div>
-                        <p className="text-xs font-medium text-slate-400 uppercase">Obowiązuje do</p>
+                        <p className="text-xs font-medium text-slate-400 uppercase">{tr.validTo}</p>
                         <p className="text-sm font-semibold text-slate-900 mt-1">{formatDate(contract.endDate)}</p>
                     </div>
                     <div>
@@ -377,10 +377,10 @@ export default function PublicContractPage({ params }: PageProps) {
                     <table className="w-full">
                         <thead className="bg-slate-50 border-b border-slate-100">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Lp.</th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Nazwa</th>
-                            <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Ilość</th>
-                            <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Cena</th>
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">{tr.colNo}</th>
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">{tr.colName}</th>
+                            <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">{tr.colQty}</th>
+                            <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">{tr.colPrice}</th>
                             <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">VAT</th>
                             <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">{tr.colGross}</th>
                         </tr>
@@ -413,7 +413,7 @@ export default function PublicContractPage({ params }: PageProps) {
                         <span className="font-medium text-slate-900">{formatCurrency(contract.totalVat, contract.currency)}</span>
                     </div>
                     <div className="flex justify-between text-base pt-2 border-t border-slate-200">
-                        <span className="font-bold text-slate-900">RAZEM BRUTTO:</span>
+                        <span className="font-bold text-slate-900">{tr.totalGrossLabel}</span>
                         <span className="font-bold text-status-accepted text-lg">{formatCurrency(contract.totalGross, contract.currency)}</span>
                     </div>
                 </div>
@@ -441,7 +441,7 @@ export default function PublicContractPage({ params }: PageProps) {
                             <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-lg">✍️</div>
                             <div>
                                 <h3 className="text-white font-bold">{tr.signatureSection}</h3>
-                                <p className="text-emerald-100 text-xs">Certyfikat podpisu umowy</p>
+                                <p className="text-emerald-100 text-xs">{tr.signCertificate}</p>
                             </div>
                         </div>
                     </div>
@@ -470,7 +470,7 @@ export default function PublicContractPage({ params }: PageProps) {
                                 <p className="text-sm font-semibold text-emerald-700 mt-1">{formatDateTime(contract.signatureLog.signedAt)}</p>
                             </div>
                             <div>
-                                <p className="text-xs font-medium text-slate-400 uppercase">Adres IP</p>
+                                <p className="text-xs font-medium text-slate-400 uppercase">{tr.ipAddress}</p>
                                 <p className="text-sm font-semibold text-slate-900 mt-1">{contract.signatureLog.ipAddress}</p>
                             </div>
                         </div>
@@ -536,20 +536,20 @@ export default function PublicContractPage({ params }: PageProps) {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         {isDownloading
-                            ? 'Generowanie PDF...'
+                            ? tr.generatingPdf
                             : contract.signatureLog
                                 ? tr.downloadWithSig
                                 : tr.downloadOnly}
                     </button>
                     {contract.seller.email && (
                         <a
-                            href={`mailto:${contract.seller.email}?subject=Umowa ${contract.number}`}
+                            href={`mailto:${contract.seller.email}?subject=${tr.emailSubject.replace('{number}', contract.number)}`}
                             className="flex-1 sm:flex-initial px-6 py-4 rounded-xl border-2 border-slate-200 text-slate-600 font-medium hover:bg-slate-50 hover:border-slate-300 transition-colors flex items-center justify-center gap-3"
                         >
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
-                            Kontakt z wykonawcą
+                            {tr.contactContractor}
                         </a>
                     )}
                 </div>

@@ -4,7 +4,6 @@
 import { use, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Card } from '@/components/ui';
 import { useEmailComposer } from '@/hooks/useEmailComposer';
 import RichTextEditor from '@/components/email/RichTextEditor';
 import { BUILT_IN_TEMPLATES } from '@/types/email.types';
@@ -29,7 +28,6 @@ function AttachmentTypeLabel({ type }: { type: EmailAttachment['type'] }) {
 function EditDraftContent({ draftId }: { draftId: string }) {
     const router = useRouter();
     const tr = useTranslations('emailsNew');
-    const commonTr = useTranslations('common');
     const {
         to, setTo,
         toName, setToName,
@@ -320,7 +318,7 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
                             </svg>
                         )}
-                        Zapisz zmiany
+                        {tr.saveChanges}
                     </button>
                     <button
                         type="button"

@@ -1,12 +1,15 @@
 // src/components/publicOffer/OfferAlerts.tsx
 'use client';
 
+import { useTranslations } from '@/i18n';
+
 interface ErrorAlertProps {
     message: string;
     onDismiss: () => void;
 }
 
 export function ErrorAlert({ message, onDismiss }: ErrorAlertProps) {
+    const commonTr = useTranslations('common');
     return (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
             <svg
@@ -28,7 +31,7 @@ export function ErrorAlert({ message, onDismiss }: ErrorAlertProps) {
                     onClick={onDismiss}
                     className="text-xs text-status-rejected hover:text-red-700 mt-1 underline"
                 >
-                    Zamknij
+                    {commonTr.close}
                 </button>
             </div>
         </div>
@@ -36,6 +39,7 @@ export function ErrorAlert({ message, onDismiss }: ErrorAlertProps) {
 }
 
 export function AuditTrailInfoAlert() {
+    const tr = useTranslations('offerPublic');
     return (
         <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
             <svg
@@ -53,11 +57,10 @@ export function AuditTrailInfoAlert() {
             </svg>
             <div>
                 <p className="text-sm font-medium text-emerald-800">
-                    Oferta z formalnym potwierdzeniem
+                    {tr.auditAlertTitle}
                 </p>
                 <p className="text-xs text-status-accepted mt-1">
-                    Przy akceptacji zostaniesz poproszony o podanie imienia i adresu email.
-                    Otrzymasz potwierdzenie z cyfrowym odciskiem treści (SHA-256).
+                    {tr.auditAlertDesc}
                 </p>
             </div>
         </div>

@@ -105,7 +105,7 @@ export default function NotificationBell() {
                     <div className="px-4 py-3 bg-surface-subtle border-b border-border">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                                <h3 className="font-semibold text-foreground">Powiadomienia</h3>
+                                <h3 className="font-semibold text-foreground">{notifTr.title}</h3>
                                 {unreadCount > 0 && (
                                     <span className="px-2 py-0.5 text-xs font-medium bg-primary/10 text-primary rounded-full">
                                         {unreadCount} {notifTr.tabs.unread}

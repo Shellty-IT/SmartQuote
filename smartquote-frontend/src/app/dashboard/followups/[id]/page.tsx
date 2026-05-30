@@ -194,7 +194,7 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                                                 </svg>
                                             </div>
                                             <div>
-                                                <p className="text-sm text-muted-foreground">Oferta</p>
+                                                <p className="text-sm text-muted-foreground">{tr.related.offer}</p>
                                                 <p className="font-medium text-foreground">{followUp.offer.number} - {followUp.offer.title}</p>
                                             </div>
                                         </div>
@@ -215,7 +215,7 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                                                 </svg>
                                             </div>
                                             <div>
-                                                <p className="text-sm text-muted-foreground">Umowa</p>
+                                                <p className="text-sm text-muted-foreground">{tr.related.contract}</p>
                                                 <p className="font-medium text-foreground">{followUp.contract.number} - {followUp.contract.title}</p>
                                             </div>
                                         </div>

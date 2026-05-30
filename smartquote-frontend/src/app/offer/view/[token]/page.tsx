@@ -6,6 +6,7 @@ import { useState, useEffect, use } from 'react';
 import { publicOffersApi, ApiError } from '@/lib/api';
 import type { PublicOfferData } from '@/types';
 import InteractiveOffer from '@/components/publicOffer/InteractiveOffer';
+import { useTranslations } from '@/i18n';
 
 interface PageProps {
     params: Promise<{ token: string }>;
@@ -13,6 +14,7 @@ interface PageProps {
 
 export default function PublicOfferPage({ params }: PageProps) {
     const { token } = use(params);
+    const tr = useTranslations('offerPublic');
 
     const [data, setData] = useState<PublicOfferData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -34,7 +36,7 @@ export default function PublicOfferPage({ params }: PageProps) {
                         setError(err.message);
                     }
                 } else {
-                    setError('Nie udało się załadować oferty');
+                    setError('LOAD_ERROR');
                 }
             } finally {
                 setIsLoading(false);
@@ -50,7 +52,7 @@ export default function PublicOfferPage({ params }: PageProps) {
         return (
             <div className="flex flex-col items-center justify-center py-24">
                 <div className="w-12 h-12 border-4 border-cyan-200 border-t-cyan-500 rounded-full animate-spin mb-6" />
-                <p className="text-slate-500 text-lg">Ładowanie oferty...</p>
+                <p className="text-slate-500 text-lg">{tr.loading}</p>
             </div>
         );
     }
@@ -64,10 +66,10 @@ export default function PublicOfferPage({ params }: PageProps) {
                     </svg>
                 </div>
                 <h1 className="text-2xl font-bold text-slate-900 mb-3">
-                    Oferta nie znaleziona
+                    {tr.notFound}
                 </h1>
                 <p className="text-slate-500">
-                    Link do oferty jest nieprawidłowy, nieaktywny lub oferta została usunięta.
+                    {tr.notFoundDesc}
                 </p>
             </div>
         );
@@ -82,14 +84,14 @@ export default function PublicOfferPage({ params }: PageProps) {
                     </svg>
                 </div>
                 <h1 className="text-2xl font-bold text-slate-900 mb-3">
-                    Wystąpił błąd
+                    {tr.error}
                 </h1>
-                <p className="text-slate-500 mb-6">{error}</p>
+                <p className="text-slate-500 mb-6">{error === 'LOAD_ERROR' ? tr.loadError : error}</p>
                 <button
                     onClick={() => window.location.reload()}
                     className="px-6 py-3 bg-cyan-500 text-white font-medium rounded-xl hover:bg-cyan-600 transition-colors"
                 >
-                    Spróbuj ponownie
+                    {tr.tryAgain}
                 </button>
             </div>
         );

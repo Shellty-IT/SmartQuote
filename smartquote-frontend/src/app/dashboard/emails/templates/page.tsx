@@ -107,7 +107,7 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                         </svg>
                     )}
-                    Zapisz szablon
+                    {tr.formSave}
                 </button>
             </div>
         </div>
@@ -139,7 +139,7 @@ export default function EmailTemplatesPage() {
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [commonTr.errorTitle, tr.errLoading]);
 
     useEffect(() => { load(); }, [load]);
 

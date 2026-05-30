@@ -1,6 +1,8 @@
 // SmartQuote-AI/src/components/publicOffer/OfferCalculator.tsx
 'use client';
 
+import { useTranslations } from '@/i18n';
+
 interface OfferCalculatorProps {
     readonly totalNet: number;
     readonly totalVat: number;
@@ -27,22 +29,23 @@ export default function OfferCalculator({
                                             totalCount,
                                             primaryColor = '#0891b2',
                                         }: OfferCalculatorProps) {
+    const tr = useTranslations('offerPublic');
     return (
         <div className="bg-slate-900 rounded-xl p-6 text-white">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider">
-                    Podsumowanie
+                    {tr.calculatorSummary}
                 </h3>
                 {totalCount > selectedCount && (
                     <span className="text-xs text-slate-500">
-                        {selectedCount} z {totalCount} pozycji
+                        {tr.calculatorItems.replace('{selected}', String(selectedCount)).replace('{total}', String(totalCount))}
                     </span>
                 )}
             </div>
 
             <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                    <span className="text-slate-400">Suma netto</span>
+                    <span className="text-slate-400">{tr.netTotal}</span>
                     <span className="text-lg font-semibold">{formatPLN(totalNet)}</span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -51,7 +54,7 @@ export default function OfferCalculator({
                 </div>
                 <div className="border-t border-slate-700 pt-3">
                     <div className="flex justify-between items-center">
-                        <span className="text-white/80 font-medium">Suma brutto</span>
+                        <span className="text-white/80 font-medium">{tr.grossTotal}</span>
                         <span
                             className="text-2xl font-bold"
                             style={{ color: primaryColor }}

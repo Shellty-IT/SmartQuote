@@ -1,6 +1,8 @@
 // src/components/publicOffer/VariantSelector.tsx
 'use client';
 
+import { useTranslations } from '@/i18n';
+
 interface VariantSelectorProps {
     variants: string[];
     selectedVariant: string | null;
@@ -16,6 +18,8 @@ export default function VariantSelector({
                                             disabled = false,
                                             primaryColor,
                                         }: VariantSelectorProps) {
+    const tr = useTranslations('offerPublic');
+
     if (variants.length === 0) return null;
 
     return (
@@ -36,13 +40,12 @@ export default function VariantSelector({
                     />
                 </svg>
                 <h2 className="text-lg font-semibold text-slate-900">
-                    Wybierz wariant
+                    {tr.selectVariant}
                 </h2>
             </div>
 
             <p className="text-sm text-slate-500 mb-4">
-                Oferta zawiera {variants.length} wariant{variants.length > 1 ? 'y' : ''}.
-                Wybierz ten, który najlepiej odpowiada Twoim potrzebom.
+                {tr.variantDesc}
             </p>
 
             <div className="flex flex-wrap gap-2">

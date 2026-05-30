@@ -2,6 +2,7 @@
 'use client';
 
 import { formatPLN, formatDateTime } from '../utils';
+import { useTranslations } from '@/i18n';
 
 interface AuditTrailData {
     contentHash: string;
@@ -26,6 +27,7 @@ export default function OfferAcceptedView({
                                               primaryColor,
                                               auditTrailData,
                                           }: OfferAcceptedViewProps) {
+    const tr = useTranslations('offerPublic');
     return (
         <div className="max-w-2xl mx-auto text-center py-16 px-4">
             <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-emerald-100 flex items-center justify-center">
@@ -41,17 +43,16 @@ export default function OfferAcceptedView({
             </div>
 
             <h1 className="text-3xl font-bold text-slate-900 mb-3">
-                Oferta zaakceptowana!
+                {tr.acceptedTitle}
             </h1>
 
             <p className="text-lg text-slate-600 mb-2">
-                Dziękujemy za akceptację oferty{' '}
-                <span className="font-semibold">{offerNumber}</span>.
+                {tr.acceptedDesc.replace('{number}', offerNumber)}
             </p>
 
             {selectedVariant && (
                 <p className="text-slate-500 mb-2">
-                    Wybrany wariant:{' '}
+                    {tr.selectedVariantLabel}{' '}
                     <span className="font-semibold" style={{ color: primaryColor }}>
                         {selectedVariant}
                     </span>
@@ -59,11 +60,11 @@ export default function OfferAcceptedView({
             )}
 
             <p className="text-slate-500 mb-8">
-                Sprzedawca został powiadomiony i wkrótce się z Tobą skontaktuje.
+                {tr.sellerNotified}
             </p>
 
             <div className="bg-slate-900 rounded-xl p-6 inline-block">
-                <p className="text-slate-400 text-sm mb-1">Zaakceptowana kwota brutto</p>
+                <p className="text-slate-400 text-sm mb-1">{tr.acceptedGrossLabel}</p>
                 <p className="text-3xl font-bold" style={{ color: primaryColor }}>
                     {formatPLN(totalGross)}
                 </p>
@@ -86,14 +87,14 @@ export default function OfferAcceptedView({
                             />
                         </svg>
                         <h3 className="text-lg font-semibold text-slate-900">
-                            Certyfikat akceptacji
+                            {tr.certTitle}
                         </h3>
                     </div>
 
                     <div className="space-y-3">
                         <div>
                             <p className="text-xs uppercase tracking-wider text-slate-400 font-medium">
-                                Oferta
+                                {tr.headerLabel}
                             </p>
                             <p className="text-sm text-slate-900 font-medium">
                                 {offerNumber} — {offerTitle}
@@ -102,7 +103,7 @@ export default function OfferAcceptedView({
 
                         <div>
                             <p className="text-xs uppercase tracking-wider text-slate-400 font-medium">
-                                Data akceptacji
+                                {tr.certDateLabel}
                             </p>
                             <p className="text-sm text-slate-900">
                                 {formatDateTime(auditTrailData.acceptedAt)}
@@ -111,7 +112,7 @@ export default function OfferAcceptedView({
 
                         <div>
                             <p className="text-xs uppercase tracking-wider text-slate-400 font-medium">
-                                Cyfrowy odcisk treści (SHA-256)
+                                {tr.certHashLabel}
                             </p>
                             <p className="text-xs text-emerald-700 font-mono break-all bg-emerald-50 p-2 rounded-lg mt-1">
                                 {auditTrailData.contentHash}
@@ -120,8 +121,7 @@ export default function OfferAcceptedView({
                     </div>
 
                     <p className="text-xs text-slate-400 mt-4 leading-relaxed">
-                        Ten hash jest unikalnym odciskiem cyfrowym treści oferty w momencie akceptacji.
-                        Potwierdzenie zostało również wysłane na Twój adres email.
+                        {tr.certHashDesc}
                     </p>
                 </div>
             )}

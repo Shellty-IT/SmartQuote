@@ -171,7 +171,7 @@ export default function AIAssistantPage() {
                     >
                         <div className="flex items-center gap-2 mb-4">
                             <span className="text-lg">📊</span>
-                            <h3 className="font-semibold text-foreground">Podsumowanie</h3>
+                            <h3 className="font-semibold text-foreground">{tr.stats.summary}</h3>
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <div
@@ -179,7 +179,7 @@ export default function AIAssistantPage() {
                                 style={{ backgroundColor: 'var(--surface-subtle)' }}
                             >
                                 <div className="text-2xl font-bold text-primary">{stats.totalClients}</div>
-                                <div className="text-xs text-muted-foreground">Klienci</div>
+                                <div className="text-xs text-muted-foreground">{tr.stats.clients}</div>
                             </div>
                             <div
                                 className="text-center p-3 rounded-xl"
