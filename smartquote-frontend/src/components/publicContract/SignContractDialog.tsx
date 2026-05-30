@@ -3,6 +3,7 @@
 
 import { useState, useRef } from 'react';
 import SignaturePad, { SignaturePadRef } from './SignaturePad';
+import { useTranslations } from '@/i18n';
 
 interface SignContractDialogProps {
     contractNumber: string;
@@ -25,6 +26,7 @@ export default function SignContractDialog({
                                                onSign,
                                                onClose,
                                            }: SignContractDialogProps) {
+    const tr = useTranslations('contractSign');
     const [signerName, setSignerName] = useState('');
     const [signerEmail, setSignerEmail] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,17 +40,17 @@ export default function SignContractDialog({
         if (!signaturePadRef.current) return;
 
         if (signaturePadRef.current.isEmpty()) {
-            setError('Proszę złożyć podpis w polu powyżej');
+            setError(tr.signatureMissing);
             return;
         }
 
         if (signerName.trim().length < 2) {
-            setError('Imię i nazwisko musi mieć minimum 2 znaki');
+            setError(tr.nameTooShort);
             return;
         }
 
         if (!isValidEmail(signerEmail)) {
-            setError('Podaj prawidłowy adres email');
+            setError(tr.emailInvalid);
             return;
         }
 
@@ -63,7 +65,7 @@ export default function SignContractDialog({
                 signatureImage,
             });
         } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Wystąpił błąd podczas podpisywania';
+            const message = err instanceof Error ? err.message : tr.signError;
             setError(message);
         } finally {
             setIsSubmitting(false);
@@ -117,48 +119,48 @@ export default function SignContractDialog({
 
                     <div>
                         <label htmlFor="signer-name" className="block text-sm font-medium text-slate-700 mb-1">
-                            Imię i nazwisko <span className="text-status-rejected">*</span>
+                            {tr.nameLabel} <span className="text-status-rejected">*</span>
                         </label>
                         <input
                             id="signer-name"
                             type="text"
                             value={signerName}
                             onChange={(e) => setSignerName(e.target.value)}
-                            placeholder="Jan Kowalski"
+                            placeholder={tr.namePlaceholder}
                             className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                         />
                     </div>
 
                     <div>
                         <label htmlFor="signer-email" className="block text-sm font-medium text-slate-700 mb-1">
-                            Email <span className="text-status-rejected">*</span>
+                            {tr.emailLabel} <span className="text-status-rejected">*</span>
                         </label>
                         <input
                             id="signer-email"
                             type="email"
                             value={signerEmail}
                             onChange={(e) => setSignerEmail(e.target.value)}
-                            placeholder="jan@firma.pl"
+                            placeholder={tr.emailPlaceholder}
                             className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                         />
-                        <p className="text-xs text-slate-400 mt-1">Na ten adres wyślemy potwierdzenie podpisu</p>
+                        <p className="text-xs text-slate-400 mt-1">{tr.emailHint}</p>
                     </div>
 
                     <div>
                         <div className="flex items-center justify-between mb-1">
                             <label className="block text-sm font-medium text-slate-700">
-                                Podpis <span className="text-status-rejected">*</span>
+                                {tr.signatureLabel} <span className="text-status-rejected">*</span>
                             </label>
                             <button
                                 type="button"
                                 onClick={handleClear}
                                 className="text-xs text-slate-500 hover:text-slate-700 transition-colors"
                             >
-                                Wyczyść
+                                {tr.clearSignature}
                             </button>
                         </div>
                         <SignaturePad ref={signaturePadRef} />
-                        <p className="text-xs text-slate-400 mt-1">Narysuj podpis myszką lub palcem na ekranie dotykowym</p>
+                        <p className="text-xs text-slate-400 mt-1">{tr.signatureHint}</p>
                     </div>
                 </div>
 
@@ -169,7 +171,7 @@ export default function SignContractDialog({
                         disabled={isSubmitting}
                         className="flex-1 px-4 py-3 rounded-xl border-2 border-slate-200 text-slate-600 font-medium hover:bg-slate-50 transition-colors disabled:opacity-50"
                     >
-                        Anuluj
+                        {tr.cancel}
                     </button>
                     <button
                         type="button"
@@ -180,10 +182,10 @@ export default function SignContractDialog({
                         {isSubmitting ? (
                             <>
                                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                Podpisywanie...
+                                {tr.signing}
                             </>
                         ) : (
-                            'Zatwierdź podpis'
+                            tr.confirm
                         )}
                     </button>
                 </div>

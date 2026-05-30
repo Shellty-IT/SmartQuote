@@ -63,13 +63,13 @@ export function useFollowUps(initialOptions: UseFollowUpsOptions = {}) {
                 setFollowUps(response.data || []);
                 setPagination(response.meta || null);
             } else {
-                setError(response.error?.message || 'Błąd pobierania follow-upów');
+                setError(response.error?.message || 'Failed to fetch follow-ups');
             }
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);
             } else {
-                setError('Błąd połączenia z serwerem');
+                setError('Server connection error');
             }
         } finally {
             setLoading(false);
@@ -89,7 +89,7 @@ export function useFollowUps(initialOptions: UseFollowUpsOptions = {}) {
         if (response.success) {
             await fetchFollowUps();
         } else {
-            throw new Error(response.error?.message || 'Błąd usuwania');
+            throw new Error(response.error?.message || 'Delete error');
         }
     }, [fetchFollowUps]);
 
@@ -99,7 +99,7 @@ export function useFollowUps(initialOptions: UseFollowUpsOptions = {}) {
             await fetchFollowUps();
             return response.data;
         } else {
-            throw new Error(response.error?.message || 'Błąd oznaczania jako wykonane');
+            throw new Error(response.error?.message || 'Failed to mark as done');
         }
     }, [fetchFollowUps]);
 
@@ -137,13 +137,13 @@ export function useFollowUp(id: string) {
             if (response.success) {
                 setFollowUp(response.data ?? null);
             } else {
-                setError(response.error?.message || 'Nie znaleziono follow-upa');
+                setError(response.error?.message || 'Follow-up not found');
             }
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);
             } else {
-                setError('Błąd połączenia z serwerem');
+                setError('Server connection error');
             }
         } finally {
             setLoading(false);
@@ -177,7 +177,7 @@ export function useFollowUpStats() {
             if (err instanceof Error) {
                 setError(err.message);
             } else {
-                setError('Błąd połączenia z serwerem');
+                setError('Server connection error');
             }
         } finally {
             setLoading(false);

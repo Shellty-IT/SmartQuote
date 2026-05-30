@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui';
 import { offerTemplatesApi, ApiError } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
+import { useTranslations } from '@/i18n';
 import type { CreateOfferTemplateInput, CreateOfferTemplateItemInput } from '@/types';
 
 interface TemplateItem extends CreateOfferTemplateItemInput {
@@ -43,6 +44,8 @@ const inputSmClass =
 export default function NewOfferTemplatePage() {
     const router = useRouter();
     const toast = useToast();
+    const tr = useTranslations('offerTemplateForm');
+    const commonTr = useTranslations('common');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [name, setName] = useState('');
@@ -70,11 +73,11 @@ export default function NewOfferTemplatePage() {
 
     async function handleSubmit() {
         if (name.length < 3) {
-            toast.error('Błąd walidacji', 'Nazwa szablonu musi mieć minimum 3 znaki');
+            toast.error(tr.toasts.validationError, tr.toasts.nameTooShort);
             return;
         }
         if (items.length === 0 || items.some((i) => !i.name || i.quantity <= 0)) {
-            toast.error('Błąd walidacji', 'Wszystkie pozycje muszą mieć nazwę i ilość większą od 0');
+            toast.error(tr.toasts.validationError, tr.toasts.itemsInvalid);
             return;
         }
 
@@ -92,12 +95,12 @@ export default function NewOfferTemplatePage() {
 
             const response = await offerTemplatesApi.create(data);
             if (response.data?.id) {
-                toast.success('Szablon utworzony', `"${name}" został zapisany`);
+                toast.success(tr.toasts.created, `"${name}" ${tr.toasts.created}`);
                 router.push('/dashboard/offer-templates');
             }
         } catch (err) {
             if (err instanceof ApiError) {
-                toast.error('Błąd', err.message);
+                toast.error(commonTr.errorTitle, err.message);
             }
         } finally {
             setIsSubmitting(false);
@@ -116,8 +119,8 @@ export default function NewOfferTemplatePage() {
                     </svg>
                     Powrót
                 </button>
-                <h1 className="text-3xl font-bold tracking-tight">Nowy szablon oferty</h1>
-                <p className="text-muted-foreground mt-1">Utwórz preset pozycji do wielokrotnego użycia</p>
+                <h1 className="text-3xl font-bold tracking-tight">{tr.newTitle}</h1>
+                <p className="text-muted-foreground mt-1">{tr.newSubtitle}</p>
             </div>
 
             <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
@@ -125,7 +128,7 @@ export default function NewOfferTemplatePage() {
                 <div className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-foreground mb-1.5">
-                            Nazwa szablonu <span className="text-status-rejected">*</span>
+                            {tr.nameLabel} <span className="text-status-rejected">*</span>
                         </label>
                         <input
                             type="text"
@@ -140,7 +143,7 @@ export default function NewOfferTemplatePage() {
                             Opis (opcjonalne)
                         </label>
                         <textarea
-                            placeholder="Krótki opis szablonu..."
+                            placeholder={tr.descLabel}
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             rows={2}
@@ -179,7 +182,7 @@ export default function NewOfferTemplatePage() {
                             Domyślne warunki (opcjonalne)
                         </label>
                         <textarea
-                            placeholder="Standardowe warunki oferty..."
+                            placeholder={tr.termsLabel}
                             value={defaultTerms}
                             onChange={(e) => setDefaultTerms(e.target.value)}
                             rows={3}
@@ -191,7 +194,7 @@ export default function NewOfferTemplatePage() {
                             Domyślne uwagi (opcjonalne)
                         </label>
                         <textarea
-                            placeholder="Dodatkowe uwagi..."
+                            placeholder={tr.notesLabel}
                             value={defaultNotes}
                             onChange={(e) => setDefaultNotes(e.target.value)}
                             rows={2}
@@ -203,7 +206,7 @@ export default function NewOfferTemplatePage() {
 
             <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-foreground">Pozycje szablonu ({items.length})</h2>
+                    <h2 className="text-lg font-semibold text-foreground">{tr.itemsSection.replace("{n}", String(items.length))}</h2>
                     <Button variant="outline" size="sm" onClick={addItem}>
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -231,7 +234,7 @@ export default function NewOfferTemplatePage() {
                                 <div className="md:col-span-2">
                                     <input
                                         type="text"
-                                        placeholder="Nazwa pozycji *"
+                                        placeholder={tr.itemNamePlaceholder}
                                         value={item.name}
                                         onChange={(e) => updateItem(item._tempId, 'name', e.target.value)}
                                         className={inputSmClass}
@@ -240,7 +243,7 @@ export default function NewOfferTemplatePage() {
                                 <div className="md:col-span-2">
                                     <input
                                         type="text"
-                                        placeholder="Opis (opcjonalnie)"
+                                        placeholder={tr.itemDescPlaceholder}
                                         value={item.description ?? ''}
                                         onChange={(e) => updateItem(item._tempId, 'description', e.target.value || null)}
                                         className={inputSmClass}
@@ -249,7 +252,7 @@ export default function NewOfferTemplatePage() {
                                 <div>
                                     <input
                                         type="number"
-                                        placeholder="Ilość"
+                                        placeholder={tr.itemQtyPlaceholder}
                                         min={0}
                                         step={0.01}
                                         value={item.quantity}
@@ -260,7 +263,7 @@ export default function NewOfferTemplatePage() {
                                 <div>
                                     <input
                                         type="text"
-                                        placeholder="Jednostka"
+                                        placeholder={tr.itemUnitPlaceholder}
                                         value={item.unit}
                                         onChange={(e) => updateItem(item._tempId, 'unit', e.target.value)}
                                         className={inputSmClass}
@@ -269,7 +272,7 @@ export default function NewOfferTemplatePage() {
                                 <div>
                                     <input
                                         type="number"
-                                        placeholder="Cena netto"
+                                        placeholder={tr.itemPricePlaceholder}
                                         min={0}
                                         step={0.01}
                                         value={item.unitPrice}
@@ -291,7 +294,7 @@ export default function NewOfferTemplatePage() {
                                 <div>
                                     <input
                                         type="number"
-                                        placeholder="Rabat %"
+                                        placeholder={tr.itemDiscountPlaceholder}
                                         min={0}
                                         max={100}
                                         value={item.discount}
@@ -302,7 +305,7 @@ export default function NewOfferTemplatePage() {
                                 <div>
                                     <input
                                         type="text"
-                                        placeholder="Wariant (opcjonalnie)"
+                                        placeholder={tr.itemVariantPlaceholder}
                                         value={item.variantName ?? ''}
                                         onChange={(e) => updateItem(item._tempId, 'variantName', e.target.value || null)}
                                         className={inputSmClass}
@@ -327,15 +330,11 @@ export default function NewOfferTemplatePage() {
             </div>
 
             <div className="flex justify-between">
-                <Button variant="outline" onClick={() => router.back()}>
-                    Anuluj
-                </Button>
+                <Button variant="outline" onClick={() => router.back()}>{commonTr.cancel}</Button>
                 <Button onClick={handleSubmit} isLoading={isSubmitting}>
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    Zapisz szablon
-                </Button>
+                    </svg>{tr.save}</Button>
             </div>
         </div>
     );

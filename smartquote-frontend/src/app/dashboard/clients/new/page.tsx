@@ -7,10 +7,12 @@ import { clientsApi } from '@/lib/api';
 import { Button, Input, Select, Textarea } from '@/components/ui';
 import { CreateClientInput } from '@/types';
 import { useToast } from '@/contexts/ToastContext';
+import { useTranslations } from '@/i18n';
 
 export default function NewClientPage() {
     const router = useRouter();
     const toast = useToast();
+    const t = useTranslations('clientForm');
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState<CreateClientInput>({
         type: 'COMPANY',
@@ -39,19 +41,19 @@ export default function NewClientPage() {
         const errors: Record<string, string> = {};
 
         if (!formData.name || formData.name.length < 2) {
-            errors.name = 'Nazwa musi mieć minimum 2 znaki';
+            errors.name = t.validation.nameTooShort;
         }
 
         if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            errors.email = 'Nieprawidłowy format email';
+            errors.email = t.validation.emailInvalid;
         }
 
         if (formData.nip && !/^\d{10}$/.test(formData.nip)) {
-            errors.nip = 'NIP musi mieć 10 cyfr';
+            errors.nip = t.validation.nipInvalid;
         }
 
         if (formData.website && !/^https?:\/\/.+/.test(formData.website)) {
-            errors.website = 'Nieprawidłowy format URL (musi zaczynać się od http:// lub https://)';
+            errors.website = t.validation.urlInvalid;
         }
 
         setFieldErrors(errors);
@@ -81,10 +83,10 @@ export default function NewClientPage() {
             };
 
             await clientsApi.create(cleanData);
-            toast.success('Klient dodany', `"${formData.name}" został dodany do bazy`);
+            toast.success(t.toasts.addedTitle, `"${formData.name}" został dodany do bazy`);
             router.push('/dashboard/clients');
         } catch {
-            toast.error('Błąd', 'Nie udało się utworzyć klienta');
+            toast.error(t.toasts.error, t.toasts.addError);
         } finally {
             setIsLoading(false);
         }
@@ -100,28 +102,28 @@ export default function NewClientPage() {
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    Powrót
+                    {t.back}
                 </button>
-                <h1 className="text-2xl font-bold text-foreground">Nowy klient</h1>
-                <p className="text-muted-foreground mt-1">Dodaj nowego klienta do swojej bazy</p>
+                <h1 className="text-2xl font-bold text-foreground">{t.newTitle}</h1>
+                <p className="text-muted-foreground mt-1">{t.newSubtitle}</p>
             </div>
 
             <form onSubmit={handleSubmit}>
                 <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
-                    <h2 className="text-lg font-semibold text-foreground mb-4">Podstawowe informacje</h2>
+                    <h2 className="text-lg font-semibold text-foreground mb-4">{t.basicInfo}</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Select
-                            label="Typ klienta"
+                            label={t.clientType}
                             name="type"
                             value={formData.type}
                             onChange={handleChange}
                             options={[
-                                { value: 'COMPANY', label: 'Firma' },
-                                { value: 'PERSON', label: 'Osoba prywatna' },
+                                { value: 'COMPANY', label: t.companyType },
+                                { value: 'PERSON', label: t.personType },
                             ]}
                         />
                         <Input
-                            label="Nazwa / Imię i nazwisko"
+                            label={t.nameLabel}
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
@@ -132,14 +134,14 @@ export default function NewClientPage() {
                         {formData.type === 'COMPANY' && (
                             <>
                                 <Input
-                                    label="Firma"
+                                    label={t.companyLabel}
                                     name="company"
                                     value={formData.company || ''}
                                     onChange={handleChange}
-                                    placeholder="Nazwa firmy"
+                                    placeholder={t.companyLabel}
                                 />
                                 <Input
-                                    label="NIP"
+                                    label={t.nipLabel}
                                     name="nip"
                                     value={formData.nip || ''}
                                     onChange={handleChange}
@@ -152,10 +154,10 @@ export default function NewClientPage() {
                 </div>
 
                 <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
-                    <h2 className="text-lg font-semibold text-foreground mb-4">Dane kontaktowe</h2>
+                    <h2 className="text-lg font-semibold text-foreground mb-4">{t.contactInfo}</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Input
-                            label="Email"
+                            label={t.emailLabel}
                             name="email"
                             type="email"
                             value={formData.email || ''}
@@ -164,14 +166,14 @@ export default function NewClientPage() {
                             placeholder="kontakt@firma.pl"
                         />
                         <Input
-                            label="Telefon"
+                            label={t.phoneLabel}
                             name="phone"
                             value={formData.phone || ''}
                             onChange={handleChange}
                             placeholder="+48 123 456 789"
                         />
                         <Input
-                            label="Strona WWW"
+                            label={t.websiteLabel}
                             name="website"
                             value={formData.website || ''}
                             onChange={handleChange}
@@ -182,11 +184,11 @@ export default function NewClientPage() {
                 </div>
 
                 <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
-                    <h2 className="text-lg font-semibold text-foreground mb-4">Adres</h2>
+                    <h2 className="text-lg font-semibold text-foreground mb-4">{t.address}</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="md:col-span-2">
                             <Input
-                                label="Ulica i numer"
+                                label={t.streetLabel}
                                 name="address"
                                 value={formData.address || ''}
                                 onChange={handleChange}
@@ -194,14 +196,14 @@ export default function NewClientPage() {
                             />
                         </div>
                         <Input
-                            label="Miasto"
+                            label={t.cityLabel}
                             name="city"
                             value={formData.city || ''}
                             onChange={handleChange}
-                            placeholder="Warszawa"
+                            placeholder={t.cityLabel}
                         />
                         <Input
-                            label="Kod pocztowy"
+                            label={t.postalCodeLabel}
                             name="postalCode"
                             value={formData.postalCode || ''}
                             onChange={handleChange}
@@ -211,22 +213,22 @@ export default function NewClientPage() {
                 </div>
 
                 <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
-                    <h2 className="text-lg font-semibold text-foreground mb-4">Notatki</h2>
+                    <h2 className="text-lg font-semibold text-foreground mb-4">{t.notes}</h2>
                     <Textarea
                         name="notes"
                         value={formData.notes || ''}
                         onChange={handleChange}
-                        placeholder="Dodatkowe informacje o kliencie..."
+                        placeholder={t.notesPlaceholder}
                         rows={4}
                     />
                 </div>
 
                 <div className="flex justify-end gap-3">
                     <Button type="button" variant="outline" onClick={() => router.back()}>
-                        Anuluj
+                        {t.cancel}
                     </Button>
                     <Button type="submit" isLoading={isLoading}>
-                        Dodaj klienta
+                        {t.addButton}
                     </Button>
                 </div>
             </form>

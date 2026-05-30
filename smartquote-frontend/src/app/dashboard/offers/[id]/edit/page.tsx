@@ -5,6 +5,7 @@ import React, { use } from 'react';
 import { useOffer } from '@/hooks/useOffers';
 import { Button } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
+import { useTranslations } from '@/i18n';
 import { useOfferForm } from '../../hooks';
 import OfferStepper from '../../new/components/OfferStepper';
 import StepClient from '../../new/components/StepClient';
@@ -14,6 +15,9 @@ import StepSummary from '../../new/components/StepSummary';
 
 export default function EditOfferPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
+    const tr = useTranslations('offerNew');
+    const offerDetailTr = useTranslations('offerDetail');
+    const commonTr = useTranslations('common');
     const { offer, isLoading: isLoadingOffer, error: offerError } = useOffer(id);
 
     const {
@@ -50,9 +54,9 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
             <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
                 <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                     <div className="text-center py-12">
-                        <p className="text-destructive mb-4">{offerError || 'Nie znaleziono oferty'}</p>
+                        <p className="text-destructive mb-4">{offerError || offerDetailTr.notFound}</p>
                         <Button onClick={() => router.push('/dashboard/offers')}>
-                            Wróć do listy
+                            {offerDetailTr.backToList}
                         </Button>
                     </div>
                 </div>
@@ -70,9 +74,9 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    Powrót
+                    {tr.back}
                 </button>
-                <h1 className="text-2xl font-bold text-foreground">Edytuj ofertę</h1>
+                <h1 className="text-2xl font-bold text-foreground">{tr.editTitle}</h1>
                 <p className="text-muted-foreground mt-1">{offer.number}</p>
             </div>
 
@@ -121,7 +125,7 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
                     variant="outline"
                     onClick={currentStep === 'client' ? () => router.back() : goBack}
                 >
-                    {currentStep === 'client' ? 'Anuluj' : 'Wstecz'}
+                    {currentStep === 'client' ? commonTr.cancel : tr.prev}
                 </Button>
 
                 <div className="flex gap-3">
@@ -130,11 +134,11 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
-                            Zapisz zmiany
+                            {commonTr.saveChanges}
                         </Button>
                     ) : (
                         <Button onClick={goNext} disabled={!canProceed()}>
-                            Dalej
+                            {tr.next}
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                             </svg>

@@ -9,11 +9,14 @@ import { useClients } from '@/hooks/useClients';
 import { Button, Input, Select, Textarea, LoadingSpinner } from '@/components/ui';
 import { Client } from '@/types';
 import { useToast } from '@/contexts/ToastContext';
+import { useTranslations } from '@/i18n';
 
 function NewContractForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const toast = useToast();
+    const t = useTranslations('contractForm');
+    const commonTr = useTranslations('common');
     const fromOfferId = searchParams.get('fromOffer');
 
     const { createContract, createFromOffer } = useContracts();
@@ -47,17 +50,17 @@ function NewContractForm() {
                 const response = await createFromOffer(fromOfferId);
 
                 if (response.success && response.data) {
-                    toast.success('Umowa utworzona', 'Umowa została wygenerowana z oferty');
+                    toast.success(t.toasts.created, t.toasts.createdFromOffer);
                     router.push(`/dashboard/contracts/${response.data.id}`);
                 } else {
-                    toast.error('Błąd', 'Nie udało się utworzyć umowy z oferty');
+                    toast.error(t.toasts.error, t.toasts.createFromOfferError);
                     setLoading(false);
                 }
             };
 
             handleCreateFromOffer();
         }
-    }, [fromOfferId, createFromOffer, router, toast]);
+    }, [fromOfferId, createFromOffer, router, toast, t]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -78,14 +81,14 @@ function NewContractForm() {
             });
 
             if (response.success && response.data) {
-                toast.success('Umowa utworzona', `"${formData.title}" została zapisana`);
+                toast.success(t.toasts.created, `"${formData.title}" została zapisana`);
                 router.push(`/dashboard/contracts/${response.data.id}`);
             } else {
-                toast.error('Błąd', 'Nie udało się utworzyć umowy');
+                toast.error(t.toasts.error, t.toasts.createError);
                 setLoading(false);
             }
         } catch {
-            toast.error('Błąd', 'Nie udało się utworzyć umowy');
+            toast.error(t.toasts.error, t.toasts.createError);
             setLoading(false);
         }
     };
@@ -119,7 +122,7 @@ function NewContractForm() {
         return (
             <div className="flex flex-col items-center justify-center py-12">
                 <LoadingSpinner size="lg" />
-                <p className="mt-4 text-muted-foreground">Tworzenie umowy z oferty...</p>
+                <p className="mt-4 text-muted-foreground">{t.creatingFromOffer}</p>
             </div>
         );
     }
@@ -135,27 +138,27 @@ function NewContractForm() {
                     </Button>
                 </Link>
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground">Nowa umowa</h1>
-                    <p className="text-muted-foreground">Utwórz nową umowę</p>
+                    <h1 className="text-2xl font-bold text-foreground">{t.newTitle}</h1>
+                    <p className="text-muted-foreground">{t.newSubtitle}</p>
                 </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                    <h2 className="text-lg font-semibold text-foreground mb-4">Informacje podstawowe</h2>
+                    <h2 className="text-lg font-semibold text-foreground mb-4">{t.basicInfo}</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Input
-                            label="Tytuł umowy *"
+                            label={t.contractTitleLabel}
                             value={formData.title}
                             onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                             required
                         />
                         <Select
-                            label="Klient *"
+                            label={t.clientLabel}
                             value={formData.clientId}
                             onChange={(e) => setFormData(prev => ({ ...prev, clientId: e.target.value }))}
                             required
-                            placeholder="Wybierz klienta"
+                            placeholder={t.clientPlaceholder}
                             options={clients.map((client: Client) => ({
                                 value: client.id,
                                 label: client.company ? `${client.name} (${client.company})` : client.name
@@ -163,26 +166,26 @@ function NewContractForm() {
                         />
                         <Input
                             type="date"
-                            label="Data rozpoczęcia"
+                            label={t.startDate}
                             value={formData.startDate}
                             onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
                         />
                         <Input
                             type="date"
-                            label="Data zakończenia"
+                            label={t.endDate}
                             value={formData.endDate}
                             onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
                         />
                         <Input
                             type="number"
-                            label="Termin płatności (dni)"
+                            label={t.paymentDays}
                             value={formData.paymentDays}
                             onChange={(e) => setFormData(prev => ({ ...prev, paymentDays: parseInt(e.target.value) || 14 }))}
                         />
                     </div>
                     <div className="mt-4">
                         <Textarea
-                            label="Opis"
+                            label={t.descriptionLabel}
                             value={formData.description}
                             onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                             rows={3}
@@ -193,9 +196,9 @@ function NewContractForm() {
 
                 <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                     <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-semibold text-foreground">Pozycje umowy</h2>
+                        <h2 className="text-lg font-semibold text-foreground">{t.itemsSection}</h2>
                         <Button type="button" variant="outline" size="sm" onClick={addItem}>
-                            + Dodaj pozycję
+                            {t.addItem}
                         </Button>
                     </div>
 
@@ -205,7 +208,7 @@ function NewContractForm() {
                                 <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
                                     <div className="md:col-span-2">
                                         <Input
-                                            label="Nazwa *"
+                                            label={t.nameLabel}
                                             value={item.name}
                                             onChange={(e) => updateItem(index, 'name', e.target.value)}
                                             required
@@ -213,20 +216,20 @@ function NewContractForm() {
                                     </div>
                                     <Input
                                         type="number"
-                                        label="Ilość"
+                                        label={t.qtyLabel}
                                         value={item.quantity}
                                         onChange={(e) => updateItem(index, 'quantity', e.target.value)}
                                         step="0.001"
                                         min="0"
                                     />
                                     <Input
-                                        label="Jednostka"
+                                        label={t.unitLabel}
                                         value={item.unit}
                                         onChange={(e) => updateItem(index, 'unit', e.target.value)}
                                     />
                                     <Input
                                         type="number"
-                                        label="Cena netto"
+                                        label={t.netPriceLabel}
                                         value={item.unitPrice}
                                         onChange={(e) => updateItem(index, 'unitPrice', e.target.value)}
                                         step="0.01"
@@ -239,9 +242,7 @@ function NewContractForm() {
                                             size="sm"
                                             onClick={() => removeItem(index)}
                                             disabled={formData.items.length === 1}
-                                        >
-                                            Usuń
-                                        </Button>
+                                        >{commonTr.delete}</Button>
                                     </div>
                                 </div>
                             </div>
@@ -250,17 +251,17 @@ function NewContractForm() {
                 </div>
 
                 <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                    <h2 className="text-lg font-semibold text-foreground mb-4">Warunki</h2>
+                    <h2 className="text-lg font-semibold text-foreground mb-4">{t.termsSection}</h2>
                     <div className="space-y-4">
                         <Textarea
-                            label="Warunki umowy"
+                            label={t.termsLabel}
                             value={formData.terms}
                             onChange={(e) => setFormData(prev => ({ ...prev, terms: e.target.value }))}
                             rows={4}
                             resizable
                         />
                         <Textarea
-                            label="Notatki wewnętrzne"
+                            label={t.internalNotes}
                             value={formData.notes}
                             onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                             rows={3}
@@ -272,11 +273,11 @@ function NewContractForm() {
                 <div className="flex justify-end gap-4">
                     <Link href="/dashboard/contracts">
                         <Button type="button" variant="outline">
-                            Anuluj
+                            {t.cancel}
                         </Button>
                     </Link>
                     <Button type="submit" disabled={loading}>
-                        {loading ? 'Tworzenie...' : 'Utwórz umowę'}
+                        {loading ? t.creating : t.createContract}
                     </Button>
                 </div>
             </form>
@@ -285,10 +286,11 @@ function NewContractForm() {
 }
 
 function NewContractLoading() {
+    const t = useTranslations('contractForm');
     return (
         <div className="flex flex-col items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
-            <p className="mt-4 text-muted-foreground">Ładowanie...</p>
+            <p className="mt-4 text-muted-foreground">{t.loading}</p>
         </div>
     );
 }

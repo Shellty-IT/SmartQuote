@@ -16,7 +16,7 @@ export default function GlobalError({ error, reset }: ErrorProps) {
     }, [error]);
 
     return (
-        <html lang="pl">
+        <html lang="en">
             <body style={{ backgroundColor: 'oklch(0.985 0.008 240)', color: 'oklch(0.22 0.05 250)' }}>
                 <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
                     <div style={{ maxWidth: '28rem', width: '100%', textAlign: 'center' }}>
@@ -34,10 +34,10 @@ export default function GlobalError({ error, reset }: ErrorProps) {
                             </svg>
                         </div>
                         <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-                            Wystąpił nieoczekiwany błąd
+                            An unexpected error occurred
                         </h1>
                         <p style={{ color: 'oklch(0.5 0.04 248)', marginBottom: '2rem', fontSize: '0.875rem' }}>
-                            Przepraszamy za utrudnienia. Spróbuj odświeżyć stronę lub wróć do dashboardu.
+                            Sorry for the inconvenience. Try refreshing the page or go back to the dashboard.
                         </p>
                         <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
                             <button
@@ -53,7 +53,7 @@ export default function GlobalError({ error, reset }: ErrorProps) {
                                     cursor: 'pointer',
                                 }}
                             >
-                                Spróbuj ponownie
+                                Try again
                             </button>
                             <a
                                 href="/dashboard"
@@ -68,7 +68,7 @@ export default function GlobalError({ error, reset }: ErrorProps) {
                                     textDecoration: 'none',
                                 }}
                             >
-                                Wróć do dashboardu
+                                Back to dashboard
                             </a>
                         </div>
                     </div>

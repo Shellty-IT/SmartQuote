@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { ai } from '@/lib/api';
 import { formatCurrency } from '@/lib/utils';
 import type { PriceInsightResult } from '@/types/ai';
+import { useTranslations } from '@/i18n';
 
 interface AIPriceInsightProps {
     itemName: string;
@@ -13,6 +14,8 @@ interface AIPriceInsightProps {
 }
 
 export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }: AIPriceInsightProps) {
+    const t = useTranslations('aiGenerator');
+    const tObs = useTranslations('offerDetail');
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [result, setResult] = useState<PriceInsightResult | null>(null);
@@ -31,7 +34,7 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
             const data = await ai.priceInsight(itemName.trim());
             setResult(data);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Błąd analizy cenowej');
+            setError(err instanceof Error ? err.message : t.priceInsight.errorFallback);
         } finally {
             setIsLoading(false);
         }
@@ -50,9 +53,9 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
         : false;
 
     const confidenceConfig = {
-        low: { label: 'Niska', color: 'bg-[oklch(0.72_0.16_60)/10%] text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]' },
-        medium: { label: 'Średnia', color: 'bg-primary/10 text-primary' },
-        high: { label: 'Wysoka', color: 'bg-status-accepted/10 text-status-accepted' },
+        low: { label: t.priceInsight.confidenceLow, color: 'bg-[oklch(0.72_0.16_60)/10%] text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]' },
+        medium: { label: t.priceInsight.confidenceMedium, color: 'bg-primary/10 text-primary' },
+        high: { label: t.priceInsight.confidenceHigh, color: 'bg-status-accepted/10 text-status-accepted' },
     };
 
     if (!isOpen) {
@@ -66,7 +69,7 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
                         ? 'ai-bg-card border-border border text-primary hover:opacity-80'
                         : 'bg-card border-border border text-muted-foreground cursor-not-allowed opacity-60'
                 }`}
-                title={canAnalyze ? 'Sprawdź sugestię cenową AI' : 'Wpisz nazwę pozycji (min. 3 znaki)'}
+                title={canAnalyze ? t.priceInsight.checkTitle : t.priceInsight.enterName}
             >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
@@ -96,7 +99,7 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
                         onClick={handleAnalyze}
                         disabled={isLoading || !canAnalyze}
                         className="p-1 text-primary hover:text-primary disabled:opacity-50"
-                        title="Odśwież analizę"
+                        title={tObs.analytics.observer.refresh}
                     >
                         <svg className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
@@ -122,7 +125,7 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                             </svg>
-                            <span className="text-sm font-medium">Analizuję dane cenowe...</span>
+                            <span className="text-sm font-medium">{t.priceInsight.analyzing}</span>
                         </div>
                     </div>
                 )}
@@ -140,9 +143,9 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
                     <div className="space-y-4">
                         <div>
                             <div className="flex items-baseline justify-between mb-2">
-                                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Sugerowana cena netto</span>
+                                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.priceInsight.suggestedNet}</span>
                                 <span className="text-xs text-muted-foreground">
-                                    na podstawie {result.historicalData.count} pozycji
+                                    {t.priceInsight.basedOn.replace('{n}', String(result.historicalData.count))}
                                 </span>
                             </div>
                             <div className="flex items-center gap-3">
@@ -177,8 +180,8 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
                                 </svg>
                                 <span>
                                     {isPriceLow
-                                        ? `Twoja cena (${formatCurrency(currentPrice)}) jest poniżej sugerowanego minimum. Marża może być zbyt niska.`
-                                        : `Twoja cena (${formatCurrency(currentPrice)}) jest powyżej sugerowanego maksimum. Konkurencyjność może być zagrożona.`
+                                        ? t.priceInsight.priceLow.replace('{price}', formatCurrency(currentPrice))
+                                        : t.priceInsight.priceHigh.replace('{price}', formatCurrency(currentPrice))
                                     }
                                 </span>
                             </div>
@@ -199,9 +202,9 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
 
                         {result.historicalData.count > 0 && (
                             <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1 border-t border-primary/20">
-                                <span>Śr. historyczna: <strong className="text-foreground">{formatCurrency(result.historicalData.avgPrice)}</strong></span>
-                                <span>Min: <strong className="text-foreground">{formatCurrency(result.historicalData.minPrice)}</strong></span>
-                                <span>Max: <strong className="text-foreground">{formatCurrency(result.historicalData.maxPrice)}</strong></span>
+                                <span>{t.priceInsight.avgHistorical} <strong className="text-foreground">{formatCurrency(result.historicalData.avgPrice)}</strong></span>
+                                <span>{t.priceInsight.min} <strong className="text-foreground">{formatCurrency(result.historicalData.minPrice)}</strong></span>
+                                <span>{t.priceInsight.max} <strong className="text-foreground">{formatCurrency(result.historicalData.maxPrice)}</strong></span>
                             </div>
                         )}
 
@@ -211,7 +214,7 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
                                 onClick={() => onPriceSelect(suggestedAvg)}
                                 className="w-full py-2 px-3 rounded-lg bg-primary hover:brightness-110 text-white text-xs font-medium transition-colors"
                             >
-                                Zastosuj sugerowaną cenę: {formatCurrency(suggestedAvg)}
+                                {t.priceInsight.applyPrice.replace('{price}', formatCurrency(suggestedAvg))}
                             </button>
                         )}
                     </div>

@@ -2,12 +2,7 @@
 
 export type Step = 'client' | 'details' | 'items' | 'summary';
 
-export const STEPS: { id: Step; label: string }[] = [
-    { id: 'client', label: 'Klient' },
-    { id: 'details', label: 'Szczegóły' },
-    { id: 'items', label: 'Pozycje' },
-    { id: 'summary', label: 'Podsumowanie' },
-];
+export const STEP_IDS: Step[] = ['client', 'details', 'items', 'summary'];
 
 export const VAT_RATES = [
     { value: '23', label: '23%' },

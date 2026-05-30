@@ -4,6 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useTranslations } from '@/i18n';
 import type { Notification, NotificationType } from '@/types';
 
 const typeConfig: Record<NotificationType, { icon: string; colorClass: string }> = {
@@ -17,21 +18,10 @@ const typeConfig: Record<NotificationType, { icon: string; colorClass: string }>
     SYSTEM: { icon: '⚙️', colorClass: 'bg-secondary text-secondary-foreground' },
 };
 
-function timeAgo(dateStr: string): string {
-    const now = new Date();
-    const date = new Date(dateStr);
-    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-    if (seconds < 60) return 'Przed chwilą';
-    if (seconds < 3600) return `${Math.floor(seconds / 60)} min temu`;
-    if (seconds < 86400) return `${Math.floor(seconds / 3600)} godz. temu`;
-    if (seconds < 172800) return 'Wczoraj';
-    if (seconds < 604800) return `${Math.floor(seconds / 86400)} dni temu`;
-    return date.toLocaleDateString('pl-PL');
-}
-
 export default function NotificationBell() {
     const router = useRouter();
+    const notifTr = useTranslations('notifications');
+    const commonTr = useTranslations('common');
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -75,6 +65,19 @@ export default function NotificationBell() {
         await deleteNotification(id);
     };
 
+    function timeAgo(dateStr: string): string {
+        const now = new Date();
+        const date = new Date(dateStr);
+        const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+        if (seconds < 60) return notifTr.timeAgo.justNow;
+        if (seconds < 3600) return notifTr.timeAgo.minutesAgo.replace('{n}', String(Math.floor(seconds / 60)));
+        if (seconds < 86400) return notifTr.timeAgo.hoursAgo.replace('{n}', String(Math.floor(seconds / 3600)));
+        if (seconds < 172800) return notifTr.timeAgo.yesterday;
+        if (seconds < 604800) return notifTr.timeAgo.daysAgo.replace('{n}', String(Math.floor(seconds / 86400)));
+        return date.toLocaleDateString();
+    }
+
     return (
         <div className="relative" ref={dropdownRef}>
             <button
@@ -105,7 +108,7 @@ export default function NotificationBell() {
                                 <h3 className="font-semibold text-foreground">Powiadomienia</h3>
                                 {unreadCount > 0 && (
                                     <span className="px-2 py-0.5 text-xs font-medium bg-primary/10 text-primary rounded-full">
-                                        {unreadCount} nowych
+                                        {unreadCount} {notifTr.tabs.unread}
                                     </span>
                                 )}
                             </div>
@@ -113,9 +116,7 @@ export default function NotificationBell() {
                                 <button
                                     onClick={handleMarkAllRead}
                                     className="text-xs font-medium text-primary hover:text-primary transition-colors"
-                                >
-                                    Oznacz wszystkie
-                                </button>
+                                >{notifTr.markAll}</button>
                             )}
                         </div>
                     </div>
@@ -132,8 +133,7 @@ export default function NotificationBell() {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                                     </svg>
                                 </div>
-                                <p className="text-foreground font-medium">Brak powiadomień</p>
-                                <p className="text-sm text-muted-foreground mt-1">Wszystko na bieżąco!</p>
+                                <p className="text-foreground font-medium">{notifTr.empty.noNotifications}</p>
                             </div>
                         ) : (
                             <div className="divide-y border-border">
@@ -175,7 +175,7 @@ export default function NotificationBell() {
                                                             <button
                                                                 onClick={(e) => handleDelete(e, notification.id)}
                                                                 className="p-1 text-muted-foreground hover:text-status-rejected opacity-0 group-hover:opacity-100 transition-all rounded"
-                                                                title="Usuń"
+                                                                title={commonTr.delete}
                                                             >
                                                                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

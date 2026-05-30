@@ -11,6 +11,7 @@ import { ClientCard } from './ClientCard';
 import { DetailsCard } from './DetailsCard';
 import { AuditTrailCard } from './AuditTrailCard';
 import { ActionsCard } from './ActionsCard';
+import { useTranslations } from '@/i18n';
 
 interface DetailsTabProps {
     offer: Offer;
@@ -33,6 +34,7 @@ export function DetailsTab({
                                onDeleteClick,
                                onCopyHash,
                            }: DetailsTabProps) {
+    const detailsTr = useTranslations('offerDetail').details;
     const auditLog = offer.acceptanceLog ?? null;
 
     const clientData = {
@@ -55,7 +57,7 @@ export function DetailsTab({
 
                 <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                     <h2 className="text-lg font-semibold text-foreground mb-4">
-                        Pozycje ({offer.items?.length || 0})
+                        {detailsTr.items} ({offer.items?.length || 0})
                     </h2>
 
                     {variantData.variantNames.length > 0 ? (
@@ -74,7 +76,7 @@ export function DetailsTab({
                                         ) : (
                                             <>
                                                 <h3 className="text-sm font-semibold text-muted-foreground">
-                                                    Pozycje wspólne
+                                                    {detailsTr.commonItems}
                                                 </h3>
                                                 <span className="text-xs text-muted-foreground">({group.items.length} poz.)</span>
                                             </>
@@ -127,7 +129,7 @@ export function DetailsTab({
                 <svg className="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-                Notatki wewnętrzne
+                {detailsTr.internalNotes}
               </span>
                         </h2>
                         <p className="text-foreground whitespace-pre-wrap">{offer.notes}</p>

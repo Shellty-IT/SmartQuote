@@ -1,7 +1,7 @@
 // src/app/dashboard/offers/[id]/components/analytics/ObserverSection.tsx
 'use client';
 
-import { Card } from '@/components/ui';
+import { useTranslations } from '@/i18n';
 import { INTENT_CONFIG } from '../../constants';
 import { getEngagementColor } from '../../utils';
 import type { ObserverInsight } from '@/types/ai';
@@ -14,6 +14,10 @@ interface ObserverSectionProps {
 }
 
 export function ObserverSection({ observerInsight, isLoading, error, onLoadObserver }: ObserverSectionProps) {
+    const tr = useTranslations('offerDetail');
+    const obs = tr.analytics.observer;
+    const eng = tr.analytics.engagement;
+
     return (
         <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
             <div className="flex items-center justify-between mb-4">
@@ -21,7 +25,7 @@ export function ObserverSection({ observerInsight, isLoading, error, onLoadObser
                     <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                     </svg>
-                    <h2 className="text-lg font-semibold text-foreground">AI Observer — Analiza zachowań</h2>
+                    <h2 className="text-lg font-semibold text-foreground">{obs.title}</h2>
                 </div>
                 <button
                     onClick={onLoadObserver}
@@ -34,7 +38,7 @@ export function ObserverSection({ observerInsight, isLoading, error, onLoadObser
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                             </svg>
-                            Analizuję...
+                            {obs.analyzing}
                         </>
                     ) : (
                         <>
@@ -42,15 +46,13 @@ export function ObserverSection({ observerInsight, isLoading, error, onLoadObser
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
-                            {observerInsight ? 'Odśwież analizę' : 'Analizuj zachowanie'}
+                            {observerInsight ? obs.refresh : obs.analyze}
                         </>
                     )}
                 </button>
             </div>
 
-            {error && (
-                <div className="p-3 rounded-lg bg-destructive/10 text-status-rejected text-sm mb-4">{error}</div>
-            )}
+            {error && <div className="p-3 rounded-lg bg-destructive/10 text-status-rejected text-sm mb-4">{error}</div>}
 
             {!observerInsight && !isLoading && !error && (
                 <div className="text-center py-8">
@@ -58,18 +60,27 @@ export function ObserverSection({ observerInsight, isLoading, error, onLoadObser
                         <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <p className="text-muted-foreground text-sm">Kliknij &quot;Analizuj zachowanie&quot; aby AI przeanalizowało interakcje klienta</p>
+                    <p className="text-muted-foreground text-sm">{obs.hint}</p>
                 </div>
             )}
 
             {observerInsight && !isLoading && (
                 <div className="space-y-4">
                     <div className="flex items-center gap-3 flex-wrap">
-            <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${INTENT_CONFIG[observerInsight.clientIntent]?.color || INTENT_CONFIG.unknown.color}`}>
-              {INTENT_CONFIG[observerInsight.clientIntent]?.label || 'Brak danych'}
-            </span>
+                        {(() => {
+                            const intentCfg = INTENT_CONFIG[observerInsight.clientIntent];
+                            const label = intentCfg
+                                ? `${intentCfg.emoji} ${(eng as Record<string, string>)[intentCfg.intentKey] ?? eng.noData}`
+                                : eng.noData;
+                            const color = intentCfg?.color ?? INTENT_CONFIG.unknown.color;
+                            return (
+                                <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${color}`}>
+                                    {label}
+                                </span>
+                            );
+                        })()}
                         <div className="flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground">Zaangażowanie:</span>
+                            <span className="text-xs text-muted-foreground">{obs.engagement}</span>
                             <div className="w-20 h-2 bg-surface-subtle rounded-full overflow-hidden">
                                 <div
                                     className={`h-full rounded-full transition-all ${getEngagementColor(observerInsight.engagementScore)}`}
@@ -80,13 +91,11 @@ export function ObserverSection({ observerInsight, isLoading, error, onLoadObser
                         </div>
                     </div>
 
-                    <p className="text-sm text-foreground leading-relaxed bg-surface-subtle rounded-lg p-3">
-                        {observerInsight.summary}
-                    </p>
+                    <p className="text-sm text-foreground leading-relaxed bg-surface-subtle rounded-lg p-3">{observerInsight.summary}</p>
 
                     {observerInsight.keyFindings.length > 0 && (
                         <div>
-                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Kluczowe ustalenia</h4>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">{obs.keyFindings}</h4>
                             <ul className="space-y-1">
                                 {observerInsight.keyFindings.map((finding, idx) => (
                                     <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
@@ -103,24 +112,20 @@ export function ObserverSection({ observerInsight, isLoading, error, onLoadObser
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {observerInsight.interestAreas.length > 0 && (
                             <div>
-                                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Obszary zainteresowania</h4>
+                                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">{obs.interests}</h4>
                                 <div className="flex flex-wrap gap-1.5">
                                     {observerInsight.interestAreas.map((area, idx) => (
-                                        <span key={idx} className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary border border-primary/25">
-                      {area}
-                    </span>
+                                        <span key={idx} className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary border border-primary/25">{area}</span>
                                     ))}
                                 </div>
                             </div>
                         )}
                         {observerInsight.concerns.length > 0 && (
                             <div>
-                                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Obawy klienta</h4>
+                                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">{obs.concerns}</h4>
                                 <div className="flex flex-wrap gap-1.5">
                                     {observerInsight.concerns.map((concern, idx) => (
-                                        <span key={idx} className="text-xs px-2 py-1 rounded-full bg-[oklch(0.72_0.16_60)/15%] text-[oklch(0.55_0.14_60)] border border-amber-500/25">
-                      {concern}
-                    </span>
+                                        <span key={idx} className="text-xs px-2 py-1 rounded-full bg-[oklch(0.72_0.16_60)/15%] text-[oklch(0.55_0.14_60)] border border-amber-500/25">{concern}</span>
                                     ))}
                                 </div>
                             </div>
@@ -128,12 +133,12 @@ export function ObserverSection({ observerInsight, isLoading, error, onLoadObser
                     </div>
 
                     <div className="flex gap-4 text-xs text-muted-foreground pt-2 border-t border-border">
-                        <span>Wyświetlenia: <strong className="text-foreground">{observerInsight.timeAnalysis.totalViews}</strong></span>
+                        <span>{obs.viewCount} <strong className="text-foreground">{observerInsight.timeAnalysis.totalViews}</strong></span>
                         {observerInsight.timeAnalysis.avgViewDuration !== null && (
-                            <span>Śr. czas: <strong className="text-foreground">{observerInsight.timeAnalysis.avgViewDuration}s</strong></span>
+                            <span>{obs.avgTime} <strong className="text-foreground">{observerInsight.timeAnalysis.avgViewDuration}s</strong></span>
                         )}
                         {observerInsight.timeAnalysis.mostActiveTime && (
-                            <span>Najaktywniejszy: <strong className="text-foreground">{observerInsight.timeAnalysis.mostActiveTime}</strong></span>
+                            <span>{obs.mostActive} <strong className="text-foreground">{observerInsight.timeAnalysis.mostActiveTime}</strong></span>
                         )}
                     </div>
                 </div>

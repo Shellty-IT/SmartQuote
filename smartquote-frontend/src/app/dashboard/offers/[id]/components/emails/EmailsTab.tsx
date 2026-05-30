@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { emailsApi } from '@/lib/api/emails.api';
 import { EmptyState } from '@/components/ui';
+import { useTranslations, useLanguage } from '@/i18n';
 import type { EmailLog, EmailLogStatus } from '@/types/email.types';
 
 interface EmailsTabProps {
@@ -13,12 +14,14 @@ interface EmailsTabProps {
 }
 
 function EmailStatusBadge({ status }: { status: EmailLogStatus }) {
-    const config: Record<EmailLogStatus, { label: string; classes: string }> = {
-        SENT: { label: 'Wysłano', classes: 'bg-status-accepted/15 text-status-accepted' },
-        FAILED: { label: 'Błąd', classes: 'bg-destructive/15 text-status-rejected' },
-        DRAFT: { label: 'Szkic', classes: 'bg-secondary text-muted-foreground dark:text-muted-foreground' },
+    const emailsTr = useTranslations('emails');
+    const config: Record<EmailLogStatus, { classes: string }> = {
+        SENT:   { classes: 'bg-status-accepted/15 text-status-accepted' },
+        FAILED: { classes: 'bg-destructive/15 text-status-rejected' },
+        DRAFT:  { classes: 'bg-secondary text-muted-foreground dark:text-muted-foreground' },
     };
-    const { label, classes } = config[status];
+    const label = emailsTr.statuses[status];
+    const { classes } = config[status];
     return (
         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${classes}`}>
             {label}
@@ -41,6 +44,9 @@ function SkeletonRow() {
 
 export function EmailsTab({ offerId, offerNumber }: EmailsTabProps) {
     const router = useRouter();
+    const tr = useTranslations('offerDetail');
+    const commonTr = useTranslations('common');
+    const { language } = useLanguage();
     const [items, setItems] = useState<EmailLog[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -50,19 +56,19 @@ export function EmailsTab({ offerId, offerNumber }: EmailsTabProps) {
         setError(null);
         try {
             const res = await emailsApi.list({ offerId, limit: 50 });
-            if (!res.data) throw new Error('Brak danych');
+            if (!res.data) throw new Error(commonTr.errorTitle);
             setItems(res.data);
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : 'Błąd ładowania');
+            setError(err instanceof Error ? err.message : commonTr.errorTitle);
         } finally {
             setIsLoading(false);
         }
-    }, [offerId]);
+    }, [offerId, commonTr.errorTitle]);
 
     useEffect(() => { load(); }, [load]);
 
     const formatDate = (dateStr: string) =>
-        new Date(dateStr).toLocaleString('pl-PL', {
+        new Date(dateStr).toLocaleString(language === 'en' ? 'en-GB' : 'pl-PL', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
@@ -74,9 +80,9 @@ export function EmailsTab({ offerId, offerNumber }: EmailsTabProps) {
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <div>
-                    <h3 className="text-sm font-semibold text-foreground">Historia korespondencji</h3>
+                    <h3 className="text-sm font-semibold text-foreground">{tr.emails.title}</h3>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                        Wiadomości email powiązane z ofertą {offerNumber}
+                        {tr.emails.subtitle} {offerNumber}
                     </p>
                 </div>
                 <button
@@ -86,7 +92,7 @@ export function EmailsTab({ offerId, offerNumber }: EmailsTabProps) {
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                     </svg>
-                    Nowa wiadomość
+                    {tr.emails.newMessage}
                 </button>
             </div>
 
@@ -108,8 +114,8 @@ export function EmailsTab({ offerId, offerNumber }: EmailsTabProps) {
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
                         }
-                        title="Brak wiadomości"
-                        description="Nie wysłano jeszcze żadnych wiadomości email w kontekście tej oferty"
+                        title={tr.emails.noMessages}
+                        description={tr.emails.noMessagesDesc}
                     />
                 ) : (
                     <div className="divide-y border-border">
@@ -162,7 +168,7 @@ export function EmailsTab({ offerId, offerNumber }: EmailsTabProps) {
                         onClick={() => router.push(`/dashboard/emails?offerId=${offerId}`)}
                         className="text-xs text-primary hover:underline"
                     >
-                        Zobacz pełną historię w module Korespondencja →
+                        {tr.emails.seeAll}
                     </button>
                 </div>
             )}

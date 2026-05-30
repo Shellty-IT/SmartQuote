@@ -7,6 +7,7 @@ import { ConfirmDialog, EmptyState } from '@/components/ui';
 import { emailsApi } from '@/lib/api/emails.api';
 import { BUILT_IN_TEMPLATES } from '@/types/email.types';
 import type { EmailTemplate } from '@/types/email.types';
+import { useTranslations } from '@/i18n';
 
 interface TemplateFormProps {
     initial?: { name: string; subject: string; body: string };
@@ -16,6 +17,8 @@ interface TemplateFormProps {
 }
 
 function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps) {
+    const tr = useTranslations('emailsTemplates');
+    const commonTr = useTranslations('common');
     const [name, setName] = useState(initial?.name ?? '');
     const [subject, setSubject] = useState(initial?.subject ?? '');
     const [body, setBody] = useState(initial?.body ?? '');
@@ -23,9 +26,9 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
 
     const validate = () => {
         const e: Record<string, string> = {};
-        if (!name.trim()) e.name = 'Nazwa jest wymagana';
-        if (!subject.trim()) e.subject = 'Temat jest wymagany';
-        if (!body.trim()) e.body = 'Treść jest wymagana';
+        if (!name.trim()) e.name = tr.validation.nameRequired;
+        if (!subject.trim()) e.subject = tr.validation.subjectRequired;
+        if (!body.trim()) e.body = tr.validation.bodyRequired;
         setErrors(e);
         return Object.keys(e).length === 0;
     };
@@ -39,13 +42,13 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
         <div className="space-y-4">
             <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-1">
-                    Nazwa szablonu <span className="text-status-rejected">*</span>
+                    {tr.formNameLabel} <span className="text-status-rejected">*</span>
                 </label>
                 <input
                     type="text"
                     value={name}
                     onChange={e => setName(e.target.value)}
-                    placeholder="np. Oferta premium"
+                    placeholder={tr.formNamePlaceholder}
                     className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30 bg-card ${
                         errors.name ? 'border-destructive' : 'border-border'
                     }`}
@@ -54,13 +57,13 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
             </div>
             <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-1">
-                    Temat wiadomości <span className="text-status-rejected">*</span>
+                    {tr.formSubjectLabel} <span className="text-status-rejected">*</span>
                 </label>
                 <input
                     type="text"
                     value={subject}
                     onChange={e => setSubject(e.target.value)}
-                    placeholder="Temat emaila"
+                    placeholder={tr.formSubjectPlaceholder}
                     className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30 bg-card ${
                         errors.subject ? 'border-destructive' : 'border-border'
                     }`}
@@ -69,13 +72,13 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
             </div>
             <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-1">
-                    Treść szablonu <span className="text-status-rejected">*</span>
+                    {tr.formBodyLabel} <span className="text-status-rejected">*</span>
                 </label>
                 <textarea
                     value={body}
                     onChange={e => setBody(e.target.value)}
                     rows={10}
-                    placeholder="Treść wiadomości email..."
+                    placeholder={tr.formBodyPlaceholder}
                     className={`w-full px-3 py-2 rounded-xl border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring/30 bg-card resize-y ${
                         errors.body ? 'border-destructive' : 'border-border'
                     }`}
@@ -91,9 +94,7 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
                     onClick={onCancel}
                     disabled={isSaving}
                     className="px-4 py-2 rounded-xl border border-border text-sm text-foreground hover:bg-secondary/60 transition-colors disabled:opacity-60"
-                >
-                    Anuluj
-                </button>
+                >{commonTr.cancel}</button>
                 <button
                     type="button"
                     onClick={handleSubmit}
@@ -114,6 +115,8 @@ function TemplateForm({ initial, onSave, onCancel, isSaving }: TemplateFormProps
 }
 
 export default function EmailTemplatesPage() {
+    const tr = useTranslations('emailsTemplates');
+    const commonTr = useTranslations('common');
     const router = useRouter();
     const [templates, setTemplates] = useState<EmailTemplate[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -129,10 +132,10 @@ export default function EmailTemplatesPage() {
         setIsLoading(true);
         try {
             const res = await emailsApi.getTemplates();
-            if (!res.data) throw new Error('Brak danych');
+            if (!res.data) throw new Error(commonTr.errorTitle);
             setTemplates(res.data.filter(t => !t.isBuiltIn));
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : 'Błąd ładowania');
+            setError(err instanceof Error ? err.message : tr.errLoading);
         } finally {
             setIsLoading(false);
         }
@@ -147,7 +150,7 @@ export default function EmailTemplatesPage() {
             setShowNewForm(false);
             await load();
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : 'Błąd tworzenia szablonu');
+            setError(err instanceof Error ? err.message : tr.errCreate);
         } finally {
             setIsSaving(false);
         }
@@ -160,7 +163,7 @@ export default function EmailTemplatesPage() {
             setEditingId(null);
             await load();
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : 'Błąd aktualizacji szablonu');
+            setError(err instanceof Error ? err.message : tr.errUpdate);
         } finally {
             setIsSaving(false);
         }
@@ -173,7 +176,7 @@ export default function EmailTemplatesPage() {
             setDeleteConfirmId(null);
             await load();
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : 'Błąd usuwania szablonu');
+            setError(err instanceof Error ? err.message : tr.errDelete);
         } finally {
             setIsDeleting(false);
         }
@@ -196,8 +199,8 @@ export default function EmailTemplatesPage() {
                         </svg>
                     </button>
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Szablony wiadomości</h1>
-                        <p className="text-muted-foreground mt-0.5">Zarządzaj szablonami email</p>
+                        <h1 className="text-3xl font-bold tracking-tight">{tr.title}</h1>
+                        <p className="text-muted-foreground mt-0.5">{tr.subtitle}</p>
                     </div>
                 </div>
                 <button
@@ -206,9 +209,7 @@ export default function EmailTemplatesPage() {
                 >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Nowy szablon
-                </button>
+                    </svg>{tr.newTemplate}</button>
             </div>
 
             {error && (
@@ -219,7 +220,7 @@ export default function EmailTemplatesPage() {
 
             {showNewForm && (
                 <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
-                    <h2 className="text-sm font-semibold text-foreground mb-4">Nowy szablon</h2>
+                    <h2 className="text-sm font-semibold text-foreground mb-4">{tr.newTemplate}</h2>
                     <TemplateForm
                         onSave={handleCreate}
                         onCancel={() => setShowNewForm(false)}
@@ -255,7 +256,7 @@ export default function EmailTemplatesPage() {
                                         <button
                                             onClick={() => setPreviewId(previewId === t.id ? null : t.id)}
                                             className="p-1.5 text-muted-foreground hover:text-primary dark:hover:text-primary hover:bg-secondary/60 rounded-lg transition-colors"
-                                            title="Podgląd"
+                                            title={tr.previewTitle}
                                         >
                                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -265,7 +266,7 @@ export default function EmailTemplatesPage() {
                                         <button
                                             onClick={() => router.push('/dashboard/emails/new')}
                                             className="p-1.5 text-muted-foreground hover:text-primary dark:hover:text-primary hover:bg-secondary/60 rounded-lg transition-colors"
-                                            title="Użyj szablonu"
+                                            title={tr.myTemplates}
                                         >
                                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -275,7 +276,7 @@ export default function EmailTemplatesPage() {
                                 </div>
                                 {previewId === t.id && (
                                     <div className="border-t border-border p-4">
-                                        <p className="text-xs font-medium text-muted-foreground mb-2">Podgląd treści:</p>
+                                        <p className="text-xs font-medium text-muted-foreground mb-2">{tr.previewLabel}</p>
                                         <pre className="text-xs text-foreground whitespace-pre-wrap leading-relaxed font-sans bg-surface-subtle/50 p-3 rounded-lg">
                                             {t.body}
                                         </pre>
@@ -288,7 +289,7 @@ export default function EmailTemplatesPage() {
 
                 <div>
                     <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                        Moje szablony ({templates.length})
+                        {tr.myTemplates} ({templates.length})
                     </h2>
 
                     {isLoading ? (
@@ -304,8 +305,8 @@ export default function EmailTemplatesPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h8" />
                                 </svg>
                             }
-                            title="Brak własnych szablonów"
-                            description='Kliknij "Nowy szablon" aby stworzyć własny szablon wiadomości'
+                            title={tr.noTemplates}
+                            description={tr.noTemplatesDesc}
                         />
                     ) : (
                         <div className="space-y-2">
@@ -327,7 +328,7 @@ export default function EmailTemplatesPage() {
                                             <button
                                                 onClick={() => setPreviewId(previewId === t.id ? null : t.id)}
                                                 className="p-1.5 text-muted-foreground hover:text-primary dark:hover:text-primary hover:bg-secondary/60 rounded-lg transition-colors"
-                                                title="Podgląd"
+                                                title={tr.previewTitle}
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -337,7 +338,7 @@ export default function EmailTemplatesPage() {
                                             <button
                                                 onClick={() => { setEditingId(t.id); setShowNewForm(false); setPreviewId(null); }}
                                                 className="p-1.5 text-muted-foreground hover:text-primary dark:hover:text-primary hover:bg-secondary/60 rounded-lg transition-colors"
-                                                title="Edytuj"
+                                                title={commonTr.edit}
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -346,7 +347,7 @@ export default function EmailTemplatesPage() {
                                             <button
                                                 onClick={() => setDeleteConfirmId(t.id)}
                                                 className="p-1.5 text-muted-foreground hover:text-status-rejected dark:hover:text-destructive hover:bg-secondary/60 rounded-lg transition-colors"
-                                                title="Usuń"
+                                                title={commonTr.delete}
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -368,7 +369,7 @@ export default function EmailTemplatesPage() {
 
                                     {previewId === t.id && editingId !== t.id && (
                                         <div className="border-t border-border p-4">
-                                            <p className="text-xs font-medium text-muted-foreground mb-2">Podgląd treści:</p>
+                                            <p className="text-xs font-medium text-muted-foreground mb-2">{tr.previewLabel}</p>
                                             <pre className="text-xs text-foreground whitespace-pre-wrap leading-relaxed font-sans bg-surface-subtle/50 p-3 rounded-lg">
                                                 {t.body}
                                             </pre>
@@ -383,7 +384,7 @@ export default function EmailTemplatesPage() {
                 {builtInPreview && (
                     <div className="mt-2 p-4 bg-card border-border border rounded-xl">
                         <p className="text-xs font-medium text-muted-foreground mb-2">
-                            Podgląd: {builtInPreview.name}
+                            {tr.previewTitle} {builtInPreview.name}
                         </p>
                         <pre className="text-xs text-foreground whitespace-pre-wrap leading-relaxed font-sans bg-surface-subtle/50 p-3 rounded-lg">
                             {builtInPreview.body}
@@ -396,9 +397,9 @@ export default function EmailTemplatesPage() {
                 isOpen={!!deleteConfirmId}
                 onClose={() => setDeleteConfirmId(null)}
                 onConfirm={() => deleteConfirmId && handleDelete(deleteConfirmId)}
-                title="Usuń szablon"
-                description="Czy na pewno chcesz usunąć ten szablon? Operacja jest nieodwracalna."
-                confirmLabel="Usuń"
+                title={tr.deleteTitle}
+                description={tr.deleteDesc}
+                confirmLabel={commonTr.delete}
                 isLoading={isDeleting}
             />
         </div>

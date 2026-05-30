@@ -2,8 +2,9 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import { useTranslations } from '@/i18n';
 import type { Tab } from '../constants';
-import { TABS_CONFIG } from '../constants';
+import { TAB_IDS } from '../constants';
 
 interface OfferTabsProps {
     activeTab: Tab;
@@ -14,6 +15,15 @@ interface OfferTabsProps {
 }
 
 export function OfferTabs({ activeTab, onTabChange, viewCount, commentsCount, emailsCount }: OfferTabsProps) {
+    const tr = useTranslations('offerDetail');
+
+    const tabLabels: Record<Tab, string> = {
+        details: tr.tabs.details,
+        analytics: tr.tabs.analytics,
+        comments: tr.tabs.comments,
+        emails: tr.tabs.emails,
+    };
+
     const getCount = (id: Tab): number | undefined => {
         if (id === 'analytics') return viewCount || undefined;
         if (id === 'comments') return commentsCount || undefined;
@@ -23,13 +33,13 @@ export function OfferTabs({ activeTab, onTabChange, viewCount, commentsCount, em
 
     return (
         <div className="flex w-fit flex-wrap gap-1 rounded-xl border border-border bg-surface-subtle p-1">
-            {TABS_CONFIG.map((tab) => {
-                const count = getCount(tab.id);
-                const active = activeTab === tab.id;
+            {TAB_IDS.map((id) => {
+                const count = getCount(id);
+                const active = activeTab === id;
                 return (
                     <button
-                        key={tab.id}
-                        onClick={() => onTabChange(tab.id)}
+                        key={id}
+                        onClick={() => onTabChange(id)}
                         className={cn(
                             'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all',
                             active
@@ -37,7 +47,7 @@ export function OfferTabs({ activeTab, onTabChange, viewCount, commentsCount, em
                                 : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground',
                         )}
                     >
-                        {tab.label}
+                        {tabLabels[id]}
                         {count !== undefined && count > 0 && (
                             <span className={cn(
                                 'rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums',

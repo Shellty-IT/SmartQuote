@@ -47,7 +47,7 @@ export function useClients(initialFilters: ClientFilters = {}): UseClientsResult
             setPage(response.meta?.page || 1);
             setTotalPages(response.meta?.totalPages || 1);
         } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Błąd pobierania klientów';
+            const message = err instanceof ApiError ? err.message : 'Failed to fetch clients';
             setError(message);
             setClients([]);
         } finally {
@@ -117,7 +117,7 @@ export function useClient(id: string) {
             const response = await clientsApi.get(id);
             setClient(response.data ?? null);
         } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Błąd pobierania klienta';
+            const message = err instanceof ApiError ? err.message : 'Failed to fetch client';
             setError(message);
             setClient(null);
         } finally {
@@ -145,7 +145,7 @@ export function useClientsStats() {
             const response = await clientsApi.stats();
             setStats(response.data ?? null);
         } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Błąd pobierania statystyk';
+            const message = err instanceof ApiError ? err.message : 'Failed to fetch stats';
             setError(message);
         } finally {
             setIsLoading(false);

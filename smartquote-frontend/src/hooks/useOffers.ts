@@ -60,7 +60,7 @@ export function useOffers(initialFilters: OfferFilters = {}): UseOffersResult {
             setPage(response.meta?.page || 1);
             setTotalPages(response.meta?.totalPages || 1);
         } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Błąd pobierania ofert';
+            const message = err instanceof ApiError ? err.message : 'Failed to fetch offers';
             setError(message);
             setOffers([]);
         } finally {
@@ -80,7 +80,7 @@ export function useOffers(initialFilters: OfferFilters = {}): UseOffersResult {
         const response = await offersApi.create(data);
         await fetchOffers();
         if (!response.data) {
-            throw new Error('Nie udało się utworzyć oferty');
+            throw new Error('Failed to create offer');
         }
         return response.data;
     }, [fetchOffers]);
@@ -89,7 +89,7 @@ export function useOffers(initialFilters: OfferFilters = {}): UseOffersResult {
         const response = await offersApi.update(id, data);
         await fetchOffers();
         if (!response.data) {
-            throw new Error('Nie udało się zaktualizować oferty');
+            throw new Error('Failed to update offer');
         }
         return response.data;
     }, [fetchOffers]);
@@ -103,7 +103,7 @@ export function useOffers(initialFilters: OfferFilters = {}): UseOffersResult {
         const response = await offersApi.duplicate(id);
         await fetchOffers();
         if (!response.data) {
-            throw new Error('Nie udało się zduplikować oferty');
+            throw new Error('Failed to duplicate offer');
         }
         return response.data;
     }, [fetchOffers]);
@@ -140,7 +140,7 @@ export function useOffer(id: string) {
             const response = await offersApi.get(id);
             setOffer(response.data ?? null);
         } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Błąd pobierania oferty';
+            const message = err instanceof ApiError ? err.message : 'Failed to fetch offer';
             setError(message);
             setOffer(null);
         } finally {
@@ -168,7 +168,7 @@ export function useOffersStats() {
             const response = await offersApi.stats();
             setStats(response.data ?? null);
         } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Błąd pobierania statystyk';
+            const message = err instanceof ApiError ? err.message : 'Failed to fetch stats';
             setError(message);
         } finally {
             setIsLoading(false);
@@ -195,7 +195,7 @@ export function useOfferPublish(id: string) {
             const response = await offersApi.publish(id);
             return response.data ?? null;
         } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Nie udało się opublikować oferty';
+            const message = err instanceof ApiError ? err.message : 'Failed to publish offer';
             setError(message);
             return null;
         } finally {
@@ -211,7 +211,7 @@ export function useOfferPublish(id: string) {
             await offersApi.unpublish(id);
             return true;
         } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Nie udało się dezaktywować linku';
+            const message = err instanceof ApiError ? err.message : 'Failed to deactivate link';
             setError(message);
             return false;
         } finally {
@@ -234,7 +234,7 @@ export function useOfferSendToClient(id: string) {
             const response = await offersApi.sendToClient(id);
             return response.data ?? null;
         } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Nie udało się wysłać oferty';
+            const message = err instanceof ApiError ? err.message : 'Failed to send offer';
             setError(message);
             return null;
         } finally {
@@ -260,7 +260,7 @@ export function useOfferAnalytics(id: string) {
             const response = await offersApi.analytics(id);
             setAnalytics(response.data ?? null);
         } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Błąd pobierania analityki';
+            const message = err instanceof ApiError ? err.message : 'Failed to fetch analytics';
             setError(message);
             setAnalytics(null);
         } finally {
@@ -291,7 +291,7 @@ export function useOfferComments(id: string) {
             const response = await offersApi.getComments(id);
             setComments(response.data ?? []);
         } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Błąd pobierania komentarzy';
+            const message = err instanceof ApiError ? err.message : 'Failed to fetch comments';
             setError(message);
             setComments([]);
         } finally {
@@ -315,7 +315,7 @@ export function useOfferComments(id: string) {
             }
             return null;
         } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Nie udało się dodać komentarza';
+            const message = err instanceof ApiError ? err.message : 'Failed to add comment';
             setError(message);
             return null;
         } finally {

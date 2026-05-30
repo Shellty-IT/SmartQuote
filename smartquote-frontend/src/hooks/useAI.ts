@@ -62,7 +62,7 @@ export function useAI() {
                 m.id === loadingMessage.id ? aiMessage : m
             ));
         } catch (error: unknown) {
-            let errorMessage = 'Wystąpił błąd. Spróbuj ponownie.';
+            let errorMessage = 'An error occurred. Please try again.';
 
             if (error instanceof Error) {
                 errorMessage = error.message;

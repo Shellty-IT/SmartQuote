@@ -1,6 +1,8 @@
 // src/app/dashboard/offers/new/components/StepDetails.tsx
+'use client';
 
 import { Input } from '@/components/ui';
+import { useTranslations } from '@/i18n';
 import type { OfferDetails } from '../types';
 
 interface StepDetailsProps {
@@ -9,24 +11,27 @@ interface StepDetailsProps {
 }
 
 export default function StepDetails({ details, onUpdate }: StepDetailsProps) {
+    const tr = useTranslations('offerNew');
+    const d = tr.details;
+
     return (
         <div>
-            <h2 className="text-lg font-semibold text-foreground mb-4">Szczegóły oferty</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-4">{d.title}</h2>
             <div className="space-y-4">
                 <Input
-                    label="Tytuł oferty"
+                    label={d.offerTitle}
                     value={details.title}
                     onChange={(e) => onUpdate('title', e.target.value)}
-                    placeholder="np. System CRM dla firmy X"
+                    placeholder={d.offerTitlePlaceholder}
                     required
                 />
 
                 <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">Opis</label>
+                    <label className="block text-sm font-medium text-foreground mb-1">{d.description}</label>
                     <textarea
                         value={details.description}
                         onChange={(e) => onUpdate('description', e.target.value)}
-                        placeholder="Krótki opis zakresu oferty..."
+                        placeholder={d.descriptionPlaceholder}
                         rows={4}
                         style={{ resize: 'vertical', minHeight: '100px' }}
                         className="w-full px-3 py-2 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
@@ -35,14 +40,14 @@ export default function StepDetails({ details, onUpdate }: StepDetailsProps) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
-                        label="Ważna do"
+                        label={d.validUntil}
                         type="date"
                         value={details.validUntil}
                         onChange={(e) => onUpdate('validUntil', e.target.value)}
                         min={new Date().toISOString().split('T')[0]}
                     />
                     <Input
-                        label="Termin płatności (dni)"
+                        label={d.paymentDays}
                         type="number"
                         value={details.paymentDays}
                         onChange={(e) => onUpdate('paymentDays', parseInt(e.target.value) || 14)}
@@ -52,7 +57,7 @@ export default function StepDetails({ details, onUpdate }: StepDetailsProps) {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">Warunki płatności</label>
+                    <label className="block text-sm font-medium text-foreground mb-1">{d.paymentTerms}</label>
                     <textarea
                         value={details.terms}
                         onChange={(e) => onUpdate('terms', e.target.value)}
@@ -63,11 +68,11 @@ export default function StepDetails({ details, onUpdate }: StepDetailsProps) {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">Notatki wewnętrzne</label>
+                    <label className="block text-sm font-medium text-foreground mb-1">{d.internalNotes}</label>
                     <textarea
                         value={details.notes}
                         onChange={(e) => onUpdate('notes', e.target.value)}
-                        placeholder="Notatki widoczne tylko dla Ciebie..."
+                        placeholder={d.internalNotesPlaceholder}
                         rows={2}
                         style={{ resize: 'vertical', minHeight: '70px' }}
                         className="w-full px-3 py-2 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
@@ -87,15 +92,9 @@ export default function StepDetails({ details, onUpdate }: StepDetailsProps) {
                                 <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                 </svg>
-                                <span className="text-sm font-medium text-foreground">
-                                    Formalne potwierdzenie akceptacji
-                                </span>
+                                <span className="text-sm font-medium text-foreground">{d.auditTrailTitle}</span>
                             </div>
-                            <p className="text-xs text-muted-foreground mt-1">
-                                Przy akceptacji zostanie zapisany adres IP, przeglądarka oraz wygenerowany
-                                cyfrowy odcisk treści (SHA-256). Klient otrzyma email z potwierdzeniem i hashem.
-                                PDF będzie zawierał certyfikat akceptacji.
-                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">{d.auditTrailDesc}</p>
                         </div>
                     </label>
                 </div>

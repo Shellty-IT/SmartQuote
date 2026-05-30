@@ -9,11 +9,14 @@ import EmptyState from '@/components/ui/EmptyState';
 import { SkeletonTableRow, SkeletonMobileCard } from '@/components/ui/Skeleton';
 import { offerTemplatesApi, ApiError } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
+import { useTranslations } from '@/i18n';
 import type { OfferTemplate } from '@/types';
 
 export default function OfferTemplatesPage() {
     const router = useRouter();
     const toast = useToast();
+    const tr = useTranslations('offerTemplatesPage');
+    const commonTr = useTranslations('common');
     const [templates, setTemplates] = useState<OfferTemplate[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -33,7 +36,7 @@ export default function OfferTemplatesPage() {
             setTemplates(response.data ?? []);
         } catch (err) {
             if (err instanceof ApiError) {
-                toast.error('Błąd', err.message);
+                toast.error(commonTr.errorTitle, err.message);
             }
         } finally {
             setIsLoading(false);
@@ -62,12 +65,12 @@ export default function OfferTemplatesPage() {
         setIsDeleting(true);
         try {
             await offerTemplatesApi.delete(deleteModal.id);
-            toast.success('Usunięto', `Szablon "${deleteModal.name}" został usunięty`);
+            toast.success(tr.toasts.deleted, tr.toasts.deletedDesc.replace("{name}", deleteModal.name));
             setDeleteModal(null);
             loadTemplates();
         } catch (err) {
             if (err instanceof ApiError) {
-                toast.error('Błąd', err.message);
+                toast.error(commonTr.errorTitle, err.message);
             }
         } finally {
             setIsDeleting(false);
@@ -80,9 +83,9 @@ export default function OfferTemplatesPage() {
         <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
                 <div>
-                    <h1 className="text-xl md:text-3xl font-bold tracking-tight">Szablony ofert</h1>
+                    <h1 className="text-xl md:text-3xl font-bold tracking-tight">{tr.title}</h1>
                     <p className="text-sm text-muted-foreground mt-1">
-                        Twórz presety pozycji do szybkiego generowania ofert
+                        {tr.subtitle}
                     </p>
                 </div>
                 <Link href="/dashboard/offer-templates/new">
@@ -90,7 +93,7 @@ export default function OfferTemplatesPage() {
                         <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                         </svg>
-                        Nowy szablon
+                        {tr.newTemplate}
                     </Button>
                 </Link>
             </div>
@@ -107,7 +110,7 @@ export default function OfferTemplatesPage() {
                     </svg>
                     <input
                         type="text"
-                        placeholder="Szukaj szablonu..."
+                        placeholder={tr.searchPlaceholder}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="w-full pl-9 pr-4 py-2.5 rounded-lg border-border bg-card text-foreground text-sm text-foreground"
@@ -118,7 +121,7 @@ export default function OfferTemplatesPage() {
                     onChange={(e) => setCategory(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-lg border-border bg-card text-foreground text-sm text-foreground"
                 >
-                    <option value="">Wszystkie kategorie</option>
+                    <option value="">{tr.allCategories}</option>
                     {categories.map((cat) => (
                         <option key={cat} value={cat}>
                             {cat}
@@ -135,11 +138,11 @@ export default function OfferTemplatesPage() {
                                 <table className="w-full">
                                     <thead className="bg-surface-subtle border-b border-border">
                                     <tr>
-                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-left">Nazwa</th>
-                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-left">Kategoria</th>
-                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-center">Pozycje</th>
-                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-center">Płatność</th>
-                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-right">Akcje</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-left">{tr.colName}</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-left">{tr.colCategory}</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-center">{tr.colItems}</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-center">{tr.colPayment}</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-right">{tr.colActions}</th>
                                     </tr>
                                     </thead>
                                     <tbody className="divide-y border-border">
@@ -165,16 +168,16 @@ export default function OfferTemplatesPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
                             </svg>
                         }
-                        title={hasFilters ? 'Brak wyników' : 'Brak szablonów'}
+                        title={hasFilters ? tr.noResults : tr.noTemplates}
                         description={
                             hasFilters
-                                ? 'Spróbuj zmienić kryteria wyszukiwania'
-                                : 'Stwórz swój pierwszy szablon oferty'
+                                ? tr.noResultsDesc
+                                : tr.createFirst
                         }
                         action={
                             !hasFilters
                                 ? {
-                                    label: 'Stwórz szablon',
+                                    label: tr.createBtn,
                                     onClick: () => router.push('/dashboard/offer-templates/new'),
                                 }
                                 : undefined
@@ -189,11 +192,11 @@ export default function OfferTemplatesPage() {
                                 <table className="w-full">
                                     <thead className="bg-surface-subtle border-b border-border">
                                     <tr>
-                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-left">Nazwa</th>
-                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-left">Kategoria</th>
-                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-center">Pozycje</th>
-                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-center">Płatność</th>
-                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-right">Akcje</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-left">{tr.colName}</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-left">{tr.colCategory}</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-center">{tr.colItems}</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-center">{tr.colPayment}</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground text-right">{tr.colActions}</th>
                                     </tr>
                                     </thead>
                                     <tbody className="divide-y border-border">
@@ -225,7 +228,7 @@ export default function OfferTemplatesPage() {
                                             </td>
                                             <td className="px-6 py-4 text-center">
                                                     <span className="text-sm text-foreground">
-                                                        {template.defaultPaymentDays} dni
+                                                        {tr.paymentDays.replace("{n}", String(template.defaultPaymentDays))}
                                                     </span>
                                             </td>
                                             <td className="px-6 py-4">
@@ -233,7 +236,7 @@ export default function OfferTemplatesPage() {
                                                     <button
                                                         onClick={() => router.push(`/dashboard/offer-templates/${template.id}`)}
                                                         className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground transition-colors"
-                                                        title="Edytuj"
+                                                        title={commonTr.edit}
                                                     >
                                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -242,7 +245,7 @@ export default function OfferTemplatesPage() {
                                                     <button
                                                         onClick={() => setDeleteModal(template)}
                                                         className="p-2 rounded-lg hover:bg-status-rejected/10 text-status-rejected transition-colors"
-                                                        title="Usuń"
+                                                        title={commonTr.delete}
                                                     >
                                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -279,7 +282,7 @@ export default function OfferTemplatesPage() {
                                 <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3">
                                     <span>{template.items.length} pozycji</span>
                                     <span>·</span>
-                                    <span>{template.defaultPaymentDays} dni płatności</span>
+                                    <span>{tr.paymentDays.replace("{n}", String(template.defaultPaymentDays))} płatności</span>
                                 </div>
                                 <div className="flex gap-2">
                                     <Button
@@ -290,9 +293,7 @@ export default function OfferTemplatesPage() {
                                     >
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                        Edytuj
-                                    </Button>
+                                        </svg>{commonTr.edit}</Button>
                                     <button
                                         onClick={() => setDeleteModal(template)}
                                         className="px-3 py-2 rounded-lg border border-destructive/30 bg-status-rejected/10 text-status-rejected text-sm font-medium hover:bg-status-rejected/20 transition-colors"
@@ -312,9 +313,9 @@ export default function OfferTemplatesPage() {
                 isOpen={!!deleteModal}
                 onClose={() => setDeleteModal(null)}
                 onConfirm={handleDelete}
-                title="Usuń szablon"
-                description={`Czy na pewno chcesz usunąć szablon "${deleteModal?.name}"? Ta operacja jest nieodwracalna.`}
-                confirmLabel="Usuń"
+                title={tr.deleteTitle}
+                description={tr.deleteDesc}
+                confirmLabel={commonTr.delete}
                 isLoading={isDeleting}
             />
         </div>

@@ -1,6 +1,8 @@
 // src/app/dashboard/offers/[id]/components/comments/CommentInput.tsx
 'use client';
 
+import { useTranslations } from '@/i18n';
+
 interface CommentInputProps {
     value: string;
     onChange: (value: string) => void;
@@ -9,6 +11,7 @@ interface CommentInputProps {
 }
 
 export function CommentInput({ value, onChange, onSubmit, isSending }: CommentInputProps) {
+    const commentTr = useTranslations('offerDetail');
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -23,7 +26,7 @@ export function CommentInput({ value, onChange, onSubmit, isSending }: CommentIn
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={isSending}
-          placeholder="Odpowiedz klientowi..."
+          placeholder={commentTr.comments.title + "..."}
           rows={2}
           className="flex-1 px-4 py-3 rounded-xl border border-border bg-card text-foreground resize-none disabled:opacity-50 text-sm"
       />

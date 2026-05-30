@@ -8,10 +8,13 @@ import { useClients } from '@/hooks/useClients';
 import { useOffers } from '@/hooks/useOffers';
 import { useContracts } from '@/hooks/useContracts';
 import { Button, Input, Select, Textarea } from '@/components/ui';
+import { useTranslations } from '@/i18n';
 import { CreateFollowUpData } from '@/types';
 
 function NewFollowUpForm() {
     const router = useRouter();
+    const tr = useTranslations('followupNew');
+    const followupsTr = useTranslations('followups');
     const searchParams = useSearchParams();
 
     const [isLoading, setIsLoading] = useState(false);
@@ -45,11 +48,11 @@ function NewFollowUpForm() {
         const errors: Record<string, string> = {};
 
         if (!formData.title || formData.title.length < 2) {
-            errors.title = 'Tytuł musi mieć minimum 2 znaki';
+            errors.title = tr.validation.titleTooShort;
         }
 
         if (!formData.dueDate) {
-            errors.dueDate = 'Termin jest wymagany';
+            errors.dueDate = tr.validation.dueDateRequired;
         }
 
         setFieldErrors(errors);
@@ -83,7 +86,7 @@ function NewFollowUpForm() {
             if (err instanceof Error) {
                 setError(err.message);
             } else {
-                setError('Wystąpił nieoczekiwany błąd');
+                setError(tr.unexpectedError);
             }
         } finally {
             setIsLoading(false);
@@ -100,10 +103,10 @@ function NewFollowUpForm() {
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    Powrót
+                    {tr.back}
                 </button>
-                <h1 className="text-3xl font-bold tracking-tight">Nowy follow-up</h1>
-                <p className="text-muted-foreground mt-1">Utwórz nowe zadanie lub przypomnienie</p>
+                <h1 className="text-3xl font-bold tracking-tight">{tr.title}</h1>
+                <p className="text-muted-foreground mt-1">{tr.subtitle}</p>
             </div>
 
             {error && (
@@ -114,47 +117,35 @@ function NewFollowUpForm() {
 
             <form onSubmit={handleSubmit}>
                 <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
-                    <h2 className="text-lg font-semibold text-foreground mb-4">Podstawowe informacje</h2>
+                    <h2 className="text-lg font-semibold text-foreground mb-4">{tr.basicInfo}</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="md:col-span-2">
                             <Input
-                                label="Tytuł"
+                                label={tr.titleLabel}
                                 name="title"
                                 value={formData.title}
                                 onChange={handleChange}
                                 error={fieldErrors.title}
                                 required
-                                placeholder="np. Zadzwonić do klienta"
+                                placeholder={tr.titlePlaceholder}
                             />
                         </div>
                         <Select
-                            label="Typ"
+                            label={tr.typeLabel}
                             name="type"
                             value={formData.type}
                             onChange={handleChange}
-                            options={[
-                                { value: 'CALL', label: '📞 Telefon' },
-                                { value: 'EMAIL', label: '✉️ Email' },
-                                { value: 'MEETING', label: '🤝 Spotkanie' },
-                                { value: 'TASK', label: '✅ Zadanie' },
-                                { value: 'REMINDER', label: '🔔 Przypomnienie' },
-                                { value: 'OTHER', label: '📌 Inne' },
-                            ]}
+                            options={Object.entries(tr.types).map(([v, l]) => ({ value: v, label: l }))}
                         />
                         <Select
-                            label="Priorytet"
+                            label={tr.priorityLabel}
                             name="priority"
                             value={formData.priority}
                             onChange={handleChange}
-                            options={[
-                                { value: 'LOW', label: 'Niski' },
-                                { value: 'MEDIUM', label: 'Średni' },
-                                { value: 'HIGH', label: 'Wysoki' },
-                                { value: 'URGENT', label: 'Pilne' },
-                            ]}
+                            options={Object.entries(followupsTr.priorities).map(([v, l]) => ({ value: v, label: l }))}
                         />
                         <Input
-                            label="Termin"
+                            label={tr.dueDateLabel}
                             name="dueDate"
                             type="date"
                             value={formData.dueDate}
@@ -166,46 +157,46 @@ function NewFollowUpForm() {
                 </div>
 
                 <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
-                    <h2 className="text-lg font-semibold text-foreground mb-4">Opis</h2>
+                    <h2 className="text-lg font-semibold text-foreground mb-4">{tr.descSection}</h2>
                     <Textarea
                         name="description"
                         value={formData.description || ''}
                         onChange={handleChange}
-                        placeholder="Szczegółowy opis zadania..."
+                        placeholder={tr.descPlaceholder}
                         rows={3}
                     />
                 </div>
 
                 <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
-                    <h2 className="text-lg font-semibold text-foreground mb-4">Powiązania (opcjonalne)</h2>
+                    <h2 className="text-lg font-semibold text-foreground mb-4">{tr.linksSection}</h2>
                     <div className="grid grid-cols-1 gap-4">
                         <Select
-                            label="Klient"
+                            label={tr.clientLabel}
                             name="clientId"
                             value={formData.clientId || ''}
                             onChange={handleChange}
                             options={[
-                                { value: '', label: 'Brak powiązania' },
+                                { value: '', label: tr.noLink },
                                 ...clients.map((c) => ({ value: c.id, label: c.name })),
                             ]}
                         />
                         <Select
-                            label="Oferta"
+                            label={tr.offerLabel}
                             name="offerId"
                             value={formData.offerId || ''}
                             onChange={handleChange}
                             options={[
-                                { value: '', label: 'Brak powiązania' },
+                                { value: '', label: tr.noLink },
                                 ...offers.map((o) => ({ value: o.id, label: `${o.number} - ${o.title}` })),
                             ]}
                         />
                         <Select
-                            label="Umowa"
+                            label={tr.contractLabel}
                             name="contractId"
                             value={formData.contractId || ''}
                             onChange={handleChange}
                             options={[
-                                { value: '', label: 'Brak powiązania' },
+                                { value: '', label: tr.noLink },
                                 ...contracts.map((c) => ({ value: c.id, label: `${c.number} - ${c.title}` })),
                             ]}
                         />
@@ -213,22 +204,22 @@ function NewFollowUpForm() {
                 </div>
 
                 <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
-                    <h2 className="text-lg font-semibold text-foreground mb-4">Notatki</h2>
+                    <h2 className="text-lg font-semibold text-foreground mb-4">{tr.notesSection}</h2>
                     <Textarea
                         name="notes"
                         value={formData.notes || ''}
                         onChange={handleChange}
-                        placeholder="Dodatkowe notatki..."
+                        placeholder={tr.notesPlaceholder}
                         rows={3}
                     />
                 </div>
 
                 <div className="flex flex-col sm:flex-row justify-end gap-3">
                     <Button type="button" variant="outline" onClick={() => router.back()}>
-                        Anuluj
+                        {tr.cancel}
                     </Button>
                     <Button type="submit" isLoading={isLoading}>
-                        Utwórz follow-up
+                        {tr.submit}
                     </Button>
                 </div>
             </form>
@@ -237,10 +228,11 @@ function NewFollowUpForm() {
 }
 
 function NewFollowUpLoading() {
+    const commonTr = useTranslations('common');
     return (
         <div className="flex flex-col items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            <p className="mt-4 text-muted-foreground">Ładowanie...</p>
+            <p className="mt-4 text-muted-foreground">{commonTr.loading}</p>
         </div>
     );
 }

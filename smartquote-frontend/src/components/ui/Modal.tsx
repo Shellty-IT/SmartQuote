@@ -3,6 +3,7 @@
 import { ReactNode, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from '@/i18n';
 
 interface ModalProps {
     isOpen: boolean;
@@ -29,6 +30,7 @@ export default function Modal({
     children,
     size = 'md',
 }: ModalProps) {
+    const tr = useTranslations('common');
     useEffect(() => {
         if (!isOpen) return;
         const handler = (e: KeyboardEvent) => {
@@ -76,7 +78,7 @@ export default function Modal({
                     )}
                     <button
                         onClick={onClose}
-                        aria-label="Zamknij"
+                        aria-label={tr.close}
                         className="absolute right-4 top-4 rounded-lg p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                     >
                         <X className="h-4 w-4" />

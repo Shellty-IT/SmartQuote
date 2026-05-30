@@ -3,6 +3,7 @@
 import { Input, Select, Textarea } from '@/components/ui';
 import { formatCurrency } from '@/lib/utils';
 import AIPriceInsight from '@/components/ai/AIPriceInsight';
+import { useTranslations } from '@/i18n';
 import { VAT_RATES, UNITS } from '../constants';
 import type { ExtendedOfferItem, OfferTotalsData } from '../types';
 
@@ -25,6 +26,8 @@ export default function OfferItemForm({
                                           onUpdate,
                                           onRemove,
                                       }: OfferItemFormProps) {
+    const tr = useTranslations('offerNew');
+    const f = tr.itemForm;
     return (
         <div
             className={`p-4 rounded-xl space-y-4 ${
@@ -36,7 +39,7 @@ export default function OfferItemForm({
             <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-muted-foreground">
-                        Pozycja {index + 1}
+                        {f.title} {index + 1}
                     </span>
                     {item.variantName.trim() && (
                         <span className="text-xs px-2 py-0.5 rounded-full bg-primary/15 text-primary font-medium">
@@ -59,16 +62,16 @@ export default function OfferItemForm({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                     <Input
-                        label="Nazwa"
+                        label={f.name}
                         value={item.name}
                         onChange={(e) => onUpdate(index, 'name', e.target.value)}
-                        placeholder="np. Wdrożenie systemu CRM"
+                        placeholder={f.namePlaceholder}
                         required
                     />
                 </div>
                 <div className="md:col-span-2">
                     <Textarea
-                        label="Opis (opcjonalnie)"
+                        label={f.description}
                         value={item.description || ''}
                         onChange={(e) => onUpdate(index, 'description', e.target.value)}
                         rows={2}
@@ -78,7 +81,7 @@ export default function OfferItemForm({
 
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <Input
-                    label="Ilość"
+                    label={f.qty}
                     type="number"
                     value={item.quantity}
                     onChange={(e) => onUpdate(index, 'quantity', parseFloat(e.target.value) || 0)}
@@ -86,13 +89,13 @@ export default function OfferItemForm({
                     step="0.01"
                 />
                 <Select
-                    label="Jednostka"
+                    label={f.unit}
                     value={item.unit || 'szt.'}
                     onChange={(e) => onUpdate(index, 'unit', e.target.value)}
                     options={UNITS}
                 />
                 <Input
-                    label="Cena netto"
+                    label={f.netPrice}
                     type="number"
                     value={item.unitPrice}
                     onChange={(e) => onUpdate(index, 'unitPrice', parseFloat(e.target.value) || 0)}
@@ -100,13 +103,13 @@ export default function OfferItemForm({
                     step="0.01"
                 />
                 <Select
-                    label="VAT"
+                    label={f.vat}
                     value={String(item.vatRate || 23)}
                     onChange={(e) => onUpdate(index, 'vatRate', parseInt(e.target.value))}
                     options={VAT_RATES}
                 />
                 <Input
-                    label="Rabat %"
+                    label={f.discount}
                     type="number"
                     value={item.discount || 0}
                     onChange={(e) => onUpdate(index, 'discount', parseFloat(e.target.value) || 0)}
@@ -117,10 +120,10 @@ export default function OfferItemForm({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
-                    label="Wariant (opcjonalnie)"
+                    label={f.variant}
                     value={item.variantName}
                     onChange={(e) => onUpdate(index, 'variantName', e.target.value)}
-                    placeholder="np. Basic, Standard, Premium"
+                    placeholder={f.variantPlaceholder}
                     list={`variant-suggestions-${index}`}
                 />
                 {uniqueVariants.length > 0 && (
@@ -149,19 +152,15 @@ export default function OfferItemForm({
                         className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
                     />
                     <div>
-                        <span className="text-sm font-medium text-foreground">
-                            Pozycja opcjonalna
-                        </span>
-                        <p className="text-xs text-muted-foreground">
-                            Klient może odznaczyć tę pozycję lub zmienić ilość
-                        </p>
+                        <span className="text-sm font-medium text-foreground">{f.optional}</span>
+                        <p className="text-xs text-muted-foreground">{f.optionalHint}</p>
                     </div>
                 </label>
 
                 {item.isOptional && (
                     <div className="flex gap-4 mt-3 pl-7">
                         <Input
-                            label="Min. ilość"
+                            label={f.minQty}
                             type="number"
                             value={item.minQuantity}
                             onChange={(e) => onUpdate(index, 'minQuantity', parseInt(e.target.value) || 1)}
@@ -169,7 +168,7 @@ export default function OfferItemForm({
                             className="w-32"
                         />
                         <Input
-                            label="Max. ilość"
+                            label={f.maxQty}
                             type="number"
                             value={item.maxQuantity}
                             onChange={(e) => onUpdate(index, 'maxQuantity', parseInt(e.target.value) || 100)}
@@ -182,13 +181,13 @@ export default function OfferItemForm({
 
             <div className="flex justify-end gap-4 pt-2 border-t border-border">
                 <span className="text-sm text-muted-foreground">
-                    Netto: <strong>{formatCurrency(itemTotals.totalNet)}</strong>
+                    {f.net} <strong>{formatCurrency(itemTotals.totalNet)}</strong>
                 </span>
                 <span className="text-sm text-muted-foreground">
-                    VAT: <strong>{formatCurrency(itemTotals.totalVat)}</strong>
+                    {f.vat2} <strong>{formatCurrency(itemTotals.totalVat)}</strong>
                 </span>
                 <span className="text-sm text-foreground">
-                    Brutto: <strong>{formatCurrency(itemTotals.totalGross)}</strong>
+                    {f.gross} <strong>{formatCurrency(itemTotals.totalGross)}</strong>
                 </span>
             </div>
         </div>

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { offerTemplatesApi, ApiError } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
+import { useTranslations } from '@/i18n';
 import type { OfferTemplate, UpdateOfferTemplateInput, CreateOfferTemplateItemInput } from '@/types';
 
 interface PageProps {
@@ -27,6 +28,8 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
     const { id } = use(params);
     const router = useRouter();
     const toast = useToast();
+    const tr = useTranslations('offerTemplateForm');
+    const commonTr = useTranslations('common');
 
     const [template, setTemplate] = useState<OfferTemplate | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -69,7 +72,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
             }
         } catch (err) {
             if (err instanceof ApiError) {
-                toast.error('Błąd', err.message);
+                toast.error(commonTr.errorTitle, err.message);
                 router.push('/dashboard/offer-templates');
             }
         } finally {
@@ -112,11 +115,11 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
 
     async function handleSubmit() {
         if (name.length < 3) {
-            toast.error('Błąd walidacji', 'Nazwa szablonu musi mieć minimum 3 znaki');
+            toast.error(tr.toasts.validationError, tr.toasts.nameTooShort);
             return;
         }
         if (items.length === 0 || items.some((i) => !i.name || i.quantity <= 0)) {
-            toast.error('Błąd walidacji', 'Wszystkie pozycje muszą mieć nazwę i ilość większą od 0');
+            toast.error(tr.toasts.validationError, tr.toasts.itemsInvalid);
             return;
         }
 
@@ -133,11 +136,11 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
             };
 
             await offerTemplatesApi.update(id, data);
-            toast.success('Szablon zaktualizowany', `"${name}" został zapisany`);
+            toast.success(tr.toasts.updated, `"${name}" ${tr.toasts.updated}`);
             router.push('/dashboard/offer-templates');
         } catch (err) {
             if (err instanceof ApiError) {
-                toast.error('Błąd', err.message);
+                toast.error(commonTr.errorTitle, err.message);
             }
         } finally {
             setIsSubmitting(false);
@@ -159,8 +162,8 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                     </svg>
                     Powrót
                 </button>
-                <h1 className="text-3xl font-bold tracking-tight">Edytuj szablon</h1>
-                <p className="text-muted-foreground mt-1">Modyfikuj szablon oferty</p>
+                <h1 className="text-3xl font-bold tracking-tight">{tr.editTitle}</h1>
+                <p className="text-muted-foreground mt-1">{tr.editSubtitle}</p>
             </div>
 
             <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
@@ -168,7 +171,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                 <div className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-foreground mb-1.5">
-                            Nazwa szablonu <span className="text-status-rejected">*</span>
+                            {tr.nameLabel} <span className="text-status-rejected">*</span>
                         </label>
                         <input
                             type="text"
@@ -181,7 +184,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                     <div>
                         <label className="block text-sm font-medium text-foreground mb-1.5">Opis (opcjonalne)</label>
                         <textarea
-                            placeholder="Krótki opis szablonu..."
+                            placeholder={tr.descLabel}
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             rows={2}
@@ -220,7 +223,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                             Domyślne warunki (opcjonalne)
                         </label>
                         <textarea
-                            placeholder="Standardowe warunki oferty..."
+                            placeholder={tr.termsLabel}
                             value={defaultTerms}
                             onChange={(e) => setDefaultTerms(e.target.value)}
                             rows={3}
@@ -232,7 +235,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                             Domyślne uwagi (opcjonalne)
                         </label>
                         <textarea
-                            placeholder="Dodatkowe uwagi..."
+                            placeholder={tr.notesLabel}
                             value={defaultNotes}
                             onChange={(e) => setDefaultNotes(e.target.value)}
                             rows={2}
@@ -244,7 +247,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
 
             <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-foreground">Pozycje szablonu ({items.length})</h2>
+                    <h2 className="text-lg font-semibold text-foreground">{tr.itemsSection.replace("{n}", String(items.length))}</h2>
                     <Button variant="outline" size="sm" onClick={addItem}>
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -272,7 +275,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                                 <div className="md:col-span-2">
                                     <input
                                         type="text"
-                                        placeholder="Nazwa pozycji *"
+                                        placeholder={tr.itemNamePlaceholder}
                                         value={item.name}
                                         onChange={(e) => updateItem(item._tempId, 'name', e.target.value)}
                                         className="w-full px-3 py-2 rounded-lg border-border bg-card text-foreground text-foreground text-sm"
@@ -281,7 +284,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                                 <div className="md:col-span-2">
                                     <input
                                         type="text"
-                                        placeholder="Opis (opcjonalnie)"
+                                        placeholder={tr.itemDescPlaceholder}
                                         value={item.description ?? ''}
                                         onChange={(e) => updateItem(item._tempId, 'description', e.target.value || null)}
                                         className="w-full px-3 py-2 rounded-lg border-border bg-card text-foreground text-foreground text-sm"
@@ -290,7 +293,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                                 <div>
                                     <input
                                         type="number"
-                                        placeholder="Ilość"
+                                        placeholder={tr.itemQtyPlaceholder}
                                         min={0}
                                         step={0.01}
                                         value={item.quantity}
@@ -301,7 +304,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                                 <div>
                                     <input
                                         type="text"
-                                        placeholder="Jednostka"
+                                        placeholder={tr.itemUnitPlaceholder}
                                         value={item.unit}
                                         onChange={(e) => updateItem(item._tempId, 'unit', e.target.value)}
                                         className="w-full px-3 py-2 rounded-lg border-border bg-card text-foreground text-foreground text-sm"
@@ -310,7 +313,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                                 <div>
                                     <input
                                         type="number"
-                                        placeholder="Cena netto"
+                                        placeholder={tr.itemPricePlaceholder}
                                         min={0}
                                         step={0.01}
                                         value={item.unitPrice}
@@ -332,7 +335,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                                 <div>
                                     <input
                                         type="number"
-                                        placeholder="Rabat %"
+                                        placeholder={tr.itemDiscountPlaceholder}
                                         min={0}
                                         max={100}
                                         value={item.discount}
@@ -343,7 +346,7 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
                                 <div>
                                     <input
                                         type="text"
-                                        placeholder="Wariant (opcjonalnie)"
+                                        placeholder={tr.itemVariantPlaceholder}
                                         value={item.variantName ?? ''}
                                         onChange={(e) => updateItem(item._tempId, 'variantName', e.target.value || null)}
                                         className="w-full px-3 py-2 rounded-lg border-border bg-card text-foreground text-foreground text-sm"
@@ -368,15 +371,11 @@ export default function EditOfferTemplatePage({ params }: PageProps) {
             </div>
 
             <div className="flex justify-between">
-                <Button variant="outline" onClick={() => router.back()}>
-                    Anuluj
-                </Button>
+                <Button variant="outline" onClick={() => router.back()}>{commonTr.cancel}</Button>
                 <Button onClick={handleSubmit} isLoading={isSubmitting}>
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    Zapisz zmiany
-                </Button>
+                    </svg>{commonTr.saveChanges}</Button>
             </div>
         </div>
     );

@@ -33,7 +33,7 @@ export function useSettings() {
             const data = await settingsApi.getAll();
             setSettings(data);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Błąd pobierania ustawień');
+            setError(err instanceof Error ? err.message : 'Failed to fetch settings');
         } finally {
             setIsLoading(false);
         }
@@ -114,7 +114,7 @@ export function useSmtpConfig() {
             const data = await settingsApi.getSmtpConfig();
             setConfig(data);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Błąd pobierania konfiguracji SMTP');
+            setError(err instanceof Error ? err.message : 'Failed to fetch SMTP config');
         } finally {
             setIsLoading(false);
         }
@@ -132,7 +132,7 @@ export function useSmtpConfig() {
             setConfig(updated);
             return updated;
         } catch (err) {
-            const message = err instanceof Error ? err.message : 'Błąd zapisu konfiguracji';
+            const message = err instanceof Error ? err.message : 'Failed to save configuration';
             setError(message);
             throw err;
         } finally {
@@ -147,7 +147,7 @@ export function useSmtpConfig() {
             const result = await settingsApi.testSmtpConnection(data);
             return result;
         } catch (err) {
-            const message = err instanceof Error ? err.message : 'Błąd testu połączenia';
+            const message = err instanceof Error ? err.message : 'Connection test error';
             setError(message);
             throw err;
         } finally {
@@ -162,7 +162,7 @@ export function useSmtpConfig() {
             const result = await settingsApi.testSavedSmtpConnection();
             return result;
         } catch (err) {
-            const message = err instanceof Error ? err.message : 'Błąd testu połączenia';
+            const message = err instanceof Error ? err.message : 'Connection test error';
             setError(message);
             throw err;
         } finally {
@@ -184,7 +184,7 @@ export function useSmtpConfig() {
                 smtpConfigured: false,
             });
         } catch (err) {
-            const message = err instanceof Error ? err.message : 'Błąd usuwania konfiguracji';
+            const message = err instanceof Error ? err.message : 'Failed to delete configuration';
             setError(message);
             throw err;
         } finally {
@@ -220,7 +220,7 @@ export function useSenderEmail() {
             const data = await settingsApi.getSenderEmail();
             setSenderEmail(data.senderEmail ?? '');
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Błąd pobierania adresu nadawcy');
+            setError(err instanceof Error ? err.message : 'Failed to fetch sender address');
         } finally {
             setIsLoading(false);
         }
@@ -237,7 +237,7 @@ export function useSenderEmail() {
             const data = await settingsApi.updateSenderEmail({ senderEmail: email });
             setSenderEmail(data.senderEmail ?? '');
         } catch (err) {
-            const message = err instanceof Error ? err.message : 'Błąd zapisu adresu nadawcy';
+            const message = err instanceof Error ? err.message : 'Failed to save sender address';
             setError(message);
             throw err;
         } finally {

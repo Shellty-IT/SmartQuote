@@ -5,11 +5,14 @@ import { useRouter } from 'next/navigation';
 import { useOffers, useOffersStats } from '@/hooks/useOffers';
 import { offersApi } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
+import { useTranslations } from '@/i18n';
 import { Offer, OfferStatus } from '@/types';
 
 export function useOffersPage() {
     const router = useRouter();
     const toast = useToast();
+    const tr = useTranslations('offersPage');
+    const commonTr = useTranslations('common');
 
     const [search, setSearch] = useState('');
     const [status, setStatus] = useState<OfferStatus | ''>('');
@@ -37,11 +40,11 @@ export function useOffersPage() {
         setIsDeleting(true);
         try {
             await offersApi.delete(deleteModal.id);
-            toast.success('Oferta usunięta', `"${deleteModal.title}" została usunięta`);
+            toast.success(tr.deleted);
             setDeleteModal(null);
             refresh();
         } catch {
-            toast.error('Błąd', 'Nie udało się usunąć oferty');
+            toast.error(commonTr.errorTitle, tr.deleteError);
         } finally {
             setIsDeleting(false);
         }
@@ -51,11 +54,11 @@ export function useOffersPage() {
         try {
             const response = await offersApi.duplicate(offer.id);
             if (response.data?.id) {
-                toast.success('Oferta zduplikowana', 'Możesz teraz edytować kopię');
+                toast.success(tr.duplicated, tr.duplicatedDesc);
                 router.push(`/dashboard/offers/${response.data.id}/edit`);
             }
         } catch {
-            toast.error('Błąd', 'Nie udało się zduplikować oferty');
+            toast.error(commonTr.errorTitle, tr.deleteError);
         }
     };
 
@@ -64,9 +67,9 @@ export function useOffersPage() {
         const url = `${window.location.origin}/offer/view/${offer.publicToken}`;
         try {
             await navigator.clipboard.writeText(url);
-            toast.info('Link skopiowany', 'Link do oferty został skopiowany do schowka');
+            toast.info(tr.linkCopied, tr.linkCopiedDesc);
         } catch {
-            toast.error('Błąd', 'Nie udało się skopiować linku');
+            toast.error(commonTr.errorTitle, commonTr.copyLink);
         }
     };
 

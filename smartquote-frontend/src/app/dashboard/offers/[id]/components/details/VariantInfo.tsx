@@ -3,6 +3,7 @@
 
 import type { OfferItem } from '@/types';
 import type { VariantData } from '../../utils';
+import { useTranslations } from '@/i18n';
 
 interface VariantInfoProps {
     variantData: VariantData;
@@ -10,6 +11,8 @@ interface VariantInfoProps {
 }
 
 export function VariantInfo({ variantData, items }: VariantInfoProps) {
+    const tr = useTranslations('offerDetail');
+
     if (variantData.variantNames.length === 0) {
         return null;
     }
@@ -20,7 +23,7 @@ export function VariantInfo({ variantData, items }: VariantInfoProps) {
                 <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                <h3 className="text-sm font-semibold text-primary">Warianty oferty</h3>
+                <h3 className="text-sm font-semibold text-primary">{tr.variantInfo.title}</h3>
             </div>
             <div className="flex flex-wrap gap-2 mb-2">
                 {variantData.variantNames.map((v) => {
@@ -37,7 +40,7 @@ export function VariantInfo({ variantData, items }: VariantInfoProps) {
                 })}
             </div>
             <p className="text-xs text-primary">
-                Pozycje wspólne: {items.filter((i) => !i.variantName).length} • Klient wybierze jeden wariant na interaktywnej stronie oferty.
+                {tr.variantInfo.commonItems} {items.filter((i) => !i.variantName).length} • {tr.variantInfo.hint}
             </p>
         </div>
     );

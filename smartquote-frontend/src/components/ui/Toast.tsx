@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { CheckCircle2, XCircle, AlertTriangle, Info, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from '@/i18n';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -50,6 +51,7 @@ interface ToastItemProps {
 }
 
 function ToastItem({ toast, onRemove }: ToastItemProps) {
+    const tr = useTranslations('common');
     const [isExiting, setIsExiting] = useState(false);
     const closingRef = useRef(false);
     const { Icon, color, bar } = typeConfig[toast.type];
@@ -84,7 +86,7 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
                 <p className="toast-title">{toast.title}</p>
                 {toast.message && <p className="toast-message">{toast.message}</p>}
             </div>
-            <button onClick={handleClose} aria-label="Zamknij" className="toast-close-btn">
+            <button onClick={handleClose} aria-label={tr.close} className="toast-close-btn">
                 <X className="h-4 w-4" />
             </button>
             {toast.duration > 0 && (

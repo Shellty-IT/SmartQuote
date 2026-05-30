@@ -31,7 +31,7 @@ export function useNotifications(limit: number = 10) {
 
             setError(null);
         } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Błąd pobierania powiadomień';
+            const message = err instanceof Error ? err.message : 'Failed to fetch notifications';
             setError(message);
         } finally {
             setIsLoading(false);

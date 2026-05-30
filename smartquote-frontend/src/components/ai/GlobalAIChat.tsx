@@ -48,7 +48,7 @@ export function GlobalAIChat() {
             const assistantMessage = {
                 id: crypto.randomUUID(),
                 role: 'assistant' as const,
-                content: response.message || 'Nie otrzymano odpowiedzi',
+                content: response.message || 'No response received',
                 timestamp: new Date(),
             };
 
@@ -64,7 +64,7 @@ export function GlobalAIChat() {
                 content:
                     error instanceof Error
                         ? error.message
-                        : 'Przepraszam, wystąpił błąd. Spróbuj ponownie później.',
+                        : 'Sorry, an error occurred. Please try again later.',
                 timestamp: new Date(),
             };
             addMessage(errorMessage);

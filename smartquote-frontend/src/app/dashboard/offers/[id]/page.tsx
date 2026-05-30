@@ -3,6 +3,7 @@
 
 import { use } from 'react';
 import { Button, ConfirmDialog } from '@/components/ui';
+import { useTranslations } from '@/i18n';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import PublishDialog from '@/components/offers/PublishDialog';
 import { useOfferDetail } from './hooks/useOfferDetail';
@@ -70,15 +71,18 @@ export default function OfferDetailPage({ params }: PageProps) {
         router,
     } = useOfferDetail(id);
 
+    const tr = useTranslations('offerDetail');
+    const commonTr = useTranslations('common');
+
     if (isLoading) return <PageLoader />;
 
     if (error || !offer) {
         return (
             <div className="mx-auto max-w-[1400px] px-4 py-16 text-center sm:px-6">
                 <div className="rounded-2xl border border-border bg-card p-12 shadow-card">
-                    <p className="text-destructive mb-4">{error || 'Nie znaleziono oferty'}</p>
+                    <p className="text-destructive mb-4">{error || tr.notFound}</p>
                     <Button onClick={() => router.push('/dashboard/offers')}>
-                        Wróć do listy
+                        {tr.backToList}
                     </Button>
                 </div>
             </div>
@@ -163,9 +167,9 @@ export default function OfferDetailPage({ params }: PageProps) {
                 isOpen={deleteModal}
                 onClose={() => setDeleteModal(false)}
                 onConfirm={handleDelete}
-                title="Usuń ofertę"
-                description={`Czy na pewno chcesz usunąć ofertę "${offer.title}" (${offer.number})? Ta operacja jest nieodwracalna.`}
-                confirmLabel="Usuń"
+                title={tr.deleteTitle}
+                description={tr.deleteDesc.replace('{title}', offer.title).replace('{number}', offer.number)}
+                confirmLabel={tr.deleteConfirm}
                 isLoading={isDeleting}
             />
 

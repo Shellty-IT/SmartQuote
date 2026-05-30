@@ -34,7 +34,7 @@ export const authOptions: NextAuthOptions = {
                     const data = await response.json();
 
                     if (!response.ok || !data.success) {
-                        throw new Error(data.error?.message || 'Błąd logowania');
+                        throw new Error(data.error?.message || 'Login error');
                     }
 
                     return {

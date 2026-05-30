@@ -4,12 +4,7 @@ import type { OfferStatus } from '@/types';
 
 export type Tab = 'details' | 'analytics' | 'comments' | 'emails';
 
-export const TABS_CONFIG: { id: Tab; label: string }[] = [
-    { id: 'details', label: 'Szczegóły' },
-    { id: 'analytics', label: 'Analityka' },
-    { id: 'comments', label: 'Komentarze' },
-    { id: 'emails', label: 'Emaile' },
-];
+export const TAB_IDS: Tab[] = ['details', 'analytics', 'comments', 'emails'];
 
 export const STATUS_TRANSITIONS: Record<OfferStatus, OfferStatus[]> = {
     DRAFT: ['SENT'],
@@ -21,22 +16,22 @@ export const STATUS_TRANSITIONS: Record<OfferStatus, OfferStatus[]> = {
     EXPIRED: ['DRAFT'],
 };
 
-export const INTERACTION_TYPE_CONFIG: Record<string, { label: string; icon: string; color: string }> = {
-    VIEW: { label: 'Wyświetlenie oferty', icon: '👁️', color: 'text-blue-600 dark:text-blue-400' },
-    ACCEPT: { label: 'Akceptacja oferty', icon: '✅', color: 'text-status-accepted' },
-    REJECT: { label: 'Odrzucenie oferty', icon: '❌', color: 'text-status-rejected' },
-    COMMENT: { label: 'Komentarz klienta', icon: '💬', color: 'text-primary' },
-    DOWNLOAD: { label: 'Pobranie PDF', icon: '📄', color: 'text-violet-600 dark:text-violet-400' },
-    VARIANT_SWITCH: { label: 'Zmiana wariantu', icon: '🔄', color: 'text-[oklch(0.55_0.14_60)]' },
-    QUANTITY_CHANGE: { label: 'Zmiana ilości', icon: '🔢', color: 'text-orange-600 dark:text-orange-400' },
+export const INTERACTION_TYPE_CONFIG: Record<string, { icon: string; color: string; eventKey: string }> = {
+    VIEW:            { icon: '👁️', color: 'text-blue-600 dark:text-blue-400',   eventKey: 'OFFER_VIEWED' },
+    ACCEPT:          { icon: '✅', color: 'text-status-accepted',               eventKey: 'OFFER_ACCEPTED' },
+    REJECT:          { icon: '❌', color: 'text-status-rejected',               eventKey: 'OFFER_REJECTED' },
+    COMMENT:         { icon: '💬', color: 'text-primary',                       eventKey: 'OFFER_COMMENT' },
+    DOWNLOAD:        { icon: '📄', color: 'text-violet-600 dark:text-violet-400', eventKey: 'PDF_DOWNLOADED' },
+    VARIANT_SWITCH:  { icon: '🔄', color: 'text-[oklch(0.55_0.14_60)]',         eventKey: 'VARIANT_CHANGED' },
+    QUANTITY_CHANGE: { icon: '🔢', color: 'text-orange-600 dark:text-orange-400', eventKey: 'QUANTITY_CHANGED' },
 };
 
-export const INTENT_CONFIG: Record<string, { label: string; color: string }> = {
-    high_interest: { label: '🔥 Wysokie zainteresowanie', color: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' },
-    medium_interest: { label: '👀 Średnie zainteresowanie', color: 'bg-primary/10 text-cyan-700 dark:text-cyan-300' },
-    low_interest: { label: '😐 Niskie zainteresowanie', color: 'bg-slate-500/15 text-slate-600 dark:text-slate-400' },
-    negotiating: { label: '🤝 Negocjuje', color: 'bg-amber-500/15 text-amber-700 dark:text-amber-300' },
-    ready_to_buy: { label: '💰 Gotowy do zakupu', color: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' },
-    hesitating: { label: '🤔 Waha się', color: 'bg-orange-500/15 text-orange-700 dark:text-orange-300' },
-    unknown: { label: '❓ Brak danych', color: 'bg-slate-500/15 text-slate-600 dark:text-slate-400' },
+export const INTENT_CONFIG: Record<string, { emoji: string; intentKey: string; color: string }> = {
+    high_interest:  { emoji: '🔥', intentKey: 'high',        color: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' },
+    medium_interest:{ emoji: '👀', intentKey: 'medium',      color: 'bg-primary/10 text-cyan-700 dark:text-cyan-300' },
+    low_interest:   { emoji: '😐', intentKey: 'low',         color: 'bg-slate-500/15 text-slate-600 dark:text-slate-400' },
+    negotiating:    { emoji: '🤝', intentKey: 'negotiating', color: 'bg-amber-500/15 text-amber-700 dark:text-amber-300' },
+    ready_to_buy:   { emoji: '💰', intentKey: 'ready',       color: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' },
+    hesitating:     { emoji: '🤔', intentKey: 'hesitant',    color: 'bg-orange-500/15 text-orange-700 dark:text-orange-300' },
+    unknown:        { emoji: '❓', intentKey: 'noData',      color: 'bg-slate-500/15 text-slate-600 dark:text-slate-400' },
 };

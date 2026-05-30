@@ -9,33 +9,14 @@ import { SkeletonStatsCardWithIcon, SkeletonTableRow } from '@/components/ui/Ske
 import { formatDate } from '@/lib/utils';
 import { FollowUp, FollowUpStatus, FollowUpType, Priority } from '@/types';
 import { useToast } from '@/contexts/ToastContext';
-
-const statusConfig: Record<FollowUpStatus, { label: string; color: string; bgColor: string }> = {
-    PENDING: { label: 'Oczekujące', color: 'text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]', bgColor: 'bg-[oklch(0.72_0.16_60)/15%]' },
-    COMPLETED: { label: 'Wykonane', color: 'text-status-accepted', bgColor: 'bg-status-accepted/15' },
-    CANCELLED: { label: 'Anulowane', color: 'text-muted-foreground', bgColor: 'bg-secondary' },
-    OVERDUE: { label: 'Zaległe', color: 'text-status-rejected', bgColor: 'bg-status-rejected/15' },
-};
-
-const typeConfig: Record<FollowUpType, { label: string; icon: string }> = {
-    CALL: { label: 'Telefon', icon: '📞' },
-    EMAIL: { label: 'Email', icon: '✉️' },
-    MEETING: { label: 'Spotkanie', icon: '🤝' },
-    TASK: { label: 'Zadanie', icon: '✅' },
-    REMINDER: { label: 'Przypomnienie', icon: '🔔' },
-    OTHER: { label: 'Inne', icon: '📌' },
-};
-
-const priorityConfig: Record<Priority, { label: string; color: string; bgColor: string }> = {
-    LOW: { label: 'Niski', color: 'text-muted-foreground', bgColor: 'bg-secondary' },
-    MEDIUM: { label: 'Średni', color: 'text-status-open', bgColor: 'bg-[color-mix(in_oklab,var(--status-open)_15%,transparent)]' },
-    HIGH: { label: 'Wysoki', color: 'text-[oklch(0.55_0.16_45)] dark:text-[oklch(0.78_0.14_45)]', bgColor: 'bg-orange-500/15' },
-    URGENT: { label: 'Pilne', color: 'text-status-rejected', bgColor: 'bg-status-rejected/15' },
-};
+import { useTranslations } from '@/i18n';
 
 export default function FollowUpsPage() {
     const router = useRouter();
     const toast = useToast();
+    const tr = useTranslations('followups');
+    const commonTr = useTranslations('common');
+
     const {
         followUps,
         loading,
@@ -62,6 +43,29 @@ export default function FollowUpsPage() {
 
     const hasFilters = !!(searchValue || filters.status || filters.type || filters.priority || filters.overdue);
 
+    const statusConfig: Record<FollowUpStatus, { label: string; color: string; bgColor: string }> = {
+        PENDING:   { label: tr.statuses.PENDING,   color: 'text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]', bgColor: 'bg-[oklch(0.72_0.16_60)/15%]' },
+        COMPLETED: { label: tr.statuses.COMPLETED, color: 'text-status-accepted',  bgColor: 'bg-status-accepted/15' },
+        CANCELLED: { label: tr.statuses.CANCELLED, color: 'text-muted-foreground', bgColor: 'bg-secondary' },
+        OVERDUE:   { label: tr.statuses.OVERDUE,   color: 'text-status-rejected',  bgColor: 'bg-status-rejected/15' },
+    };
+
+    const typeConfig: Record<FollowUpType, { label: string; icon: string }> = {
+        CALL:     { label: tr.types.CALL,     icon: '📞' },
+        EMAIL:    { label: tr.types.EMAIL,    icon: '✉️' },
+        MEETING:  { label: tr.types.MEETING,  icon: '🤝' },
+        TASK:     { label: tr.types.TASK,     icon: '✅' },
+        REMINDER: { label: tr.types.REMINDER, icon: '🔔' },
+        OTHER:    { label: tr.types.OTHER,    icon: '📌' },
+    };
+
+    const priorityConfig: Record<Priority, { label: string; color: string; bgColor: string }> = {
+        LOW:    { label: tr.priorities.LOW,    color: 'text-muted-foreground', bgColor: 'bg-secondary' },
+        MEDIUM: { label: tr.priorities.MEDIUM, color: 'text-status-open', bgColor: 'bg-[color-mix(in_oklab,var(--status-open)_15%,transparent)]' },
+        HIGH:   { label: tr.priorities.HIGH,   color: 'text-[oklch(0.55_0.16_45)] dark:text-[oklch(0.78_0.14_45)]', bgColor: 'bg-orange-500/15' },
+        URGENT: { label: tr.priorities.URGENT, color: 'text-status-rejected', bgColor: 'bg-status-rejected/15' },
+    };
+
     const handleSearch = (value: string) => {
         setSearchValue(value);
         setFilters({ search: value, page: 1 });
@@ -69,14 +73,13 @@ export default function FollowUpsPage() {
 
     const handleDelete = async () => {
         if (!deleteModal.followUp) return;
-
         setIsDeleting(true);
         try {
             await deleteFollowUp(deleteModal.followUp.id);
-            toast.success('Follow-up usunięty', `"${deleteModal.followUp.title}" został usunięty`);
+            toast.success(tr.deleted);
             setDeleteModal({ isOpen: false, followUp: null });
         } catch {
-            toast.error('Błąd', 'Nie udało się usunąć follow-upu');
+            toast.error(commonTr.errorTitle, tr.deleteError);
         } finally {
             setIsDeleting(false);
         }
@@ -86,9 +89,9 @@ export default function FollowUpsPage() {
         setCompletingId(followUp.id);
         try {
             await completeFollowUp(followUp.id);
-            toast.success('Follow-up wykonany', `"${followUp.title}" został oznaczony jako wykonany`);
+            toast.success(tr.done);
         } catch {
-            toast.error('Błąd', 'Nie udało się oznaczyć jako wykonane');
+            toast.error(commonTr.errorTitle, tr.doneError);
         } finally {
             setCompletingId(null);
         }
@@ -100,85 +103,47 @@ export default function FollowUpsPage() {
         return new Date(followUp.dueDate) < new Date();
     };
 
+    const tableHeaderClass = 'px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground';
+
     return (
         <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Follow-upy</h1>
-                    <p className="text-muted-foreground mt-1">Zarządzaj zadaniami i przypomnieniami</p>
+                    <h1 className="text-3xl font-bold tracking-tight">{tr.title}</h1>
+                    <p className="text-muted-foreground mt-1">{tr.subtitle}</p>
                 </div>
                 <Button onClick={() => router.push('/dashboard/followups/new')}>
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    Nowy follow-up
+                    {tr.newFollowup}
                 </Button>
             </div>
 
             {statsLoading ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    {Array.from({ length: 4 }).map((_, i) => (
-                        <SkeletonStatsCardWithIcon key={i} />
-                    ))}
+                    {Array.from({ length: 4 }).map((_, i) => <SkeletonStatsCardWithIcon key={i} />)}
                 </div>
             ) : stats ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-muted-foreground">Oczekujące</p>
-                                <p className="text-2xl font-bold tracking-tight">{stats.byStatus?.PENDING || 0}</p>
-                            </div>
-                            <div
-                                className="w-10 h-10 rounded-lg flex items-center justify-center"
-                                style={{ backgroundColor: 'var(--accent)' }}
-                            >
-                                <span className="text-xl">⏳</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-muted-foreground">Zaległe</p>
-                                <p className="text-2xl font-bold text-status-rejected">{stats.overdue || 0}</p>
-                            </div>
-                            <div
-                                className="w-10 h-10 rounded-lg flex items-center justify-center"
-                                style={{ backgroundColor: 'color-mix(in oklab, var(--status-rejected) 15%, transparent)' }}
-                            >
-                                <span className="text-xl">🚨</span>
+                    {[
+                        { label: tr.stats.pending, value: stats.byStatus?.PENDING || 0, icon: '⏳', colorVar: 'var(--accent)', valueClass: '' },
+                        { label: tr.stats.overdue, value: stats.overdue || 0, icon: '🚨', colorVar: 'color-mix(in oklab, var(--status-rejected) 15%, transparent)', valueClass: 'text-status-rejected' },
+                        { label: tr.stats.today, value: stats.todayDue || 0, icon: '📅', colorVar: 'color-mix(in oklab, var(--status-open) 15%, transparent)', valueClass: 'text-status-open' },
+                        { label: tr.stats.completedMonth, value: stats.completedThisMonth || 0, icon: '✅', colorVar: 'color-mix(in oklab, var(--status-accepted) 15%, transparent)', valueClass: 'text-status-accepted' },
+                    ].map(({ label, value, icon, colorVar, valueClass }) => (
+                        <div key={label} className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-muted-foreground">{label}</p>
+                                    <p className={`text-2xl font-bold tracking-tight ${valueClass}`}>{value}</p>
+                                </div>
+                                <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: colorVar }}>
+                                    <span className="text-xl">{icon}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-muted-foreground">Na dziś</p>
-                                <p className="text-2xl font-bold text-status-open">{stats.todayDue || 0}</p>
-                            </div>
-                            <div
-                                className="w-10 h-10 rounded-lg flex items-center justify-center"
-                                style={{ backgroundColor: 'color-mix(in oklab, var(--status-open) 15%, transparent)' }}
-                            >
-                                <span className="text-xl">📅</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-muted-foreground">Wykonane (miesiąc)</p>
-                                <p className="text-2xl font-bold text-status-accepted">{stats.completedThisMonth || 0}</p>
-                            </div>
-                            <div
-                                className="w-10 h-10 rounded-lg flex items-center justify-center"
-                                style={{ backgroundColor: 'color-mix(in oklab, var(--status-accepted) 15%, transparent)' }}
-                            >
-                                <span className="text-xl">✅</span>
-                            </div>
-                        </div>
-                    </div>
+                    ))}
                 </div>
             ) : null}
 
@@ -186,7 +151,7 @@ export default function FollowUpsPage() {
                 <div className="flex flex-wrap gap-4">
                     <div className="flex-1 min-w-[200px]">
                         <Input
-                            placeholder="Szukaj follow-upów..."
+                            placeholder={tr.filters.search}
                             value={searchValue}
                             onChange={(e) => handleSearch(e.target.value)}
                             icon={
@@ -196,62 +161,56 @@ export default function FollowUpsPage() {
                             }
                         />
                     </div>
-                    <select
-                        className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30"
-                        style={{
-                            backgroundColor: 'var(--card)',
-                            borderColor: 'var(--border)',
-                            color: 'var(--foreground)',
-                        }}
-                        value={filters.status || ''}
-                        onChange={(e) => setFilters({ status: e.target.value, page: 1 })}
-                    >
-                        <option value="">Wszystkie statusy</option>
-                        <option value="PENDING">Oczekujące</option>
-                        <option value="OVERDUE">Zaległe</option>
-                        <option value="COMPLETED">Wykonane</option>
-                        <option value="CANCELLED">Anulowane</option>
-                    </select>
-                    <select
-                        className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30"
-                        style={{
-                            backgroundColor: 'var(--card)',
-                            borderColor: 'var(--border)',
-                            color: 'var(--foreground)',
-                        }}
-                        value={filters.type || ''}
-                        onChange={(e) => setFilters({ type: e.target.value, page: 1 })}
-                    >
-                        <option value="">Wszystkie typy</option>
-                        <option value="CALL">Telefon</option>
-                        <option value="EMAIL">Email</option>
-                        <option value="MEETING">Spotkanie</option>
-                        <option value="TASK">Zadanie</option>
-                        <option value="REMINDER">Przypomnienie</option>
-                        <option value="OTHER">Inne</option>
-                    </select>
-                    <select
-                        className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30"
-                        style={{
-                            backgroundColor: 'var(--card)',
-                            borderColor: 'var(--border)',
-                            color: 'var(--foreground)',
-                        }}
-                        value={filters.priority || ''}
-                        onChange={(e) => setFilters({ priority: e.target.value, page: 1 })}
-                    >
-                        <option value="">Wszystkie priorytety</option>
-                        <option value="LOW">Niski</option>
-                        <option value="MEDIUM">Średni</option>
-                        <option value="HIGH">Wysoki</option>
-                        <option value="URGENT">Pilne</option>
-                    </select>
+                    {[
+                        {
+                            value: filters.status || '',
+                            onChange: (v: string) => setFilters({ status: v, page: 1 }),
+                            options: [
+                                { value: '', label: tr.filters.allStatuses },
+                                { value: 'PENDING', label: tr.statuses.PENDING },
+                                { value: 'OVERDUE', label: tr.statuses.OVERDUE },
+                                { value: 'COMPLETED', label: tr.statuses.COMPLETED },
+                                { value: 'CANCELLED', label: tr.statuses.CANCELLED },
+                            ],
+                        },
+                        {
+                            value: filters.type || '',
+                            onChange: (v: string) => setFilters({ type: v, page: 1 }),
+                            options: [
+                                { value: '', label: tr.filters.allTypes },
+                                { value: 'CALL', label: tr.types.CALL },
+                                { value: 'EMAIL', label: tr.types.EMAIL },
+                                { value: 'MEETING', label: tr.types.MEETING },
+                                { value: 'TASK', label: tr.types.TASK },
+                                { value: 'REMINDER', label: tr.types.REMINDER },
+                                { value: 'OTHER', label: tr.types.OTHER },
+                            ],
+                        },
+                        {
+                            value: filters.priority || '',
+                            onChange: (v: string) => setFilters({ priority: v, page: 1 }),
+                            options: [
+                                { value: '', label: tr.filters.allPriorities },
+                                { value: 'LOW', label: tr.priorities.LOW },
+                                { value: 'MEDIUM', label: tr.priorities.MEDIUM },
+                                { value: 'HIGH', label: tr.priorities.HIGH },
+                                { value: 'URGENT', label: tr.priorities.URGENT },
+                            ],
+                        },
+                    ].map((sel, idx) => (
+                        <select
+                            key={idx}
+                            className="px-4 py-2.5 border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30"
+                            style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                            value={sel.value}
+                            onChange={(e) => sel.onChange(e.target.value)}
+                        >
+                            {sel.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                        </select>
+                    ))}
                     <label
                         className="flex items-center gap-2 px-4 py-2.5 border rounded-lg cursor-pointer transition-colors"
-                        style={{
-                            backgroundColor: 'var(--card)',
-                            borderColor: 'var(--border)',
-                        }}
+                        style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
                     >
                         <input
                             type="checkbox"
@@ -259,24 +218,15 @@ export default function FollowUpsPage() {
                             onChange={(e) => setFilters({ overdue: e.target.checked || undefined, page: 1 })}
                             className="w-4 h-4 text-primary rounded"
                         />
-                        <span className="text-foreground text-sm">Tylko zaległe</span>
+                        <span className="text-foreground text-sm">{tr.filters.overdueOnly}</span>
                     </label>
                 </div>
             </div>
 
             {error && (
-                <div
-                    className="mb-6 p-4 rounded-lg border"
-                    style={{
-                        backgroundColor: 'var(--error-bg, rgba(239, 68, 68, 0.1))',
-                        borderColor: 'var(--error-border, rgba(239, 68, 68, 0.25))',
-                        color: 'var(--error-text, #ef4444)',
-                    }}
-                >
+                <div className="mb-6 p-4 rounded-lg border" style={{ backgroundColor: 'var(--error-bg, rgba(239, 68, 68, 0.1))', borderColor: 'var(--error-border, rgba(239, 68, 68, 0.25))', color: 'var(--error-text, #ef4444)' }}>
                     {error}
-                    <button onClick={refetch} className="ml-2 underline hover:opacity-80">
-                        Spróbuj ponownie
-                    </button>
+                    <button onClick={refetch} className="ml-2 underline hover:opacity-80">{commonTr.retry}</button>
                 </div>
             )}
 
@@ -286,19 +236,17 @@ export default function FollowUpsPage() {
                         <table className="w-full">
                             <thead>
                             <tr className="border-b" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface-subtle)' }}>
-                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Follow-up</th>
-                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground hidden md:table-cell">Powiązanie</th>
-                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground hidden sm:table-cell">Typ</th>
-                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground hidden lg:table-cell">Priorytet</th>
-                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Termin</th>
-                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground hidden sm:table-cell">Status</th>
-                                <th className="px-6 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Akcje</th>
+                                <th className={tableHeaderClass}>{tr.table.followup}</th>
+                                <th className={`${tableHeaderClass} hidden md:table-cell`}>{tr.table.linked}</th>
+                                <th className={`${tableHeaderClass} hidden sm:table-cell`}>{tr.table.type}</th>
+                                <th className={`${tableHeaderClass} hidden lg:table-cell`}>{tr.table.priority}</th>
+                                <th className={tableHeaderClass}>{tr.table.due}</th>
+                                <th className={`${tableHeaderClass} hidden sm:table-cell`}>{tr.table.status}</th>
+                                <th className="px-6 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{tr.table.actions}</th>
                             </tr>
                             </thead>
                             <tbody>
-                            {Array.from({ length: 6 }).map((_, i) => (
-                                <SkeletonTableRow key={i} columns={7} />
-                            ))}
+                            {Array.from({ length: 6 }).map((_, i) => <SkeletonTableRow key={i} columns={7} />)}
                             </tbody>
                         </table>
                     </div>
@@ -317,17 +265,9 @@ export default function FollowUpsPage() {
                                 </svg>
                             )
                         }
-                        title={hasFilters ? 'Brak wyników' : 'Brak follow-upów'}
-                        description={
-                            hasFilters
-                                ? 'Spróbuj zmienić kryteria wyszukiwania'
-                                : 'Utwórz pierwszy follow-up, aby śledzić zadania i przypomnienia'
-                        }
-                        action={
-                            hasFilters
-                                ? undefined
-                                : { label: 'Nowy follow-up', onClick: () => router.push('/dashboard/followups/new') }
-                        }
+                        title={hasFilters ? tr.noResults : tr.noFollowups}
+                        description={hasFilters ? tr.changeFilters : tr.createFirst}
+                        action={hasFilters ? undefined : { label: tr.newFollowup, onClick: () => router.push('/dashboard/followups/new') }}
                     />
                 </div>
             ) : (
@@ -336,88 +276,65 @@ export default function FollowUpsPage() {
                         <table className="w-full">
                             <thead>
                             <tr className="border-b" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface-subtle)' }}>
-                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Follow-up</th>
-                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground hidden md:table-cell">Powiązanie</th>
-                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground hidden sm:table-cell">Typ</th>
-                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground hidden lg:table-cell">Priorytet</th>
-                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Termin</th>
-                                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground hidden sm:table-cell">Status</th>
-                                <th className="px-6 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Akcje</th>
+                                <th className={tableHeaderClass}>{tr.table.followup}</th>
+                                <th className={`${tableHeaderClass} hidden md:table-cell`}>{tr.table.linked}</th>
+                                <th className={`${tableHeaderClass} hidden sm:table-cell`}>{tr.table.type}</th>
+                                <th className={`${tableHeaderClass} hidden lg:table-cell`}>{tr.table.priority}</th>
+                                <th className={tableHeaderClass}>{tr.table.due}</th>
+                                <th className={`${tableHeaderClass} hidden sm:table-cell`}>{tr.table.status}</th>
+                                <th className="px-6 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{tr.table.actions}</th>
                             </tr>
                             </thead>
                             <tbody>
                             {followUps.map((followUp) => {
                                 const overdue = isOverdue(followUp);
-                                const status = overdue ? statusConfig.OVERDUE : statusConfig[followUp.status];
-                                const type = typeConfig[followUp.type];
-                                const priority = priorityConfig[followUp.priority];
+                                const statusCfg = overdue ? statusConfig.OVERDUE : statusConfig[followUp.status];
+                                const typeCfg = typeConfig[followUp.type];
+                                const priorityCfg = priorityConfig[followUp.priority];
 
                                 return (
                                     <tr
                                         key={followUp.id}
-                                        className={`border-b cursor-pointer border-b border-border transition-colors hover:bg-secondary/40 ${
-                                            overdue ? 'border-l-4 border-l-red-500' : ''
-                                        }`}
-                                        style={{
-                                            borderBottomColor: 'var(--border)',
-                                            backgroundColor: overdue ? 'rgba(239, 68, 68, 0.04)' : undefined,
-                                        }}
+                                        className={`border-b cursor-pointer border-b border-border transition-colors hover:bg-secondary/40 ${overdue ? 'border-l-4 border-l-red-500' : ''}`}
+                                        style={{ borderBottomColor: 'var(--border)', backgroundColor: overdue ? 'rgba(239, 68, 68, 0.04)' : undefined }}
                                         onClick={() => router.push(`/dashboard/followups/${followUp.id}`)}
                                     >
                                         <td className="px-6 py-4">
                                             <div className="flex items-start gap-2">
-                                                {overdue && (
-                                                    <span className="text-status-rejected animate-pulse flex-shrink-0 mt-0.5" title="Zaległy!">⚠️</span>
-                                                )}
+                                                {overdue && <span className="text-status-rejected animate-pulse flex-shrink-0 mt-0.5" title={tr.overdue}>⚠️</span>}
                                                 <div>
                                                     <p className="font-medium text-foreground">{followUp.title}</p>
                                                     {followUp.description && (
-                                                        <p className="text-sm text-muted-foreground truncate max-w-xs">
-                                                            {followUp.description}
-                                                        </p>
+                                                        <p className="text-sm text-muted-foreground truncate max-w-xs">{followUp.description}</p>
                                                     )}
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 hidden md:table-cell">
                                             <div className="text-sm">
-                                                {followUp.client && (
-                                                    <p className="text-foreground">{followUp.client.name}</p>
-                                                )}
-                                                {followUp.offer && (
-                                                    <p className="text-muted-foreground">Oferta: {followUp.offer.number}</p>
-                                                )}
-                                                {followUp.contract && (
-                                                    <p className="text-muted-foreground">Umowa: {followUp.contract.number}</p>
-                                                )}
-                                                {!followUp.client && !followUp.offer && !followUp.contract && (
-                                                    <span className="text-muted-foreground">-</span>
-                                                )}
+                                                {followUp.client && <p className="text-foreground">{followUp.client.name}</p>}
+                                                {followUp.offer && <p className="text-muted-foreground">{tr.related.offer}: {followUp.offer.number}</p>}
+                                                {followUp.contract && <p className="text-muted-foreground">{tr.related.contract}: {followUp.contract.number}</p>}
+                                                {!followUp.client && !followUp.offer && !followUp.contract && <span className="text-muted-foreground">-</span>}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 hidden sm:table-cell">
                                             <span className="inline-flex items-center gap-1.5">
-                                                <span>{type.icon}</span>
-                                                <span className="text-sm text-foreground">{type.label}</span>
+                                                <span>{typeCfg.icon}</span>
+                                                <span className="text-sm text-foreground">{typeCfg.label}</span>
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 hidden lg:table-cell">
-                                            <Badge className={`${priority.bgColor} ${priority.color}`}>
-                                                {priority.label}
-                                            </Badge>
+                                            <Badge className={`${priorityCfg.bgColor} ${priorityCfg.color}`}>{priorityCfg.label}</Badge>
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`text-sm ${overdue ? 'text-status-rejected font-semibold' : 'text-muted-foreground'}`}>
                                                 {formatDate(followUp.dueDate)}
-                                                {overdue && (
-                                                    <span className="block text-xs text-destructive mt-0.5">Zaległy!</span>
-                                                )}
+                                                {overdue && <span className="block text-xs text-destructive mt-0.5">{tr.overdue}</span>}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 hidden sm:table-cell">
-                                            <Badge className={`${status.bgColor} ${status.color}`}>
-                                                {status.label}
-                                            </Badge>
+                                            <Badge className={`${statusCfg.bgColor} ${statusCfg.color}`}>{statusCfg.label}</Badge>
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
@@ -427,15 +344,9 @@ export default function FollowUpsPage() {
                                                         disabled={completingId === followUp.id}
                                                         className="p-2 text-muted-foreground rounded-lg transition-colors disabled:opacity-50"
                                                         style={{ backgroundColor: 'transparent' }}
-                                                        onMouseEnter={(e) => {
-                                                            e.currentTarget.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
-                                                            e.currentTarget.style.color = '#10b981';
-                                                        }}
-                                                        onMouseLeave={(e) => {
-                                                            e.currentTarget.style.backgroundColor = 'transparent';
-                                                            e.currentTarget.style.color = 'var(--muted-foreground)';
-                                                        }}
-                                                        title="Oznacz jako wykonane"
+                                                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(16, 185, 129, 0.15)'; e.currentTarget.style.color = '#10b981'; }}
+                                                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--muted-foreground)'; }}
+                                                        title={tr.markDone}
                                                     >
                                                         {completingId === followUp.id ? (
                                                             <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -453,14 +364,8 @@ export default function FollowUpsPage() {
                                                     onClick={() => router.push(`/dashboard/followups/${followUp.id}/edit`)}
                                                     className="p-2 text-muted-foreground rounded-lg transition-colors"
                                                     style={{ backgroundColor: 'transparent' }}
-                                                    onMouseEnter={(e) => {
-                                                        e.currentTarget.style.backgroundColor = 'var(--accent)';
-                                                        e.currentTarget.style.color = 'var(--primary)';
-                                                    }}
-                                                    onMouseLeave={(e) => {
-                                                        e.currentTarget.style.backgroundColor = 'transparent';
-                                                        e.currentTarget.style.color = 'var(--muted-foreground)';
-                                                    }}
+                                                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--primary)'; }}
+                                                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--muted-foreground)'; }}
                                                 >
                                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -470,14 +375,8 @@ export default function FollowUpsPage() {
                                                     onClick={() => setDeleteModal({ isOpen: true, followUp })}
                                                     className="p-2 text-muted-foreground rounded-lg transition-colors"
                                                     style={{ backgroundColor: 'transparent' }}
-                                                    onMouseEnter={(e) => {
-                                                        e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
-                                                        e.currentTarget.style.color = '#ef4444';
-                                                    }}
-                                                    onMouseLeave={(e) => {
-                                                        e.currentTarget.style.backgroundColor = 'transparent';
-                                                        e.currentTarget.style.color = 'var(--muted-foreground)';
-                                                    }}
+                                                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)'; e.currentTarget.style.color = '#ef4444'; }}
+                                                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--muted-foreground)'; }}
                                                 >
                                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -495,25 +394,11 @@ export default function FollowUpsPage() {
                     {totalPages > 1 && (
                         <div className="px-6 py-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4" style={{ borderColor: 'var(--border)' }}>
                             <p className="text-sm text-muted-foreground">
-                                Pokazano {followUps.length} z {total} follow-upów
+                                {tr.showing.replace('{shown}', String(followUps.length)).replace('{total}', String(total))}
                             </p>
                             <div className="flex gap-2">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    disabled={page === 1}
-                                    onClick={() => setFilters({ page: page - 1 })}
-                                >
-                                    Poprzednia
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    disabled={page === totalPages}
-                                    onClick={() => setFilters({ page: page + 1 })}
-                                >
-                                    Następna
-                                </Button>
+                                <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setFilters({ page: page - 1 })}>{commonTr.previous}</Button>
+                                <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setFilters({ page: page + 1 })}>{commonTr.next}</Button>
                             </div>
                         </div>
                     )}
@@ -524,9 +409,9 @@ export default function FollowUpsPage() {
                 isOpen={deleteModal.isOpen}
                 onClose={() => setDeleteModal({ isOpen: false, followUp: null })}
                 onConfirm={handleDelete}
-                title="Usuń follow-up"
-                description={`Czy na pewno chcesz usunąć follow-up "${deleteModal.followUp?.title}"? Ta operacja jest nieodwracalna.`}
-                confirmLabel="Usuń"
+                title={tr.delete.title}
+                description={tr.delete.description.replace('{title}', deleteModal.followUp?.title || '')}
+                confirmLabel={tr.delete.confirm}
                 isLoading={isDeleting}
             />
         </div>

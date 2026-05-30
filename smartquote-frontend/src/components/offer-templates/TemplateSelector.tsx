@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { offerTemplatesApi } from '@/lib/api';
+import { useTranslations } from '@/i18n';
 import type { OfferTemplate } from '@/types';
 
 interface TemplateSelectorProps {
@@ -12,6 +13,7 @@ interface TemplateSelectorProps {
 }
 
 export default function TemplateSelector({ isOpen, onClose, onSelect }: TemplateSelectorProps) {
+    const tr = useTranslations('templateSelector');
     const [templates, setTemplates] = useState<OfferTemplate[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [search, setSearch] = useState('');
@@ -84,12 +86,12 @@ export default function TemplateSelector({ isOpen, onClose, onSelect }: Template
             >
                 <div className="flex items-center justify-between p-6 border-b border-border">
                     <h2 id="template-selector-title" className="text-lg font-bold text-foreground">
-                        Wybierz szablon oferty
+                        {tr.title}
                     </h2>
                     <button
                         onClick={onClose}
                         className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground"
-                        aria-label="Zamknij"
+                        aria-label={tr.close}
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -104,7 +106,7 @@ export default function TemplateSelector({ isOpen, onClose, onSelect }: Template
                         </svg>
                         <input
                             type="text"
-                            placeholder="Szukaj szablonu..."
+                            placeholder={tr.search}
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="w-full pl-9 pr-4 py-2 rounded-lg border-border bg-card text-foreground text-sm text-foreground"
@@ -127,12 +129,10 @@ export default function TemplateSelector({ isOpen, onClose, onSelect }: Template
                                 </svg>
                             </div>
                             <p className="text-foreground font-medium text-sm">
-                                {search ? 'Brak wyników' : 'Brak szablonów'}
+                                {search ? tr.noResults : tr.noTemplates}
                             </p>
                             <p className="text-muted-foreground text-xs mt-1">
-                                {search
-                                    ? 'Spróbuj zmienić wyszukiwanie'
-                                    : 'Stwórz pierwszy szablon w sekcji Szablony ofert'}
+                                {search ? tr.tryChanging : tr.createFirst}
                             </p>
                         </div>
                     ) : (
@@ -194,7 +194,7 @@ export default function TemplateSelector({ isOpen, onClose, onSelect }: Template
                         onClick={onClose}
                         className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary/60 transition-colors"
                     >
-                        Anuluj
+                        {tr.cancel}
                     </button>
                     <button
                         onClick={handleConfirm}

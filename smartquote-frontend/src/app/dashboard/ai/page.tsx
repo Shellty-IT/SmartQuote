@@ -4,8 +4,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAI } from '@/hooks/useAI';
 import { ChatMessage, QuickActions, SuggestionCard } from '@/components/ai';
+import { useTranslations } from '@/i18n';
 
 export default function AIAssistantPage() {
+    const dashTr = useTranslations('dashboard');
+    const tr = useTranslations('aiPage');
     const {
         messages,
         isLoading,
@@ -101,8 +104,7 @@ export default function AIAssistantPage() {
                                 Witaj w SmartQuote AI!
                             </h2>
                             <p className="text-muted-foreground max-w-md mb-8">
-                                Jestem Twoim inteligentnym asystentem. Mogę pomóc Ci tworzyć oferty,
-                                analizować klientów, pisać emaile i wiele więcej.
+                                {tr.welcomeDesc}
                             </p>
                             <QuickActions onAction={handleQuickAction} />
                         </div>
@@ -130,7 +132,7 @@ export default function AIAssistantPage() {
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={handleKeyDown}
-                                placeholder="Napisz wiadomość... (Enter aby wysłać, Shift+Enter nowa linia)"
+                                placeholder={tr.inputPlaceholder}
                                 className="w-full px-4 py-3 rounded-xl border resize-none transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30"
                                 style={{
                                     backgroundColor: 'var(--card)',
@@ -184,7 +186,7 @@ export default function AIAssistantPage() {
                                 style={{ backgroundColor: 'var(--surface-subtle)' }}
                             >
                                 <div className="text-2xl font-bold text-status-accepted">{stats.activeOffers}</div>
-                                <div className="text-xs text-muted-foreground">Aktywne oferty</div>
+                                <div className="text-xs text-muted-foreground">{dashTr.kpi.activeOffers}</div>
                             </div>
                             <div
                                 className="text-center p-3 rounded-xl"
@@ -232,7 +234,7 @@ export default function AIAssistantPage() {
                     <ul className="text-xs text-muted-foreground space-y-2.5">
                         <li className="flex items-start gap-2">
                             <span className="flex-shrink-0">💡</span>
-                            <span>Opisz potrzebę klienta, a stworzę ofertę</span>
+                            <span>{tr.suggestions.createOffer}</span>
                         </li>
                         <li className="flex items-start gap-2">
                             <span className="flex-shrink-0">📧</span>
