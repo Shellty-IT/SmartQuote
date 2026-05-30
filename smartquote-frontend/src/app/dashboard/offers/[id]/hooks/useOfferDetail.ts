@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import { useOffer, useOfferAnalytics, useOfferComments } from '@/hooks/useOffers';
 import { offersApi, ai, ksefApi } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
+import { useTranslations } from '@/i18n';
 import { getStatusConfig } from '@/lib/utils';
 import { groupByVariant } from '../utils';
 import { STATUS_TRANSITIONS } from '../constants';
@@ -17,6 +18,8 @@ import type { KsefAvailability } from '@/types/ksef.types';
 export function useOfferDetail(offerId: string) {
     const router = useRouter();
     const toast = useToast();
+    const tr = useTranslations('offerDetail');
+    const commonTr = useTranslations('common');
     const { data: session } = useSession();
     const { offer, isLoading, error, refresh } = useOffer(offerId);
     const { analytics, refresh: refreshAnalytics } = useOfferAnalytics(offerId);
@@ -85,9 +88,9 @@ export function useOfferDetail(offerId: string) {
     const handleCopyHash = async (hash: string) => {
         try {
             await navigator.clipboard.writeText(hash);
-            toast.info('Skopiowano', 'Hash skopiowany do schowka');
+            toast.info(tr.toasts.hashCopied, tr.toasts.hashCopiedDesc);
         } catch {
-            toast.error('Błąd', 'Nie udało się skopiować do schowka');
+            toast.error(commonTr.errorTitle, tr.toasts.hashCopyError);
         }
     };
 
@@ -98,7 +101,7 @@ export function useOfferDetail(offerId: string) {
             const data = await ai.observerInsight(offerId);
             setObserverInsight(data);
         } catch (err) {
-            setObserverError(err instanceof Error ? err.message : 'Błąd analizy');
+            setObserverError(err instanceof Error ? err.message : tr.toasts.observerError);
         } finally {
             setIsLoadingObserver(false);
         }
@@ -111,7 +114,7 @@ export function useOfferDetail(offerId: string) {
             const data = await ai.closingStrategy(offerId);
             setClosingStrategy(data);
         } catch (err) {
-            setCloserError(err instanceof Error ? err.message : 'Błąd generowania strategii');
+            setCloserError(err instanceof Error ? err.message : tr.toasts.closerError);
         } finally {
             setIsLoadingCloser(false);
         }
@@ -129,9 +132,9 @@ export function useOfferDetail(offerId: string) {
             await offersApi.update(offer.id, { status: newStatus });
             await refresh();
             const statusConfig = getStatusConfig(newStatus);
-            toast.success('Status zmieniony', `Oferta: ${statusConfig.label}`);
+            toast.success(tr.toasts.statusChanged, statusConfig.label);
         } catch {
-            toast.error('Błąd', 'Nie udało się zmienić statusu oferty');
+            toast.error(commonTr.errorTitle, tr.toasts.statusError);
         } finally {
             setIsUpdatingStatus(false);
         }
@@ -142,10 +145,10 @@ export function useOfferDetail(offerId: string) {
         setIsDeleting(true);
         try {
             await offersApi.delete(offer.id);
-            toast.success('Oferta usunięta', `${offer.number} została usunięta`);
+            toast.success(tr.toasts.deleted, offer.number);
             router.push('/dashboard/offers');
         } catch {
-            toast.error('Błąd', 'Nie udało się usunąć oferty');
+            toast.error(commonTr.errorTitle, tr.toasts.deleteError);
             setIsDeleting(false);
         }
     };
@@ -155,11 +158,11 @@ export function useOfferDetail(offerId: string) {
         try {
             const response = await offersApi.duplicate(offer.id);
             if (response.data?.id) {
-                toast.success('Oferta zduplikowana', 'Możesz teraz edytować kopię');
+                toast.success(tr.toasts.duplicated, tr.toasts.duplicatedDesc);
                 router.push(`/dashboard/offers/${response.data.id}/edit`);
             }
         } catch {
-            toast.error('Błąd', 'Nie udało się zduplikować oferty');
+            toast.error(commonTr.errorTitle, tr.toasts.duplicateError);
         }
     };
 
@@ -167,7 +170,7 @@ export function useOfferDetail(offerId: string) {
         if (!offer) return;
         const token = session?.accessToken || localStorage.getItem('token');
         if (!token) {
-            toast.error('Brak autoryzacji', 'Zaloguj się ponownie');
+            toast.error(tr.toasts.noAuth, tr.toasts.noAuthDesc);
             return;
         }
         setIsDownloadingPDF(true);
@@ -179,20 +182,20 @@ export function useOfferDetail(offerId: string) {
             });
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error((errorData as { message?: string }).message || `Błąd ${response.status}`);
+                throw new Error((errorData as { message?: string }).message || `Error ${response.status}`);
             }
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `Oferta_${offer.number.replace(/\//g, '-')}.pdf`;
+            link.download = `Offer_${offer.number.replace(/\//g, '-')}.pdf`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
-            toast.success('PDF pobrany', `Oferta ${offer.number}`);
+            toast.success(tr.toasts.pdfDownloaded, offer.number);
         } catch (err) {
-            toast.error('Błąd PDF', err instanceof Error ? err.message : 'Wystąpił błąd podczas pobierania');
+            toast.error(tr.toasts.pdfError, err instanceof Error ? err.message : commonTr.errorTitle);
         } finally {
             setIsDownloadingPDF(false);
         }

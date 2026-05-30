@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useOfferPublish, useOfferSendToClient } from '@/hooks/useOffers';
 import { useSmtpConfig } from '@/hooks/useSettings';
 import { useToast } from '@/contexts/ToastContext';
+import { useTranslations } from '@/i18n';
 
 interface PublishDialogProps {
     isOpen: boolean;
@@ -34,6 +35,7 @@ export default function PublishDialog({
     const { sendToClient, isSending, error: sendError } = useOfferSendToClient(offerId);
     const { config: smtpConfig, isLoading: isLoadingSmtp } = useSmtpConfig();
     const toast = useToast();
+    const tr = useTranslations('publishDialog');
 
     const [publicUrl, setPublicUrl] = useState<string | null>(null);
     const [wasPublished, setWasPublished] = useState(false);
@@ -89,14 +91,14 @@ export default function PublishDialog({
             setPublicUrl(result.publicUrl);
             setWasPublished(true);
             onPublished();
-            toast.success('Link opublikowany', `Oferta ${offerNumber} jest teraz dostępna`);
+            toast.success(tr.toasts.published, tr.toasts.publishedDesc);
 
             if (sendEmail && canSendEmail) {
                 const sendResult = await sendToClient();
                 if (sendResult?.sent) {
                     setEmailSent(true);
                     setEmailSentTo(sendResult.email);
-                    toast.success('Email wysłany', `Link wysłany na ${sendResult.email}`);
+                    toast.success(tr.toasts.emailSent, tr.toasts.emailSentDesc.replace('{email}', sendResult.email));
                 }
             }
         }
@@ -107,7 +109,7 @@ export default function PublishDialog({
         if (result?.sent) {
             setEmailSent(true);
             setEmailSentTo(result.email);
-            toast.success('Email wysłany', `Link wysłany na ${result.email}`);
+            toast.success(tr.toasts.emailSent, tr.toasts.emailSentDesc.replace('{email}', result.email));
         }
     };
 
@@ -118,7 +120,7 @@ export default function PublishDialog({
             setWasPublished(false);
             setEmailSent(false);
             onPublished();
-            toast.warning('Link dezaktywowany', `Oferta ${offerNumber} nie jest już dostępna`);
+            toast.warning(tr.toasts.deactivated, tr.toasts.deactivatedDesc);
         }
     };
 
@@ -126,7 +128,7 @@ export default function PublishDialog({
         if (!publicUrl) return;
         try {
             await navigator.clipboard.writeText(publicUrl);
-            toast.info('Link skopiowany', 'Link do oferty został skopiowany do schowka');
+            toast.info(tr.toasts.copied, tr.toasts.copiedDesc);
         } catch {
             const input = document.createElement('input');
             input.value = publicUrl;
@@ -134,7 +136,7 @@ export default function PublishDialog({
             input.select();
             document.execCommand('copy');
             document.body.removeChild(input);
-            toast.info('Link skopiowany', 'Link do oferty został skopiowany do schowka');
+            toast.info(tr.toasts.copied, tr.toasts.copiedDesc);
         }
     };
 
@@ -172,14 +174,14 @@ export default function PublishDialog({
                         </div>
                         <div>
                             <h2 id="publish-dialog-title" className="text-xl font-bold text-foreground">
-                                Interaktywny link do oferty
+                                {tr.title}
                             </h2>
                             <p className="text-sm text-muted-foreground">{offerNumber}</p>
                         </div>
                         <button
                             onClick={handleClose}
                             className="ml-auto p-2 text-muted-foreground hover:text-muted-foreground hover:bg-secondary rounded-lg transition-colors"
-                            aria-label="Zamknij"
+                            aria-label={tr.close}
                         >
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -197,11 +199,10 @@ export default function PublishDialog({
                         <div>
                             <div className="bg-surface-subtle rounded-xl p-4 mb-6">
                                 <p className="text-sm text-foreground leading-relaxed">
-                                    Wygeneruj interaktywny link, który możesz wysłać klientowi.
-                                    Klient będzie mógł:
+                                    {tr.generateDesc}
                                 </p>
                                 <ul className="mt-3 space-y-2">
-                                    {['Przeglądać pozycje oferty', 'Wybierać opcjonalne pozycje i zmieniać ilości', 'Zadawać pytania przez komentarze', 'Zaakceptować lub odrzucić ofertę'].map((text) => (
+                                    {[tr.features.browse, tr.features.optional, tr.features.comments, tr.features.accept].map((text) => (
                                         <li key={text} className="flex items-center gap-2 text-sm text-muted-foreground">
                                             <svg className="w-4 h-4 text-primary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -219,8 +220,8 @@ export default function PublishDialog({
                                     </svg>
                                     <p className={`text-sm ${isExpired ? 'text-destructive' : 'text-status-open'}`}>
                                         {isExpired
-                                            ? 'Uwaga: Oferta wygasła. Klient zobaczy informację o wygaśnięciu.'
-                                            : `Link będzie aktywny do ${new Date(validUntil).toLocaleDateString('pl-PL', { day: '2-digit', month: 'long', year: 'numeric' })}`
+                                            ? tr.expiredWarning
+                                            : `${tr.activeUntil} ${new Date(validUntil).toLocaleDateString(undefined, { day: '2-digit', month: 'long', year: 'numeric' })}`
                                         }
                                     </p>
                                 </div>
@@ -237,22 +238,22 @@ export default function PublishDialog({
                                     />
                                     <div>
                                         <span className="text-sm font-medium text-foreground">
-                                            Wyślij link mailem do klienta
+                                            {tr.sendEmail}
                                         </span>
                                         {clientEmail && canSendEmail && (
                                             <p className="text-xs text-muted-foreground mt-0.5">
-                                                Na adres: {clientEmail}
+                                                {tr.sendTo} {clientEmail}
                                             </p>
                                         )}
                                         {!clientEmail && (
                                             <p className="text-xs text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)] mt-0.5">
-                                                Klient nie ma podanego adresu email
+                                                {tr.noEmail}
                                             </p>
                                         )}
                                         {clientEmail && !smtpReady && !isLoadingSmtp && (
                                             <p className="text-xs text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)] mt-0.5">
-                                                Skonfiguruj skrzynkę pocztową w{' '}
-                                                <Link href="/dashboard/settings" className="underline hover:text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]">ustawieniach</Link>
+                                                {tr.configSmtp}{' '}
+                                                <Link href="/dashboard/settings" className="underline hover:text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]">{tr.configSmtpLink}</Link>
                                             </p>
                                         )}
                                     </div>
@@ -264,7 +265,7 @@ export default function PublishDialog({
                                     onClick={handleClose}
                                     className="flex-1 px-4 py-3 rounded-xl border border-border text-foreground font-medium hover:bg-surface-subtle transition-colors"
                                 >
-                                    Anuluj
+                                    {tr.cancel}
                                 </button>
                                 <button
                                     onClick={handlePublish}
@@ -277,14 +278,14 @@ export default function PublishDialog({
                                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                             </svg>
-                                            {isSending ? 'Wysyłanie...' : 'Generowanie...'}
+                                            {isSending ? tr.sending : tr.generating}
                                         </>
                                     ) : (
                                         <>
                                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                                             </svg>
-                                            {sendEmail ? 'Generuj i wyślij' : 'Generuj link'}
+                                            {sendEmail ? tr.generateAndSend : tr.generate}
                                         </>
                                     )}
                                 </button>
@@ -294,7 +295,7 @@ export default function PublishDialog({
                         <div>
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-foreground mb-2">
-                                    Link do oferty
+                                    {tr.linkLabel}
                                 </label>
                                 <div className="flex gap-2">
                                     <div className="flex-1 px-4 py-3 bg-surface-subtle border border-border rounded-xl text-sm text-foreground break-all select-all">
@@ -307,7 +308,7 @@ export default function PublishDialog({
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                                         </svg>
-                                        Kopiuj
+                                        {tr.copy}
                                     </button>
                                 </div>
                             </div>
@@ -319,7 +320,7 @@ export default function PublishDialog({
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                         <p className="text-sm text-status-accepted">
-                                            Email z linkiem został wysłany na adres <strong>{emailSentTo}</strong>
+                                            {tr.emailSent} <strong>{emailSentTo}</strong>
                                         </p>
                                     </div>
                                 </div>
@@ -337,14 +338,14 @@ export default function PublishDialog({
                                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                             </svg>
-                                            Wysyłanie...
+                                            {tr.sending}
                                         </>
                                     ) : (
                                         <>
                                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                             </svg>
-                                            Wyślij link mailem ({clientEmail})
+                                            {tr.sendByEmailFull.replace('{email}', clientEmail ?? '')}
                                         </>
                                     )}
                                 </button>
@@ -353,10 +354,7 @@ export default function PublishDialog({
                             {!emailSent && !canSendEmail && (
                                 <div className="bg-surface-subtle border border-border rounded-xl p-4 mb-4">
                                     <p className="text-sm text-muted-foreground">
-                                        {!clientEmail
-                                            ? 'Klient nie ma podanego adresu email — skopiuj link i wyślij ręcznie.'
-                                            : 'Skonfiguruj skrzynkę pocztową w ustawieniach, aby wysyłać oferty mailem.'
-                                        }
+                                        {!clientEmail ? tr.noEmailManual : tr.noSmtp}
                                     </p>
                                 </div>
                             )}
@@ -373,17 +371,17 @@ export default function PublishDialog({
                                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                             </svg>
-                                            Dezaktywacja...
+                                            {tr.deactivating}
                                         </>
                                     ) : (
-                                        'Dezaktywuj link'
+                                        tr.deactivate
                                     )}
                                 </button>
                                 <button
                                     onClick={handleClose}
                                     className="flex-1 px-4 py-3 rounded-xl bg-slate-900 text-white font-medium hover:bg-card transition-colors"
                                 >
-                                    Zamknij
+                                    {tr.close}
                                 </button>
                             </div>
                         </div>

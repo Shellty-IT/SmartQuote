@@ -43,11 +43,11 @@ export function useEmailList() {
             if (search.trim()) params.search = search.trim();
 
             const res = await emailsApi.list(params);
-            if (!res.data) throw new Error('Brak danych');
+            if (!res.data) throw new Error('No data');
             setItems(res.data);
             if (res.meta) setMeta(res.meta);
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : 'Błąd ładowania');
+            setError(err instanceof Error ? err.message : 'Load error');
         } finally {
             setIsLoading(false);
         }

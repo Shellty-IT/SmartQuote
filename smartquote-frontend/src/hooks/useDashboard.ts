@@ -76,7 +76,7 @@ export function useDashboard(): UseDashboardReturn {
             }
 
         } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Błąd pobierania danych dashboard';
+            const message = err instanceof ApiError ? err.message : 'Failed to fetch dashboard data';
             setError(message);
 
         } finally {

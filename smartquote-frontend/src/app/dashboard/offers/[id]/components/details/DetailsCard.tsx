@@ -3,6 +3,7 @@
 
 import { formatDate, formatDateTime } from '@/lib/utils';
 import { cn } from '@/lib/utils';
+import { useTranslations } from '@/i18n';
 import type { Offer } from '@/types';
 
 interface DetailsCardProps {
@@ -20,37 +21,36 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 }
 
 export function DetailsCard({ offer, isExpired }: DetailsCardProps) {
+    const tr = useTranslations('offerDetail');
+    const d = tr.details;
+
     return (
         <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-            <h2 className="mb-4 text-lg font-semibold tracking-tight">Szczegóły</h2>
+            <h2 className="mb-4 text-lg font-semibold tracking-tight">{d.title}</h2>
             <div className="space-y-2">
-                <Row label="Numer"><span className="font-mono">{offer.number}</span></Row>
-                <Row label="Utworzono">{formatDateTime(offer.createdAt)}</Row>
+                <Row label={d.number}><span className="font-mono">{offer.number}</span></Row>
+                <Row label={d.created}>{formatDateTime(offer.createdAt)}</Row>
                 {offer.validUntil && (
-                    <Row label="Ważna do">
+                    <Row label={d.validUntil}>
                         <span className={cn(isExpired && 'font-semibold text-status-rejected')}>
                             {formatDate(offer.validUntil)}
                         </span>
                     </Row>
                 )}
-                <Row label="Termin płatności">{offer.paymentDays} dni</Row>
-                {offer.sentAt && <Row label="Wysłano">{formatDateTime(offer.sentAt)}</Row>}
-                {offer.viewedAt && <Row label="Otwarto">{formatDateTime(offer.viewedAt)}</Row>}
+                <Row label={d.paymentDays}>{offer.paymentDays} {d.paymentDaysSuffix}</Row>
+                {offer.sentAt && <Row label={d.sent}>{formatDateTime(offer.sentAt)}</Row>}
+                {offer.viewedAt && <Row label={d.opened}>{formatDateTime(offer.viewedAt)}</Row>}
                 {offer.acceptedAt && (
-                    <Row label="Zaakceptowano">
-                        <span className="font-semibold text-status-accepted">
-                            {formatDateTime(offer.acceptedAt)}
-                        </span>
+                    <Row label={d.accepted}>
+                        <span className="font-semibold text-status-accepted">{formatDateTime(offer.acceptedAt)}</span>
                     </Row>
                 )}
                 {offer.rejectedAt && (
-                    <Row label="Odrzucono">
-                        <span className="font-semibold text-status-rejected">
-                            {formatDateTime(offer.rejectedAt)}
-                        </span>
+                    <Row label={d.rejected}>
+                        <span className="font-semibold text-status-rejected">{formatDateTime(offer.rejectedAt)}</span>
                     </Row>
                 )}
-                {offer.viewCount > 0 && <Row label="Wyświetlenia">{offer.viewCount}</Row>}
+                {offer.viewCount > 0 && <Row label={d.views}>{offer.viewCount}</Row>}
             </div>
         </div>
     );

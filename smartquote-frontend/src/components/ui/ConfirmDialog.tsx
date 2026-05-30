@@ -4,6 +4,7 @@ import { AlertTriangle, AlertCircle, Info } from 'lucide-react';
 import Modal from './Modal';
 import LegacyButton from './Button';
 import { cn } from '@/lib/utils';
+import { useTranslations } from '@/i18n';
 
 interface ConfirmDialogProps {
     isOpen: boolean;
@@ -41,11 +42,14 @@ export default function ConfirmDialog({
     onConfirm,
     title,
     description,
-    confirmLabel = 'Potwierdź',
-    cancelLabel = 'Anuluj',
+    confirmLabel: confirmLabelProp,
+    cancelLabel: cancelLabelProp,
     variant = 'danger',
     isLoading = false,
 }: ConfirmDialogProps) {
+    const commonTr = useTranslations('common');
+    const confirmLabel = confirmLabelProp ?? commonTr.confirm;
+    const cancelLabel = cancelLabelProp ?? commonTr.cancel;
     const { Icon, iconClass, bgClass } = iconConfig[variant];
     return (
         <Modal isOpen={isOpen} onClose={onClose} size="sm">

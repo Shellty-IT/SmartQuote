@@ -1,6 +1,8 @@
 // src/app/dashboard/offers/new/components/StepItems.tsx
+'use client';
 
 import { Button } from '@/components/ui';
+import { useTranslations } from '@/i18n';
 import type { ExtendedOfferItem, OfferTotalsData } from '../types';
 import { calculateItemTotal } from '../../hooks/useOfferForm';
 import OfferItemForm from './OfferItemForm';
@@ -23,15 +25,18 @@ export default function StepItems({
                                       onRemoveItem,
                                       onUpdateItem,
                                   }: StepItemsProps) {
+    const tr = useTranslations('offerNew');
+    const i = tr.items;
+
     return (
         <div>
             <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-foreground">Pozycje oferty</h2>
+                <h2 className="text-lg font-semibold text-foreground">{i.title}</h2>
                 <Button variant="outline" size="sm" onClick={onAddItem}>
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    Dodaj pozycję
+                    {i.addItem}
                 </Button>
             </div>
 
@@ -41,13 +46,9 @@ export default function StepItems({
                         <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
-                        <span className="text-sm font-medium text-primary">
-                            Warianty: {uniqueVariants.join(', ')}
-                        </span>
+                        <span className="text-sm font-medium text-primary">{i.variantsLabel} {uniqueVariants.join(', ')}</span>
                     </div>
-                    <p className="text-xs text-primary">
-                        Pozycje bez wariantu są wspólne dla wszystkich wariantów. Klient wybierze jeden wariant.
-                    </p>
+                    <p className="text-xs text-primary">{i.variantsHint}</p>
                 </div>
             )}
 

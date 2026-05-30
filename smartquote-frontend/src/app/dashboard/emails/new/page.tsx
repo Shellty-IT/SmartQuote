@@ -7,14 +7,15 @@ import Link from 'next/link';
 import { useEmailComposer } from '@/hooks/useEmailComposer';
 import RichTextEditor from '@/components/email/RichTextEditor';
 import { BUILT_IN_TEMPLATES } from '@/types/email.types';
+import { useTranslations } from '@/i18n';
 import type { EmailAttachment } from '@/types/email.types';
 
 function AttachmentTypeLabel({ type }: { type: EmailAttachment['type'] }) {
     const labels: Record<EmailAttachment['type'], { text: string; color: string }> = {
         offer_pdf: { text: 'PDF oferty', color: 'text-primary' },
         contract_pdf: { text: 'PDF umowy', color: 'text-status-accepted' },
-        offer_link: { text: 'Link oferty', color: 'text-primary' },
-        contract_link: { text: 'Link umowy', color: 'text-status-accepted' },
+        offer_link: { text: 'Offer link', color: 'text-primary' },
+        contract_link: { text: 'Contract link', color: 'text-status-accepted' },
     };
     const { text, color } = labels[type];
     return <span className={`text-xs font-medium ${color}`}>{text}</span>;
@@ -100,6 +101,7 @@ function StyledInput({ type = 'text', value, onChange, placeholder, hasError }: 
 
 function EmailComposerContent() {
     const router = useRouter();
+    const composerTr = useTranslations('emailsNew');
     const {
         to, setTo,
         toName, setToName,
@@ -146,8 +148,8 @@ function EmailComposerContent() {
                     </svg>
                 </button>
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Nowa wiadomość</h1>
-                    <p className="text-muted-foreground mt-0.5">Napisz i wyślij wiadomość do klienta</p>
+                    <h1 className="text-3xl font-bold tracking-tight">{composerTr.title}</h1>
+                    <p className="text-muted-foreground mt-0.5">{composerTr.subtitle}</p>
                 </div>
             </div>
 
@@ -177,16 +179,16 @@ function EmailComposerContent() {
             )}
 
             <div className="space-y-5">
-                <SectionCard title="Szablon wiadomości" accent="#7dd3fc">
+                <SectionCard title={composerTr.templateSection} accent="#7dd3fc">
                     <StyledSelect value={selectedTemplateId} onChange={handleTemplateSelect} disabled={isLoadingData}>
                         <option value="">— Własna wiadomość —</option>
-                        <optgroup label="Wbudowane">
+                        <optgroup label={composerTr.templateBuiltIn}>
                             {BUILT_IN_TEMPLATES.map(t => (
                                 <option key={t.id} value={t.id}>{t.name}</option>
                             ))}
                         </optgroup>
                         {userTemplates.filter(t => !t.isBuiltIn).length > 0 && (
-                            <optgroup label="Moje szablony">
+                            <optgroup label={composerTr.templateMine}>
                                 {userTemplates.filter(t => !t.isBuiltIn).map(t => (
                                     <option key={t.id} value={t.id}>{t.name}</option>
                                 ))}
@@ -195,12 +197,12 @@ function EmailComposerContent() {
                     </StyledSelect>
                 </SectionCard>
 
-                <SectionCard title="Odbiorca" accent="#93c5fd">
+                <SectionCard title={composerTr.recipientSection} accent="#93c5fd">
                     <div className="space-y-4">
                         <div>
-                            <FormLabel>Klient (opcjonalnie)</FormLabel>
+                            <FormLabel>{composerTr.clientOptional}</FormLabel>
                             <StyledSelect value={clientId} onChange={handleClientChange} disabled={isLoadingData}>
-                                <option value="">— Wybierz klienta —</option>
+                                <option value="">{composerTr.clientSelect}</option>
                                 {clients.map(c => (
                                     <option key={c.id} value={c.id}>
                                         {c.name}{c.email ? ` <${c.email}>` : ''}
@@ -211,7 +213,7 @@ function EmailComposerContent() {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <FormLabel required>Adres email</FormLabel>
+                                <FormLabel required>{composerTr.emailRequired}</FormLabel>
                                 <StyledInput
                                     type="email"
                                     value={to}
@@ -222,48 +224,48 @@ function EmailComposerContent() {
                                 {errors.to && <p className="mt-1 text-xs text-status-rejected">{errors.to}</p>}
                             </div>
                             <div>
-                                <FormLabel>Imię i nazwisko (opcjonalnie)</FormLabel>
+                                <FormLabel>{composerTr.nameOptional}</FormLabel>
                                 <StyledInput
                                     value={toName}
                                     onChange={setToName}
-                                    placeholder="Jan Kowalski"
+                                    placeholder={composerTr.nameOptional}
                                 />
                             </div>
                         </div>
                     </div>
                 </SectionCard>
 
-                <SectionCard title="Treść wiadomości" accent="#60a5fa">
+                <SectionCard title={composerTr.contentSection} accent="#60a5fa">
                     <div className="space-y-4">
                         <div>
-                            <FormLabel required>Temat</FormLabel>
+                            <FormLabel required>{composerTr.subjectLabel}</FormLabel>
                             <StyledInput
                                 value={subject}
                                 onChange={setSubject}
-                                placeholder="Temat wiadomości"
+                                placeholder={composerTr.subjectPlaceholder}
                                 hasError={!!errors.subject}
                             />
                             {errors.subject && <p className="mt-1 text-xs text-status-rejected">{errors.subject}</p>}
                         </div>
                         <div>
-                            <FormLabel required>Treść</FormLabel>
+                            <FormLabel required>{composerTr.bodyLabel}</FormLabel>
                             <RichTextEditor
                                 value={body}
                                 onChange={setBody}
-                                placeholder="Wpisz treść wiadomości..."
+                                placeholder={composerTr.bodyPlaceholder}
                             />
                             {errors.body && <p className="mt-1 text-xs text-status-rejected">{errors.body}</p>}
                         </div>
                     </div>
                 </SectionCard>
 
-                <SectionCard title="Załączniki" accent="#38bdf8">
+                <SectionCard title={composerTr.attachmentsSection} accent="#38bdf8">
                     <div className="space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <FormLabel>Oferta</FormLabel>
+                                <FormLabel>{composerTr.offerLabel}</FormLabel>
                                 <StyledSelect value={offerId} onChange={handleOfferChange} disabled={isLoadingData}>
-                                    <option value="">— Wybierz ofertę —</option>
+                                    <option value="">{composerTr.offerSelect}</option>
                                     {offers.map(o => (
                                         <option key={o.id} value={o.id}>
                                             {o.number} — {o.title}
@@ -272,9 +274,9 @@ function EmailComposerContent() {
                                 </StyledSelect>
                             </div>
                             <div>
-                                <FormLabel>Umowa</FormLabel>
+                                <FormLabel>{composerTr.contractLabel}</FormLabel>
                                 <StyledSelect value={contractId} onChange={handleContractChange} disabled={isLoadingData}>
-                                    <option value="">— Wybierz umowę —</option>
+                                    <option value="">{composerTr.contractSelect}</option>
                                     {contracts.map(c => (
                                         <option key={c.id} value={c.id}>
                                             {c.number} — {c.title}
@@ -303,9 +305,7 @@ function EmailComposerContent() {
                                     >
                                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                                        </svg>
-                                        Dodaj link publiczny oferty
-                                    </button>
+                                        </svg>{composerTr.addOfferLink}</button>
                                 )}
                                 {selectedContract?.publicToken && (
                                     <button
@@ -319,16 +319,14 @@ function EmailComposerContent() {
                                     >
                                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                                        </svg>
-                                        Dodaj link publiczny umowy
-                                    </button>
+                                        </svg>{composerTr.addContractLink}</button>
                                 )}
                             </div>
                         )}
 
                         {attachments.length > 0 && (
                             <div className="space-y-2">
-                                <p className="text-xs font-semibold" style={{ color: 'var(--muted-foreground)' }}>Dodane załączniki:</p>
+                                <p className="text-xs font-semibold" style={{ color: 'var(--muted-foreground)' }}>{composerTr.attachmentsAdded}</p>
                                 {attachments.map((att, i) => (
                                     <div
                                         key={i}

@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import { useTranslations } from '@/i18n';
 
 interface LoadingSpinnerProps {
     size?: 'sm' | 'md' | 'lg';
@@ -26,11 +27,12 @@ export default function LoadingSpinner({ size = 'md', className }: LoadingSpinne
 }
 
 export function PageLoader() {
+    const tr = useTranslations('common');
     return (
         <div className="flex min-h-[400px] items-center justify-center">
             <div className="flex flex-col items-center gap-4">
                 <LoadingSpinner size="lg" />
-                <p className="text-sm font-medium text-muted-foreground">Ładowanie...</p>
+                <p className="text-sm font-medium text-muted-foreground">{tr.loading}</p>
             </div>
         </div>
     );

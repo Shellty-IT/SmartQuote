@@ -1,8 +1,8 @@
 // src/app/dashboard/offers/[id]/components/analytics/ClientSelectionCard.tsx
 'use client';
 
-import { Card } from '@/components/ui';
 import { formatCurrency } from '@/lib/utils';
+import { useTranslations } from '@/i18n';
 
 interface SelectedItem {
     name: string;
@@ -16,13 +16,12 @@ interface ClientSelectionCardProps {
 }
 
 export function ClientSelectionCard({ items }: ClientSelectionCardProps) {
-    if (items.length === 0) {
-        return null;
-    }
+    const tr = useTranslations('offerDetail');
+    if (items.length === 0) return null;
 
     return (
         <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-            <h2 className="text-lg font-semibold text-foreground mb-4">Wybór klienta</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-4">{tr.analytics.clientSelection}</h2>
             <div className="space-y-2">
                 {items.map((item, index) => (
                     <div

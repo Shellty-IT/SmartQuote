@@ -11,8 +11,13 @@ import { useContracts } from '@/hooks/useContracts';
 import { Button, Input, Select, Textarea } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { UpdateFollowUpData } from '@/types';
+import { useTranslations } from '@/i18n';
 
 export default function EditFollowUpPage({ params }: { params: Promise<{ id: string }> }) {
+    const tr = useTranslations('followupNew');
+    const followupsTr = useTranslations('followups');
+    const offerDetailTr = useTranslations('offerDetail');
+    const commonTr = useTranslations('common');
     const { id } = use(params);
     const router = useRouter();
     const { followUp, loading: loadingFollowUp, error: fetchError } = useFollowUp(id);
@@ -55,11 +60,11 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
         const errors: Record<string, string> = {};
 
         if (!formData.title || formData.title.length < 2) {
-            errors.title = 'Tytuł musi mieć minimum 2 znaki';
+            errors.title = tr.validation.titleTooShort;
         }
 
         if (!formData.dueDate) {
-            errors.dueDate = 'Termin jest wymagany';
+            errors.dueDate = tr.validation.dueDateRequired;
         }
 
         setFieldErrors(errors);
@@ -96,7 +101,7 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
             if (err instanceof Error) {
                 setError(err.message);
             } else {
-                setError('Wystąpił nieoczekiwany błąd');
+                setError(tr.unexpectedError);
             }
         } finally {
             setIsLoading(false);
@@ -111,9 +116,7 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
                 <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                     <div className="text-center py-12">
                         <p className="text-status-rejected mb-4">{fetchError || 'Nie znaleziono follow-upa'}</p>
-                        <Button onClick={() => router.push('/dashboard/followups')}>
-                            Wróć do listy
-                        </Button>
+                        <Button onClick={() => router.push('/dashboard/followups')}>{offerDetailTr.backToList}</Button>
                     </div>
                 </div>
             </div>
@@ -132,7 +135,7 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
                     </svg>
                     Powrót
                 </button>
-                <h1 className="text-3xl font-bold tracking-tight">Edytuj follow-up</h1>
+                <h1 className="text-3xl font-bold tracking-tight">{commonTr.edit}</h1>
                 <p className="text-muted-foreground mt-1">Modyfikuj szczegóły zadania</p>
             </div>
 
@@ -148,13 +151,13 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="md:col-span-2">
                             <Input
-                                label="Tytuł"
+                                label={tr.titleLabel}
                                 name="title"
                                 value={formData.title || ''}
                                 onChange={handleChange}
                                 error={fieldErrors.title}
                                 required
-                                placeholder="np. Zadzwonić do klienta"
+                                placeholder={tr.titlePlaceholder}
                             />
                         </div>
                         <Select
@@ -179,7 +182,7 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
                             options={[
                                 { value: 'PENDING', label: 'Oczekujące' },
                                 { value: 'COMPLETED', label: 'Wykonane' },
-                                { value: 'CANCELLED', label: 'Anulowane' },
+                                { value: 'CANCELLED', label: followupsTr.statuses.CANCELLED },
                             ]}
                         />
                         <Select
@@ -195,7 +198,7 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
                             ]}
                         />
                         <Input
-                            label="Termin"
+                            label={tr.dueDateLabel}
                             name="dueDate"
                             type="date"
                             value={formData.dueDate || ''}
@@ -218,15 +221,15 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
                 </div>
 
                 <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
-                    <h2 className="text-lg font-semibold text-foreground mb-4">Powiązania</h2>
+                    <h2 className="text-lg font-semibold text-foreground mb-4">{tr.linksSection}</h2>
                     <div className="grid grid-cols-1 gap-4">
                         <Select
-                            label="Klient"
+                            label={tr.clientLabel}
                             name="clientId"
                             value={formData.clientId || ''}
                             onChange={handleChange}
                             options={[
-                                { value: '', label: 'Brak powiązania' },
+                                { value: '', label: tr.noLink },
                                 ...clients.map((c) => ({ value: c.id, label: c.name })),
                             ]}
                         />
@@ -236,7 +239,7 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
                             value={formData.offerId || ''}
                             onChange={handleChange}
                             options={[
-                                { value: '', label: 'Brak powiązania' },
+                                { value: '', label: tr.noLink },
                                 ...offers.map((o) => ({ value: o.id, label: `${o.number} - ${o.title}` })),
                             ]}
                         />
@@ -246,7 +249,7 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
                             value={formData.contractId || ''}
                             onChange={handleChange}
                             options={[
-                                { value: '', label: 'Brak powiązania' },
+                                { value: '', label: tr.noLink },
                                 ...contracts.map((c) => ({ value: c.id, label: `${c.number} - ${c.title}` })),
                             ]}
                         />
@@ -254,23 +257,19 @@ export default function EditFollowUpPage({ params }: { params: Promise<{ id: str
                 </div>
 
                 <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
-                    <h2 className="text-lg font-semibold text-foreground mb-4">Notatki</h2>
+                    <h2 className="text-lg font-semibold text-foreground mb-4">{tr.notesSection}</h2>
                     <Textarea
                         name="notes"
                         value={formData.notes || ''}
                         onChange={handleChange}
-                        placeholder="Dodatkowe notatki..."
+                        placeholder={tr.notesPlaceholder}
                         rows={3}
                     />
                 </div>
 
                 <div className="flex flex-col sm:flex-row justify-end gap-3">
-                    <Button type="button" variant="outline" onClick={() => router.back()}>
-                        Anuluj
-                    </Button>
-                    <Button type="submit" isLoading={isLoading}>
-                        Zapisz zmiany
-                    </Button>
+                    <Button type="button" variant="outline" onClick={() => router.back()}>{commonTr.cancel}</Button>
+                    <Button type="submit" isLoading={isLoading}>{commonTr.saveChanges}</Button>
                 </div>
             </form>
         </div>

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input, Button } from '@/components/ui';
 import { getInitials } from '@/lib/utils';
+import { useTranslations } from '@/i18n';
 import type { Client } from '@/types';
 
 interface StepClientProps {
@@ -14,6 +15,8 @@ interface StepClientProps {
 
 export default function StepClient({ clients, selectedClient, onSelectClient }: StepClientProps) {
     const router = useRouter();
+    const tr = useTranslations('offerNew');
+    const c = tr.client;
     const [clientSearch, setClientSearch] = useState('');
 
     const filteredClients = clients.filter(
@@ -25,9 +28,9 @@ export default function StepClient({ clients, selectedClient, onSelectClient }: 
 
     return (
         <div>
-            <h2 className="text-lg font-semibold text-foreground mb-4">Wybierz klienta</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-4">{c.title}</h2>
             <Input
-                placeholder="Szukaj klienta..."
+                placeholder={c.search}
                 value={clientSearch}
                 onChange={(e) => setClientSearch(e.target.value)}
                 className="mb-4"
@@ -54,7 +57,7 @@ export default function StepClient({ clients, selectedClient, onSelectClient }: 
                         <div className="flex-1 min-w-0">
                             <p className="font-medium text-foreground truncate">{client.name}</p>
                             <p className="text-sm text-muted-foreground truncate">
-                                {client.email || client.phone || 'Brak kontaktu'}
+                                {client.email || client.phone || c.noContact}
                             </p>
                         </div>
                         {selectedClient?.id === client.id && (
@@ -67,9 +70,9 @@ export default function StepClient({ clients, selectedClient, onSelectClient }: 
             </div>
             {filteredClients.length === 0 && (
                 <div className="text-center py-8">
-                    <p className="text-muted-foreground mb-4">Nie znaleziono klientów</p>
+                    <p className="text-muted-foreground mb-4">{c.noResults}</p>
                     <Button variant="outline" onClick={() => router.push('/dashboard/clients/new')}>
-                        Dodaj nowego klienta
+                        {c.addNew}
                     </Button>
                 </div>
             )}

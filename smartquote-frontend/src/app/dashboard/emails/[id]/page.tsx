@@ -6,16 +6,18 @@ import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui';
 import { emailsApi } from '@/lib/api/emails.api';
 import type { EmailLog, EmailLogStatus, EmailAttachment } from '@/types/email.types';
+import { useTranslations } from '@/i18n';
 
 interface PageProps {
     params: Promise<{ id: string }>;
 }
 
 function EmailStatusBadge({ status }: { status: EmailLogStatus }) {
+    const eTr = useTranslations('emailDetail');
     const config: Record<EmailLogStatus, { label: string; classes: string }> = {
-        SENT: { label: 'Wysłano', classes: 'bg-status-accepted/15 text-status-accepted' },
-        FAILED: { label: 'Błąd wysyłki', classes: 'bg-status-rejected/15 text-status-rejected' },
-        DRAFT: { label: 'Szkic', classes: 'bg-secondary text-muted-foreground dark:text-muted-foreground' },
+        SENT: { label: eTr.statusLabels.SENT, classes: 'bg-status-accepted/15 text-status-accepted' },
+        FAILED: { label: eTr.statusLabels.FAILED, classes: 'bg-status-rejected/15 text-status-rejected' },
+        DRAFT: { label: eTr.statusLabels.DRAFT, classes: 'bg-secondary text-muted-foreground dark:text-muted-foreground' },
     };
     const { label, classes } = config[status];
     return (
@@ -26,12 +28,13 @@ function EmailStatusBadge({ status }: { status: EmailLogStatus }) {
 }
 
 function AttachmentItem({ att }: { att: EmailAttachment }) {
+    const eTr = useTranslations('emailDetail');
     const isPdf = att.type === 'offer_pdf' || att.type === 'contract_pdf';
     const typeLabels: Record<EmailAttachment['type'], string> = {
-        offer_pdf: 'PDF oferty',
-        contract_pdf: 'PDF umowy',
-        offer_link: 'Link oferty',
-        contract_link: 'Link umowy',
+        offer_pdf: eTr.attachTypes.offer_pdf,
+        contract_pdf: eTr.attachTypes.contract_pdf,
+        offer_link: eTr.attachTypes.offer_link,
+        contract_link: eTr.attachTypes.contract_link,
     };
     return (
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-subtle/50 border border-border">
@@ -53,6 +56,8 @@ function AttachmentItem({ att }: { att: EmailAttachment }) {
 }
 
 export default function EmailDetailPage({ params }: PageProps) {
+    const tr = useTranslations('emailDetail');
+    const commonTr = useTranslations('common');
     const { id } = use(params);
     const router = useRouter();
     const [log, setLog] = useState<EmailLog | null>(null);
@@ -63,10 +68,10 @@ export default function EmailDetailPage({ params }: PageProps) {
         const load = async () => {
             try {
                 const res = await emailsApi.get(id);
-                if (!res.data) throw new Error('Brak danych');
+                if (!res.data) throw new Error(commonTr.errorTitle);
                 setLog(res.data);
             } catch (err: unknown) {
-                setError(err instanceof Error ? err.message : 'Błąd ładowania');
+                setError(err instanceof Error ? err.message : commonTr.errorTitle);
             } finally {
                 setIsLoading(false);
             }
@@ -97,13 +102,11 @@ export default function EmailDetailPage({ params }: PageProps) {
             <div className="p-4 md:p-8 max-w-3xl mx-auto">
                 <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                     <div className="text-center py-12">
-                        <p className="text-status-rejected mb-4">{error || 'Nie znaleziono wiadomości'}</p>
+                        <p className="text-status-rejected mb-4">{error || tr.notFound}</p>
                         <button
                             onClick={() => router.push('/dashboard/emails')}
                             className="px-4 py-2 rounded-xl bg-primary text-white text-sm"
-                        >
-                            Wróć do listy
-                        </button>
+                        >{tr.backToList}</button>
                     </div>
                 </div>
             </div>
@@ -135,29 +138,27 @@ export default function EmailDetailPage({ params }: PageProps) {
                     >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
-                        Edytuj i wyślij
-                    </button>
+                        </svg>{tr.editAndSend}</button>
                 )}
             </div>
 
             <div className="space-y-4">
                 <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                    <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Szczegóły</h2>
+                    <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">{tr.detailsSection}</h2>
                     <dl className="space-y-2">
                         <div className="flex gap-4">
-                            <dt className="text-sm text-muted-foreground w-20 flex-shrink-0">Do:</dt>
+                            <dt className="text-sm text-muted-foreground w-20 flex-shrink-0">{tr.toLabel}</dt>
                             <dd className="text-sm text-foreground">
                                 {log.toName ? `${log.toName} <${log.to}>` : log.to}
                             </dd>
                         </div>
                         <div className="flex gap-4">
-                            <dt className="text-sm text-muted-foreground w-20 flex-shrink-0">Temat:</dt>
+                            <dt className="text-sm text-muted-foreground w-20 flex-shrink-0">{tr.subjectLabel}</dt>
                             <dd className="text-sm text-foreground">{log.subject}</dd>
                         </div>
                         {log.client && (
                             <div className="flex gap-4">
-                                <dt className="text-sm text-muted-foreground w-20 flex-shrink-0">Klient:</dt>
+                                <dt className="text-sm text-muted-foreground w-20 flex-shrink-0">{tr.clientLabel}</dt>
                                 <dd className="text-sm text-foreground">
                                     <button
                                         onClick={() => router.push(`/dashboard/clients/${log.client!.id}`)}
@@ -170,7 +171,7 @@ export default function EmailDetailPage({ params }: PageProps) {
                         )}
                         {log.offer && (
                             <div className="flex gap-4">
-                                <dt className="text-sm text-muted-foreground w-20 flex-shrink-0">Oferta:</dt>
+                                <dt className="text-sm text-muted-foreground w-20 flex-shrink-0">{tr.offerLabel}</dt>
                                 <dd className="text-sm text-foreground">
                                     <button
                                         onClick={() => router.push(`/dashboard/offers/${log.offer!.id}`)}
@@ -183,7 +184,7 @@ export default function EmailDetailPage({ params }: PageProps) {
                         )}
                         {log.contract && (
                             <div className="flex gap-4">
-                                <dt className="text-sm text-muted-foreground w-20 flex-shrink-0">Umowa:</dt>
+                                <dt className="text-sm text-muted-foreground w-20 flex-shrink-0">{tr.contractLabel}</dt>
                                 <dd className="text-sm text-foreground">
                                     <button
                                         onClick={() => router.push(`/dashboard/contracts/${log.contract!.id}`)}
@@ -196,7 +197,7 @@ export default function EmailDetailPage({ params }: PageProps) {
                         )}
                         {log.errorMessage && (
                             <div className="flex gap-4">
-                                <dt className="text-sm text-muted-foreground w-20 flex-shrink-0">Błąd:</dt>
+                                <dt className="text-sm text-muted-foreground w-20 flex-shrink-0">{tr.errorLabel}</dt>
                                 <dd className="text-sm text-status-rejected">{log.errorMessage}</dd>
                             </div>
                         )}
@@ -204,7 +205,7 @@ export default function EmailDetailPage({ params }: PageProps) {
                 </div>
 
                 <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                    <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Treść wiadomości</h2>
+                    <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">{tr.bodySection}</h2>
                     <div className="prose prose-sm max-w-none text-foreground whitespace-pre-wrap leading-relaxed">
                         {log.body}
                     </div>

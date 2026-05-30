@@ -279,7 +279,7 @@ export function useEmailComposer(draftId?: string) {
             } else {
                 res = await emailsApi.send(buildPayload(false));
             }
-            if (!res.data) throw new Error('Brak odpowiedzi z serwera');
+            if (!res.data) throw new Error('No response from server');
 
             if (res.data.status === 'FAILED') {
                 setErrorMessage('Wiadomość nie została wysłana. Sprawdź konfigurację SMTP w ustawieniach.');
@@ -289,9 +289,9 @@ export function useEmailComposer(draftId?: string) {
             setSuccessMessage('Wiadomość została wysłana pomyślnie!');
             setTimeout(() => router.push('/dashboard/emails'), 1500);
         } catch (err: unknown) {
-            const msg = err instanceof Error ? err.message : 'Błąd wysyłki';
+            const msg = err instanceof Error ? err.message : 'Send error';
             if (msg.includes('SMTP_NOT_CONFIGURED')) {
-                setErrorMessage('Brak konfiguracji SMTP. Przejdź do Ustawienia → SMTP aby skonfigurować skrzynkę pocztową.');
+                setErrorMessage('SMTP not configured. Go to Settings → Mailbox to configure your email.');
             } else {
                 setErrorMessage(msg);
             }
@@ -325,7 +325,7 @@ export function useEmailComposer(draftId?: string) {
             setSuccessMessage('Szkic zapisany');
             setTimeout(() => router.push('/dashboard/emails'), 1200);
         } catch (err: unknown) {
-            setErrorMessage(err instanceof Error ? err.message : 'Błąd zapisywania szkicu');
+            setErrorMessage(err instanceof Error ? err.message : 'Failed to save draft');
         } finally {
             setIsSavingDraft(false);
         }

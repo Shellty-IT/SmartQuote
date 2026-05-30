@@ -9,11 +9,14 @@ import { useClients } from '@/hooks/useClients';
 import { Button, Input, Select, Textarea, LoadingSpinner } from '@/components/ui';
 import { Client, ContractItem } from '@/types';
 import { useToast } from '@/contexts/ToastContext';
+import { useTranslations } from '@/i18n';
 
 export default function EditContractPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const router = useRouter();
     const toast = useToast();
+    const t = useTranslations('contractForm');
+    const commonTr = useTranslations('common');
 
     const { contract, loading: contractLoading, error: contractError } = useContract(id);
     const { updateContract } = useContracts();
@@ -85,10 +88,10 @@ export default function EditContractPage({ params }: { params: Promise<{ id: str
         });
 
         if (response.success) {
-            toast.success('Umowa zaktualizowana', 'Zmiany zostały zapisane');
+            toast.success(t.toasts.updated, t.toasts.updatedDesc);
             router.push(`/dashboard/contracts/${id}`);
         } else {
-            toast.error('Błąd', 'Nie udało się zaktualizować umowy');
+            toast.error(t.toasts.error, t.toasts.updateError);
             setLoading(false);
         }
     };
@@ -129,10 +132,10 @@ export default function EditContractPage({ params }: { params: Promise<{ id: str
     if (contractError || !contract) {
         return (
             <div className="text-center py-12">
-                <p className="text-destructive">{contractError || 'Umowa nie znaleziona'}</p>
+                <p className="text-destructive">{contractError || t.notFound}</p>
                 <Link href="/dashboard/contracts">
                     <Button variant="outline" className="mt-4">
-                        Wróć do listy
+                        {t.backToList}
                     </Button>
                 </Link>
             </div>
@@ -150,27 +153,27 @@ export default function EditContractPage({ params }: { params: Promise<{ id: str
                     </Button>
                 </Link>
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground">Edytuj umowę</h1>
+                    <h1 className="text-2xl font-bold text-foreground">{t.editTitle}</h1>
                     <p className="text-muted-foreground">{contract.number}</p>
                 </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                    <h2 className="text-lg font-semibold text-foreground mb-4">Informacje podstawowe</h2>
+                    <h2 className="text-lg font-semibold text-foreground mb-4">{t.basicInfo}</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Input
-                            label="Tytuł umowy *"
+                            label={t.contractTitleLabel}
                             value={formData.title}
                             onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                             required
                         />
                         <Select
-                            label="Klient *"
+                            label={t.clientLabel}
                             value={formData.clientId}
                             onChange={(e) => setFormData(prev => ({ ...prev, clientId: e.target.value }))}
                             required
-                            placeholder="Wybierz klienta"
+                            placeholder={t.clientPlaceholder}
                             options={clients.map((client: Client) => ({
                                 value: client.id,
                                 label: client.company ? `${client.name} (${client.company})` : client.name
@@ -178,26 +181,26 @@ export default function EditContractPage({ params }: { params: Promise<{ id: str
                         />
                         <Input
                             type="date"
-                            label="Data rozpoczęcia"
+                            label={t.startDate}
                             value={formData.startDate}
                             onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
                         />
                         <Input
                             type="date"
-                            label="Data zakończenia"
+                            label={t.endDate}
                             value={formData.endDate}
                             onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
                         />
                         <Input
                             type="number"
-                            label="Termin płatności (dni)"
+                            label={t.paymentDays}
                             value={formData.paymentDays}
                             onChange={(e) => setFormData(prev => ({ ...prev, paymentDays: parseInt(e.target.value) || 14 }))}
                         />
                     </div>
                     <div className="mt-4">
                         <Textarea
-                            label="Opis"
+                            label={t.descriptionLabel}
                             value={formData.description}
                             onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                             rows={3}
@@ -207,9 +210,9 @@ export default function EditContractPage({ params }: { params: Promise<{ id: str
 
                 <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                     <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-semibold text-foreground">Pozycje umowy</h2>
+                        <h2 className="text-lg font-semibold text-foreground">{t.itemsSection}</h2>
                         <Button type="button" variant="outline" size="sm" onClick={addItem}>
-                            + Dodaj pozycję
+                            {t.addItem}
                         </Button>
                     </div>
 
@@ -219,7 +222,7 @@ export default function EditContractPage({ params }: { params: Promise<{ id: str
                                 <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
                                     <div className="md:col-span-2">
                                         <Input
-                                            label="Nazwa *"
+                                            label={t.nameLabel}
                                             value={item.name}
                                             onChange={(e) => updateItem(index, 'name', e.target.value)}
                                             required
@@ -227,20 +230,20 @@ export default function EditContractPage({ params }: { params: Promise<{ id: str
                                     </div>
                                     <Input
                                         type="number"
-                                        label="Ilość"
+                                        label={t.qtyLabel}
                                         value={item.quantity}
                                         onChange={(e) => updateItem(index, 'quantity', e.target.value)}
                                         step="0.001"
                                         min="0"
                                     />
                                     <Input
-                                        label="Jednostka"
+                                        label={t.unitLabel}
                                         value={item.unit}
                                         onChange={(e) => updateItem(index, 'unit', e.target.value)}
                                     />
                                     <Input
                                         type="number"
-                                        label="Cena netto"
+                                        label={t.netPriceLabel}
                                         value={item.unitPrice}
                                         onChange={(e) => updateItem(index, 'unitPrice', e.target.value)}
                                         step="0.01"
@@ -253,9 +256,7 @@ export default function EditContractPage({ params }: { params: Promise<{ id: str
                                             size="sm"
                                             onClick={() => removeItem(index)}
                                             disabled={formData.items.length === 1}
-                                        >
-                                            Usuń
-                                        </Button>
+                                        >{commonTr.delete}</Button>
                                     </div>
                                 </div>
                             </div>
@@ -264,16 +265,16 @@ export default function EditContractPage({ params }: { params: Promise<{ id: str
                 </div>
 
                 <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                    <h2 className="text-lg font-semibold text-foreground mb-4">Warunki</h2>
+                    <h2 className="text-lg font-semibold text-foreground mb-4">{t.termsSection}</h2>
                     <div className="space-y-4">
                         <Textarea
-                            label="Warunki umowy"
+                            label={t.termsLabel}
                             value={formData.terms}
                             onChange={(e) => setFormData(prev => ({ ...prev, terms: e.target.value }))}
                             rows={4}
                         />
                         <Textarea
-                            label="Notatki wewnętrzne"
+                            label={t.internalNotes}
                             value={formData.notes}
                             onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                             rows={3}
@@ -284,11 +285,11 @@ export default function EditContractPage({ params }: { params: Promise<{ id: str
                 <div className="flex justify-end gap-4">
                     <Link href={`/dashboard/contracts/${id}`}>
                         <Button type="button" variant="outline">
-                            Anuluj
+                            {t.cancel}
                         </Button>
                     </Link>
                     <Button type="submit" disabled={loading}>
-                        {loading ? 'Zapisywanie...' : 'Zapisz zmiany'}
+                        {loading ? t.saving : t.saveChanges}
                     </Button>
                 </div>
             </form>

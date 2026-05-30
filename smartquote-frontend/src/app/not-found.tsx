@@ -12,15 +12,15 @@ export default function NotFound() {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
-                <h1 className="mb-2 text-2xl font-bold tracking-tight">Strona nie istnieje</h1>
+                <h1 className="mb-2 text-2xl font-bold tracking-tight">Page not found</h1>
                 <p className="mb-8 text-sm text-muted-foreground">
-                    Strona, której szukasz, nie została znaleziona lub przeniesiono ją pod inny adres.
+                    The page you are looking for does not exist or has been moved to a different address.
                 </p>
                 <Link
                     href="/dashboard"
                     className="inline-flex items-center gap-2 rounded-xl bg-gradient-primary px-6 py-3 text-sm font-semibold text-white shadow-glow ring-1 ring-white/15 transition hover:brightness-110"
                 >
-                    <Home className="h-4 w-4" /> Wróć do dashboardu
+                    <Home className="h-4 w-4" /> Back to dashboard
                 </Link>
             </div>
         </div>

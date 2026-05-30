@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Modal, Button, Textarea, LoadingSpinner } from '@/components/ui';
 import { useAI } from '@/hooks/useAI';
 import { GeneratedOffer } from '@/types';
+import { useTranslations } from '@/i18n';
 
 interface AIOfferGeneratorProps {
     isOpen: boolean;
@@ -21,6 +22,7 @@ export function AIOfferGenerator({
                                      clientId,
                                      clientName,
                                  }: AIOfferGeneratorProps) {
+    const t = useTranslations('aiGenerator');
     const { generateOffer, isLoading } = useAI();
     const [description, setDescription] = useState('');
     const [generatedOffer, setGeneratedOffer] = useState<GeneratedOffer | null>(null);
@@ -54,35 +56,35 @@ export function AIOfferGenerator({
         <Modal
             isOpen={isOpen}
             onClose={handleClose}
-            title="✨ Generuj ofertę z AI"
+            title={t.modalTitle}
             size="lg"
         >
             {step === 'input' ? (
                 <div className="space-y-4">
                     {clientName && (
                         <div className="p-3 ai-bg-card border-border border rounded-lg text-sm">
-                            Tworzysz ofertę dla: <strong>{clientName}</strong>
+                            {t.creatingFor} <strong>{clientName}</strong>
                         </div>
                     )}
 
                     <div>
                         <label className="block text-sm font-medium text-muted-foreground mb-2">
-                            Opisz potrzeby klienta i oczekiwany zakres oferty
+                            {t.descLabel}
                         </label>
                         <Textarea
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            placeholder="Np. Klient potrzebuje strony internetowej dla małej firmy. Chce stronę z 5 podstronami, formularzem kontaktowym, integracją z Google Analytics. Budżet około 5000-7000 PLN."
+                            placeholder={t.placeholder}
                             rows={6}
                         />
                         <p className="mt-2 text-xs text-muted-foreground">
-                            Im więcej szczegółów podasz, tym lepsza będzie wygenerowana oferta.
+                            {t.hint}
                         </p>
                     </div>
 
                     <div className="flex gap-3 justify-end">
                         <Button variant="outline" onClick={handleClose}>
-                            Anuluj
+                            {t.cancel}
                         </Button>
                         <Button
                             onClick={handleGenerate}
@@ -91,10 +93,10 @@ export function AIOfferGenerator({
                             {isLoading ? (
                                 <>
                                     <LoadingSpinner size="sm" className="mr-2" />
-                                    Generuję...
+                                    {t.generating}
                                 </>
                             ) : (
-                                'Generuj ofertę'
+                                t.generate
                             )}
                         </Button>
                     </div>
@@ -137,16 +139,16 @@ export function AIOfferGenerator({
                                 )}
 
                                 <div className="mt-4 text-right text-sm text-muted-foreground">
-                                    Ważność: {generatedOffer.validDays} dni
+                                    {t.validDays.replace('{n}', String(generatedOffer.validDays))}
                                 </div>
                             </div>
 
                             <div className="flex gap-3 justify-end">
                                 <Button variant="outline" onClick={() => setStep('input')}>
-                                    ← Wróć i zmień
+                                    {t.back}
                                 </Button>
                                 <Button onClick={handleAccept}>
-                                    Użyj tej oferty
+                                    {t.use}
                                 </Button>
                             </div>
                         </>

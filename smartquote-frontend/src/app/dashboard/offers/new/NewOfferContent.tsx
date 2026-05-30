@@ -3,6 +3,7 @@
 
 import { Button } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
+import { useTranslations } from '@/i18n';
 import { useOfferForm } from '../hooks';
 import OfferStepper from './components/OfferStepper';
 import StepClient from './components/StepClient';
@@ -12,6 +13,7 @@ import StepSummary from './components/StepSummary';
 import TemplateSelector from '@/components/offer-templates/TemplateSelector';
 
 export default function NewOfferContent() {
+    const tr = useTranslations('offerNew');
     const {
         clients,
         isLoadingClients,
@@ -38,26 +40,21 @@ export default function NewOfferContent() {
         router,
     } = useOfferForm();
 
-    if (isLoadingClients && clients.length === 0) {
-        return <PageLoader />;
-    }
+    if (isLoadingClients && clients.length === 0) return <PageLoader />;
 
     return (
         <div className="p-4 md:p-8 max-w-4xl mx-auto">
             <div className="mb-8">
-                <button
-                    onClick={() => router.back()}
-                    className="flex items-center gap-2 text-muted-foreground hover:opacity-70 mb-4"
-                >
+                <button onClick={() => router.back()} className="flex items-center gap-2 text-muted-foreground hover:opacity-70 mb-4">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    Powrót
+                    {tr.back}
                 </button>
                 <div className="flex items-start justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">Nowa oferta</h1>
-                        <p className="text-muted-foreground mt-1">Utwórz nową ofertę handlową</p>
+                        <h1 className="text-2xl font-bold text-foreground">{tr.title}</h1>
+                        <p className="text-muted-foreground mt-1">{tr.subtitle}</p>
                     </div>
                     {currentStep === 'items' && (
                         <button
@@ -67,7 +64,7 @@ export default function NewOfferContent() {
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
                             </svg>
-                            Użyj szablonu
+                            {tr.useTemplate}
                         </button>
                     )}
                 </div>
@@ -77,20 +74,11 @@ export default function NewOfferContent() {
 
             <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
                 {currentStep === 'client' && (
-                    <StepClient
-                        clients={clients}
-                        selectedClient={selectedClient}
-                        onSelectClient={setSelectedClient}
-                    />
+                    <StepClient clients={clients} selectedClient={selectedClient} onSelectClient={setSelectedClient} />
                 )}
-
                 {currentStep === 'details' && (
-                    <StepDetails
-                        details={offerDetails}
-                        onUpdate={updateDetails}
-                    />
+                    <StepDetails details={offerDetails} onUpdate={updateDetails} />
                 )}
-
                 {currentStep === 'items' && (
                     <StepItems
                         items={items}
@@ -101,24 +89,14 @@ export default function NewOfferContent() {
                         onUpdateItem={updateItem}
                     />
                 )}
-
                 {currentStep === 'summary' && selectedClient && (
-                    <StepSummary
-                        client={selectedClient}
-                        details={offerDetails}
-                        items={items}
-                        totals={totals}
-                        uniqueVariants={uniqueVariants}
-                    />
+                    <StepSummary client={selectedClient} details={offerDetails} items={items} totals={totals} uniqueVariants={uniqueVariants} />
                 )}
             </div>
 
             <div className="flex justify-between">
-                <Button
-                    variant="outline"
-                    onClick={currentStep === 'client' ? () => router.back() : goBack}
-                >
-                    {currentStep === 'client' ? 'Anuluj' : 'Wstecz'}
+                <Button variant="outline" onClick={currentStep === 'client' ? () => router.back() : goBack}>
+                    {currentStep === 'client' ? tr.cancel : tr.prev}
                 </Button>
 
                 <div className="flex gap-3">
@@ -127,11 +105,11 @@ export default function NewOfferContent() {
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
-                            Utwórz ofertę
+                            {tr.create}
                         </Button>
                     ) : (
                         <Button onClick={goNext} disabled={!canProceed()}>
-                            Dalej
+                            {tr.next}
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                             </svg>

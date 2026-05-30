@@ -1,7 +1,8 @@
 // src/app/dashboard/offers/new/components/OfferStepper.tsx
 'use client';
 
-import { STEPS, type Step } from '../constants';
+import { useTranslations } from '@/i18n';
+import { STEP_IDS, type Step } from '../constants';
 
 interface OfferStepperProps {
     currentStep: Step;
@@ -9,34 +10,37 @@ interface OfferStepperProps {
 }
 
 export default function OfferStepper({ currentStep, onStepClick }: OfferStepperProps) {
-    const currentIndex = STEPS.findIndex((s) => s.id === currentStep);
+    const tr = useTranslations('offerNew');
+    const labels: Record<Step, string> = {
+        client: tr.steps.client,
+        details: tr.steps.details,
+        items: tr.steps.items,
+        summary: tr.steps.summary,
+    };
+    const currentIndex = STEP_IDS.indexOf(currentStep);
 
     return (
         <div className="mb-8">
             <div className="flex items-center justify-between">
-                {STEPS.map((step, index) => {
-                    const isActive = step.id === currentStep;
+                {STEP_IDS.map((stepId, index) => {
+                    const isActive = stepId === currentStep;
                     const isCompleted = index < currentIndex;
                     const isClickable = index <= currentIndex;
 
                     return (
-                        <div key={step.id} className="flex items-center flex-1">
+                        <div key={stepId} className="flex items-center flex-1">
                             <button
-                                onClick={() => isClickable && onStepClick(step.id)}
+                                onClick={() => isClickable && onStepClick(stepId)}
                                 disabled={!isClickable}
-                                className={`flex items-center gap-3 ${
-                                    isClickable ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
-                                }`}
+                                className={`flex items-center gap-3 ${isClickable ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
                             >
-                                <div
-                                    className={`grid h-10 w-10 place-items-center rounded-full text-sm font-semibold transition-all ${
-                                        isActive
-                                            ? 'bg-gradient-primary text-white shadow-glow ring-1 ring-white/15'
-                                            : isCompleted
-                                                ? 'bg-status-accepted text-white'
-                                                : 'border border-border bg-card text-muted-foreground'
-                                    }`}
-                                >
+                                <div className={`grid h-10 w-10 place-items-center rounded-full text-sm font-semibold transition-all ${
+                                    isActive
+                                        ? 'bg-gradient-primary text-white shadow-glow ring-1 ring-white/15'
+                                        : isCompleted
+                                            ? 'bg-status-accepted text-white'
+                                            : 'border border-border bg-card text-muted-foreground'
+                                }`}>
                                     {isCompleted ? (
                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -45,15 +49,11 @@ export default function OfferStepper({ currentStep, onStepClick }: OfferStepperP
                                         index + 1
                                     )}
                                 </div>
-                                <span
-                                    className={`hidden md:block text-sm font-medium ${
-                                        isActive ? 'text-foreground' : 'text-muted-foreground'
-                                    }`}
-                                >
-                                    {step.label}
+                                <span className={`hidden md:block text-sm font-medium ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>
+                                    {labels[stepId]}
                                 </span>
                             </button>
-                            {index < STEPS.length - 1 && (
+                            {index < STEP_IDS.length - 1 && (
                                 <div className="flex-1 h-0.5 mx-2 md:mx-4 bg-surface-subtle" />
                             )}
                         </div>

@@ -2,6 +2,7 @@
 'use client';
 
 import { formatDateTime } from '@/lib/utils';
+import { useTranslations } from '@/i18n';
 
 interface Comment {
     id: string;
@@ -15,13 +16,15 @@ interface CommentsListProps {
 }
 
 export function CommentsList({ comments }: CommentsListProps) {
+    const tr = useTranslations('offerDetail');
+
     if (comments.length === 0) {
         return (
             <div className="text-center py-8 mb-6">
                 <svg className="w-12 h-12 mx-auto text-muted-foreground opacity-40 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
-                <p className="text-muted-foreground">Brak komentarzy</p>
+                <p className="text-muted-foreground">{tr.comments.noComments}</p>
             </div>
         );
     }
@@ -41,7 +44,7 @@ export function CommentsList({ comments }: CommentsListProps) {
                         <p className="text-sm whitespace-pre-wrap">{comment.content}</p>
                         <div className={`flex items-center gap-2 mt-1 ${comment.author === 'SELLER' ? 'justify-end' : 'justify-start'}`}>
               <span className={`text-xs ${comment.author === 'SELLER' ? 'text-white/85' : 'text-muted-foreground'}`}>
-                {comment.author === 'SELLER' ? 'Ty' : 'Klient'}
+                {comment.author === 'SELLER' ? tr.comments.you : tr.comments.client}
               </span>
                             <span className={`text-xs ${comment.author === 'SELLER' ? 'text-white/70' : 'text-muted-foreground opacity-50'}`}>•</span>
                             <span className={`text-xs ${comment.author === 'SELLER' ? 'text-white/70' : 'text-muted-foreground'}`}>

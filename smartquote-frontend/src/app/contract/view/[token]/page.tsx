@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback, use } from 'react';
 import Image from 'next/image';
 import SignContractDialog from '@/components/publicContract/SignContractDialog';
+import { useTranslations } from '@/i18n';
 
 interface PageProps {
     params: Promise<{ token: string }>;
@@ -83,13 +84,13 @@ interface PublicContractData {
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
 
-const statusLabels: Record<string, { label: string; color: string; bg: string }> = {
-    DRAFT: { label: 'Szkic', color: 'text-slate-600', bg: 'bg-slate-100' },
-    PENDING_SIGNATURE: { label: 'Do podpisu', color: 'text-amber-700', bg: 'bg-amber-100' },
-    ACTIVE: { label: 'Aktywna', color: 'text-emerald-700', bg: 'bg-emerald-100' },
-    COMPLETED: { label: 'Zakończona', color: 'text-blue-700', bg: 'bg-blue-100' },
-    TERMINATED: { label: 'Rozwiązana', color: 'text-red-700', bg: 'bg-red-100' },
-    EXPIRED: { label: 'Wygasła', color: 'text-orange-700', bg: 'bg-orange-100' },
+const statusColors: Record<string, { color: string; bg: string }> = {
+    DRAFT: { color: 'text-slate-600', bg: 'bg-slate-100' },
+    PENDING_SIGNATURE: { color: 'text-amber-700', bg: 'bg-amber-100' },
+    ACTIVE: { color: 'text-emerald-700', bg: 'bg-emerald-100' },
+    COMPLETED: { color: 'text-blue-700', bg: 'bg-blue-100' },
+    TERMINATED: { color: 'text-red-700', bg: 'bg-red-100' },
+    EXPIRED: { color: 'text-orange-700', bg: 'bg-orange-100' },
 };
 
 function formatCurrency(amount: number, currency: string = 'PLN'): string {
@@ -110,6 +111,7 @@ function formatDateTime(dateStr: string | null): string {
 
 export default function PublicContractPage({ params }: PageProps) {
     const { token } = use(params);
+    const tr = useTranslations('contractPublic');
 
     const [data, setData] = useState<PublicContractData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -133,13 +135,13 @@ export default function PublicContractPage({ params }: PageProps) {
                 if (response.status === 404) {
                     setError('NOT_FOUND');
                 } else {
-                    setError(json.error?.message || 'Błąd serwera');
+                    setError(json.error?.message || tr.serverError);
                 }
                 return;
             }
             setData(json.data);
         } catch {
-            setError('Nie udało się załadować umowy');
+            setError(tr.loadError);
         } finally {
             if (showSpinner) setIsLoading(false);
         }
@@ -157,7 +159,7 @@ export default function PublicContractPage({ params }: PageProps) {
         });
         const json = await response.json();
         if (!response.ok) {
-            throw new Error(json.error?.message || 'Błąd podpisywania umowy');
+            throw new Error(json.error?.message || tr.errorTitle);
         }
         setShowSignDialog(false);
         setSignSuccess(true);
@@ -170,7 +172,7 @@ export default function PublicContractPage({ params }: PageProps) {
         setDownloadError(null);
         try {
             const response = await fetch(`${API_URL}/api/public/contracts/${token}/pdf`);
-            if (!response.ok) throw new Error('Nie udało się pobrać dokumentu PDF');
+            if (!response.ok) throw new Error(tr.pdfDownloadError);
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -181,7 +183,7 @@ export default function PublicContractPage({ params }: PageProps) {
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
         } catch (err) {
-            setDownloadError(err instanceof Error ? err.message : 'Wystąpił błąd podczas pobierania PDF');
+            setDownloadError(err instanceof Error ? err.message : tr.pdfErrorGeneric);
         } finally {
             setIsDownloading(false);
         }
@@ -203,7 +205,7 @@ export default function PublicContractPage({ params }: PageProps) {
         return (
             <div className="flex flex-col items-center justify-center py-24">
                 <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-500 rounded-full animate-spin mb-6" />
-                <p className="text-slate-500 text-lg">Ładowanie umowy...</p>
+                <p className="text-slate-500 text-lg">{tr.loading}</p>
             </div>
         );
     }
@@ -230,17 +232,15 @@ export default function PublicContractPage({ params }: PageProps) {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
                     </svg>
                 </div>
-                <h1 className="text-2xl font-bold text-slate-900 mb-3">Wystąpił błąd</h1>
+                <h1 className="text-2xl font-bold text-slate-900 mb-3">{tr.errorTitle}</h1>
                 <p className="text-slate-500 mb-6">{error}</p>
-                <button onClick={() => loadContract(true)} className="px-6 py-3 bg-emerald-500 text-white font-medium rounded-xl hover:bg-emerald-600 transition-colors">
-                    Spróbuj ponownie
-                </button>
+                <button onClick={() => loadContract(true)} className="px-6 py-3 bg-emerald-500 text-white font-medium rounded-xl hover:bg-emerald-600 transition-colors">{tr.retry}</button>
             </div>
         );
     }
 
     const { contract } = data;
-    const status = statusLabels[contract.status] || statusLabels.DRAFT;
+    const status = statusColors[contract.status] || statusColors.DRAFT;
     const isTerminal = contract.status === 'TERMINATED' || contract.status === 'EXPIRED';
     const canSign = contract.status === 'PENDING_SIGNATURE' && !contract.signatureLog;
 
@@ -252,8 +252,8 @@ export default function PublicContractPage({ params }: PageProps) {
                         ✅
                     </div>
                     <div>
-                        <p className="font-semibold text-emerald-800">Umowa została podpisana!</p>
-                        <p className="text-sm text-status-accepted">Potwierdzenie zostanie wysłane na podany adres email.</p>
+                        <p className="font-semibold text-emerald-800">{tr.signedSuccess}</p>
+                        <p className="text-sm text-status-accepted">{tr.confirmEmail}</p>
                     </div>
                 </div>
             )}
@@ -267,9 +267,9 @@ export default function PublicContractPage({ params }: PageProps) {
                     </div>
                     <div>
                         <p className="font-semibold text-red-800">
-                            {contract.status === 'TERMINATED' ? 'Ta umowa została rozwiązana' : 'Ta umowa wygasła'}
+                            {contract.status === 'TERMINATED' ? tr.terminatedMsg : tr.expiredMsg}
                         </p>
-                        <p className="text-sm text-red-600">Dokument ma charakter archiwalny.</p>
+                        <p className="text-sm text-red-600">{tr.archival}</p>
                     </div>
                 </div>
             )}
@@ -282,7 +282,7 @@ export default function PublicContractPage({ params }: PageProps) {
                         </svg>
                     </div>
                     <div className="flex-1">
-                        <p className="font-semibold text-red-800">Błąd pobierania PDF</p>
+                        <p className="font-semibold text-red-800">{tr.pdfErrorTitle}</p>
                         <p className="text-sm text-red-600">{downloadError}</p>
                     </div>
                     <button
@@ -305,13 +305,13 @@ export default function PublicContractPage({ params }: PageProps) {
                             )}
                             <div>
                                 <p className="text-white/80 text-sm">{contract.seller.name || 'SmartQuote'}</p>
-                                <p className="text-white font-bold text-lg">UMOWA</p>
+                                <p className="text-white font-bold text-lg">{tr.contractLabel}</p>
                             </div>
                         </div>
                         <div className="text-right">
-                            <p className="text-white/80 text-sm">Nr {contract.number}</p>
+                            <p className="text-white/80 text-sm">{tr.nrLabel} {contract.number}</p>
                             <span className={`inline-block mt-1 px-3 py-1 rounded-full text-xs font-medium ${status.bg} ${status.color}`}>
-                                {status.label}
+                                {tr.statusLabels[contract.status as keyof typeof tr.statusLabels]}
                             </span>
                         </div>
                     </div>
@@ -349,7 +349,7 @@ export default function PublicContractPage({ params }: PageProps) {
             <div className="bg-white rounded-2xl border border-slate-200 p-6">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div>
-                        <p className="text-xs font-medium text-slate-400 uppercase">Data zawarcia</p>
+                        <p className="text-xs font-medium text-slate-400 uppercase">{tr.contractDate}</p>
                         <p className="text-sm font-semibold text-slate-900 mt-1">{formatDate(contract.createdAt)}</p>
                     </div>
                     <div>
@@ -361,7 +361,7 @@ export default function PublicContractPage({ params }: PageProps) {
                         <p className="text-sm font-semibold text-slate-900 mt-1">{formatDate(contract.endDate)}</p>
                     </div>
                     <div>
-                        <p className="text-xs font-medium text-slate-400 uppercase">Data podpisania</p>
+                        <p className="text-xs font-medium text-slate-400 uppercase">{tr.signedDate}</p>
                         <p className={`text-sm font-semibold mt-1 ${contract.signedAt ? 'text-status-accepted' : 'text-slate-900'}`}>
                             {formatDate(contract.signedAt)}
                         </p>
@@ -371,7 +371,7 @@ export default function PublicContractPage({ params }: PageProps) {
 
             <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
                 <div className="px-6 py-4 border-b border-slate-100">
-                    <h2 className="text-lg font-semibold text-slate-900">Pozycje umowy</h2>
+                    <h2 className="text-lg font-semibold text-slate-900">{tr.contractItems}</h2>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full">
@@ -382,7 +382,7 @@ export default function PublicContractPage({ params }: PageProps) {
                             <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Ilość</th>
                             <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Cena</th>
                             <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">VAT</th>
-                            <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Brutto</th>
+                            <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">{tr.colGross}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -405,7 +405,7 @@ export default function PublicContractPage({ params }: PageProps) {
 
                 <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 space-y-2">
                     <div className="flex justify-between text-sm">
-                        <span className="text-slate-500">Suma netto:</span>
+                        <span className="text-slate-500">{tr.subtotal}</span>
                         <span className="font-medium text-slate-900">{formatCurrency(contract.totalNet, contract.currency)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
@@ -421,16 +421,16 @@ export default function PublicContractPage({ params }: PageProps) {
 
             {contract.terms && (
                 <div className="bg-white rounded-2xl border border-slate-200 p-6">
-                    <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Warunki umowy</h3>
+                    <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">{tr.contractTerms}</h3>
                     <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{contract.terms}</p>
                 </div>
             )}
 
             {contract.paymentTerms && (
                 <div className="bg-white rounded-2xl border border-slate-200 p-6">
-                    <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Warunki płatności</h3>
+                    <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">{tr.paymentTermsLabel}</h3>
                     <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{contract.paymentTerms}</p>
-                    <p className="text-sm text-slate-500 mt-2">Termin płatności: <span className="font-medium text-slate-700">{contract.paymentDays} dni</span></p>
+                    <p className="text-sm text-slate-500 mt-2">{tr.paymentDays} <span className="font-medium text-slate-700">{contract.paymentDays} {tr.paymentDaysSuffix}</span></p>
                 </div>
             )}
 
@@ -440,7 +440,7 @@ export default function PublicContractPage({ params }: PageProps) {
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-lg">✍️</div>
                             <div>
-                                <h3 className="text-white font-bold">Podpis elektroniczny</h3>
+                                <h3 className="text-white font-bold">{tr.signatureSection}</h3>
                                 <p className="text-emerald-100 text-xs">Certyfikat podpisu umowy</p>
                             </div>
                         </div>
@@ -451,14 +451,14 @@ export default function PublicContractPage({ params }: PageProps) {
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={contract.signatureLog.signatureImage}
-                                alt="Podpis elektroniczny"
+                                alt={tr.signatureAlt}
                                 className="max-w-[300px] max-h-[120px] object-contain"
                             />
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <p className="text-xs font-medium text-slate-400 uppercase">Podpisujący</p>
+                                <p className="text-xs font-medium text-slate-400 uppercase">{tr.signer}</p>
                                 <p className="text-sm font-semibold text-slate-900 mt-1">{contract.signatureLog.signerName}</p>
                             </div>
                             <div>
@@ -466,7 +466,7 @@ export default function PublicContractPage({ params }: PageProps) {
                                 <p className="text-sm font-semibold text-slate-900 mt-1">{contract.signatureLog.signerEmail}</p>
                             </div>
                             <div>
-                                <p className="text-xs font-medium text-slate-400 uppercase">Data podpisu</p>
+                                <p className="text-xs font-medium text-slate-400 uppercase">{tr.signDate}</p>
                                 <p className="text-sm font-semibold text-emerald-700 mt-1">{formatDateTime(contract.signatureLog.signedAt)}</p>
                             </div>
                             <div>
@@ -476,7 +476,7 @@ export default function PublicContractPage({ params }: PageProps) {
                         </div>
 
                         <div>
-                            <p className="text-xs font-medium text-slate-400 uppercase mb-2">Content Hash (SHA-256)</p>
+                            <p className="text-xs font-medium text-slate-400 uppercase mb-2">{tr.contentHashLabel}</p>
                             <div className="flex items-center gap-2">
                                 <code className="flex-1 text-xs bg-slate-900 text-emerald-400 px-4 py-3 rounded-xl font-mono break-all leading-relaxed">
                                     {contract.signatureLog.contentHash}
@@ -484,7 +484,7 @@ export default function PublicContractPage({ params }: PageProps) {
                                 <button
                                     onClick={() => handleCopyHash(contract.signatureLog!.contentHash)}
                                     className="flex-shrink-0 p-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors relative"
-                                    title="Kopiuj hash"
+                                    title={tr.copyHash}
                                 >
                                     {hashCopied ? (
                                         <svg className="w-5 h-5 text-status-accepted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -502,11 +502,10 @@ export default function PublicContractPage({ params }: PageProps) {
                                 </button>
                             </div>
                             {copyError && (
-                                <p className="text-xs text-red-500 mt-1">Nie udało się skopiować. Zaznacz hash ręcznie.</p>
+                                <p className="text-xs text-red-500 mt-1">{tr.copyError}</p>
                             )}
                             <p className="text-xs text-slate-400 mt-2">
-                                Ten hash jest unikalnym odciskiem cyfrowym treści umowy w momencie podpisu.
-                                Każda zmiana w treści generowałaby inny hash — co potwierdza integralność dokumentu.
+                                {tr.hashDesc}
                             </p>
                         </div>
                     </div>
@@ -522,9 +521,7 @@ export default function PublicContractPage({ params }: PageProps) {
                         >
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                            </svg>
-                            Podpisz umowę
-                        </button>
+                            </svg>{tr.signBtn}</button>
                     )}
                     <button
                         onClick={handleDownloadPdf}
@@ -541,8 +538,8 @@ export default function PublicContractPage({ params }: PageProps) {
                         {isDownloading
                             ? 'Generowanie PDF...'
                             : contract.signatureLog
-                                ? 'Pobierz umowę z podpisem (PDF)'
-                                : 'Pobierz umowę (PDF)'}
+                                ? tr.downloadWithSig
+                                : tr.downloadOnly}
                     </button>
                     {contract.seller.email && (
                         <a

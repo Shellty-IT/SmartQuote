@@ -5,9 +5,10 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useClients } from '@/hooks/useClients';
 import { offersApi, ApiError } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
+import { useTranslations } from '@/i18n';
 import type { Client, CreateOfferInput, OfferTemplate, Offer } from '@/types';
 import type { Step } from '../new/constants';
-import { STEPS } from '../new/constants';
+import { STEP_IDS } from '../new/constants';
 import type { ExtendedOfferItem, OfferDetails, OfferTotalsData } from '../new/types';
 import { emptyItem, defaultOfferDetails } from '../new/types';
 
@@ -36,6 +37,8 @@ export function useOfferForm(options?: { initialData?: Offer }) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const toast = useToast();
+    const tr = useTranslations('offerNew');
+    const commonTr = useTranslations('common');
 
     const isEditMode = !!options?.initialData;
     const offerId = options?.initialData?.id;
@@ -116,16 +119,16 @@ export function useOfferForm(options?: { initialData?: Offer }) {
     const goToStep = useCallback((step: Step) => setCurrentStep(step), []);
 
     const goNext = useCallback(() => {
-        const currentIndex = STEPS.findIndex((s) => s.id === currentStep);
-        if (currentIndex < STEPS.length - 1) {
-            setCurrentStep(STEPS[currentIndex + 1].id);
+        const currentIndex = STEP_IDS.indexOf(currentStep);
+        if (currentIndex < STEP_IDS.length - 1) {
+            setCurrentStep(STEP_IDS[currentIndex + 1]);
         }
     }, [currentStep]);
 
     const goBack = useCallback(() => {
-        const currentIndex = STEPS.findIndex((s) => s.id === currentStep);
+        const currentIndex = STEP_IDS.indexOf(currentStep);
         if (currentIndex > 0) {
-            setCurrentStep(STEPS[currentIndex - 1].id);
+            setCurrentStep(STEP_IDS[currentIndex - 1]);
         }
     }, [currentStep]);
 
@@ -188,8 +191,10 @@ export function useOfferForm(options?: { initialData?: Offer }) {
             }
 
             toast.success(
-                'Szablon zastosowany',
-                `Wstawiono ${template.items.length} pozycji z szablonu "${template.name}"`
+                tr.toasts.templateApplied,
+                tr.toasts.templateAppliedDesc
+                    .replace('{n}', String(template.items.length))
+                    .replace('{name}', template.name)
             );
         },
         [offerDetails.paymentDays, toast]
@@ -242,29 +247,29 @@ export function useOfferForm(options?: { initialData?: Offer }) {
 
             if (isEditMode && offerId) {
                 await offersApi.update(offerId, data);
-                toast.success('Oferta zaktualizowana', 'Zmiany zostały zapisane pomyślnie');
+                toast.success(tr.toasts.updated, tr.toasts.updatedDesc);
                 router.push(`/dashboard/offers/${offerId}`);
             } else {
                 const response = await offersApi.create(data);
                 if (response.data?.id) {
-                    toast.success('Oferta utworzona', `"${offerDetails.title}" została zapisana`);
+                    toast.success(tr.toasts.created);
                     router.push(`/dashboard/offers/${response.data.id}`);
                 } else {
-                    throw new Error('Nie udało się utworzyć oferty');
+                    throw new Error(tr.toasts.createError);
                 }
             }
         } catch (err) {
             if (err instanceof ApiError) {
                 toast.error(
-                    isEditMode ? 'Błąd aktualizacji' : 'Błąd tworzenia oferty',
+                    isEditMode ? tr.toasts.updateError : tr.toasts.createError,
                     err.message
                 );
             } else {
-                toast.error('Błąd', 'Wystąpił nieoczekiwany błąd');
+                toast.error(commonTr.errorTitle, tr.toasts.unknownError);
             }
             setIsSubmitting(false);
         }
-    }, [isEditMode, offerId, selectedClient, offerDetails, items, toast, router]);
+    }, [isEditMode, offerId, selectedClient, offerDetails, items, toast, router, tr.toasts, commonTr.errorTitle]);
 
     return {
         clients,

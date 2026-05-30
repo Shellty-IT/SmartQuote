@@ -6,12 +6,14 @@ import { useState, useEffect, use } from 'react';
 import { publicOffersApi, ApiError } from '@/lib/api';
 import type { PublicOfferData } from '@/types';
 import InteractiveOffer from '@/components/publicOffer/InteractiveOffer';
+import { useTranslations } from '@/i18n';
 
 interface PageProps {
     params: Promise<{ token: string }>;
 }
 
 export default function PublicOfferPage({ params }: PageProps) {
+    const tr = useTranslations('offerPublicPage');
     const { token } = use(params);
 
     const [data, setData] = useState<PublicOfferData | null>(null);
@@ -50,7 +52,7 @@ export default function PublicOfferPage({ params }: PageProps) {
         return (
             <div className="flex flex-col items-center justify-center py-24">
                 <div className="w-12 h-12 border-4 border-cyan-200 border-t-cyan-500 rounded-full animate-spin mb-6" />
-                <p className="text-slate-500 text-lg">Ładowanie oferty...</p>
+                <p className="text-slate-500 text-lg">{tr.loading}</p>
             </div>
         );
     }
@@ -81,16 +83,12 @@ export default function PublicOfferPage({ params }: PageProps) {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
                     </svg>
                 </div>
-                <h1 className="text-2xl font-bold text-slate-900 mb-3">
-                    Wystąpił błąd
-                </h1>
+                <h1 className="text-2xl font-bold text-slate-900 mb-3">{tr.errorTitle}</h1>
                 <p className="text-slate-500 mb-6">{error}</p>
                 <button
                     onClick={() => window.location.reload()}
                     className="px-6 py-3 bg-cyan-500 text-white font-medium rounded-xl hover:bg-cyan-600 transition-colors"
-                >
-                    Spróbuj ponownie
-                </button>
+                >{tr.retry}</button>
             </div>
         );
     }

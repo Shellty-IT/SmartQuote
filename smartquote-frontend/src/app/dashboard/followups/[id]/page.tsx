@@ -9,31 +9,31 @@ import { Button, Badge, ConfirmDialog } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { formatDate } from '@/lib/utils';
 import { FollowUpStatus, FollowUpType, Priority } from '@/types';
+import { useTranslations } from '@/i18n';
 
-const statusConfig: Record<FollowUpStatus, { label: string; color: string; bgColor: string }> = {
-    PENDING: { label: 'Oczekujące', color: 'text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]', bgColor: 'bg-[oklch(0.72_0.16_60)/10%] dark:bg-amber-900/30' },
-    COMPLETED: { label: 'Wykonane', color: 'text-status-accepted dark:text-green-400', bgColor: 'bg-green-50 dark:bg-green-900/30' },
-    CANCELLED: { label: 'Anulowane', color: 'text-foreground', bgColor: 'bg-secondary dark:bg-secondary/50' },
-    OVERDUE: { label: 'Zaległe', color: 'text-destructive', bgColor: 'bg-destructive/10 dark:bg-red-900/30' },
+const statusColors: Record<FollowUpStatus, { color: string; bgColor: string }> = {
+    PENDING: { color: 'text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]', bgColor: 'bg-[oklch(0.72_0.16_60)/10%] dark:bg-amber-900/30' },
+    COMPLETED: { color: 'text-status-accepted dark:text-green-400', bgColor: 'bg-green-50 dark:bg-green-900/30' },
+    CANCELLED: { color: 'text-foreground', bgColor: 'bg-secondary dark:bg-secondary/50' },
+    OVERDUE: { color: 'text-destructive', bgColor: 'bg-destructive/10 dark:bg-red-900/30' },
 };
 
-const typeConfig: Record<FollowUpType, { label: string; icon: string }> = {
-    CALL: { label: 'Telefon', icon: '📞' },
-    EMAIL: { label: 'Email', icon: '✉️' },
-    MEETING: { label: 'Spotkanie', icon: '🤝' },
-    TASK: { label: 'Zadanie', icon: '✅' },
-    REMINDER: { label: 'Przypomnienie', icon: '🔔' },
-    OTHER: { label: 'Inne', icon: '📌' },
+const typeIcons: Record<FollowUpType, string> = {
+    CALL: '📞', EMAIL: '✉️', MEETING: '🤝', TASK: '✅', REMINDER: '🔔', OTHER: '📌',
 };
 
-const priorityConfig: Record<Priority, { label: string; color: string; bgColor: string }> = {
-    LOW: { label: 'Niski', color: 'text-muted-foreground dark:text-muted-foreground', bgColor: 'bg-secondary dark:bg-secondary/50' },
-    MEDIUM: { label: 'Średni', color: 'text-primary', bgColor: 'bg-[color-mix(in_oklab,var(--status-open)_10%,transparent)] dark:bg-blue-900/30' },
-    HIGH: { label: 'Wysoki', color: 'text-[oklch(0.55_0.16_45)] dark:text-[oklch(0.78_0.14_45)] dark:text-orange-400', bgColor: 'bg-orange-50 dark:bg-orange-900/30' },
-    URGENT: { label: 'Pilne', color: 'text-destructive', bgColor: 'bg-destructive/10 dark:bg-red-900/30' },
+const priorityColors: Record<Priority, { color: string; bgColor: string }> = {
+    LOW: { color: 'text-muted-foreground dark:text-muted-foreground', bgColor: 'bg-secondary dark:bg-secondary/50' },
+    MEDIUM: { color: 'text-primary', bgColor: 'bg-[color-mix(in_oklab,var(--status-open)_10%,transparent)] dark:bg-blue-900/30' },
+    HIGH: { color: 'text-[oklch(0.55_0.16_45)] dark:text-[oklch(0.78_0.14_45)] dark:text-orange-400', bgColor: 'bg-orange-50 dark:bg-orange-900/30' },
+    URGENT: { color: 'text-destructive', bgColor: 'bg-destructive/10 dark:bg-red-900/30' },
 };
 
 export default function FollowUpDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const tr = useTranslations('followups');
+    const followupsNewTr = useTranslations('followupNew');
+    const commonTr = useTranslations('common');
+    const offerDetailTr = useTranslations('offerDetail');
     const { id } = use(params);
     const router = useRouter();
     const { followUp, loading, error, refetch } = useFollowUp(id);
@@ -76,19 +76,21 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
             <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
                 <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                     <div className="text-center py-12">
-                        <p className="text-status-rejected mb-4">{error || 'Nie znaleziono follow-upa'}</p>
-                        <Button onClick={() => router.push('/dashboard/followups')}>
-                            Wróć do listy
-                        </Button>
+                        <p className="text-status-rejected mb-4">{error || tr.table.followup}</p>
+                        <Button onClick={() => router.push('/dashboard/followups')}>{offerDetailTr.backToList}</Button>
                     </div>
                 </div>
             </div>
         );
     }
 
-    const status = isOverdue ? statusConfig.OVERDUE : statusConfig[followUp.status];
-    const type = typeConfig[followUp.type];
-    const priority = priorityConfig[followUp.priority];
+    const statusKey = (isOverdue ? 'OVERDUE' : followUp.status) as FollowUpStatus;
+    const status = statusColors[statusKey];
+    const statusLabel = tr.statuses[statusKey as keyof typeof tr.statuses];
+    const typeLabel = tr.types[followUp.type as keyof typeof tr.types];
+    const typeIcon = typeIcons[followUp.type];
+    const priority = priorityColors[followUp.priority];
+    const priorityLabel = tr.priorities[followUp.priority as keyof typeof tr.priorities];
 
     return (
         <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-8 sm:px-6">
@@ -103,18 +105,18 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                         </svg>
                     </button>
                     <div className="w-16 h-16 rounded-2xl bg-gradient-primary flex items-center justify-center text-white text-2xl">
-                        {type.icon}
+                        {typeIcon}
                     </div>
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">{followUp.title}</h1>
                         <div className="flex flex-wrap items-center gap-2 mt-1">
                             <Badge className={`${status.bgColor} ${status.color}`}>
-                                {status.label}
+                                {statusLabel}
                             </Badge>
                             <Badge className={`${priority.bgColor} ${priority.color}`}>
-                                {priority.label}
+                                {priorityLabel}
                             </Badge>
-                            <span className="text-sm text-muted-foreground">{type.label}</span>
+                            <span className="text-sm text-muted-foreground">{typeLabel}</span>
                         </div>
                     </div>
                 </div>
@@ -128,20 +130,14 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                         >
                             <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                            Oznacz jako wykonane
-                        </Button>
+                            </svg>{tr.markDone}</Button>
                     )}
-                    <Button variant="outline" onClick={() => router.push(`/dashboard/followups/${followUp.id}/edit`)}>
-                        Edytuj
-                    </Button>
+                    <Button variant="outline" onClick={() => router.push(`/dashboard/followups/${followUp.id}/edit`)}>{commonTr.edit}</Button>
                     <Button
                         variant="outline"
                         onClick={() => setDeleteModal(true)}
                         className="text-status-rejected border-destructive/30 dark:border-red-700 hover:bg-destructive/10 dark:hover:bg-red-900/30"
-                    >
-                        Usuń
-                    </Button>
+                    >{commonTr.delete}</Button>
                 </div>
             </div>
 
@@ -149,21 +145,21 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                 <div className="lg:col-span-2 space-y-6">
                     {followUp.description && (
                         <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                            <h2 className="text-lg font-semibold text-foreground mb-4">Opis</h2>
+                            <h2 className="text-lg font-semibold text-foreground mb-4">{followupsNewTr.descSection}</h2>
                             <p className="text-foreground whitespace-pre-wrap">{followUp.description}</p>
                         </div>
                     )}
 
                     {followUp.notes && (
                         <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                            <h2 className="text-lg font-semibold text-foreground mb-4">Notatki</h2>
+                            <h2 className="text-lg font-semibold text-foreground mb-4">{followupsNewTr.notesSection}</h2>
                             <p className="text-foreground whitespace-pre-wrap">{followUp.notes}</p>
                         </div>
                     )}
 
                     {(followUp.client || followUp.offer || followUp.contract) && (
                         <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                            <h2 className="text-lg font-semibold text-foreground mb-4">Powiązania</h2>
+                            <h2 className="text-lg font-semibold text-foreground mb-4">{followupsNewTr.linksSection}</h2>
                             <div className="space-y-3">
                                 {followUp.client && (
                                     <div
@@ -177,7 +173,7 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                                                 </svg>
                                             </div>
                                             <div>
-                                                <p className="text-sm text-muted-foreground">Klient</p>
+                                                <p className="text-sm text-muted-foreground">{followupsNewTr.clientLabel}</p>
                                                 <p className="font-medium text-foreground">{followUp.client.name}</p>
                                             </div>
                                         </div>
@@ -238,25 +234,25 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                         <h2 className="text-lg font-semibold text-foreground mb-4">Szczegóły</h2>
                         <div className="space-y-4">
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">Termin</span>
+                                <span className="text-muted-foreground">{followupsNewTr.dueDateLabel}</span>
                                 <span className={`font-medium ${isOverdue ? 'text-status-rejected' : 'text-foreground'}`}>
                   {formatDate(followUp.dueDate)}
                 </span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Typ</span>
-                                <span className="text-foreground">{type.icon} {type.label}</span>
+                                <span className="text-foreground">{typeIcon} {typeLabel}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Priorytet</span>
                                 <Badge className={`${priority.bgColor} ${priority.color}`}>
-                                    {priority.label}
+                                    {priorityLabel}
                                 </Badge>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Status</span>
                                 <Badge className={`${status.bgColor} ${status.color}`}>
-                                    {status.label}
+                                    {statusLabel}
                                 </Badge>
                             </div>
                             {followUp.completedAt && (
@@ -290,9 +286,7 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                                 >
                                     <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                    Oznacz jako wykonane
-                                </Button>
+                                    </svg>{tr.markDone}</Button>
                             )}
                             <Button
                                 variant="outline"
@@ -301,9 +295,7 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                             >
                                 <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                </svg>
-                                Nowy follow-up
-                            </Button>
+                                </svg>{tr.newFollowup}</Button>
                             {followUp.client?.email && (
                                 <Button
                                     variant="outline"
@@ -312,9 +304,7 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                                 >
                                     <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                    </svg>
-                                    Wyślij email
-                                </Button>
+                                    </svg>{commonTr.refresh}</Button>
                             )}
                         </div>
                     </div>
@@ -325,9 +315,9 @@ export default function FollowUpDetailPage({ params }: { params: Promise<{ id: s
                 isOpen={deleteModal}
                 onClose={() => setDeleteModal(false)}
                 onConfirm={handleDelete}
-                title="Usuń follow-up"
+                title={tr.delete.title}
                 description={`Czy na pewno chcesz usunąć follow-up "${followUp.title}"? Ta operacja jest nieodwracalna.`}
-                confirmLabel="Usuń"
+                confirmLabel={commonTr.delete}
                 isLoading={isDeleting}
             />
         </div>

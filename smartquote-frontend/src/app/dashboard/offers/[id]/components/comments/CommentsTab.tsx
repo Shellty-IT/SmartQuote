@@ -1,8 +1,8 @@
 // src/app/dashboard/offers/[id]/components/comments/CommentsTab.tsx
 'use client';
 
-import { Card } from '@/components/ui';
 import type { ClosingStrategy } from '@/types/ai';
+import { useTranslations } from '@/i18n';
 import { CommentsList } from './CommentsList';
 import { CloserStrategy } from './CloserStrategy';
 import { CommentInput } from './CommentInput';
@@ -43,11 +43,12 @@ export function CommentsTab({
                                 onExpandStrategy,
                                 onUseStrategy,
                             }: CommentsTabProps) {
+    const tr = useTranslations('offerDetail');
     return (
         <div className="max-w-2xl space-y-6">
             <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                 <h2 className="text-lg font-semibold text-foreground mb-4">
-                    Komentarze ({comments.length})
+                    {tr.comments.title} ({comments.length})
                 </h2>
 
                 <CommentsList comments={comments} />

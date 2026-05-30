@@ -2,6 +2,7 @@
 'use client';
 
 import type { ClosingStrategy } from '@/types/ai';
+import { useTranslations } from '@/i18n';
 
 interface CloserStrategyProps {
     closingStrategy: ClosingStrategy | null;
@@ -22,6 +23,9 @@ export function CloserStrategy({
                                    onExpandStrategy,
                                    onUseStrategy,
                                }: CloserStrategyProps) {
+    const tr = useTranslations('offerDetail');
+    const closer = tr.comments.closer;
+
     const renderStrategyCard = (
         key: string,
         strategy: { title: string; description: string; suggestedResponse: string; riskLevel?: string; proposedConcessions?: string[]; maxDiscountPercent?: number },
@@ -43,12 +47,12 @@ export function CloserStrategy({
                                 strategy.riskLevel === 'medium' ? 'bg-[oklch(0.72_0.16_60)/10%] text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]' :
                                     'bg-destructive/10 text-destructive'
                         }`}>
-              Ryzyko: {strategy.riskLevel === 'low' ? 'niskie' : strategy.riskLevel === 'medium' ? 'średnie' : 'wysokie'}
+              {closer.risk} {strategy.riskLevel === 'low' ? closer.riskLow : strategy.riskLevel === 'medium' ? closer.riskMedium : closer.riskHigh}
             </span>
                     )}
                     {strategy.maxDiscountPercent !== undefined && (
                         <span className="text-xs px-2 py-0.5 rounded-full bg-status-accepted/10 text-status-accepted font-medium">
-              Max rabat: {strategy.maxDiscountPercent}%
+              {closer.maxDiscount} {strategy.maxDiscountPercent}%
             </span>
                     )}
                 </div>
@@ -73,7 +77,7 @@ export function CloserStrategy({
                         onClick={(e) => { e.stopPropagation(); onUseStrategy(strategy.suggestedResponse); }}
                         className="text-xs px-3 py-1.5 rounded-lg bg-primary text-white hover:brightness-110 transition-colors"
                     >
-                        Wstaw odpowiedź
+                        {closer.useStrategy}
                     </button>
                 </div>
             )}
@@ -87,7 +91,7 @@ export function CloserStrategy({
                     <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                     </svg>
-                    <span className="text-sm font-semibold text-muted-foreground">AI Closer — Strategia negocjacji</span>
+                    <span className="text-sm font-semibold text-muted-foreground">{closer.title}</span>
                 </div>
                 <button
                     onClick={onLoadCloser}
@@ -100,10 +104,10 @@ export function CloserStrategy({
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                             </svg>
-                            Generuję...
+                            {closer.generating}
                         </>
                     ) : (
-                        closingStrategy ? 'Odśwież strategię' : 'Zasugeruj strategię'
+                        closingStrategy ? closer.refresh : closer.suggest
                     )}
                 </button>
             </div>
