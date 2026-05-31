@@ -1368,7 +1368,7 @@ export const pl = {
             confidenceHigh: 'Wysoka',
             checkTitle: 'Sprawdź sugestię cenową AI',
             enterName: 'Wpisz nazwę pozycji (min. 3 znaki)',
-            errorFallback: 'Price analysis error',
+            errorFallback: 'Błąd analizy cenowej',
         },
     },
     clientForm: {

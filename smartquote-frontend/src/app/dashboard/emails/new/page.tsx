@@ -11,14 +11,14 @@ import { useTranslations } from '@/i18n';
 import type { EmailAttachment } from '@/types/email.types';
 
 function AttachmentTypeLabel({ type }: { type: EmailAttachment['type'] }) {
-    const labels: Record<EmailAttachment['type'], { text: string; color: string }> = {
-        offer_pdf: { text: 'PDF oferty', color: 'text-primary' },
-        contract_pdf: { text: 'PDF umowy', color: 'text-status-accepted' },
-        offer_link: { text: 'Offer link', color: 'text-primary' },
-        contract_link: { text: 'Contract link', color: 'text-status-accepted' },
+    const tr = useTranslations('emailsNew');
+    const colors: Record<EmailAttachment['type'], string> = {
+        offer_pdf: 'text-primary',
+        contract_pdf: 'text-status-accepted',
+        offer_link: 'text-primary',
+        contract_link: 'text-status-accepted',
     };
-    const { text, color } = labels[type];
-    return <span className={`text-xs font-medium ${color}`}>{text}</span>;
+    return <span className={`text-xs font-medium ${colors[type]}`}>{tr.attachTypes[type]}</span>;
 }
 
 function SectionCard({ title, accent, children }: { title: string; accent?: string; children: React.ReactNode }) {

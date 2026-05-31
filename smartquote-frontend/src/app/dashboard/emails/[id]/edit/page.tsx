@@ -15,14 +15,14 @@ interface PageProps {
 }
 
 function AttachmentTypeLabel({ type }: { type: EmailAttachment['type'] }) {
-    const labels: Record<EmailAttachment['type'], { text: string; color: string }> = {
-        offer_pdf: { text: 'PDF oferty', color: 'text-status-rejected' },
-        contract_pdf: { text: 'PDF umowy', color: 'text-status-accepted' },
-        offer_link: { text: 'Link oferty', color: 'text-primary' },
-        contract_link: { text: 'Link umowy', color: 'text-status-accepted' },
+    const tr = useTranslations('emailsNew');
+    const colors: Record<EmailAttachment['type'], string> = {
+        offer_pdf: 'text-status-rejected',
+        contract_pdf: 'text-status-accepted',
+        offer_link: 'text-primary',
+        contract_link: 'text-status-accepted',
     };
-    const { text, color } = labels[type];
-    return <span className={`text-xs font-medium ${color}`}>{text}</span>;
+    return <span className={`text-xs font-medium ${colors[type]}`}>{tr.attachTypes[type]}</span>;
 }
 
 function EditDraftContent({ draftId }: { draftId: string }) {
