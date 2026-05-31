@@ -67,6 +67,13 @@ export async function changePassword(
     return { message: 'Hasło zostało zmienione' };
 }
 
+export async function deleteAccount(userId: string) {
+    await prisma.user.delete({ where: { id: userId } });
+    authCache.invalidate(userId);
+    logger.info({ userId }, 'Account deleted');
+    return { message: 'Konto zostało usunięte' };
+}
+
 export async function getSettings(userId: string) {
     let settings = await prisma.userSettings.findUnique({ where: { userId } });
     if (!settings) {

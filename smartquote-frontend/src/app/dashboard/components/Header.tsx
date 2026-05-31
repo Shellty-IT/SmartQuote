@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Search, Sun, Moon, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/app/providers';
-import { useTranslations } from '@/i18n';
+import { useTranslations, useLanguage } from '@/i18n';
 import { useUnreadCount } from '@/hooks/useNotifications';
 import { settingsApi } from '@/lib/api';
 import { getInitials } from '@/lib/utils';
@@ -15,6 +15,7 @@ import { getInitials } from '@/lib/utils';
 export default function Header() {
     const { data: session } = useSession();
     const { theme, toggle } = useTheme();
+    const { language, setLanguage } = useLanguage();
     const { count: unreadCount } = useUnreadCount();
     const commonTr = useTranslations('common');
     const settingsTr = useTranslations('settings');
@@ -50,6 +51,34 @@ export default function Header() {
 
             {/* Right controls — ml-auto pushes to right edge regardless of search width */}
             <div className="ml-auto flex shrink-0 items-center gap-2">
+                {/* Language switcher */}
+                <div className="flex items-center rounded-lg border border-border bg-card overflow-hidden">
+                    <button
+                        onClick={() => setLanguage('pl')}
+                        aria-label="Polski"
+                        className={cn(
+                            'h-9 px-2.5 text-xs font-semibold transition-colors',
+                            language === 'pl'
+                                ? 'bg-gradient-primary text-white'
+                                : 'text-muted-foreground hover:text-foreground'
+                        )}
+                    >
+                        PL
+                    </button>
+                    <button
+                        onClick={() => setLanguage('en')}
+                        aria-label="English"
+                        className={cn(
+                            'h-9 px-2.5 text-xs font-semibold transition-colors',
+                            language === 'en'
+                                ? 'bg-gradient-primary text-white'
+                                : 'text-muted-foreground hover:text-foreground'
+                        )}
+                    >
+                        EN
+                    </button>
+                </div>
+
                 {/* Theme toggle */}
                 <button
                     onClick={toggle}

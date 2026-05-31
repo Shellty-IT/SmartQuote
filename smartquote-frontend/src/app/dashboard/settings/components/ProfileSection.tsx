@@ -2,10 +2,12 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { signOut } from 'next-auth/react';
 
 import Button from '@/components/ui/Button';
 import { compressImage } from '@/lib/imageUtils';
 import { useTranslations } from '@/i18n';
+import { settingsApi } from '@/lib/api';
 import type { UserProfile, UpdateProfileInput } from '@/types';
 
 interface Props {
@@ -26,6 +28,10 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
         name: profile.name || '',
         phone: profile.phone || '',
     });
+
+    const [deleteConfirm, setDeleteConfirm] = useState('');
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState('');
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -79,6 +85,19 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
         } catch {
         } finally {
             setIsUploadingAvatar(false);
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        if (deleteConfirm !== tr.account.deleteConfirmWord) return;
+        setIsDeleting(true);
+        setDeleteError('');
+        try {
+            await settingsApi.deleteAccount();
+            await signOut({ callbackUrl: '/' });
+        } catch {
+            setDeleteError(commonTr.errorTitle);
+            setIsDeleting(false);
         }
     };
 
@@ -230,6 +249,56 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
                     </Button>
                 </div>
             )}
+
+            {/* Danger zone */}
+            <div className="mt-8 rounded-xl border border-destructive/30 bg-destructive/5 p-5">
+                <div className="mb-1 flex items-center gap-2">
+                    <svg className="h-4 w-4 text-destructive" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <span className="text-sm font-semibold text-destructive">{tr.account.dangerZone}</span>
+                </div>
+                <h3 className="text-base font-semibold text-foreground">{tr.account.deleteTitle}</h3>
+                <p className="mt-0.5 text-sm text-muted-foreground">{tr.account.deleteSubtitle}</p>
+
+                <div className="mt-4 rounded-lg border border-destructive/20 bg-destructive/8 px-4 py-3 text-sm text-destructive">
+                    {tr.account.deleteWarning}
+                </div>
+
+                <div className="mt-4 space-y-3">
+                    <div>
+                        <label className="mb-1.5 block text-sm font-medium text-foreground">
+                            {tr.account.deleteConfirmLabel}
+                        </label>
+                        <input
+                            type="text"
+                            value={deleteConfirm}
+                            onChange={(e) => setDeleteConfirm(e.target.value)}
+                            placeholder={tr.account.deleteConfirmPlaceholder}
+                            disabled={isDeleting}
+                            className="h-10 w-full rounded-lg border border-border bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-destructive focus:outline-none focus:ring-2 focus:ring-destructive/20 disabled:opacity-50"
+                        />
+                    </div>
+                    {deleteError && (
+                        <p className="text-sm text-destructive">{deleteError}</p>
+                    )}
+                    <button
+                        onClick={handleDeleteAccount}
+                        disabled={deleteConfirm !== tr.account.deleteConfirmWord || isDeleting}
+                        className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-destructive bg-destructive px-4 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                        {isDeleting ? (
+                            <>
+                                <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                </svg>
+                                {tr.account.deleting}
+                            </>
+                        ) : tr.account.deleteBtn}
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }

@@ -22,10 +22,12 @@ import {
     ChevronsLeft,
     Sun,
     Moon,
+    ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/app/providers';
 import { useTranslations } from '@/i18n';
+import PrivacyPolicyModal from '@/components/PrivacyPolicyModal';
 import { useSidebarStats } from '@/hooks/useSidebarStats';
 import { useUnreadCount } from '@/hooks/useNotifications';
 
@@ -62,6 +64,7 @@ export default function Sidebar() {
     const commonTr = useTranslations('common');
     const [collapsed, setCollapsed] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [privacyOpen, setPrivacyOpen] = useState(false);
     const prevPathname = useRef(pathname);
 
     useEffect(() => {
@@ -197,6 +200,17 @@ export default function Sidebar() {
                 </Link>
 
                 <button
+                    onClick={() => setPrivacyOpen(true)}
+                    className={cn(
+                        'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground/80 transition-all hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
+                        collapsed && 'justify-center px-2'
+                    )}
+                >
+                    <ShieldCheck className="h-[18px] w-[18px] shrink-0" strokeWidth={2} />
+                    {!collapsed && <span>{commonTr.privacyPolicy}</span>}
+                </button>
+
+                <button
                     onClick={() => signOut({ callbackUrl: '/' })}
                     className={cn(
                         'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground/80 transition-all hover:bg-destructive/10 hover:text-destructive',
@@ -266,6 +280,8 @@ export default function Sidebar() {
                     </aside>
                 </>
             )}
+
+            <PrivacyPolicyModal isOpen={privacyOpen} onClose={() => setPrivacyOpen(false)} />
         </>
     );
 }

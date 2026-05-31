@@ -36,4 +36,6 @@ router.delete('/smtp', settingsController.deleteSmtpConfig);
 router.post('/smtp/test', validate(v.testSmtpConnectionSchema), settingsController.testSmtpConnection);
 router.post('/smtp/test-saved', settingsController.testSavedSmtpConnection);
 
+router.delete('/account', settingsController.deleteAccount);
+
 export default router;

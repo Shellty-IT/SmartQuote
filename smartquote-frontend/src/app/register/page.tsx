@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from '@/i18n';
+import PrivacyPolicyModal from '@/components/PrivacyPolicyModal';
 
 interface FormErrors {
     email?: string;
@@ -19,6 +20,7 @@ export default function RegisterPage() {
     const tr = useTranslations('auth');
 
     const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '', name: '' });
+    const [privacyOpen, setPrivacyOpen] = useState(false);
     const [errors, setErrors] = useState<FormErrors>({});
     const [isLoading, setIsLoading] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -242,8 +244,16 @@ export default function RegisterPage() {
                     {tr.register.agreeing}{' '}
                     <a href="#" className="underline hover:text-foreground">{tr.register.terms}</a>
                     {tr.register.andWord}
-                    <a href="#" className="underline hover:text-foreground">{tr.register.privacy}</a>
+                    <button
+                        type="button"
+                        onClick={() => setPrivacyOpen(true)}
+                        className="underline hover:text-foreground"
+                    >
+                        {tr.register.privacy}
+                    </button>
                 </p>
+
+                <PrivacyPolicyModal isOpen={privacyOpen} onClose={() => setPrivacyOpen(false)} />
             </div>
         </div>
     );

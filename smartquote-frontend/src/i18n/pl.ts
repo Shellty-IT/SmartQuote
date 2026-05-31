@@ -48,6 +48,8 @@ export const pl = {
         creating: 'Tworzenie...',
         deleting: 'Usuwanie...',
         andWord: ' i ',
+        privacyPolicy: 'Polityka prywatności',
+        language: 'Język',
     },
     statuses: {
         DRAFT: 'Szkic',
@@ -84,7 +86,7 @@ export const pl = {
         title: 'Ustawienia',
         subtitle: 'Zarządzaj kontem i preferencjami',
         tabs: {
-            profile: { label: 'Profil', description: 'Dane osobowe i avatar' },
+            profile: { label: 'Konto', description: 'Profil, avatar i konto' },
             security: { label: 'Bezpieczeństwo', description: 'Hasło i zabezpieczenia' },
             company: { label: 'Firma', description: 'Dane firmy na dokumentach' },
             notifications: { label: 'Powiadomienia', description: 'E-mail i przypomnienia' },
@@ -297,6 +299,17 @@ export const pl = {
             createBtn: 'Utwórz klucz',
             deleteModalTitle: 'Usuń klucz API',
             deleteWarning: 'Usunięcie klucza jest nieodwracalne. Wszystkie integracje używające tego klucza przestaną działać.',
+        },
+        account: {
+            dangerZone: 'Strefa niebezpieczna',
+            deleteTitle: 'Usuń konto',
+            deleteSubtitle: 'Trwale usuń swoje konto i wszystkie powiązane dane',
+            deleteWarning: 'Ta operacja jest nieodwracalna. Wszystkie Twoje dane zostaną trwale usunięte: oferty, umowy, klienci, follow-upy i ustawienia konta.',
+            deleteConfirmLabel: 'Wpisz USUŃ aby potwierdzić',
+            deleteConfirmPlaceholder: 'USUŃ',
+            deleteConfirmWord: 'USUŃ',
+            deleteBtn: 'Usuń moje konto',
+            deleting: 'Usuwanie...',
         },
     },
     auth: {

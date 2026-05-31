@@ -129,4 +129,9 @@ export const settingsApi = {
         const response = await api.post<TestSmtpConnectionResult>('/settings/smtp/test-saved');
         return response.data as TestSmtpConnectionResult;
     },
+
+    deleteAccount: async (): Promise<{ message: string }> => {
+        const response = await api.delete<{ message: string }>('/settings/account');
+        return response.data as { message: string };
+    },
 };

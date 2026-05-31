@@ -201,3 +201,13 @@ export async function testSavedSmtpConnection(req: Request, res: Response, next:
         next(error);
     }
 }
+
+export async function deleteAccount(req: Request, res: Response, next: NextFunction) {
+    try {
+        const userId = req.user!.id;
+        const result = await settingsService.deleteAccount(userId);
+        successResponse(res, result);
+    } catch (error) {
+        next(error);
+    }
+}

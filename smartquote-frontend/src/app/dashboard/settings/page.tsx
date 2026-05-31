@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronRight, User, Shield, Building2, Bell, Mail, Palette, Sparkles, Key } from 'lucide-react';
+import { ChevronRight, User, Shield, Building2, Bell, Mail, Sparkles, Key } from 'lucide-react';
 import { useSettings } from '@/hooks/useSettings';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { cn } from '@/lib/utils';
@@ -13,11 +13,10 @@ import SecuritySection from './components/SecuritySection';
 import CompanySection from './components/CompanySection';
 import NotificationsSection from './components/NotificationsSection';
 import SmtpSection from './components/SmtpSection';
-import AppearanceSection from './components/AppearanceSection';
 import AISection from './components/AISection';
 import ApiKeysSection from './components/ApiKeysSection';
 
-type SettingsTab = 'profile' | 'security' | 'company' | 'notifications' | 'smtp' | 'appearance' | 'ai' | 'api-keys';
+type SettingsTab = 'profile' | 'security' | 'company' | 'notifications' | 'smtp' | 'ai' | 'api-keys';
 
 const TAB_ICONS: Record<SettingsTab, React.ElementType> = {
     profile: User,
@@ -25,7 +24,6 @@ const TAB_ICONS: Record<SettingsTab, React.ElementType> = {
     company: Building2,
     notifications: Bell,
     smtp: Mail,
-    appearance: Palette,
     ai: Sparkles,
     'api-keys': Key,
 };
@@ -42,7 +40,6 @@ export default function SettingsPage() {
         { id: 'company' as SettingsTab,       ...tr.tabs.company },
         { id: 'notifications' as SettingsTab, ...tr.tabs.notifications },
         { id: 'smtp' as SettingsTab,          ...tr.tabs.smtp },
-        { id: 'appearance' as SettingsTab,    ...tr.tabs.appearance },
         { id: 'ai' as SettingsTab,            ...tr.tabs.ai },
         { id: 'api-keys' as SettingsTab,      ...tr.tabs.apiKeys },
     ];
@@ -71,7 +68,6 @@ export default function SettingsPage() {
             case 'company':       return <CompanySection company={settings.companyInfo} onUpdate={actions.updateCompany} />;
             case 'notifications': return <NotificationsSection settings={settings.settings} onUpdate={actions.updatePreferences} />;
             case 'smtp':          return <SmtpSection />;
-            case 'appearance':    return <AppearanceSection settings={settings.settings} onUpdate={actions.updatePreferences} />;
             case 'ai':            return <AISection settings={settings.settings} onUpdate={actions.updatePreferences} />;
             case 'api-keys':      return <ApiKeysSection apiKeys={settings.apiKeys} onCreate={actions.createApiKey} onToggle={actions.toggleApiKey} onDelete={actions.deleteApiKey} />;
             default:              return null;

@@ -48,6 +48,8 @@ export const en = {
         creating: 'Creating...',
         deleting: 'Deleting...',
         andWord: ' and ',
+        privacyPolicy: 'Privacy Policy',
+        language: 'Language',
     },
     statuses: {
         DRAFT: 'Draft',
@@ -84,7 +86,7 @@ export const en = {
         title: 'Settings',
         subtitle: 'Manage account and preferences',
         tabs: {
-            profile: { label: 'Profile', description: 'Personal data and avatar' },
+            profile: { label: 'Account', description: 'Profile, avatar and account' },
             security: { label: 'Security', description: 'Password and security' },
             company: { label: 'Company', description: 'Company data on documents' },
             notifications: { label: 'Notifications', description: 'Email and reminders' },
@@ -297,6 +299,17 @@ export const en = {
             createBtn: 'Create key',
             deleteModalTitle: 'Delete API key',
             deleteWarning: 'Deleting the key is irreversible. All integrations using this key will stop working.',
+        },
+        account: {
+            dangerZone: 'Danger zone',
+            deleteTitle: 'Delete account',
+            deleteSubtitle: 'Permanently delete your account and all associated data',
+            deleteWarning: 'This action is irreversible. All your data will be permanently deleted: offers, contracts, clients, follow-ups and account settings.',
+            deleteConfirmLabel: 'Type DELETE to confirm',
+            deleteConfirmPlaceholder: 'DELETE',
+            deleteConfirmWord: 'DELETE',
+            deleteBtn: 'Delete my account',
+            deleting: 'Deleting...',
         },
     },
     auth: {

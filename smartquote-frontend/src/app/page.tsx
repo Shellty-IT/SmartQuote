@@ -10,17 +10,20 @@ import { Mail, Lock, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { checkBackendHealth } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { useTranslations } from '@/i18n';
+import PrivacyPolicyModal from '@/components/PrivacyPolicyModal';
 
 type BackendStatus = 'checking' | 'waking' | 'ready' | 'error';
 
 export default function LoginPage() {
     const router = useRouter();
     const tr = useTranslations('auth');
+    const commonTr = useTranslations('common');
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [privacyOpen, setPrivacyOpen] = useState(false);
 
     const [backendStatus, setBackendStatus] = useState<BackendStatus>('checking');
     const [wakeAttempt, setWakeAttempt] = useState(0);
@@ -185,8 +188,17 @@ export default function LoginPage() {
                     <a href="https://shellty-it.github.io/" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
                         Shellty IT
                     </a>
+                    {' · '}
+                    <button
+                        onClick={() => setPrivacyOpen(true)}
+                        className="underline hover:text-foreground"
+                    >
+                        {commonTr.privacyPolicy}
+                    </button>
                 </p>
             </div>
+
+            <PrivacyPolicyModal isOpen={privacyOpen} onClose={() => setPrivacyOpen(false)} />
         </div>
     );
 }
