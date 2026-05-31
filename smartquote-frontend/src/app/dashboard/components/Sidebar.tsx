@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations } from '@/i18n';
+import { useSidebarCollapsed } from '@/app/providers';
 import PrivacyPolicyModal from '@/components/PrivacyPolicyModal';
 import { useSidebarStats } from '@/hooks/useSidebarStats';
 import { useUnreadCount } from '@/hooks/useNotifications';
@@ -53,11 +54,11 @@ const BADGE_TONE: Record<string, string> = {
 
 export default function Sidebar() {
     const pathname = usePathname();
+    const { collapsed, setCollapsed } = useSidebarCollapsed();
     const { stats, isLoading } = useSidebarStats();
     const { count: unreadNotifications } = useUnreadCount();
     const tr = useTranslations('sidebar');
     const commonTr = useTranslations('common');
-    const [collapsed, setCollapsed] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
     const [privacyOpen, setPrivacyOpen] = useState(false);
     const prevPathname = useRef(pathname);
@@ -188,9 +189,18 @@ export default function Sidebar() {
                 </button>
 
                 {!collapsed && (
-                    <div className="mt-2 flex items-center gap-1.5 px-3 pt-2 border-t border-sidebar-border/40">
-                        <span className="text-[10px] text-muted-foreground/50">© 2026</span>
-                        <span className="text-[10px] text-muted-foreground/30">·</span>
+                    <div className="mt-2 border-t border-sidebar-border/40 px-3 pt-2 space-y-0.5">
+                        <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] text-muted-foreground/50">© 2026 SmartQuote — by</span>
+                            <a
+                                href="https://shellty-it.github.io"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[10px] text-muted-foreground/50 hover:text-muted-foreground transition-colors underline-offset-2 hover:underline"
+                            >
+                                Shellty
+                            </a>
+                        </div>
                         <button
                             onClick={() => setPrivacyOpen(true)}
                             className="text-[10px] text-muted-foreground/50 hover:text-muted-foreground transition-colors underline-offset-2 hover:underline"
@@ -203,7 +213,7 @@ export default function Sidebar() {
 
             {/* Collapse toggle — desktop only */}
             <button
-                onClick={() => setCollapsed((c) => !c)}
+                onClick={() => setCollapsed(!collapsed)}
                 className="absolute -right-3 top-20 hidden lg:grid h-6 w-6 place-items-center rounded-full border border-border bg-card text-muted-foreground shadow-card transition hover:text-primary"
                 aria-label={commonTr.collapsePanel}
             >

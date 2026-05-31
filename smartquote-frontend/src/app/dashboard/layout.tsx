@@ -8,11 +8,14 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import { GlobalAIChat } from '@/components/ai/GlobalAIChat';
 import { useTranslations } from '@/i18n';
+import { useSidebarCollapsed } from '@/app/providers';
+import { cn } from '@/lib/utils';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const { status } = useSession();
     const router = useRouter();
     const commonTr = useTranslations('common');
+    const { collapsed } = useSidebarCollapsed();
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -38,7 +41,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Sidebar />
 
             {/* Content area shifts right by sidebar width on lg */}
-            <div className="flex min-w-0 flex-1 flex-col lg:pl-[260px]">
+            <div className={cn(
+                'flex min-w-0 flex-1 flex-col transition-all duration-300',
+                collapsed ? 'lg:pl-[72px]' : 'lg:pl-[260px]'
+            )}>
                 <Header />
                 <main className="relative flex-1 overflow-x-hidden">
                     {/* Subtle mesh gradient top overlay */}

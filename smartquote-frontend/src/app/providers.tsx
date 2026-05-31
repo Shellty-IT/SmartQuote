@@ -110,16 +110,41 @@ function ThemeProvider({ children }: { children: ReactNode }) {
     );
 }
 
+interface SidebarContextType {
+    collapsed: boolean;
+    setCollapsed: (v: boolean) => void;
+}
+
+const SidebarContext = createContext<SidebarContextType>({
+    collapsed: false,
+    setCollapsed: () => {},
+});
+
+export function useSidebarCollapsed() {
+    return useContext(SidebarContext);
+}
+
+function SidebarProvider({ children }: { children: ReactNode }) {
+    const [collapsed, setCollapsed] = useState(false);
+    return (
+        <SidebarContext.Provider value={{ collapsed, setCollapsed }}>
+            {children}
+        </SidebarContext.Provider>
+    );
+}
+
 export function Providers({ children }: { children: ReactNode }) {
     return (
         <SessionProvider>
             <ThemeProvider>
                 <LanguageProvider>
-                    <ToastProvider>
-                        <AIChatProvider>
-                            {children}
-                        </AIChatProvider>
-                    </ToastProvider>
+                    <SidebarProvider>
+                        <ToastProvider>
+                            <AIChatProvider>
+                                {children}
+                            </AIChatProvider>
+                        </ToastProvider>
+                    </SidebarProvider>
                 </LanguageProvider>
             </ThemeProvider>
         </SessionProvider>
