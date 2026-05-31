@@ -189,8 +189,8 @@ export default function Sidebar() {
                 </button>
 
                 {!collapsed && (
-                    <div className="mt-2 border-t border-sidebar-border/40 px-3 pt-2 space-y-0.5">
-                        <div className="flex items-center gap-1.5">
+                    <div className="mt-2 border-t border-sidebar-border/40 px-3 pt-2 space-y-0.5 text-center">
+                        <div className="flex items-center justify-center gap-1.5">
                             <span className="text-[10px] text-muted-foreground/50">© 2026 SmartQuote — by</span>
                             <a
                                 href="https://shellty-it.github.io"
