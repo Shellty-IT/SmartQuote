@@ -20,12 +20,8 @@ import {
     Settings,
     LogOut,
     ChevronsLeft,
-    Sun,
-    Moon,
-    ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useTheme } from '@/app/providers';
 import { useTranslations } from '@/i18n';
 import PrivacyPolicyModal from '@/components/PrivacyPolicyModal';
 import { useSidebarStats } from '@/hooks/useSidebarStats';
@@ -57,7 +53,6 @@ const BADGE_TONE: Record<string, string> = {
 
 export default function Sidebar() {
     const pathname = usePathname();
-    const { theme, toggle } = useTheme();
     const { stats, isLoading } = useSidebarStats();
     const { count: unreadNotifications } = useUnreadCount();
     const tr = useTranslations('sidebar');
@@ -168,24 +163,6 @@ export default function Sidebar() {
 
             {/* Footer */}
             <div className="border-t border-sidebar-border/70 p-3 space-y-0.5">
-                {/* Theme toggle */}
-                <button
-                    onClick={toggle}
-                    aria-label={theme === 'dark' ? commonTr.enableLightMode : commonTr.enableDarkMode}
-                    className={cn(
-                        'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground/80 transition-all hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
-                        collapsed && 'justify-center px-2'
-                    )}
-                >
-                    {theme === 'dark'
-                        ? <Sun className="h-[18px] w-[18px] shrink-0" strokeWidth={2} />
-                        : <Moon className="h-[18px] w-[18px] shrink-0" strokeWidth={2} />
-                    }
-                    {!collapsed && (
-                        <span>{theme === 'dark' ? commonTr.lightMode : commonTr.darkMode}</span>
-                    )}
-                </button>
-
                 <Link
                     href="/dashboard/settings"
                     onClick={() => setMobileOpen(false)}
@@ -200,17 +177,6 @@ export default function Sidebar() {
                 </Link>
 
                 <button
-                    onClick={() => setPrivacyOpen(true)}
-                    className={cn(
-                        'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground/80 transition-all hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
-                        collapsed && 'justify-center px-2'
-                    )}
-                >
-                    <ShieldCheck className="h-[18px] w-[18px] shrink-0" strokeWidth={2} />
-                    {!collapsed && <span>{commonTr.privacyPolicy}</span>}
-                </button>
-
-                <button
                     onClick={() => signOut({ callbackUrl: '/' })}
                     className={cn(
                         'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground/80 transition-all hover:bg-destructive/10 hover:text-destructive',
@@ -220,6 +186,19 @@ export default function Sidebar() {
                     <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={2} />
                     {!collapsed && <span>{commonTr.logout}</span>}
                 </button>
+
+                {!collapsed && (
+                    <div className="mt-2 flex items-center gap-1.5 px-3 pt-2 border-t border-sidebar-border/40">
+                        <span className="text-[10px] text-muted-foreground/50">© 2026</span>
+                        <span className="text-[10px] text-muted-foreground/30">·</span>
+                        <button
+                            onClick={() => setPrivacyOpen(true)}
+                            className="text-[10px] text-muted-foreground/50 hover:text-muted-foreground transition-colors underline-offset-2 hover:underline"
+                        >
+                            {commonTr.privacyPolicy}
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Collapse toggle — desktop only */}
