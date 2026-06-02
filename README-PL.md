@@ -12,7 +12,7 @@ workflow umów i automatyczne follow-upy oparte o Google Gemini.**
 [![Node.js](https://img.shields.io/badge/Node-%3E%3D18.0-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![License](https://img.shields.io/badge/license-Proprietary-red)](#-licencja)
 
-**[🚀 Demo na żywo](https://smartquote-ai.netlify.app)** &nbsp;·&nbsp; [🇬🇧 English version](./README.md)
+**[🚀 Demo na żywo](https://smartquote-ai.vercel.app)** &nbsp;·&nbsp; [🇬🇧 English version](./README.md)
 
 </div>
 
@@ -404,7 +404,6 @@ Monorepo wdraża oba projekty niezależnie — nie ma konfiguracji Docker.
 
 ### Frontend — Netlify
 
-- Konfiguracja buildu w pliku [`smartquote-frontend/netlify.toml`](./smartquote-frontend/netlify.toml)
 - Wykorzystuje `@netlify/plugin-nextjs` do wsparcia App Router Next.js
 - Zmienne środowiskowe ustaw w **Netlify → Site configuration → Environment variables**
 - Rekomendowane: połącz Netlify z repozytorium GitHub, ustaw base directory na `smartquote-frontend/`

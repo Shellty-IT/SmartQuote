@@ -12,7 +12,7 @@ and automated follow-ups powered by Google Gemini.**
 [![Node.js](https://img.shields.io/badge/Node-%3E%3D18.0-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![License](https://img.shields.io/badge/license-Proprietary-red)](#-license)
 
-**[🚀 Live Demo](https://smartquote-ai.netlify.app)** &nbsp;·&nbsp; [🇵🇱 Polska wersja](./README-PL.md)
+**[🚀 Live Demo](https://smartquote-ai.vercel.app)** &nbsp;·&nbsp; [🇵🇱 Polska wersja](./README-PL.md)
 
 </div>
 
@@ -402,7 +402,6 @@ The monorepo deploys both projects independently — there is no Docker setup.
 
 ### Frontend — Netlify
 
-- Build configuration lives in [`smartquote-frontend/netlify.toml`](./smartquote-frontend/netlify.toml)
 - Uses `@netlify/plugin-nextjs` for Next.js App Router support
 - Set environment variables in **Netlify → Site configuration → Environment variables**
 - Recommended: connect Netlify to the GitHub repo, set the base directory to `smartquote-frontend/`
