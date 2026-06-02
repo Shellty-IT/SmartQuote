@@ -1,6 +1,6 @@
 // src/services/offers.service.ts
 import { randomBytes } from 'crypto';
-import { OfferStatus } from '@prisma/client';
+import { OfferStatus, Prisma } from '@prisma/client';
 import { config } from '../config';
 import { createModuleLogger } from '../lib/logger';
 import { offersRepository, OfferItemData, UpdateOfferData } from '../repositories/offers.repository';
@@ -54,28 +54,44 @@ function getStatusTimestampKey(status: string): keyof UpdateOfferData | null {
 
 export class OffersService {
     async create(userId: string, data: CreateOfferInput) {
-        const number = await generateOfferNumber(userId);
         const itemsWithTotals = buildItemsWithTotals(data.items);
         const offerTotals = calculateOfferTotals(itemsWithTotals);
 
-        logger.info({ userId, offerNumber: number }, 'Creating offer');
+        // Retry up to 5 times to handle rare concurrent-request collisions
+        for (let attempt = 0; attempt < 5; attempt++) {
+            const number = await generateOfferNumber(userId);
+            logger.info({ userId, offerNumber: number, attempt }, 'Creating offer');
 
-        return offersRepository.create({
-            number,
-            title: data.title,
-            description: data.description,
-            validUntil: data.validUntil ? new Date(data.validUntil) : null,
-            notes: data.notes,
-            terms: data.terms,
-            paymentDays: data.paymentDays ?? 14,
-            requireAuditTrail: data.requireAuditTrail ?? false,
-            totalNet: offerTotals.totalNet,
-            totalVat: offerTotals.totalVat,
-            totalGross: offerTotals.totalGross,
-            userId,
-            clientId: data.clientId,
-            items: itemsWithTotals.map(mapItemToData),
-        });
+            try {
+                return await offersRepository.create({
+                    number,
+                    title: data.title,
+                    description: data.description,
+                    validUntil: data.validUntil ? new Date(data.validUntil) : null,
+                    notes: data.notes,
+                    terms: data.terms,
+                    paymentDays: data.paymentDays ?? 14,
+                    requireAuditTrail: data.requireAuditTrail ?? false,
+                    totalNet: offerTotals.totalNet,
+                    totalVat: offerTotals.totalVat,
+                    totalGross: offerTotals.totalGross,
+                    userId,
+                    clientId: data.clientId,
+                    items: itemsWithTotals.map(mapItemToData),
+                });
+            } catch (err) {
+                const isUniqueViolation =
+                    err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002';
+                if (isUniqueViolation && attempt < 4) {
+                    logger.warn({ userId, attempt, number }, 'Offer number collision, retrying');
+                    continue;
+                }
+                throw err;
+            }
+        }
+
+        // Unreachable — satisfies TypeScript
+        throw new Error('Failed to generate unique offer number');
     }
 
     async findById(id: string, userId: string) {
