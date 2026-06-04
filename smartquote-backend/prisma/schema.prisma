@@ -183,6 +183,9 @@ model Offer {
   invoiceSentAt     DateTime?
   invoiceExternalId String?
 
+  templateType  String?  @default("classic")
+  blocks        Json?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

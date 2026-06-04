@@ -53,6 +53,8 @@ export const createOfferSchema = z.object({
         paymentDays: z.number().int().min(0).max(365).optional().default(14),
         requireAuditTrail: z.boolean().optional().default(false),
         items: z.array(offerItemSchema).min(1, 'Oferta musi zawierać przynajmniej jedną pozycję'),
+        templateType: z.string().max(50).optional().nullable(),
+        blocks: z.unknown().optional().nullable(),
     }),
 });
 
@@ -71,6 +73,8 @@ export const updateOfferSchema = z.object({
         paymentDays: z.number().int().min(0).max(365).optional(),
         requireAuditTrail: z.boolean().optional(),
         items: z.array(offerItemSchema).optional(),
+        templateType: z.string().max(50).optional().nullable(),
+        blocks: z.unknown().optional().nullable(),
     }),
 });
 

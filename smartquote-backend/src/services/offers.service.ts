@@ -78,6 +78,8 @@ export class OffersService {
                     userId,
                     clientId: data.clientId,
                     items: itemsWithTotals.map(mapItemToData),
+                    templateType: data.templateType ?? 'classic',
+                    blocks: (data.blocks as import('@prisma/client').Prisma.InputJsonValue) ?? null,
                 });
             } catch (err) {
                 const isUniqueViolation =
@@ -121,6 +123,14 @@ export class OffersService {
 
         if (data.requireAuditTrail !== undefined) {
             updateData.requireAuditTrail = data.requireAuditTrail;
+        }
+
+        if (data.templateType !== undefined) {
+            updateData.templateType = data.templateType;
+        }
+
+        if (data.blocks !== undefined) {
+            updateData.blocks = (data.blocks as import('@prisma/client').Prisma.InputJsonValue) ?? null;
         }
 
         if (data.status) {
