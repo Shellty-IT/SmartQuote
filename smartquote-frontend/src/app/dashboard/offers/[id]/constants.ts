@@ -2,9 +2,9 @@
 
 import type { OfferStatus } from '@/types';
 
-export type Tab = 'details' | 'analytics' | 'comments' | 'emails';
+export type Tab = 'details' | 'analytics' | 'comments' | 'emails' | 'template';
 
-export const TAB_IDS: Tab[] = ['details', 'analytics', 'comments', 'emails'];
+export const TAB_IDS: Tab[] = ['details', 'analytics', 'comments', 'emails', 'template'];
 
 export const STATUS_TRANSITIONS: Record<OfferStatus, OfferStatus[]> = {
     DRAFT: ['SENT'],

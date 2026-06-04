@@ -22,6 +22,7 @@ export function OfferTabs({ activeTab, onTabChange, viewCount, commentsCount, em
         analytics: tr.tabs.analytics,
         comments: tr.tabs.comments,
         emails: tr.tabs.emails,
+        template: tr.tabs.template,
     };
 
     const getCount = (id: Tab): number | undefined => {

@@ -77,6 +77,8 @@ export interface Offer {
     acceptanceLog?: OfferAcceptanceLog | null;
     invoiceSentAt: string | null;
     invoiceExternalId: string | null;
+    templateType: string | null;
+    blocks: unknown | null;
     createdAt: string;
     updatedAt: string;
     client: Client;
@@ -119,6 +121,8 @@ export interface UpdateOfferInput extends Partial<Omit<CreateOfferInput, 'items'
     status?: OfferStatus;
     requireAuditTrail?: boolean;
     items?: CreateOfferItemInput[];
+    templateType?: string | null;
+    blocks?: unknown | null;
 }
 
 export interface OffersStats {
