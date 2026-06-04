@@ -106,22 +106,30 @@ jobs:
       - name: Clean previous Playwright artifacts
         run: rm -rf playwright-report test-results
 
-      - name: Wait for Netlify deployment
+      - name: Wait for Vercel deployment
         run: |
-          echo "Waiting for Netlify deployment to complete..."
-          sleep 120
+          echo "Waiting for Vercel deployment to be ready..."
+          echo "Target: ${{ secrets.PLAYWRIGHT_BASE_URL }}"
+          sleep 60
 
-          echo "Checking if frontend is responding..."
+          echo "Polling frontend availability..."
           for i in {1..30}; do
-            if curl -f -s -o /dev/null "${{ secrets.PLAYWRIGHT_BASE_URL }}"; then
-              echo "Frontend is up and running"
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+              --max-time 15 \
+              --retry 0 \
+              -H "Accept: text/html" \
+              "${{ secrets.PLAYWRIGHT_BASE_URL }}" || echo "000")
+
+            if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "307" ] || [ "$HTTP_STATUS" = "302" ]; then
+              echo "Frontend is responding (HTTP $HTTP_STATUS)"
               exit 0
             fi
-            echo "   Attempt $i/30 failed, retrying in 10s..."
+
+            echo "   Attempt $i/30: HTTP $HTTP_STATUS — retrying in 10s..."
             sleep 10
           done
 
-          echo "Frontend failed to respond after 7 minutes"
+          echo "Frontend did not respond after ~5 minutes. Last HTTP status: $HTTP_STATUS"
           exit 1
 
       - name: Run E2E tests

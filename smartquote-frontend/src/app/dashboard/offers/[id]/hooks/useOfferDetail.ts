@@ -1,6 +1,6 @@
 // src/app/dashboard/offers/[id]/hooks/useOfferDetail.ts
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useOffer, useOfferAnalytics, useOfferComments } from '@/hooks/useOffers';
@@ -31,6 +31,10 @@ export function useOfferDetail(offerId: string) {
     const [deleteModal, setDeleteModal] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isDownloadingPDF, setIsDownloadingPDF] = useState(false);
+    const [isPreviewingPDF, setIsPreviewingPDF] = useState(false);
+    const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
+    const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+    const [pdfPreviewError, setPdfPreviewError] = useState<string | null>(null);
     const [publishDialogOpen, setPublishDialogOpen] = useState(false);
     const [newComment, setNewComment] = useState('');
 
@@ -166,25 +170,34 @@ export function useOfferDetail(offerId: string) {
         }
     };
 
-    const handleDownloadPDF = async () => {
+    const fetchOfferPdfBlob = useCallback(async () => {
         if (!offer) return;
         const token = session?.accessToken || localStorage.getItem('token');
         if (!token) {
             toast.error(tr.toasts.noAuth, tr.toasts.noAuthDesc);
             return;
         }
+
+        const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
+        const response = await fetch(`${apiUrl}/api/offers/${offer.id}/pdf`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error((errorData as { message?: string }).message || `Error ${response.status}`);
+        }
+
+        return response.blob();
+    }, [offer, session?.accessToken, toast, tr.toasts.noAuth, tr.toasts.noAuthDesc]);
+
+    const handleDownloadPDF = async () => {
+        if (!offer) return;
         setIsDownloadingPDF(true);
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
-            const response = await fetch(`${apiUrl}/api/offers/${offer.id}/pdf`, {
-                method: 'GET',
-                headers: { 'Authorization': `Bearer ${token}` },
-            });
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error((errorData as { message?: string }).message || `Error ${response.status}`);
-            }
-            const blob = await response.blob();
+            const blob = await fetchOfferPdfBlob();
+            if (!blob) return;
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
@@ -200,6 +213,45 @@ export function useOfferDetail(offerId: string) {
             setIsDownloadingPDF(false);
         }
     };
+
+    const handlePreviewPDF = async () => {
+        if (!offer) return;
+        setIsPreviewingPDF(true);
+        setPdfPreviewError(null);
+        try {
+            const blob = await fetchOfferPdfBlob();
+            if (!blob) return;
+            setPdfPreviewUrl((currentUrl) => {
+                if (currentUrl) window.URL.revokeObjectURL(currentUrl);
+                return window.URL.createObjectURL(blob);
+            });
+            setPdfPreviewOpen(true);
+        } catch (err) {
+            const message = err instanceof Error ? err.message : commonTr.errorTitle;
+            setPdfPreviewError(message);
+            setPdfPreviewOpen(true);
+            toast.error(tr.toasts.pdfError, message);
+        } finally {
+            setIsPreviewingPDF(false);
+        }
+    };
+
+    const handleClosePdfPreview = useCallback(() => {
+        setPdfPreviewOpen(false);
+        setPdfPreviewError(null);
+        setPdfPreviewUrl((currentUrl) => {
+            if (currentUrl) window.URL.revokeObjectURL(currentUrl);
+            return null;
+        });
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (pdfPreviewUrl) {
+                window.URL.revokeObjectURL(pdfPreviewUrl);
+            }
+        };
+    }, [pdfPreviewUrl]);
 
     const handlePublished = () => {
         refresh();
@@ -235,6 +287,10 @@ export function useOfferDetail(offerId: string) {
         setDeleteModal,
         isDeleting,
         isDownloadingPDF,
+        isPreviewingPDF,
+        pdfPreviewOpen,
+        pdfPreviewUrl,
+        pdfPreviewError,
         publishDialogOpen,
         setPublishDialogOpen,
         newComment,
@@ -269,6 +325,8 @@ export function useOfferDetail(offerId: string) {
         handleStatusChange,
         handleDelete,
         handleDuplicate,
+        handlePreviewPDF,
+        handleClosePdfPreview,
         handleDownloadPDF,
         handlePublished,
         handleAddSellerComment,

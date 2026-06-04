@@ -14,6 +14,7 @@ import { AnalyticsTab } from './components/analytics/AnalyticsTab';
 import { CommentsTab } from './components/comments/CommentsTab';
 import { EmailsTab } from './components/emails/EmailsTab';
 import { KsefMasterPreview } from './components/KsefMasterPreview';
+import { PdfPreviewModal } from '@/components/pdf/PdfPreviewModal';
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -35,6 +36,10 @@ export default function OfferDetailPage({ params }: PageProps) {
         setDeleteModal,
         isDeleting,
         isDownloadingPDF,
+        isPreviewingPDF,
+        pdfPreviewOpen,
+        pdfPreviewUrl,
+        pdfPreviewError,
         publishDialogOpen,
         setPublishDialogOpen,
         newComment,
@@ -65,6 +70,8 @@ export default function OfferDetailPage({ params }: PageProps) {
         handleStatusChange,
         handleDelete,
         handleDuplicate,
+        handlePreviewPDF,
+        handleClosePdfPreview,
         handleDownloadPDF,
         handlePublished,
         handleAddSellerComment,
@@ -121,6 +128,8 @@ export default function OfferDetailPage({ params }: PageProps) {
                     variantData={variantData}
                     isExpired={isExpired}
                     isDownloadingPDF={isDownloadingPDF}
+                    isPreviewingPDF={isPreviewingPDF}
+                    onPreviewPDF={handlePreviewPDF}
                     onDownloadPDF={handleDownloadPDF}
                     onPublishClick={() => setPublishDialogOpen(true)}
                     onDeleteClick={() => setDeleteModal(true)}
@@ -189,6 +198,17 @@ export default function OfferDetailPage({ params }: PageProps) {
                 onClose={() => setKsefModalOpen(false)}
                 offerId={offer.id}
                 onSent={handleKsefSent}
+            />
+
+            <PdfPreviewModal
+                isOpen={pdfPreviewOpen}
+                onClose={handleClosePdfPreview}
+                pdfUrl={pdfPreviewUrl}
+                error={pdfPreviewError}
+                title={tr.pdfPreview.title.replace('{number}', offer.number)}
+                frameTitle={tr.pdfPreview.frameTitle}
+                openInNewTabLabel={tr.pdfPreview.openInNewTab}
+                loadingLabel={tr.pdfPreview.loading}
             />
         </div>
     );

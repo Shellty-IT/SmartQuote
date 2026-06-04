@@ -26,6 +26,8 @@ export const contractsApi = {
         api.get<ContractsStats>('/contracts/stats'),
     downloadPdf: (id: string) =>
         api.downloadBlob(`/contracts/${id}/pdf`),
+    previewPdf: (id: string) =>
+        api.downloadBlob(`/contracts/${id}/pdf`),
     publish: (id: string) =>
         api.post<{ publicToken: string; publicUrl: string; alreadyPublished: boolean }>(`/contracts/${id}/publish`),
     unpublish: (id: string) =>

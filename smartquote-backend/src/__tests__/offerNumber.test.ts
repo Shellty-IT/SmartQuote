@@ -26,6 +26,14 @@ describe('generateOfferNumber', () => {
         expect(result).toBe(`${PREFIX}001`);
     });
 
+    it('queries the mapped offers table', async () => {
+        mockQueryRaw.mockResolvedValue([{ max_num: null }]);
+        await generateOfferNumber('user-1');
+
+        const query = mockQueryRaw.mock.calls[0][0];
+        expect(query.strings.join('')).toContain('FROM "offers"');
+    });
+
     it('increments the last offer number by 1', async () => {
         mockQueryRaw.mockResolvedValue([{ max_num: 5n }]);
         const result = await generateOfferNumber('user-1');

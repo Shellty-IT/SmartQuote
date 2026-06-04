@@ -1,7 +1,7 @@
 // src/app/dashboard/contracts/[id]/page.tsx
 'use client';
 
-import { use, useState } from 'react';
+import { use, useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { useContract } from '@/hooks/useContracts';
 import { contractsApi } from '@/lib/api';
@@ -12,6 +12,7 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 import { useToast } from '@/contexts/ToastContext';
 import type { ContractStatus } from '@/types';
 import { useTranslations } from '@/i18n';
+import { PdfPreviewModal } from '@/components/pdf/PdfPreviewModal';
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -109,6 +110,10 @@ export default function ContractDetailsPage({ params }: PageProps) {
     const [isChangingStatus, setIsChangingStatus] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
     const [isPublishing, setIsPublishing] = useState(false);
+    const [isPreviewing, setIsPreviewing] = useState(false);
+    const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
+    const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+    const [pdfPreviewError, setPdfPreviewError] = useState<string | null>(null);
 
     const STATUS_ACTIONS: Record<ContractStatus, StatusAction[]> = {
         DRAFT: [
@@ -162,6 +167,42 @@ export default function ContractDetailsPage({ params }: PageProps) {
             setIsDownloading(false);
         }
     };
+
+    const handlePreviewPdf = async () => {
+        if (!contract) return;
+        setIsPreviewing(true);
+        setPdfPreviewError(null);
+        try {
+            const blob = await contractsApi.previewPdf(contract.id);
+            setPdfPreviewUrl((current) => {
+                if (current) window.URL.revokeObjectURL(current);
+                return window.URL.createObjectURL(blob);
+            });
+            setPdfPreviewOpen(true);
+        } catch (err) {
+            const message = err instanceof Error ? err.message : t.toasts.pdfPreviewError;
+            setPdfPreviewError(message);
+            setPdfPreviewOpen(true);
+            toast.error(t.toasts.pdfError, message);
+        } finally {
+            setIsPreviewing(false);
+        }
+    };
+
+    const handleClosePdfPreview = useCallback(() => {
+        setPdfPreviewOpen(false);
+        setPdfPreviewError(null);
+        setPdfPreviewUrl((current) => {
+            if (current) window.URL.revokeObjectURL(current);
+            return null;
+        });
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (pdfPreviewUrl) window.URL.revokeObjectURL(pdfPreviewUrl);
+        };
+    }, [pdfPreviewUrl]);
 
     const handlePublish = async () => {
         if (!contract) return;
@@ -569,6 +610,13 @@ export default function ContractDetailsPage({ params }: PageProps) {
                                     {t.editContract}
                                 </Button>
                             </Link>
+                            <Button variant="outline" className="w-full" onClick={handlePreviewPdf} disabled={isPreviewing}>
+                                <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                {isPreviewing ? t.generatingPdf : t.previewPdf}
+                            </Button>
                             <Button variant="outline" className="w-full" onClick={handleDownloadPdf} disabled={isDownloading}>
                                 <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -645,6 +693,17 @@ export default function ContractDetailsPage({ params }: PageProps) {
                 description={statusConfirm?.description || ''}
                 confirmLabel={t.confirm}
                 isLoading={isChangingStatus}
+            />
+
+            <PdfPreviewModal
+                isOpen={pdfPreviewOpen}
+                onClose={handleClosePdfPreview}
+                pdfUrl={pdfPreviewUrl}
+                error={pdfPreviewError}
+                title={t.pdfPreview.title.replace('{number}', contract.number)}
+                frameTitle={t.pdfPreview.frameTitle}
+                openInNewTabLabel={t.pdfPreview.openInNewTab}
+                loadingLabel={t.pdfPreview.loading}
             />
         </div>
     );

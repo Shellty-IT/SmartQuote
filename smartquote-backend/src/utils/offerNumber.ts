@@ -10,7 +10,7 @@ export async function generateOfferNumber(userId: string): Promise<string> {
     const result = await prisma.$queryRaw<[{ max_num: bigint | null }]>(
         Prisma.sql`
             SELECT MAX(CAST(SUBSTRING("number", ${prefix.length + 1}) AS INTEGER)) AS max_num
-            FROM "Offer"
+            FROM "offers"
             WHERE "userId" = ${userId}
             AND "number" LIKE ${prefix + '%'}
         `,

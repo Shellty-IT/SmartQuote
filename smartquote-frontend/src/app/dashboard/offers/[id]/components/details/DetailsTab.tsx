@@ -17,6 +17,8 @@ interface DetailsTabProps {
     variantData: VariantData;
     isExpired: boolean;
     isDownloadingPDF: boolean;
+    isPreviewingPDF: boolean;
+    onPreviewPDF: () => void;
     onDownloadPDF: () => void;
     onPublishClick: () => void;
     onDeleteClick: () => void;
@@ -28,6 +30,8 @@ export function DetailsTab({
                                variantData,
                                isExpired,
                                isDownloadingPDF,
+                               isPreviewingPDF,
+                               onPreviewPDF,
                                onDownloadPDF,
                                onPublishClick,
                                onDeleteClick,
@@ -147,6 +151,8 @@ export function DetailsTab({
                 <ActionsCard
                     isInteractive={offer.isInteractive ?? false}
                     isDownloadingPDF={isDownloadingPDF}
+                    isPreviewingPDF={isPreviewingPDF}
+                    onPreviewPDF={onPreviewPDF}
                     onDownloadPDF={onDownloadPDF}
                     onPublishClick={onPublishClick}
                     onDeleteClick={onDeleteClick}
