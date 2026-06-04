@@ -114,6 +114,8 @@ export interface CreateOfferInput {
     terms?: string | null;
     paymentDays?: number;
     requireAuditTrail?: boolean;
+    templateType?: string | null;
+    blocks?: unknown | null;
     items: CreateOfferItemInput[];
 }
 

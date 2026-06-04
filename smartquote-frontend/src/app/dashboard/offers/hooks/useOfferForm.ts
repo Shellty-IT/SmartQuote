@@ -66,6 +66,7 @@ export function useOfferForm(options?: { initialData?: Offer }) {
                 terms: options.initialData.terms || '',
                 paymentDays: options.initialData.paymentDays,
                 requireAuditTrail: options.initialData.requireAuditTrail || false,
+                templateType: (options.initialData.templateType as 'classic' | 'proposal') ?? 'classic',
             };
         }
         return defaultOfferDetails;
@@ -230,6 +231,7 @@ export function useOfferForm(options?: { initialData?: Offer }) {
                 terms: offerDetails.terms || undefined,
                 paymentDays: offerDetails.paymentDays,
                 requireAuditTrail: offerDetails.requireAuditTrail,
+                templateType: offerDetails.templateType ?? 'classic',
                 items: items.map((item) => ({
                     name: item.name,
                     description: item.description || undefined,

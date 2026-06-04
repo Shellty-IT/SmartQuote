@@ -1109,6 +1109,12 @@ export const pl = {
             internalNotesPlaceholder: 'Notatki widoczne tylko dla Ciebie...',
             auditTrailTitle: 'Formalne potwierdzenie akceptacji',
             auditTrailDesc: 'Przy akceptacji zostanie zapisany adres IP, przeglądarka oraz wygenerowany cyfrowy odcisk treści (SHA-256). Klient otrzyma email z potwierdzeniem i hashem. PDF będzie zawierał certyfikat akceptacji.',
+            pdfTemplateLabel: 'Szablon PDF',
+            pdfTemplateHint: 'Jak ma wyglądać dokument PDF tej oferty',
+            pdfClassic: 'Klasyczny',
+            pdfClassicDesc: 'Standardowa tabela pozycji z podsumowaniem',
+            pdfProposal: 'Propozycja biznesowa',
+            pdfProposalDesc: 'Dwustronicowy dokument — jak profesjonalna broszura ofertowa. Treść edytujesz po utworzeniu oferty w zakładce „Szablon PDF".',
         },
         items: {
             title: 'Pozycje oferty',

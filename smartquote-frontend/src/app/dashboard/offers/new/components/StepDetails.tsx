@@ -3,6 +3,7 @@
 
 import { Input } from '@/components/ui';
 import { useTranslations } from '@/i18n';
+import { cn } from '@/lib/utils';
 import type { OfferDetails } from '../types';
 
 interface StepDetailsProps {
@@ -80,6 +81,42 @@ export default function StepDetails({ details, onUpdate }: StepDetailsProps) {
                     />
                 </div>
 
+                {/* PDF template type */}
+                <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">{d.pdfTemplateLabel}</label>
+                    <p className="text-xs text-muted-foreground mb-3">{d.pdfTemplateHint}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {(['classic', 'proposal'] as const).map((type) => {
+                            const isActive = details.templateType === type;
+                            const icon = type === 'classic' ? '📄' : '🗂️';
+                            const label = type === 'classic' ? d.pdfClassic : d.pdfProposal;
+                            const desc = type === 'classic' ? d.pdfClassicDesc : d.pdfProposalDesc;
+                            return (
+                                <button
+                                    key={type}
+                                    type="button"
+                                    onClick={() => onUpdate('templateType', type)}
+                                    className={cn(
+                                        'flex items-start gap-3 rounded-xl border-2 p-3 text-left transition-all',
+                                        isActive
+                                            ? 'border-primary bg-primary/5'
+                                            : 'border-border hover:border-border/60 hover:bg-surface-subtle',
+                                    )}
+                                >
+                                    <span className="text-xl flex-shrink-0 mt-0.5">{icon}</span>
+                                    <div>
+                                        <p className={cn('text-sm font-semibold', isActive ? 'text-primary' : 'text-foreground')}>
+                                            {label}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{desc}</p>
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* Audit trail */}
                 <div className="p-4 bg-card border-border border rounded-xl">
                     <label className="flex items-start gap-3 cursor-pointer">
                         <input

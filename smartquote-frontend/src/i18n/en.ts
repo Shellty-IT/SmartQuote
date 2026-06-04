@@ -1109,6 +1109,12 @@ export const en = {
             internalNotesPlaceholder: 'Notes visible only to you...',
             auditTrailTitle: 'Formal acceptance confirmation',
             auditTrailDesc: 'Upon acceptance, IP address, browser and a digital content fingerprint (SHA-256) will be saved. Client will receive a confirmation email with hash. PDF will contain an acceptance certificate.',
+            pdfTemplateLabel: 'PDF template',
+            pdfTemplateHint: 'How the PDF document for this offer should look',
+            pdfClassic: 'Classic',
+            pdfClassicDesc: 'Standard item table with summary',
+            pdfProposal: 'Business proposal',
+            pdfProposalDesc: 'Two-page document — like a professional offer brochure. Edit content after creation in the "PDF Template" tab.',
         },
         items: {
             title: 'Offer items',
