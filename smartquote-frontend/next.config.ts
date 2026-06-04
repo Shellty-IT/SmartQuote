@@ -1,16 +1,24 @@
 // SmartQuote-AI/next.config.ts
 import type { NextConfig } from 'next';
 
+const isDev = process.env.NODE_ENV === 'development';
+
+const connectSrc = isDev
+    ? "connect-src 'self' https: http://localhost:8080 ws://localhost:3000"
+    : "connect-src 'self' https:";
+
 const securityHeaders = [
     { key: 'X-DNS-Prefetch-Control', value: 'on' },
     { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
     { key: 'X-Content-Type-Options', value: 'nosniff' },
     { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
     { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
-    {
-        key: 'Strict-Transport-Security',
-        value: 'max-age=63072000; includeSubDomains; preload',
-    },
+    ...(isDev ? [] : [
+        {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
+        },
+    ]),
     {
         key: 'Content-Security-Policy',
         value: [
@@ -19,7 +27,7 @@ const securityHeaders = [
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data: blob: https:",
             "font-src 'self' data:",
-            "connect-src 'self' https:",
+            connectSrc,
             "frame-ancestors 'none'",
         ].join('; '),
     },

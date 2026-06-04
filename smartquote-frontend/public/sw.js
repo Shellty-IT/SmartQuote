@@ -1,5 +1,5 @@
 // public/sw.js
-const CACHE_NAME = 'smartquote-v1';
+const CACHE_NAME = 'smartquote-v2';
 const OFFLINE_URL = '/offline.html';
 
 const PRECACHE_URLS = [
@@ -13,7 +13,6 @@ const PRECACHE_URLS = [
 
 const CACHE_STRATEGIES = {
     cacheFirst: [
-        /\/_next\/static\//,
         /\/icons\//,
         /\/manifest\.json$/,
         /\.woff2?$/,
@@ -22,11 +21,11 @@ const CACHE_STRATEGIES = {
         /\.ico$/,
     ],
     networkFirst: [
-        /\/_next\/data\//,
         /\/dashboard/,
         /\/offer\/view\//,
     ],
     networkOnly: [
+        /\/_next\//,
         /\/api\//,
         /\/auth\//,
         /nextauth/,

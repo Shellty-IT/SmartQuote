@@ -157,7 +157,7 @@ cd smartquote-backend
 npm install
 
 # Configure environment
-cp .env.example .env
+cp .env .env
 # Edit .env — fill in DATABASE_URL, JWT_SECRET (min. 32 chars), GEMINI_API_KEY
 
 # Database setup
@@ -220,7 +220,7 @@ npm run dev
 | `KSEF_MASTER_API_KEY`   | ❌       | API key for KSeF bridge                                    | `sk_smartquote_ksef_bridge_secret`                 |
 | `CRON_SECRET`           | ❌       | Bearer token used to authenticate `/cron/reminders` calls  | `random-cron-secret`                               |
 
-A full template is available in [`smartquote-backend/.env.example`](./smartquote-backend/.env.example).
+A full template is available in [`smartquote-backend/.env.example`](smartquote-backend/.env).
 
 ### Frontend (`smartquote-frontend/.env.local`)
 
