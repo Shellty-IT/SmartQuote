@@ -11,7 +11,8 @@ import {
     EmailType,
 } from '../../types';
 import { initAI } from './core';
-import { chat, generateOffer, generateEmail, analyzeClient, getUserContext } from './chat';
+import { chat, generateOffer, generateEmail, analyzeClient, getUserContext, generateOfferDescription } from './chat';
+import type { OfferDescriptionContext } from './prompts';
 import { getPriceInsight, getObserverInsight, getClosingStrategy } from './analysis';
 import { generatePostMortem, getLatestInsights, getInsightsList } from './feedback';
 
@@ -38,6 +39,10 @@ class AIService {
 
     generateEmail(_userId: string, type: EmailType, context: EmailGenerationContext): Promise<string> {
         return generateEmail(this.ai, type, context);
+    }
+
+    generateOfferDescription(ctx: OfferDescriptionContext): Promise<string> {
+        return generateOfferDescription(this.ai, ctx);
     }
 
     analyzeClient(userId: string, clientId: string): Promise<ClientAnalysis> {

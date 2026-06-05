@@ -81,7 +81,11 @@ export default function NewOfferContent() {
                     <StepClient clients={clients} selectedClient={selectedClient} onSelectClient={setSelectedClient} />
                 )}
                 {currentStep === 'details' && (
-                    <StepDetails details={offerDetails} onUpdate={updateDetails} />
+                    <StepDetails
+                        details={offerDetails}
+                        onUpdate={updateDetails}
+                        clientName={selectedClient?.name}
+                    />
                 )}
                 {currentStep === 'items' && (
                     <StepItems

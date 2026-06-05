@@ -1,6 +1,6 @@
 // src/services/pdf/offer-document-renderer.ts
 import { PDFOffer } from './types';
-import { txt, money, date, statusMap, groupItemsByVariant, renderItemsTable } from './helpers';
+import { txt, stripHtml, money, date, statusMap, groupItemsByVariant, renderItemsTable } from './helpers';
 import { PDF_CONFIG } from './pdf-config';
 import { Decimal } from '@prisma/client/runtime/library';
 import { offerPartiesRenderer } from './offer-parties-renderer';
@@ -121,9 +121,10 @@ export class OfferDocumentRenderer {
             Y += 16;
         }
         if (offer.description) {
+            const descText = stripHtml(offer.description);
             doc.font('Regular').fontSize(sizes.normal).fillColor(colors.textLight);
-            const descHeight = doc.heightOfString(txt(offer.description), { width: layout.contentWidth });
-            doc.text(txt(offer.description), layout.leftMargin, Y, { width: layout.contentWidth });
+            const descHeight = doc.heightOfString(descText, { width: layout.contentWidth });
+            doc.text(descText, layout.leftMargin, Y, { width: layout.contentWidth });
             Y += descHeight + 8;
         }
 
@@ -238,8 +239,9 @@ export class OfferDocumentRenderer {
         doc.font('Bold').fontSize(sizes.header).fillColor(colors.text).text('Warunki:', layout.leftMargin, Y);
         Y += 12;
         doc.font('Regular').fontSize(sizes.normal).fillColor(colors.textLight);
-        const termsHeight = doc.heightOfString(txt(offer.terms), { width: layout.contentWidth });
-        doc.text(txt(offer.terms), layout.leftMargin, Y, { width: layout.contentWidth });
+        const termsText = stripHtml(offer.terms);
+        const termsHeight = doc.heightOfString(termsText, { width: layout.contentWidth });
+        doc.text(termsText, layout.leftMargin, Y, { width: layout.contentWidth });
 
         return Y + termsHeight + 13;
     }

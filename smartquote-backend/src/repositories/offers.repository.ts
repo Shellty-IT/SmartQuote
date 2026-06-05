@@ -51,7 +51,7 @@ export interface CreateOfferData {
     clientId: string;
     items: OfferItemData[];
     templateType?: string | null;
-    blocks?: Prisma.InputJsonValue | null;
+    blocks?: Prisma.InputJsonValue | typeof Prisma.JsonNull;
 }
 
 export interface UpdateOfferData {
@@ -73,7 +73,7 @@ export interface UpdateOfferData {
     publicToken?: string | null;
     isInteractive?: boolean;
     templateType?: string | null;
-    blocks?: Prisma.InputJsonValue | null;
+    blocks?: Prisma.InputJsonValue | typeof Prisma.JsonNull;
 }
 
 const offerWithClientSelect = {

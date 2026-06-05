@@ -53,6 +53,23 @@ export function createDoc(): PDFKit.PDFDocument {
 
 export const txt = (text: string | null | undefined): string => text ?? '';
 
+/** Strip HTML tags and decode common entities — used when rendering rich text in PDFKit */
+export const stripHtml = (html: string | null | undefined): string => {
+    if (!html) return '';
+    return html
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/p>/gi, '\n')
+        .replace(/<\/li>/gi, '\n')
+        .replace(/<[^>]+>/g, '')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+};
+
 export const money = (amount: Decimal | number, cur = 'PLN'): string => {
     const n = typeof amount === 'number' ? amount : Number(amount);
     return n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + (cur ? ' ' + cur : '');

@@ -12,6 +12,7 @@ import {
     offerIdParamSchema,
     latestInsightsSchema,
     insightsListSchema,
+    offerDescriptionSchema,
 } from '../validators/ai.validator';
 
 const router = Router();
@@ -20,6 +21,7 @@ router.use(authenticate);
 
 router.post('/chat', validate(chatSchema), aiController.chat.bind(aiController));
 router.post('/generate-offer', validate(generateOfferSchema), aiController.generateOffer.bind(aiController));
+router.post('/offer-description', validate(offerDescriptionSchema), aiController.generateOfferDescription.bind(aiController));
 router.post('/generate-email', validate(generateEmailSchema), aiController.generateEmail.bind(aiController));
 router.post('/price-insight', validate(priceInsightSchema), aiController.priceInsight.bind(aiController));
 

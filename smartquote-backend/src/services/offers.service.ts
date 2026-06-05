@@ -79,7 +79,9 @@ export class OffersService {
                     clientId: data.clientId,
                     items: itemsWithTotals.map(mapItemToData),
                     templateType: data.templateType ?? 'classic',
-                    blocks: (data.blocks as import('@prisma/client').Prisma.InputJsonValue) ?? null,
+                    blocks: data.blocks != null
+                        ? (data.blocks as Prisma.InputJsonValue)
+                        : Prisma.JsonNull,
                 });
             } catch (err) {
                 const isUniqueViolation =
@@ -130,7 +132,9 @@ export class OffersService {
         }
 
         if (data.blocks !== undefined) {
-            updateData.blocks = (data.blocks as import('@prisma/client').Prisma.InputJsonValue) ?? null;
+            updateData.blocks = data.blocks != null
+                ? (data.blocks as Prisma.InputJsonValue)
+                : Prisma.JsonNull;
         }
 
         if (data.status) {

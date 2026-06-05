@@ -90,6 +90,51 @@ Pamiętaj:
 - VAT zazwyczaj 23%`;
 }
 
+export interface OfferDescriptionContext {
+    readonly title: string;
+    readonly clientName: string;
+    readonly clientType?: string;
+    readonly templateType?: string;
+    readonly currentText?: string;
+    readonly mode: 'generate' | 'polish';
+}
+
+export function buildOfferDescriptionPrompt(ctx: OfferDescriptionContext): string {
+    if (ctx.mode === 'polish') {
+        return `Ulepsz poniższy tekst oferty handlowej. Popraw styl, gramatykę i profesjonalizm. Zachowaj sens i fakty. Zwróć tekst w formacie HTML (używaj tylko tagów: <p>, <strong>, <em>, <ul>, <li>, <br>).
+
+TYTUŁ OFERTY: ${ctx.title}
+KLIENT: ${ctx.clientName}
+
+TEKST DO ULEPSZENIA:
+${ctx.currentText}
+
+Zwróć TYLKO HTML (bez markdown, bez bloku \`\`\`html, bez objaśnień). Zacznij od tagu <p>.`;
+    }
+
+    const isWebsite = ctx.templateType === 'proposal';
+
+    if (isWebsite) {
+        return `Wygeneruj profesjonalny wstęp do oferty na wykonanie strony internetowej. Tekst ma być ciepły, personalny i przekonujący — skierowany do konkretnego klienta.
+
+TYTUŁ OFERTY: ${ctx.title}
+KLIENT: ${ctx.clientName}${ctx.clientType ? ` (${ctx.clientType})` : ''}
+
+Zwróć 2-3 akapity HTML. Pierwszy — personalizowane powitanie i nawiązanie do potrzeb klienta. Drugi — dlaczego warto zainwestować w profesjonalną stronę. Trzeci (opcjonalnie) — krótkie zapewnienie o jakości i podejściu do projektu.
+
+Używaj tylko tagów: <p>, <strong>, <em>. Zacznij od <p>. Nie używaj markdown. Zwróć TYLKO HTML.`;
+    }
+
+    return `Wygeneruj profesjonalny opis oferty handlowej w formacie HTML.
+
+TYTUŁ OFERTY: ${ctx.title}
+KLIENT: ${ctx.clientName}${ctx.clientType ? ` (${ctx.clientType})` : ''}${ctx.currentText ? `\n\nDODATKOWY KONTEKST:\n${ctx.currentText}` : ''}
+
+Zwróć 2-3 zdania HTML opisujące zakres i wartość oferty. Ton: profesjonalny, konkretny, zorientowany na korzyści klienta.
+
+Używaj tylko tagów: <p>, <strong>, <em>. Zacznij od <p>. Nie używaj markdown. Zwróć TYLKO HTML.`;
+}
+
 export function buildEmailPrompt(type: EmailType, context: EmailGenerationContext): string {
     const templates: Record<EmailType, string> = {
         offer_send: `Napisz profesjonalny email do klienta ${context.clientName} z przesłaniem oferty "${context.offerTitle || 'handlowej'}".`,

@@ -31,6 +31,23 @@ export class AIController {
         }
     }
 
+    async generateOfferDescription(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+        try {
+            const { title, clientName, clientType, templateType, currentText, mode } = req.body;
+            const description = await aiService.generateOfferDescription({
+                title,
+                clientName,
+                clientType,
+                templateType,
+                currentText,
+                mode: mode ?? 'generate',
+            });
+            return successResponse(res, { description });
+        } catch (err) {
+            next(err);
+        }
+    }
+
     async generateEmail(req: AuthenticatedRequest, res: Response, next: NextFunction) {
         try {
             const userId = req.user!.id;
