@@ -96,6 +96,7 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
                     <StepDetails
                         details={offerDetails}
                         onUpdate={updateDetails}
+                        clientName={selectedClient?.name}
                     />
                 )}
 
