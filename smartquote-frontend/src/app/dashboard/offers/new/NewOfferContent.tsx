@@ -10,6 +10,7 @@ import StepClient from './components/StepClient';
 import StepDetails from './components/StepDetails';
 import StepItems from './components/StepItems';
 import StepSummary from './components/StepSummary';
+import StepTemplate from './components/StepTemplate';
 import TemplateSelector from '@/components/offer-templates/TemplateSelector';
 
 export default function NewOfferContent() {
@@ -29,6 +30,7 @@ export default function NewOfferContent() {
         updateItem,
         totals,
         uniqueVariants,
+        stepIds,
         goToStep,
         goNext,
         goBack,
@@ -37,6 +39,8 @@ export default function NewOfferContent() {
         applyTemplate,
         templateSelectorOpen,
         setTemplateSelectorOpen,
+        proposalBlocks,
+        setProposalBlocks,
         router,
     } = useOfferForm();
 
@@ -70,7 +74,7 @@ export default function NewOfferContent() {
                 </div>
             </div>
 
-            <OfferStepper currentStep={currentStep} onStepClick={goToStep} />
+            <OfferStepper currentStep={currentStep} stepIds={stepIds} onStepClick={goToStep} />
 
             <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
                 {currentStep === 'client' && (
@@ -87,6 +91,17 @@ export default function NewOfferContent() {
                         onAddItem={addItem}
                         onRemoveItem={removeItem}
                         onUpdateItem={updateItem}
+                    />
+                )}
+                {currentStep === 'template' && (
+                    <StepTemplate
+                        client={selectedClient}
+                        offerTitle={offerDetails.title}
+                        totalGross={totals.totalGross}
+                        currency="PLN"
+                        paymentDays={offerDetails.paymentDays}
+                        blocks={proposalBlocks}
+                        onBlocksChange={setProposalBlocks}
                     />
                 )}
                 {currentStep === 'summary' && selectedClient && (

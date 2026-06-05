@@ -35,6 +35,7 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
         updateItem,
         totals,
         uniqueVariants,
+        stepIds,
         goToStep,
         goNext,
         goBack,
@@ -80,7 +81,7 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
                 <p className="text-muted-foreground mt-1">{offer.number}</p>
             </div>
 
-            <OfferStepper currentStep={currentStep} onStepClick={goToStep} />
+            <OfferStepper currentStep={currentStep} stepIds={stepIds} onStepClick={goToStep} />
 
             <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
                 {currentStep === 'client' && (
