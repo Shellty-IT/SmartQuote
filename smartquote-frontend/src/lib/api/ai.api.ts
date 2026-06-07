@@ -82,4 +82,32 @@ export const ai = {
             meta: response.meta as { page: number; limit: number; total: number; totalPages: number },
         };
     },
+
+    generateOfferDescription: async (params: {
+        title: string;
+        clientName: string;
+        clientType?: string;
+        templateType?: string;
+        currentText?: string;
+        mode: 'generate' | 'polish';
+    }): Promise<string> => {
+        const response = await api.post<{ description: string }>('/ai/offer-description', params);
+        return (response.data as { description: string }).description;
+    },
+
+    /**
+     * Generates structured content for a single proposal section via AI.
+     * Returns a partial block object (e.g. { paragraphs: [...] } for intro).
+     * Falls back to empty object on parse error.
+     */
+    generateSection: async (params: {
+        sectionKey: string
+        offerTitle: string
+        clientName: string
+        totalGross: number
+        currency: string
+    }): Promise<Record<string, unknown>> => {
+        const response = await api.post<Record<string, unknown>>('/ai/generate-section', params)
+        return (response.data as Record<string, unknown>) ?? {}
+    },
 };

@@ -1,6 +1,7 @@
 // src/app/dashboard/offers/new/NewOfferContent.tsx
 'use client';
 
+import { useEffect } from 'react';
 import { Button } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { useTranslations } from '@/i18n';
@@ -10,6 +11,7 @@ import StepClient from './components/StepClient';
 import StepDetails from './components/StepDetails';
 import StepItems from './components/StepItems';
 import StepSummary from './components/StepSummary';
+import StepTemplate from './components/StepTemplate';
 import TemplateSelector from '@/components/offer-templates/TemplateSelector';
 
 export default function NewOfferContent() {
@@ -29,6 +31,7 @@ export default function NewOfferContent() {
         updateItem,
         totals,
         uniqueVariants,
+        stepIds,
         goToStep,
         goNext,
         goBack,
@@ -37,8 +40,18 @@ export default function NewOfferContent() {
         applyTemplate,
         templateSelectorOpen,
         setTemplateSelectorOpen,
+        proposalBlocks,
+        setProposalBlocks,
         router,
     } = useOfferForm();
+
+    // Initialize terms from i18n once on mount (can't use i18n value in useState initializer)
+    useEffect(() => {
+        if (!offerDetails.terms) {
+            updateDetails('terms', tr.details.termsDefault);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     if (isLoadingClients && clients.length === 0) return <PageLoader />;
 
@@ -70,14 +83,18 @@ export default function NewOfferContent() {
                 </div>
             </div>
 
-            <OfferStepper currentStep={currentStep} onStepClick={goToStep} />
+            <OfferStepper currentStep={currentStep} stepIds={stepIds} onStepClick={goToStep} />
 
             <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
                 {currentStep === 'client' && (
                     <StepClient clients={clients} selectedClient={selectedClient} onSelectClient={setSelectedClient} />
                 )}
                 {currentStep === 'details' && (
-                    <StepDetails details={offerDetails} onUpdate={updateDetails} />
+                    <StepDetails
+                        details={offerDetails}
+                        onUpdate={updateDetails}
+                        clientName={selectedClient?.name}
+                    />
                 )}
                 {currentStep === 'items' && (
                     <StepItems
@@ -87,6 +104,17 @@ export default function NewOfferContent() {
                         onAddItem={addItem}
                         onRemoveItem={removeItem}
                         onUpdateItem={updateItem}
+                    />
+                )}
+                {currentStep === 'template' && (
+                    <StepTemplate
+                        client={selectedClient}
+                        offerTitle={offerDetails.title}
+                        totalGross={totals.totalGross}
+                        currency="PLN"
+                        paymentDays={offerDetails.paymentDays}
+                        blocks={proposalBlocks}
+                        onBlocksChange={setProposalBlocks}
                     />
                 )}
                 {currentStep === 'summary' && selectedClient && (

@@ -2,27 +2,29 @@
 'use client';
 
 import { useTranslations } from '@/i18n';
-import { STEP_IDS, type Step } from '../constants';
+import type { Step } from '../constants';
 
 interface OfferStepperProps {
     currentStep: Step;
+    stepIds: Step[];
     onStepClick: (step: Step) => void;
 }
 
-export default function OfferStepper({ currentStep, onStepClick }: OfferStepperProps) {
+export default function OfferStepper({ currentStep, stepIds, onStepClick }: OfferStepperProps) {
     const tr = useTranslations('offerNew');
     const labels: Record<Step, string> = {
         client: tr.steps.client,
         details: tr.steps.details,
         items: tr.steps.items,
+        template: tr.steps.template,
         summary: tr.steps.summary,
     };
-    const currentIndex = STEP_IDS.indexOf(currentStep);
+    const currentIndex = stepIds.indexOf(currentStep);
 
     return (
         <div className="mb-8">
             <div className="flex items-center justify-between">
-                {STEP_IDS.map((stepId, index) => {
+                {stepIds.map((stepId, index) => {
                     const isActive = stepId === currentStep;
                     const isCompleted = index < currentIndex;
                     const isClickable = index <= currentIndex;
@@ -53,7 +55,7 @@ export default function OfferStepper({ currentStep, onStepClick }: OfferStepperP
                                     {labels[stepId]}
                                 </span>
                             </button>
-                            {index < STEP_IDS.length - 1 && (
+                            {index < stepIds.length - 1 && (
                                 <div className="flex-1 h-0.5 mx-2 md:mx-4 bg-surface-subtle" />
                             )}
                         </div>

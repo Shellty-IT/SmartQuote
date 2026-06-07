@@ -7,8 +7,12 @@ export default function ContractsLoading() {
                 {Array.from({ length: 4 }).map((_, i) => <SkeletonStatsCardWithIcon key={i} />)}
             </div>
             <SkeletonFilterBar />
-            <div className="space-y-2">
-                {Array.from({ length: 8 }).map((_, i) => <SkeletonTableRow key={i} />)}
+            <div className="rounded-lg border border-border overflow-hidden">
+                <table className="w-full">
+                    <tbody>
+                        {Array.from({ length: 8 }).map((_, i) => <SkeletonTableRow key={i} />)}
+                    </tbody>
+                </table>
             </div>
         </div>
     );

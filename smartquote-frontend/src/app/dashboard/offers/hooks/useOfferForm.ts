@@ -11,6 +11,8 @@ import type { Step } from '../new/constants';
 import { STEP_IDS } from '../new/constants';
 import type { ExtendedOfferItem, OfferDetails, OfferTotalsData } from '../new/types';
 import { emptyItem, defaultOfferDetails } from '../new/types';
+import { mergeWithDefaults, type ProposalBlocks } from '@/lib/pdf/proposal-blocks';
+import { buildStepIds } from '../new/constants';
 
 export function calculateItemTotal(item: ExtendedOfferItem): OfferTotalsData {
     const quantity = item.quantity || 0;
@@ -49,6 +51,20 @@ export function useOfferForm(options?: { initialData?: Offer }) {
     const [currentStep, setCurrentStep] = useState<Step>('client');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [templateSelectorOpen, setTemplateSelectorOpen] = useState(false);
+    const [proposalBlocks, setProposalBlocks] = useState<ProposalBlocks>(() => {
+        // Load saved document template from localStorage (set in Szablony → Szablony dokumentów)
+        let savedTemplate: Partial<ProposalBlocks> | null = null
+        try {
+            const raw = typeof window !== 'undefined' ? localStorage.getItem('sq_default_proposal_blocks') : null
+            savedTemplate = raw ? (JSON.parse(raw) as Partial<ProposalBlocks>) : null
+        } catch {
+            // ignore parse errors
+        }
+        return mergeWithDefaults(
+            options?.initialData?.blocks as Partial<ProposalBlocks> | null ?? savedTemplate,
+            undefined,
+        )
+    });
 
     const [selectedClient, setSelectedClient] = useState<Client | null>(() => {
         return options?.initialData?.client || null;
@@ -66,9 +82,14 @@ export function useOfferForm(options?: { initialData?: Offer }) {
                 terms: options.initialData.terms || '',
                 paymentDays: options.initialData.paymentDays,
                 requireAuditTrail: options.initialData.requireAuditTrail || false,
+                templateType: (options.initialData.templateType as 'classic' | 'proposal') ?? 'classic',
             };
         }
-        return defaultOfferDetails;
+        return {
+            ...defaultOfferDetails,
+            // Initialize terms from i18n so it matches the user's language (PL/EN)
+            terms: '',
+        };
     });
 
     const [items, setItems] = useState<ExtendedOfferItem[]>(() => {
@@ -116,21 +137,26 @@ export function useOfferForm(options?: { initialData?: Offer }) {
 
     const uniqueVariants = useMemo(() => getUniqueVariants(items), [items]);
 
+    const stepIds = useMemo(
+        () => buildStepIds(offerDetails.templateType ?? 'classic'),
+        [offerDetails.templateType],
+    );
+
     const goToStep = useCallback((step: Step) => setCurrentStep(step), []);
 
     const goNext = useCallback(() => {
-        const currentIndex = STEP_IDS.indexOf(currentStep);
-        if (currentIndex < STEP_IDS.length - 1) {
-            setCurrentStep(STEP_IDS[currentIndex + 1]);
+        const currentIndex = stepIds.indexOf(currentStep);
+        if (currentIndex < stepIds.length - 1) {
+            setCurrentStep(stepIds[currentIndex + 1]);
         }
-    }, [currentStep]);
+    }, [currentStep, stepIds]);
 
     const goBack = useCallback(() => {
-        const currentIndex = STEP_IDS.indexOf(currentStep);
+        const currentIndex = stepIds.indexOf(currentStep);
         if (currentIndex > 0) {
-            setCurrentStep(STEP_IDS[currentIndex - 1]);
+            setCurrentStep(stepIds[currentIndex - 1]);
         }
-    }, [currentStep]);
+    }, [currentStep, stepIds]);
 
     const addItem = useCallback(() => {
         setItems((prev) => [...prev, { ...emptyItem }]);
@@ -230,6 +256,8 @@ export function useOfferForm(options?: { initialData?: Offer }) {
                 terms: offerDetails.terms || undefined,
                 paymentDays: offerDetails.paymentDays,
                 requireAuditTrail: offerDetails.requireAuditTrail,
+                templateType: offerDetails.templateType ?? 'classic',
+                blocks: offerDetails.templateType === 'proposal' ? (proposalBlocks as unknown) : null,
                 items: items.map((item) => ({
                     name: item.name,
                     description: item.description || undefined,
@@ -287,6 +315,7 @@ export function useOfferForm(options?: { initialData?: Offer }) {
         updateItem,
         totals,
         uniqueVariants,
+        stepIds,
         goToStep,
         goNext,
         goBack,
@@ -295,6 +324,8 @@ export function useOfferForm(options?: { initialData?: Offer }) {
         applyTemplate,
         templateSelectorOpen,
         setTemplateSelectorOpen,
+        proposalBlocks,
+        setProposalBlocks,
         router,
     };
 }

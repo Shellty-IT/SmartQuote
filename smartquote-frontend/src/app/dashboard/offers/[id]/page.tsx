@@ -15,6 +15,7 @@ import { CommentsTab } from './components/comments/CommentsTab';
 import { EmailsTab } from './components/emails/EmailsTab';
 import { KsefMasterPreview } from './components/KsefMasterPreview';
 import { PdfPreviewModal } from '@/components/pdf/PdfPreviewModal';
+import { TemplateTab } from './components/template/TemplateTab';
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -26,6 +27,7 @@ export default function OfferDetailPage({ params }: PageProps) {
         offer,
         isLoading,
         error,
+        refresh,
         analytics,
         comments,
         isSending,
@@ -168,6 +170,13 @@ export default function OfferDetailPage({ params }: PageProps) {
                 <EmailsTab
                     offerId={offer.id}
                     offerNumber={offer.number}
+                />
+            )}
+
+            {activeTab === 'template' && (
+                <TemplateTab
+                    offer={offer}
+                    onSaved={refresh}
                 />
             )}
 

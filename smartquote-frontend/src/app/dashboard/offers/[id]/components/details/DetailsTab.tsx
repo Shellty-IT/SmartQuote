@@ -52,7 +52,10 @@ export function DetailsTab({
                 {offer.description && (
                     <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                         <h2 className="text-lg font-semibold text-foreground mb-3">{detailsTr.description}</h2>
-                        <p className="text-foreground whitespace-pre-wrap">{offer.description}</p>
+                        <div
+                            className="prose prose-sm max-w-none text-foreground [&_strong]:text-foreground [&_a]:text-primary"
+                            dangerouslySetInnerHTML={{ __html: offer.description }}
+                        />
                     </div>
                 )}
 
@@ -121,7 +124,10 @@ export function DetailsTab({
                 {offer.terms && (
                     <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                         <h2 className="text-lg font-semibold text-foreground mb-3">{detailsTr.paymentTerms}</h2>
-                        <p className="text-foreground whitespace-pre-wrap">{offer.terms}</p>
+                        <div
+                            className="prose prose-sm max-w-none text-foreground [&_strong]:text-foreground"
+                            dangerouslySetInnerHTML={{ __html: offer.terms }}
+                        />
                     </div>
                 )}
 
@@ -135,7 +141,7 @@ export function DetailsTab({
                 {detailsTr.internalNotes}
               </span>
                         </h2>
-                        <p className="text-foreground whitespace-pre-wrap">{offer.notes}</p>
+                        <p className="text-foreground whitespace-pre-wrap text-sm">{offer.notes}</p>
                     </div>
                 )}
             </div>

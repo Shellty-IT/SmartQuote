@@ -21,6 +21,8 @@ import {
     buildOfferGenerationPrompt,
     buildEmailPrompt,
     buildClientAnalysisPrompt,
+    buildOfferDescriptionPrompt,
+    type OfferDescriptionContext,
 } from './prompts';
 
 const log = createModuleLogger('ai:chat');
@@ -269,6 +271,21 @@ export async function generateEmail(
     return callGemini(ai, prompt);
 }
 
+export async function generateOfferDescription(
+    ai: GoogleGenAI | null,
+    ctx: OfferDescriptionContext,
+): Promise<string> {
+    if (!ai) throw new Error('AI nie jest skonfigurowany');
+    const prompt = buildOfferDescriptionPrompt(ctx);
+    const raw = await callGemini(ai, prompt);
+    // Sanitise: strip any accidental markdown fences if model adds them
+    return raw
+        .replace(/^```html\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/\s*```$/i, '')
+        .trim();
+}
+
 export async function analyzeClient(
     ai: GoogleGenAI | null,
     userId: string,
@@ -329,4 +346,52 @@ export async function analyzeClient(
 
     aiCache.set(cacheKey, result, CACHE_TTL.CLIENT_ANALYSIS);
     return result;
+}
+
+// ── Proposal section generation ───────────────────────────────────────────────
+
+export interface GenerateSectionParams {
+    sectionKey: string
+    offerTitle: string
+    clientName: string
+    totalGross: number
+    currency: string
+}
+
+const SECTION_INSTRUCTIONS: Record<string, string> = {
+    intro: 'Napisz profesjonalne wprowadzenie do oferty (2 akapity po polsku, ciepły ale biznesowy ton). Odpowiedź TYLKO jako JSON: {"paragraphs":["akapit1","akapit2"]}',
+    demo: 'Napisz treść sekcji demo/podglądu. Odpowiedź TYLKO jako JSON: {"title":"tytuł sekcji","body":"opis jednozdaniowy","note":"opcjonalna krótka nota"}',
+    structure: 'Napisz strukturę projektu (4-5 elementów). Odpowiedź TYLKO jako JSON: {"title":"Proponowana struktura","items":[{"icon":"emoji","name":"nazwa","description":"krótki opis"},...]}',
+    scope: 'Napisz zakres realizacji (7-9 pozycji). Odpowiedź TYLKO jako JSON: {"title":"Pełny zakres realizacji","items":[{"html":"opis pozycji"},...]}',
+    testing: 'Napisz opis procesu realizacji/testowania (krótki). Odpowiedź TYLKO jako JSON: {"intro":"opis procesu jednozdaniowy","note":"opcjonalna nota"}',
+    technology: 'Napisz opis technologii i uzasadnienie wyboru. Odpowiedź TYLKO jako JSON: {"body":"opis technologii 2-3 zdania","note":"opcjonalna nota"}',
+    about: 'Napisz wezwanie do działania (CTA) kończące ofertę. Odpowiedź TYLKO jako JSON: {"ctaText":"2-3 zdania zachęcające do kontaktu"}',
+}
+
+/**
+ * Generates structured content for a single proposal block.
+ * Uses callGemini directly — no DB queries, no conversation history.
+ */
+export async function generateSectionContent(
+    ai: GoogleGenAI | null,
+    params: GenerateSectionParams,
+): Promise<Record<string, unknown>> {
+    if (!ai) throw new Error('AI nie jest skonfigurowany')
+
+    const instruction =
+        SECTION_INSTRUCTIONS[params.sectionKey] ??
+        `Napisz treść sekcji ${params.sectionKey} po polsku. Zwróć JSON z odpowiednimi polami.`
+
+    const formattedValue = params.totalGross.toLocaleString('pl-PL')
+    const prompt = [
+        `Kontekst oferty — tytuł: "${params.offerTitle}", klient: ${params.clientName}, wartość: ${formattedValue} ${params.currency}.`,
+        '',
+        `Zadanie: ${instruction}`,
+        '',
+        'Odpowiedź musi być TYLKO poprawnym JSON-em, bez markdown, bez wyjaśnień.',
+    ].join('\n')
+
+    const responseText = await callGemini(ai, prompt)
+    const parsed = extractJson(responseText)
+    return (parsed as Record<string, unknown>) ?? {}
 }

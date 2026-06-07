@@ -17,6 +17,7 @@ export interface OfferDetails {
     terms: string;
     paymentDays: number;
     requireAuditTrail: boolean;
+    templateType: 'classic' | 'proposal';
 }
 
 export interface OfferTotalsData {
@@ -44,7 +45,8 @@ export const defaultOfferDetails: OfferDetails = {
     description: '',
     validUntil: '',
     notes: '',
-    terms: 'Payment by bank transfer within 14 days of invoice issuance.',
+    terms: '', // Initialized from i18n in useOfferForm or NewOfferContent
     paymentDays: 14,
     requireAuditTrail: false,
+    templateType: 'classic',
 };

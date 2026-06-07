@@ -41,4 +41,13 @@ export const offersApi = {
         api.post<OfferComment>(`/offers/${id}/comments`, { content }),
     sendToClient: (id: string) =>
         api.post<SendToClientResult>(`/offers/${id}/send-to-client`),
+    /** Proposal template — download PDF (rendered by Vercel/Puppeteer) */
+    downloadProposalPdf: async (id: string): Promise<Blob> => {
+        const res = await fetch(`/api/offers/${id}/pdf/proposal`)
+        if (!res.ok) throw new Error(`PDF generation failed: ${res.status}`)
+        return res.blob()
+    },
+    /** Proposal template — fetch HTML string for in-browser preview */
+    getProposalPreviewUrl: (id: string): string =>
+        `/api/offers/${id}/proposal/preview`,
 };

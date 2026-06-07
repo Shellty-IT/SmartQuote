@@ -1,18 +1,49 @@
 // src/app/dashboard/offers/new/components/StepDetails.tsx
 'use client';
 
+import { useState, useCallback } from 'react';
+import { Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui';
 import { useTranslations } from '@/i18n';
+import { cn } from '@/lib/utils';
+import { ai } from '@/lib/api';
+import RichTextEditor from '@/components/email/RichTextEditor';
 import type { OfferDetails } from '../types';
 
 interface StepDetailsProps {
     details: OfferDetails;
     onUpdate: <K extends keyof OfferDetails>(field: K, value: OfferDetails[K]) => void;
+    /** Client name for AI context (optional) */
+    clientName?: string;
 }
 
-export default function StepDetails({ details, onUpdate }: StepDetailsProps) {
+export default function StepDetails({ details, onUpdate, clientName }: StepDetailsProps) {
     const tr = useTranslations('offerNew');
     const d = tr.details;
+    const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
+    const [isPolishingDesc, setIsPolishingDesc] = useState(false);
+
+    const handleGenerateDescription = useCallback(async (mode: 'generate' | 'polish') => {
+        if (!details.title || details.title.length < 3) return;
+        mode === 'generate' ? setIsGeneratingDesc(true) : setIsPolishingDesc(true);
+        try {
+            const result = await ai.generateOfferDescription({
+                title: details.title,
+                clientName: clientName || 'Klient',
+                templateType: details.templateType,
+                currentText: mode === 'polish' ? details.description : undefined,
+                mode,
+            });
+            onUpdate('description', result);
+        } catch {
+            // toast is not available here — user sees no change on error (silent fail)
+        } finally {
+            setIsGeneratingDesc(false);
+            setIsPolishingDesc(false);
+        }
+    }, [details.title, details.description, details.templateType, clientName, onUpdate]);
+
+    const canAI = details.title.length >= 3;
 
     return (
         <div>
@@ -27,15 +58,49 @@ export default function StepDetails({ details, onUpdate }: StepDetailsProps) {
                     required
                 />
 
+                {/* Description with AI */}
                 <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">{d.description}</label>
-                    <textarea
+                    <div className="flex items-center justify-between mb-1">
+                        <label className="block text-sm font-medium text-foreground">{d.description}</label>
+                        <div className="flex items-center gap-1.5">
+                            <button
+                                type="button"
+                                disabled={!canAI || isGeneratingDesc || isPolishingDesc}
+                                onClick={() => handleGenerateDescription('generate')}
+                                title={canAI ? d.aiHint : d.offerTitlePlaceholder}
+                                className={cn(
+                                    'flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors',
+                                    canAI
+                                        ? 'bg-primary/10 text-primary hover:bg-primary/20'
+                                        : 'cursor-not-allowed opacity-40 bg-muted text-muted-foreground',
+                                )}
+                            >
+                                <Sparkles className="h-3 w-3" />
+                                {isGeneratingDesc ? d.aiGenerating : d.aiGenerate}
+                            </button>
+                            {details.description && (
+                                <button
+                                    type="button"
+                                    disabled={!canAI || isGeneratingDesc || isPolishingDesc}
+                                    onClick={() => handleGenerateDescription('polish')}
+                                    className={cn(
+                                        'flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors',
+                                        canAI
+                                            ? 'bg-primary/10 text-primary hover:bg-primary/20'
+                                            : 'cursor-not-allowed opacity-40 bg-muted text-muted-foreground',
+                                    )}
+                                >
+                                    <Sparkles className="h-3 w-3" />
+                                    {isPolishingDesc ? d.aiGenerating : d.aiPolish}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    <RichTextEditor
                         value={details.description}
-                        onChange={(e) => onUpdate('description', e.target.value)}
+                        onChange={(v) => onUpdate('description', v)}
                         placeholder={d.descriptionPlaceholder}
-                        rows={4}
-                        style={{ resize: 'vertical', minHeight: '100px' }}
-                        className="w-full px-3 py-2 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
+                        minHeight={160}
                     />
                 </div>
 
@@ -57,17 +122,17 @@ export default function StepDetails({ details, onUpdate }: StepDetailsProps) {
                     />
                 </div>
 
+                {/* Payment terms — rich text */}
                 <div>
                     <label className="block text-sm font-medium text-foreground mb-1">{d.paymentTerms}</label>
-                    <textarea
+                    <RichTextEditor
                         value={details.terms}
-                        onChange={(e) => onUpdate('terms', e.target.value)}
-                        rows={2}
-                        style={{ resize: 'vertical', minHeight: '70px' }}
-                        className="w-full px-3 py-2 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
+                        onChange={(v) => onUpdate('terms', v)}
+                        minHeight={80}
                     />
                 </div>
 
+                {/* Internal notes — plain textarea (not client-facing) */}
                 <div>
                     <label className="block text-sm font-medium text-foreground mb-1">{d.internalNotes}</label>
                     <textarea
@@ -80,6 +145,40 @@ export default function StepDetails({ details, onUpdate }: StepDetailsProps) {
                     />
                 </div>
 
+                {/* PDF template type */}
+                <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">{d.pdfTemplateLabel}</label>
+                    <p className="text-xs text-muted-foreground mb-3">{d.pdfTemplateHint}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {(['classic', 'proposal'] as const).map((type) => {
+                            const isActive = details.templateType === type;
+                            const icon = type === 'classic' ? '📄' : '🗂️';
+                            const label = type === 'classic' ? d.pdfClassic : d.pdfProposal;
+                            const desc = type === 'classic' ? d.pdfClassicDesc : d.pdfProposalDesc;
+                            return (
+                                <button
+                                    key={type}
+                                    type="button"
+                                    onClick={() => onUpdate('templateType', type)}
+                                    className={cn(
+                                        'flex items-start gap-3 rounded-xl border-2 p-3 text-left transition-all',
+                                        isActive
+                                            ? 'border-primary bg-primary/5'
+                                            : 'border-border hover:border-border/60 hover:bg-surface-subtle',
+                                    )}
+                                >
+                                    <span className="text-xl flex-shrink-0 mt-0.5">{icon}</span>
+                                    <div>
+                                        <p className={cn('text-sm font-semibold', isActive ? 'text-primary' : 'text-foreground')}>{label}</p>
+                                        <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{desc}</p>
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* Audit trail */}
                 <div className="p-4 bg-card border-border border rounded-xl">
                     <label className="flex items-start gap-3 cursor-pointer">
                         <input

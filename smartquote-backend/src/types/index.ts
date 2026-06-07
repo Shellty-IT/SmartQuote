@@ -93,6 +93,8 @@ export interface CreateOfferInput {
     paymentDays?: number;
     requireAuditTrail?: boolean;
     items: OfferItemInput[];
+    templateType?: string | null;
+    blocks?: unknown | null;
 }
 
 export interface UpdateOfferInput {
@@ -105,6 +107,8 @@ export interface UpdateOfferInput {
     paymentDays?: number;
     requireAuditTrail?: boolean;
     items?: OfferItemInput[];
+    templateType?: string | null;
+    blocks?: unknown | null;
 }
 
 export interface PublicOfferAcceptInput {
