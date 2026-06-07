@@ -78,3 +78,13 @@ export const latestInsightsSchema = z.object({
         limit: z.string().regex(/^\d+$/).transform(Number).optional(),
     }),
 });
+
+export const generateSectionSchema = z.object({
+    body: z.object({
+        sectionKey: z.string().min(1).max(50),
+        offerTitle: z.string().min(1).max(300),
+        clientName: z.string().min(1).max(200),
+        totalGross: z.number().min(0),
+        currency: z.string().min(1).max(10),
+    }),
+});

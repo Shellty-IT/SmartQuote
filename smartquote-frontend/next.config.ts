@@ -26,8 +26,12 @@ const securityHeaders = [
             "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data: blob: https:",
-            "font-src 'self' data:",
+            // Google Fonts needed for Outfit font in proposal document editor iframe
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+            "font-src 'self' data: https://fonts.gstatic.com",
             connectSrc,
+            // Allow blob: and srcdoc iframes (PDF preview modal + document editor)
+            "frame-src 'self' blob:",
             "frame-ancestors 'none'",
         ].join('; '),
     },

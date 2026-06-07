@@ -2,7 +2,7 @@
 // Generates a full HTML string for the proposal template.
 // Used by: Puppeteer PDF route + HTML preview route.
 
-import { mergeWithDefaults, type ProposalBlocks } from './proposal-blocks'
+import { mergeWithDefaults, type ProposalBlocks, type SectionKey } from './proposal-blocks'
 
 export interface ProposalOfferData {
     number: string
@@ -15,7 +15,7 @@ export interface ProposalOfferData {
         name: string
         company?: string | null
     }
-    user: {
+    user?: {
         name?: string | null
         email: string
         companyInfo?: {
@@ -24,7 +24,7 @@ export interface ProposalOfferData {
             logo?: string | null
             phone?: string | null
         } | null
-    }
+    } | null
     blocks?: unknown | null
 }
 
@@ -48,31 +48,31 @@ function formatMoney(amount: number, currency = 'PLN'): string {
     return (
         amount
             .toFixed(2)
-            .replace(/\B(?=(\d{3})+(?!\d))/g, ' ') +
-        ' ' +
+            .replace(/\B(?=(\d{3})+(?!\d))/g, ' ') +
+        ' ' +
         currency
     )
 }
 
 const SVG_CHECK = `<svg viewBox="0 0 10 10" fill="none"><path d="M2 5.2l2.2 2.2 3.6-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`
 
-// ── Section renderers ─────────────────────────────────────────────────────────
+// ── Section renderers (editorMode = always render for inline preview) ─────────
 
-function renderIntro(blocks: ProposalBlocks): string {
-    if (!blocks.intro.enabled) return ''
+function renderIntro(blocks: ProposalBlocks, editorMode = false): string {
+    if (!blocks.intro.enabled && !editorMode) return ''
     const paragraphs = blocks.intro.paragraphs
         .filter(Boolean)
         .map((p) => `<p>${p}</p>`)
         .join('\n      ')
     return `
     <div class="intro">
-      ${paragraphs}
+      ${paragraphs || '<p><em>Brak tekstu wprowadzającego</em></p>'}
     </div>`
 }
 
-function renderDemo(blocks: ProposalBlocks): string {
+function renderDemo(blocks: ProposalBlocks, editorMode = false): string {
     const d = blocks.demo
-    if (!d.enabled) return ''
+    if (!d.enabled && !editorMode) return ''
     const urls = d.urls
         .filter((u) => u.href && u.href !== 'https://')
         .map(
@@ -99,9 +99,9 @@ function renderDemo(blocks: ProposalBlocks): string {
     </div>`
 }
 
-function renderStructure(blocks: ProposalBlocks): string {
+function renderStructure(blocks: ProposalBlocks, editorMode = false): string {
     const s = blocks.structure
-    if (!s.enabled || !s.items.length) return ''
+    if (!s.enabled && !editorMode) return ''
     const items = s.items
         .map(
             (item) => `
@@ -125,9 +125,9 @@ function renderStructure(blocks: ProposalBlocks): string {
     </div>`
 }
 
-function renderScope(blocks: ProposalBlocks): string {
+function renderScope(blocks: ProposalBlocks, editorMode = false): string {
     const s = blocks.scope
-    if (!s.enabled || !s.items.length) return ''
+    if (!s.enabled && !editorMode) return ''
     const items = s.items
         .map(
             (item) => `
@@ -146,9 +146,9 @@ function renderScope(blocks: ProposalBlocks): string {
     </div>`
 }
 
-function renderTesting(blocks: ProposalBlocks): string {
+function renderTesting(blocks: ProposalBlocks, editorMode = false): string {
     const t = blocks.testing
-    if (!t.enabled || !t.cards.length) return ''
+    if (!t.enabled && !editorMode) return ''
     const cards = t.cards
         .map(
             (c) => `
@@ -170,9 +170,9 @@ function renderTesting(blocks: ProposalBlocks): string {
       </div>`
 }
 
-function renderTechnology(blocks: ProposalBlocks): string {
+function renderTechnology(blocks: ProposalBlocks, editorMode = false): string {
     const t = blocks.technology
-    if (!t.enabled) return ''
+    if (!t.enabled && !editorMode) return ''
     const options = t.options
         .map(
             (opt) => `
@@ -203,9 +203,11 @@ function renderTechnology(blocks: ProposalBlocks): string {
 function renderPricingBox(
     offer: ProposalOfferData,
     blocks: ProposalBlocks,
+    editorMode = false,
 ): string {
     const pe = blocks.pricingExtra
-    const timelineCard = pe.enabled
+    const showExtra = pe.enabled || editorMode
+    const timelineCard = showExtra
         ? `
         <div class="p-card">
           <div class="pc-label">⏱️ Czas realizacji</div>
@@ -213,7 +215,7 @@ function renderPricingBox(
           <div class="pc-sub">${esc(pe.timelineSub)}</div>
         </div>`
         : ''
-    const contractCard = pe.enabled
+    const contractCard = showExtra
         ? `
         <div class="p-card">
           <div class="pc-label">🧾 Forma współpracy</div>
@@ -230,7 +232,7 @@ function renderPricingBox(
         <div class="p-card hot">
           <div class="pc-label">💵 Cena</div>
           <div class="pc-val">${formatMoney(offer.totalGross, offer.currency)}</div>
-          <div class="pc-sub">brutto · płatność ${offer.paymentDays} dni</div>
+          <div class="pc-sub">płatność ${offer.paymentDays} dni</div>
         </div>
         ${timelineCard}
         ${contractCard}
@@ -241,19 +243,23 @@ function renderPricingBox(
 function renderAbout(
     offer: ProposalOfferData,
     blocks: ProposalBlocks,
+    editorMode = false,
 ): string {
     const a = blocks.about
-    if (!a.enabled) return ''
-    const website = offer.user.companyInfo?.website
-    const aboutBox = website
+    if (!a.enabled && !editorMode) return ''
+    const website = offer.user?.companyInfo?.website
+    const aboutBox = (website || editorMode)
         ? `
       <div class="about-box">
         <div class="sec"><span class="ico">🗂️</span><h2>Więcej o nas i naszych realizacjach</h2></div>
-        <a class="about-url" href="${esc(website)}">👉 ${esc(website.replace(/^https?:\/\//, ''))}</a>
+        ${website
+            ? `<a class="about-url" href="${esc(website)}">👉 ${esc(website.replace(/^https?:\/\//, ''))}</a>`
+            : `<p style="font-size:9px;color:#999;font-style:italic;">Ustaw witrynę w ustawieniach firmy</p>`}
       </div>`
         : ''
+    const hasAboutBox = website || editorMode
     return `
-    <div class="bottom-row" style="${!website ? 'grid-template-columns:1fr;' : ''}">
+    <div class="bottom-row" style="${!hasAboutBox ? 'grid-template-columns:1fr;' : ''}">
       ${aboutBox}
       <div class="cta-box">
         <p>${esc(a.ctaText)}</p>
@@ -261,38 +267,194 @@ function renderAbout(
     </div>`
 }
 
-// ── Page split logic ──────────────────────────────────────────────────────────
-// Page 1: header + intro + demo + structure
-// Page 2: scope + (testing+technology) + pricing + about
+// ── Editor mode helpers ───────────────────────────────────────────────────────
+
+function editorCss(): string {
+    return `
+    /* ── EDITOR MODE ── */
+    .header-editor-wrap {
+      position: relative;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    [data-block] {
+      position: relative;
+      cursor: pointer;
+      transition: box-shadow 0.15s, outline 0.15s;
+      border-radius: 3px;
+    }
+    [data-block]:hover {
+      outline: 2px solid #E8711A;
+      outline-offset: 3px;
+    }
+    /* Tooltip badge — inside bottom-right corner of the block, no overflow conflict */
+    [data-block]::after {
+      content: '✏️  Kliknij aby edytować';
+      position: absolute;
+      bottom: 4px; right: 6px;
+      background: #E8711A;
+      color: white;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      padding: 2px 8px;
+      border-radius: 2px;
+      opacity: 0;
+      transition: opacity 0.15s;
+      pointer-events: none;
+      z-index: 100;
+      white-space: nowrap;
+    }
+    [data-block]:hover::after { opacity: 1; }
+    /* header wrapper: tooltip at top-right so it doesn't overlap header content bottom */
+    .header-editor-wrap::after {
+      top: 8px; right: 10px;
+      bottom: auto;
+    }
+    [data-block].sq-disabled {
+      opacity: 0.4;
+      position: relative;
+    }
+    [data-block].sq-disabled::before {
+      content: '👁️ Sekcja ukryta — kliknij aby włączyć';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      background: rgba(0,0,0,0.65);
+      color: white;
+      font-size: 9px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 4px;
+      z-index: 10;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    [data-block].sq-active {
+      outline: 2.5px solid #E8711A;
+      outline-offset: 3px;
+      box-shadow: 0 0 0 4px rgba(232,113,26,0.12);
+    }
+    `
+}
+
+function editorScript(): string {
+    return `
+    <script>
+      document.querySelectorAll('[data-block]').forEach(function(el) {
+        el.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var blockKey = el.getAttribute('data-block');
+          document.querySelectorAll('[data-block]').forEach(function(b) {
+            b.classList.remove('sq-active');
+          });
+          el.classList.add('sq-active');
+          window.parent.postMessage({ type: 'sq:editBlock', blockKey: blockKey }, '*');
+        });
+      });
+    </script>
+    `
+}
+
+function wrapEditable(html: string, blockKey: string, enabled: boolean): string {
+    return `<div data-block="${blockKey}"${!enabled ? ' class="sq-disabled"' : ''}>${html}</div>`
+}
+
+/** Renders a single body section (dispatcher). Returns '' for unknown keys. */
+function renderSection(
+    key: SectionKey,
+    blocks: ProposalBlocks,
+    offer: ProposalOfferData,
+    editorMode: boolean,
+): string {
+    if (editorMode) {
+        switch (key) {
+            case 'intro':       return wrapEditable(renderIntro(blocks, true), 'intro', blocks.intro.enabled)
+            case 'demo':        return wrapEditable(renderDemo(blocks, true), 'demo', blocks.demo.enabled)
+            case 'structure':   return wrapEditable(renderStructure(blocks, true), 'structure', blocks.structure.enabled)
+            case 'scope':       return wrapEditable(renderScope(blocks, true), 'scope', blocks.scope.enabled)
+            case 'testing':     return wrapEditable(renderTesting(blocks, true), 'testing', blocks.testing.enabled)
+            case 'technology':  return wrapEditable(renderTechnology(blocks, true), 'technology', blocks.technology.enabled)
+            case 'pricingExtra':return wrapEditable(renderPricingBox(offer, blocks, true), 'pricingExtra', blocks.pricingExtra.enabled)
+            case 'about':       return wrapEditable(renderAbout(offer, blocks, true), 'about', blocks.about.enabled)
+            default:            return ''
+        }
+    } else {
+        switch (key) {
+            case 'intro':       return renderIntro(blocks)
+            case 'demo':        return renderDemo(blocks)
+            case 'structure':   return renderStructure(blocks)
+            case 'scope':       return renderScope(blocks)
+            case 'testing':     return renderTesting(blocks)
+            case 'technology':  return renderTechnology(blocks)
+            case 'pricingExtra':return renderPricingBox(offer, blocks)
+            case 'about':       return renderAbout(offer, blocks)
+            default:            return ''
+        }
+    }
+}
 
 // ── Full HTML ─────────────────────────────────────────────────────────────────
 
-export function buildProposalHtml(offer: ProposalOfferData): string {
+export interface BuildProposalHtmlOptions {
+    /** When true, sections get data-block attributes + hover edit UI. Used in the document editor, NOT for PDF. */
+    editorMode?: boolean
+    /** Zoom level 0.5–1.5, applied as CSS zoom on the body. Default 1. */
+    zoom?: number
+}
+
+export function buildProposalHtml(offer: ProposalOfferData, options: BuildProposalHtmlOptions = {}): string {
+    const { editorMode = false, zoom = 1 } = options
     const blocks = mergeWithDefaults(
         offer.blocks as Partial<ProposalBlocks> | null,
         offer.client.name,
     )
 
-    const sellerName = offer.user.companyInfo?.name ?? offer.user.name ?? offer.user.email
+    // Defensive: user may be missing when backend doesn't include it yet
+    const user = offer.user ?? { name: null, email: '', companyInfo: null }
+    const sellerName = user.companyInfo?.name ?? user.name ?? user.email ?? ''
     const clientLabel = offer.client.company
         ? `${offer.client.name} · ${offer.client.company}`
         : offer.client.name
-    const website = offer.user.companyInfo?.website ?? ''
-    const logo = offer.user.companyInfo?.logo ?? ''
+    const website = user.companyInfo?.website ?? ''
+    const logo = user.companyInfo?.logo ?? ''
     const dateStr = formatDate(offer.createdAt)
 
     const logoHtml = logo
         ? `<img src="${esc(logo)}" alt="${esc(sellerName)} logo" class="header-logo">`
-        : `<div class="header-logo-placeholder">${esc(sellerName)}</div>`
+        : `<div class="header-logo-placeholder">${esc(sellerName || 'LOGO')}</div>`
 
-    const hasTestingOrTech = blocks.testing.enabled || blocks.technology.enabled
-    const testingTechSection = hasTestingOrTech
-        ? `
-    <div style="display:grid;grid-template-columns:${blocks.testing.enabled && blocks.technology.enabled ? '1fr 1fr' : '1fr'};gap:6mm;margin-bottom:6mm;">
-      ${renderTesting(blocks)}
-      ${renderTechnology(blocks)}
-    </div>`
-        : ''
+    // Footer texts
+    const footerCustomNote = blocks.footer.customNote ? `${esc(blocks.footer.customNote)} ` : ''
+    const authorSuffix = blocks.footer.showAuthor && sellerName ? ` · <strong>${esc(sellerName)}</strong>` : ''
+    const footerRight = website
+        ? `<strong>${esc(website.replace(/^https?:\/\//, ''))}</strong> · Dokument poufny`
+        : `Dokument poufny`
+
+    // Build page bodies — testing+technology are rendered side-by-side when adjacent on the same page
+    function buildPageBody(sections: SectionKey[]): string {
+        const parts: string[] = []
+        let i = 0
+        while (i < sections.length) {
+            const cur = sections[i]
+            const next = sections[i + 1]
+            // Side-by-side when testing & technology are consecutive (in either order)
+            const isTT = (cur === 'testing' && next === 'technology') || (cur === 'technology' && next === 'testing')
+            if (isTT) {
+                const leftHtml = renderSection(cur, blocks, offer, editorMode)
+                const rightHtml = renderSection(next, blocks, offer, editorMode)
+                parts.push(`<div style="display:grid;grid-template-columns:1fr 1fr;gap:6mm;margin-bottom:0;">${leftHtml}${rightHtml}</div>`)
+                i += 2
+            } else {
+                parts.push(renderSection(cur, blocks, offer, editorMode))
+                i++
+            }
+        }
+        return parts.join('\n    ')
+    }
+
+    const page1Body = buildPageBody(blocks.page1Sections)
+    const page2Body = buildPageBody(blocks.page2Sections)
 
     return `<!DOCTYPE html>
 <html lang="pl">
@@ -317,6 +479,7 @@ export function buildProposalHtml(offer: ProposalOfferData): string {
       --white:      #FFFFFF;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { zoom: ${zoom}; }
     body {
       background: #CDD2E2;
       font-family: 'Outfit', sans-serif;
@@ -370,10 +533,10 @@ export function buildProposalHtml(offer: ProposalOfferData): string {
     .header-meta .lbl { color: rgba(255,255,255,0.38); font-size: 7.5px; letter-spacing: 1.2px; text-transform: uppercase; }
     .header-meta .val { color: white; font-size: 12px; font-weight: 600; margin-top: 2px; }
     .header-meta .site { color: var(--orange); font-size: 9px; font-weight: 500; margin-top: 5px; opacity: 0.9; }
-    .header-logo { display: block; height: 54px; width: auto; margin-bottom: 6px; margin-left: auto; }
+    .header-logo { display: block; height: 72px; width: auto; max-width: 160px; margin-bottom: 6px; margin-left: auto; object-fit: contain; }
     .header-logo-placeholder {
-      display: block; height: 54px; line-height: 54px; text-align: right;
-      color: white; font-size: 14px; font-weight: 700; margin-bottom: 6px;
+      display: block; height: 72px; line-height: 72px; text-align: right;
+      color: white; font-size: 16px; font-weight: 700; margin-bottom: 6px;
     }
     /* ── BODY ── */
     .body { padding: 7mm 16mm; flex: 1; }
@@ -506,17 +669,19 @@ export function buildProposalHtml(offer: ProposalOfferData): string {
       content: ''; position: absolute; bottom: 0; left: 0;
       width: 28mm; height: 2px; background: var(--orange);
     }
+    ${editorMode ? editorCss() : ''}
   </style>
 </head>
 <body>
 
 <!-- PAGE 1 -->
 <div class="page">
+  ${editorMode ? '<div data-block="header" class="header-editor-wrap">' : ''}
   <header class="header">
     <div class="header-decor"></div>
     <div class="header-decor2"></div>
     <div class="header-left">
-      <div class="header-tag">Oferta handlowa</div>
+      <div class="header-tag">${esc(blocks.header.tag)}</div>
       <h1 class="header-title">${esc(offer.title)}</h1>
       <div class="header-subtitle">${esc(clientLabel)}</div>
     </div>
@@ -527,17 +692,16 @@ export function buildProposalHtml(offer: ProposalOfferData): string {
       ${website ? `<div class="site">${esc(website.replace(/^https?:\/\//, ''))}</div>` : ''}
     </div>
   </header>
+  ${editorMode ? '</div>' : ''}
 
   <div class="body">
-    ${renderIntro(blocks)}
-    ${renderDemo(blocks)}
-    ${renderStructure(blocks)}
+    ${page1Body}
   </div>
 
-  <footer class="footer">
-    <div class="footer-left">Oferta ${esc(offer.number)} przygotowana dla: <strong>${esc(offer.client.name)}</strong> · <strong>Strona 1 / 2</strong></div>
+  <footer class="footer"${editorMode ? ' data-block="footer"' : ''}>
+    <div class="footer-left">Oferta przygotowana ${footerCustomNote}dla: <strong>${esc(offer.client.name)}</strong> · <strong>Strona 1 / 2</strong>${authorSuffix}</div>
     <div class="footer-divider"></div>
-    <div class="footer-right">${website ? `<strong>${esc(website.replace(/^https?:\/\//, ''))}</strong> · ` : ''}Dokument poufny</div>
+    <div class="footer-right">${footerRight}</div>
   </footer>
 </div>
 
@@ -546,19 +710,17 @@ export function buildProposalHtml(offer: ProposalOfferData): string {
   <div class="page-strip"></div>
 
   <div class="body" style="padding-top:6mm;">
-    ${renderScope(blocks)}
-    ${testingTechSection}
-    ${renderPricingBox(offer, blocks)}
-    ${renderAbout(offer, blocks)}
+    ${page2Body}
   </div>
 
-  <footer class="footer">
-    <div class="footer-left">Oferta ${esc(offer.number)} · <strong>Strona 2 / 2</strong></div>
+  <footer class="footer"${editorMode ? ' data-block="footer"' : ''}>
+    <div class="footer-left">Oferta ${esc(offer.number)} · <strong>Strona 2 / 2</strong>${authorSuffix}</div>
     <div class="footer-divider"></div>
-    <div class="footer-right">${website ? `<strong>${esc(website.replace(/^https?:\/\//, ''))}</strong> · ` : ''}Wszystkie ceny brutto · ${new Date().getFullYear()}</div>
+    <div class="footer-right">${footerRight}</div>
   </footer>
 </div>
 
+${editorMode ? editorScript() : ''}
 </body>
 </html>`
 }

@@ -13,6 +13,7 @@ import {
     latestInsightsSchema,
     insightsListSchema,
     offerDescriptionSchema,
+    generateSectionSchema,
 } from '../validators/ai.validator';
 
 const router = Router();
@@ -24,6 +25,7 @@ router.post('/generate-offer', validate(generateOfferSchema), aiController.gener
 router.post('/offer-description', validate(offerDescriptionSchema), aiController.generateOfferDescription.bind(aiController));
 router.post('/generate-email', validate(generateEmailSchema), aiController.generateEmail.bind(aiController));
 router.post('/price-insight', validate(priceInsightSchema), aiController.priceInsight.bind(aiController));
+router.post('/generate-section', validate(generateSectionSchema), aiController.generateSection.bind(aiController));
 
 router.get('/analyze-client/:clientId', validate(analyzeClientSchema), aiController.analyzeClient.bind(aiController));
 router.get('/suggestions', aiController.getSuggestions.bind(aiController));

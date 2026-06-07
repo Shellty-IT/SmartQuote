@@ -44,6 +44,7 @@ export function mapToPDFUser(user: UserWithCompany): PDFUser {
         city: user.companyInfo?.city || null,
         postalCode: user.companyInfo?.postalCode || null,
         logo: user.companyInfo?.logo || null,
+        website: user.companyInfo?.website || null,
     };
 }
 

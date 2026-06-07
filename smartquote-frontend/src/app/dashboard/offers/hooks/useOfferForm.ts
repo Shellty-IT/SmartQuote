@@ -51,9 +51,20 @@ export function useOfferForm(options?: { initialData?: Offer }) {
     const [currentStep, setCurrentStep] = useState<Step>('client');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [templateSelectorOpen, setTemplateSelectorOpen] = useState(false);
-    const [proposalBlocks, setProposalBlocks] = useState<ProposalBlocks>(() =>
-        mergeWithDefaults(null, undefined),
-    );
+    const [proposalBlocks, setProposalBlocks] = useState<ProposalBlocks>(() => {
+        // Load saved document template from localStorage (set in Szablony → Szablony dokumentów)
+        let savedTemplate: Partial<ProposalBlocks> | null = null
+        try {
+            const raw = typeof window !== 'undefined' ? localStorage.getItem('sq_default_proposal_blocks') : null
+            savedTemplate = raw ? (JSON.parse(raw) as Partial<ProposalBlocks>) : null
+        } catch {
+            // ignore parse errors
+        }
+        return mergeWithDefaults(
+            options?.initialData?.blocks as Partial<ProposalBlocks> | null ?? savedTemplate,
+            undefined,
+        )
+    });
 
     const [selectedClient, setSelectedClient] = useState<Client | null>(() => {
         return options?.initialData?.client || null;
@@ -74,7 +85,11 @@ export function useOfferForm(options?: { initialData?: Offer }) {
                 templateType: (options.initialData.templateType as 'classic' | 'proposal') ?? 'classic',
             };
         }
-        return defaultOfferDetails;
+        return {
+            ...defaultOfferDetails,
+            // Initialize terms from i18n so it matches the user's language (PL/EN)
+            terms: '',
+        };
     });
 
     const [items, setItems] = useState<ExtendedOfferItem[]>(() => {

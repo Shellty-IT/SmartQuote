@@ -31,6 +31,22 @@ export class AIController {
         }
     }
 
+    async generateSection(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+        try {
+            const { sectionKey, offerTitle, clientName, totalGross, currency } = req.body;
+            const result = await aiService.generateSection({
+                sectionKey,
+                offerTitle,
+                clientName,
+                totalGross,
+                currency,
+            });
+            return successResponse(res, result);
+        } catch (err) {
+            next(err);
+        }
+    }
+
     async generateOfferDescription(req: AuthenticatedRequest, res: Response, next: NextFunction) {
         try {
             const { title, clientName, clientType, templateType, currentText, mode } = req.body;

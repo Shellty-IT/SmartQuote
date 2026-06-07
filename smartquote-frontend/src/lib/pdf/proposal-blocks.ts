@@ -31,6 +31,20 @@ export interface TechOption {
 
 // ── Block shapes ─────────────────────────────────────────────────────────────
 
+export interface HeaderBlock {
+    enabled: boolean
+    /** Tag label shown above offer title, e.g. "Oferta handlowa" */
+    tag: string
+}
+
+export interface FooterBlock {
+    enabled: boolean
+    /** Text inserted after "przygotowana", e.g. "indywidualnie" */
+    customNote: string
+    /** Whether to show the seller name (logged-in user) in the footer */
+    showAuthor: boolean
+}
+
 export interface IntroBlock {
     enabled: boolean
     /** Array of HTML paragraph strings */
@@ -87,8 +101,23 @@ export interface AboutBlock {
     ctaText: string
 }
 
+/** Keys of all body sections (excludes header/footer which are always present) */
+export type SectionKey = 'intro' | 'demo' | 'structure' | 'scope' | 'testing' | 'technology' | 'pricingExtra' | 'about'
+
+/** Default order — used by SectionManager when key is missing in saved data */
+export const DEFAULT_PAGE1_SECTIONS: SectionKey[] = ['intro', 'demo', 'structure']
+export const DEFAULT_PAGE2_SECTIONS: SectionKey[] = ['scope', 'testing', 'technology', 'pricingExtra', 'about']
+/** All section keys in default order (used to find "removed" sections) */
+export const ALL_SECTION_KEYS: SectionKey[] = [...DEFAULT_PAGE1_SECTIONS, ...DEFAULT_PAGE2_SECTIONS]
+
 export interface ProposalBlocks {
     version: 1
+    /** Body section keys in render order on page 1 */
+    page1Sections: SectionKey[]
+    /** Body section keys in render order on page 2 */
+    page2Sections: SectionKey[]
+    header: HeaderBlock
+    footer: FooterBlock
     intro: IntroBlock
     demo: DemoBlock
     structure: StructureBlock
@@ -108,6 +137,20 @@ export function buildDefaultBlocks(clientName?: string): ProposalBlocks {
 
     return {
         version: 1,
+
+        page1Sections: [...DEFAULT_PAGE1_SECTIONS],
+        page2Sections: [...DEFAULT_PAGE2_SECTIONS],
+
+        header: {
+            enabled: true,
+            tag: 'Oferta handlowa',
+        },
+
+        footer: {
+            enabled: true,
+            customNote: 'indywidualnie',
+            showAuthor: true,
+        },
 
         intro: {
             enabled: true,
@@ -203,8 +246,15 @@ export function mergeWithDefaults(
 ): ProposalBlocks {
     const defaults = buildDefaultBlocks(clientName)
     if (!saved) return defaults
+    const validSet = new Set<string>(ALL_SECTION_KEYS)
+    const filterValid = (arr: SectionKey[]) => arr.filter((k) => validSet.has(k))
+
     return {
         version: 1,
+        page1Sections: filterValid(saved.page1Sections ?? defaults.page1Sections),
+        page2Sections: filterValid(saved.page2Sections ?? defaults.page2Sections),
+        header: { ...defaults.header, ...saved.header },
+        footer: { ...defaults.footer, ...saved.footer },
         intro: { ...defaults.intro, ...saved.intro },
         demo: { ...defaults.demo, ...saved.demo },
         structure: { ...defaults.structure, ...saved.structure },

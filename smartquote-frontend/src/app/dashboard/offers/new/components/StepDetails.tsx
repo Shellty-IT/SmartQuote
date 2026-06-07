@@ -99,7 +99,7 @@ export default function StepDetails({ details, onUpdate, clientName }: StepDetai
                     <RichTextEditor
                         value={details.description}
                         onChange={(v) => onUpdate('description', v)}
-                        placeholder="Krótki opis zakresu oferty..."
+                        placeholder={d.descriptionPlaceholder}
                         minHeight={160}
                     />
                 </div>

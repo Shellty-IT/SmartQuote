@@ -1,6 +1,7 @@
 // src/app/dashboard/offers/new/NewOfferContent.tsx
 'use client';
 
+import { useEffect } from 'react';
 import { Button } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { useTranslations } from '@/i18n';
@@ -43,6 +44,14 @@ export default function NewOfferContent() {
         setProposalBlocks,
         router,
     } = useOfferForm();
+
+    // Initialize terms from i18n once on mount (can't use i18n value in useState initializer)
+    useEffect(() => {
+        if (!offerDetails.terms) {
+            updateDetails('terms', tr.details.termsDefault);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     if (isLoadingClients && clients.length === 0) return <PageLoader />;
 

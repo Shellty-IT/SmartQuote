@@ -5,7 +5,7 @@
 
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { buildProposalHtml, type ProposalOfferData } from '@/lib/pdf/proposal-html'
+import { buildProposalHtml } from '@/lib/pdf/proposal-html'
 import { htmlToPdfBuffer } from '@/lib/pdf/puppeteer'
 
 // Vercel route config — require adequate memory + allow up to 10s (Hobby limit)
@@ -32,12 +32,20 @@ export async function GET(
         })
     }
 
-    // 2. Fetch offer from backend
     const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8080').replace(/\/$/, '')
-    const offerRes = await fetch(`${backendUrl}/api/offers/${id}`, {
-        headers: { Authorization: `Bearer ${session.accessToken}` },
-        cache: 'no-store',
-    })
+    const authHeader = { Authorization: `Bearer ${session.accessToken}` }
+
+    // 2. Fetch offer + user settings in parallel
+    const [offerRes, settingsRes] = await Promise.all([
+        fetch(`${backendUrl}/api/offers/${id}`, {
+            headers: authHeader,
+            cache: 'no-store',
+        }),
+        fetch(`${backendUrl}/api/settings`, {
+            headers: authHeader,
+            cache: 'no-store',
+        }),
+    ])
 
     if (!offerRes.ok) {
         const status = offerRes.status === 404 ? 404 : 502
@@ -47,25 +55,81 @@ export async function GET(
         })
     }
 
-    const { data: offer } = (await offerRes.json()) as { data: ProposalOfferData }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: offerRaw } = (await offerRes.json()) as { data: Record<string, any> }
 
-    // 3. Build HTML
-    const html = buildProposalHtml(offer)
+    // Settings may be unavailable — fail-open with empty data
+    let profileName: string | null = null
+    let profileEmail = ''
+    let companyData: { name: string | null; website: string | null; logo: string | null; phone: string | null } | null = null
 
-    // 4. Render PDF
+    if (settingsRes.ok) {
+        try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { data: settings } = (await settingsRes.json()) as { data: Record<string, any> }
+            profileName = settings?.profile?.name ?? null
+            profileEmail = settings?.profile?.email ?? ''
+            if (settings?.companyInfo) {
+                companyData = {
+                    name: settings.companyInfo.name ?? null,
+                    website: settings.companyInfo.website ?? null,
+                    logo: settings.companyInfo.logo ?? null,
+                    phone: settings.companyInfo.phone ?? null,
+                }
+            }
+        } catch {
+            // settings parse error — continue without company data
+        }
+    }
+
+    // 3. Build ProposalOfferData combining offer + user/company info
+    const proposalOffer = {
+        number: String(offerRaw.number ?? ''),
+        title: String(offerRaw.title ?? ''),
+        totalGross: Number(offerRaw.totalGross ?? 0),
+        currency: String(offerRaw.currency ?? 'PLN'),
+        paymentDays: Number(offerRaw.paymentDays ?? 14),
+        createdAt: offerRaw.createdAt ?? new Date().toISOString(),
+        blocks: offerRaw.blocks ?? null,
+        client: {
+            name: offerRaw.client?.name ?? '',
+            company: offerRaw.client?.company ?? null,
+        },
+        user: {
+            name: profileName,
+            email: profileEmail,
+            companyInfo: companyData,
+        },
+    }
+
+    // 4. Build HTML
+    let html: string
+    try {
+        html = buildProposalHtml(proposalOffer)
+    } catch (err) {
+        const stack = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
+        console.error('[proposal-pdf] buildProposalHtml threw:', stack)
+        return new Response(
+            JSON.stringify({ error: 'HTML build failed', detail: stack }),
+            { status: 500, headers: { 'Content-Type': 'application/json' } },
+        )
+    }
+
+    // 5. Render PDF via Puppeteer
     let buffer: Buffer
     try {
         buffer = await htmlToPdfBuffer(html)
     } catch (err) {
-        console.error('[proposal-pdf] Puppeteer error:', err)
-        return new Response(JSON.stringify({ error: 'PDF generation failed' }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        })
+        const stack = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
+        console.error('[proposal-pdf] Puppeteer error:', stack)
+        return new Response(
+            JSON.stringify({ error: 'PDF generation failed', detail: stack }),
+            { status: 500, headers: { 'Content-Type': 'application/json' } },
+        )
     }
 
-    // 5. Return PDF
-    const filename = `Oferta_${offer.number.replace(/\//g, '-')}_propozycja.pdf`
+    // 6. Return PDF
+    const filename = `Oferta_${proposalOffer.number.replace(/\//g, '-')}_propozycja.pdf`
     return new Response(new Uint8Array(buffer), {
         status: 200,
         headers: {

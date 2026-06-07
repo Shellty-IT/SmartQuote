@@ -11,7 +11,16 @@ import {
     EmailType,
 } from '../../types';
 import { initAI } from './core';
-import { chat, generateOffer, generateEmail, analyzeClient, getUserContext, generateOfferDescription } from './chat';
+import {
+    chat,
+    generateOffer,
+    generateEmail,
+    analyzeClient,
+    getUserContext,
+    generateOfferDescription,
+    generateSectionContent,
+    type GenerateSectionParams,
+} from './chat';
 import type { OfferDescriptionContext } from './prompts';
 import { getPriceInsight, getObserverInsight, getClosingStrategy } from './analysis';
 import { generatePostMortem, getLatestInsights, getInsightsList } from './feedback';
@@ -81,6 +90,10 @@ class AIService {
         },
     ) {
         return getInsightsList(userId, params);
+    }
+
+    generateSection(params: GenerateSectionParams): Promise<Record<string, unknown>> {
+        return generateSectionContent(this.ai, params);
     }
 
     clearConversationHistory(userId: string): void {

@@ -54,6 +54,7 @@ export interface PDFUser {
     city: string | null;
     postalCode: string | null;
     logo: string | null;
+    website: string | null;
 }
 
 export interface PDFAcceptanceLog {
