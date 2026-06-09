@@ -5,7 +5,7 @@ module.exports = {
     testEnvironment: 'node',
     roots: ['<rootDir>/src'],
     testMatch: ['**/__tests__/**/*.test.ts'],
-    moduleFileExtensions: ['ts', 'js', 'mjs', 'cjs', 'json'],
+    moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
     // Runs before each test file — sets env vars so config/index.ts doesn't exit(1)
     setupFiles: ['<rootDir>/jest.setup.ts'],
     clearMocks: true,
@@ -48,22 +48,16 @@ module.exports = {
     ],
     coverageDirectory: 'coverage',
     transform: {
-        // TypeScript files — standard ts-jest
-        '^.+\\.ts$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
-        // Plain JS / ESM files coming from node_modules (e.g. @react-pdf/renderer v4 is ESM-only)
-        '^.+\\.(js|mjs|cjs|jsx)$': ['ts-jest', {
-            tsconfig: {
-                allowJs: true,
-                esModuleInterop: true,
-                module: 'commonjs',
-            },
-            diagnostics: false,
-        }],
+        '^.+\\.(ts|tsx)$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
     },
-    // By default Jest ignores all node_modules; we punch a hole for @react-pdf/* so
-    // the ESM packages get compiled to CJS by the transform rule above.
-    transformIgnorePatterns: [
-        '/node_modules/(?!@react-pdf)',
-    ],
+    // @react-pdf/renderer v4 is ESM-only and depends on yoga-layout (WebAssembly).
+    // Neither ESM nor WASM can be loaded by ts-jest in a CommonJS Jest environment.
+    // We redirect the import to a hand-written mock that returns a fake PDF buffer,
+    // so unit tests verify service logic without ever touching the real renderer.
+    moduleNameMapper: {
+        '^@react-pdf/renderer$': '<rootDir>/src/__mocks__/@react-pdf/renderer.ts',
+        // html-react-parser → html-dom-parser is also ESM-only; mock it too
+        '^html-react-parser$': '<rootDir>/src/__mocks__/html-react-parser.ts',
+    },
     testTimeout: 15000,
 };
