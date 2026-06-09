@@ -10,6 +10,25 @@ import { Button, Input, Select, Textarea, LoadingSpinner } from '@/components/ui
 import { Client } from '@/types';
 import { useToast } from '@/contexts/ToastContext';
 import { useTranslations } from '@/i18n';
+import { cn } from '@/lib/utils';
+import { FileText, FileCode } from 'lucide-react';
+import {
+    buildDefaultContractBlocks,
+    mergeContractWithDefaults,
+    type ContractShortBlocks,
+} from '@/lib/pdf/contract-short-blocks';
+import { ContractDocumentEditor } from '@/components/contracts/editor/ContractDocumentEditor';
+
+const LS_KEY = 'sq_default_contract_short_blocks';
+
+function loadBlocksFromStorage(): ContractShortBlocks {
+    if (typeof window === 'undefined') return buildDefaultContractBlocks();
+    try {
+        const raw = localStorage.getItem(LS_KEY);
+        if (raw) return mergeContractWithDefaults(JSON.parse(raw));
+    } catch { /* ignore */ }
+    return buildDefaultContractBlocks();
+}
 
 function NewContractForm() {
     const router = useRouter();
@@ -22,6 +41,8 @@ function NewContractForm() {
     const { createContract, createFromOffer } = useContracts();
     const { clients } = useClients({ limit: 100 });
     const [loading, setLoading] = useState(false);
+    const [templateType, setTemplateType] = useState<'classic' | 'short'>('classic');
+    const [contractBlocks, setContractBlocks] = useState<ContractShortBlocks>(loadBlocksFromStorage);
 
     const createFromOfferAttempted = useRef(false);
 
@@ -70,6 +91,8 @@ function NewContractForm() {
             const response = await createContract({
                 ...formData,
                 paymentDays: Number(formData.paymentDays),
+                templateType,
+                blocks: templateType === 'short' ? (contractBlocks as unknown) : undefined,
                 items: formData.items.map((item, index) => ({
                     ...item,
                     quantity: Number(item.quantity),
@@ -193,6 +216,58 @@ function NewContractForm() {
                         />
                     </div>
                 </div>
+
+                {/* Template type selector */}
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">{t.templateSection}</h2>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        {(['classic', 'short'] as const).map((type) => (
+                            <button
+                                key={type}
+                                type="button"
+                                onClick={() => setTemplateType(type)}
+                                className={cn(
+                                    'flex items-start gap-3 rounded-xl border-2 p-4 text-left transition-all',
+                                    templateType === type
+                                        ? 'border-primary bg-primary/5'
+                                        : 'border-border hover:border-border/80 hover:bg-secondary/30',
+                                )}
+                            >
+                                <div className={cn(
+                                    'mt-0.5 flex-shrink-0 rounded-full p-1.5',
+                                    templateType === type ? 'bg-primary text-white' : 'bg-muted text-muted-foreground',
+                                )}>
+                                    {type === 'classic'
+                                        ? <FileText className="h-4 w-4" />
+                                        : <FileCode className="h-4 w-4" />
+                                    }
+                                </div>
+                                <div>
+                                    <p className={cn('font-semibold text-sm', templateType === type ? 'text-primary' : 'text-foreground')}>
+                                        {type === 'classic' ? t.templateClassic : t.templateShort}
+                                    </p>
+                                    <p className="mt-0.5 text-xs text-muted-foreground">
+                                        {type === 'classic' ? t.templateClassicDesc : t.templateShortDesc}
+                                    </p>
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Short contract block editor */}
+                {templateType === 'short' && (
+                    <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+                        <h2 className="text-lg font-semibold text-foreground mb-3">Treść umowy</h2>
+                        <p className="text-xs text-muted-foreground mb-4">
+                            Edytuj zawartość każdego paragrafu. Kliknij sekcję w podglądzie, aby otworzyć edytor.
+                        </p>
+                        <ContractDocumentEditor
+                            blocks={contractBlocks}
+                            onBlocksChange={setContractBlocks}
+                        />
+                    </div>
+                )}
 
                 <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                     <div className="flex items-center justify-between mb-4">

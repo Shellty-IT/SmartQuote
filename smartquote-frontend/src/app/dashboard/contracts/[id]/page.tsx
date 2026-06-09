@@ -13,6 +13,8 @@ import { useToast } from '@/contexts/ToastContext';
 import type { ContractStatus } from '@/types';
 import { useTranslations } from '@/i18n';
 import { PdfPreviewModal } from '@/components/pdf/PdfPreviewModal';
+import { ContractTemplateTab } from './components/ContractTemplateTab';
+import { cn } from '@/lib/utils';
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -106,6 +108,7 @@ export default function ContractDetailsPage({ params }: PageProps) {
     const t = useTranslations('contractDetailPage');
     const statusTr = useTranslations('statuses');
     const { contract, loading, error, refetch } = useContract(id);
+    const [activeTab, setActiveTab] = useState<'details' | 'template'>('details');
     const [statusConfirm, setStatusConfirm] = useState<{ next: ContractStatus; label: string; description: string } | null>(null);
     const [isChangingStatus, setIsChangingStatus] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
@@ -295,6 +298,33 @@ export default function ContractDetailsPage({ params }: PageProps) {
                 </div>
             </div>
 
+            {/* Tab bar */}
+            <div className="flex gap-1 rounded-xl border border-border bg-card p-1 shadow-card w-fit">
+                {(['details', 'template'] as const).map((tab) => (
+                    <button
+                        key={tab}
+                        type="button"
+                        onClick={() => setActiveTab(tab)}
+                        className={cn(
+                            'rounded-lg px-4 py-2 text-sm font-medium transition-all',
+                            activeTab === tab
+                                ? 'bg-primary text-white shadow-sm'
+                                : 'text-muted-foreground hover:text-foreground hover:bg-secondary/40',
+                        )}
+                    >
+                        {tab === 'details' ? t.detailsTabBtn : t.templateTabBtn}
+                    </button>
+                ))}
+            </div>
+
+            {/* Template tab */}
+            {activeTab === 'template' && (
+                <ContractTemplateTab contract={contract} onSaved={refetch} />
+            )}
+
+            {/* Details tab — status timeline + rest of existing UI */}
+            {activeTab === 'details' && (
+            <>
             <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">{t.statusLabel}</h3>
                 <StatusTimeline currentStatus={contract.status} t={t} />
@@ -684,6 +714,7 @@ export default function ContractDetailsPage({ params }: PageProps) {
                     )}
                 </div>
             </div>
+            </> )} {/* end activeTab === 'details' */}
 
             <ConfirmDialog
                 isOpen={!!statusConfirm}

@@ -12,6 +12,7 @@ import StepDetails from './components/StepDetails';
 import StepItems from './components/StepItems';
 import StepSummary from './components/StepSummary';
 import StepTemplate from './components/StepTemplate';
+import StepTypeChoice from './components/StepTypeChoice';
 import TemplateSelector from '@/components/offer-templates/TemplateSelector';
 
 export default function NewOfferContent() {
@@ -89,11 +90,18 @@ export default function NewOfferContent() {
                 {currentStep === 'client' && (
                     <StepClient clients={clients} selectedClient={selectedClient} onSelectClient={setSelectedClient} />
                 )}
+                {currentStep === 'type_choice' && (
+                    <StepTypeChoice
+                        selectedType={offerDetails.templateType ?? 'classic'}
+                        onSelect={(type) => updateDetails('templateType', type)}
+                    />
+                )}
                 {currentStep === 'details' && (
                     <StepDetails
                         details={offerDetails}
                         onUpdate={updateDetails}
                         clientName={selectedClient?.name}
+                        hideTemplateSelector
                     />
                 )}
                 {currentStep === 'items' && (

@@ -35,6 +35,7 @@ export function useOfferDetail(offerId: string) {
     const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
     const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
     const [pdfPreviewError, setPdfPreviewError] = useState<string | null>(null);
+    const [pdfPreviewFrameType, setPdfPreviewFrameType] = useState<'pdf' | 'html'>('pdf');
     const [publishDialogOpen, setPublishDialogOpen] = useState(false);
     const [newComment, setNewComment] = useState('');
 
@@ -196,12 +197,18 @@ export function useOfferDetail(offerId: string) {
         if (!offer) return;
         setIsDownloadingPDF(true);
         try {
-            const blob = await fetchOfferPdfBlob();
-            if (!blob) return;
+            let blob: Blob;
+            if (offer.templateType === 'proposal') {
+                blob = await offersApi.downloadProposalPdf(offer.id);
+            } else {
+                const fetched = await fetchOfferPdfBlob();
+                if (!fetched) return;
+                blob = fetched;
+            }
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `Offer_${offer.number.replace(/\//g, '-')}.pdf`;
+            link.download = `Oferta_${offer.number.replace(/\//g, '-')}.pdf`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -219,13 +226,23 @@ export function useOfferDetail(offerId: string) {
         setIsPreviewingPDF(true);
         setPdfPreviewError(null);
         try {
-            const blob = await fetchOfferPdfBlob();
-            if (!blob) return;
-            setPdfPreviewUrl((currentUrl) => {
-                if (currentUrl) window.URL.revokeObjectURL(currentUrl);
-                return window.URL.createObjectURL(blob);
-            });
-            setPdfPreviewOpen(true);
+            if (offer.templateType === 'proposal') {
+                // Proposal: show HTML preview in iframe
+                const htmlUrl = offersApi.getProposalPreviewUrl(offer.id);
+                setPdfPreviewUrl(htmlUrl);
+                setPdfPreviewFrameType('html');
+                setPdfPreviewOpen(true);
+            } else {
+                // Classic: show PDF blob
+                const blob = await fetchOfferPdfBlob();
+                if (!blob) return;
+                setPdfPreviewFrameType('pdf');
+                setPdfPreviewUrl((currentUrl) => {
+                    if (currentUrl) window.URL.revokeObjectURL(currentUrl);
+                    return window.URL.createObjectURL(blob);
+                });
+                setPdfPreviewOpen(true);
+            }
         } catch (err) {
             const message = err instanceof Error ? err.message : commonTr.errorTitle;
             setPdfPreviewError(message);
@@ -291,6 +308,7 @@ export function useOfferDetail(offerId: string) {
         pdfPreviewOpen,
         pdfPreviewUrl,
         pdfPreviewError,
+        pdfPreviewFrameType,
         publishDialogOpen,
         setPublishDialogOpen,
         newComment,

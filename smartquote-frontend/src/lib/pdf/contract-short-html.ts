@@ -230,6 +230,29 @@ function buildCss(editorMode: boolean, zoom: number): string {
     `
 }
 
+// ── Helpers for dynamic section numbering ────────────────────────────────────
+
+/**
+ * Returns the rendered §N number for a given section key, respecting editorMode
+ * (disabled sections still count in editorMode since they are shown greyed-out).
+ * Returns null if the section is not present in blocks.sections.
+ */
+function computeSectionNum(
+    blocks: ContractShortBlocks,
+    targetKey: ContractSectionKey,
+    editorMode: boolean,
+): number | null {
+    let num = 0
+    for (const key of blocks.sections) {
+        const enabled = (blocks[key] as { enabled?: boolean })?.enabled !== false
+        if (enabled || editorMode) {
+            num++
+            if (key === targetKey) return num
+        }
+    }
+    return null
+}
+
 // ── Section renderers ─────────────────────────────────────────────────────────
 
 function sectionAttr(key: ContractSectionKey, disabled: boolean, active: boolean, editorMode: boolean): string {
@@ -431,6 +454,9 @@ function renderObligations(
     const attr = sectionAttr('obligations', disabled, activeSection === 'obligations', editorMode)
     const num = `§${sectionNum}`
 
+    const paymentNum = computeSectionNum(blocks, 'payment', editorMode)
+    const paymentRef = paymentNum !== null ? `§${paymentNum}` : 'odpowiednim paragrafem'
+
     return `
   <div class="sec"${attr}>
     <div class="sec-h">
@@ -442,7 +468,7 @@ function renderObligations(
       <li>dostarczenia wszelkich niezbędnych materiałów (teksty, zdjęcia, logo, dane firmowe) w terminie ${blankField(s.materialsDays, '12mm')} dni od podpisania umowy,</li>
       <li>udzielenia dostępu do hostingu i panelu domeny w terminie ${blankField(s.accessDays, '12mm')} dni od podpisania umowy,</li>
       <li>udzielania odpowiedzi i akceptacji na przedstawione propozycje w ciągu <strong>${blankField(s.responseDays, '8mm')} dni roboczych</strong> od ich przekazania,</li>
-      <li>terminowego regulowania płatności zgodnie z §${blocks.sections.indexOf('payment') + 1 > 0 ? blocks.sections.indexOf('payment') + 1 : 'N'},</li>
+      <li>terminowego regulowania płatności zgodnie z ${paymentRef},</li>
       <li>zapewnienia, że dostarczone materiały nie naruszają praw osób trzecich — odpowiedzialność za treści spoczywa wyłącznie na Zamawiającym.</li>
     </ol>
   </div>`
@@ -486,7 +512,7 @@ function renderCopyright(
     const num = `§${sectionNum}`
 
     const items = s.items
-        .map((item, i) => `<li>${rawHtml(item)}</li>`)
+        .map((item) => `<li>${rawHtml(item)}</li>`)
         .join('\n      ')
 
     return `
@@ -720,7 +746,7 @@ ${sectionsHtml}
 <div class="screen-footer">
   <span class="sf-l">${footerContractNum}</span>
   <span class="sf-c">POUFNE</span>
-  <span class="sf-r">${esc(blocks.header.kicker.split('·')[1]?.trim() ?? '')}</span>
+  <span class="sf-r">${esc(blocks.header.footerWebsite || blocks.header.kicker.split('·')[0]?.trim() || '')}</span>
 </div>
 
 ${editorMode ? buildEditorScript() : ''}

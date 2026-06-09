@@ -161,6 +161,8 @@ export interface CreateContractInput {
     paymentTerms?: string;
     paymentDays?: number;
     notes?: string;
+    templateType?: string;
+    blocks?: unknown;
     items: ContractItemInput[];
 }
 
@@ -175,6 +177,8 @@ export interface UpdateContractInput {
     paymentTerms?: string;
     paymentDays?: number;
     notes?: string;
+    templateType?: string;
+    blocks?: unknown;
     items?: ContractItemInput[];
 }
 

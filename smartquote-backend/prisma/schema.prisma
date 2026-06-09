@@ -421,6 +421,9 @@ model Contract {
 
   notes String?
 
+  templateType String? @default("classic")
+  blocks       Json?
+
   publicToken String?   @unique
   sentAt      DateTime?
 

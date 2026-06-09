@@ -2,7 +2,15 @@
   "functions": {
     "src/app/api/offers/[id]/pdf/proposal/route.ts": {
       "memory": 1024,
-      "maxDuration": 10
+      "maxDuration": 30
+    },
+    "src/app/api/contracts/[id]/pdf/short/route.ts": {
+      "memory": 1024,
+      "maxDuration": 30
+    },
+    "src/app/api/public/contracts/[token]/pdf/short/route.ts": {
+      "memory": 1024,
+      "maxDuration": 30
     }
   }
 }

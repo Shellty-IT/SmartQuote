@@ -94,6 +94,8 @@ export interface PricingExtraBlock {
     timelineSub: string
     contractType: string
     contractSub: string
+    /** When set, overrides the price automatically pulled from offer positions */
+    priceOverride: number | null
 }
 
 export interface AboutBlock {
@@ -229,6 +231,7 @@ export function buildDefaultBlocks(clientName?: string): ProposalBlocks {
             timelineSub: 'od ustalenia szczegółów i przekazania materiałów',
             contractType: 'Umowa, faktura VAT',
             contractSub: 'pełna transparentność',
+            priceOverride: null,
         },
 
         about: {

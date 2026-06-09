@@ -1,5 +1,5 @@
 // src/services/contracts.service.ts
-import { ContractStatus } from '@prisma/client';
+import { ContractStatus, Prisma } from '@prisma/client';
 import { randomBytes } from 'crypto';
 import { config } from '../config';
 import {
@@ -119,6 +119,10 @@ export class ContractsService {
             paymentTerms: data.paymentTerms,
             paymentDays: data.paymentDays ?? 14,
             notes: data.notes,
+            templateType: data.templateType ?? 'classic',
+            blocks: data.blocks !== undefined
+                ? (data.blocks === null ? Prisma.JsonNull : data.blocks as Prisma.InputJsonValue)
+                : undefined,
             ...totals,
             items: calculatedItems,
         });
@@ -139,6 +143,10 @@ export class ContractsService {
             paymentTerms: data.paymentTerms,
             paymentDays: data.paymentDays,
             notes: data.notes,
+            templateType: data.templateType,
+            blocks: data.blocks !== undefined
+                ? (data.blocks === null ? Prisma.JsonNull : data.blocks as Prisma.InputJsonValue)
+                : undefined,
         };
 
         if (data.items && data.items.length > 0) {

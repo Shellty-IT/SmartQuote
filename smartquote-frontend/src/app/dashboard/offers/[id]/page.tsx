@@ -42,6 +42,7 @@ export default function OfferDetailPage({ params }: PageProps) {
         pdfPreviewOpen,
         pdfPreviewUrl,
         pdfPreviewError,
+        pdfPreviewFrameType,
         publishDialogOpen,
         setPublishDialogOpen,
         newComment,
@@ -214,6 +215,7 @@ export default function OfferDetailPage({ params }: PageProps) {
                 onClose={handleClosePdfPreview}
                 pdfUrl={pdfPreviewUrl}
                 error={pdfPreviewError}
+                frameType={pdfPreviewFrameType}
                 title={tr.pdfPreview.title.replace('{number}', offer.number)}
                 frameTitle={tr.pdfPreview.frameTitle}
                 openInNewTabLabel={tr.pdfPreview.openInNewTab}

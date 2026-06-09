@@ -15,9 +15,14 @@ interface StepDetailsProps {
     onUpdate: <K extends keyof OfferDetails>(field: K, value: OfferDetails[K]) => void;
     /** Client name for AI context (optional) */
     clientName?: string;
+    /**
+     * When true, the PDF template-type selector is hidden.
+     * Used in new-offer flow where the type is chosen in a dedicated StepTypeChoice step.
+     */
+    hideTemplateSelector?: boolean;
 }
 
-export default function StepDetails({ details, onUpdate, clientName }: StepDetailsProps) {
+export default function StepDetails({ details, onUpdate, clientName, hideTemplateSelector = false }: StepDetailsProps) {
     const tr = useTranslations('offerNew');
     const d = tr.details;
     const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
@@ -145,8 +150,8 @@ export default function StepDetails({ details, onUpdate, clientName }: StepDetai
                     />
                 </div>
 
-                {/* PDF template type */}
-                <div>
+                {/* PDF template type — hidden in new-offer flow (type chosen in StepTypeChoice) */}
+                {!hideTemplateSelector && <div>
                     <label className="block text-sm font-medium text-foreground mb-2">{d.pdfTemplateLabel}</label>
                     <p className="text-xs text-muted-foreground mb-3">{d.pdfTemplateHint}</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -176,7 +181,7 @@ export default function StepDetails({ details, onUpdate, clientName }: StepDetai
                             );
                         })}
                     </div>
-                </div>
+                </div>}
 
                 {/* Audit trail */}
                 <div className="p-4 bg-card border-border border rounded-xl">

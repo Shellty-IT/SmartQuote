@@ -25,6 +25,8 @@ export const createContractSchema = z.object({
         paymentTerms: z.string().optional(),
         paymentDays: z.number().int().min(0).optional().default(14),
         notes: z.string().optional(),
+        templateType: z.enum(['classic', 'short']).optional(),
+        blocks: z.unknown().optional(),
         items: z.array(contractItemSchema).min(1, 'Przynajmniej jedna pozycja jest wymagana'),
     }),
 });
@@ -41,6 +43,8 @@ export const updateContractSchema = z.object({
         paymentTerms: z.string().optional(),
         paymentDays: z.number().int().min(0).optional(),
         notes: z.string().optional(),
+        templateType: z.enum(['classic', 'short']).optional(),
+        blocks: z.unknown().optional(),
         items: z.array(contractItemSchema).optional(),
     }),
 });

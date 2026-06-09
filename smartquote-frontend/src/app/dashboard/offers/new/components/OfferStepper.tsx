@@ -14,6 +14,7 @@ export default function OfferStepper({ currentStep, stepIds, onStepClick }: Offe
     const tr = useTranslations('offerNew');
     const labels: Record<Step, string> = {
         client: tr.steps.client,
+        type_choice: tr.steps.type_choice,
         details: tr.steps.details,
         items: tr.steps.items,
         template: tr.steps.template,

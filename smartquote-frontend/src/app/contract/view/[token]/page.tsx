@@ -64,6 +64,8 @@ interface PublicContractData {
         title: string;
         description: string | null;
         status: string;
+        templateType: 'classic' | 'short';
+        blocks: unknown | null;
         totalNet: number;
         totalVat: number;
         totalGross: number;
@@ -171,7 +173,13 @@ export default function PublicContractPage({ params }: PageProps) {
         setIsDownloading(true);
         setDownloadError(null);
         try {
-            const response = await fetch(`${API_URL}/api/public/contracts/${token}/pdf`);
+            const isShort = data?.contract.templateType === 'short';
+            // Short template: rendered by Vercel/Puppeteer (public route, no auth)
+            // Classic template: rendered by backend (direct call)
+            const pdfUrl = isShort
+                ? `/api/public/contracts/${token}/pdf/short`
+                : `${API_URL}/api/public/contracts/${token}/pdf`;
+            const response = await fetch(pdfUrl);
             if (!response.ok) throw new Error(tr.pdfDownloadError);
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
@@ -369,69 +377,86 @@ export default function PublicContractPage({ params }: PageProps) {
                 </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-                <div className="px-6 py-4 border-b border-slate-100">
-                    <h2 className="text-lg font-semibold text-slate-900">{tr.contractItems}</h2>
-                </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="bg-slate-50 border-b border-slate-100">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">{tr.colNo}</th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">{tr.colName}</th>
-                            <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">{tr.colQty}</th>
-                            <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">{tr.colPrice}</th>
-                            <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">VAT</th>
-                            <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">{tr.colGross}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {contract.items.map((item, idx) => (
-                            <tr key={item.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
-                                <td className="px-6 py-3 text-sm text-slate-500">{idx + 1}</td>
-                                <td className="px-6 py-3">
-                                    <p className="text-sm font-medium text-slate-900">{item.name}</p>
-                                    {item.description && <p className="text-xs text-slate-500">{item.description}</p>}
-                                </td>
-                                <td className="px-6 py-3 text-right text-sm text-slate-900">{item.quantity} {item.unit}</td>
-                                <td className="px-6 py-3 text-right text-sm text-slate-900">{formatCurrency(item.unitPrice)}</td>
-                                <td className="px-6 py-3 text-right text-sm text-slate-900">{item.vatRate}%</td>
-                                <td className="px-6 py-3 text-right text-sm font-semibold text-slate-900">{formatCurrency(item.totalGross)}</td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 space-y-2">
-                    <div className="flex justify-between text-sm">
-                        <span className="text-slate-500">{tr.subtotal}</span>
-                        <span className="font-medium text-slate-900">{formatCurrency(contract.totalNet, contract.currency)}</span>
+            {/* Short template: full-page HTML document rendered in iframe */}
+            {contract.templateType === 'short' ? (
+                <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-slate-100">
+                        <h2 className="text-lg font-semibold text-slate-900">Treść umowy</h2>
                     </div>
-                    <div className="flex justify-between text-sm">
-                        <span className="text-slate-500">VAT:</span>
-                        <span className="font-medium text-slate-900">{formatCurrency(contract.totalVat, contract.currency)}</span>
-                    </div>
-                    <div className="flex justify-between text-base pt-2 border-t border-slate-200">
-                        <span className="font-bold text-slate-900">{tr.totalGrossLabel}</span>
-                        <span className="font-bold text-status-accepted text-lg">{formatCurrency(contract.totalGross, contract.currency)}</span>
-                    </div>
+                    <iframe
+                        src={`/api/public/contracts/${token}/short/preview`}
+                        className="w-full border-0"
+                        style={{ height: '80vh', minHeight: 600 }}
+                        title="Treść umowy"
+                    />
                 </div>
-            </div>
+            ) : (
+                <>
+                    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+                        <div className="px-6 py-4 border-b border-slate-100">
+                            <h2 className="text-lg font-semibold text-slate-900">{tr.contractItems}</h2>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead className="bg-slate-50 border-b border-slate-100">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">{tr.colNo}</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">{tr.colName}</th>
+                                    <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">{tr.colQty}</th>
+                                    <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">{tr.colPrice}</th>
+                                    <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">VAT</th>
+                                    <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">{tr.colGross}</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {contract.items.map((item, idx) => (
+                                    <tr key={item.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
+                                        <td className="px-6 py-3 text-sm text-slate-500">{idx + 1}</td>
+                                        <td className="px-6 py-3">
+                                            <p className="text-sm font-medium text-slate-900">{item.name}</p>
+                                            {item.description && <p className="text-xs text-slate-500">{item.description}</p>}
+                                        </td>
+                                        <td className="px-6 py-3 text-right text-sm text-slate-900">{item.quantity} {item.unit}</td>
+                                        <td className="px-6 py-3 text-right text-sm text-slate-900">{formatCurrency(item.unitPrice)}</td>
+                                        <td className="px-6 py-3 text-right text-sm text-slate-900">{item.vatRate}%</td>
+                                        <td className="px-6 py-3 text-right text-sm font-semibold text-slate-900">{formatCurrency(item.totalGross)}</td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        </div>
 
-            {contract.terms && (
-                <div className="bg-white rounded-2xl border border-slate-200 p-6">
-                    <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">{tr.contractTerms}</h3>
-                    <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{contract.terms}</p>
-                </div>
-            )}
+                        <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 space-y-2">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-slate-500">{tr.subtotal}</span>
+                                <span className="font-medium text-slate-900">{formatCurrency(contract.totalNet, contract.currency)}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                                <span className="text-slate-500">VAT:</span>
+                                <span className="font-medium text-slate-900">{formatCurrency(contract.totalVat, contract.currency)}</span>
+                            </div>
+                            <div className="flex justify-between text-base pt-2 border-t border-slate-200">
+                                <span className="font-bold text-slate-900">{tr.totalGrossLabel}</span>
+                                <span className="font-bold text-status-accepted text-lg">{formatCurrency(contract.totalGross, contract.currency)}</span>
+                            </div>
+                        </div>
+                    </div>
 
-            {contract.paymentTerms && (
-                <div className="bg-white rounded-2xl border border-slate-200 p-6">
-                    <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">{tr.paymentTermsLabel}</h3>
-                    <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{contract.paymentTerms}</p>
-                    <p className="text-sm text-slate-500 mt-2">{tr.paymentDays} <span className="font-medium text-slate-700">{contract.paymentDays} {tr.paymentDaysSuffix}</span></p>
-                </div>
+                    {contract.terms && (
+                        <div className="bg-white rounded-2xl border border-slate-200 p-6">
+                            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">{tr.contractTerms}</h3>
+                            <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{contract.terms}</p>
+                        </div>
+                    )}
+
+                    {contract.paymentTerms && (
+                        <div className="bg-white rounded-2xl border border-slate-200 p-6">
+                            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">{tr.paymentTermsLabel}</h3>
+                            <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{contract.paymentTerms}</p>
+                            <p className="text-sm text-slate-500 mt-2">{tr.paymentDays} <span className="font-medium text-slate-700">{contract.paymentDays} {tr.paymentDaysSuffix}</span></p>
+                        </div>
+                    )}
+                </>
             )}
 
             {contract.signatureLog && (

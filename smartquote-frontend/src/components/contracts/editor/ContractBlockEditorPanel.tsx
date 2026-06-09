@@ -3,7 +3,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Plus, Trash2, GripVertical } from 'lucide-react'
+import { X, Plus, Trash2, GripVertical, ChevronUp, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui'
 import type {
     ContractShortBlocks,
@@ -114,6 +114,13 @@ function ItemsList({
     }
     const remove = (i: number) => onChange(items.filter((_, idx) => idx !== i))
     const add = () => onChange([...items, ''])
+    const move = (i: number, dir: -1 | 1) => {
+        const j = i + dir
+        if (j < 0 || j >= items.length) return
+        const next = [...items]
+        ;[next[i], next[j]] = [next[j], next[i]]
+        onChange(next)
+    }
 
     return (
         <div className="space-y-2">
@@ -126,13 +133,34 @@ function ItemsList({
                         rows={rows}
                         className="flex-1 rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 resize-y"
                     />
-                    <button
-                        type="button"
-                        onClick={() => remove(i)}
-                        className="mt-2 p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 flex-shrink-0"
-                    >
-                        <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    <div className="flex flex-col gap-0.5 flex-shrink-0 mt-1">
+                        <button
+                            type="button"
+                            onClick={() => move(i, -1)}
+                            disabled={i === 0}
+                            className="p-0.5 rounded text-muted-foreground hover:text-foreground hover:bg-secondary/60 disabled:opacity-30 disabled:pointer-events-none"
+                            title="Przesuń wyżej"
+                        >
+                            <ChevronUp className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => move(i, 1)}
+                            disabled={i === items.length - 1}
+                            className="p-0.5 rounded text-muted-foreground hover:text-foreground hover:bg-secondary/60 disabled:opacity-30 disabled:pointer-events-none"
+                            title="Przesuń niżej"
+                        >
+                            <ChevronDown className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => remove(i)}
+                            className="p-0.5 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                            title="Usuń"
+                        >
+                            <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                    </div>
                 </div>
             ))}
             <button
@@ -186,6 +214,7 @@ function HeaderEditor({
                 <Field label="Nr umowy" value={local.contractNumber} onChange={(v) => setLocal((p) => ({ ...p, contractNumber: v }))} placeholder="np. 01/2026" />
                 <Field label="Miejscowość" value={local.city} onChange={(v) => setLocal((p) => ({ ...p, city: v }))} placeholder="np. Warszawa" />
                 <Field label="Data zawarcia" value={local.date} onChange={(v) => setLocal((p) => ({ ...p, date: v }))} placeholder="np. 7 czerwca 2026" />
+                <Field label="Strona www (stopka)" value={local.footerWebsite ?? ''} onChange={(v) => setLocal((p) => ({ ...p, footerWebsite: v }))} placeholder="np. twoja-firma.pl" />
             </div>
             <div className="border-t border-border p-4">
                 <Button className="w-full" onClick={() => onSave({ ...blocks, header: local })}>
@@ -635,19 +664,31 @@ export function SectionManagerPanel({
     const activeSections = blocks.sections
     const removedSections = SECTION_KEYS.filter((k) => !activeSections.includes(k))
 
-    const toggleSection = (key: ContractSectionKey) => {
-        const isActive = activeSections.includes(key)
-        const next = isActive
-            ? activeSections.filter((k) => k !== key)
-            : [...activeSections, key]
-        // Restore in original order
-        const ordered = SECTION_KEYS.filter((k) => next.includes(k))
-        // Update enabled flag on the block
+    const removeSection = (key: ContractSectionKey) => {
+        const next = activeSections.filter((k) => k !== key)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const rawBlock = blocks[key] as any
         const updatedBlock = { ...rawBlock }
-        if ('enabled' in updatedBlock) updatedBlock.enabled = !isActive
-        onSave({ ...blocks, [key]: updatedBlock, sections: ordered })
+        if ('enabled' in updatedBlock) updatedBlock.enabled = false
+        onSave({ ...blocks, [key]: updatedBlock, sections: next })
+    }
+
+    const restoreSection = (key: ContractSectionKey) => {
+        // Restore in canonical order (original SECTION_KEYS order)
+        const next = SECTION_KEYS.filter((k) => activeSections.includes(k) || k === key)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const rawBlock = blocks[key] as any
+        const updatedBlock = { ...rawBlock }
+        if ('enabled' in updatedBlock) updatedBlock.enabled = true
+        onSave({ ...blocks, [key]: updatedBlock, sections: next })
+    }
+
+    const moveSection = (idx: number, dir: -1 | 1) => {
+        const j = idx + dir
+        if (j < 0 || j >= activeSections.length) return
+        const next = [...activeSections]
+        ;[next[idx], next[j]] = [next[j], next[idx]]
+        onSave({ ...blocks, sections: next })
     }
 
     return (
@@ -659,20 +700,38 @@ export function SectionManagerPanel({
                     {activeSections.map((key, idx) => (
                         <div
                             key={key}
-                            className="flex items-center justify-between gap-2 rounded-lg border border-border bg-card px-3 py-2"
+                            className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2"
                         >
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs text-muted-foreground w-4">§{idx + 1}</span>
-                                <span className="text-sm text-foreground">{SECTION_LABELS[key]}</span>
+                            <span className="text-xs text-muted-foreground w-5 flex-shrink-0">§{idx + 1}</span>
+                            <span className="flex-1 text-sm text-foreground">{SECTION_LABELS[key]}</span>
+                            <div className="flex items-center gap-0.5 flex-shrink-0">
+                                <button
+                                    type="button"
+                                    onClick={() => moveSection(idx, -1)}
+                                    disabled={idx === 0}
+                                    className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-secondary/60 disabled:opacity-30 disabled:pointer-events-none"
+                                    title="Przesuń wyżej"
+                                >
+                                    <ChevronUp className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => moveSection(idx, 1)}
+                                    disabled={idx === activeSections.length - 1}
+                                    className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-secondary/60 disabled:opacity-30 disabled:pointer-events-none"
+                                    title="Przesuń niżej"
+                                >
+                                    <ChevronDown className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => removeSection(key)}
+                                    className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                    title="Usuń sekcję"
+                                >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                </button>
                             </div>
-                            <button
-                                type="button"
-                                onClick={() => toggleSection(key)}
-                                className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                                title="Usuń sekcję"
-                            >
-                                <Trash2 className="h-3.5 w-3.5" />
-                            </button>
                         </div>
                     ))}
                 </div>
@@ -688,7 +747,7 @@ export function SectionManagerPanel({
                                 <span className="text-sm text-muted-foreground">{SECTION_LABELS[key]}</span>
                                 <button
                                     type="button"
-                                    onClick={() => toggleSection(key)}
+                                    onClick={() => restoreSection(key)}
                                     className="text-xs text-primary hover:text-primary/80 font-medium"
                                 >
                                     + Przywróć
