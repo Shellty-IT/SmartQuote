@@ -5,7 +5,7 @@ module.exports = {
     testEnvironment: 'node',
     roots: ['<rootDir>/src'],
     testMatch: ['**/__tests__/**/*.test.ts'],
-    moduleFileExtensions: ['ts', 'js', 'json'],
+    moduleFileExtensions: ['ts', 'js', 'mjs', 'cjs', 'json'],
     // Runs before each test file — sets env vars so config/index.ts doesn't exit(1)
     setupFiles: ['<rootDir>/jest.setup.ts'],
     clearMocks: true,
@@ -48,7 +48,22 @@ module.exports = {
     ],
     coverageDirectory: 'coverage',
     transform: {
+        // TypeScript files — standard ts-jest
         '^.+\\.ts$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
+        // Plain JS / ESM files coming from node_modules (e.g. @react-pdf/renderer v4 is ESM-only)
+        '^.+\\.(js|mjs|cjs|jsx)$': ['ts-jest', {
+            tsconfig: {
+                allowJs: true,
+                esModuleInterop: true,
+                module: 'commonjs',
+            },
+            diagnostics: false,
+        }],
     },
+    // By default Jest ignores all node_modules; we punch a hole for @react-pdf/* so
+    // the ESM packages get compiled to CJS by the transform rule above.
+    transformIgnorePatterns: [
+        '/node_modules/(?!@react-pdf)',
+    ],
     testTimeout: 15000,
 };

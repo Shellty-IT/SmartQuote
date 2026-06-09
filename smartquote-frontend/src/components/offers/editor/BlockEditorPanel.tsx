@@ -132,7 +132,7 @@ function FooterEditor({ block, onChange }: { block: FooterBlock; onChange: (b: F
                 />
             </Field>
             <p className="mb-3 text-xs text-muted-foreground">
-                Efekt: <em>„Oferta przygotowana <strong>{block.customNote || '…'}</strong> dla Klient · Strona 1 / 2"</em>
+                Efekt: <em>„Oferta przygotowana <strong>{block.customNote || '…'}</strong> dla Klient · Strona 1 / 2&rdquo;</em>
             </p>
             <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
                 <span className="text-xs text-muted-foreground">Pokaż imię i nazwisko autora w stopce</span>
