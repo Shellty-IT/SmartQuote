@@ -39,6 +39,8 @@ export interface CreateContractData {
     paymentTerms?: string | null;
     paymentDays: number;
     notes?: string | null;
+    templateType?: string | null;
+    blocks?: Prisma.InputJsonValue | typeof Prisma.JsonNull;
     totalNet: number;
     totalVat: number;
     totalGross: number;
@@ -57,6 +59,8 @@ export interface UpdateContractData {
     paymentTerms?: string | null;
     paymentDays?: number;
     notes?: string | null;
+    templateType?: string | null;
+    blocks?: Prisma.InputJsonValue | typeof Prisma.JsonNull;
     totalNet?: number;
     totalVat?: number;
     totalGross?: number;

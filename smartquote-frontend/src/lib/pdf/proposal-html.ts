@@ -206,6 +206,7 @@ function renderPricingBox(
     editorMode = false,
 ): string {
     const pe = blocks.pricingExtra
+    const displayPrice = pe.priceOverride != null ? pe.priceOverride : offer.totalGross
     const showExtra = pe.enabled || editorMode
     const timelineCard = showExtra
         ? `
@@ -231,7 +232,7 @@ function renderPricingBox(
       <div class="pricing-cards">
         <div class="p-card hot">
           <div class="pc-label">💵 Cena</div>
-          <div class="pc-val">${formatMoney(offer.totalGross, offer.currency)}</div>
+          <div class="pc-val">${formatMoney(displayPrice, offer.currency)}</div>
           <div class="pc-sub">płatność ${offer.paymentDays} dni</div>
         </div>
         ${timelineCard}
@@ -529,7 +530,7 @@ export function buildProposalHtml(offer: ProposalOfferData, options: BuildPropos
     }
     .header-title { color: white; font-size: 25px; font-weight: 800; line-height: 1.15; }
     .header-subtitle { color: rgba(255,255,255,0.45); font-size: 10.5px; font-weight: 400; margin-top: 5px; }
-    .header-meta { position: absolute; top: 11mm; right: 16mm; text-align: right; z-index: 3; }
+    .header-meta { position: absolute; top: 5mm; right: 16mm; text-align: right; z-index: 3; }
     .header-meta .lbl { color: rgba(255,255,255,0.38); font-size: 7.5px; letter-spacing: 1.2px; text-transform: uppercase; }
     .header-meta .val { color: white; font-size: 12px; font-weight: 600; margin-top: 2px; }
     .header-meta .site { color: var(--orange); font-size: 9px; font-weight: 500; margin-top: 5px; opacity: 0.9; }

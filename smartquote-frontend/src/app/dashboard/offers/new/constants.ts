@@ -1,18 +1,31 @@
 // src/app/dashboard/offers/new/constants.ts
 
-export type Step = 'client' | 'details' | 'items' | 'template' | 'summary';
+export type Step = 'client' | 'type_choice' | 'details' | 'items' | 'template' | 'summary';
 
-/** Full list including the optional template step */
-export const ALL_STEP_IDS: Step[] = ['client', 'details', 'items', 'template', 'summary'];
+/** Default list (classic, new offer) */
+export const STEP_IDS: Step[] = ['client', 'type_choice', 'details', 'items', 'summary'];
 
-/** Default list without the template step (classic offers) */
-export const STEP_IDS: Step[] = ['client', 'details', 'items', 'summary'];
-
-/** Build step list dynamically based on template type */
-export function buildStepIds(templateType: 'classic' | 'proposal'): Step[] {
+/**
+ * Build step list dynamically.
+ * - New offer (isEditMode=false):
+ *   classic  → client → type_choice → details → items → summary
+ *   proposal → client → type_choice → template → summary
+ * - Edit mode (isEditMode=true):
+ *   classic  → client → details → items → summary
+ *   proposal → client → details → template → summary
+ */
+export function buildStepIds(
+    templateType: 'classic' | 'proposal',
+    isEditMode = false,
+): Step[] {
+    if (isEditMode) {
+        return templateType === 'proposal'
+            ? ['client', 'details', 'template', 'summary']
+            : ['client', 'details', 'items', 'summary'];
+    }
     return templateType === 'proposal'
-        ? ['client', 'details', 'items', 'template', 'summary']
-        : ['client', 'details', 'items', 'summary'];
+        ? ['client', 'type_choice', 'template', 'summary']
+        : ['client', 'type_choice', 'details', 'items', 'summary'];
 }
 
 export const VAT_RATES = [

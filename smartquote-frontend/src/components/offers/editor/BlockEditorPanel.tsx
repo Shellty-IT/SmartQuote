@@ -487,13 +487,50 @@ function TechnologyEditor({
     )
 }
 
-function PricingEditor({ block, onChange }: { block: PricingExtraBlock; onChange: (b: PricingExtraBlock) => void }) {
+function PricingEditor({
+    block,
+    onChange,
+    offerContext,
+}: {
+    block: PricingExtraBlock
+    onChange: (b: PricingExtraBlock) => void
+    offerContext?: OfferContext
+}) {
     const s = (p: Partial<PricingExtraBlock>) => onChange({ ...block, ...p })
+    const currency = offerContext?.currency ?? 'PLN'
+    const autoPrice = offerContext ? offerContext.totalGross.toFixed(2) : null
+
     return (
-        <div>
-            <p className="mb-3 rounded-lg bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-                💡 Cena i termin płatności pobierane są automatycznie z pozycji oferty.
+        <div className="space-y-3">
+            <p className="rounded-lg bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                💡 Cena pobierana automatycznie z pozycji oferty. Wpisz wartość poniżej, aby ją nadpisać w dokumencie.
             </p>
+            <Field label={`Nadpisz cenę (${currency})`}>
+                <div className="flex items-center gap-2">
+                    <input
+                        className={inputCls}
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder={autoPrice != null ? `Automatycznie: ${autoPrice}` : 'Wartość z pozycji oferty'}
+                        value={block.priceOverride ?? ''}
+                        onChange={(e) => {
+                            const val = e.target.value
+                            s({ priceOverride: val === '' ? null : Number(val) })
+                        }}
+                    />
+                    {block.priceOverride != null && (
+                        <button
+                            type="button"
+                            onClick={() => s({ priceOverride: null })}
+                            title="Przywróć automatyczną cenę"
+                            className="shrink-0 rounded-lg border border-border bg-muted/50 px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                        >
+                            Wyczyść
+                        </button>
+                    )}
+                </div>
+            </Field>
             <div className="grid grid-cols-2 gap-3">
                 <Field label="Czas realizacji">
                     <input className={inputCls} value={block.timeline} onChange={(e) => s({ timeline: e.target.value })} />
@@ -863,7 +900,7 @@ export function BlockEditorPanel({ blockKey, blocks, onSave, onClose, offerConte
             case 'scope':        return <ScopeEditor block={draft.scope} onChange={updateBlock as (b: ScopeBlock) => void} offerContext={offerContext} />
             case 'testing':      return <TestingEditor block={draft.testing} onChange={updateBlock as (b: TestingBlock) => void} offerContext={offerContext} />
             case 'technology':   return <TechnologyEditor block={draft.technology} onChange={updateBlock as (b: TechnologyBlock) => void} offerContext={offerContext} />
-            case 'pricingExtra': return <PricingEditor block={draft.pricingExtra} onChange={updateBlock as (b: PricingExtraBlock) => void} />
+            case 'pricingExtra': return <PricingEditor block={draft.pricingExtra} onChange={updateBlock as (b: PricingExtraBlock) => void} offerContext={offerContext} />
             case 'about':        return <AboutEditor block={draft.about} onChange={updateBlock as (b: AboutBlock) => void} offerContext={offerContext} />
             default:             return null
         }

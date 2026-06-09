@@ -32,4 +32,13 @@ export const contractsApi = {
         api.post<{ publicToken: string; publicUrl: string; alreadyPublished: boolean }>(`/contracts/${id}/publish`),
     unpublish: (id: string) =>
         api.delete<{ unpublished: boolean }>(`/contracts/${id}/publish`),
+    /** Short contract template — download PDF (rendered by Vercel/Puppeteer) */
+    downloadShortPdf: async (id: string): Promise<Blob> => {
+        const res = await fetch(`/api/contracts/${id}/pdf/short`)
+        if (!res.ok) throw new Error(`PDF generation failed: ${res.status}`)
+        return res.blob()
+    },
+    /** Short contract template — URL for in-browser HTML preview (used in iframe) */
+    getShortPreviewUrl: (id: string): string =>
+        `/api/contracts/${id}/short/preview`,
 };

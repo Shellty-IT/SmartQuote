@@ -34,6 +34,8 @@ export interface ContractHeaderBlock {
     contractNumber: string
     city: string
     date: string
+    /** Website shown in the screen footer (right side). Leave empty to use brand from kicker. */
+    footerWebsite: string
 }
 
 export interface ContractParty {
@@ -166,6 +168,7 @@ export function buildDefaultContractBlocks(): ContractShortBlocks {
             contractNumber: '',
             city: '',
             date: '',
+            footerWebsite: '',
         },
 
         parties: {

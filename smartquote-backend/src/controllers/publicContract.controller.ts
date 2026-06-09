@@ -89,6 +89,8 @@ class PublicContractController {
                     title: contract.title,
                     description: contract.description,
                     status: contract.status,
+                    templateType: contract.templateType ?? 'classic',
+                    blocks: contract.blocks ?? null,
                     totalNet: Number(contract.totalNet),
                     totalVat: Number(contract.totalVat),
                     totalGross: Number(contract.totalGross),

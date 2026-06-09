@@ -116,7 +116,7 @@ export function useOfferForm(options?: { initialData?: Offer }) {
             const client = clients.find((c) => c.id === preselectedClientId);
             if (client) {
                 setSelectedClient(client);
-                setCurrentStep('details');
+                setCurrentStep('type_choice');
             }
         }
     }, [isEditMode, preselectedClientId, clients]);
@@ -138,8 +138,8 @@ export function useOfferForm(options?: { initialData?: Offer }) {
     const uniqueVariants = useMemo(() => getUniqueVariants(items), [items]);
 
     const stepIds = useMemo(
-        () => buildStepIds(offerDetails.templateType ?? 'classic'),
-        [offerDetails.templateType],
+        () => buildStepIds(offerDetails.templateType ?? 'classic', isEditMode),
+        [offerDetails.templateType, isEditMode],
     );
 
     const goToStep = useCallback((step: Step) => setCurrentStep(step), []);
@@ -230,6 +230,8 @@ export function useOfferForm(options?: { initialData?: Offer }) {
         switch (currentStep) {
             case 'client':
                 return selectedClient !== null;
+            case 'type_choice':
+                return true; // template type always has a default value
             case 'details':
                 return offerDetails.title.length >= 3;
             case 'items':
@@ -247,18 +249,26 @@ export function useOfferForm(options?: { initialData?: Offer }) {
         setIsSubmitting(true);
 
         try {
-            const data: CreateOfferInput = {
-                clientId: selectedClient.id,
-                title: offerDetails.title,
-                description: offerDetails.description || undefined,
-                validUntil: offerDetails.validUntil || undefined,
-                notes: offerDetails.notes || undefined,
-                terms: offerDetails.terms || undefined,
-                paymentDays: offerDetails.paymentDays,
-                requireAuditTrail: offerDetails.requireAuditTrail,
-                templateType: offerDetails.templateType ?? 'classic',
-                blocks: offerDetails.templateType === 'proposal' ? (proposalBlocks as unknown) : null,
-                items: items.map((item) => ({
+            const isProposal = offerDetails.templateType === 'proposal';
+
+            // For proposal offers created via the new flow, the details step is skipped
+            // → auto-fill title and create a single placeholder item from priceOverride.
+            const submittedTitle = offerDetails.title.trim() || `Propozycja — ${selectedClient.name}`;
+
+            const proposalPlaceholderItem = {
+                name: submittedTitle,
+                description: undefined,
+                quantity: 1,
+                unit: 'szt.',
+                unitPrice: proposalBlocks.pricingExtra.priceOverride ?? 0,
+                vatRate: 23,
+                discount: 0,
+                isOptional: false,
+            };
+
+            const submittedItems = isProposal && !isEditMode
+                ? [proposalPlaceholderItem]
+                : items.map((item) => ({
                     name: item.name,
                     description: item.description || undefined,
                     quantity: item.quantity,
@@ -270,7 +280,20 @@ export function useOfferForm(options?: { initialData?: Offer }) {
                     minQuantity: item.isOptional ? item.minQuantity : undefined,
                     maxQuantity: item.isOptional ? item.maxQuantity : undefined,
                     variantName: item.variantName.trim() || undefined,
-                })),
+                }));
+
+            const data: CreateOfferInput = {
+                clientId: selectedClient.id,
+                title: submittedTitle,
+                description: offerDetails.description || undefined,
+                validUntil: offerDetails.validUntil || undefined,
+                notes: offerDetails.notes || undefined,
+                terms: offerDetails.terms || undefined,
+                paymentDays: offerDetails.paymentDays,
+                requireAuditTrail: offerDetails.requireAuditTrail,
+                templateType: offerDetails.templateType ?? 'classic',
+                blocks: isProposal ? (proposalBlocks as unknown) : null,
+                items: submittedItems,
             };
 
             if (isEditMode && offerId) {
@@ -297,7 +320,7 @@ export function useOfferForm(options?: { initialData?: Offer }) {
             }
             setIsSubmitting(false);
         }
-    }, [isEditMode, offerId, selectedClient, offerDetails, items, toast, router, tr.toasts, commonTr.errorTitle]);
+    }, [isEditMode, offerId, selectedClient, offerDetails, proposalBlocks, items, toast, router, tr.toasts, commonTr.errorTitle]);
 
     return {
         clients,
