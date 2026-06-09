@@ -96,6 +96,8 @@ export interface PricingExtraBlock {
     contractSub: string
     /** When set, overrides the price automatically pulled from offer positions */
     priceOverride: number | null
+    /** Whether the displayed price is net or gross (default: 'gross') */
+    priceType: 'net' | 'gross'
 }
 
 export interface AboutBlock {
@@ -232,6 +234,7 @@ export function buildDefaultBlocks(clientName?: string): ProposalBlocks {
             contractType: 'Umowa, faktura VAT',
             contractSub: 'pełna transparentność',
             priceOverride: null,
+            priceType: 'gross' as const,
         },
 
         about: {

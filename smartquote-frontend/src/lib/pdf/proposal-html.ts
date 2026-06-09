@@ -207,6 +207,7 @@ function renderPricingBox(
 ): string {
     const pe = blocks.pricingExtra
     const displayPrice = pe.priceOverride != null ? pe.priceOverride : offer.totalGross
+    const priceLabel = (pe.priceType ?? 'gross') === 'net' ? 'netto' : 'brutto'
     const showExtra = pe.enabled || editorMode
     const timelineCard = showExtra
         ? `
@@ -231,7 +232,7 @@ function renderPricingBox(
       </div>
       <div class="pricing-cards">
         <div class="p-card hot">
-          <div class="pc-label">💵 Cena</div>
+          <div class="pc-label">💵 Cena (${priceLabel})</div>
           <div class="pc-val">${formatMoney(displayPrice, offer.currency)}</div>
           <div class="pc-sub">płatność ${offer.paymentDays} dni</div>
         </div>

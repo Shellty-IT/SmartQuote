@@ -3,14 +3,13 @@
 
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
-import { Eye, Download, Save, FileText, Presentation } from 'lucide-react'
+import { Eye, Download } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { PdfPreviewModal } from '@/components/pdf/PdfPreviewModal'
 import { ProposalDocumentEditor } from '@/components/offers/editor/ProposalDocumentEditor'
 import { offersApi, settingsApi } from '@/lib/api'
 import { useToast } from '@/contexts/ToastContext'
 import { useTranslations } from '@/i18n'
-import { cn } from '@/lib/utils'
 import { mergeWithDefaults, type ProposalBlocks } from '@/lib/pdf/proposal-blocks'
 import type { CompanyInfo, Offer } from '@/types'
 
@@ -27,13 +26,10 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
     const { data: session } = useSession()
     const toast = useToast()
 
-    const [templateType, setTemplateType] = useState<'classic' | 'proposal'>(
-        (offer.templateType ?? 'classic') as 'classic' | 'proposal',
-    )
+    const templateType = (offer.templateType ?? 'classic') as 'classic' | 'proposal'
     const [blocks, setBlocks] = useState<ProposalBlocks>(
         mergeWithDefaults(offer.blocks as Partial<ProposalBlocks> | null, offer.client?.name),
     )
-    const [isSaving, setIsSaving] = useState(false)
     const [isDownloading, setIsDownloading] = useState(false)
     const [companyInfo, setCompanyInfo] = useState<CompanyInfo | null>(null)
 
@@ -41,19 +37,6 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
     useEffect(() => {
         settingsApi.getCompany().then(setCompanyInfo).catch(() => {})
     }, [])
-
-    const handleSave = async () => {
-        setIsSaving(true)
-        try {
-            await offersApi.update(offer.id, { templateType, blocks: blocks as unknown })
-            toast.success(ttr.saved, offer.number)
-            onSaved()
-        } catch {
-            toast.error(ttr.saveError, offer.number)
-        } finally {
-            setIsSaving(false)
-        }
-    }
 
     const handleDownload = async () => {
         setIsDownloading(true)
@@ -158,44 +141,6 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
 
     return (
         <div className="space-y-6">
-
-            {/* Template type selector */}
-            <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{ttr.typeLabel}</h2>
-                    <Button onClick={handleSave} disabled={isSaving} size="sm">
-                        <Save className="h-3.5 w-3.5" />
-                        {isSaving ? ttr.saving : ttr.saveBtn}
-                    </Button>
-                </div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    {(['classic', 'proposal'] as const).map((type) => (
-                        <button
-                            key={type}
-                            type="button"
-                            onClick={() => setTemplateType(type)}
-                            className={cn(
-                                'flex items-start gap-3 rounded-xl border-2 p-4 text-left transition-all',
-                                templateType === type
-                                    ? 'border-primary bg-primary/5'
-                                    : 'border-border hover:border-border/80 hover:bg-secondary/30',
-                            )}
-                        >
-                            <div className={cn('mt-0.5 flex-shrink-0 rounded-full p-1.5', templateType === type ? 'bg-primary text-white' : 'bg-muted text-muted-foreground')}>
-                                {type === 'classic' ? <FileText className="h-4 w-4" /> : <Presentation className="h-4 w-4" />}
-                            </div>
-                            <div>
-                                <p className={cn('font-semibold', templateType === type ? 'text-primary' : 'text-foreground')}>
-                                    {type === 'classic' ? ttr.classic : ttr.proposal}
-                                </p>
-                                <p className="mt-0.5 text-xs text-muted-foreground">
-                                    {type === 'classic' ? ttr.classicDesc : ttr.proposalDesc}
-                                </p>
-                            </div>
-                        </button>
-                    ))}
-                </div>
-            </div>
 
             {/* ── PROPOSAL: inline document editor ──────────────────────────── */}
             {templateType === 'proposal' && (

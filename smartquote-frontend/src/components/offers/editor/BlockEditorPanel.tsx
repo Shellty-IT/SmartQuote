@@ -531,6 +531,16 @@ function PricingEditor({
                     )}
                 </div>
             </Field>
+            <Field label="Typ ceny">
+                <select
+                    className={inputCls}
+                    value={block.priceType ?? 'gross'}
+                    onChange={(e) => s({ priceType: e.target.value as 'net' | 'gross' })}
+                >
+                    <option value="gross">Brutto (z VAT)</option>
+                    <option value="net">Netto (bez VAT)</option>
+                </select>
+            </Field>
             <div className="grid grid-cols-2 gap-3">
                 <Field label="Czas realizacji">
                     <input className={inputCls} value={block.timeline} onChange={(e) => s({ timeline: e.target.value })} />
