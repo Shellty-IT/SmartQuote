@@ -14,6 +14,7 @@ export interface OfferFillMessage {
 export interface OfferFillContext {
     clientName: string
     offerTitle: string
+    currentBlocks?: Record<string, unknown>
 }
 
 export interface OfferFillResult {
@@ -25,23 +26,64 @@ export interface OfferFillResult {
 // Marker the AI embeds when it has collected enough info
 const COMPLETE_MARKER = '[[FILL_COMPLETE]]'
 
-function buildOfferFillSystemPrompt(ctx: OfferFillContext): string {
-    return `Jesteś asystentem pomagającym wypełnić szablon oferty na stronę internetową dla klienta "${ctx.clientName}".
-Tytuł oferty: "${ctx.offerTitle}".
+function buildCurrentBlocksSummary(blocks: Record<string, unknown>): string {
+    try {
+        const intro = (blocks.intro as { paragraphs?: string[] })?.paragraphs ?? []
+        const scope = (blocks.scope as { items?: Array<{ html: string }> })?.items ?? []
+        const structure = (blocks.structure as { items?: Array<{ icon: string; name: string }> })?.items ?? []
+        const pricing = blocks.pricingExtra as { timeline?: string; priceType?: string } | undefined
+        const lines: string[] = ['AKTUALNY STAN SZABLONU:']
+        if (intro.length) lines.push(`- Wstęp: "${intro[0]?.slice(0, 100)}..."`)
+        if (scope.length) lines.push(`- Zakres (${scope.length} pozycji): ${scope.slice(0, 3).map(i => i.html?.slice(0, 50)).join(', ')}...`)
+        if (structure.length) lines.push(`- Struktura (${structure.length} elementów): ${structure.map(i => i.icon + ' ' + i.name).join(', ')}`)
+        if (pricing?.timeline) lines.push(`- Termin: ${pricing.timeline}, typ ceny: ${pricing.priceType ?? 'gross'}`)
+        return lines.join('\n')
+    } catch {
+        return ''
+    }
+}
 
-Twoim zadaniem jest przeprowadzić krótką rozmowę (maksymalnie 4-5 pytań) aby zebrać:
+function buildOfferFillSystemPrompt(ctx: OfferFillContext): string {
+    const hasBlocks = !!ctx.currentBlocks
+    const blocksSummary = hasBlocks && ctx.currentBlocks
+        ? buildCurrentBlocksSummary(ctx.currentBlocks)
+        : ''
+
+    const mode = hasBlocks
+        ? `Szablon jest już częściowo wypełniony. Możesz go modyfikować, poprawiać i rozwijać na prośbę użytkownika.
+Możesz zmienić dowolną sekcję: wstęp, zakres, strukturę, ikony, termin, CTA.
+Jeśli użytkownik prosi o zmianę konkretnej sekcji (np. "dodaj ikony", "zmień zakres") — zrób to i zwróć pełny zaktualizowany JSON.`
+        : `Przeprowadź krótką rozmowę (maksymalnie 4-5 pytań) aby zebrać:
 1. Krótki opis projektu / branżę klienta
 2. Główne funkcje/podstrony strony (lista 5-10 elementów)
 3. Szacowany termin realizacji
-4. Czy cena jest netto czy brutto (jeśli user poda cenę)
-5. Ewentualne dodatkowe informacje (stack, CMS, integracje)
+4. Czy cena jest netto czy brutto
+5. Ewentualne dodatkowe informacje (stack, CMS, integracje)`
 
-Zasady rozmowy:
-- Zadaj jedno pytanie na raz (nie bombarduj wieloma)
-- Bądź konkretny i profesjonalny, pisz po polsku
-- Gdy masz wystarczające informacje (min. opis + zakres prac), wygeneruj bloki i zakończ
-- Nie pytaj o cenę — zostanie automatycznie pobrana z pozycji oferty
-- Gdy masz dość info: powiedz "Świetnie, generuję ofertę..." i zakończ wiadomość znacznikiem ${COMPLETE_MARKER}
+    return `Jesteś Markiem — doświadczonym copywriterem i handlowcem B2B z 15 latami praktyki w sprzedaży usług IT i tworzeniu stron internetowych.
+Twoje oferty wygrywają przetargi. Wiesz jak pisać, żeby klient czuł że to rozwiązanie jest stworzone specjalnie dla niego.
+
+ZASADY TWOJEGO WARSZTATU:
+- Piszesz językiem korzyści, nie cech (nie "robimy strony" → "Twoi klienci znajdą Cię w Google i zadzwonią sami")
+- Unikasz ogólników ("profesjonalna strona") — zawsze konkretnie i branżowo
+- Zakres prac opisujesz tak, żeby klient widział wartość każdej pozycji, nie tylko nazwę
+- Struktura strony = propozycja wartości dla końcowego użytkownika klienta
+- Ikony w liście zakresu dobierasz tematycznie i spójnie (np. 🏠 dla nieruchomości, ⚖️ dla prawnika)
+- CTA piszesz ciepło ale asertywnie — bez "zachęcam", "proszę o kontakt", zamiast tego konkrety
+- Intro oferty zaczyna się od empatii wobec potrzeby klienta, nie od przedstawiania siebie
+
+AKTUALNY KONTEKST:
+Klient: "${ctx.clientName}"
+Tytuł oferty: "${ctx.offerTitle}"
+${blocksSummary ? '\n' + blocksSummary + '\n' : ''}
+${mode}
+
+ZASADY ROZMOWY:
+- Zadaj jedno, konkretne pytanie na raz
+- Jeśli branża klienta jest znana — od razu sugeruj ikony i język branżowy bez pytania
+- Gdy masz dość informacji lub użytkownik prosi o zmianę — działaj natychmiast, nie pytaj o potwierdzenie
+- Nie pytaj o cenę — pobierana automatycznie
+- Gdy generujesz/aktualizujesz szablon: napisz jedno zdanie co zmieniłeś i dlaczego, zakończ znacznikiem ${COMPLETE_MARKER}
 
 Za znacznikiem ${COMPLETE_MARKER} umieść TYLKO poprawny JSON zgodny z poniższym schematem:
 

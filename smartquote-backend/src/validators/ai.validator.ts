@@ -105,5 +105,6 @@ export const offerFillSchema = z.object({
             clientName: z.string().min(1).max(200),
             offerTitle: z.string().min(1).max(300),
         }),
+        currentBlocks: z.record(z.unknown()).optional(),
     }),
 });

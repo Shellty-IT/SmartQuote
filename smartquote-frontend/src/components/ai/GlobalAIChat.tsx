@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession } from 'next-auth/react';
 import { ai } from '@/lib/api';
+import { useAIChat } from '@/contexts/AIChatContext';
 import { useChatMessages } from './hooks/useChatMessages';
 import { useChatScroll } from './hooks/useChatScroll';
 import { ChatHeader } from './ChatHeader';
@@ -19,6 +20,7 @@ export function GlobalAIChat() {
     const [unreadCount, setUnreadCount] = useState(0);
 
     const { data: session } = useSession();
+    const { hideGlobalFab } = useAIChat();
     const { messages, addMessage, clearMessages } = useChatMessages();
     const { messagesEndRef } = useChatScroll(messages, isOpen, isMinimized);
 
@@ -96,7 +98,7 @@ export function GlobalAIChat() {
         }
     };
 
-    if (!session) {
+    if (!session || hideGlobalFab) {
         return null;
     }
 

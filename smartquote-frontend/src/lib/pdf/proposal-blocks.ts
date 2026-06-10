@@ -103,6 +103,8 @@ export interface PricingExtraBlock {
 export interface AboutBlock {
     enabled: boolean
     ctaText: string
+    /** Heading text for the "about us" box shown when company website is set */
+    aboutBoxTitle: string
 }
 
 /** Keys of all body sections (excludes header/footer which are always present) */
@@ -241,6 +243,7 @@ export function buildDefaultBlocks(clientName?: string): ProposalBlocks {
             enabled: true,
             ctaText:
                 'Jeśli są Państwo zainteresowani współpracą, chętnie umówię się na krótką rozmowę, aby omówić szczegóły. Proszę o kontakt!',
+            aboutBoxTitle: 'Więcej o nas i naszych realizacjach',
         },
     }
 }

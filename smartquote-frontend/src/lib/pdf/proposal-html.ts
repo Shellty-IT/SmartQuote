@@ -3,6 +3,7 @@
 // Used by: Puppeteer PDF route + HTML preview route.
 
 import { mergeWithDefaults, type ProposalBlocks, type SectionKey } from './proposal-blocks'
+import { EMBEDDED_FONTS_CSS } from './embedded-fonts'
 
 export interface ProposalOfferData {
     number: string
@@ -253,7 +254,7 @@ function renderAbout(
     const aboutBox = (website || editorMode)
         ? `
       <div class="about-box">
-        <div class="sec"><span class="ico">🗂️</span><h2>Więcej o nas i naszych realizacjach</h2></div>
+        <div class="sec"><span class="ico">🗂️</span><h2>${esc(a.aboutBoxTitle ?? 'Więcej o nas i naszych realizacjach')}</h2></div>
         ${website
             ? `<a class="about-url" href="${esc(website)}">👉 ${esc(website.replace(/^https?:\/\//, ''))}</a>`
             : `<p style="font-size:9px;color:#999;font-style:italic;">Ustaw witrynę w ustawieniach firmy</p>`}
@@ -464,10 +465,7 @@ export function buildProposalHtml(offer: ProposalOfferData, options: BuildPropos
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Oferta ${esc(offer.number)} — ${esc(offer.title)}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
+  <style>${EMBEDDED_FONTS_CSS}
     :root {
       --navy:       #0C1D56;
       --navy-mid:   #172A78;

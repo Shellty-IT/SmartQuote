@@ -98,6 +98,7 @@ export default function StepTemplate({
                 onClose={() => setAiDrawerOpen(false)}
                 clientName={client?.name ?? ''}
                 offerTitle={offerTitle}
+                currentBlocks={blocks}
                 onApply={onBlocksChange}
             />
         </>

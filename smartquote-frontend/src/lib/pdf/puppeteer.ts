@@ -45,8 +45,8 @@ export async function htmlToPdfBuffer(html: string): Promise<Buffer> {
 
     try {
         await page.setContent(html, { waitUntil: 'load', timeout: 15_000 })
-        // Extra wait for Google Fonts to render (replaces networkidle0 removed in puppeteer v25)
-        await new Promise((r) => setTimeout(r, 800))
+        // Wait for all @font-face fonts to finish loading before printing
+        await page.evaluate(() => document.fonts.ready)
 
         const pdf = await page.pdf({
             format: 'A4',
