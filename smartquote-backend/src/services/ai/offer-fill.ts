@@ -1,7 +1,8 @@
 // src/services/ai/offer-fill.ts
 // Conversational AI that collects project details and generates ProposalBlocks JSON.
 import { GoogleGenAI } from '@google/genai'
-import { callGemini, extractJson } from './core'
+import { extractJson } from './core'
+import { config } from '../../config'
 import { createModuleLogger } from '../../lib/logger'
 
 const log = createModuleLogger('ai:offer-fill')
@@ -23,70 +24,103 @@ export interface OfferFillResult {
     isComplete: boolean
 }
 
-// Marker the AI embeds when it has collected enough info
 const COMPLETE_MARKER = '[[FILL_COMPLETE]]'
 
 function buildCurrentBlocksSummary(blocks: Record<string, unknown>): string {
     try {
-        const intro = (blocks.intro as { paragraphs?: string[] })?.paragraphs ?? []
-        const scope = (blocks.scope as { items?: Array<{ html: string }> })?.items ?? []
-        const structure = (blocks.structure as { items?: Array<{ icon: string; name: string }> })?.items ?? []
-        const pricing = blocks.pricingExtra as { timeline?: string; priceType?: string } | undefined
-        const lines: string[] = ['AKTUALNY STAN SZABLONU:']
-        if (intro.length) lines.push(`- Wstęp: "${intro[0]?.slice(0, 100)}..."`)
-        if (scope.length) lines.push(`- Zakres (${scope.length} pozycji): ${scope.slice(0, 3).map(i => i.html?.slice(0, 50)).join(', ')}...`)
-        if (structure.length) lines.push(`- Struktura (${structure.length} elementów): ${structure.map(i => i.icon + ' ' + i.name).join(', ')}`)
-        if (pricing?.timeline) lines.push(`- Termin: ${pricing.timeline}, typ ceny: ${pricing.priceType ?? 'gross'}`)
+        const intro = (blocks.intro as { enabled?: boolean; paragraphs?: string[] } | undefined)
+        const scope = (blocks.scope as { enabled?: boolean; items?: Array<{ html: string }> } | undefined)
+        const structure = (blocks.structure as { enabled?: boolean; items?: Array<{ icon: string; name: string; description: string }> } | undefined)
+        const pricing = blocks.pricingExtra as { enabled?: boolean; timeline?: string; priceType?: string } | undefined
+        const about = blocks.about as { enabled?: boolean; ctaText?: string } | undefined
+
+        const lines: string[] = ['=== AKTUALNY STAN SZABLONU ===']
+
+        if (intro?.enabled && intro.paragraphs?.length) {
+            lines.push(`WSTĘP (${intro.paragraphs.length} akapity):`)
+            intro.paragraphs.forEach((p, i) => lines.push(`  [${i + 1}] ${p.slice(0, 200)}`))
+        } else {
+            lines.push('WSTĘP: wyłączony lub pusty')
+        }
+
+        if (structure?.enabled && structure.items?.length) {
+            lines.push(`STRUKTURA STRONY (${structure.items.length} elementów):`)
+            structure.items.forEach(item => lines.push(`  ${item.icon} ${item.name} — ${item.description?.slice(0, 80)}`))
+        } else {
+            lines.push('STRUKTURA: wyłączona lub pusta')
+        }
+
+        if (scope?.enabled && scope.items?.length) {
+            lines.push(`ZAKRES PRAC (${scope.items.length} pozycji):`)
+            scope.items.slice(0, 8).forEach((item, i) => lines.push(`  [${i + 1}] ${item.html?.slice(0, 120)}`))
+            if (scope.items.length > 8) lines.push(`  ... i ${scope.items.length - 8} więcej`)
+        } else {
+            lines.push('ZAKRES: wyłączony lub pusty')
+        }
+
+        if (pricing?.enabled) {
+            lines.push(`WYCENA: termin="${pricing.timeline}", typ ceny="${pricing.priceType ?? 'gross'}"`)
+        }
+
+        if (about?.enabled && about.ctaText) {
+            lines.push(`CTA: "${about.ctaText.slice(0, 150)}"`)
+        }
+
+        lines.push('=== KONIEC STANU ===')
         return lines.join('\n')
     } catch {
         return ''
     }
 }
 
-function buildOfferFillSystemPrompt(ctx: OfferFillContext): string {
-    const hasBlocks = !!ctx.currentBlocks
-    const blocksSummary = hasBlocks && ctx.currentBlocks
-        ? buildCurrentBlocksSummary(ctx.currentBlocks)
+function buildSystemPrompt(ctx: OfferFillContext): string {
+    const hasContent = !!ctx.currentBlocks
+    const blocksSummary = hasContent && ctx.currentBlocks
+        ? '\n' + buildCurrentBlocksSummary(ctx.currentBlocks) + '\n'
         : ''
 
-    const mode = hasBlocks
-        ? `Szablon jest już częściowo wypełniony. Możesz go modyfikować, poprawiać i rozwijać na prośbę użytkownika.
-Możesz zmienić dowolną sekcję: wstęp, zakres, strukturę, ikony, termin, CTA.
-Jeśli użytkownik prosi o zmianę konkretnej sekcji (np. "dodaj ikony", "zmień zakres") — zrób to i zwróć pełny zaktualizowany JSON.`
-        : `Przeprowadź krótką rozmowę (maksymalnie 4-5 pytań) aby zebrać:
-1. Krótki opis projektu / branżę klienta
-2. Główne funkcje/podstrony strony (lista 5-10 elementów)
-3. Szacowany termin realizacji
-4. Czy cena jest netto czy brutto
-5. Ewentualne dodatkowe informacje (stack, CMS, integracje)`
+    const modeInstructions = hasContent
+        ? `Szablon jest już częściowo wypełniony — widzisz jego aktualny stan powyżej.
+Możesz modyfikować dowolną sekcję na prośbę użytkownika.
+Gdy użytkownik pyta "co jest już wypełnione" — opisz mu aktualny stan z powyższego zestawienia.
+Gdy prosi o zmianę (np. "dodaj ikony", "zmień zakres na prawnika") — wprowadź zmiany i zwróć pełny JSON.
+Gdy prosi o wygenerowanie od zera — wygeneruj kompletny nowy szablon.`
+        : `Przeprowadź krótką rozmowę (maksymalnie 3-4 pytania) aby zebrać:
+1. Opis branży / działalności klienta
+2. Główne podstrony / funkcje serwisu (5-10 elementów)
+3. Przybliżony termin realizacji
+Gdy masz te informacje — od razu generuj szablon. Nie pytaj o więcej.`
 
-    return `Jesteś Markiem — doświadczonym copywriterem i handlowcem B2B z 15 latami praktyki w sprzedaży usług IT i tworzeniu stron internetowych.
-Twoje oferty wygrywają przetargi. Wiesz jak pisać, żeby klient czuł że to rozwiązanie jest stworzone specjalnie dla niego.
+    return `Jesteś Markiem — doświadczonym copywriterem i handlowcem B2B z 15 latami praktyki w tworzeniu ofert na usługi IT i strony internetowe. Twoje oferty wygrywają przetargi.
 
-ZASADY TWOJEGO WARSZTATU:
-- Piszesz językiem korzyści, nie cech (nie "robimy strony" → "Twoi klienci znajdą Cię w Google i zadzwonią sami")
-- Unikasz ogólników ("profesjonalna strona") — zawsze konkretnie i branżowo
-- Zakres prac opisujesz tak, żeby klient widział wartość każdej pozycji, nie tylko nazwę
-- Struktura strony = propozycja wartości dla końcowego użytkownika klienta
-- Ikony w liście zakresu dobierasz tematycznie i spójnie (np. 🏠 dla nieruchomości, ⚖️ dla prawnika)
-- CTA piszesz ciepło ale asertywnie — bez "zachęcam", "proszę o kontakt", zamiast tego konkrety
-- Intro oferty zaczyna się od empatii wobec potrzeby klienta, nie od przedstawiania siebie
-
-AKTUALNY KONTEKST:
+KONTEKST:
 Klient: "${ctx.clientName}"
 Tytuł oferty: "${ctx.offerTitle}"
-${blocksSummary ? '\n' + blocksSummary + '\n' : ''}
-${mode}
+${blocksSummary}
+TRYB PRACY:
+${modeInstructions}
+
+ZASADY PISANIA:
+- Język korzyści, nie cech ("Twoi klienci znajdą Cię w Google" zamiast "SEO")
+- Konkretnie i branżowo — zero ogólników jak "profesjonalna strona"
+- Ikony w zakresie dobieraj tematycznie (🏠 nieruchomości, ⚖️ prawnik, 🍕 gastronomia)
+- CTA ciepłe ale asertywne — bez "zachęcam", bez "proszę o kontakt"
+- Wstęp zaczyna się od empatii wobec potrzeby klienta
 
 ZASADY ROZMOWY:
-- Zadaj jedno, konkretne pytanie na raz
-- Jeśli branża klienta jest znana — od razu sugeruj ikony i język branżowy bez pytania
-- Gdy masz dość informacji lub użytkownik prosi o zmianę — działaj natychmiast, nie pytaj o potwierdzenie
-- Nie pytaj o cenę — pobierana automatycznie
-- Gdy generujesz/aktualizujesz szablon: napisz jedno zdanie co zmieniłeś i dlaczego, zakończ znacznikiem ${COMPLETE_MARKER}
+- Jedno pytanie na raz, krótko i konkretnie
+- Jeśli branża jest oczywista z nazwy klienta lub tytułu — zaproponuj ikony bez pytania
+- Gdy masz wystarczające informacje — DZIAŁAJ natychmiast, nie pytaj o potwierdzenie
+- Gdy użytkownik prosi o zmianę czegoś konkretnego — zrób to od razu
+- NIE pytaj o cenę (pobierana z systemu automatycznie)
 
-Za znacznikiem ${COMPLETE_MARKER} umieść TYLKO poprawny JSON zgodny z poniższym schematem:
+KIEDY GENEROWAĆ/AKTUALIZOWAĆ SZABLON:
+Gdy masz dane do wygenerowania lub gdy użytkownik prosi o zmianę:
+1. Napisz jedno zdanie: co zmieniłeś/zrobiłeś i dlaczego
+2. Dodaj znacznik ${COMPLETE_MARKER}
+3. Bezpośrednio za znacznikiem (bez żadnego tekstu między) umieść TYLKO kompletny JSON
 
+SCHEMAT JSON (wypełnij wszystkie pola):
 {
   "version": 1,
   "page1Sections": ["intro", "structure"],
@@ -95,55 +129,37 @@ Za znacznikiem ${COMPLETE_MARKER} umieść TYLKO poprawny JSON zgodny z poniższ
   "footer": { "enabled": true, "customNote": "indywidualnie", "showAuthor": true },
   "intro": {
     "enabled": true,
-    "paragraphs": ["Akapit powitalny 1-2 zdania.", "Akapit drugi 1-2 zdania o projekcie."]
+    "paragraphs": ["Akapit 1 — empatia wobec potrzeby klienta.", "Akapit 2 — co konkretnie dostarczasz."]
   },
   "demo": { "enabled": false, "title": "", "body": "", "urls": [] },
   "structure": {
     "enabled": true,
     "title": "Proponowana struktura strony",
-    "items": [
-      { "icon": "📋", "name": "Nazwa podstrony", "description": "Krótki opis" }
-    ],
+    "items": [{ "icon": "📋", "name": "Nazwa podstrony", "description": "Wartość dla użytkownika końcowego" }],
     "note": ""
   },
   "scope": {
     "enabled": true,
     "title": "Pełny zakres realizacji",
-    "items": [{ "html": "Opis pozycji zakresu" }]
+    "items": [{ "html": "Pozycja zakresu — konkretna wartość, nie tylko nazwa" }]
   },
   "testing": { "enabled": false, "intro": "", "cards": [] },
   "technology": { "enabled": false, "body": "", "options": [] },
   "pricingExtra": {
     "enabled": true,
-    "timeline": "X tygodnie/tygodni",
-    "timelineSub": "od ustalenia szczegółów",
+    "timeline": "X tygodnie",
+    "timelineSub": "od ustalenia szczegółów i przekazania materiałów",
     "contractType": "Umowa, faktura VAT",
     "contractSub": "pełna transparentność",
     "priceOverride": null,
-    "priceType": "net"
+    "priceType": "gross"
   },
   "about": {
     "enabled": true,
-    "ctaText": "2-3 zdania zachęcające do podjęcia współpracy."
+    "ctaText": "2-3 zdania zachęcające do współpracy — ciepłe i konkretne.",
+    "aboutBoxTitle": "Więcej o nas i naszych realizacjach"
   }
-}
-
-Wypełnij JSON na podstawie zebranych informacji. JSON musi być kompletny i poprawny.`
-}
-
-function buildConversationPrompt(
-    systemPrompt: string,
-    history: OfferFillMessage[],
-    userMessage: string,
-): string {
-    const lines: string[] = [systemPrompt, '', '--- HISTORIA ROZMOWY ---']
-    for (const msg of history) {
-        lines.push(`${msg.role === 'user' ? 'Użytkownik' : 'Asystent'}: ${msg.content}`)
-    }
-    lines.push(`Użytkownik: ${userMessage}`)
-    lines.push('')
-    lines.push('Asystent:')
-    return lines.join('\n')
+}`
 }
 
 function parseResponse(raw: string): { message: string; blocks: Record<string, unknown> | null } {
@@ -174,9 +190,29 @@ export async function offerFillChat(
     }
 
     try {
-        const systemPrompt = buildOfferFillSystemPrompt(context)
-        const prompt = buildConversationPrompt(systemPrompt, history, userMessage)
-        const raw = await callGemini(ai, prompt)
+        const systemPrompt = buildSystemPrompt(context)
+
+        // Build proper multi-turn contents array (Gemini role: 'user' | 'model')
+        type GeminiContent = { role: 'user' | 'model'; parts: Array<{ text: string }> }
+        const contents: GeminiContent[] = [
+            ...history.map((msg): GeminiContent => ({
+                role: msg.role === 'user' ? 'user' : 'model',
+                parts: [{ text: msg.content }],
+            })),
+            { role: 'user', parts: [{ text: userMessage }] },
+        ]
+
+        const response = await ai.models.generateContent({
+            model: config.gemini.model,
+            contents,
+            config: {
+                systemInstruction: systemPrompt,
+                temperature: 0.85,
+                maxOutputTokens: 8192,
+            },
+        })
+
+        const raw = response.text ?? ''
         const { message, blocks } = parseResponse(raw)
 
         return {

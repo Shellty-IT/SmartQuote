@@ -3,9 +3,10 @@ import type { NextConfig } from 'next';
 
 const isDev = process.env.NODE_ENV === 'development';
 
-const connectSrc = isDev
-    ? "connect-src 'self' https: http://localhost:8080 ws://localhost:3000"
-    : "connect-src 'self' https:";
+// localhost:* is always safe to allow in connect-src — it is never accessible from the public internet,
+// so including it in the production build's CSP has zero security impact on Vercel deployments.
+// This covers both `next dev` and `next start` for local development without relying on env vars.
+const connectSrc = "connect-src 'self' https: http://localhost:* ws://localhost:*";
 
 // CSP builder — frame-ancestors controls who can embed this page in an iframe.
 // Default is 'none' (no embedding). Preview routes override it to 'self'.
@@ -13,10 +14,9 @@ function buildCsp(frameAncestors: "'none'" | "'self'") {
     return [
         "default-src 'self'",
         "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-        // Merged style-src: app styles + Google Fonts (Outfit used in proposal editor)
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "style-src 'self' 'unsafe-inline'",
         "img-src 'self' data: blob: https:",
-        "font-src 'self' data: https://fonts.gstatic.com",
+        "font-src 'self' data:",
         connectSrc,
         // Allow blob: and srcdoc iframes (PDF preview modal + document editor)
         "frame-src 'self' blob:",

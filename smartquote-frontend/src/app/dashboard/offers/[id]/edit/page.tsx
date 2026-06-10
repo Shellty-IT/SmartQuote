@@ -100,6 +100,7 @@ function EditOfferForm({ offer }: { offer: Offer }) {
                     <StepTemplate
                         client={selectedClient}
                         offerTitle={offerDetails.title}
+                        onTitleChange={(v) => updateDetails('title', v)}
                         totalGross={totals.totalGross}
                         currency={offer.currency ?? 'PLN'}
                         paymentDays={offerDetails.paymentDays}

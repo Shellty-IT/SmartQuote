@@ -499,12 +499,29 @@ function PricingEditor({
     const s = (p: Partial<PricingExtraBlock>) => onChange({ ...block, ...p })
     const currency = offerContext?.currency ?? 'PLN'
     const autoPrice = offerContext ? offerContext.totalGross.toFixed(2) : null
+    const priceType = block.priceType ?? 'gross'
+
+    const calculatedCounterpart = block.priceOverride != null
+        ? priceType === 'gross'
+            ? `= ${(Math.round((block.priceOverride / 1.23) * 100) / 100).toFixed(2)} ${currency} netto`
+            : `= ${(Math.round(block.priceOverride * 1.23 * 100) / 100).toFixed(2)} ${currency} brutto`
+        : null
 
     return (
         <div className="space-y-3">
             <p className="rounded-lg bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
                 💡 Cena pobierana automatycznie z pozycji oferty. Wpisz wartość poniżej, aby ją nadpisać w dokumencie.
             </p>
+            <Field label="Typ ceny">
+                <select
+                    className={inputCls}
+                    value={priceType}
+                    onChange={(e) => s({ priceType: e.target.value as 'net' | 'gross' })}
+                >
+                    <option value="gross">Brutto (z VAT)</option>
+                    <option value="net">Netto (bez VAT)</option>
+                </select>
+            </Field>
             <Field label={`Nadpisz cenę (${currency})`}>
                 <div className="flex items-center gap-2">
                     <input
@@ -530,16 +547,9 @@ function PricingEditor({
                         </button>
                     )}
                 </div>
-            </Field>
-            <Field label="Typ ceny">
-                <select
-                    className={inputCls}
-                    value={block.priceType ?? 'gross'}
-                    onChange={(e) => s({ priceType: e.target.value as 'net' | 'gross' })}
-                >
-                    <option value="gross">Brutto (z VAT)</option>
-                    <option value="net">Netto (bez VAT)</option>
-                </select>
+                {calculatedCounterpart && (
+                    <p className="mt-1 text-xs text-muted-foreground">{calculatedCounterpart} (VAT 23%)</p>
+                )}
             </Field>
             <div className="grid grid-cols-2 gap-3">
                 <Field label="Czas realizacji">

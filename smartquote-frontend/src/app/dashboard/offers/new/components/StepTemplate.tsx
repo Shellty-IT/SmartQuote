@@ -16,6 +16,7 @@ import type { Client } from '@/types'
 interface StepTemplateProps {
     client: Client | null
     offerTitle: string
+    onTitleChange: (title: string) => void
     totalGross: number
     currency: string
     paymentDays: number
@@ -26,6 +27,7 @@ interface StepTemplateProps {
 export default function StepTemplate({
     client,
     offerTitle,
+    onTitleChange,
     totalGross,
     currency,
     paymentDays,
@@ -84,6 +86,17 @@ export default function StepTemplate({
                         <Sparkles className="h-4 w-4" />
                         Wypełnij z AI
                     </button>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                    <label className="text-sm font-medium text-foreground">Nazwa oferty</label>
+                    <input
+                        type="text"
+                        value={offerTitle}
+                        onChange={(e) => onTitleChange(e.target.value)}
+                        placeholder="Wpisz nazwę oferty..."
+                        className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
                 </div>
 
                 <ProposalDocumentEditor
