@@ -97,6 +97,11 @@ export async function createAndPublishOffer(
     await firstClient.click();
     await page.getByTestId('offer-next-button').click();
 
+    // New: type_choice step (classic is the default — just advance through it)
+    const typeChoiceStep = page.getByTestId('offer-step-type-choice');
+    await typeChoiceStep.waitFor({ state: 'visible', timeout: 5000 });
+    await page.getByTestId('offer-next-button').click();
+
     const titleInput = page.getByTestId('offer-title-input');
     await titleInput.waitFor({ state: 'visible', timeout: 5000 });
     await titleInput.fill(title);

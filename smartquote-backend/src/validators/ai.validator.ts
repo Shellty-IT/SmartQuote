@@ -88,3 +88,22 @@ export const generateSectionSchema = z.object({
         currency: z.string().min(1).max(10),
     }),
 });
+
+export const offerFillSchema = z.object({
+    body: z.object({
+        message: z.string().min(1).max(2000),
+        history: z
+            .array(
+                z.object({
+                    role: z.enum(['user', 'assistant']),
+                    content: z.string().max(4000),
+                }),
+            )
+            .max(20)
+            .default([]),
+        context: z.object({
+            clientName: z.string().min(1).max(200),
+            offerTitle: z.string().min(1).max(300),
+        }),
+    }),
+});
