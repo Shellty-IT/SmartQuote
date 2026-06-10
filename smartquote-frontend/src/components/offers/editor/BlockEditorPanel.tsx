@@ -571,6 +571,13 @@ function AboutEditor({
                     if (typeof data.ctaText === 'string') onChange({ ...block, ctaText: data.ctaText })
                 }}
             />
+            <Field label='Tytuł sekcji "O nas"'>
+                <input
+                    className={inputCls}
+                    value={block.aboutBoxTitle ?? 'Więcej o nas i naszych realizacjach'}
+                    onChange={(e) => onChange({ ...block, aboutBoxTitle: e.target.value })}
+                />
+            </Field>
             <Field label="Tekst CTA (wezwanie do działania)">
                 <textarea
                     className={textareaCls}

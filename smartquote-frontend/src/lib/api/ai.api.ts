@@ -103,6 +103,7 @@ export const ai = {
         message: string
         history: Array<{ role: 'user' | 'assistant'; content: string }>
         context: { clientName: string; offerTitle: string }
+        currentBlocks?: Record<string, unknown>
     }): Promise<{ message: string; blocks: Record<string, unknown> | null; isComplete: boolean }> => {
         const response = await api.post<{ message: string; blocks: Record<string, unknown> | null; isComplete: boolean }>(
             '/ai/offer-fill',

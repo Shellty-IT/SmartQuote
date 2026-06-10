@@ -95,8 +95,9 @@ export class AIController {
 
     async offerFill(req: AuthenticatedRequest, res: Response, next: NextFunction) {
         try {
-            const { message, history, context } = req.body;
-            const result = await aiService.offerFill(context, history ?? [], message);
+            const { message, history, context, currentBlocks } = req.body;
+            const fullContext = { ...context, currentBlocks };
+            const result = await aiService.offerFill(fullContext, history ?? [], message);
             return successResponse(res, result);
         } catch (err) {
             next(err);

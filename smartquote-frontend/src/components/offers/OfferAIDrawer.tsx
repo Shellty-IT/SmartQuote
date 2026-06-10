@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Send, Sparkles, CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { ai } from '@/lib/api'
+import { useAIChat } from '@/contexts/AIChatContext'
 import { mergeWithDefaults, type ProposalBlocks } from '@/lib/pdf/proposal-blocks'
 
 interface Message {
@@ -20,31 +21,46 @@ interface OfferAIDrawerProps {
     onClose: () => void
     clientName: string
     offerTitle: string
+    currentBlocks: ProposalBlocks
     onApply: (blocks: ProposalBlocks) => void
 }
 
-const INITIAL_MESSAGE: Message = {
-    id: 'init',
-    role: 'assistant',
-    content: 'Cześć! Pomogę Ci wypełnić szablon oferty. Zacznijmy od podstaw — opisz krótko projekt lub branżę klienta. Czym się zajmuje firma i czego potrzebuje?',
+function buildInitialMessage(hasContent: boolean): Message {
+    return {
+        id: 'init',
+        role: 'assistant',
+        content: hasContent
+            ? 'Cześć! Widzę że szablon jest już częściowo wypełniony. Mogę go zmodyfikować, poprawić lub rozwinąć wybrane sekcje. Co chciałbyś zmienić lub ulepszyć?'
+            : 'Cześć! Pomogę Ci wypełnić szablon oferty. Zacznijmy od podstaw — opisz krótko projekt lub branżę klienta. Czym się zajmuje firma i czego potrzebuje?',
+    }
 }
 
-export function OfferAIDrawer({ isOpen, onClose, clientName, offerTitle, onApply }: OfferAIDrawerProps) {
-    const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE])
+export function OfferAIDrawer({ isOpen, onClose, clientName, offerTitle, currentBlocks, onApply }: OfferAIDrawerProps) {
+    const { setHideGlobalFab } = useAIChat()
+    const [messages, setMessages] = useState<Message[]>(() => [buildInitialMessage(false)])
     const [input, setInput] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [generatedBlocks, setGeneratedBlocks] = useState<Record<string, unknown> | null>(null)
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLTextAreaElement>(null)
 
+    // Hide global FAB when this drawer is open
+    useEffect(() => {
+        setHideGlobalFab(isOpen)
+        return () => setHideGlobalFab(false)
+    }, [isOpen, setHideGlobalFab])
+
     // Reset conversation when drawer opens fresh
     useEffect(() => {
         if (isOpen) {
-            setMessages([INITIAL_MESSAGE])
+            const hasContent = currentBlocks.intro.paragraphs.some((p) => p.length > 60)
+                || currentBlocks.scope.items.length > 3
+            setMessages([buildInitialMessage(hasContent)])
             setInput('')
             setGeneratedBlocks(null)
             setTimeout(() => inputRef.current?.focus(), 300)
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen])
 
     useEffect(() => {
@@ -73,6 +89,7 @@ export function OfferAIDrawer({ isOpen, onClose, clientName, offerTitle, onApply
                     clientName: clientName || 'Klient',
                     offerTitle: offerTitle || 'Nowa oferta',
                 },
+                currentBlocks: currentBlocks as unknown as Record<string, unknown>,
             })
 
             const assistantMsg: Message = {

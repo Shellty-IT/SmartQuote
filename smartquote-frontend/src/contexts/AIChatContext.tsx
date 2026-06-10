@@ -10,6 +10,8 @@ interface AIChatContextType {
     sendQuickMessage: (message: string) => void;
     quickMessage: string | null;
     clearQuickMessage: () => void;
+    hideGlobalFab: boolean;
+    setHideGlobalFab: (hide: boolean) => void;
 }
 
 const AIChatContext = createContext<AIChatContextType | undefined>(undefined);
@@ -17,6 +19,7 @@ const AIChatContext = createContext<AIChatContextType | undefined>(undefined);
 export function AIChatProvider({ children }: { children: ReactNode }) {
     const [isOpen, setIsOpen] = useState(false);
     const [quickMessage, setQuickMessage] = useState<string | null>(null);
+    const [hideGlobalFab, setHideGlobalFab] = useState(false);
 
     const openChat = useCallback(() => setIsOpen(true), []);
     const closeChat = useCallback(() => setIsOpen(false), []);
@@ -39,7 +42,9 @@ export function AIChatProvider({ children }: { children: ReactNode }) {
             toggleChat,
             sendQuickMessage,
             quickMessage,
-            clearQuickMessage
+            clearQuickMessage,
+            hideGlobalFab,
+            setHideGlobalFab,
         }}>
             {children}
         </AIChatContext.Provider>
