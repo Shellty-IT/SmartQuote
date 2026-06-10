@@ -24,6 +24,9 @@ import {
 import type { OfferDescriptionContext } from './prompts';
 import { getPriceInsight, getObserverInsight, getClosingStrategy } from './analysis';
 import { generatePostMortem, getLatestInsights, getInsightsList } from './feedback';
+import { offerFillChat, type OfferFillMessage, type OfferFillContext, type OfferFillResult } from './offer-fill';
+
+export type { OfferFillMessage, OfferFillContext, OfferFillResult };
 
 class AIService {
     private readonly ai: GoogleGenAI | null;
@@ -94,6 +97,10 @@ class AIService {
 
     generateSection(params: GenerateSectionParams): Promise<Record<string, unknown>> {
         return generateSectionContent(this.ai, params);
+    }
+
+    offerFill(context: OfferFillContext, history: OfferFillMessage[], message: string): Promise<OfferFillResult> {
+        return offerFillChat(this.ai, context, history, message);
     }
 
     clearConversationHistory(userId: string): void {

@@ -96,6 +96,22 @@ export const ai = {
     },
 
     /**
+     * Multi-turn conversation that collects project info and returns ProposalBlocks.
+     * When isComplete is true, blocks contains the generated template content.
+     */
+    offerFill: async (params: {
+        message: string
+        history: Array<{ role: 'user' | 'assistant'; content: string }>
+        context: { clientName: string; offerTitle: string }
+    }): Promise<{ message: string; blocks: Record<string, unknown> | null; isComplete: boolean }> => {
+        const response = await api.post<{ message: string; blocks: Record<string, unknown> | null; isComplete: boolean }>(
+            '/ai/offer-fill',
+            params,
+        )
+        return response.data as { message: string; blocks: Record<string, unknown> | null; isComplete: boolean }
+    },
+
+    /**
      * Generates structured content for a single proposal section via AI.
      * Returns a partial block object (e.g. { paragraphs: [...] } for intro).
      * Falls back to empty object on parse error.

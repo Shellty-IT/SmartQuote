@@ -12,7 +12,7 @@ export default function StepTypeChoice({ selectedType, onSelect }: StepTypeChoic
     const c = tr.typeChoice
 
     return (
-        <div>
+        <div data-testid="offer-step-type-choice">
             <h2 className="text-lg font-semibold text-foreground mb-1">{c.title}</h2>
             <p className="text-sm text-muted-foreground mb-6">{c.subtitle}</p>
 

@@ -1,17 +1,16 @@
 // src/app/dashboard/contracts/[id]/components/ContractTemplateTab.tsx
-// Tab for editing and downloading the "Umowa — Krótka" contract template.
+// Tab for editing and downloading the contract template.
 // Mirrors the TemplateTab pattern used for offer proposals.
 'use client'
 
 import { useState, useCallback, useMemo } from 'react'
-import { Eye, Download, Save, FileText, FileCode } from 'lucide-react'
+import { Eye, Download } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { PdfPreviewModal } from '@/components/pdf/PdfPreviewModal'
 import { ContractDocumentEditor } from '@/components/contracts/editor/ContractDocumentEditor'
 import { contractsApi } from '@/lib/api'
 import { useToast } from '@/contexts/ToastContext'
 import { useTranslations } from '@/i18n'
-import { cn } from '@/lib/utils'
 import { mergeContractWithDefaults, type ContractShortBlocks } from '@/lib/pdf/contract-short-blocks'
 import type { Contract } from '@/types'
 
@@ -24,32 +23,11 @@ export function ContractTemplateTab({ contract, onSaved }: ContractTemplateTabPr
     const t = useTranslations('contractDetailPage')
     const toast = useToast()
 
-    const [templateType, setTemplateType] = useState<'classic' | 'short'>(
-        (contract.templateType ?? 'classic') as 'classic' | 'short',
-    )
+    const templateType = (contract.templateType ?? 'classic') as 'classic' | 'short'
     const [blocks, setBlocks] = useState<ContractShortBlocks>(() =>
         mergeContractWithDefaults(contract.blocks as Partial<ContractShortBlocks> | null),
     )
-    const [isSaving, setIsSaving] = useState(false)
     const [isDownloading, setIsDownloading] = useState(false)
-
-    // ── Save template type + blocks ─────────────────────────────────────────────
-
-    const handleSave = async () => {
-        setIsSaving(true)
-        try {
-            await contractsApi.update(contract.id, {
-                templateType,
-                blocks: templateType === 'short' ? (blocks as unknown) : undefined,
-            })
-            toast.success(t.templateSaved, contract.number)
-            onSaved()
-        } catch {
-            toast.error(t.templateSaveError, contract.number)
-        } finally {
-            setIsSaving(false)
-        }
-    }
 
     // ── Short template — download PDF ───────────────────────────────────────────
 
@@ -60,7 +38,7 @@ export function ContractTemplateTab({ contract, onSaved }: ContractTemplateTabPr
             const url = URL.createObjectURL(blob)
             const a = document.createElement('a')
             a.href = url
-            a.download = `Umowa_${contract.number.replace(/\//g, '-')}_krotka.pdf`
+            a.download = `Umowa_${contract.number.replace(/\//g, '-')}_strona.pdf`
             document.body.appendChild(a)
             a.click()
             document.body.removeChild(a)
@@ -138,59 +116,14 @@ export function ContractTemplateTab({ contract, onSaved }: ContractTemplateTabPr
         setBlocks(updatedBlocks)
         try {
             await contractsApi.update(contract.id, { blocks: updatedBlocks as unknown })
+            onSaved()
         } catch {
             toast.error(t.templateSaveError, contract.number)
         }
-    }, [contract.id, contract.number, t.templateSaveError, toast])
+    }, [contract.id, contract.number, t.templateSaveError, toast, onSaved])
 
     return (
         <div className="space-y-6">
-
-            {/* Template type selector + save */}
-            <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                        {t.templateTypeLabel}
-                    </h2>
-                    <Button onClick={handleSave} disabled={isSaving} size="sm">
-                        <Save className="h-3.5 w-3.5" />
-                        {isSaving ? t.templateSaving : t.templateSaveBtn}
-                    </Button>
-                </div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    {(['classic', 'short'] as const).map((type) => (
-                        <button
-                            key={type}
-                            type="button"
-                            onClick={() => setTemplateType(type)}
-                            className={cn(
-                                'flex items-start gap-3 rounded-xl border-2 p-4 text-left transition-all',
-                                templateType === type
-                                    ? 'border-primary bg-primary/5'
-                                    : 'border-border hover:border-border/80 hover:bg-secondary/30',
-                            )}
-                        >
-                            <div className={cn(
-                                'mt-0.5 flex-shrink-0 rounded-full p-1.5',
-                                templateType === type ? 'bg-primary text-white' : 'bg-muted text-muted-foreground',
-                            )}>
-                                {type === 'classic'
-                                    ? <FileText className="h-4 w-4" />
-                                    : <FileCode className="h-4 w-4" />
-                                }
-                            </div>
-                            <div>
-                                <p className={cn('font-semibold', templateType === type ? 'text-primary' : 'text-foreground')}>
-                                    {type === 'classic' ? t.templateClassic : t.templateShort}
-                                </p>
-                                <p className="mt-0.5 text-xs text-muted-foreground">
-                                    {type === 'classic' ? t.templateClassicDesc : t.templateShortDesc}
-                                </p>
-                            </div>
-                        </button>
-                    ))}
-                </div>
-            </div>
 
             {/* Short: inline document editor */}
             {templateType === 'short' && (
@@ -202,7 +135,7 @@ export function ContractTemplateTab({ contract, onSaved }: ContractTemplateTabPr
                 />
             )}
 
-            {/* Short: preview button (outside editor toolbar for easy access) */}
+            {/* Short: preview + download bar */}
             {templateType === 'short' && (
                 <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-card">
                     <Button variant="outline" onClick={handleShortPreview}>
