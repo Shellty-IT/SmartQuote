@@ -207,8 +207,26 @@ function renderPricingBox(
     editorMode = false,
 ): string {
     const pe = blocks.pricingExtra
-    const displayPrice = pe.priceOverride != null ? pe.priceOverride : offer.totalGross
-    const priceLabel = (pe.priceType ?? 'gross') === 'net' ? 'netto' : 'brutto'
+    const isNet = (pe.priceType ?? 'gross') === 'net'
+
+    // When priceOverride is set, derive both gross and net (assuming 23% VAT).
+    // When no override, fall back to offer.totalGross from line items.
+    let grossPrice: number
+    let netPrice: number | null = null
+    if (pe.priceOverride != null) {
+        if (isNet) {
+            netPrice = pe.priceOverride
+            grossPrice = Math.round(pe.priceOverride * 1.23 * 100) / 100
+        } else {
+            grossPrice = pe.priceOverride
+            netPrice = Math.round((pe.priceOverride / 1.23) * 100) / 100
+        }
+    } else {
+        grossPrice = offer.totalGross
+    }
+
+    const netSub = netPrice !== null ? `${formatMoney(netPrice, offer.currency)} netto · ` : ''
+
     const showExtra = pe.enabled || editorMode
     const timelineCard = showExtra
         ? `
@@ -233,9 +251,9 @@ function renderPricingBox(
       </div>
       <div class="pricing-cards">
         <div class="p-card hot">
-          <div class="pc-label">💵 Cena (${priceLabel})</div>
-          <div class="pc-val">${formatMoney(displayPrice, offer.currency)}</div>
-          <div class="pc-sub">płatność ${offer.paymentDays} dni</div>
+          <div class="pc-label">💵 Cena (brutto)</div>
+          <div class="pc-val">${formatMoney(grossPrice, offer.currency)}</div>
+          <div class="pc-sub">${netSub}płatność ${offer.paymentDays} dni</div>
         </div>
         ${timelineCard}
         ${contractCard}
@@ -611,6 +629,7 @@ export function buildProposalHtml(offer: ProposalOfferData, options: BuildPropos
     .tech-card .tc-title { font-size: 9.5px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
     .tech-card .tc-url { display: flex; gap: 4px; font-size: 8.5px; color: var(--grey-text); margin-top: 2px; align-items: baseline; }
     .tech-card .tc-url a { font-family: 'Courier New', monospace; font-size: 8px; color: var(--navy-mid); font-weight: 600; text-decoration: none; }
+    .tech-note { font-size: 9px; color: var(--grey-text); font-style: italic; margin-top: 5px; line-height: 1.5; }
     /* Pricing */
     .pricing {
       background: var(--navy); border-radius: 6px; padding: 6mm 7mm 5mm;

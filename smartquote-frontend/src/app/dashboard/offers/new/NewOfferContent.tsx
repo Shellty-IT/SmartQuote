@@ -118,6 +118,7 @@ export default function NewOfferContent() {
                     <StepTemplate
                         client={selectedClient}
                         offerTitle={offerDetails.title}
+                        onTitleChange={(v) => updateDetails('title', v)}
                         totalGross={totals.totalGross}
                         currency="PLN"
                         paymentDays={offerDetails.paymentDays}
