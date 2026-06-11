@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { contractsApi } from '@/lib/api';
-import type { Contract, ContractsStats, CreateContractInput, ContractStatus } from '@/types';
+import type { ContractsStats, CreateContractInput, ContractStatus } from '@/types';
 
 interface UseContractsParams {
     page?: number;

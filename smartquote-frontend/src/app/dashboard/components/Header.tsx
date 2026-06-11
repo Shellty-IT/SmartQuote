@@ -24,7 +24,7 @@ export default function Header({ onSearchOpen }: HeaderProps) {
     const commonTr = useTranslations('common');
     const settingsTr = useTranslations('settings');
     const [avatar, setAvatar] = useState<string | null>(null);
-    const [searchOpen, setSearchOpen] = useState(false);
+    const [searchOpen] = useState(false);
 
     useEffect(() => {
         let cancelled = false;

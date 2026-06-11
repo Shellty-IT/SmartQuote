@@ -1,7 +1,7 @@
 // src/components/ai/GlobalAIChat.tsx
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -117,6 +117,16 @@ export function GlobalAIChat() {
         }
     };
 
+    const toggleOpen = useCallback(() => {
+        setIsOpen((prev) => {
+            if (!prev) {
+                setIsMinimized(false);
+                setUnreadCount(0);
+            }
+            return !prev;
+        });
+    }, []);
+
     const executeAction = useCallback(async (action: AIAction) => {
         switch (action.type) {
             case 'navigate':
@@ -157,8 +167,7 @@ export function GlobalAIChat() {
             default:
                 break;
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [router, addMessage]);
+    }, [router, addMessage, toggleOpen]);
 
     const handleClearHistory = async () => {
         try {
@@ -166,16 +175,6 @@ export function GlobalAIChat() {
         } catch {
         }
         clearMessages();
-    };
-
-    const toggleOpen = () => {
-        setIsOpen((prev) => {
-            if (!prev) {
-                setIsMinimized(false);
-                setUnreadCount(0);
-            }
-            return !prev;
-        });
     };
 
     const toggleMinimize = () => {

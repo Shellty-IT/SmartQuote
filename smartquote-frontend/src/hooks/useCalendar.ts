@@ -16,6 +16,7 @@ export function useCalendarEvents(params?: { from?: string; to?: string }): UseC
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const paramsKey = JSON.stringify(params);
     const fetchEvents = useCallback(async () => {
         setIsLoading(true);
         setError(null);
@@ -29,7 +30,7 @@ export function useCalendarEvents(params?: { from?: string; to?: string }): UseC
             setIsLoading(false);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [JSON.stringify(params)]);
+    }, [paramsKey]);
 
     useEffect(() => {
         fetchEvents();

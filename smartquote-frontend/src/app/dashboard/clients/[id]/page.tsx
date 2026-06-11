@@ -5,7 +5,7 @@ import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     ArrowLeft, Pencil, Plus, Mail, Phone,
-    Globe, Hash, MapPin, ExternalLink, ChevronRight, FileText, ScrollText,
+    Globe, Hash, MapPin, ChevronRight, FileText, ScrollText,
 } from 'lucide-react';
 import { useClient } from '@/hooks/useClients';
 import { clientsApi } from '@/lib/api/clients.api';

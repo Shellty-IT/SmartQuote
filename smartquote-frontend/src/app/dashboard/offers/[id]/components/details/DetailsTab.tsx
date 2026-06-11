@@ -36,7 +36,6 @@ import { InlineEdit } from '@/components/ui';
 import { offersApi } from '@/lib/api/offers.api';
 import { ai } from '@/lib/api/ai.api';
 import type { PriceCheckResult } from '@/types/ai';
-import { PriceCheckBadge } from '@/components/offers/PriceCheckBadge';
 
 interface DetailsTabProps {
     offer: Offer;

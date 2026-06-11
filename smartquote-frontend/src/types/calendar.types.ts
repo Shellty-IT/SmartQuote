@@ -30,4 +30,4 @@ export interface CreateCalendarEventInput {
     leadId?: string | null;
 }
 
-export interface UpdateCalendarEventInput extends Partial<CreateCalendarEventInput> {}
+export type UpdateCalendarEventInput = Partial<CreateCalendarEventInput>;
