@@ -118,7 +118,16 @@ export function OfferAIDrawer({ isOpen, onClose, clientName, offerTitle, current
 
     const handleApply = () => {
         if (!generatedBlocks) return
-        const blocks = mergeWithDefaults(generatedBlocks as Partial<ProposalBlocks>, clientName)
+        const generated = generatedBlocks as Partial<ProposalBlocks>
+        // Deep-merge: start from currentBlocks so sections AI didn't touch are preserved.
+        // Only page1Sections/page2Sections are replaced if AI explicitly returned them.
+        const merged: Partial<ProposalBlocks> = {
+            ...currentBlocks,
+            ...generated,
+            page1Sections: generated.page1Sections ?? currentBlocks.page1Sections,
+            page2Sections: generated.page2Sections ?? currentBlocks.page2Sections,
+        }
+        const blocks = mergeWithDefaults(merged, clientName)
         onApply(blocks)
         onClose()
     }
@@ -243,9 +252,9 @@ export function OfferAIDrawer({ isOpen, onClose, clientName, offerTitle, current
                                         onChange={(e) => setInput(e.target.value)}
                                         onKeyDown={handleKeyDown}
                                         placeholder="Napisz wiadomość… (Enter = wyślij)"
-                                        rows={2}
+                                        rows={4}
                                         disabled={isLoading}
-                                        className="flex-1 resize-none rounded-xl border border-border bg-secondary/40 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50"
+                                        className="flex-1 resize-y min-h-[80px] max-h-[240px] rounded-xl border border-border bg-secondary/40 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50"
                                     />
                                     <Button
                                         type="button"

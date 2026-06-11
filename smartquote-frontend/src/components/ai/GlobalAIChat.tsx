@@ -1,16 +1,47 @@
 // src/components/ai/GlobalAIChat.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { ai } from '@/lib/api';
+import { notesApi } from '@/lib/api/notes.api';
 import { useAIChat } from '@/contexts/AIChatContext';
+import { usePageContext } from '@/hooks/usePageContext';
+import type { PageContext } from '@/hooks/usePageContext';
 import { useChatMessages } from './hooks/useChatMessages';
 import { useChatScroll } from './hooks/useChatScroll';
 import { ChatHeader } from './ChatHeader';
 import { ChatMessages } from './ChatMessages';
 import { ChatInput } from './ChatInput';
+import type { AIAction } from '@/types/ai';
+
+function getQuickSuggestions(pageContext: PageContext): string[] {
+    switch (pageContext.type) {
+        case 'offer':
+            return ['Jak zwiększyć szanse na akceptację tej oferty?', 'Sprawdź ceny pozycji w tej ofercie', 'Zasugeruj follow-up dla tej oferty'];
+        case 'client':
+            return ['Podsumuj historię tego klienta', 'Zasugeruj następny krok', 'Jakie oferty warto wysłać temu klientowi?'];
+        case 'lead':
+            return ['Jak przekształcić ten lead w klienta?', 'Zasugeruj wiadomość do tego leada', 'Dodaj notatkę o tym leadzie'];
+        case 'dashboard':
+            return ['Co wymaga mojej uwagi dzisiaj?', 'Pokaż zaległe zadania', 'Jakie mam możliwości sprzedażowe?'];
+        default:
+            return ['Pomóż mi stworzyć ofertę', 'Pokaż zaległe follow-upy', 'Jakie mam aktywne oferty?'];
+    }
+}
+
+function getContextBadgeLabel(pageContext: PageContext): string | null {
+    switch (pageContext.type) {
+        case 'offer': return 'Oferta';
+        case 'client': return 'Klient';
+        case 'lead': return 'Lead';
+        case 'contract': return 'Umowa';
+        case 'dashboard': return 'Dashboard';
+        default: return null;
+    }
+}
 
 export function GlobalAIChat() {
     const [isOpen, setIsOpen] = useState(false);
@@ -20,9 +51,19 @@ export function GlobalAIChat() {
     const [unreadCount, setUnreadCount] = useState(0);
 
     const { data: session } = useSession();
+    const router = useRouter();
     const { hideGlobalFab } = useAIChat();
+    const pageContext = usePageContext();
     const { messages, addMessage, clearMessages } = useChatMessages();
     const { messagesEndRef } = useChatScroll(messages, isOpen, isMinimized);
+
+    const quickSuggestions = getQuickSuggestions(pageContext);
+    const contextBadge = getContextBadgeLabel(pageContext);
+
+    // Handle suggestion chip click: send the message immediately
+    const handleSuggestionClick = useCallback((suggestion: string) => {
+        setInput(suggestion);
+    }, []);
 
     const handleSend = async () => {
         if (!input.trim() || isLoading) return;
@@ -45,13 +86,14 @@ export function GlobalAIChat() {
                 content: m.content,
             }));
 
-            const response = await ai.chat(messageToSend, history);
+            const response = await ai.chat(messageToSend, history, pageContext);
 
             const assistantMessage = {
                 id: crypto.randomUUID(),
                 role: 'assistant' as const,
                 content: response.message || 'No response received',
                 timestamp: new Date(),
+                actions: response.actions,
             };
 
             addMessage(assistantMessage);
@@ -75,20 +117,65 @@ export function GlobalAIChat() {
         }
     };
 
+    const executeAction = useCallback(async (action: AIAction) => {
+        switch (action.type) {
+            case 'navigate':
+                if (action.payload?.path) {
+                    router.push(action.payload.path as string);
+                    toggleOpen();
+                }
+                break;
+            case 'create_note':
+                try {
+                    const p = action.payload as { content?: string; entityType?: string; entityId?: string };
+                    if (p.content && p.entityType && p.entityId) {
+                        await notesApi.create({
+                            content: p.content,
+                            [`${p.entityType}Id`]: p.entityId,
+                        } as Parameters<typeof notesApi.create>[0]);
+                        addMessage({
+                            id: crypto.randomUUID(),
+                            role: 'assistant',
+                            content: '✅ Notatka zapisana.',
+                            timestamp: new Date(),
+                        });
+                    }
+                } catch { /* ignore */ }
+                break;
+            case 'create_offer':
+                router.push('/dashboard/offers/new');
+                toggleOpen();
+                break;
+            case 'create_lead':
+                router.push('/dashboard/leads/new');
+                toggleOpen();
+                break;
+            case 'create_followup':
+                router.push('/dashboard/followups');
+                toggleOpen();
+                break;
+            default:
+                break;
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [router, addMessage]);
+
     const handleClearHistory = async () => {
         try {
             await ai.clearHistory();
         } catch {
-}
+        }
         clearMessages();
     };
 
     const toggleOpen = () => {
-        setIsOpen(!isOpen);
-        if (!isOpen) {
-            setIsMinimized(false);
-            setUnreadCount(0);
-        }
+        setIsOpen((prev) => {
+            if (!prev) {
+                setIsMinimized(false);
+                setUnreadCount(0);
+            }
+            return !prev;
+        });
     };
 
     const toggleMinimize = () => {
@@ -167,11 +254,24 @@ export function GlobalAIChat() {
                                     exit={{ height: 0 }}
                                     className="flex-1 overflow-hidden flex flex-col"
                                 >
+                                    {contextBadge && (
+                                        <div className="px-4 pt-2">
+                                            <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 bg-primary/10 text-primary rounded-full border border-primary/20">
+                                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                                </svg>
+                                                Kontekst: {contextBadge}
+                                            </span>
+                                        </div>
+                                    )}
+
                                     <ChatMessages
                                         messages={messages}
                                         isLoading={isLoading}
                                         messagesEndRef={messagesEndRef}
-                                        onSuggestionClick={setInput}
+                                        onSuggestionClick={handleSuggestionClick}
+                                        onAction={executeAction}
+                                        quickSuggestions={quickSuggestions}
                                     />
 
                                     <ChatInput

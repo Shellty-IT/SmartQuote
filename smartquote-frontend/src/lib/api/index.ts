@@ -13,3 +13,7 @@ export { settingsApi } from './settings.api';
 export { ksefApi } from './ksef.api';
 export { emailsApi } from './emails.api';
 export { offerTemplatesApi } from './offer-templates.api';
+export { leadsApi } from './leads.api';
+export { notesApi } from './notes.api';
+export { searchApi } from './search.api';
+export { calendarApi } from './calendar.api';

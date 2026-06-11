@@ -12,7 +12,11 @@ import { useUnreadCount } from '@/hooks/useNotifications';
 import { settingsApi } from '@/lib/api';
 import { getInitials } from '@/lib/utils';
 
-export default function Header() {
+interface HeaderProps {
+    onSearchOpen?: () => void;
+}
+
+export default function Header({ onSearchOpen }: HeaderProps) {
     const { data: session } = useSession();
     const { theme, toggle } = useTheme();
     const { language, setLanguage } = useLanguage();
@@ -38,16 +42,20 @@ export default function Header() {
 
     return (
         <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-xl sm:px-6">
-            {/* Search */}
-            <div className={cn('relative transition-all duration-200', searchOpen ? 'flex-1' : 'flex-1 max-w-sm')}>
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input
-                    placeholder={commonTr.search}
-                    onFocus={() => setSearchOpen(true)}
-                    onBlur={() => setSearchOpen(false)}
-                    className="h-9 w-full rounded-lg border border-border bg-secondary/60 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-primary focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/30"
-                />
-            </div>
+            {/* Search — opens command palette */}
+            <button
+                onClick={onSearchOpen}
+                className={cn(
+                    'relative flex flex-1 max-w-sm items-center gap-2 h-9 rounded-lg border border-border bg-secondary/60 px-3 text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:bg-card',
+                    searchOpen && 'flex-1 max-w-full',
+                )}
+            >
+                <Search className="h-4 w-4 shrink-0" />
+                <span className="flex-1 text-left truncate">{commonTr.search}</span>
+                <kbd className="hidden shrink-0 rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] sm:block">
+                    Ctrl K
+                </kbd>
+            </button>
 
             {/* Right controls — ml-auto pushes to right edge regardless of search width */}
             <div className="ml-auto flex shrink-0 items-center gap-2">

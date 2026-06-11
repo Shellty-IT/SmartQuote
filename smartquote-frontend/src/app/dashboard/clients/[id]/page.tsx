@@ -5,15 +5,18 @@ import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     ArrowLeft, Pencil, Plus, Mail, Phone,
-    Globe, Hash, MapPin, ExternalLink, ChevronRight, FileText,
+    Globe, Hash, MapPin, ExternalLink, ChevronRight, FileText, ScrollText,
 } from 'lucide-react';
 import { useClient } from '@/hooks/useClients';
+import { clientsApi } from '@/lib/api/clients.api';
 import { useOffers } from '@/hooks/useOffers';
-import { Button } from '@/components/ui';
+import { useContracts } from '@/hooks/useContracts';
+import { Button, InlineEdit } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { formatDate, formatCurrency, getInitials, cn } from '@/lib/utils';
 import { useTranslations } from '@/i18n';
+import { NotesFeed } from '@/components/notes/NotesFeed';
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -39,8 +42,9 @@ export default function ClientDetailPage({ params }: PageProps) {
     const router = useRouter();
     const t = useTranslations('clientDetail');
     const tForm = useTranslations('clientForm');
-    const { client, isLoading, error } = useClient(id);
-    const { offers } = useOffers({ clientId: id, limit: 5 });
+    const { client, isLoading, error, refresh } = useClient(id);
+    const { offers } = useOffers({ clientId: id, limit: 20 });
+    const { contracts } = useContracts({ clientId: id, limit: 20 });
 
     if (isLoading) return <PageLoader />;
 
@@ -55,8 +59,18 @@ export default function ClientDetailPage({ params }: PageProps) {
         );
     }
 
+    // Compute 360° metrics
+    const totalGross = offers.reduce((sum, o) => sum + Number(o.totalGross), 0);
+    const acceptedOffers = offers.filter(o => o.status === 'ACCEPTED');
+    const sentOffers = offers.filter(o => ['SENT', 'VIEWED', 'NEGOTIATION', 'ACCEPTED', 'REJECTED', 'EXPIRED'].includes(o.status));
+    const winRate = sentOffers.length > 0 ? Math.round((acceptedOffers.length / sentOffers.length) * 100) : null;
+    const lastContact = offers.length > 0
+        ? [...offers].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())[0]?.updatedAt
+        : null;
+
     const quickActions = [
         { icon: Plus, label: t.newOffer, fn: () => router.push(`/dashboard/offers/new?clientId=${client.id}`) },
+        { icon: ScrollText, label: 'Nowa umowa', fn: () => router.push(`/dashboard/contracts/new?clientId=${client.id}`) },
         client.email ? { icon: Mail, label: t.sendEmail, fn: () => { window.location.href = `mailto:${client.email}`; } } : null,
         client.phone ? { icon: Phone, label: t.call, fn: () => { window.location.href = `tel:${client.phone}`; } } : null,
     ].filter(Boolean) as { icon: React.ElementType; label: string; fn: () => void }[];
@@ -120,28 +134,37 @@ export default function ClientDetailPage({ params }: PageProps) {
                     <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
                         <h2 className="mb-4 text-lg font-semibold tracking-tight">{t.contact}</h2>
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            {client.email && (
-                                <Field icon={Mail} label={t.email}>
-                                    <a className="text-primary hover:underline" href={`mailto:${client.email}`}>{client.email}</a>
-                                </Field>
-                            )}
-                            {client.phone && (
-                                <Field icon={Phone} label={t.phone}>
-                                    <span className="font-mono">{client.phone}</span>
-                                </Field>
-                            )}
-                            {client.website && (
-                                <Field icon={Globe} label={t.website}>
-                                    <a
-                                        className="inline-flex items-center gap-1 text-primary hover:underline"
-                                        href={client.website}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                    >
-                                        {client.website} <ExternalLink className="h-3 w-3" />
-                                    </a>
-                                </Field>
-                            )}
+                            <Field icon={Hash} label={tForm.companyLabel ?? 'Firma'}>
+                                <InlineEdit
+                                    value={client.company ?? ''}
+                                    emptyText="Dodaj nazwę firmy..."
+                                    onSave={async (v) => { await clientsApi.update(client.id, { company: v }); await refresh(); }}
+                                />
+                            </Field>
+                            <Field icon={Mail} label={t.email}>
+                                <InlineEdit
+                                    value={client.email ?? ''}
+                                    emptyText="Dodaj email..."
+                                    onSave={async (v) => { await clientsApi.update(client.id, { email: v }); await refresh(); }}
+                                    displayClassName="text-primary"
+                                />
+                            </Field>
+                            <Field icon={Phone} label={t.phone}>
+                                <InlineEdit
+                                    value={client.phone ?? ''}
+                                    emptyText="Dodaj telefon..."
+                                    onSave={async (v) => { await clientsApi.update(client.id, { phone: v }); await refresh(); }}
+                                    displayClassName="font-mono"
+                                />
+                            </Field>
+                            <Field icon={Globe} label={t.website}>
+                                <InlineEdit
+                                    value={client.website ?? ''}
+                                    emptyText="Dodaj stronę..."
+                                    onSave={async (v) => { await clientsApi.update(client.id, { website: v }); await refresh(); }}
+                                    displayClassName="text-primary"
+                                />
+                            </Field>
                             {client.nip && (
                                 <Field icon={Hash} label={t.nip}>
                                     <span className="font-mono">{client.nip}</span>
@@ -205,6 +228,46 @@ export default function ClientDetailPage({ params }: PageProps) {
                             </div>
                         )}
                     </section>
+                    {/* Contracts section */}
+                    <section className="rounded-2xl border border-border bg-card shadow-card">
+                        <div className="flex items-center justify-between border-b border-border px-6 py-4">
+                            <h2 className="text-lg font-semibold tracking-tight">Umowy</h2>
+                            <button
+                                onClick={() => router.push(`/dashboard/contracts/new?clientId=${client.id}`)}
+                                className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+                            >
+                                <Plus className="h-3.5 w-3.5" /> Nowa umowa
+                            </button>
+                        </div>
+                        {contracts.length === 0 ? (
+                            <div className="flex flex-col items-center py-12 text-center">
+                                <ScrollText className="mb-3 h-10 w-10 text-muted-foreground/40" strokeWidth={1.5} />
+                                <p className="text-sm text-muted-foreground">Brak umów dla tego klienta</p>
+                            </div>
+                        ) : (
+                            <div className="divide-y divide-border/60">
+                                {contracts.map((contract) => (
+                                    <button
+                                        key={contract.id}
+                                        onClick={() => router.push(`/dashboard/contracts/${contract.id}`)}
+                                        className="group flex w-full items-center gap-4 px-6 py-4 text-left transition hover:bg-secondary/50"
+                                    >
+                                        <div className="min-w-0 flex-1">
+                                            <p className="font-semibold leading-tight">{contract.title}</p>
+                                            <p className="font-mono text-xs text-muted-foreground">{contract.number}</p>
+                                        </div>
+                                        <div className="shrink-0 text-right">
+                                            <StatusBadge status={contract.status} showDot={false} />
+                                        </div>
+                                        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/60 transition group-hover:translate-x-0.5" />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </section>
+
+                    {/* Notes feed */}
+                    <NotesFeed entityId={client.id} entityType="client" />
                 </div>
 
                 {/* Right: stats + quick actions */}
@@ -214,9 +277,12 @@ export default function ClientDetailPage({ params }: PageProps) {
                         <h2 className="mb-4 text-lg font-semibold tracking-tight">{t.stats}</h2>
                         <div className="space-y-2">
                             {[
-                                { label: t.allOffers, value: String(client._count?.offers || 0) },
+                                { label: 'Łączna wartość', value: `${formatCurrency(totalGross)}` },
+                                { label: 'Zaakceptowane oferty', value: `${acceptedOffers.length}${winRate !== null ? ` (${winRate}% win rate)` : ''}` },
+                                { label: t.allOffers, value: String(offers.length) },
+                                { label: 'Umowy', value: String(contracts.length) },
                                 { label: t.createdAt, value: formatDate(client.createdAt) },
-                                { label: t.updatedAt, value: formatDate(client.updatedAt) },
+                                { label: 'Ostatni kontakt', value: lastContact ? formatDate(lastContact) : '—' },
                             ].map(({ label, value }) => (
                                 <div key={label} className="flex items-center justify-between rounded-lg bg-surface-subtle px-3 py-2.5">
                                     <span className="text-sm text-muted-foreground">{label}</span>

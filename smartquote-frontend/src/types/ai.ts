@@ -10,7 +10,7 @@ export interface AIMessage {
 }
 
 export interface AIAction {
-    type: 'create_offer' | 'create_followup' | 'send_email' | 'view_client' | 'view_offer' | 'navigate';
+    type: 'create_offer' | 'create_followup' | 'send_email' | 'view_client' | 'view_offer' | 'navigate' | 'create_note' | 'create_lead';
     label: string;
     payload: Record<string, unknown>;
 }
@@ -180,6 +180,13 @@ export interface InsightsListItem extends LatestInsightItem {
     offerCurrency: string;
     clientCompany: string | null;
     resolvedAt: string | null;
+}
+
+export interface PriceCheckResult {
+    itemIndex: number;
+    verdict: 'low' | 'fair' | 'high';
+    suggestion: string;
+    suggestedRange?: { min: number; max: number } | null;
 }
 
 export interface InsightsListParams {

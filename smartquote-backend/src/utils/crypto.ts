@@ -7,10 +7,13 @@ const IV_LENGTH = 16;
 
 function getEncryptionKey(): Buffer {
     const envKey = process.env.ENCRYPTION_KEY || process.env.SMTP_ENCRYPTION_KEY || '';
-    if (envKey.length >= 32) {
-        return Buffer.from(envKey.slice(0, 32), 'utf-8');
+    if (envKey.length < 32) {
+        throw new Error(
+            'ENCRYPTION_KEY must be at least 32 characters. ' +
+            'Generate one with: openssl rand -base64 32',
+        );
     }
-    return Buffer.from(envKey.padEnd(32, '0'), 'utf-8');
+    return Buffer.from(envKey.slice(0, 32), 'utf-8');
 }
 
 export function encrypt(text: string): string {

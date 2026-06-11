@@ -1,44 +1,20 @@
-// SmartQuote-AI/src/hooks/useOffers.ts
-
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { offersApi, ApiError } from '@/lib/api';
 import type {
     Offer,
     OfferFilters,
-    OffersStats,
     CreateOfferInput,
     UpdateOfferInput,
     PublishOfferResult,
     SendToClientResult,
-    OfferAnalytics,
     OfferComment,
 } from '@/types';
 
-interface UseOffersResult {
-    offers: Offer[];
-    total: number;
-    page: number;
-    totalPages: number;
-    isLoading: boolean;
-    error: string | null;
-    filters: OfferFilters;
-    setFilters: (filters: Partial<OfferFilters>) => void;
-    refresh: () => Promise<void>;
-    createOffer: (data: CreateOfferInput) => Promise<Offer>;
-    updateOffer: (id: string, data: UpdateOfferInput) => Promise<Offer>;
-    deleteOffer: (id: string) => Promise<void>;
-    duplicateOffer: (id: string) => Promise<Offer>;
-}
-
-export function useOffers(initialFilters: OfferFilters = {}): UseOffersResult {
-    const [offers, setOffers] = useState<Offer[]>([]);
-    const [total, setTotal] = useState(0);
-    const [page, setPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+export function useOffers(initialFilters: OfferFilters = {}) {
+    const queryClient = useQueryClient();
     const [filters, setFiltersState] = useState<OfferFilters>({
         page: 1,
         limit: 20,
@@ -47,77 +23,78 @@ export function useOffers(initialFilters: OfferFilters = {}): UseOffersResult {
         ...initialFilters,
     });
 
-    const fetchOffers = useCallback(async () => {
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const response = await offersApi.list(
-                filters as Record<string, string | number | boolean | undefined>
-            );
-            setOffers(response.data || []);
-            setTotal(response.meta?.total || 0);
-            setPage(response.meta?.page || 1);
-            setTotalPages(response.meta?.totalPages || 1);
-        } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Failed to fetch offers';
-            setError(message);
-            setOffers([]);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [filters]);
-
-    useEffect(() => {
-        fetchOffers();
-    }, [fetchOffers]);
+    const { data, isLoading, error, refetch } = useQuery({
+        queryKey: ['offers', filters],
+        queryFn: () => offersApi.list(filters as Record<string, string | number | boolean | undefined>),
+    });
 
     const setFilters = useCallback((newFilters: Partial<OfferFilters>) => {
         setFiltersState((prev) => ({ ...prev, ...newFilters }));
     }, []);
 
-    const createOffer = useCallback(async (data: CreateOfferInput): Promise<Offer> => {
-        const response = await offersApi.create(data);
-        await fetchOffers();
-        if (!response.data) {
-            throw new Error('Failed to create offer');
-        }
-        return response.data;
-    }, [fetchOffers]);
+    const invalidateAll = useCallback(async () => {
+        await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ['offers'] }),
+            queryClient.invalidateQueries({ queryKey: ['offers-stats'] }),
+        ]);
+    }, [queryClient]);
 
-    const updateOffer = useCallback(async (id: string, data: UpdateOfferInput): Promise<Offer> => {
-        const response = await offersApi.update(id, data);
-        await fetchOffers();
-        if (!response.data) {
-            throw new Error('Failed to update offer');
-        }
-        return response.data;
-    }, [fetchOffers]);
+    const createMutation = useMutation({
+        mutationFn: (input: CreateOfferInput) => offersApi.create(input),
+        onSuccess: invalidateAll,
+    });
 
-    const deleteOffer = useCallback(async (id: string): Promise<void> => {
-        await offersApi.delete(id);
-        await fetchOffers();
-    }, [fetchOffers]);
+    const updateMutation = useMutation({
+        mutationFn: ({ id, input }: { id: string; input: UpdateOfferInput }) =>
+            offersApi.update(id, input),
+        onSuccess: async (_, { id }) => {
+            await invalidateAll();
+            await queryClient.invalidateQueries({ queryKey: ['offer', id] });
+        },
+    });
 
-    const duplicateOffer = useCallback(async (id: string): Promise<Offer> => {
-        const response = await offersApi.duplicate(id);
-        await fetchOffers();
-        if (!response.data) {
-            throw new Error('Failed to duplicate offer');
-        }
+    const deleteMutation = useMutation({
+        mutationFn: (id: string) => offersApi.delete(id),
+        onSuccess: invalidateAll,
+    });
+
+    const duplicateMutation = useMutation({
+        mutationFn: (id: string) => offersApi.duplicate(id),
+        onSuccess: invalidateAll,
+    });
+
+    const createOffer = async (input: CreateOfferInput): Promise<Offer> => {
+        const response = await createMutation.mutateAsync(input);
+        if (!response.data) throw new Error('Failed to create offer');
         return response.data;
-    }, [fetchOffers]);
+    };
+
+    const updateOffer = async (id: string, input: UpdateOfferInput): Promise<Offer> => {
+        const response = await updateMutation.mutateAsync({ id, input });
+        if (!response.data) throw new Error('Failed to update offer');
+        return response.data;
+    };
+
+    const deleteOffer = async (id: string): Promise<void> => {
+        await deleteMutation.mutateAsync(id);
+    };
+
+    const duplicateOffer = async (id: string): Promise<Offer> => {
+        const response = await duplicateMutation.mutateAsync(id);
+        if (!response.data) throw new Error('Failed to duplicate offer');
+        return response.data;
+    };
 
     return {
-        offers,
-        total,
-        page,
-        totalPages,
+        offers: data?.data || [],
+        total: data?.meta?.total || 0,
+        page: data?.meta?.page || 1,
+        totalPages: data?.meta?.totalPages || 1,
         isLoading,
-        error,
+        error: error instanceof ApiError ? error.message : (error?.message ?? null),
         filters,
         setFilters,
-        refresh: fetchOffers,
+        refresh: () => { void refetch(); },
         createOffer,
         updateOffer,
         deleteOffer,
@@ -126,202 +103,145 @@ export function useOffers(initialFilters: OfferFilters = {}): UseOffersResult {
 }
 
 export function useOffer(id: string) {
-    const [offer, setOffer] = useState<Offer | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const { data, isLoading, error, refetch } = useQuery({
+        queryKey: ['offer', id],
+        queryFn: () => offersApi.get(id),
+        enabled: !!id,
+        staleTime: 60_000,
+    });
 
-    const fetchOffer = useCallback(async () => {
-        if (!id) return;
-
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const response = await offersApi.get(id);
-            setOffer(response.data ?? null);
-        } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Failed to fetch offer';
-            setError(message);
-            setOffer(null);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [id]);
-
-    useEffect(() => {
-        fetchOffer();
-    }, [fetchOffer]);
-
-    return { offer, isLoading, error, refresh: fetchOffer };
+    return {
+        offer: data?.data ?? null,
+        isLoading,
+        error: error?.message ?? null,
+        refresh: () => { void refetch(); },
+    };
 }
 
 export function useOffersStats() {
-    const [stats, setStats] = useState<OffersStats | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const { data, isLoading, error, refetch } = useQuery({
+        queryKey: ['offers-stats'],
+        queryFn: () => offersApi.stats(),
+        staleTime: 60_000,
+    });
 
-    const fetchStats = useCallback(async () => {
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const response = await offersApi.stats();
-            setStats(response.data ?? null);
-        } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Failed to fetch stats';
-            setError(message);
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        fetchStats();
-    }, [fetchStats]);
-
-    return { stats, isLoading, error, refresh: fetchStats };
+    return {
+        stats: data?.data ?? null,
+        isLoading,
+        error: error?.message ?? null,
+        refresh: refetch,
+    };
 }
 
 export function useOfferPublish(id: string) {
-    const [isPublishing, setIsPublishing] = useState(false);
-    const [isUnpublishing, setIsUnpublishing] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const queryClient = useQueryClient();
 
-    const publish = useCallback(async (): Promise<PublishOfferResult | null> => {
-        setIsPublishing(true);
-        setError(null);
+    const publishMutation = useMutation({
+        mutationFn: () => offersApi.publish(id),
+        onSuccess: async () => {
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ['offer', id] }),
+                queryClient.invalidateQueries({ queryKey: ['offers'] }),
+            ]);
+        },
+    });
 
-        try {
-            const response = await offersApi.publish(id);
-            return response.data ?? null;
-        } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Failed to publish offer';
-            setError(message);
-            return null;
-        } finally {
-            setIsPublishing(false);
-        }
-    }, [id]);
+    const unpublishMutation = useMutation({
+        mutationFn: () => offersApi.unpublish(id),
+        onSuccess: async () => {
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ['offer', id] }),
+                queryClient.invalidateQueries({ queryKey: ['offers'] }),
+            ]);
+        },
+    });
 
-    const unpublish = useCallback(async (): Promise<boolean> => {
-        setIsUnpublishing(true);
-        setError(null);
+    const publish = async (): Promise<PublishOfferResult | null> => {
+        const response = await publishMutation.mutateAsync();
+        return response.data ?? null;
+    };
 
-        try {
-            await offersApi.unpublish(id);
-            return true;
-        } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Failed to deactivate link';
-            setError(message);
-            return false;
-        } finally {
-            setIsUnpublishing(false);
-        }
-    }, [id]);
+    const unpublish = async (): Promise<boolean> => {
+        await unpublishMutation.mutateAsync();
+        return true;
+    };
 
-    return { publish, unpublish, isPublishing, isUnpublishing, error };
+    return {
+        publish,
+        unpublish,
+        isPublishing: publishMutation.isPending,
+        isUnpublishing: unpublishMutation.isPending,
+        error: publishMutation.error?.message ?? unpublishMutation.error?.message ?? null,
+    };
 }
 
 export function useOfferSendToClient(id: string) {
-    const [isSending, setIsSending] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const sendMutation = useMutation({
+        mutationFn: () => offersApi.sendToClient(id),
+    });
 
-    const sendToClient = useCallback(async (): Promise<SendToClientResult | null> => {
-        setIsSending(true);
-        setError(null);
+    const sendToClient = async (): Promise<SendToClientResult | null> => {
+        const response = await sendMutation.mutateAsync();
+        return response.data ?? null;
+    };
 
-        try {
-            const response = await offersApi.sendToClient(id);
-            return response.data ?? null;
-        } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Failed to send offer';
-            setError(message);
-            return null;
-        } finally {
-            setIsSending(false);
-        }
-    }, [id]);
-
-    return { sendToClient, isSending, error };
+    return {
+        sendToClient,
+        isSending: sendMutation.isPending,
+        error: sendMutation.error?.message ?? null,
+    };
 }
 
 export function useOfferAnalytics(id: string) {
-    const [analytics, setAnalytics] = useState<OfferAnalytics | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const { data, isLoading, error, refetch } = useQuery({
+        queryKey: ['offer-analytics', id],
+        queryFn: () => offersApi.analytics(id),
+        enabled: !!id,
+        staleTime: 60_000,
+    });
 
-    const fetchAnalytics = useCallback(async () => {
-        if (!id) return;
-
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const response = await offersApi.analytics(id);
-            setAnalytics(response.data ?? null);
-        } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Failed to fetch analytics';
-            setError(message);
-            setAnalytics(null);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [id]);
-
-    useEffect(() => {
-        fetchAnalytics();
-    }, [fetchAnalytics]);
-
-    return { analytics, isLoading, error, refresh: fetchAnalytics };
+    return {
+        analytics: data?.data ?? null,
+        isLoading,
+        error: error?.message ?? null,
+        refresh: refetch,
+    };
 }
 
 export function useOfferComments(id: string) {
-    const [comments, setComments] = useState<OfferComment[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isSending, setIsSending] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const queryClient = useQueryClient();
 
-    const fetchComments = useCallback(async () => {
-        if (!id) return;
+    const { data, isLoading, error, refetch } = useQuery({
+        queryKey: ['offer-comments', id],
+        queryFn: () => offersApi.getComments(id),
+        enabled: !!id,
+    });
 
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const response = await offersApi.getComments(id);
-            setComments(response.data ?? []);
-        } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Failed to fetch comments';
-            setError(message);
-            setComments([]);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [id]);
-
-    useEffect(() => {
-        fetchComments();
-    }, [fetchComments]);
-
-    const addComment = useCallback(async (content: string): Promise<OfferComment | null> => {
-        setIsSending(true);
-        setError(null);
-
-        try {
-            const response = await offersApi.addComment(id, content);
+    const addMutation = useMutation({
+        mutationFn: (content: string) => offersApi.addComment(id, content),
+        onSuccess: (response) => {
             if (response.data) {
-                setComments((prev) => [...prev, response.data!]);
-                return response.data;
+                queryClient.setQueryData(
+                    ['offer-comments', id],
+                    (old: typeof data) => old
+                        ? { ...old, data: [...(old.data ?? []), response.data!] }
+                        : old,
+                );
             }
-            return null;
-        } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Failed to add comment';
-            setError(message);
-            return null;
-        } finally {
-            setIsSending(false);
-        }
-    }, [id]);
+        },
+    });
 
-    return { comments, isLoading, isSending, error, addComment, refresh: fetchComments };
+    const addComment = async (content: string): Promise<OfferComment | null> => {
+        const response = await addMutation.mutateAsync(content);
+        return response.data ?? null;
+    };
+
+    return {
+        comments: data?.data ?? [],
+        isLoading,
+        isSending: addMutation.isPending,
+        error: error?.message ?? null,
+        addComment,
+        refresh: refetch,
+    };
 }

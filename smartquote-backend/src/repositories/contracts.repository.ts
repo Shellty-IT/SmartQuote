@@ -205,23 +205,31 @@ export class ContractsRepository {
         });
     }
 
-    async update(id: string, data: UpdateContractData) {
-        return prisma.contract.update({
-            where: { id },
-            data,
-            include: {
-                client: true,
-                items: { orderBy: { position: 'asc' } as const },
-            },
+    async update(id: string, userId: string, data: UpdateContractData) {
+        return prisma.$transaction(async (tx) => {
+            const record = await tx.contract.findFirst({ where: { id, userId }, select: { id: true } });
+            if (!record) return null;
+            return tx.contract.update({
+                where: { id },
+                data,
+                include: {
+                    client: true,
+                    items: { orderBy: { position: 'asc' } as const },
+                },
+            });
         });
     }
 
     async updateWithItems(
         id: string,
+        userId: string,
         data: UpdateContractData,
         items: ContractItemData[],
     ) {
         return prisma.$transaction(async (tx) => {
+            const record = await tx.contract.findFirst({ where: { id, userId }, select: { id: true } });
+            if (!record) return null;
+
             await tx.contractItem.deleteMany({ where: { contractId: id } });
 
             return tx.contract.update({
@@ -238,8 +246,9 @@ export class ContractsRepository {
         });
     }
 
-    async delete(id: string) {
-        await prisma.contract.delete({ where: { id } });
+    async delete(id: string, userId: string): Promise<boolean> {
+        const result = await prisma.contract.deleteMany({ where: { id, userId } });
+        return result.count > 0;
     }
 
     async countByYear(userId: string, year: number) {

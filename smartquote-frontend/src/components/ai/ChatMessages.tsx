@@ -4,12 +4,15 @@ import { useSession } from 'next-auth/react';
 import { ChatBubble } from './ChatBubble';
 import { useTranslations } from '@/i18n';
 import type { ChatMessage } from './hooks/useChatMessages';
+import type { AIAction } from '@/types/ai';
 
 interface ChatMessagesProps {
     messages: ChatMessage[];
     isLoading: boolean;
     messagesEndRef: React.RefObject<HTMLDivElement | null>;
     onSuggestionClick: (suggestion: string) => void;
+    onAction?: (action: AIAction) => void;
+    quickSuggestions?: string[];
 }
 
 export function ChatMessages({
@@ -17,17 +20,23 @@ export function ChatMessages({
                                  isLoading,
                                  messagesEndRef,
                                  onSuggestionClick,
+                                 onAction,
+                                 quickSuggestions,
                              }: ChatMessagesProps) {
     const { data: session } = useSession();
 
     return (
         <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ maxHeight: '320px' }}>
             {messages.length === 0 ? (
-                <EmptyState userName={session?.user?.name} onSuggestionClick={onSuggestionClick} />
+                <EmptyState
+                    userName={session?.user?.name}
+                    onSuggestionClick={onSuggestionClick}
+                    quickSuggestions={quickSuggestions}
+                />
             ) : (
                 <>
                     {messages.map((message) => (
-                        <ChatBubble key={message.id} message={message} />
+                        <ChatBubble key={message.id} message={message} onAction={onAction} />
                     ))}
                     {isLoading && <TypingIndicator />}
                 </>
@@ -40,16 +49,19 @@ export function ChatMessages({
 function EmptyState({
                         userName,
                         onSuggestionClick,
+                        quickSuggestions,
                     }: {
     userName?: string | null;
     onSuggestionClick: (suggestion: string) => void;
+    quickSuggestions?: string[];
 }) {
     const tr = useTranslations('aiChat');
-    const suggestions = [
+    const defaultSuggestions = [
         tr.suggestions.createOffer,
         tr.suggestions.summarizeDay,
         tr.suggestions.overdueFollowups,
     ];
+    const suggestions = quickSuggestions && quickSuggestions.length > 0 ? quickSuggestions : defaultSuggestions;
 
     return (
         <>

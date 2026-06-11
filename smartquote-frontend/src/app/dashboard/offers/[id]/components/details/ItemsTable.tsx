@@ -4,12 +4,15 @@
 import { formatCurrency } from '@/lib/utils';
 import { useTranslations } from '@/i18n';
 import type { OfferItem } from '@/types';
+import type { PriceCheckResult } from '@/types/ai';
+import { PriceCheckBadge } from '@/components/offers/PriceCheckBadge';
 
 interface ItemsTableProps {
     items: OfferItem[];
+    priceCheckResults?: PriceCheckResult[] | null;
 }
 
-export function ItemsTable({ items }: ItemsTableProps) {
+export function ItemsTable({ items, priceCheckResults }: ItemsTableProps) {
     const tr = useTranslations('offerDetail');
     return (
         <div className="overflow-x-auto">
@@ -54,7 +57,19 @@ export function ItemsTable({ items }: ItemsTableProps) {
                             {item.vatRate}%
                         </td>
                         <td className="py-3 text-right font-semibold text-foreground">
-                            {formatCurrency(Number(item.totalGross))}
+                            <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                                {formatCurrency(Number(item.totalGross))}
+                                {priceCheckResults && (() => {
+                                    const r = priceCheckResults.find((x) => x.itemIndex === index);
+                                    return r ? (
+                                        <PriceCheckBadge
+                                            verdict={r.verdict}
+                                            suggestion={r.suggestion}
+                                            suggestedRange={r.suggestedRange}
+                                        />
+                                    ) : null;
+                                })()}
+                            </div>
                         </td>
                     </tr>
                 ))}

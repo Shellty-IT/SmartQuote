@@ -42,5 +42,6 @@ export { Alert, AlertTitle, AlertDescription } from './alert';
 export { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel, AlertDialogTrigger } from './alert-dialog';
 export { Checkbox } from './checkbox';
 export { Toaster } from './sonner';
+export { InlineEdit } from './InlineEdit';
 export { ToastContainer } from './Toast';
 export type { ToastType, ToastData } from './Toast';

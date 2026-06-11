@@ -3,8 +3,19 @@
 
 import { SessionProvider } from 'next-auth/react';
 import { ReactNode, useEffect, useState, createContext, useContext, useCallback, useRef } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AIChatProvider } from '@/contexts/AIChatContext';
 import { ToastProvider } from '@/contexts/ToastContext';
+
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            staleTime: 30_000,
+            retry: 1,
+            refetchOnWindowFocus: true,
+        },
+    },
+});
 
 type Theme = 'light' | 'dark';
 type Language = 'pl' | 'en';
@@ -135,18 +146,20 @@ function SidebarProvider({ children }: { children: ReactNode }) {
 
 export function Providers({ children }: { children: ReactNode }) {
     return (
-        <SessionProvider>
-            <ThemeProvider>
-                <LanguageProvider>
-                    <SidebarProvider>
-                        <ToastProvider>
-                            <AIChatProvider>
-                                {children}
-                            </AIChatProvider>
-                        </ToastProvider>
-                    </SidebarProvider>
-                </LanguageProvider>
-            </ThemeProvider>
-        </SessionProvider>
+        <QueryClientProvider client={queryClient}>
+            <SessionProvider>
+                <ThemeProvider>
+                    <LanguageProvider>
+                        <SidebarProvider>
+                            <ToastProvider>
+                                <AIChatProvider>
+                                    {children}
+                                </AIChatProvider>
+                            </ToastProvider>
+                        </SidebarProvider>
+                    </LanguageProvider>
+                </ThemeProvider>
+            </SessionProvider>
+        </QueryClientProvider>
     );
 }

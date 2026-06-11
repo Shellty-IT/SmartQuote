@@ -25,8 +25,10 @@ import type { OfferDescriptionContext } from './prompts';
 import { getPriceInsight, getObserverInsight, getClosingStrategy } from './analysis';
 import { generatePostMortem, getLatestInsights, getInsightsList } from './feedback';
 import { offerFillChat, type OfferFillMessage, type OfferFillContext, type OfferFillResult } from './offer-fill';
+import { priceCheck, type PriceCheckInput, type PriceCheckResult } from './price-check';
 
 export type { OfferFillMessage, OfferFillContext, OfferFillResult };
+export type { PriceCheckInput, PriceCheckResult };
 
 class AIService {
     private readonly ai: GoogleGenAI | null;
@@ -41,8 +43,8 @@ class AIService {
         return getUserContext(userId);
     }
 
-    chat(userId: string, message: string, conversationHistory: AIMessage[] = []): Promise<AIResponse> {
-        return chat(this.ai, userId, message, conversationHistory);
+    chat(userId: string, message: string, conversationHistory: AIMessage[] = [], pageContext?: { type: string; id?: string; title?: string; extra?: string }): Promise<AIResponse> {
+        return chat(this.ai, userId, message, conversationHistory, pageContext);
     }
 
     generateOffer(_userId: string, description: string): Promise<GeneratedOffer> {
@@ -101,6 +103,10 @@ class AIService {
 
     offerFill(context: OfferFillContext, history: OfferFillMessage[], message: string): Promise<OfferFillResult> {
         return offerFillChat(this.ai, context, history, message);
+    }
+
+    priceCheck(userId: string, input: PriceCheckInput): Promise<PriceCheckResult[]> {
+        return priceCheck(this.ai, userId, input);
     }
 
     clearConversationHistory(userId: string): void {

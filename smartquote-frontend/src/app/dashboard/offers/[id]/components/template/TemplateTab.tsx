@@ -134,10 +134,12 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
         // Auto-save silently
         try {
             await offersApi.update(offer.id, { blocks: updatedBlocks as unknown })
+            // Refresh offer so all tabs (Details, header) reflect updated totals
+            onSaved()
         } catch {
             toast.error(ttr.saveError, offer.number)
         }
-    }, [offer.id, offer.number, ttr.saveError, toast])
+    }, [offer.id, offer.number, ttr.saveError, toast, onSaved])
 
     return (
         <div className="space-y-6">

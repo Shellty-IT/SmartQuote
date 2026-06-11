@@ -126,8 +126,12 @@ describe('encrypt/decrypt with missing env key', () => {
         process.env.ENCRYPTION_KEY = 'test-encryption-key-32chars-pad!';
     });
 
-    it('still round-trips when key falls back to padded zeros', () => {
-        const original = 'fallback key test';
-        expect(decrypt(encrypt(original))).toBe(original);
+    it('throws when ENCRYPTION_KEY is not set', () => {
+        expect(() => encrypt('any text')).toThrow(/ENCRYPTION_KEY must be at least 32 characters/);
+    });
+
+    it('throws when ENCRYPTION_KEY is shorter than 32 chars', () => {
+        process.env.ENCRYPTION_KEY = 'too-short';
+        expect(() => encrypt('any text')).toThrow(/ENCRYPTION_KEY must be at least 32 characters/);
     });
 });

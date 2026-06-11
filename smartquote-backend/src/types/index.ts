@@ -254,6 +254,7 @@ export interface AIStats {
     activeOffers: number;
     pendingFollowUps: number;
     monthlyRevenue: number;
+    leadsCount?: number;
 }
 
 export interface AIContextClient {
@@ -294,17 +295,27 @@ export interface AIContextFollowUp {
     client: { name: string } | null;
 }
 
+export interface AIContextLead {
+    id: string;
+    name: string;
+    company: string | null;
+    email: string | null;
+    status: string;
+    createdAt: Date;
+}
+
 export interface AIContext {
     userId: string;
     clients?: AIContextClient[];
     offers?: AIContextOffer[];
     contracts?: AIContextContract[];
     followUps?: AIContextFollowUp[];
+    leads?: AIContextLead[];
     stats?: AIStats;
 }
 
 export interface AIAction {
-    type: 'create_offer' | 'create_followup' | 'send_email' | 'view_client' | 'view_offer' | 'navigate';
+    type: 'create_offer' | 'create_followup' | 'send_email' | 'view_client' | 'view_offer' | 'navigate' | 'create_note' | 'update_status' | 'create_lead';
     label: string;
     payload: Record<string, unknown>;
 }
@@ -423,4 +434,72 @@ export interface GetEmailLogsParams {
     offerId?: string;
     contractId?: string;
     search?: string;
+}
+
+export type LeadStatus = 'NEW' | 'CONTACTED' | 'CONVERTED' | 'LOST';
+
+export interface CreateLeadInput {
+    name: string;
+    company?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    source?: string | null;
+    notes?: string | null;
+}
+
+export interface UpdateLeadInput {
+    name?: string;
+    company?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    source?: string | null;
+    notes?: string | null;
+    status?: LeadStatus;
+    clientId?: string | null;
+}
+
+export interface ConvertLeadInput {
+    name?: string;
+    email?: string | null;
+    phone?: string | null;
+    company?: string | null;
+    nip?: string | null;
+}
+
+export interface CreateNoteInput {
+    content: string;
+    clientId?: string | null;
+    offerId?: string | null;
+    contractId?: string | null;
+    leadId?: string | null;
+}
+
+export interface UpdateNoteInput {
+    content: string;
+}
+
+export type { Alert } from '../services/alerts.service';
+
+export interface CreateCalendarEventInput {
+    title: string;
+    description?: string | null;
+    startAt: string; // ISO date string
+    endAt?: string | null;
+    allDay?: boolean;
+    color?: string;
+    clientId?: string | null;
+    offerId?: string | null;
+    leadId?: string | null;
+}
+
+export interface UpdateCalendarEventInput {
+    title?: string;
+    description?: string | null;
+    startAt?: string;
+    endAt?: string | null;
+    allDay?: boolean;
+    color?: string;
+    clientId?: string | null;
+    offerId?: string | null;
+    leadId?: string | null;
 }

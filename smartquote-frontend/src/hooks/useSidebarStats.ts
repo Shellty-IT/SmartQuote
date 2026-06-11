@@ -1,86 +1,56 @@
-// SmartQuote-AI/src/hooks/useSidebarStats.ts
-
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { offersApi, clientsApi, contractsApi, followUpsApi, ApiError } from '@/lib/api';
+import { useQueries } from '@tanstack/react-query';
+import { offersApi, clientsApi, contractsApi, followUpsApi } from '@/lib/api';
+import { leadsApi } from '@/lib/api/leads.api';
 
 interface SidebarStats {
     offers: number;
     contracts: number;
     clients: number;
     followups: number;
+    leads: number;
 }
 
+// Shared query config — each stat is cached independently and shared with entity hooks.
+// When useClients/useOffers/etc. invalidate their stats queries, the sidebar updates too.
+const STATS_QUERY_CONFIG = {
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+} as const;
+
 export function useSidebarStats() {
-    const [stats, setStats] = useState<SidebarStats>({
-        offers: 0,
-        contracts: 0,
-        clients: 0,
-        followups: 0,
+    const [offersRes, clientsRes, contractsRes, followupsRes, leadsRes] = useQueries({
+        queries: [
+            { queryKey: ['offers-stats'], queryFn: () => offersApi.stats(), ...STATS_QUERY_CONFIG },
+            { queryKey: ['clients-stats'], queryFn: () => clientsApi.stats(), ...STATS_QUERY_CONFIG },
+            { queryKey: ['contracts-stats'], queryFn: () => contractsApi.stats(), ...STATS_QUERY_CONFIG },
+            { queryKey: ['followups-stats'], queryFn: () => followUpsApi.stats(), ...STATS_QUERY_CONFIG },
+            { queryKey: ['leads-stats'], queryFn: () => leadsApi.stats(), ...STATS_QUERY_CONFIG },
+        ],
     });
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
 
-    const fetchStats = useCallback(async () => {
-        setIsLoading(true);
-        setError(null);
+    const stats: SidebarStats = {
+        offers: offersRes.data?.data?.total ?? 0,
+        clients: clientsRes.data?.data?.total ?? 0,
+        contracts: contractsRes.data?.data?.total ?? 0,
+        followups:
+            (followupsRes.data?.data?.byStatus?.PENDING ?? 0) +
+            (followupsRes.data?.data?.overdue ?? 0),
+        leads:
+            (leadsRes.data?.data?.byStatus?.NEW ?? 0) +
+            (leadsRes.data?.data?.byStatus?.CONTACTED ?? 0),
+    };
 
-        try {
-            const [offersRes, clientsRes, contractsRes, followupsRes] = await Promise.allSettled([
-                offersApi.stats(),
-                clientsApi.stats(),
-                contractsApi.stats(),
-                followUpsApi.stats(),
-            ]);
+    const isLoading = [offersRes, clientsRes, contractsRes, followupsRes, leadsRes].some(
+        (r) => r.isLoading,
+    );
 
-            let offersCount = 0;
-            let clientsCount = 0;
-            let contractsCount = 0;
-            let followupsCount = 0;
+    const error =
+        offersRes.error?.message ??
+        clientsRes.error?.message ??
+        contractsRes.error?.message ??
+        null;
 
-            if (offersRes.status === 'fulfilled' && offersRes.value.data) {
-                const data = offersRes.value.data;
-                offersCount = data.total || 0;
-            }
-
-            if (clientsRes.status === 'fulfilled' && clientsRes.value.data) {
-                const data = clientsRes.value.data;
-                clientsCount = data.total || 0;
-            }
-
-            if (contractsRes.status === 'fulfilled' && contractsRes.value.data) {
-                const data = contractsRes.value.data;
-                contractsCount = data.total || 0;
-            }
-
-            if (followupsRes.status === 'fulfilled' && followupsRes.value.data) {
-                const data = followupsRes.value.data;
-                followupsCount =
-                    (data.byStatus?.PENDING || 0) +
-                    (data.overdue || 0);
-            }
-
-            setStats({
-                offers: offersCount,
-                contracts: contractsCount,
-                clients: clientsCount,
-                followups: followupsCount,
-            });
-        } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Failed to load stats';
-            setError(message);
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        fetchStats();
-
-        const interval = setInterval(fetchStats, 60000);
-        return () => clearInterval(interval);
-    }, [fetchStats]);
-
-    return { stats, isLoading, error, refresh: fetchStats };
+    return { stats, isLoading, error };
 }

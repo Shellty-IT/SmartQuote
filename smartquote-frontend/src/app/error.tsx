@@ -1,78 +1,47 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 
 interface ErrorProps {
     error: Error & { digest?: string };
     reset: () => void;
 }
 
-export default function GlobalError({ error, reset }: ErrorProps) {
+export default function RootError({ error, reset }: ErrorProps) {
     useEffect(() => {
         if (process.env.NODE_ENV === 'development') {
-            console.error('[GlobalError]', error);
+            console.error('[RootError]', error);
         }
     }, [error]);
 
     return (
-        <html lang="en">
-            <body style={{ backgroundColor: 'oklch(0.985 0.008 240)', color: 'oklch(0.22 0.05 250)' }}>
-                <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-                    <div style={{ maxWidth: '28rem', width: '100%', textAlign: 'center' }}>
-                        <div style={{
-                            width: '4rem', height: '4rem', borderRadius: '1rem',
-                            background: 'oklch(0.6 0.22 25 / 0.12)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            margin: '0 auto 1.5rem',
-                            border: '1px solid oklch(0.6 0.22 25 / 0.25)',
-                        }}>
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="oklch(0.6 0.22 25)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-                                <line x1="12" y1="9" x2="12" y2="13"/>
-                                <line x1="12" y1="17" x2="12.01" y2="17"/>
-                            </svg>
-                        </div>
-                        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-                            An unexpected error occurred
-                        </h1>
-                        <p style={{ color: 'oklch(0.5 0.04 248)', marginBottom: '2rem', fontSize: '0.875rem' }}>
-                            Sorry for the inconvenience. Try refreshing the page or go back to the dashboard.
-                        </p>
-                        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
-                            <button
-                                onClick={reset}
-                                style={{
-                                    padding: '0.625rem 1.25rem',
-                                    background: 'linear-gradient(135deg, oklch(0.62 0.18 248), oklch(0.72 0.16 210))',
-                                    color: 'white',
-                                    borderRadius: '0.75rem',
-                                    fontSize: '0.875rem',
-                                    fontWeight: 600,
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                }}
-                            >
-                                Try again
-                            </button>
-                            <a
-                                href="/dashboard"
-                                style={{
-                                    padding: '0.625rem 1.25rem',
-                                    background: 'oklch(0.955 0.018 240)',
-                                    color: 'oklch(0.22 0.05 250)',
-                                    borderRadius: '0.75rem',
-                                    fontSize: '0.875rem',
-                                    fontWeight: 600,
-                                    border: '1px solid oklch(0.92 0.018 240)',
-                                    textDecoration: 'none',
-                                }}
-                            >
-                                Back to dashboard
-                            </a>
-                        </div>
-                    </div>
+        <div className="min-h-[60vh] flex items-center justify-center p-6">
+            <div className="max-w-sm w-full text-center">
+                <div className="w-14 h-14 bg-destructive/15 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                    <svg className="w-7 h-7 text-destructive" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
                 </div>
-            </body>
-        </html>
+                <h2 className="text-xl font-bold text-foreground mb-2">Wystąpił nieoczekiwany błąd</h2>
+                <p className="text-muted-foreground text-sm mb-6">
+                    Przepraszamy za niedogodności. Spróbuj ponownie lub wróć do panelu.
+                </p>
+                <div className="flex gap-3 justify-center">
+                    <button
+                        onClick={reset}
+                        className="px-4 py-2 bg-primary hover:brightness-110 text-white rounded-xl text-sm font-medium transition-colors"
+                    >
+                        Spróbuj ponownie
+                    </button>
+                    <Link
+                        href="/dashboard"
+                        className="px-4 py-2 bg-secondary hover:bg-secondary text-foreground rounded-xl text-sm font-medium transition-colors"
+                    >
+                        Panel główny
+                    </Link>
+                </div>
+            </div>
+        </div>
     );
 }

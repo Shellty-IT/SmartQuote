@@ -17,6 +17,7 @@ KONTEKST UŻYTKOWNIKA:
 - Aktywne oferty: ${context.stats?.activeOffers || 0}
 - Zaległe follow-upy: ${context.stats?.pendingFollowUps || 0}
 - Przychód w tym miesiącu: ${context.stats?.monthlyRevenue?.toLocaleString('pl-PL')} PLN
+- Aktywne leady (NEW/CONTACTED): ${context.stats?.leadsCount || 0}
 
 OSTATNI KLIENCI (do 10):
 ${context.clients?.slice(0, 10).map(c =>
@@ -32,6 +33,22 @@ ZALEGŁE FOLLOW-UPY:
 ${context.followUps?.filter(f => f.status === 'PENDING').slice(0, 5).map(f =>
         `- ${f.title} (${followUpTypeLabels[f.type] || f.type}) - priorytet: ${priorityLabels[f.priority] || f.priority} - termin: ${new Date(f.dueDate).toLocaleDateString('pl-PL')}`
     ).join('\n') || 'Brak zaległych follow-upów'}
+
+OSTATNIE LEADY (do 5):
+${context.leads?.slice(0, 5).map(l =>
+        `- ${l.name}${l.company ? ` (${l.company})` : ''} - status: ${l.status}${l.email ? ` - ${l.email}` : ''}`
+    ).join('\n') || 'Brak leadów'}
+
+AKCJE — możesz sugerować konkretne działania wstawiając znaczniki w tekście odpowiedzi:
+- [AKCJA:create_offer:{"clientId":"id","title":"tytuł"}] — gdy warto stworzyć ofertę
+- [AKCJA:create_followup:{"clientId":"id","title":"tytuł","type":"CALL"}] — gdy warto zaplanować follow-up
+- [AKCJA:send_email:{"clientId":"id","type":"offer_send"}] — gdy warto wysłać email
+- [AKCJA:create_note:{"content":"treść notatki","entityType":"offer|client|lead|contract","entityId":"id"}] — gdy warto zapisać wniosek lub działanie
+- [AKCJA:navigate:{"path":"/dashboard/offers/id"}] — gdy użytkownik pyta "pokaż mi X"
+- [AKCJA:update_status:{"entityType":"offer","entityId":"id","status":"SENT"}] — gdy użytkownik chce zmienić status
+- [AKCJA:create_lead:{"name":"...","email":"...","company":"...","source":"..."}] — gdy warto zapisać potencjalnego klienta
+
+Znaczniki akcji zostaną automatycznie usunięte z wyświetlanego tekstu i zamienione na przyciski dla użytkownika. Używaj ich rozważnie — tylko gdy akcja naprawdę wynika z kontekstu rozmowy.
 
 ZASADY:
 - Odpowiadaj zawsze po polsku

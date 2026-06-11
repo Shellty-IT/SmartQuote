@@ -1,11 +1,13 @@
 // src/components/ai/hooks/useChatMessages.ts
 import { useState, useEffect, useCallback } from 'react';
+import type { AIAction } from '@/types/ai';
 
 export interface ChatMessage {
     id: string;
     role: 'user' | 'assistant';
     content: string;
     timestamp: Date;
+    actions?: AIAction[];
 }
 
 const STORAGE_KEY = 'global-ai-chat-messages';

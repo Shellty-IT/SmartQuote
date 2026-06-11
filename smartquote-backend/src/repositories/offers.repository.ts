@@ -297,23 +297,31 @@ export class OffersRepository {
         });
     }
 
-    async update(id: string, data: UpdateOfferData) {
-        return prisma.offer.update({
-            where: { id },
-            data,
-            include: {
-                client: true,
-                items: { orderBy: { position: 'asc' } as const },
-            },
+    async update(id: string, userId: string, data: UpdateOfferData) {
+        return prisma.$transaction(async (tx) => {
+            const record = await tx.offer.findFirst({ where: { id, userId }, select: { id: true } });
+            if (!record) return null;
+            return tx.offer.update({
+                where: { id },
+                data,
+                include: {
+                    client: true,
+                    items: { orderBy: { position: 'asc' } as const },
+                },
+            });
         });
     }
 
     async updateWithItems(
         id: string,
+        userId: string,
         data: UpdateOfferData,
         items: OfferItemData[],
     ) {
         return prisma.$transaction(async (tx) => {
+            const record = await tx.offer.findFirst({ where: { id, userId }, select: { id: true } });
+            if (!record) return null;
+
             await tx.offerItem.deleteMany({ where: { offerId: id } });
 
             return tx.offer.update({
@@ -330,8 +338,9 @@ export class OffersRepository {
         });
     }
 
-    async delete(id: string) {
-        return prisma.offer.delete({ where: { id } });
+    async delete(id: string, userId: string): Promise<boolean> {
+        const result = await prisma.offer.deleteMany({ where: { id, userId } });
+        return result.count > 0;
     }
 
     async groupByStatus(userId: string) {

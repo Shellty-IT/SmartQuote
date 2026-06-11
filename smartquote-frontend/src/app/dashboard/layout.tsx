@@ -3,10 +3,11 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import { GlobalAIChat } from '@/components/ai/GlobalAIChat';
+import CommandPalette from '@/components/search/CommandPalette';
 import { useTranslations } from '@/i18n';
 import { useSidebarCollapsed } from '@/app/providers';
 import { cn } from '@/lib/utils';
@@ -16,6 +17,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const router = useRouter();
     const commonTr = useTranslations('common');
     const { collapsed } = useSidebarCollapsed();
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+    const handleKeyDown = useCallback((e: KeyboardEvent) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            setIsSearchOpen(true);
+        }
+    }, []);
+
+    useEffect(() => {
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [handleKeyDown]);
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -45,7 +59,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 'flex min-w-0 flex-1 flex-col transition-all duration-300',
                 collapsed ? 'lg:pl-[72px]' : 'lg:pl-[260px]'
             )}>
-                <Header />
+                <Header onSearchOpen={() => setIsSearchOpen(true)} />
                 <main className="relative flex-1 overflow-x-hidden">
                     {/* Subtle mesh gradient top overlay */}
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-[320px] bg-gradient-mesh opacity-50" />
@@ -54,6 +68,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
 
             <GlobalAIChat />
+            <CommandPalette isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
         </div>
     );
 }

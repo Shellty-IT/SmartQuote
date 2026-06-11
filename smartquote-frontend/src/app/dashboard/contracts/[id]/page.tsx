@@ -15,6 +15,7 @@ import { useTranslations } from '@/i18n';
 import { PdfPreviewModal } from '@/components/pdf/PdfPreviewModal';
 import { ContractTemplateTab } from './components/ContractTemplateTab';
 import { cn } from '@/lib/utils';
+import { NotesFeed } from '@/components/notes/NotesFeed';
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -712,6 +713,8 @@ export default function ContractDetailsPage({ params }: PageProps) {
                             </div>
                         </div>
                     )}
+
+                    <NotesFeed entityId={contract.id} entityType="contract" />
                 </div>
             </div>
             </> )} {/* end activeTab === 'details' */}

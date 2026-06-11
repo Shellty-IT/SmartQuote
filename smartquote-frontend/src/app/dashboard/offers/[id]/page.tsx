@@ -137,6 +137,7 @@ export default function OfferDetailPage({ params }: PageProps) {
                     onPublishClick={() => setPublishDialogOpen(true)}
                     onDeleteClick={() => setDeleteModal(true)}
                     onCopyHash={handleCopyHash}
+                    onSaved={refresh}
                 />
             )}
 

@@ -145,16 +145,17 @@ export const followUpsRepository = {
         });
     },
 
-    update(id: string, data: Prisma.FollowUpUpdateInput) {
-        return prisma.followUp.update({
-            where: { id },
-            data,
-            include: followUpInclude,
+    update(id: string, userId: string, data: Prisma.FollowUpUpdateInput) {
+        return prisma.$transaction(async (tx) => {
+            const record = await tx.followUp.findFirst({ where: { id, userId }, select: { id: true } });
+            if (!record) return null;
+            return tx.followUp.update({ where: { id }, data, include: followUpInclude });
         });
     },
 
-    delete(id: string) {
-        return prisma.followUp.delete({ where: { id } });
+    async delete(id: string, userId: string): Promise<boolean> {
+        const result = await prisma.followUp.deleteMany({ where: { id, userId } });
+        return result.count > 0;
     },
 
     deleteMany(ids: string[], userId: string) {
