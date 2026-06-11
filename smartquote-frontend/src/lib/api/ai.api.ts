@@ -11,11 +11,18 @@ import type {
     ClosingStrategy,
     LatestInsightItem,
     InsightsListItem,
+    PriceCheckResult,
 } from '@/types/ai';
+import type { OfferItem } from '@/types';
+import type { AlertsResponse } from '@/types/alert.types';
 
 export const ai = {
-    chat: async (message: string, history: Array<{ role: 'user' | 'assistant'; content: string }> = []): Promise<ChatData> => {
-        const response = await api.post<ChatData>('/ai/chat', { message, history });
+    chat: async (
+        message: string,
+        history: Array<{ role: 'user' | 'assistant'; content: string }> = [],
+        pageContext?: { type: string; id?: string; title?: string; extra?: string }
+    ): Promise<ChatData> => {
+        const response = await api.post<ChatData>('/ai/chat', { message, history, pageContext });
         return response.data as ChatData;
     },
 
@@ -46,6 +53,11 @@ export const ai = {
 
     getSuggestions: async (): Promise<SuggestionsData> => {
         const response = await api.get<SuggestionsData>('/ai/suggestions');
+        return response.data as SuggestionsData;
+    },
+
+    getContext: async (): Promise<SuggestionsData> => {
+        const response = await api.get<SuggestionsData>('/ai/context');
         return response.data as SuggestionsData;
     },
 
@@ -110,6 +122,16 @@ export const ai = {
             params,
         )
         return response.data as { message: string; blocks: Record<string, unknown> | null; isComplete: boolean }
+    },
+
+    getAlerts: async (): Promise<AlertsResponse> => {
+        const response = await api.get<AlertsResponse>('/ai/alerts');
+        return response.data as AlertsResponse;
+    },
+
+    priceCheck: async (items: OfferItem[], currency: string, clientContext?: string): Promise<PriceCheckResult[]> => {
+        const response = await api.post<PriceCheckResult[]>('/ai/price-check', { items, currency, clientContext });
+        return response.data as PriceCheckResult[];
     },
 
     /**

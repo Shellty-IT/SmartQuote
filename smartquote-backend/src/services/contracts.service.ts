@@ -157,14 +157,19 @@ export class ContractsService {
 
             const totals = sumItems(calculatedItems);
 
-            return contractsRepository.updateWithItems(
+            const result = await contractsRepository.updateWithItems(
                 id,
+                userId,
                 { ...updateData, ...totals },
                 calculatedItems,
             );
+            if (!result) throw new NotFoundError('Umowa');
+            return result;
         }
 
-        return contractsRepository.update(id, updateData);
+        const result = await contractsRepository.update(id, userId, updateData);
+        if (!result) throw new NotFoundError('Umowa');
+        return result;
     }
 
     async updateContractStatus(id: string, userId: string, status: ContractStatus) {
@@ -185,7 +190,7 @@ export class ContractsService {
     async deleteContract(id: string, userId: string) {
         const existing = await contractsRepository.findById(id, userId);
         if (!existing) throw new NotFoundError('Umowa');
-        await contractsRepository.delete(id);
+        await contractsRepository.delete(id, userId);
         return true;
     }
 
@@ -257,7 +262,7 @@ export class ContractsService {
         }
 
         const token = randomBytes(32).toString('hex');
-        await contractsRepository.update(id, { publicToken: token });
+        await contractsRepository.update(id, userId, { publicToken: token });
 
         return {
             publicToken: token,
@@ -270,7 +275,7 @@ export class ContractsService {
         const contract = await contractsRepository.findById(id, userId);
         if (!contract) throw new NotFoundError('Umowa');
 
-        await contractsRepository.update(id, { publicToken: null });
+        await contractsRepository.update(id, userId, { publicToken: null });
         return { unpublished: true };
     }
 }

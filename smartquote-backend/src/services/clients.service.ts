@@ -57,15 +57,14 @@ export class ClientsService {
     }
 
     async update(id: string, userId: string, data: UpdateClientInput) {
-        const exists = await clientsRepository.existsForUser(id, userId);
-        if (!exists) throw new NotFoundError('Klient');
-        return clientsRepository.update(id, data);
+        const result = await clientsRepository.update(id, userId, data);
+        if (!result) throw new NotFoundError('Klient');
+        return result;
     }
 
     async delete(id: string, userId: string) {
-        const exists = await clientsRepository.existsForUser(id, userId);
-        if (!exists) throw new NotFoundError('Klient');
-        return clientsRepository.delete(id);
+        const deleted = await clientsRepository.delete(id, userId);
+        if (!deleted) throw new NotFoundError('Klient');
     }
 
     async getStats(userId: string) {

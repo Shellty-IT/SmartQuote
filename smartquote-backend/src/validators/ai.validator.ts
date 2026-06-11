@@ -14,6 +14,12 @@ export const chatSchema = z.object({
             )
             .optional()
             .default([]),
+        pageContext: z.object({
+            type: z.string(),
+            id: z.string().optional(),
+            title: z.string().optional(),
+            extra: z.string().optional(),
+        }).optional(),
     }),
 });
 
@@ -86,6 +92,26 @@ export const generateSectionSchema = z.object({
         clientName: z.string().min(1).max(200),
         totalGross: z.number().min(0),
         currency: z.string().min(1).max(10),
+    }),
+});
+
+export const priceCheckSchema = z.object({
+    body: z.object({
+        items: z
+            .array(
+                z.object({
+                    name: z.string().min(1).max(500),
+                    description: z.string().max(1000).optional().nullable(),
+                    quantity: z.number().positive(),
+                    unit: z.string().min(1).max(50),
+                    unitPrice: z.number().min(0),
+                    vatRate: z.number().min(0).max(100),
+                }),
+            )
+            .min(1, 'Musisz podać co najmniej jedną pozycję')
+            .max(50),
+        currency: z.string().min(1).max(10),
+        clientContext: z.string().max(500).optional().nullable(),
     }),
 });
 

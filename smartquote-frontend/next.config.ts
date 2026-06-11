@@ -19,7 +19,8 @@ function buildCsp(frameAncestors: "'none'" | "'self'") {
         "font-src 'self' data:",
         connectSrc,
         // Allow blob: and srcdoc iframes (PDF preview modal + document editor)
-        "frame-src 'self' blob:",
+        // shellty-it.github.io needed for demo/about website previews in offer documents
+        "frame-src 'self' blob: https://shellty-it.github.io",
         `frame-ancestors ${frameAncestors}`,
     ].join('; ');
 }
@@ -63,6 +64,23 @@ const nextConfig: NextConfig = {
             // Public offer page can also be previewed in the same modal
             {
                 source: '/public/offers/:token',
+                headers: previewFrameHeaders,
+            },
+            // Contract short template preview — loaded in iframe inside dashboard + public contract page
+            {
+                source: '/api/contracts/:id/short/preview',
+                headers: previewFrameHeaders,
+            },
+            {
+                source: '/api/contracts/:id/pdf/short',
+                headers: previewFrameHeaders,
+            },
+            {
+                source: '/api/public/contracts/:token/short/preview',
+                headers: previewFrameHeaders,
+            },
+            {
+                source: '/api/public/contracts/:token/pdf/short',
                 headers: previewFrameHeaders,
             },
             {

@@ -35,7 +35,7 @@ function buildMonthStart(): Date {
 }
 
 export async function getUserContext(userId: string): Promise<AIContext> {
-    const [clients, offers, contracts, followUps] = await Promise.all([
+    const [clients, offers, contracts, followUps, leads] = await Promise.all([
         prisma.client.findMany({
             where: { userId },
             take: 50,
@@ -90,9 +90,15 @@ export async function getUserContext(userId: string): Promise<AIContext> {
                 client: { select: { name: true } },
             },
         }),
+        prisma.lead.findMany({
+            where: { userId },
+            take: 20,
+            orderBy: { createdAt: 'desc' },
+            select: { id: true, name: true, company: true, email: true, status: true, createdAt: true },
+        }),
     ]);
 
-    const [totalClients, activeOffers, pendingFollowUps, revenueResult] = await Promise.all([
+    const [totalClients, activeOffers, pendingFollowUps, revenueResult, leadsCount] = await Promise.all([
         prisma.client.count({ where: { userId } }),
         prisma.offer.count({
             where: { userId, status: { in: ['DRAFT', 'SENT', 'NEGOTIATION'] } },
@@ -104,6 +110,7 @@ export async function getUserContext(userId: string): Promise<AIContext> {
             where: { userId, status: 'ACCEPTED', updatedAt: { gte: buildMonthStart() } },
             _sum: { totalGross: true },
         }),
+        prisma.lead.count({ where: { userId, status: { in: ['NEW', 'CONTACTED'] } } }),
     ]);
 
     const stats: AIStats = {
@@ -111,9 +118,10 @@ export async function getUserContext(userId: string): Promise<AIContext> {
         activeOffers,
         pendingFollowUps,
         monthlyRevenue: revenueResult._sum.totalGross?.toNumber() ?? 0,
+        leadsCount,
     };
 
-    return { userId, clients, offers, contracts, followUps, stats };
+    return { userId, clients, offers, contracts, followUps, leads, stats };
 }
 
 function parseActions(response: string): { cleanMessage: string; actions: AIAction[] } {
@@ -145,6 +153,34 @@ function parseActions(response: string): { cleanMessage: string; actions: AIActi
                 actions.push({
                     type: 'send_email',
                     label: '✉️ Wyślij email',
+                    payload: payload ? safeJsonParse(payload) : {},
+                });
+                break;
+            case 'create_note':
+                actions.push({
+                    type: 'create_note',
+                    label: '📝 Dodaj notatkę',
+                    payload: payload ? safeJsonParse(payload) : {},
+                });
+                break;
+            case 'update_status':
+                actions.push({
+                    type: 'update_status',
+                    label: '🔄 Zmień status',
+                    payload: payload ? safeJsonParse(payload) : {},
+                });
+                break;
+            case 'navigate':
+                actions.push({
+                    type: 'navigate',
+                    label: '→ Przejdź',
+                    payload: payload ? safeJsonParse(payload) : {},
+                });
+                break;
+            case 'create_lead':
+                actions.push({
+                    type: 'create_lead',
+                    label: '👤 Utwórz lead',
                     payload: payload ? safeJsonParse(payload) : {},
                 });
                 break;
@@ -220,6 +256,7 @@ export async function chat(
     userId: string,
     message: string,
     conversationHistory: AIMessage[] = [],
+    pageContext?: { type: string; id?: string; title?: string; extra?: string },
 ): Promise<AIResponse> {
     if (!ai) {
         return {
@@ -231,7 +268,19 @@ export async function chat(
 
     try {
         const context = await getUserContext(userId);
-        const systemPrompt = buildSystemPrompt(context);
+        let systemPrompt = buildSystemPrompt(context);
+
+        if (pageContext) {
+            const pageSection = [
+                '\n=== KONTEKST STRONY ===',
+                `Użytkownik aktualnie przegląda: ${pageContext.type}${pageContext.title ? ` — "${pageContext.title}"` : ''}${pageContext.id ? ` (ID: ${pageContext.id})` : ''}`,
+                pageContext.extra ? pageContext.extra : '',
+                'Kiedy odpowiadasz na pytania o "tę ofertę", "tego klienta", "ten lead" itp. — odnoś się do powyższego kontekstu.',
+                '=== KONIEC KONTEKSTU ===',
+            ].filter(Boolean).join('\n');
+            systemPrompt += pageSection;
+        }
+
         const fullPrompt = buildChatPrompt(systemPrompt, conversationHistory, message);
 
         const responseText = await callGemini(ai, fullPrompt);

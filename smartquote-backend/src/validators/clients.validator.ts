@@ -19,7 +19,7 @@ export const createClientSchema = z.object({
         city: z.string().max(100).optional().nullable(),
         postalCode: z.string().max(10).optional().nullable(),
         country: z.string().max(100).optional().default('Polska'),
-        website: z.string().url('Nieprawidłowy URL').optional().nullable(),
+        website: z.preprocess((v) => (v === '' ? null : v), z.string().url('Nieprawidłowy URL').optional().nullable()),
         notes: z.string().max(2000).optional().nullable(),
     }),
 });
@@ -40,7 +40,7 @@ export const updateClientSchema = z.object({
         city: z.string().max(100).optional().nullable(),
         postalCode: z.string().max(10).optional().nullable(),
         country: z.string().max(100).optional(),
-        website: z.string().url().optional().nullable(),
+        website: z.preprocess((v) => (v === '' ? null : v), z.string().url().optional().nullable()),
         notes: z.string().max(2000).optional().nullable(),
         isActive: z.boolean().optional(),
     }),

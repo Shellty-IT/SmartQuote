@@ -155,41 +155,35 @@ describe('ClientsService.findAll', () => {
 // ── update ────────────────────────────────────────────────────────────────────
 
 describe('ClientsService.update', () => {
-    it('updates client when it exists', async () => {
-        repo.existsForUser.mockResolvedValue(true as never);
+    it('updates client when repo returns a result', async () => {
         repo.update.mockResolvedValue({ ...MOCK_CLIENT, name: 'Updated' } as never);
 
         const result = await service.update(CLIENT_ID, USER_ID, { name: 'Updated' });
-        expect(repo.existsForUser).toHaveBeenCalledWith(CLIENT_ID, USER_ID);
-        expect(repo.update).toHaveBeenCalledWith(CLIENT_ID, { name: 'Updated' });
+        expect(repo.update).toHaveBeenCalledWith(CLIENT_ID, USER_ID, { name: 'Updated' });
         expect((result as typeof MOCK_CLIENT).name).toBe('Updated');
     });
 
-    it('throws NotFoundError when client does not exist', async () => {
-        repo.existsForUser.mockResolvedValue(false as never);
+    it('throws NotFoundError when repo returns null (ownership mismatch)', async () => {
+        repo.update.mockResolvedValue(null as never);
 
         await expect(service.update(CLIENT_ID, USER_ID, { name: 'X' })).rejects.toThrow(NotFoundError);
-        expect(repo.update).not.toHaveBeenCalled();
     });
 });
 
 // ── delete ────────────────────────────────────────────────────────────────────
 
 describe('ClientsService.delete', () => {
-    it('deletes client when it exists', async () => {
-        repo.existsForUser.mockResolvedValue(true as never);
-        repo.delete.mockResolvedValue(MOCK_CLIENT as never);
+    it('deletes client when repo returns true', async () => {
+        repo.delete.mockResolvedValue(true as never);
 
         await service.delete(CLIENT_ID, USER_ID);
-        expect(repo.existsForUser).toHaveBeenCalledWith(CLIENT_ID, USER_ID);
-        expect(repo.delete).toHaveBeenCalledWith(CLIENT_ID);
+        expect(repo.delete).toHaveBeenCalledWith(CLIENT_ID, USER_ID);
     });
 
-    it('throws NotFoundError when client does not exist', async () => {
-        repo.existsForUser.mockResolvedValue(false as never);
+    it('throws NotFoundError when repo returns false (ownership mismatch)', async () => {
+        repo.delete.mockResolvedValue(false as never);
 
         await expect(service.delete(CLIENT_ID, USER_ID)).rejects.toThrow(NotFoundError);
-        expect(repo.delete).not.toHaveBeenCalled();
     });
 });
 

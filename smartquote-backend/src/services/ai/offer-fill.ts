@@ -114,6 +114,13 @@ ZASADY ROZMOWY:
 - Gdy użytkownik prosi o zmianę czegoś konkretnego — zrób to od razu
 - NIE pytaj o cenę (pobierana z systemu automatycznie)
 
+OCHRONA SEKCJI (KRYTYCZNE):
+- Gdy użytkownik prosi o zmianę KONKRETNEJ sekcji (np. "wypełnij strukturę"), zmieniaj TYLKO tę sekcję.
+- Wszystkie pozostałe sekcje SKOPIUJ DOKŁADNIE tak jak są w AKTUALNYM STANIE SZABLONU — bez żadnych modyfikacji.
+- NIGDY nie usuwaj, nie czyść, nie "resetuj" sekcji których użytkownik nie wymienił.
+- Jeśli sekcja ma enabled:true w aktualnym stanie — w JSON odpowiedzi też musi mieć enabled:true (chyba że user prosił o zmianę).
+- page1Sections i page2Sections: zachowaj DOKŁADNIE tak jak są, chyba że user prosił o reorganizację.
+
 KIEDY GENEROWAĆ/AKTUALIZOWAĆ SZABLON:
 Gdy masz dane do wygenerowania lub gdy użytkownik prosi o zmianę:
 1. Napisz jedno zdanie: co zmieniłeś/zrobiłeś i dlaczego

@@ -49,8 +49,7 @@ export class ClientsController {
 
     async delete(req: AuthenticatedRequest, res: Response, next: NextFunction) {
         try {
-            const client = await clientsService.delete(req.params.id, req.user!.id);
-            if (!client) throw new NotFoundError('Klient');
+            await clientsService.delete(req.params.id, req.user!.id);
             return successResponse(res, { message: 'Klient usunięty' });
         } catch (err) {
             return next(err);

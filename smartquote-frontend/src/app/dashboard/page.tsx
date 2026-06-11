@@ -15,6 +15,7 @@ import { useOffers, useOffersStats } from '@/hooks/useOffers';
 import { useClientsStats } from '@/hooks/useClients';
 import { ai } from '@/lib/api';
 import KPICard from './components/KPICard';
+import { SmartAlertsSection } from '@/components/dashboard/SmartAlertsSection';
 import StatsChart from './components/StatsChart';
 import DashboardSkeleton from './components/DashboardSkeleton';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -178,6 +179,8 @@ export default function DashboardPage() {
                     </button>
                 </div>
             </div>
+
+            <SmartAlertsSection />
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <KPICard

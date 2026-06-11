@@ -1,7 +1,6 @@
-// src/hooks/useContracts.ts
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { contractsApi } from '@/lib/api';
 import type { Contract, ContractsStats, CreateContractInput, ContractStatus } from '@/types';
 
@@ -14,155 +13,106 @@ interface UseContractsParams {
 }
 
 export function useContracts(params: UseContractsParams = {}) {
-    const [contracts, setContracts] = useState<Contract[]>([]);
-    const [pagination, setPagination] = useState({
-        page: 1,
-        limit: 10,
-        total: 0,
-        totalPages: 0,
+    const queryClient = useQueryClient();
+
+    const { data, isLoading, error, refetch } = useQuery({
+        queryKey: ['contracts', params],
+        queryFn: () => contractsApi.list({
+            page: params.page,
+            limit: params.limit,
+            status: params.status,
+            clientId: params.clientId,
+            search: params.search,
+        }),
     });
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
 
-    const fetchContracts = useCallback(async () => {
-        try {
-            setLoading(true);
-            setError(null);
-
-            const response = await contractsApi.list({
-                page: params.page,
-                limit: params.limit,
-                status: params.status,
-                clientId: params.clientId,
-                search: params.search,
-            });
-
-            if (response.success) {
-                setContracts(Array.isArray(response.data) ? response.data : []);
-                if (response.meta) {
-                    setPagination({
-                        page: response.meta.page ?? 1,
-                        limit: response.meta.limit ?? 10,
-                        total: response.meta.total ?? 0,
-                        totalPages: response.meta.totalPages ?? 0,
-                    });
-                }
-            }
-        } catch {
-            setError('Failed to load contracts');
-        } finally {
-            setLoading(false);
-        }
-    }, [params.page, params.limit, params.status, params.clientId, params.search]);
-
-    useEffect(() => {
-        fetchContracts();
-    }, [fetchContracts]);
-
-    const createContract = async (data: CreateContractInput) => {
-        const response = await contractsApi.create(data);
-        if (response.success) {
-            await fetchContracts();
-        }
-        return response;
+    const invalidateAll = async () => {
+        await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ['contracts'] }),
+            queryClient.invalidateQueries({ queryKey: ['contracts-stats'] }),
+        ]);
     };
 
-    const createFromOffer = async (offerId: string) => {
-        const response = await contractsApi.createFromOffer(offerId);
-        if (response.success) {
-            await fetchContracts();
-        }
-        return response;
-    };
+    const createMutation = useMutation({
+        mutationFn: (input: CreateContractInput) => contractsApi.create(input),
+        onSuccess: invalidateAll,
+    });
 
-    const updateContract = async (id: string, data: Partial<CreateContractInput>) => {
-        const response = await contractsApi.update(id, data);
-        if (response.success) {
-            await fetchContracts();
-        }
-        return response;
-    };
+    const createFromOfferMutation = useMutation({
+        mutationFn: (offerId: string) => contractsApi.createFromOffer(offerId),
+        onSuccess: invalidateAll,
+    });
 
-    const updateStatus = async (id: string, status: ContractStatus) => {
-        const response = await contractsApi.updateStatus(id, status);
-        if (response.success) {
-            await fetchContracts();
-        }
-        return response;
-    };
+    const updateMutation = useMutation({
+        mutationFn: ({ id, input }: { id: string; input: Partial<CreateContractInput> }) =>
+            contractsApi.update(id, input),
+        onSuccess: async (_, { id }) => {
+            await invalidateAll();
+            await queryClient.invalidateQueries({ queryKey: ['contract', id] });
+        },
+    });
 
-    const deleteContract = async (id: string) => {
-        const response = await contractsApi.delete(id);
-        if (response.success) {
-            await fetchContracts();
-        }
-        return response;
-    };
+    const updateStatusMutation = useMutation({
+        mutationFn: ({ id, status }: { id: string; status: ContractStatus }) =>
+            contractsApi.updateStatus(id, status),
+        onSuccess: async (_, { id }) => {
+            await invalidateAll();
+            await queryClient.invalidateQueries({ queryKey: ['contract', id] });
+        },
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: (id: string) => contractsApi.delete(id),
+        onSuccess: invalidateAll,
+    });
+
+    const contracts = Array.isArray(data?.data) ? data.data : [];
+    const meta = data?.meta;
 
     return {
         contracts,
-        pagination,
-        loading,
-        error,
-        refetch: fetchContracts,
-        createContract,
-        createFromOffer,
-        updateContract,
-        updateStatus,
-        deleteContract,
+        pagination: meta
+            ? { page: meta.page ?? 1, limit: meta.limit ?? 10, total: meta.total ?? 0, totalPages: meta.totalPages ?? 0 }
+            : { page: 1, limit: 10, total: 0, totalPages: 0 },
+        loading: isLoading,
+        error: error?.message ?? null,
+        refetch: () => { void refetch(); },
+        createContract: (input: CreateContractInput) => createMutation.mutateAsync(input),
+        createFromOffer: (offerId: string) => createFromOfferMutation.mutateAsync(offerId),
+        updateContract: (id: string, input: Partial<CreateContractInput>) =>
+            updateMutation.mutateAsync({ id, input }),
+        updateStatus: (id: string, status: ContractStatus) =>
+            updateStatusMutation.mutateAsync({ id, status }),
+        deleteContract: (id: string) => deleteMutation.mutateAsync(id),
     };
 }
 
 export function useContract(id: string) {
-    const [contract, setContract] = useState<Contract | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const { data, isLoading, error, refetch } = useQuery({
+        queryKey: ['contract', id],
+        queryFn: () => contractsApi.get(id),
+        enabled: !!id,
+        staleTime: 60_000,
+    });
 
-    const fetchContract = useCallback(async () => {
-        if (!id) return;
-        try {
-            setLoading(true);
-            setError(null);
-            const response = await contractsApi.get(id);
-            if (response.success && response.data) {
-                setContract(response.data);
-            }
-        } catch {
-            setError('Failed to load contract');
-        } finally {
-            setLoading(false);
-        }
-    }, [id]);
-
-    useEffect(() => {
-        fetchContract();
-    }, [fetchContract]);
-
-    return { contract, loading, error, refetch: fetchContract };
+    return {
+        contract: data?.data ?? null,
+        loading: isLoading,
+        error: error?.message ?? null,
+        refetch: () => { void refetch(); },
+    };
 }
 
 export function useContractsStats() {
-    const [stats, setStats] = useState<ContractsStats | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const { data, isLoading, error } = useQuery({
+        queryKey: ['contracts-stats'],
+        queryFn: () => contractsApi.stats(),
+        staleTime: 60_000,
+    });
 
-    useEffect(() => {
-        const fetchStats = async () => {
-            try {
-                setLoading(true);
-                const response = await contractsApi.stats();
-                if (response.success && response.data) {
-                    setStats(response.data);
-                }
-            } catch {
-                setError('Failed to load stats');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchStats();
-    }, []);
-
-    return { stats, loading, error };
+    return {
+        stats: (data?.success && data?.data ? data.data : null) as ContractsStats | null,
+        loading: isLoading,
+        error: error?.message ?? null,
+    };
 }

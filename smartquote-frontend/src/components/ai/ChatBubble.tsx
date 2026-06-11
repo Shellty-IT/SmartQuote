@@ -2,12 +2,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import type { ChatMessage } from './hooks/useChatMessages';
+import type { AIAction } from '@/types/ai';
 
 interface ChatBubbleProps {
     message: ChatMessage;
+    onAction?: (action: AIAction) => void;
 }
 
-export function ChatBubble({ message }: ChatBubbleProps) {
+export function ChatBubble({ message, onAction }: ChatBubbleProps) {
     const isUser = message.role === 'user';
 
     return (
@@ -34,24 +36,40 @@ export function ChatBubble({ message }: ChatBubbleProps) {
                 )}
             </div>
 
-            <div
-                className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
-                    isUser
-                        ? 'bg-gradient-primary text-white rounded-tr-none'
-                        : 'bg-surface-subtle text-foreground rounded-tl-none'
-                }`}
-            >
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                <p
-                    className={`text-xs mt-1 ${
-                        isUser ? 'text-white/85' : 'text-muted-foreground'
+            <div className={`max-w-[75%] flex flex-col gap-2 ${isUser ? 'items-end' : 'items-start'}`}>
+                <div
+                    className={`rounded-2xl px-4 py-2.5 ${
+                        isUser
+                            ? 'bg-gradient-primary text-white rounded-tr-none'
+                            : 'bg-surface-subtle text-foreground rounded-tl-none'
                     }`}
                 >
-                    {message.timestamp.toLocaleTimeString('pl-PL', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                    })}
-                </p>
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    <p
+                        className={`text-xs mt-1 ${
+                            isUser ? 'text-white/85' : 'text-muted-foreground'
+                        }`}
+                    >
+                        {message.timestamp.toLocaleTimeString('pl-PL', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                        })}
+                    </p>
+                </div>
+
+                {!isUser && message.actions && message.actions.length > 0 && onAction && (
+                    <div className="flex flex-wrap gap-1.5">
+                        {message.actions.map((action, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => onAction(action)}
+                                className="text-xs px-3 py-1.5 bg-primary/10 text-primary border border-primary/20 rounded-full hover:bg-primary/20 transition-colors font-medium"
+                            >
+                                {action.label}
+                            </button>
+                        ))}
+                    </div>
+                )}
             </div>
         </motion.div>
     );

@@ -33,6 +33,9 @@ model User {
   emailLogs      EmailLog[]
   emailTemplates EmailTemplate[]
   offerTemplates OfferTemplate[]
+  leads          Lead[]
+  notes          Note[]
+  calendarEvents CalendarEvent[]
 
   @@map("users")
 }
@@ -117,6 +120,36 @@ model ApiKey {
   @@map("api_keys")
 }
 
+enum LeadStatus {
+  NEW
+  CONTACTED
+  CONVERTED
+  LOST
+}
+
+model Lead {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  company   String?
+  email     String?
+  phone     String?
+  source    String?
+  notes     String?
+  status    LeadStatus @default(NEW)
+  clientId  String?
+  client         Client?         @relation(fields: [clientId], references: [id])
+  notesList      Note[]
+  calendarEvents CalendarEvent[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([userId])
+  @@index([userId, status])
+  @@map("leads")
+}
+
 model Client {
   id         String     @id @default(cuid())
   type       ClientType @default(COMPANY)
@@ -136,12 +169,15 @@ model Client {
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
 
-  userId    String
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  offers    Offer[]
-  followUps FollowUp[]
-  contracts Contract[]
-  emailLogs EmailLog[]
+  userId         String
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  offers         Offer[]
+  followUps      FollowUp[]
+  contracts      Contract[]
+  emailLogs      EmailLog[]
+  leads          Lead[]
+  notesList      Note[]
+  calendarEvents CalendarEvent[]
 
   @@index([userId])
   @@index([userId, name])
@@ -202,6 +238,8 @@ model Offer {
   legacyInsights OfferLegacyInsight[]
   acceptanceLog  OfferAcceptanceLog?
   emailLogs      EmailLog[]
+  notesList      Note[]
+  calendarEvents CalendarEvent[]
 
   @@unique([userId, number])
   @@index([userId])
@@ -440,6 +478,7 @@ model Contract {
   followUps FollowUp[]
   signatureLog ContractSignatureLog?
   emailLogs    EmailLog[]
+  notesList    Note[]
 
   @@unique([userId, number])
   @@index([userId])
@@ -594,6 +633,56 @@ model EmailTemplate {
   @@index([userId, name])
   @@map("email_templates")
 }
+
+model Note {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content    String
+  // Polymorphic relations — at most one of these is set
+  clientId   String?
+  client     Client?   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  offerId    String?
+  offer      Offer?    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  contractId String?
+  contract   Contract? @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  leadId     String?
+  lead       Lead?     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([clientId])
+  @@index([offerId])
+  @@index([contractId])
+  @@index([leadId])
+  @@map("notes")
+}
+
+model CalendarEvent {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  startAt     DateTime
+  endAt       DateTime?
+  allDay      Boolean   @default(false)
+  color       String    @default("blue")
+  clientId    String?
+  client      Client?   @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  offerId     String?
+  offer       Offer?    @relation(fields: [offerId], references: [id], onDelete: SetNull)
+  leadId      String?
+  lead        Lead?     @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([userId, startAt])
+  @@map("calendar_events")
+}
+
 
 enum UserRole {
   USER

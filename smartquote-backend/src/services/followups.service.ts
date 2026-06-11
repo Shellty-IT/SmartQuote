@@ -139,7 +139,9 @@ export const followUpsService = {
             }
         }
 
-        return followUpsRepository.update(id, updateData);
+        const result = await followUpsRepository.update(id, userId, updateData);
+        if (!result) throw new Error('Nie znaleziono follow-up');
+        return result;
     },
 
     async updateStatus(id: string, userId: string, status: FollowUpStatus, notes?: string) {
@@ -161,7 +163,9 @@ export const followUpsService = {
                 : `${timestamp}: ${notes}`;
         }
 
-        return followUpsRepository.update(id, updateData);
+        const result = await followUpsRepository.update(id, userId, updateData);
+        if (!result) throw new Error('Nie znaleziono follow-up');
+        return result;
     },
 
     async complete(id: string, userId: string, notes?: string) {
@@ -171,7 +175,7 @@ export const followUpsService = {
     async delete(id: string, userId: string): Promise<void> {
         const existing = await followUpsRepository.findById(id, userId);
         if (!existing) throw new Error('Nie znaleziono follow-up');
-        await followUpsRepository.delete(id);
+        await followUpsRepository.delete(id, userId);
     },
 
     async deleteMany(ids: string[], userId: string): Promise<number> {

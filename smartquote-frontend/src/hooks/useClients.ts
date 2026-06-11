@@ -1,31 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { clientsApi, ApiError } from '@/lib/api';
-import { Client, ClientFilters, ClientsStats, CreateClientInput, UpdateClientInput } from '@/types';
+import { Client, ClientFilters, CreateClientInput, UpdateClientInput } from '@/types';
 
-interface UseClientsResult {
-    clients: Client[];
-    total: number;
-    page: number;
-    totalPages: number;
-    isLoading: boolean;
-    error: string | null;
-    filters: ClientFilters;
-    setFilters: (filters: Partial<ClientFilters>) => void;
-    refresh: () => Promise<void>;
-    createClient: (data: CreateClientInput) => Promise<Client>;
-    updateClient: (id: string, data: UpdateClientInput) => Promise<Client>;
-    deleteClient: (id: string) => Promise<void>;
-}
-
-export function useClients(initialFilters: ClientFilters = {}): UseClientsResult {
-    const [clients, setClients] = useState<Client[]>([]);
-    const [total, setTotal] = useState(0);
-    const [page, setPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+export function useClients(initialFilters: ClientFilters = {}) {
+    const queryClient = useQueryClient();
     const [filters, setFiltersState] = useState<ClientFilters>({
         page: 1,
         limit: 20,
@@ -34,68 +15,67 @@ export function useClients(initialFilters: ClientFilters = {}): UseClientsResult
         ...initialFilters,
     });
 
-    const fetchClients = useCallback(async () => {
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const response = await clientsApi.list(
-                filters as Record<string, string | number | boolean | undefined>
-            );
-            setClients(response.data || []);
-            setTotal(response.meta?.total || 0);
-            setPage(response.meta?.page || 1);
-            setTotalPages(response.meta?.totalPages || 1);
-        } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Failed to fetch clients';
-            setError(message);
-            setClients([]);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [filters]);
-
-    useEffect(() => {
-        fetchClients();
-    }, [fetchClients]);
+    const { data, isLoading, error, refetch } = useQuery({
+        queryKey: ['clients', filters],
+        queryFn: () => clientsApi.list(filters as Record<string, string | number | boolean | undefined>),
+    });
 
     const setFilters = useCallback((newFilters: Partial<ClientFilters>) => {
         setFiltersState((prev) => ({ ...prev, ...newFilters }));
     }, []);
 
-    const createClient = useCallback(async (data: CreateClientInput): Promise<Client> => {
-        const response = await clientsApi.create(data);
-        await fetchClients();
-        if (!response.data) {
-            throw new Error('Failed to create client');
-        }
-        return response.data;
-    }, [fetchClients]);
+    const invalidateAll = useCallback(async () => {
+        await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ['clients'] }),
+            queryClient.invalidateQueries({ queryKey: ['clients-stats'] }),
+        ]);
+    }, [queryClient]);
 
-    const updateClient = useCallback(async (id: string, data: UpdateClientInput): Promise<Client> => {
-        const response = await clientsApi.update(id, data);
-        await fetchClients();
-        if (!response.data) {
-            throw new Error('Failed to update client');
-        }
-        return response.data;
-    }, [fetchClients]);
+    const createMutation = useMutation({
+        mutationFn: (input: CreateClientInput) => clientsApi.create(input),
+        onSuccess: invalidateAll,
+    });
 
-    const deleteClient = useCallback(async (id: string): Promise<void> => {
-        await clientsApi.delete(id);
-        await fetchClients();
-    }, [fetchClients]);
+    const updateMutation = useMutation({
+        mutationFn: ({ id, input }: { id: string; input: UpdateClientInput }) =>
+            clientsApi.update(id, input),
+        onSuccess: async (_, { id }) => {
+            await invalidateAll();
+            await queryClient.invalidateQueries({ queryKey: ['client', id] });
+        },
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: (id: string) => clientsApi.delete(id),
+        onSuccess: invalidateAll,
+    });
+
+    const createClient = async (input: CreateClientInput): Promise<Client> => {
+        const response = await createMutation.mutateAsync(input);
+        if (!response.data) throw new Error('Failed to create client');
+        return response.data;
+    };
+
+    const updateClient = async (id: string, input: UpdateClientInput): Promise<Client> => {
+        const response = await updateMutation.mutateAsync({ id, input });
+        if (!response.data) throw new Error('Failed to update client');
+        return response.data;
+    };
+
+    const deleteClient = async (id: string): Promise<void> => {
+        await deleteMutation.mutateAsync(id);
+    };
 
     return {
-        clients,
-        total,
-        page,
-        totalPages,
+        clients: data?.data || [],
+        total: data?.meta?.total || 0,
+        page: data?.meta?.page || 1,
+        totalPages: data?.meta?.totalPages || 1,
         isLoading,
-        error,
+        error: error instanceof ApiError ? error.message : (error?.message ?? null),
         filters,
         setFilters,
-        refresh: fetchClients,
+        refresh: () => { void refetch(); },
         createClient,
         updateClient,
         deleteClient,
@@ -103,58 +83,32 @@ export function useClients(initialFilters: ClientFilters = {}): UseClientsResult
 }
 
 export function useClient(id: string) {
-    const [client, setClient] = useState<Client | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const { data, isLoading, error, refetch } = useQuery({
+        queryKey: ['client', id],
+        queryFn: () => clientsApi.get(id),
+        enabled: !!id,
+        staleTime: 60_000,
+    });
 
-    const fetchClient = useCallback(async () => {
-        if (!id) return;
-
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const response = await clientsApi.get(id);
-            setClient(response.data ?? null);
-        } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Failed to fetch client';
-            setError(message);
-            setClient(null);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [id]);
-
-    useEffect(() => {
-        fetchClient();
-    }, [fetchClient]);
-
-    return { client, isLoading, error, refresh: fetchClient };
+    return {
+        client: data?.data ?? null,
+        isLoading,
+        error: error?.message ?? null,
+        refresh: () => { void refetch(); },
+    };
 }
 
 export function useClientsStats() {
-    const [stats, setStats] = useState<ClientsStats | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const { data, isLoading, error, refetch } = useQuery({
+        queryKey: ['clients-stats'],
+        queryFn: () => clientsApi.stats(),
+        staleTime: 60_000,
+    });
 
-    const fetchStats = useCallback(async () => {
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const response = await clientsApi.stats();
-            setStats(response.data ?? null);
-        } catch (err) {
-            const message = err instanceof ApiError ? err.message : 'Failed to fetch stats';
-            setError(message);
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        fetchStats();
-    }, [fetchStats]);
-
-    return { stats, isLoading, error, refresh: fetchStats };
+    return {
+        stats: data?.data ?? null,
+        isLoading,
+        error: error?.message ?? null,
+        refresh: () => { void refetch(); },
+    };
 }

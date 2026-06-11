@@ -15,6 +15,10 @@ import notificationsRoutes from './notifications.routes';
 import ksefBridgeRoutes from './ksef-bridge.routes';
 import emailComposerRoutes from './email-composer.routes';
 import offerTemplatesRoutes from './offer-templates.routes';
+import searchRoutes from './search.routes';
+import leadsRoutes from './leads.routes';
+import notesRoutes from './notes.routes';
+import calendarRoutes from './calendar.routes';
 
 const router = Router();
 
@@ -52,5 +56,9 @@ router.use('/notifications', notificationsRoutes);
 router.use('/ksef', ksefBridgeRoutes);
 router.use('/emails', emailComposerRoutes);
 router.use('/offer-templates', offerTemplatesRoutes);
+router.use('/search', searchRoutes);
+router.use('/leads', leadsRoutes);
+router.use('/notes', notesRoutes);
+router.use('/calendar', calendarRoutes);
 
 export default router;

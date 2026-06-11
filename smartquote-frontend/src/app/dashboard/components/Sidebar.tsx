@@ -12,7 +12,9 @@ import {
     FileStack,
     ScrollText,
     Users,
+    UserSearch,
     CalendarClock,
+    CalendarDays,
     Mail,
     Bell,
     Sparkles,
@@ -28,7 +30,7 @@ import PrivacyPolicyModal from '@/components/PrivacyPolicyModal';
 import { useSidebarStats } from '@/hooks/useSidebarStats';
 import { useUnreadCount } from '@/hooks/useNotifications';
 
-type NavKey = 'dashboard' | 'offers' | 'offerTemplates' | 'contracts' | 'clients' | 'followups' | 'correspondence' | 'notifications' | 'aiAssistant' | 'aiInsights';
+type NavKey = 'dashboard' | 'offers' | 'offerTemplates' | 'contracts' | 'clients' | 'leads' | 'followups' | 'calendar' | 'correspondence' | 'notifications' | 'aiAssistant' | 'aiInsights';
 
 const NAV_ITEMS: { key: NavKey; href: string; icon: React.ElementType; stat: string | null; badgeTone: 'default' | 'primary' | 'success' | 'info' | 'warning' | 'violet' }[] = [
     { key: 'dashboard',      href: '/dashboard',                 icon: LayoutDashboard, stat: null,        badgeTone: 'default' },
@@ -36,7 +38,9 @@ const NAV_ITEMS: { key: NavKey; href: string; icon: React.ElementType; stat: str
     { key: 'offerTemplates', href: '/dashboard/offer-templates', icon: FileStack,       stat: null,        badgeTone: 'default' },
     { key: 'contracts',      href: '/dashboard/contracts',       icon: ScrollText,      stat: 'contracts', badgeTone: 'success' },
     { key: 'clients',        href: '/dashboard/clients',         icon: Users,           stat: 'clients',   badgeTone: 'info'    },
+    { key: 'leads',          href: '/dashboard/leads',           icon: UserSearch,      stat: 'leads',     badgeTone: 'warning' },
     { key: 'followups',      href: '/dashboard/followups',       icon: CalendarClock,   stat: 'followups', badgeTone: 'warning' },
+    { key: 'calendar',       href: '/dashboard/calendar',        icon: CalendarDays,    stat: null,        badgeTone: 'default' },
     { key: 'correspondence', href: '/dashboard/emails',          icon: Mail,            stat: null,        badgeTone: 'default' },
     { key: 'notifications',  href: '/dashboard/notifications',   icon: Bell,            stat: 'notif',     badgeTone: 'violet'  },
     { key: 'aiAssistant',    href: '/dashboard/ai',              icon: Sparkles,        stat: null,        badgeTone: 'default' },

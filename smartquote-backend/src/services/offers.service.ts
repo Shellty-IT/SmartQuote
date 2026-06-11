@@ -135,6 +135,33 @@ export class OffersService {
             updateData.blocks = data.blocks != null
                 ? (data.blocks as Prisma.InputJsonValue)
                 : Prisma.JsonNull;
+
+            // When the proposal template has a priceOverride, sync it to the offer totals
+            // so all views (list, details, PDF) show the same price.
+            if (data.blocks != null && !data.items) {
+                try {
+                    const b = data.blocks as Record<string, unknown>
+                    const pe = b.pricingExtra as Record<string, unknown> | undefined
+                    if (pe && pe.priceOverride != null) {
+                        const override = Number(pe.priceOverride)
+                        const isNet = (pe.priceType as string | undefined) === 'net'
+                        if (!isNaN(override) && override > 0) {
+                            const totalGross = isNet
+                                ? Math.round(override * 1.23 * 100) / 100
+                                : override
+                            const totalNet = isNet
+                                ? override
+                                : Math.round((override / 1.23) * 100) / 100
+                            const totalVat = Math.round((totalGross - totalNet) * 100) / 100
+                            updateData.totalGross = totalGross
+                            updateData.totalNet = totalNet
+                            updateData.totalVat = totalVat
+                        }
+                    }
+                } catch {
+                    // ignore – don't fail the update if blocks parsing fails
+                }
+            }
         }
 
         if (data.status) {
@@ -153,6 +180,7 @@ export class OffersService {
 
             result = await offersRepository.updateWithItems(
                 id,
+                userId,
                 {
                     ...updateData,
                     totalNet: offerTotals.totalNet,
@@ -162,8 +190,10 @@ export class OffersService {
                 itemsWithTotals.map(mapItemToData),
             );
         } else {
-            result = await offersRepository.update(id, updateData);
+            result = await offersRepository.update(id, userId, updateData);
         }
+
+        if (!result) throw new NotFoundError('Oferta');
 
         const isTerminalChange =
             data.status &&
@@ -181,7 +211,7 @@ export class OffersService {
     async delete(id: string, userId: string) {
         const existing = await offersRepository.findById(id, userId);
         if (!existing) throw new NotFoundError('Oferta');
-        return offersRepository.delete(id);
+        await offersRepository.delete(id, userId);
     }
 
     async getStats(userId: string) {
@@ -266,12 +296,13 @@ export class OffersService {
 
         const publicToken = randomBytes(16).toString('base64url');
 
-        const updated = await offersRepository.update(offerId, {
+        const updated = await offersRepository.update(offerId, userId, {
             publicToken,
             isInteractive: true,
             status: offer.status === 'DRAFT' ? 'SENT' : (offer.status as OfferStatus),
             sentAt: offer.status === 'DRAFT' ? new Date() : undefined,
         });
+        if (!updated) throw new NotFoundError('Oferta');
 
         logger.info({ offerId, publicToken }, 'Offer published');
 
@@ -286,7 +317,7 @@ export class OffersService {
         const offer = await offersRepository.findById(offerId, userId);
         if (!offer) throw new NotFoundError('Oferta');
 
-        await offersRepository.update(offerId, {
+        await offersRepository.update(offerId, userId, {
             publicToken: null,
             isInteractive: false,
         });

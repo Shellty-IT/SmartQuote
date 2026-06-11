@@ -2,6 +2,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../types';
 import { aiService } from '../services/ai';
+import { getAlerts } from '../services/alerts.service';
 import { successResponse, paginatedResponse } from '../utils/apiResponse';
 import { parseQueryInt } from '../utils/queryParsers';
 import { ValidationError } from '../errors/domain.errors';
@@ -10,9 +11,9 @@ export class AIController {
     async chat(req: AuthenticatedRequest, res: Response, next: NextFunction) {
         try {
             const userId = req.user!.id;
-            const { message, history } = req.body;
+            const { message, history, pageContext } = req.body;
 
-            const response = await aiService.chat(userId, message, history);
+            const response = await aiService.chat(userId, message, history, pageContext);
             return successResponse(res, response);
         } catch (err) {
             next(err);
@@ -125,6 +126,13 @@ export class AIController {
         }
     }
 
+    async getContext(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+        try {
+            const result = await aiService.getSuggestions(req.user!.id);
+            return successResponse(res, result);
+        } catch (err) { return next(err); }
+    }
+
     async priceInsight(req: AuthenticatedRequest, res: Response, next: NextFunction) {
         try {
             const userId = req.user!.id;
@@ -171,6 +179,25 @@ export class AIController {
         } catch (err) {
             next(err);
         }
+    }
+
+    async priceCheck(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user!.id;
+            const { items, currency, clientContext } = req.body;
+
+            const result = await aiService.priceCheck(userId, { items, currency, clientContext });
+            return successResponse(res, result);
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    async getAlerts(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+        try {
+            const alerts = await getAlerts(req.user!.id);
+            return successResponse(res, { alerts, total: alerts.length });
+        } catch (err) { return next(err); }
     }
 
     async insightsList(req: AuthenticatedRequest, res: Response, next: NextFunction) {

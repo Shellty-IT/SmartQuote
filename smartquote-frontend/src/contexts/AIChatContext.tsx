@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import type { PageContext } from '@/hooks/usePageContext';
 
 interface AIChatContextType {
     isOpen: boolean;
@@ -12,6 +13,10 @@ interface AIChatContextType {
     clearQuickMessage: () => void;
     hideGlobalFab: boolean;
     setHideGlobalFab: (hide: boolean) => void;
+    pageContext: PageContext | null;
+    setPageContext: (ctx: PageContext | null) => void;
+    proactiveSuggestions: string[];
+    setProactiveSuggestions: (s: string[]) => void;
 }
 
 const AIChatContext = createContext<AIChatContextType | undefined>(undefined);
@@ -20,6 +25,8 @@ export function AIChatProvider({ children }: { children: ReactNode }) {
     const [isOpen, setIsOpen] = useState(false);
     const [quickMessage, setQuickMessage] = useState<string | null>(null);
     const [hideGlobalFab, setHideGlobalFab] = useState(false);
+    const [pageContext, setPageContext] = useState<PageContext | null>(null);
+    const [proactiveSuggestions, setProactiveSuggestions] = useState<string[]>([]);
 
     const openChat = useCallback(() => setIsOpen(true), []);
     const closeChat = useCallback(() => setIsOpen(false), []);
@@ -45,6 +52,10 @@ export function AIChatProvider({ children }: { children: ReactNode }) {
             clearQuickMessage,
             hideGlobalFab,
             setHideGlobalFab,
+            pageContext,
+            setPageContext,
+            proactiveSuggestions,
+            setProactiveSuggestions,
         }}>
             {children}
         </AIChatContext.Provider>

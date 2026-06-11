@@ -53,15 +53,17 @@ export const clientsRepository = {
         return prisma.client.count({ where: buildWhereClause(filter) });
     },
 
-    update(id: string, data: UpdateClientInput) {
-        return prisma.client.update({
-            where: { id },
-            data,
+    update(id: string, userId: string, data: UpdateClientInput) {
+        return prisma.$transaction(async (tx) => {
+            const record = await tx.client.findFirst({ where: { id, userId }, select: { id: true } });
+            if (!record) return null;
+            return tx.client.update({ where: { id }, data, include: { _count: { select: { offers: true, followUps: true } } } });
         });
     },
 
-    delete(id: string) {
-        return prisma.client.delete({ where: { id } });
+    async delete(id: string, userId: string): Promise<boolean> {
+        const result = await prisma.client.deleteMany({ where: { id, userId } });
+        return result.count > 0;
     },
 
     existsForUser(id: string, userId: string): Promise<boolean> {

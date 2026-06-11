@@ -386,6 +386,8 @@ function TestingEditor({
     const s = (p: Partial<TestingBlock>) => onChange({ ...block, ...p })
     const upCard = (i: number, p: Partial<TestingCard>) =>
         s({ cards: block.cards.map((c, j) => (j === i ? { ...c, ...p } : c)) })
+    const removeCard = (i: number) => s({ cards: block.cards.filter((_, j) => j !== i) })
+    const addCard = () => s({ cards: [...block.cards, { icon: '✅', title: 'Nowa karta', description: 'Opis' }] })
     return (
         <div>
             <AiGenerateButton
@@ -394,22 +396,32 @@ function TestingEditor({
                 onResult={(data) => {
                     if (typeof data.intro === 'string') s({ intro: data.intro })
                     if (typeof data.note === 'string') s({ note: data.note })
+                    if (Array.isArray(data.cards)) s({ cards: data.cards as TestingCard[] })
                 }}
             />
             <Field label="Tekst wstępny">
                 <textarea className={textareaCls} value={block.intro} onChange={(e) => s({ intro: e.target.value })} />
             </Field>
             <label className={labelCls}>Karty</label>
-            <div className="mb-3 grid grid-cols-2 gap-2">
+            <div className="mb-2 space-y-2">
                 {block.cards.map((card, i) => (
                     <div key={i} className="rounded-lg border border-border p-3">
-                        <div className="grid grid-cols-[48px_1fr] gap-2 mb-1">
-                            <Field label="Ikona">
-                                <input className={inputCls} value={card.icon} onChange={(e) => upCard(i, { icon: e.target.value })} />
-                            </Field>
-                            <Field label="Tytuł">
-                                <input className={inputCls} value={card.title} onChange={(e) => upCard(i, { title: e.target.value })} />
-                            </Field>
+                        <div className="flex items-start gap-2">
+                            <div className="flex-1 grid grid-cols-[48px_1fr] gap-2 mb-1">
+                                <Field label="Ikona">
+                                    <input className={inputCls} value={card.icon} onChange={(e) => upCard(i, { icon: e.target.value })} />
+                                </Field>
+                                <Field label="Tytuł">
+                                    <input className={inputCls} value={card.title} onChange={(e) => upCard(i, { title: e.target.value })} />
+                                </Field>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => removeCard(i)}
+                                className="mt-5 shrink-0 rounded-md border border-border p-1.5 text-destructive hover:bg-destructive/10"
+                            >
+                                <Trash2 className="h-3.5 w-3.5" />
+                            </button>
                         </div>
                         <Field label="Opis">
                             <input className={inputCls} value={card.description} onChange={(e) => upCard(i, { description: e.target.value })} />
@@ -417,6 +429,13 @@ function TestingEditor({
                     </div>
                 ))}
             </div>
+            <button
+                type="button"
+                onClick={addCard}
+                className="mb-3 flex items-center gap-1 text-xs text-primary hover:underline"
+            >
+                <Plus className="h-3 w-3" /> Dodaj kartę
+            </button>
             <Field label="Nota (opcjonalnie)">
                 <input className={inputCls} value={block.note ?? ''} onChange={(e) => s({ note: e.target.value })} />
             </Field>

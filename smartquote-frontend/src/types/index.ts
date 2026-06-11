@@ -13,3 +13,5 @@ export * from './ai';
 export * from './ksef.types';
 export * from './email.types';
 export * from './offer-template.types';
+export * from './lead.types';
+export * from './search.types';
