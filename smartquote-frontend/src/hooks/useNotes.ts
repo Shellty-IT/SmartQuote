@@ -24,6 +24,7 @@ export function useNotes(filter: UseNotesFilter): UseNotesResult {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const filterKey = JSON.stringify(filter);
     const fetchNotes = useCallback(async () => {
         setIsLoading(true);
         setError(null);
@@ -38,7 +39,7 @@ export function useNotes(filter: UseNotesFilter): UseNotesResult {
             setIsLoading(false);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [JSON.stringify(filter)]);
+    }, [filterKey]);
 
     useEffect(() => {
         fetchNotes();

@@ -8,7 +8,6 @@ import { useToast } from '@/contexts/ToastContext';
 import { useTranslations } from '@/i18n';
 import type { Client, CreateOfferInput, OfferTemplate, Offer } from '@/types';
 import type { Step } from '../new/constants';
-import { STEP_IDS } from '../new/constants';
 import type { ExtendedOfferItem, OfferDetails, OfferTotalsData } from '../new/types';
 import { emptyItem, defaultOfferDetails } from '../new/types';
 import { mergeWithDefaults, type ProposalBlocks } from '@/lib/pdf/proposal-blocks';

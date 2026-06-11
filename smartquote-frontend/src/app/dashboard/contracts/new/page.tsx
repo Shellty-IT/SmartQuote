@@ -282,6 +282,7 @@ function NewContractForm() {
                             <button
                                 key={client.id}
                                 type="button"
+                                data-testid="contract-client-card"
                                 onClick={() => setSelectedClient(client)}
                                 className={cn(
                                     'flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all',
@@ -318,6 +319,7 @@ function NewContractForm() {
                     <div className="flex justify-end mt-4">
                         <Button
                             type="button"
+                            data-testid="contract-next-button"
                             disabled={!selectedClient}
                             onClick={() => setStep('type_choice')}
                         >
@@ -329,7 +331,7 @@ function NewContractForm() {
 
             {/* ── STEP: type_choice ────────────────────────────────────────────── */}
             {step === 'type_choice' && (
-                <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                <div data-testid="contract-step-type-choice" className="rounded-2xl border border-border bg-card p-6 shadow-card">
                     <h2 className="text-lg font-semibold text-foreground mb-1">{tn.typeChoice.title}</h2>
                     <p className="text-sm text-muted-foreground mb-6">{tn.typeChoice.subtitle}</p>
 
@@ -422,6 +424,7 @@ function NewContractForm() {
                         </Button>
                         <Button
                             type="button"
+                            data-testid="contract-next-button"
                             onClick={() => setStep(templateType === 'short' ? 'website_form' : 'classic_form')}
                         >
                             {commonTr.next}

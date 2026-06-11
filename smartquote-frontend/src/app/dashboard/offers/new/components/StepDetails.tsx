@@ -30,7 +30,7 @@ export default function StepDetails({ details, onUpdate, clientName, hideTemplat
 
     const handleGenerateDescription = useCallback(async (mode: 'generate' | 'polish') => {
         if (!details.title || details.title.length < 3) return;
-        mode === 'generate' ? setIsGeneratingDesc(true) : setIsPolishingDesc(true);
+        if (mode === 'generate') setIsGeneratingDesc(true); else setIsPolishingDesc(true);
         try {
             const result = await ai.generateOfferDescription({
                 title: details.title,

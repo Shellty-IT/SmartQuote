@@ -2,11 +2,8 @@
 
 import { useState, useMemo } from 'react';
 import { Plus, Calendar } from 'lucide-react';
-// @ts-ignore
 import { useCalendarApp, ScheduleXCalendar } from '@schedule-x/react';
-// @ts-ignore
 import { createViewMonthGrid, createViewWeek, createViewDay } from '@schedule-x/calendar';
-// @ts-ignore
 import { createEventModalPlugin } from '@schedule-x/event-modal';
 import '@schedule-x/theme-default/dist/index.css';
 import { useCalendarEvents } from '@/hooks/useCalendar';
@@ -60,11 +57,9 @@ export default function CalendarPage() {
         calendarId: e.color || 'blue',
     })), [events]);
 
-    // @ts-ignore
     const calendar = useCalendarApp({
         views: [createViewMonthGrid(), createViewWeek(), createViewDay()],
         events: scheduleXEvents,
-        // @ts-ignore
         plugins: [createEventModalPlugin()],
         calendars: {
             blue:   { colorName: 'blue',   lightColors: { main: '#3b82f6', container: '#eff6ff', onContainer: '#1d4ed8' } },

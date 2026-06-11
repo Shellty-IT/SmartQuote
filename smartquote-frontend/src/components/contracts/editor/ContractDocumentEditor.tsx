@@ -3,7 +3,7 @@
 // Renders the contract HTML in an iframe. User clicks a section → side panel opens.
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Download, RefreshCw, ZoomIn, ZoomOut, Layers } from 'lucide-react'
 import { Button } from '@/components/ui'
 import {

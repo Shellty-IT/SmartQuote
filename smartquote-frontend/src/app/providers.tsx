@@ -7,15 +7,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AIChatProvider } from '@/contexts/AIChatContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 
-const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            staleTime: 30_000,
-            retry: 1,
-            refetchOnWindowFocus: true,
-        },
-    },
-});
 
 type Theme = 'light' | 'dark';
 type Language = 'pl' | 'en';
@@ -145,6 +136,15 @@ function SidebarProvider({ children }: { children: ReactNode }) {
 }
 
 export function Providers({ children }: { children: ReactNode }) {
+    const [queryClient] = useState(() => new QueryClient({
+        defaultOptions: {
+            queries: {
+                staleTime: 30_000,
+                retry: 1,
+                refetchOnWindowFocus: true,
+            },
+        },
+    }));
     return (
         <QueryClientProvider client={queryClient}>
             <SessionProvider>
