@@ -258,57 +258,23 @@ export async function createContract(
 
     await page.goto('/dashboard/contracts/new', { waitUntil: 'domcontentloaded' });
 
-    await page.getByText('Informacje podstawowe').waitFor({ state: 'visible', timeout: 30000 });
+    // Step 1: select a client
+    const clientCard = page.getByTestId('contract-client-card').first();
+    await clientCard.waitFor({ state: 'visible', timeout: 30000 });
+    await clientCard.click();
+    await page.getByTestId('contract-next-button').click();
+
+    // Step 2: template type — classic is pre-selected, just advance
+    await page.getByTestId('contract-step-type-choice').waitFor({ state: 'visible', timeout: 10000 });
+    await page.getByTestId('contract-next-button').click();
+
+    // Step 3: classic form
+    await page.getByText('Informacje podstawowe').waitFor({ state: 'visible', timeout: 10000 });
 
     const textInputs = page.locator('form input:not([type="date"]):not([type="number"]):not([type="hidden"]):not([type="checkbox"])');
     const titleField = textInputs.first();
     await titleField.waitFor({ state: 'visible', timeout: 5000 });
     await titleField.fill(title);
-
-    // Wait for client options to be populated BEFORE grabbing a locator reference.
-    // On mobile-safari the async fetch causes a re-render that detaches any
-    // previously-captured DOM node, so we must wait for a stable state first.
-    await page.waitForFunction(
-        () => {
-            const select = document.querySelector('form select');
-            return !!select && select.querySelectorAll('option').length > 1;
-        },
-        { timeout: 30000 }
-    );
-
-    // Fresh locator after the DOM has settled — safe to use on mobile.
-    const clientSelect = page.locator('form select').first();
-    await clientSelect.waitFor({ state: 'visible', timeout: 5000 });
-
-    const clientOptions = clientSelect.locator('option');
-    const optionCount = await clientOptions.count();
-    if (optionCount > 1) {
-        const secondOption = await clientOptions.nth(1).getAttribute('value');
-        if (secondOption) {
-            await clientSelect.selectOption(secondOption);
-
-            // On mobile-safari, Playwright's selectOption may not trigger React's
-            // synthetic onChange reliably. Fire an explicit input + change event
-            // to ensure the React state is updated before form submission.
-            await page.evaluate((sel) => {
-                const el = document.querySelector('form select') as HTMLSelectElement | null;
-                if (!el) return;
-                el.value = sel;
-                el.dispatchEvent(new Event('input', { bubbles: true }));
-                el.dispatchEvent(new Event('change', { bubbles: true }));
-            }, secondOption);
-
-            // Verify the value is set before proceeding.
-            await page.waitForFunction(
-                (expected) => {
-                    const el = document.querySelector('form select') as HTMLSelectElement | null;
-                    return !!el && el.value === expected;
-                },
-                secondOption,
-                { timeout: 5000 }
-            );
-        }
-    }
 
     const itemNameField = textInputs.nth(1);
     await itemNameField.scrollIntoViewIfNeeded();
