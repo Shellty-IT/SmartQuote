@@ -8,9 +8,9 @@ import { createModuleLogger } from '../lib/logger';
 const log = createModuleLogger('followup-reminder-ctrl');
 
 function checkCronAuth(req: Request, res: Response): boolean {
-    const authHeader = req.headers['x-cron-secret'];
     const expectedSecret = config.cronSecret;
-    if (expectedSecret && authHeader !== expectedSecret) {
+    // Deny unconditionally when CRON_SECRET is not configured — fail-closed.
+    if (!expectedSecret || req.headers['x-cron-secret'] !== expectedSecret) {
         errorResponse(res, 'UNAUTHORIZED', 'Invalid cron secret', 401);
         return false;
     }

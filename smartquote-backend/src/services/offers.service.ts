@@ -13,6 +13,7 @@ import { triggerPostMortem } from './shared/postmortem.utils';
 import { NotFoundError, ValidationError, ExternalServiceError } from '../errors/domain.errors';
 import { mapToPDFUser, mapToPDFClient } from './pdf/data-mapper';
 import { pdfService } from './pdf';
+import { syncTotalsFromBlocks } from '../utils/syncTotalsFromBlocks';
 
 const logger = createModuleLogger('offers-service');
 const frontendUrl = config.frontendUrl.replace(/\/$/, '');
@@ -139,27 +140,11 @@ export class OffersService {
             // When the proposal template has a priceOverride, sync it to the offer totals
             // so all views (list, details, PDF) show the same price.
             if (data.blocks != null && !data.items) {
-                try {
-                    const b = data.blocks as Record<string, unknown>
-                    const pe = b.pricingExtra as Record<string, unknown> | undefined
-                    if (pe && pe.priceOverride != null) {
-                        const override = Number(pe.priceOverride)
-                        const isNet = (pe.priceType as string | undefined) === 'net'
-                        if (!isNaN(override) && override > 0) {
-                            const totalGross = isNet
-                                ? Math.round(override * 1.23 * 100) / 100
-                                : override
-                            const totalNet = isNet
-                                ? override
-                                : Math.round((override / 1.23) * 100) / 100
-                            const totalVat = Math.round((totalGross - totalNet) * 100) / 100
-                            updateData.totalGross = totalGross
-                            updateData.totalNet = totalNet
-                            updateData.totalVat = totalVat
-                        }
-                    }
-                } catch {
-                    // ignore – don't fail the update if blocks parsing fails
+                const totals = syncTotalsFromBlocks(data.blocks as Record<string, unknown>);
+                if (totals) {
+                    updateData.totalGross = totals.totalGross;
+                    updateData.totalNet = totals.totalNet;
+                    updateData.totalVat = totals.totalVat;
                 }
             }
         }

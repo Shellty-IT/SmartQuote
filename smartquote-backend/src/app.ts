@@ -66,42 +66,8 @@ const authLimiter = rateLimit({
     },
 });
 
-// Extract user ID from JWT token payload without verification (for rate-limiting key only).
-function extractUserIdFromBearer(authHeader: string | undefined): string | null {
-    if (!authHeader?.startsWith('Bearer ')) return null;
-    try {
-        const payload = JSON.parse(
-            Buffer.from(authHeader.slice(7).split('.')[1], 'base64').toString(),
-        );
-        return (payload?.userId as string) || (payload?.id as string) || null;
-    } catch {
-        return null;
-    }
-}
-
-const aiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 30,
-    standardHeaders: true,
-    legacyHeaders: false,
-    // AI endpoints require auth so userId key is always used; IP fallback is last resort only.
-    validate: { keyGeneratorIpFallback: false },
-    keyGenerator: (req) => {
-        const userId = extractUserIdFromBearer(req.headers.authorization);
-        return userId ? `ai:user:${userId}` : `ai:ip:${req.ip ?? req.socket.remoteAddress ?? 'unknown'}`;
-    },
-    message: {
-        success: false,
-        error: {
-            code: 'RATE_LIMIT_EXCEEDED',
-            message: 'Zbyt wiele żądań AI. Spróbuj ponownie za 15 minut.',
-        },
-    },
-});
-
 app.use(globalLimiter);
 app.use('/api/auth', authLimiter);
-app.use('/api/ai', aiLimiter);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));

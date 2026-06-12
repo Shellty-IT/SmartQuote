@@ -10,7 +10,7 @@ export interface AIMessage {
 }
 
 export interface AIAction {
-    type: 'create_offer' | 'create_followup' | 'send_email' | 'view_client' | 'view_offer' | 'navigate' | 'create_note' | 'create_lead';
+    type: 'create_offer' | 'create_followup' | 'send_email' | 'view_client' | 'view_offer' | 'navigate' | 'create_note' | 'create_lead' | 'update_status';
     label: string;
     payload: Record<string, unknown>;
 }

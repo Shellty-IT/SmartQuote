@@ -118,16 +118,8 @@ export function OfferAIDrawer({ isOpen, onClose, clientName, offerTitle, current
 
     const handleApply = () => {
         if (!generatedBlocks) return
-        const generated = generatedBlocks as Partial<ProposalBlocks>
-        // Deep-merge: start from currentBlocks so sections AI didn't touch are preserved.
-        // Only page1Sections/page2Sections are replaced if AI explicitly returned them.
-        const merged: Partial<ProposalBlocks> = {
-            ...currentBlocks,
-            ...generated,
-            page1Sections: generated.page1Sections ?? currentBlocks.page1Sections,
-            page2Sections: generated.page2Sections ?? currentBlocks.page2Sections,
-        }
-        const blocks = mergeWithDefaults(merged, clientName)
+        // Backend already ran diffMergeBlocks against currentBlocks — blocks are safe to apply directly.
+        const blocks = mergeWithDefaults(generatedBlocks as Partial<ProposalBlocks>, clientName)
         onApply(blocks)
         onClose()
     }

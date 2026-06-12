@@ -48,7 +48,65 @@ The repository is a **monorepo** containing two independent applications:
 - **`smartquote-backend/`** — Express.js REST API with PostgreSQL, Prisma ORM and Google Gemini integration
 
 Both projects keep separate dependency trees, separate CI pipelines and separate deployments
-(Netlify for the frontend, Render for the backend).
+(Vercel for the frontend, Render for the backend).
+
+---
+
+## 🏗 Architecture
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                      USER BROWSER                            │
+└─────────────────────────────┬────────────────────────────────┘
+                              │ HTTPS
+                              ▼
+┌──────────────────────────────────────────────────────────────┐
+│            VERCEL  (smartquote-frontend / Next.js 16)        │
+│                                                              │
+│  ┌──────────────────┐   ┌──────────────────────────────────┐ │
+│  │ Dashboard pages  │   │ Vercel API routes (serverless)   │ │
+│  │ /dashboard/*     │   │  GET /api/offers/:id/pdf/proposal│ │
+│  │                  │   │  GET /api/contracts/:id/pdf/short│ │
+│  │ Public pages     │   │  → Puppeteer + @sparticuz/chromium│ │
+│  │ /offer/view/:tok │   └──────────────────────────────────┘ │
+│  │ /contract/view/  │                                         │
+│  └────────┬─────────┘                                         │
+└───────────┼──────────────────────────────────────────────────┘
+            │ REST API + JWT bearer
+            ▼
+┌──────────────────────────────────────────────────────────────┐
+│            RENDER  (smartquote-backend / Express.js)         │
+│                                                              │
+│  Auth · Offers · Contracts · Clients · Follow-ups · Emails   │
+│  PDF (PDFKit classic) · KSeF bridge · Cron reminders         │
+│                                                              │
+│  ┌─────────────┐    ┌────────────┐    ┌────────────────────┐ │
+│  │ Prisma ORM  │    │ AI service │    │ Email service      │ │
+│  └──────┬──────┘    └─────┬──────┘    └─────────┬──────────┘ │
+└─────────┼─────────────────┼──────────────────────┼───────────┘
+          │                 │                       │
+          ▼                 ▼                       ▼
+  ┌──────────────┐  ┌────────────────┐   ┌──────────────────┐
+  │  Neon DB     │  │ Google Gemini  │   │  SMTP / MailerSend│
+  │  PostgreSQL  │  │ 2.5 Flash      │   │  (per-user config)│
+  └──────────────┘  └────────────────┘   └──────────────────┘
+```
+
+**Offer → AI → PDF → public page flow:**
+1. Sales rep fills offer form → AI auto-generates description + proposal template (Gemini)
+2. Offer is saved to PostgreSQL; optional PDF generated on Render (classic) or Vercel (proposal/contract)
+3. Offer published → unique share token → public page `/offer/view/:token`
+4. Client views, selects variant, accepts/rejects → audit trail stored in DB
+5. On acceptance → KSeF bridge optionally triggers e-invoice via KSeF Master
+
+---
+
+## 🔑 Live Demo
+
+**URL:** https://smart-quote-ai.vercel.app
+
+The demo instance allows free open registration — create an account to explore all features.
+Sample clients, offers, and contracts can be seeded locally with `npm run seed`.
 
 ---
 
@@ -100,7 +158,7 @@ Both projects keep separate dependency trees, separate CI pipelines and separate
 | Language         | TypeScript 5                                        |
 | Linting          | ESLint 9 + eslint-config-next                       |
 | E2E testing      | Playwright 1.58                                     |
-| Deployment       | Netlify (`@netlify/plugin-nextjs`)                  |
+| Deployment       | Vercel                                              |
 
 ### Backend (`smartquote-backend/`)
 
@@ -252,7 +310,7 @@ SmartQuote/
 │   ├── tests/e2e/                   ← Playwright E2E tests
 │   ├── docs/                        ← Frontend-specific docs
 │   ├── public/                      ← Static assets, PWA manifest, service worker
-│   ├── netlify.toml                 ← Netlify build config
+│   ├── vercel.json                  ← Vercel build config
 │   ├── next.config.ts               ← Next.js configuration
 │   ├── playwright.config.ts         ← Playwright configuration
 │   └── package.json
@@ -344,7 +402,7 @@ SmartQuote/
 
 - **CORS** — allow-list based on `FRONTEND_URL` / `CLIENT_URL`
 - **Helmet** — secure HTTP headers
-- **Rate limiting** — 500 requests / 15 min globally, 20 requests / 15 min for `/auth/*`
+- **Rate limiting** — 500 req/15 min globally; 20 req/15 min for `/auth/*`; 30 req/15 min per-user for `/ai/*`; 100 req/15 min for public offer/contract pages
 - **Zod validation** — every request body, query and param schema-checked
 - **Auth cache** — 5-minute TTL in-memory cache, reduces DB load by ~80% on authenticated requests
 
@@ -400,11 +458,11 @@ cd smartquote-frontend && npm run lint
 
 The monorepo deploys both projects independently — there is no Docker setup.
 
-### Frontend — Netlify
+### Frontend — Vercel
 
-- Uses `@netlify/plugin-nextjs` for Next.js App Router support
-- Set environment variables in **Netlify → Site configuration → Environment variables**
-- Recommended: connect Netlify to the GitHub repo, set the base directory to `smartquote-frontend/`
+- Deployed via Vercel with Next.js App Router support built-in
+- Set environment variables in **Vercel → Project → Settings → Environment Variables**
+- Connect Vercel to the GitHub repo, set the root directory to `smartquote-frontend/`
 
 ### Backend — Render
 

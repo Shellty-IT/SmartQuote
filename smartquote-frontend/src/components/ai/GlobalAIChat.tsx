@@ -5,8 +5,14 @@ import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { ai } from '@/lib/api';
 import { notesApi } from '@/lib/api/notes.api';
+import { offersApi } from '@/lib/api/offers.api';
+import { contractsApi } from '@/lib/api/contracts.api';
+import { leadsApi } from '@/lib/api/leads.api';
+import { followUpsApi } from '@/lib/api/follow-ups.api';
+import { useToast } from '@/contexts/ToastContext';
 import { useAIChat } from '@/contexts/AIChatContext';
 import { usePageContext } from '@/hooks/usePageContext';
 import type { PageContext } from '@/hooks/usePageContext';
@@ -52,6 +58,8 @@ export function GlobalAIChat() {
 
     const { data: session } = useSession();
     const router = useRouter();
+    const queryClient = useQueryClient();
+    const toast = useToast();
     const { hideGlobalFab } = useAIChat();
     const pageContext = usePageContext();
     const { messages, addMessage, clearMessages } = useChatMessages();
@@ -135,39 +143,122 @@ export function GlobalAIChat() {
                     toggleOpen();
                 }
                 break;
-            case 'create_note':
+
+            case 'create_note': {
+                const p = action.payload as { content?: string; entityType?: string; entityId?: string };
+                if (!p.content || !p.entityType || !p.entityId) break;
                 try {
-                    const p = action.payload as { content?: string; entityType?: string; entityId?: string };
-                    if (p.content && p.entityType && p.entityId) {
-                        await notesApi.create({
-                            content: p.content,
-                            [`${p.entityType}Id`]: p.entityId,
-                        } as Parameters<typeof notesApi.create>[0]);
-                        addMessage({
-                            id: crypto.randomUUID(),
-                            role: 'assistant',
-                            content: '✅ Notatka zapisana.',
-                            timestamp: new Date(),
-                        });
+                    await notesApi.create({
+                        content: p.content,
+                        [`${p.entityType}Id`]: p.entityId,
+                    } as Parameters<typeof notesApi.create>[0]);
+                    addMessage({ id: crypto.randomUUID(), role: 'assistant', content: '✅ Notatka zapisana.', timestamp: new Date() });
+                } catch {
+                    toast.error('Nie udało się zapisać notatki.');
+                }
+                break;
+            }
+
+            case 'update_status': {
+                const p = action.payload as { entityType?: string; entityId?: string; status?: string };
+                if (!p.entityId || !p.status) break;
+                try {
+                    if (p.entityType === 'contract') {
+                        await contractsApi.updateStatus(p.entityId, p.status);
+                        queryClient.invalidateQueries({ queryKey: ['contract', p.entityId] });
+                        queryClient.invalidateQueries({ queryKey: ['contracts'] });
+                    } else {
+                        await offersApi.update(p.entityId, { status: p.status as import('@/types').OfferStatus });
+                        queryClient.invalidateQueries({ queryKey: ['offer', p.entityId] });
+                        queryClient.invalidateQueries({ queryKey: ['offers'] });
                     }
-                } catch { /* ignore */ }
+                    addMessage({ id: crypto.randomUUID(), role: 'assistant', content: `✅ Status zmieniony na: ${p.status}.`, timestamp: new Date() });
+                } catch {
+                    toast.error('Nie udało się zmienić statusu.');
+                }
                 break;
-            case 'create_offer':
-                router.push('/dashboard/offers/new');
+            }
+
+            case 'create_lead': {
+                const p = action.payload as { name?: string; email?: string; company?: string; source?: string };
+                if (!p.name) {
+                    router.push('/dashboard/leads/new');
+                    toggleOpen();
+                    break;
+                }
+                try {
+                    const lead = await leadsApi.create({
+                        name: p.name,
+                        email: p.email ?? '',
+                        company: p.company ?? '',
+                        phone: '',
+                        source: p.source ?? 'AI',
+                        notes: '',
+                    });
+                    queryClient.invalidateQueries({ queryKey: ['leads'] });
+                    addMessage({ id: crypto.randomUUID(), role: 'assistant', content: `✅ Lead "${p.name}" zapisany.`, timestamp: new Date() });
+                    if (lead.data?.id) {
+                        router.push(`/dashboard/leads/${lead.data.id}`);
+                    }
+                    toggleOpen();
+                } catch {
+                    toast.error('Nie udało się zapisać leada.');
+                }
+                break;
+            }
+
+            case 'create_followup': {
+                const p = action.payload as { clientId?: string; title?: string; type?: string };
+                if (!p.title) {
+                    router.push('/dashboard/followups');
+                    toggleOpen();
+                    break;
+                }
+                try {
+                    const dueDate = new Date();
+                    dueDate.setDate(dueDate.getDate() + 1);
+                    dueDate.setHours(10, 0, 0, 0);
+                    await followUpsApi.create({
+                        title: p.title,
+                        type: (p.type as 'CALL' | 'EMAIL' | 'MEETING' | 'TASK' | 'REMINDER' | 'OTHER') ?? 'TASK',
+                        priority: 'MEDIUM',
+                        dueDate: dueDate.toISOString(),
+                        clientId: p.clientId,
+                    });
+                    queryClient.invalidateQueries({ queryKey: ['followups'] });
+                    addMessage({ id: crypto.randomUUID(), role: 'assistant', content: `✅ Follow-up "${p.title}" zaplanowany na jutro o 10:00.`, timestamp: new Date() });
+                } catch {
+                    toast.error('Nie udało się zapisać follow-up.');
+                }
+                break;
+            }
+
+            case 'create_offer': {
+                const p = action.payload as { clientId?: string; title?: string };
+                const params = new URLSearchParams();
+                if (p.clientId) params.set('clientId', p.clientId);
+                if (p.title) params.set('title', p.title);
+                const qs = params.toString();
+                router.push(`/dashboard/offers/new${qs ? `?${qs}` : ''}`);
                 toggleOpen();
                 break;
-            case 'create_lead':
-                router.push('/dashboard/leads/new');
+            }
+
+            case 'send_email': {
+                const p = action.payload as { clientId?: string; offerId?: string };
+                const params = new URLSearchParams();
+                if (p.clientId) params.set('clientId', p.clientId);
+                if (p.offerId) params.set('offerId', p.offerId);
+                const qs = params.toString();
+                router.push(`/dashboard/emails/new${qs ? `?${qs}` : ''}`);
                 toggleOpen();
                 break;
-            case 'create_followup':
-                router.push('/dashboard/followups');
-                toggleOpen();
-                break;
+            }
+
             default:
                 break;
         }
-    }, [router, addMessage, toggleOpen]);
+    }, [router, queryClient, toast, addMessage, toggleOpen]);
 
     const handleClearHistory = async () => {
         try {

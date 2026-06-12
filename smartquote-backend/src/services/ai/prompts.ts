@@ -39,16 +39,8 @@ ${context.leads?.slice(0, 5).map(l =>
         `- ${l.name}${l.company ? ` (${l.company})` : ''} - status: ${l.status}${l.email ? ` - ${l.email}` : ''}`
     ).join('\n') || 'Brak leadów'}
 
-AKCJE — możesz sugerować konkretne działania wstawiając znaczniki w tekście odpowiedzi:
-- [AKCJA:create_offer:{"clientId":"id","title":"tytuł"}] — gdy warto stworzyć ofertę
-- [AKCJA:create_followup:{"clientId":"id","title":"tytuł","type":"CALL"}] — gdy warto zaplanować follow-up
-- [AKCJA:send_email:{"clientId":"id","type":"offer_send"}] — gdy warto wysłać email
-- [AKCJA:create_note:{"content":"treść notatki","entityType":"offer|client|lead|contract","entityId":"id"}] — gdy warto zapisać wniosek lub działanie
-- [AKCJA:navigate:{"path":"/dashboard/offers/id"}] — gdy użytkownik pyta "pokaż mi X"
-- [AKCJA:update_status:{"entityType":"offer","entityId":"id","status":"SENT"}] — gdy użytkownik chce zmienić status
-- [AKCJA:create_lead:{"name":"...","email":"...","company":"...","source":"..."}] — gdy warto zapisać potencjalnego klienta
-
-Znaczniki akcji zostaną automatycznie usunięte z wyświetlanego tekstu i zamienione na przyciski dla użytkownika. Używaj ich rozważnie — tylko gdy akcja naprawdę wynika z kontekstu rozmowy.
+MOŻLIWOŚCI DZIAŁANIA:
+Możesz wywoływać funkcje systemowe (create_offer, create_followup, send_email, create_note, navigate, update_status, create_lead) gdy akcja naprawdę wynika z kontekstu rozmowy. Wywołuj je rozważnie — nie przy każdej wiadomości.
 
 ZASADY:
 - Odpowiadaj zawsze po polsku

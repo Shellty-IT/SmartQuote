@@ -14,10 +14,10 @@ import {
     EmailGenerationContext,
     EmailType,
 } from '../../types';
-import { callGemini, extractJson, safeJsonParse } from './core';
+import { config } from '../../config';
+import { callGemini, callGeminiStructured, Type, type Schema } from './core';
 import {
     buildSystemPrompt,
-    buildChatPrompt,
     buildOfferGenerationPrompt,
     buildEmailPrompt,
     buildClientAnalysisPrompt,
@@ -35,19 +35,20 @@ function buildMonthStart(): Date {
 }
 
 export async function getUserContext(userId: string): Promise<AIContext> {
-    const [clients, offers, contracts, followUps, leads] = await Promise.all([
+    const cacheKey = buildCacheKey('user-context', userId);
+    const cached = aiCache.get<AIContext>(cacheKey);
+    if (cached) return cached;
+
+    const monthStart = buildMonthStart();
+    const [
+        clients, offers, contracts, followUps, leads,
+        totalClients, activeOffers, pendingFollowUps, revenueResult, leadsCount,
+    ] = await Promise.all([
         prisma.client.findMany({
             where: { userId },
             take: 50,
             orderBy: { updatedAt: 'desc' },
-            select: {
-                id: true,
-                name: true,
-                company: true,
-                email: true,
-                type: true,
-                isActive: true,
-            },
+            select: { id: true, name: true, company: true, email: true, type: true, isActive: true },
         }),
         prisma.offer.findMany({
             where: { userId },
@@ -96,18 +97,11 @@ export async function getUserContext(userId: string): Promise<AIContext> {
             orderBy: { createdAt: 'desc' },
             select: { id: true, name: true, company: true, email: true, status: true, createdAt: true },
         }),
-    ]);
-
-    const [totalClients, activeOffers, pendingFollowUps, revenueResult, leadsCount] = await Promise.all([
         prisma.client.count({ where: { userId } }),
-        prisma.offer.count({
-            where: { userId, status: { in: ['DRAFT', 'SENT', 'NEGOTIATION'] } },
-        }),
-        prisma.followUp.count({
-            where: { userId, status: 'PENDING', dueDate: { lte: new Date() } },
-        }),
+        prisma.offer.count({ where: { userId, status: { in: ['DRAFT', 'SENT', 'NEGOTIATION'] } } }),
+        prisma.followUp.count({ where: { userId, status: 'PENDING', dueDate: { lte: new Date() } } }),
         prisma.offer.aggregate({
-            where: { userId, status: 'ACCEPTED', updatedAt: { gte: buildMonthStart() } },
+            where: { userId, status: 'ACCEPTED', updatedAt: { gte: monthStart } },
             _sum: { totalGross: true },
         }),
         prisma.lead.count({ where: { userId, status: { in: ['NEW', 'CONTACTED'] } } }),
@@ -121,76 +115,109 @@ export async function getUserContext(userId: string): Promise<AIContext> {
         leadsCount,
     };
 
-    return { userId, clients, offers, contracts, followUps, leads, stats };
+    const context: AIContext = { userId, clients, offers, contracts, followUps, leads, stats };
+    aiCache.set(cacheKey, context, CACHE_TTL.USER_CONTEXT);
+    return context;
 }
 
-function parseActions(response: string): { cleanMessage: string; actions: AIAction[] } {
-    const actions: AIAction[] = [];
-    let cleanMessage = response;
+// ── Gemini function declarations ──────────────────────────────────────────────
 
-    const actionRegex = /\[AKCJA:([\w_]+)(?::([^\]]+))?\]/g;
-    let match;
+const CHAT_FUNCTION_DECLARATIONS = [
+    {
+        name: 'create_offer',
+        description: 'Utwórz nową ofertę dla klienta',
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                clientId: { type: Type.STRING, description: 'ID klienta z systemu' },
+                title: { type: Type.STRING, description: 'Tytuł oferty' },
+            },
+        },
+    },
+    {
+        name: 'create_followup',
+        description: 'Zaplanuj follow-up (telefon, email, spotkanie lub zadanie) z klientem',
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                clientId: { type: Type.STRING, description: 'ID klienta' },
+                title: { type: Type.STRING, description: 'Tytuł follow-upu' },
+                type: { type: Type.STRING, description: 'CALL, EMAIL, MEETING lub TASK' },
+            },
+        },
+    },
+    {
+        name: 'send_email',
+        description: 'Wyślij email do klienta',
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                clientId: { type: Type.STRING, description: 'ID klienta' },
+                type: { type: Type.STRING, description: 'Typ emaila, np. offer_send' },
+            },
+        },
+    },
+    {
+        name: 'create_note',
+        description: 'Dodaj notatkę do oferty, klienta, leadu lub kontraktu',
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                content: { type: Type.STRING, description: 'Treść notatki' },
+                entityType: { type: Type.STRING, description: 'offer, client, lead lub contract' },
+                entityId: { type: Type.STRING, description: 'ID encji' },
+            },
+            required: ['content'],
+        },
+    },
+    {
+        name: 'navigate',
+        description: 'Nawiguj do konkretnej strony (gdy użytkownik prosi "pokaż mi X")',
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                path: { type: Type.STRING, description: 'Ścieżka URL, np. /dashboard/offers/123' },
+            },
+            required: ['path'],
+        },
+    },
+    {
+        name: 'update_status',
+        description: 'Zmień status oferty lub kontraktu',
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                entityType: { type: Type.STRING, description: 'offer lub contract' },
+                entityId: { type: Type.STRING, description: 'ID encji' },
+                status: { type: Type.STRING, description: 'Nowy status, np. SENT lub ACCEPTED' },
+            },
+            required: ['entityType', 'entityId', 'status'],
+        },
+    },
+    {
+        name: 'create_lead',
+        description: 'Zapisz nowego potencjalnego klienta (lead)',
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                name: { type: Type.STRING, description: 'Imię i nazwisko' },
+                email: { type: Type.STRING, description: 'Adres email' },
+                company: { type: Type.STRING, description: 'Nazwa firmy' },
+                source: { type: Type.STRING, description: 'Źródło leadu' },
+            },
+        },
+    },
+] as const;
 
-    while ((match = actionRegex.exec(response)) !== null) {
-        const [fullMatch, type, payload] = match;
-
-        switch (type) {
-            case 'create_offer':
-                actions.push({
-                    type: 'create_offer',
-                    label: '➕ Utwórz ofertę',
-                    payload: payload ? safeJsonParse(payload) : {},
-                });
-                break;
-            case 'create_followup':
-                actions.push({
-                    type: 'create_followup',
-                    label: '📅 Zaplanuj follow-up',
-                    payload: payload ? safeJsonParse(payload) : {},
-                });
-                break;
-            case 'send_email':
-                actions.push({
-                    type: 'send_email',
-                    label: '✉️ Wyślij email',
-                    payload: payload ? safeJsonParse(payload) : {},
-                });
-                break;
-            case 'create_note':
-                actions.push({
-                    type: 'create_note',
-                    label: '📝 Dodaj notatkę',
-                    payload: payload ? safeJsonParse(payload) : {},
-                });
-                break;
-            case 'update_status':
-                actions.push({
-                    type: 'update_status',
-                    label: '🔄 Zmień status',
-                    payload: payload ? safeJsonParse(payload) : {},
-                });
-                break;
-            case 'navigate':
-                actions.push({
-                    type: 'navigate',
-                    label: '→ Przejdź',
-                    payload: payload ? safeJsonParse(payload) : {},
-                });
-                break;
-            case 'create_lead':
-                actions.push({
-                    type: 'create_lead',
-                    label: '👤 Utwórz lead',
-                    payload: payload ? safeJsonParse(payload) : {},
-                });
-                break;
-        }
-
-        cleanMessage = cleanMessage.replace(fullMatch, '');
-    }
-
-    return { cleanMessage: cleanMessage.trim(), actions };
-}
+const ACTION_LABELS: Record<string, string> = {
+    create_offer: '➕ Utwórz ofertę',
+    create_followup: '📅 Zaplanuj follow-up',
+    send_email: '✉️ Wyślij email',
+    create_note: '📝 Dodaj notatkę',
+    update_status: '🔄 Zmień status',
+    navigate: '→ Przejdź',
+    create_lead: '👤 Utwórz lead',
+};
 
 function generateSuggestions(message: string, context: AIContext): string[] {
     const suggestions: string[] = [];
@@ -281,18 +308,73 @@ export async function chat(
             systemPrompt += pageSection;
         }
 
-        const fullPrompt = buildChatPrompt(systemPrompt, conversationHistory, message);
+        type GeminiContent = { role: 'user' | 'model'; parts: Array<{ text: string }> };
+        const contents: GeminiContent[] = [
+            ...conversationHistory.map((msg): GeminiContent => ({
+                role: msg.role === 'user' ? 'user' : 'model',
+                parts: [{ text: msg.content }],
+            })),
+            { role: 'user', parts: [{ text: message }] },
+        ];
 
-        const responseText = await callGemini(ai, fullPrompt);
-        const { cleanMessage, actions } = parseActions(responseText);
+        const response = await ai.models.generateContent({
+            model: config.gemini.model,
+            contents,
+            config: {
+                systemInstruction: systemPrompt,
+                tools: [{ functionDeclarations: CHAT_FUNCTION_DECLARATIONS as unknown as never[] }],
+            },
+        });
+
+        const parts = response.candidates?.[0]?.content?.parts ?? [];
+        const responseText = parts
+            .filter((p): p is { text: string } => typeof (p as { text?: unknown }).text === 'string')
+            .map((p) => p.text)
+            .join('');
+
+        const actions: AIAction[] = parts
+            .filter((p): p is { functionCall: { name: string; args: Record<string, unknown> } } => {
+                const fc = (p as { functionCall?: { name?: string } }).functionCall;
+                return fc != null && typeof fc.name === 'string' && ACTION_LABELS[fc.name] != null;
+            })
+            .map((p) => ({
+                type: p.functionCall.name as AIAction['type'],
+                label: ACTION_LABELS[p.functionCall.name],
+                payload: p.functionCall.args ?? {},
+            }));
+
         const suggestions = generateSuggestions(message, context);
-
-        return { message: cleanMessage, suggestions, actions };
+        return { message: responseText, suggestions, actions };
     } catch (error: unknown) {
         log.error({ error, userId }, 'AI chat failed');
         return resolveAIErrorMessage(error);
     }
 }
+
+const GENERATE_OFFER_SCHEMA: Schema = {
+    type: Type.OBJECT,
+    properties: {
+        title: { type: Type.STRING },
+        notes: { type: Type.STRING },
+        validDays: { type: Type.NUMBER },
+        items: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    name: { type: Type.STRING },
+                    description: { type: Type.STRING },
+                    quantity: { type: Type.NUMBER },
+                    unit: { type: Type.STRING },
+                    unitPrice: { type: Type.NUMBER },
+                    vatRate: { type: Type.NUMBER },
+                },
+                required: ['name', 'quantity', 'unit', 'unitPrice', 'vatRate'],
+            },
+        },
+    },
+    required: ['title', 'items', 'validDays'],
+};
 
 export async function generateOffer(
     ai: GoogleGenAI | null,
@@ -301,12 +383,7 @@ export async function generateOffer(
     if (!ai) throw new Error('AI nie jest skonfigurowany');
 
     const prompt = buildOfferGenerationPrompt(description);
-    const responseText = await callGemini(ai, prompt);
-    const parsed = extractJson(responseText);
-
-    if (!parsed) throw new Error('Nie udało się wygenerować oferty');
-
-    return parsed as GeneratedOffer;
+    return callGeminiStructured<GeneratedOffer>(ai, prompt, GENERATE_OFFER_SCHEMA);
 }
 
 export async function generateEmail(
@@ -379,20 +456,20 @@ export async function analyzeClient(
         })),
     });
 
-    const responseText = await callGemini(ai, prompt);
-    const parsed = extractJson(responseText);
+    const CLIENT_ANALYSIS_SCHEMA: Schema = {
+        type: Type.OBJECT,
+        properties: {
+            score: { type: Type.NUMBER },
+            potential: { type: Type.STRING },
+            summary: { type: Type.STRING },
+            recommendations: { type: Type.ARRAY, items: { type: Type.STRING } },
+            nextAction: { type: Type.STRING },
+            risks: { type: Type.ARRAY, items: { type: Type.STRING } },
+        },
+        required: ['score', 'potential', 'summary', 'recommendations', 'nextAction', 'risks'],
+    };
 
-    const result: ClientAnalysis = parsed
-        ? (parsed as ClientAnalysis)
-        : {
-            score: 5,
-            potential: 'sredni',
-            summary: responseText,
-            recommendations: [],
-            nextAction: 'Skontaktuj się z klientem',
-            risks: [],
-        };
-
+    const result = await callGeminiStructured<ClientAnalysis>(ai, prompt, CLIENT_ANALYSIS_SCHEMA);
     aiCache.set(cacheKey, result, CACHE_TTL.CLIENT_ANALYSIS);
     return result;
 }
@@ -407,19 +484,84 @@ export interface GenerateSectionParams {
     currency: string
 }
 
-const SECTION_INSTRUCTIONS: Record<string, string> = {
-    intro: 'Napisz profesjonalne wprowadzenie do oferty (2 akapity po polsku, ciepły ale biznesowy ton). Odpowiedź TYLKO jako JSON: {"paragraphs":["akapit1","akapit2"]}',
-    demo: 'Napisz treść sekcji demo/podglądu. Odpowiedź TYLKO jako JSON: {"title":"tytuł sekcji","body":"opis jednozdaniowy","note":"opcjonalna krótka nota"}',
-    structure: 'Napisz strukturę projektu (4-5 elementów). Odpowiedź TYLKO jako JSON: {"title":"Proponowana struktura","items":[{"icon":"emoji","name":"nazwa","description":"krótki opis"},...]}',
-    scope: 'Napisz zakres realizacji (7-9 pozycji). Odpowiedź TYLKO jako JSON: {"title":"Pełny zakres realizacji","items":[{"html":"opis pozycji"},...]}',
-    testing: 'Napisz opis procesu realizacji/testowania (krótki). Odpowiedź TYLKO jako JSON: {"intro":"opis procesu jednozdaniowy","note":"opcjonalna nota"}',
-    technology: 'Napisz opis technologii i uzasadnienie wyboru. Odpowiedź TYLKO jako JSON: {"body":"opis technologii 2-3 zdania","note":"opcjonalna nota"}',
-    about: 'Napisz wezwanie do działania (CTA) kończące ofertę. Odpowiedź TYLKO jako JSON: {"ctaText":"2-3 zdania zachęcające do kontaktu"}',
+const SECTION_PROMPTS: Record<string, string> = {
+    intro: 'Napisz profesjonalne wprowadzenie do oferty (2 akapity po polsku, ciepły ale biznesowy ton).',
+    demo: 'Napisz treść sekcji demo/podglądu — tytuł i jednozdaniowy opis.',
+    structure: 'Napisz strukturę projektu (4–5 elementów z ikonkami emoji, nazwami i krótkimi opisami).',
+    scope: 'Napisz zakres realizacji (7–9 pozycji — konkretne deliverables).',
+    testing: 'Napisz jednozdaniowy opis procesu realizacji.',
+    technology: 'Napisz opis technologii i uzasadnienie wyboru (2–3 zdania).',
+    about: 'Napisz ciepłe, asertywne wezwanie do działania (2–3 zdania, bez "zachęcam").',
+}
+
+const SECTION_SCHEMAS: Record<string, Schema> = {
+    intro: {
+        type: Type.OBJECT,
+        properties: { paragraphs: { type: Type.ARRAY, items: { type: Type.STRING } } },
+        required: ['paragraphs'],
+    },
+    demo: {
+        type: Type.OBJECT,
+        properties: {
+            title: { type: Type.STRING },
+            body: { type: Type.STRING },
+            note: { type: Type.STRING },
+        },
+        required: ['title', 'body'],
+    },
+    structure: {
+        type: Type.OBJECT,
+        properties: {
+            title: { type: Type.STRING },
+            items: {
+                type: Type.ARRAY,
+                items: {
+                    type: Type.OBJECT,
+                    properties: {
+                        icon: { type: Type.STRING },
+                        name: { type: Type.STRING },
+                        description: { type: Type.STRING },
+                    },
+                    required: ['icon', 'name', 'description'],
+                },
+            },
+        },
+        required: ['title', 'items'],
+    },
+    scope: {
+        type: Type.OBJECT,
+        properties: {
+            title: { type: Type.STRING },
+            items: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { html: { type: Type.STRING } }, required: ['html'] } },
+        },
+        required: ['title', 'items'],
+    },
+    testing: {
+        type: Type.OBJECT,
+        properties: { intro: { type: Type.STRING }, note: { type: Type.STRING } },
+        required: ['intro'],
+    },
+    technology: {
+        type: Type.OBJECT,
+        properties: { body: { type: Type.STRING }, note: { type: Type.STRING } },
+        required: ['body'],
+    },
+    about: {
+        type: Type.OBJECT,
+        properties: { ctaText: { type: Type.STRING } },
+        required: ['ctaText'],
+    },
+}
+
+const FALLBACK_SECTION_SCHEMA: Schema = {
+    type: Type.OBJECT,
+    properties: { content: { type: Type.STRING } },
+    required: ['content'],
 }
 
 /**
  * Generates structured content for a single proposal block.
- * Uses callGemini directly — no DB queries, no conversation history.
+ * Uses responseSchema for guaranteed JSON — no extractJson regex fallback.
  */
 export async function generateSectionContent(
     ai: GoogleGenAI | null,
@@ -427,20 +569,12 @@ export async function generateSectionContent(
 ): Promise<Record<string, unknown>> {
     if (!ai) throw new Error('AI nie jest skonfigurowany')
 
-    const instruction =
-        SECTION_INSTRUCTIONS[params.sectionKey] ??
-        `Napisz treść sekcji ${params.sectionKey} po polsku. Zwróć JSON z odpowiednimi polami.`
+    const instruction = SECTION_PROMPTS[params.sectionKey]
+        ?? `Napisz treść sekcji ${params.sectionKey} po polsku.`
+    const schema = SECTION_SCHEMAS[params.sectionKey] ?? FALLBACK_SECTION_SCHEMA
 
     const formattedValue = params.totalGross.toLocaleString('pl-PL')
-    const prompt = [
-        `Kontekst oferty — tytuł: "${params.offerTitle}", klient: ${params.clientName}, wartość: ${formattedValue} ${params.currency}.`,
-        '',
-        `Zadanie: ${instruction}`,
-        '',
-        'Odpowiedź musi być TYLKO poprawnym JSON-em, bez markdown, bez wyjaśnień.',
-    ].join('\n')
+    const prompt = `Kontekst oferty — tytuł: "${params.offerTitle}", klient: ${params.clientName}, wartość: ${formattedValue} ${params.currency}.\n\n${instruction}`
 
-    const responseText = await callGemini(ai, prompt)
-    const parsed = extractJson(responseText)
-    return (parsed as Record<string, unknown>) ?? {}
+    return callGeminiStructured<Record<string, unknown>>(ai, prompt, schema)
 }
