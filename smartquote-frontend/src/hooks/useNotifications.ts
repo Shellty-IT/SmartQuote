@@ -1,6 +1,6 @@
 // SmartQuote-AI/src/hooks/useNotifications.ts
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { notificationsApi } from '@/lib/api';
 import type { Notification } from '@/types';
 
@@ -80,16 +80,8 @@ export function useNotifications(limit: number = 10) {
         fetchNotifications();
     }, [fetchNotifications]);
 
-    const initialized = useRef(false);
-
     useEffect(() => {
-        if (initialized.current) return;
-        initialized.current = true;
-
-        requestAnimationFrame(() => {
-            fetchNotifications();
-        });
-
+        fetchNotifications();
         const interval = setInterval(fetchNotifications, POLL_INTERVAL);
         return () => clearInterval(interval);
     }, [fetchNotifications]);
@@ -120,16 +112,8 @@ export function useUnreadCount() {
 }
     }, []);
 
-    const initialized = useRef(false);
-
     useEffect(() => {
-        if (initialized.current) return;
-        initialized.current = true;
-
-        requestAnimationFrame(() => {
-            fetchCount();
-        });
-
+        fetchCount();
         const interval = setInterval(fetchCount, POLL_INTERVAL);
         return () => clearInterval(interval);
     }, [fetchCount]);

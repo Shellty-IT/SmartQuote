@@ -1,8 +1,10 @@
 // src/routes/ai.routes.ts
-import { Router } from 'express';
+import { Router, Request } from 'express';
+import rateLimit from 'express-rate-limit';
 import { authenticate } from '../middleware/auth';
 import { validate } from '../middleware/validate';
 import { aiController } from '../controllers/ai.controller';
+import type { AuthenticatedRequest } from '../types';
 import {
     chatSchema,
     generateOfferSchema,
@@ -22,6 +24,25 @@ const router = Router();
 
 router.use(authenticate);
 
+// Per-user AI rate limiter — placed after authenticate so req.user is always verified.
+const aiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    validate: { keyGeneratorIpFallback: false },
+    keyGenerator: (req: Request) => `ai:user:${(req as AuthenticatedRequest).user!.id}`,
+    message: {
+        success: false,
+        error: {
+            code: 'RATE_LIMIT_EXCEEDED',
+            message: 'Zbyt wiele żądań AI. Spróbuj ponownie za 15 minut.',
+        },
+    },
+});
+
+router.use(aiLimiter);
+
 router.post('/chat', validate(chatSchema), aiController.chat.bind(aiController));
 router.post('/generate-offer', validate(generateOfferSchema), aiController.generateOffer.bind(aiController));
 router.post('/offer-description', validate(offerDescriptionSchema), aiController.generateOfferDescription.bind(aiController));
@@ -34,7 +55,7 @@ router.post('/price-check', validate(priceCheckSchema), aiController.priceCheck.
 router.get('/analyze-client/:clientId', validate(analyzeClientSchema), aiController.analyzeClient.bind(aiController));
 router.get('/alerts', aiController.getAlerts.bind(aiController));
 router.get('/suggestions', aiController.getSuggestions.bind(aiController));
-router.get('/context', aiController.getContext.bind(aiController));
+router.get('/context', aiController.getSuggestions.bind(aiController));
 router.get('/observer/:offerId', validate(offerIdParamSchema), aiController.observerInsight.bind(aiController));
 router.get('/closing-strategy/:offerId', validate(offerIdParamSchema), aiController.closingStrategy.bind(aiController));
 router.get('/latest-insights', validate(latestInsightsSchema), aiController.latestInsights.bind(aiController));

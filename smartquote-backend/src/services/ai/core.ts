@@ -1,5 +1,5 @@
 // smartquote_backend/src/services/ai/core.ts
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, Type, type Schema } from '@google/genai';
 import { config } from '../../config';
 import { createModuleLogger } from '../../lib/logger';
 
@@ -173,4 +173,33 @@ export async function callGemini(ai: GoogleGenAI, prompt: string): Promise<strin
         contents: prompt,
     });
     return response.text || '';
+}
+
+export { Type, type Schema };
+
+/**
+ * Call Gemini with a responseSchema to get guaranteed JSON output.
+ * Throws if the model returns empty text (shouldn't happen with structured output).
+ */
+export async function callGeminiStructured<T>(
+    ai: GoogleGenAI,
+    prompt: string,
+    schema: Schema,
+    systemInstruction?: string,
+): Promise<T> {
+    const response = await ai.models.generateContent({
+        model: config.gemini.model,
+        contents: prompt,
+        config: {
+            responseMimeType: 'application/json',
+            responseSchema: schema,
+            ...(systemInstruction ? { systemInstruction } : {}),
+        },
+    });
+    const text = response.text ?? '';
+    try {
+        return JSON.parse(text) as T;
+    } catch {
+        throw new Error(`Gemini structured output returned invalid JSON: ${text.slice(0, 200)}`);
+    }
 }

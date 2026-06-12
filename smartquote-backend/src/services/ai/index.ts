@@ -32,11 +32,9 @@ export type { PriceCheckInput, PriceCheckResult };
 
 class AIService {
     private readonly ai: GoogleGenAI | null;
-    private readonly conversationHistories: Map<string, Array<{ role: string; content: string }>>;
 
     constructor() {
         this.ai = initAI();
-        this.conversationHistories = new Map();
     }
 
     getUserContext(userId: string) {
@@ -107,10 +105,6 @@ class AIService {
 
     priceCheck(userId: string, input: PriceCheckInput): Promise<PriceCheckResult[]> {
         return priceCheck(this.ai, userId, input);
-    }
-
-    clearConversationHistory(userId: string): void {
-        this.conversationHistories.delete(userId);
     }
 
     async getSuggestions(userId: string): Promise<{ suggestions: AISuggestion[]; stats: AIStats | undefined }> {

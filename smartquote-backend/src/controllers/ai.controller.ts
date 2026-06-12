@@ -105,14 +105,9 @@ export class AIController {
         }
     }
 
-    async clearHistory(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-        try {
-            const userId = req.user!.id;
-            aiService.clearConversationHistory(userId);
-            return successResponse(res, { message: 'Historia konwersacji wyczyszczona' });
-        } catch (err) {
-            next(err);
-        }
+    async clearHistory(_req: AuthenticatedRequest, res: Response, _next: NextFunction) {
+        // Chat history is managed client-side; this endpoint exists for frontend compatibility.
+        return successResponse(res, { message: 'Historia konwersacji wyczyszczona' });
     }
 
     async getSuggestions(req: AuthenticatedRequest, res: Response, next: NextFunction) {
@@ -124,13 +119,6 @@ export class AIController {
         } catch (err) {
             next(err);
         }
-    }
-
-    async getContext(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-        try {
-            const result = await aiService.getSuggestions(req.user!.id);
-            return successResponse(res, result);
-        } catch (err) { return next(err); }
     }
 
     async priceInsight(req: AuthenticatedRequest, res: Response, next: NextFunction) {

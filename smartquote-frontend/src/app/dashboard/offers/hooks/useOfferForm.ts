@@ -1,6 +1,6 @@
 // src/app/dashboard/offers/hooks/useOfferForm.ts
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useClients } from '@/hooks/useClients';
 import { offersApi, ApiError } from '@/lib/api';
@@ -44,6 +44,7 @@ export function useOfferForm(options?: { initialData?: Offer }) {
     const isEditMode = !!options?.initialData;
     const offerId = options?.initialData?.id;
     const preselectedClientId = searchParams.get('clientId');
+    const preselectedTitle = searchParams.get('title');
 
     const { clients, isLoading: isLoadingClients } = useClients({ limit: 100 });
 
@@ -88,6 +89,7 @@ export function useOfferForm(options?: { initialData?: Offer }) {
             ...defaultOfferDetails,
             // Initialize terms from i18n so it matches the user's language (PL/EN)
             terms: '',
+            ...(preselectedTitle ? { title: preselectedTitle } : {}),
         };
     });
 
@@ -110,10 +112,17 @@ export function useOfferForm(options?: { initialData?: Offer }) {
         return [{ ...emptyItem }];
     });
 
+    // Guard prevents this one-shot init from re-running on every TanStack Query background refetch
+    // (each refetch returns a new clients array reference, which would re-trigger the effect and
+    // reset the wizard step back to type_choice even after the user has progressed further).
+    const preselectedApplied = useRef(false);
+
     useEffect(() => {
+        if (preselectedApplied.current) return;
         if (!isEditMode && preselectedClientId && clients.length > 0) {
             const client = clients.find((c) => c.id === preselectedClientId);
             if (client) {
+                preselectedApplied.current = true;
                 setSelectedClient(client);
                 setCurrentStep('type_choice');
             }

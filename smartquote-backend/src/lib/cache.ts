@@ -110,6 +110,7 @@ export const CACHE_TTL = {
     OBSERVER: 5 * 60,
     CLOSING_STRATEGY: 5 * 60,
     CLIENT_ANALYSIS: 10 * 60,
+    USER_CONTEXT: 60,
 } as const;
 
 export function buildCacheKey(prefix: string, ...parts: string[]): string {

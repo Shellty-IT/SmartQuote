@@ -70,7 +70,6 @@ function applyTheme(t: Theme) {
 
 function ThemeProvider({ children }: { children: ReactNode }) {
     const [theme, setThemeState] = useState<Theme>('light');
-    const [mounted, setMounted] = useState(false);
     const initialized = useRef(false);
 
     useEffect(() => {
@@ -82,7 +81,6 @@ function ThemeProvider({ children }: { children: ReactNode }) {
             const resolved: Theme = (saved === 'light' || saved === 'dark') ? saved : 'light';
             setThemeState(resolved);
             applyTheme(resolved);
-            setMounted(true);
         });
     }, []);
 
@@ -100,10 +98,6 @@ function ThemeProvider({ children }: { children: ReactNode }) {
             return next;
         });
     }, []);
-
-    if (!mounted) {
-        return <>{children}</>;
-    }
 
     return (
         <ThemeContext.Provider value={{ theme, setTheme, toggle }}>
