@@ -17,11 +17,40 @@ import {
     mergeContractWithDefaults,
     type ContractShortBlocks,
 } from '@/lib/pdf/contract-short-blocks';
+import {
+    buildDefaultContractServicesBlocks,
+    mergeServicesWithDefaults,
+    type ContractServicesBlocks,
+} from '@/lib/pdf/contract-services-blocks';
+import {
+    buildDefaultContractDedicatedBlocks,
+    mergeDedicatedWithDefaults,
+    type ContractDedicatedBlocks,
+} from '@/lib/pdf/contract-dedicated-blocks';
+import {
+    buildDefaultContractSlaBlocks,
+    mergeSlaWithDefaults,
+    type ContractSlaBlocks,
+} from '@/lib/pdf/contract-sla-blocks';
+import {
+    buildDefaultContractMobileBlocks,
+    mergeMobileWithDefaults,
+    type ContractMobileBlocks,
+} from '@/lib/pdf/contract-mobile-blocks';
 import { ContractDocumentEditor } from '@/components/contracts/editor/ContractDocumentEditor';
+import { ContractServicesDocumentEditor } from '@/components/contracts/editor/ContractServicesDocumentEditor';
+import { ContractDedicatedDocumentEditor } from '@/components/contracts/editor/ContractDedicatedDocumentEditor';
+import { ContractSlaDocumentEditor } from '@/components/contracts/editor/ContractSlaDocumentEditor';
+import { ContractMobileDocumentEditor } from '@/components/contracts/editor/ContractMobileDocumentEditor';
 
 const LS_KEY = 'sq_default_contract_short_blocks';
+const LS_KEY_SERVICES = 'sq_default_contract_services_blocks';
+const LS_KEY_DEDICATED = 'sq_default_contract_dedicated_blocks';
+const LS_KEY_SLA = 'sq_default_contract_sla_blocks';
+const LS_KEY_MOBILE = 'sq_default_contract_mobile_blocks';
 
 type ContractStep = 'client' | 'type_choice' | 'classic_form' | 'website_form';
+type TemplateType = 'classic' | 'short' | 'services' | 'dedicated' | 'sla' | 'mobile';
 
 function loadBlocksFromStorage(): ContractShortBlocks {
     if (typeof window === 'undefined') return buildDefaultContractBlocks();
@@ -32,16 +61,89 @@ function loadBlocksFromStorage(): ContractShortBlocks {
     return buildDefaultContractBlocks();
 }
 
+function loadServicesBlocksFromStorage(): ContractServicesBlocks {
+    if (typeof window === 'undefined') return buildDefaultContractServicesBlocks();
+    try {
+        const raw = localStorage.getItem(LS_KEY_SERVICES);
+        if (raw) return mergeServicesWithDefaults(JSON.parse(raw));
+    } catch { /* ignore */ }
+    return buildDefaultContractServicesBlocks();
+}
+
+function loadDedicatedBlocksFromStorage(): ContractDedicatedBlocks {
+    if (typeof window === 'undefined') return buildDefaultContractDedicatedBlocks();
+    try {
+        const raw = localStorage.getItem(LS_KEY_DEDICATED);
+        if (raw) return mergeDedicatedWithDefaults(JSON.parse(raw));
+    } catch { /* ignore */ }
+    return buildDefaultContractDedicatedBlocks();
+}
+
+function loadSlaBlocksFromStorage(): ContractSlaBlocks {
+    if (typeof window === 'undefined') return buildDefaultContractSlaBlocks();
+    try {
+        const raw = localStorage.getItem(LS_KEY_SLA);
+        if (raw) return mergeSlaWithDefaults(JSON.parse(raw));
+    } catch { /* ignore */ }
+    return buildDefaultContractSlaBlocks();
+}
+
+function loadMobileBlocksFromStorage(): ContractMobileBlocks {
+    if (typeof window === 'undefined') return buildDefaultContractMobileBlocks();
+    try {
+        const raw = localStorage.getItem(LS_KEY_MOBILE);
+        if (raw) return mergeMobileWithDefaults(JSON.parse(raw));
+    } catch { /* ignore */ }
+    return buildDefaultContractMobileBlocks();
+}
+
+// ── Template card ──────────────────────────────────────────────────────────────
+
+function TemplateCard({ selected, onSelect, label, desc, icon, preview }: {
+    type: string; selected: boolean; onSelect: () => void;
+    label: string; desc: string; icon: React.ReactNode; preview: React.ReactNode;
+}) {
+    return (
+        <button
+            type="button"
+            onClick={onSelect}
+            className={cn(
+                'flex flex-col gap-4 p-5 rounded-xl border-2 text-left transition-all',
+                selected ? 'border-primary bg-primary/5' : 'border-border bg-card hover:bg-secondary/40',
+            )}
+        >
+            <div className="flex items-start gap-3">
+                <div className={cn(
+                    'w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0',
+                    selected ? 'bg-primary text-white' : 'bg-muted text-muted-foreground',
+                )}>
+                    {icon}
+                </div>
+                <div className="flex-1">
+                    <p className="font-semibold text-foreground">{label}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{desc}</p>
+                </div>
+                {selected && (
+                    <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                )}
+            </div>
+            {preview}
+        </button>
+    );
+}
+
 // ── Simple step indicator ──────────────────────────────────────────────────────
 
 interface StepperProps {
     currentStep: ContractStep;
-    templateType: 'classic' | 'short';
+    templateType: TemplateType;
     stepLabels: { client: string; type_choice: string; form: string };
 }
 
 function ContractStepper({ currentStep, templateType, stepLabels }: StepperProps) {
-    const formStep: ContractStep = templateType === 'short' ? 'website_form' : 'classic_form';
+    const formStep: ContractStep = templateType === 'classic' ? 'classic_form' : 'website_form';
     const steps: ContractStep[] = ['client', 'type_choice', formStep];
     const currentIndex = steps.indexOf(currentStep);
 
@@ -108,10 +210,14 @@ function NewContractForm() {
 
     const [loading, setLoading] = useState(false);
     const [step, setStep] = useState<ContractStep>('client');
-    const [templateType, setTemplateType] = useState<'classic' | 'short'>('classic');
+    const [templateType, setTemplateType] = useState<TemplateType>('classic');
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [clientSearch, setClientSearch] = useState('');
     const [contractBlocks, setContractBlocks] = useState<ContractShortBlocks>(loadBlocksFromStorage);
+    const [servicesBlocks, setServicesBlocks] = useState<ContractServicesBlocks>(loadServicesBlocksFromStorage);
+    const [dedicatedBlocks, setDedicatedBlocks] = useState<ContractDedicatedBlocks>(loadDedicatedBlocksFromStorage);
+    const [slaBlocks, setSlaBlocks] = useState<ContractSlaBlocks>(loadSlaBlocksFromStorage);
+    const [mobileBlocks, setMobileBlocks] = useState<ContractMobileBlocks>(loadMobileBlocksFromStorage);
 
     const createFromOfferAttempted = useRef(false);
 
@@ -129,9 +235,9 @@ function NewContractForm() {
         ],
     });
 
-    // Auto-fill title when client is selected for website template
+    // Auto-fill title when client is selected for HTML templates
     useEffect(() => {
-        if (selectedClient && templateType === 'short' && !formData.title) {
+        if (selectedClient && templateType !== 'classic' && !formData.title) {
             setFormData(prev => ({ ...prev, title: `Umowa — ${selectedClient.name}` }));
         }
     }, [selectedClient, templateType, formData.title]);
@@ -166,13 +272,21 @@ function NewContractForm() {
         const title = formData.title || (selectedClient ? `Umowa — ${selectedClient.name}` : 'Nowa umowa');
 
         try {
+            const blocksForTemplate =
+                templateType === 'short' ? (contractBlocks as unknown)
+                    : templateType === 'services' ? (servicesBlocks as unknown)
+                    : templateType === 'dedicated' ? (dedicatedBlocks as unknown)
+                    : templateType === 'sla' ? (slaBlocks as unknown)
+                    : templateType === 'mobile' ? (mobileBlocks as unknown)
+                    : undefined;
+
             const response = await createContract({
                 ...formData,
                 title,
                 clientId,
                 paymentDays: Number(formData.paymentDays),
                 templateType,
-                blocks: templateType === 'short' ? (contractBlocks as unknown) : undefined,
+                blocks: blocksForTemplate,
                 items: formData.items.map((item, index) => ({
                     ...item,
                     quantity: Number(item.quantity),
@@ -335,87 +449,126 @@ function NewContractForm() {
                     <h2 className="text-lg font-semibold text-foreground mb-1">{tn.typeChoice.title}</h2>
                     <p className="text-sm text-muted-foreground mb-6">{tn.typeChoice.subtitle}</p>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {/* Classic */}
-                        <button
-                            type="button"
-                            onClick={() => setTemplateType('classic')}
-                            className={cn(
-                                'flex flex-col gap-4 p-5 rounded-xl border-2 text-left transition-all',
-                                templateType === 'classic'
-                                    ? 'border-primary bg-primary/5'
-                                    : 'border-border bg-card hover:bg-secondary/40',
-                            )}
-                        >
-                            <div className="flex items-start gap-3">
-                                <div className={cn(
-                                    'w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0',
-                                    templateType === 'classic' ? 'bg-primary text-white' : 'bg-muted text-muted-foreground',
-                                )}>
-                                    <FileText className="w-5 h-5" />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="font-semibold text-foreground">{tn.typeChoice.classicLabel}</p>
-                                    <p className="text-sm text-muted-foreground mt-1">{tn.typeChoice.classicDesc}</p>
-                                </div>
-                                {templateType === 'classic' && (
-                                    <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                    </svg>
-                                )}
-                            </div>
-                            <div className="rounded-lg bg-secondary/60 p-3 space-y-1.5">
-                                {[0, 1, 2].map((i) => (
-                                    <div key={i} className="flex items-center gap-2">
-                                        <div className="h-2 rounded bg-muted-foreground/30 flex-1" />
-                                        <div className="h-2 w-12 rounded bg-muted-foreground/20" />
+                        <TemplateCard
+                            type="classic"
+                            selected={templateType === 'classic'}
+                            onSelect={() => setTemplateType('classic')}
+                            label={tn.typeChoice.classicLabel}
+                            desc={tn.typeChoice.classicDesc}
+                            icon={<FileText className="w-5 h-5" />}
+                            preview={
+                                <div className="rounded-lg bg-secondary/60 p-3 space-y-1.5">
+                                    {[0, 1, 2].map((i) => (
+                                        <div key={i} className="flex items-center gap-2">
+                                            <div className="h-2 rounded bg-muted-foreground/30 flex-1" />
+                                            <div className="h-2 w-12 rounded bg-muted-foreground/20" />
+                                        </div>
+                                    ))}
+                                    <div className="flex justify-end mt-2">
+                                        <div className="h-2.5 w-20 rounded bg-primary/40" />
                                     </div>
-                                ))}
-                                <div className="flex justify-end mt-2">
-                                    <div className="h-2.5 w-20 rounded bg-primary/40" />
                                 </div>
-                            </div>
-                        </button>
-
+                            }
+                        />
                         {/* Website / short */}
-                        <button
-                            type="button"
-                            onClick={() => setTemplateType('short')}
-                            className={cn(
-                                'flex flex-col gap-4 p-5 rounded-xl border-2 text-left transition-all',
-                                templateType === 'short'
-                                    ? 'border-primary bg-primary/5'
-                                    : 'border-border bg-card hover:bg-secondary/40',
-                            )}
-                        >
-                            <div className="flex items-start gap-3">
-                                <div className={cn(
-                                    'w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0',
-                                    templateType === 'short' ? 'bg-primary text-white' : 'bg-muted text-muted-foreground',
-                                )}>
-                                    <FileCode className="w-5 h-5" />
+                        <TemplateCard
+                            type="short"
+                            selected={templateType === 'short'}
+                            onSelect={() => setTemplateType('short')}
+                            label={tn.typeChoice.websiteLabel}
+                            desc={tn.typeChoice.websiteDesc}
+                            icon={<FileCode className="w-5 h-5" />}
+                            preview={
+                                <div className="rounded-lg bg-secondary/60 p-3 space-y-1.5">
+                                    <div className="h-3 w-24 rounded bg-primary/40" />
+                                    <div className="h-2 rounded bg-muted-foreground/20 w-full" />
+                                    <div className="h-2 rounded bg-muted-foreground/20 w-4/5" />
+                                    <div className="h-2 rounded bg-muted-foreground/20 w-3/5" />
                                 </div>
-                                <div className="flex-1">
-                                    <p className="font-semibold text-foreground">{tn.typeChoice.websiteLabel}</p>
-                                    <p className="text-sm text-muted-foreground mt-1">{tn.typeChoice.websiteDesc}</p>
+                            }
+                        />
+                        {/* Mobile app */}
+                        <TemplateCard
+                            type="mobile"
+                            selected={templateType === 'mobile'}
+                            onSelect={() => setTemplateType('mobile')}
+                            label={tn.typeChoice.mobileLabel}
+                            desc={tn.typeChoice.mobileDesc}
+                            icon={<FileCode className="w-5 h-5" />}
+                            preview={
+                                <div className="rounded-lg bg-secondary/60 p-3 space-y-1.5">
+                                    <div className="h-2 w-16 rounded" style={{ background: 'rgba(27,58,92,0.4)' }} />
+                                    <div className="h-2 rounded bg-muted-foreground/20 w-full" />
+                                    <div className="h-2 rounded bg-muted-foreground/20 w-3/5" />
+                                    <div className="flex gap-1.5 mt-1">
+                                        <div className="h-2 flex-1 rounded bg-muted-foreground/20" />
+                                        <div className="h-2 flex-1 rounded bg-muted-foreground/20" />
+                                        <div className="h-2 flex-1 rounded bg-muted-foreground/20" />
+                                    </div>
                                 </div>
-                                {templateType === 'short' && (
-                                    <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                    </svg>
-                                )}
-                            </div>
-                            <div className="rounded-lg bg-secondary/60 p-3 space-y-1.5">
-                                <div className="h-3 w-24 rounded bg-primary/40" />
-                                <div className="h-2 rounded bg-muted-foreground/20 w-full" />
-                                <div className="h-2 rounded bg-muted-foreground/20 w-4/5" />
-                                <div className="h-2 rounded bg-muted-foreground/20 w-3/5" />
-                                <div className="flex gap-2 mt-2">
-                                    <div className="h-5 flex-1 rounded bg-primary/30" />
-                                    <div className="h-5 flex-1 rounded bg-muted-foreground/20" />
+                            }
+                        />
+                        {/* Services / sklep internetowy */}
+                        <TemplateCard
+                            type="services"
+                            selected={templateType === 'services'}
+                            onSelect={() => setTemplateType('services')}
+                            label={tn.typeChoice.servicesLabel}
+                            desc={tn.typeChoice.servicesDesc}
+                            icon={<FileCode className="w-5 h-5" />}
+                            preview={
+                                <div className="rounded-lg bg-secondary/60 p-3 space-y-1.5">
+                                    <div className="h-2 w-16 rounded" style={{ background: 'rgba(201,168,76,0.4)' }} />
+                                    <div className="h-2 rounded bg-muted-foreground/20 w-full" />
+                                    <div className="h-2 rounded bg-muted-foreground/20 w-4/5" />
+                                    <div className="h-px w-full bg-muted-foreground/20 mt-1" />
+                                    <div className="h-4 rounded" style={{ background: 'rgba(27,58,92,0.15)' }} />
                                 </div>
-                            </div>
-                        </button>
+                            }
+                        />
+                        {/* Dedicated system */}
+                        <TemplateCard
+                            type="dedicated"
+                            selected={templateType === 'dedicated'}
+                            onSelect={() => setTemplateType('dedicated')}
+                            label={tn.typeChoice.dedicatedLabel}
+                            desc={tn.typeChoice.dedicatedDesc}
+                            icon={<FileCode className="w-5 h-5" />}
+                            preview={
+                                <div className="rounded-lg bg-secondary/60 p-3 space-y-1.5">
+                                    <div className="h-2 w-20 rounded" style={{ background: 'rgba(27,58,92,0.4)' }} />
+                                    <div className="h-2 rounded bg-muted-foreground/20 w-full" />
+                                    <div className="flex gap-1.5 mt-1">
+                                        {[0,1,2,3].map(i => <div key={i} className="h-4 flex-1 rounded bg-muted-foreground/20" />)}
+                                    </div>
+                                    <div className="h-2 rounded bg-muted-foreground/20 w-3/4" />
+                                </div>
+                            }
+                        />
+                        {/* SLA / Opieka IT */}
+                        <TemplateCard
+                            type="sla"
+                            selected={templateType === 'sla'}
+                            onSelect={() => setTemplateType('sla')}
+                            label={tn.typeChoice.slaLabel}
+                            desc={tn.typeChoice.slaDesc}
+                            icon={<FileCode className="w-5 h-5" />}
+                            preview={
+                                <div className="rounded-lg bg-secondary/60 p-3 space-y-1.5">
+                                    <div className="h-2 w-14 rounded" style={{ background: 'rgba(201,168,76,0.4)' }} />
+                                    <div className="flex gap-1 mt-1">
+                                        <div className="h-3 w-4 rounded" style={{ background: 'rgba(220,38,38,0.3)' }} />
+                                        <div className="h-3 w-4 rounded" style={{ background: 'rgba(234,88,12,0.3)' }} />
+                                        <div className="h-3 w-4 rounded" style={{ background: 'rgba(202,138,4,0.3)' }} />
+                                        <div className="h-3 w-4 rounded" style={{ background: 'rgba(22,163,74,0.3)' }} />
+                                    </div>
+                                    <div className="h-2 rounded bg-muted-foreground/20 w-full" />
+                                    <div className="h-2 rounded bg-muted-foreground/20 w-4/5" />
+                                </div>
+                            }
+                        />
                     </div>
 
                     <div className="flex justify-between mt-6">
@@ -425,7 +578,7 @@ function NewContractForm() {
                         <Button
                             type="button"
                             data-testid="contract-next-button"
-                            onClick={() => setStep(templateType === 'short' ? 'website_form' : 'classic_form')}
+                            onClick={() => setStep(templateType === 'classic' ? 'classic_form' : 'website_form')}
                         >
                             {commonTr.next}
                         </Button>
@@ -625,10 +778,17 @@ function NewContractForm() {
                     </div>
 
                     <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
-                        <ContractDocumentEditor
-                            blocks={contractBlocks}
-                            onBlocksChange={setContractBlocks}
-                        />
+                        {templateType === 'services' ? (
+                            <ContractServicesDocumentEditor blocks={servicesBlocks} onBlocksChange={setServicesBlocks} />
+                        ) : templateType === 'dedicated' ? (
+                            <ContractDedicatedDocumentEditor blocks={dedicatedBlocks} onBlocksChange={setDedicatedBlocks} />
+                        ) : templateType === 'sla' ? (
+                            <ContractSlaDocumentEditor blocks={slaBlocks} onBlocksChange={setSlaBlocks} />
+                        ) : templateType === 'mobile' ? (
+                            <ContractMobileDocumentEditor blocks={mobileBlocks} onBlocksChange={setMobileBlocks} />
+                        ) : (
+                            <ContractDocumentEditor blocks={contractBlocks} onBlocksChange={setContractBlocks} />
+                        )}
                     </div>
 
                     <div className="flex justify-between gap-4">

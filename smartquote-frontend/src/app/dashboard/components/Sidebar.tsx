@@ -32,13 +32,15 @@ import { useUnreadCount } from '@/hooks/useNotifications';
 
 type NavKey = 'dashboard' | 'offers' | 'offerTemplates' | 'contracts' | 'clients' | 'leads' | 'followups' | 'calendar' | 'correspondence' | 'notifications' | 'aiAssistant' | 'aiInsights';
 
+// Ordering follows the CRM sales funnel: capture (leads) → convert (clients) →
+// sell (offers → contracts) → supporting tools → activity/comms → AI.
 const NAV_ITEMS: { key: NavKey; href: string; icon: React.ElementType; stat: string | null; badgeTone: 'default' | 'primary' | 'success' | 'info' | 'warning' | 'violet' }[] = [
     { key: 'dashboard',      href: '/dashboard',                 icon: LayoutDashboard, stat: null,        badgeTone: 'default' },
-    { key: 'offers',         href: '/dashboard/offers',          icon: FileText,        stat: 'offers',    badgeTone: 'primary' },
-    { key: 'offerTemplates', href: '/dashboard/offer-templates', icon: FileStack,       stat: null,        badgeTone: 'default' },
-    { key: 'contracts',      href: '/dashboard/contracts',       icon: ScrollText,      stat: 'contracts', badgeTone: 'success' },
-    { key: 'clients',        href: '/dashboard/clients',         icon: Users,           stat: 'clients',   badgeTone: 'info'    },
     { key: 'leads',          href: '/dashboard/leads',           icon: UserSearch,      stat: 'leads',     badgeTone: 'warning' },
+    { key: 'clients',        href: '/dashboard/clients',         icon: Users,           stat: 'clients',   badgeTone: 'info'    },
+    { key: 'offers',         href: '/dashboard/offers',          icon: FileText,        stat: 'offers',    badgeTone: 'primary' },
+    { key: 'contracts',      href: '/dashboard/contracts',       icon: ScrollText,      stat: 'contracts', badgeTone: 'success' },
+    { key: 'offerTemplates', href: '/dashboard/offer-templates', icon: FileStack,       stat: null,        badgeTone: 'default' },
     { key: 'followups',      href: '/dashboard/followups',       icon: CalendarClock,   stat: 'followups', badgeTone: 'warning' },
     { key: 'calendar',       href: '/dashboard/calendar',        icon: CalendarDays,    stat: null,        badgeTone: 'default' },
     { key: 'correspondence', href: '/dashboard/emails',          icon: Mail,            stat: null,        badgeTone: 'default' },
@@ -59,7 +61,7 @@ const BADGE_TONE: Record<string, string> = {
 export default function Sidebar() {
     const pathname = usePathname();
     const { collapsed, setCollapsed } = useSidebarCollapsed();
-    const { stats, isLoading } = useSidebarStats();
+    const { stats, loading } = useSidebarStats();
     const { count: unreadNotifications } = useUnreadCount();
     const tr = useTranslations('sidebar');
     const commonTr = useTranslations('common');
@@ -79,9 +81,10 @@ export default function Sidebar() {
         return () => { document.body.style.overflow = ''; };
     }, [mobileOpen]);
 
-    function getBadge(stat: string | null, notif: number): number | null {
+    function getBadge(stat: string | null, notif: number): number | 'loading' | null {
         if (stat === 'notif') return notif > 0 ? notif : null;
         if (!stat) return null;
+        if (loading[stat as keyof typeof loading]) return 'loading';
         const v = stats[stat as keyof typeof stats];
         return typeof v === 'number' && v > 0 ? v : null;
     }
@@ -153,10 +156,10 @@ export default function Sidebar() {
                                     {badge !== null && (
                                         <span className={cn(
                                             'rounded-full px-2 py-0.5 text-[10px] font-semibold tabular-nums',
-                                            isLoading ? 'animate-pulse' : '',
+                                            badge === 'loading' ? 'animate-pulse' : '',
                                             active ? 'bg-gradient-primary text-white' : BADGE_TONE[item.badgeTone],
                                         )}>
-                                            {isLoading ? '·' : badge > 9999 ? '9999+' : badge}
+                                            {badge === 'loading' ? '...' : badge > 9999 ? '9999+' : badge}
                                         </span>
                                     )}
                                 </>

@@ -56,7 +56,7 @@ export interface Contract {
     paymentTerms: string | null;
     paymentDays: number;
     notes: string | null;
-    templateType: 'classic' | 'short';
+    templateType: 'classic' | 'short' | 'services' | 'dedicated' | 'sla' | 'mobile';
     blocks: unknown | null;
     publicToken: string | null;
     sentAt: string | null;
@@ -88,7 +88,7 @@ export interface CreateContractInput {
     paymentTerms?: string;
     paymentDays?: number;
     notes?: string;
-    templateType?: 'classic' | 'short';
+    templateType?: 'classic' | 'short' | 'services' | 'dedicated' | 'sla' | 'mobile';
     blocks?: unknown;
     items: {
         name: string;

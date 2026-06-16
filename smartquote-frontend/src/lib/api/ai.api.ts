@@ -12,6 +12,7 @@ import type {
     LatestInsightItem,
     InsightsListItem,
     PriceCheckResult,
+    PriceSuggestion,
 } from '@/types/ai';
 import type { OfferItem } from '@/types';
 import type { AlertsResponse } from '@/types/alert.types';
@@ -114,7 +115,7 @@ export const ai = {
     offerFill: async (params: {
         message: string
         history: Array<{ role: 'user' | 'assistant'; content: string }>
-        context: { clientName: string; offerTitle: string }
+        context: { clientName: string; offerTitle: string; language?: 'pl' | 'en' }
         currentBlocks?: Record<string, unknown>
     }): Promise<{ message: string; blocks: Record<string, unknown> | null; isComplete: boolean }> => {
         const response = await api.post<{ message: string; blocks: Record<string, unknown> | null; isComplete: boolean }>(
@@ -122,6 +123,19 @@ export const ai = {
             params,
         )
         return response.data as { message: string; blocks: Record<string, unknown> | null; isComplete: boolean }
+    },
+
+    /**
+     * Suggests a market price range for the offer, grounded in live web search.
+     */
+    priceSuggestion: async (params: {
+        offerTitle: string
+        clientName: string
+        scopeSummary?: string
+        currency?: string
+    }): Promise<PriceSuggestion> => {
+        const response = await api.post<PriceSuggestion>('/ai/price-suggestion', params)
+        return response.data as PriceSuggestion
     },
 
     getAlerts: async (): Promise<AlertsResponse> => {

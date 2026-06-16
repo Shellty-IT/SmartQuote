@@ -3,14 +3,24 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useClients } from '@/hooks/useClients';
+import { useLeads } from '@/hooks/useLeads';
 import { offersApi, ApiError } from '@/lib/api';
+import { leadsApi } from '@/lib/api/leads.api';
 import { useToast } from '@/contexts/ToastContext';
 import { useTranslations } from '@/i18n';
 import type { Client, CreateOfferInput, OfferTemplate, Offer } from '@/types';
+import type { Lead } from '@/types/lead.types';
 import type { Step } from '../new/constants';
 import type { ExtendedOfferItem, OfferDetails, OfferTotalsData } from '../new/types';
 import { emptyItem, defaultOfferDetails } from '../new/types';
 import { mergeWithDefaults, type ProposalBlocks } from '@/lib/pdf/proposal-blocks';
+import { mergeShopWithDefaults, buildDefaultShopBlocks, type ShopBlocks } from '@/lib/pdf/shop-blocks';
+import { mergeWebsiteV2WithDefaults, buildDefaultWebsiteV2Blocks, type WebsiteV2Blocks } from '@/lib/pdf/website-v2-blocks';
+import { mergeWebsiteV3WithDefaults, buildDefaultWebsiteV3Blocks, type WebsiteV3Blocks } from '@/lib/pdf/website-v3-blocks';
+import { mergeSupportWithDefaults, buildDefaultSupportBlocks, type SupportBlocks } from '@/lib/pdf/support-blocks';
+import { mergeMobileAppWithDefaults, buildDefaultMobileAppBlocks, type MobileAppBlocks } from '@/lib/pdf/mobile-app-blocks';
+import { mergeMobileSimpleWithDefaults, buildDefaultMobileSimpleBlocks, type MobileSimpleBlocks } from '@/lib/pdf/mobile-simple-blocks';
+import { mergeUniversalWithDefaults, buildDefaultUniversalBlocks, type UniversalBlocks } from '@/lib/pdf/universal-blocks';
 import { buildStepIds } from '../new/constants';
 
 export function calculateItemTotal(item: ExtendedOfferItem): OfferTotalsData {
@@ -44,9 +54,11 @@ export function useOfferForm(options?: { initialData?: Offer }) {
     const isEditMode = !!options?.initialData;
     const offerId = options?.initialData?.id;
     const preselectedClientId = searchParams.get('clientId');
+    const preselectedLeadId = searchParams.get('leadId');
     const preselectedTitle = searchParams.get('title');
 
     const { clients, isLoading: isLoadingClients } = useClients({ limit: 100 });
+    const { leads, isLoading: isLoadingLeads } = useLeads({ limit: 200 });
 
     const [currentStep, setCurrentStep] = useState<Step>('client');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -66,9 +78,94 @@ export function useOfferForm(options?: { initialData?: Offer }) {
         )
     });
 
+    const [shopBlocks, setShopBlocks] = useState<ShopBlocks>(() => {
+        if (options?.initialData?.templateType === 'shop' && options?.initialData?.blocks)
+            return mergeShopWithDefaults(options.initialData.blocks as Partial<ShopBlocks>)
+        if (!options?.initialData) {
+            try {
+                const raw = typeof window !== 'undefined' ? localStorage.getItem('sq_default_shop_blocks') : null
+                if (raw) return mergeShopWithDefaults(JSON.parse(raw) as Partial<ShopBlocks>)
+            } catch { /* ignore */ }
+        }
+        return buildDefaultShopBlocks()
+    })
+
+    const [websiteV2Blocks, setWebsiteV2Blocks] = useState<WebsiteV2Blocks>(() => {
+        if (options?.initialData?.templateType === 'website_v2' && options?.initialData?.blocks)
+            return mergeWebsiteV2WithDefaults(options.initialData.blocks as Partial<WebsiteV2Blocks>)
+        if (!options?.initialData) {
+            try {
+                const raw = typeof window !== 'undefined' ? localStorage.getItem('sq_default_website_v2_blocks') : null
+                if (raw) return mergeWebsiteV2WithDefaults(JSON.parse(raw) as Partial<WebsiteV2Blocks>)
+            } catch { /* ignore */ }
+        }
+        return buildDefaultWebsiteV2Blocks()
+    })
+
+    const [websiteV3Blocks, setWebsiteV3Blocks] = useState<WebsiteV3Blocks>(() => {
+        if (options?.initialData?.templateType === 'website_v3' && options?.initialData?.blocks)
+            return mergeWebsiteV3WithDefaults(options.initialData.blocks as Partial<WebsiteV3Blocks>)
+        if (!options?.initialData) {
+            try {
+                const raw = typeof window !== 'undefined' ? localStorage.getItem('sq_default_website_v3_blocks') : null
+                if (raw) return mergeWebsiteV3WithDefaults(JSON.parse(raw) as Partial<WebsiteV3Blocks>)
+            } catch { /* ignore */ }
+        }
+        return buildDefaultWebsiteV3Blocks()
+    })
+
+    const [supportBlocks, setSupportBlocks] = useState<SupportBlocks>(() => {
+        if (options?.initialData?.templateType === 'support' && options?.initialData?.blocks)
+            return mergeSupportWithDefaults(options.initialData.blocks as Partial<SupportBlocks>)
+        if (!options?.initialData) {
+            try {
+                const raw = typeof window !== 'undefined' ? localStorage.getItem('sq_default_support_blocks') : null
+                if (raw) return mergeSupportWithDefaults(JSON.parse(raw) as Partial<SupportBlocks>)
+            } catch { /* ignore */ }
+        }
+        return buildDefaultSupportBlocks()
+    })
+
+    const [mobileAppBlocks, setMobileAppBlocks] = useState<MobileAppBlocks>(() => {
+        if (options?.initialData?.templateType === 'mobile_app' && options?.initialData?.blocks)
+            return mergeMobileAppWithDefaults(options.initialData.blocks as Partial<MobileAppBlocks>)
+        if (!options?.initialData) {
+            try {
+                const raw = typeof window !== 'undefined' ? localStorage.getItem('sq_default_mobile_app_blocks') : null
+                if (raw) return mergeMobileAppWithDefaults(JSON.parse(raw) as Partial<MobileAppBlocks>)
+            } catch { /* ignore */ }
+        }
+        return buildDefaultMobileAppBlocks()
+    })
+
+    const [mobileSimpleBlocks, setMobileSimpleBlocks] = useState<MobileSimpleBlocks>(() => {
+        if (options?.initialData?.templateType === 'mobile_simple' && options?.initialData?.blocks)
+            return mergeMobileSimpleWithDefaults(options.initialData.blocks as Partial<MobileSimpleBlocks>)
+        if (!options?.initialData) {
+            try {
+                const raw = typeof window !== 'undefined' ? localStorage.getItem('sq_default_mobile_simple_blocks') : null
+                if (raw) return mergeMobileSimpleWithDefaults(JSON.parse(raw) as Partial<MobileSimpleBlocks>)
+            } catch { /* ignore */ }
+        }
+        return buildDefaultMobileSimpleBlocks()
+    })
+
+    const [universalBlocks, setUniversalBlocks] = useState<UniversalBlocks>(() => {
+        if (options?.initialData?.templateType === 'universal' && options?.initialData?.blocks)
+            return mergeUniversalWithDefaults(options.initialData.blocks as Partial<UniversalBlocks>)
+        if (!options?.initialData) {
+            try {
+                const raw = typeof window !== 'undefined' ? localStorage.getItem('sq_default_universal_blocks') : null
+                if (raw) return mergeUniversalWithDefaults(JSON.parse(raw) as Partial<UniversalBlocks>)
+            } catch { /* ignore */ }
+        }
+        return buildDefaultUniversalBlocks()
+    })
+
     const [selectedClient, setSelectedClient] = useState<Client | null>(() => {
         return options?.initialData?.client || null;
     });
+    const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
 
     const [offerDetails, setOfferDetails] = useState<OfferDetails>(() => {
         if (options?.initialData) {
@@ -82,13 +179,21 @@ export function useOfferForm(options?: { initialData?: Offer }) {
                 terms: options.initialData.terms || '',
                 paymentDays: options.initialData.paymentDays,
                 requireAuditTrail: options.initialData.requireAuditTrail || false,
-                templateType: (options.initialData.templateType as 'classic' | 'proposal') ?? 'classic',
+                templateType: (options.initialData.templateType as 'classic' | 'proposal' | 'shop' | 'website_v2' | 'website_v3' | 'support' | 'mobile_app' | 'mobile_simple' | 'universal') ?? 'classic',
             };
         }
+        // Load saved classic settings from localStorage (set in Szablony → Szablony dokumentów)
+        let classicSettings: { paymentDays?: number; terms?: string; notes?: string } = {}
+        try {
+            const raw = typeof window !== 'undefined' ? localStorage.getItem('sq_default_classic_settings') : null
+            if (raw) classicSettings = JSON.parse(raw)
+        } catch { /* ignore */ }
         return {
             ...defaultOfferDetails,
-            // Initialize terms from i18n so it matches the user's language (PL/EN)
             terms: '',
+            ...(classicSettings.paymentDays != null ? { paymentDays: classicSettings.paymentDays } : {}),
+            ...(classicSettings.terms ? { terms: classicSettings.terms } : {}),
+            ...(classicSettings.notes ? { notes: classicSettings.notes } : {}),
             ...(preselectedTitle ? { title: preselectedTitle } : {}),
         };
     });
@@ -126,8 +231,15 @@ export function useOfferForm(options?: { initialData?: Offer }) {
                 setSelectedClient(client);
                 setCurrentStep('type_choice');
             }
+        } else if (!isEditMode && preselectedLeadId && leads.length > 0) {
+            const lead = leads.find((l) => l.id === preselectedLeadId);
+            if (lead) {
+                preselectedApplied.current = true;
+                setSelectedLead(lead);
+                setCurrentStep('type_choice');
+            }
         }
-    }, [isEditMode, preselectedClientId, clients]);
+    }, [isEditMode, preselectedClientId, preselectedLeadId, clients, leads]);
 
     const totals = useMemo(() => {
         return items.reduce(
@@ -237,7 +349,7 @@ export function useOfferForm(options?: { initialData?: Offer }) {
     const canProceed = useCallback(() => {
         switch (currentStep) {
             case 'client':
-                return selectedClient !== null;
+                return selectedClient !== null || selectedLead !== null;
             case 'type_choice':
                 return true; // template type always has a default value
             case 'details':
@@ -249,32 +361,86 @@ export function useOfferForm(options?: { initialData?: Offer }) {
             default:
                 return true;
         }
-    }, [currentStep, selectedClient, offerDetails.title, items]);
+    }, [currentStep, selectedClient, selectedLead, offerDetails.title, items]);
 
     const handleSubmit = useCallback(async () => {
-        if (!selectedClient) return;
+        if (!selectedClient && !selectedLead) return;
 
         setIsSubmitting(true);
 
         try {
-            const isProposal = offerDetails.templateType === 'proposal';
+            // Resolve clientId — convert lead to client if needed
+            let resolvedClientId: string;
+            if (selectedClient) {
+                resolvedClientId = selectedClient.id;
+            } else {
+                const lead = selectedLead!;
+                if (lead.clientId) {
+                    resolvedClientId = lead.clientId;
+                } else {
+                    const converted = await leadsApi.convert(lead.id, {
+                        name: lead.name,
+                        email: lead.email ?? undefined,
+                        phone: lead.phone ?? undefined,
+                        company: lead.company ?? undefined,
+                    });
+                    if (!converted.data?.clientId) throw new Error('Lead conversion failed')
+                    resolvedClientId = converted.data.clientId;
+                }
+            }
 
-            // For proposal offers created via the new flow, the details step is skipped
+            const entityName = selectedClient?.name ?? selectedLead?.name ?? 'Klient';
+
+            const isProposal = offerDetails.templateType === 'proposal';
+            const isShop = offerDetails.templateType === 'shop';
+            const isWebsiteV2 = offerDetails.templateType === 'website_v2';
+            const isWebsiteV3 = offerDetails.templateType === 'website_v3';
+            const isSupport = offerDetails.templateType === 'support';
+            const isMobileApp = offerDetails.templateType === 'mobile_app';
+            const isMobileSimple = offerDetails.templateType === 'mobile_simple';
+            const isUniversal = offerDetails.templateType === 'universal';
+            const isDocTemplate = isProposal || isShop || isWebsiteV2 || isWebsiteV3 || isSupport || isMobileApp || isMobileSimple || isUniversal;
+
+            // For doc-template offers created via the new flow, the details step is skipped
             // → auto-fill title and create a single placeholder item from priceOverride.
-            const submittedTitle = offerDetails.title.trim() || `Propozycja — ${selectedClient.name}`;
+            const submittedTitle = offerDetails.title.trim() ||
+                (isShop ? `Sklep — ${entityName}` :
+                 isWebsiteV2 ? `Strona WWW — ${entityName}` :
+                 isWebsiteV3 ? `Strona WWW v3 — ${entityName}` :
+                 isSupport ? `Wsparcie IT — ${entityName}` :
+                 isMobileApp ? `Aplikacja mobilna — ${entityName}` :
+                 isMobileSimple ? `Aplikacja mobilna — ${entityName}` :
+                 isUniversal ? `Oferta — ${entityName}` :
+                 `Propozycja — ${entityName}`);
+
+            const docTemplatePriceOverride = isShop
+                ? (shopBlocks.pricing.priceOverride ?? 0)
+                : isWebsiteV2
+                ? (websiteV2Blocks.pricing.priceOverride ?? 0)
+                : isWebsiteV3
+                ? (websiteV3Blocks.pricing.priceOverride ?? 0)
+                : isSupport
+                ? (supportBlocks.pricing.priceOverride ?? 0)
+                : isMobileApp
+                ? (mobileAppBlocks.pricing.priceOverride ?? 0)
+                : isMobileSimple
+                ? (mobileSimpleBlocks.process.priceOverride ?? 0)
+                : isUniversal
+                ? (universalBlocks.pricing.priceOverride ?? 0)
+                : (proposalBlocks.pricingExtra.priceOverride ?? 0);
 
             const proposalPlaceholderItem = {
                 name: submittedTitle,
                 description: undefined,
                 quantity: 1,
                 unit: 'szt.',
-                unitPrice: proposalBlocks.pricingExtra.priceOverride ?? 0,
+                unitPrice: docTemplatePriceOverride,
                 vatRate: 23,
                 discount: 0,
                 isOptional: false,
             };
 
-            const submittedItems = isProposal && !isEditMode
+            const submittedItems = isDocTemplate && !isEditMode
                 ? [proposalPlaceholderItem]
                 : items.map((item) => ({
                     name: item.name,
@@ -291,7 +457,7 @@ export function useOfferForm(options?: { initialData?: Offer }) {
                 }));
 
             const data: CreateOfferInput = {
-                clientId: selectedClient.id,
+                clientId: resolvedClientId,
                 title: submittedTitle,
                 description: offerDetails.description || undefined,
                 validUntil: offerDetails.validUntil || undefined,
@@ -300,7 +466,7 @@ export function useOfferForm(options?: { initialData?: Offer }) {
                 paymentDays: offerDetails.paymentDays,
                 requireAuditTrail: offerDetails.requireAuditTrail,
                 templateType: offerDetails.templateType ?? 'classic',
-                blocks: isProposal ? (proposalBlocks as unknown) : null,
+                blocks: isProposal ? (proposalBlocks as unknown) : isShop ? (shopBlocks as unknown) : isWebsiteV2 ? (websiteV2Blocks as unknown) : isWebsiteV3 ? (websiteV3Blocks as unknown) : isSupport ? (supportBlocks as unknown) : isMobileApp ? (mobileAppBlocks as unknown) : isMobileSimple ? (mobileSimpleBlocks as unknown) : isUniversal ? (universalBlocks as unknown) : null,
                 items: submittedItems,
             };
 
@@ -328,16 +494,20 @@ export function useOfferForm(options?: { initialData?: Offer }) {
             }
             setIsSubmitting(false);
         }
-    }, [isEditMode, offerId, selectedClient, offerDetails, proposalBlocks, items, toast, router, tr.toasts, commonTr.errorTitle]);
+    }, [isEditMode, offerId, selectedClient, selectedLead, offerDetails, proposalBlocks, shopBlocks, websiteV2Blocks, websiteV3Blocks, supportBlocks, mobileAppBlocks, mobileSimpleBlocks, universalBlocks, items, toast, router, tr.toasts, commonTr.errorTitle]);
 
     return {
         clients,
         isLoadingClients,
+        leads,
+        isLoadingLeads,
         currentStep,
         isSubmitting,
         isEditMode,
         selectedClient,
         setSelectedClient,
+        selectedLead,
+        setSelectedLead,
         offerDetails,
         updateDetails,
         items,
@@ -357,6 +527,20 @@ export function useOfferForm(options?: { initialData?: Offer }) {
         setTemplateSelectorOpen,
         proposalBlocks,
         setProposalBlocks,
+        shopBlocks,
+        setShopBlocks,
+        websiteV2Blocks,
+        setWebsiteV2Blocks,
+        websiteV3Blocks,
+        setWebsiteV3Blocks,
+        supportBlocks,
+        setSupportBlocks,
+        mobileAppBlocks,
+        setMobileAppBlocks,
+        mobileSimpleBlocks,
+        setMobileSimpleBlocks,
+        universalBlocks,
+        setUniversalBlocks,
         router,
     };
 }

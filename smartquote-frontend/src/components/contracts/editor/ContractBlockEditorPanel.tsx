@@ -10,6 +10,7 @@ import type {
     ContractSectionKey,
 } from '@/lib/pdf/contract-short-blocks'
 import { ALL_CONTRACT_SECTION_KEYS as SECTION_KEYS } from '@/lib/pdf/contract-short-blocks'
+import { AiGenerateButton, type OfferContext } from '@/components/offers/editor/block-editors'
 
 // ── Shared field components ───────────────────────────────────────────────────
 
@@ -280,10 +281,12 @@ function SubjectEditor({
     blocks,
     onSave,
     onClose,
+    aiContext,
 }: {
     blocks: ContractShortBlocks
     onSave: (b: ContractShortBlocks) => void
     onClose: () => void
+    aiContext?: OfferContext
 }) {
     const [local, setLocal] = useState(blocks.subject)
 
@@ -291,6 +294,15 @@ function SubjectEditor({
         <div className="flex flex-col h-full">
             <PanelHeader title="§ Przedmiot Umowy" onClose={onClose} />
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                <AiGenerateButton
+                    sectionKey="contract_short.subject"
+                    offerContext={aiContext}
+                    onResult={(data) => setLocal((p) => ({
+                        ...p,
+                        scopeItems: Array.isArray(data.scopeItems) ? data.scopeItems as string[] : p.scopeItems,
+                        additionalNote: typeof data.additionalNote === 'string' ? data.additionalNote : p.additionalNote,
+                    }))}
+                />
                 <SectionTitle value={local.sectionTitle} onChange={(v) => setLocal((p) => ({ ...p, sectionTitle: v }))} />
 
                 <div className="space-y-2">
@@ -770,6 +782,7 @@ export interface ContractBlockEditorPanelProps {
     blocks: ContractShortBlocks
     onSave: (blocks: ContractShortBlocks) => void
     onClose: () => void
+    aiContext?: OfferContext
 }
 
 export function ContractBlockEditorPanel({
@@ -777,6 +790,7 @@ export function ContractBlockEditorPanel({
     blocks,
     onSave,
     onClose,
+    aiContext,
 }: ContractBlockEditorPanelProps) {
     switch (sectionKey) {
         case 'header':
@@ -784,7 +798,7 @@ export function ContractBlockEditorPanel({
         case 'parties':
             return <PartiesEditor blocks={blocks} onSave={onSave} onClose={onClose} />
         case 'subject':
-            return <SubjectEditor blocks={blocks} onSave={onSave} onClose={onClose} />
+            return <SubjectEditor blocks={blocks} onSave={onSave} onClose={onClose} aiContext={aiContext} />
         case 'deadline':
             return <DeadlineEditor blocks={blocks} onSave={onSave} onClose={onClose} />
         case 'payment':

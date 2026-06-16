@@ -1,8 +1,9 @@
 // src/services/ai/offer-fill.ts
 // Conversational AI that collects project details and generates ProposalBlocks JSON.
-// Uses Gemini structured output — model ALWAYS returns { message, isComplete, blocks }.
-// On the backend we Zod-validate blocks and apply a non-destructive diff-merge.
-import { GoogleGenAI, Type } from '@google/genai'
+// responseMimeType:'application/json' guarantees parseable JSON; responseSchema is intentionally
+// NOT used here — Gemini's structured output flattens nested objects when schema is shallow,
+// producing empty blocks. The full schema is described in the system prompt instead; Zod validates.
+import { GoogleGenAI } from '@google/genai'
 import { z } from 'zod'
 import { config } from '../../config'
 import { createModuleLogger } from '../../lib/logger'
@@ -18,7 +19,15 @@ export interface OfferFillContext {
     clientName: string
     offerTitle: string
     currentBlocks?: Record<string, unknown>
+    // Language for BOTH the chat reply and the generated template content.
+    // Defaults to Polish when omitted.
+    language?: 'pl' | 'en'
 }
+
+// Cap how much conversation history we forward to Gemini. The validator already
+// limits the request to 30 turns, but a long thread inflates token cost and can
+// crowd the context window; the last N messages carry the relevant intent.
+const MAX_HISTORY_MESSAGES = 20
 
 export interface OfferFillResult {
     message: string
@@ -27,11 +36,16 @@ export interface OfferFillResult {
 }
 
 // ── Zod schema for ProposalBlocks validation ──────────────────────────────────
-// Lightweight — enough to catch garbage, not exhaustive field-by-field.
+// Covers every field that proposal-html.ts reads at runtime. Fields not listed here
+// would pass Zod but could silently break rendering if they carry garbage.
 
 const SectionKeySchema = z.enum([
     'intro', 'demo', 'structure', 'scope', 'testing', 'technology', 'pricingExtra', 'about',
+    'benefits', 'process', 'stats',
 ])
+
+// Shared sub-schema — used in demo.urls and technology.options[].urls.
+const DemoUrlSchema = z.object({ href: z.string(), label: z.string() })
 
 const ProposalBlocksSchema = z.object({
     version: z.literal(1).optional(),
@@ -40,11 +54,20 @@ const ProposalBlocksSchema = z.object({
     header: z.object({ enabled: z.boolean(), tag: z.string() }).optional(),
     footer: z.object({ enabled: z.boolean(), customNote: z.string(), showAuthor: z.boolean() }).optional(),
     intro: z.object({ enabled: z.boolean(), paragraphs: z.array(z.string()) }).optional(),
-    demo: z.object({ enabled: z.boolean(), title: z.string(), body: z.string() }).partial().optional(),
+    demo: z.object({
+        enabled: z.boolean(),
+        title: z.string(),
+        body: z.string(),
+        // renderDemo() iterates urls, reads warning, reads note — all must be validated.
+        urls: z.array(DemoUrlSchema),
+        warning: z.string().optional(),
+        note: z.string().optional(),
+    }).partial().optional(),
     structure: z.object({
         enabled: z.boolean(),
         title: z.string(),
         items: z.array(z.object({ icon: z.string(), name: z.string(), description: z.string() })),
+        note: z.string().optional(),   // renderStructure() reads s.note
     }).optional(),
     scope: z.object({
         enabled: z.boolean(),
@@ -55,8 +78,19 @@ const ProposalBlocksSchema = z.object({
         enabled: z.boolean(),
         intro: z.string(),
         cards: z.array(z.object({ icon: z.string(), title: z.string(), description: z.string() })),
+        note: z.string().optional(),   // renderTesting() reads t.note
     }).optional(),
-    technology: z.object({ enabled: z.boolean(), body: z.string() }).partial().optional(),
+    technology: z.object({
+        enabled: z.boolean(),
+        body: z.string(),
+        // renderTechnology() iterates options and reads note — both were absent before.
+        options: z.array(z.object({
+            icon: z.string(),
+            title: z.string(),
+            urls: z.array(DemoUrlSchema),
+        })),
+        note: z.string().optional(),
+    }).partial().optional(),
     pricingExtra: z.object({
         enabled: z.boolean(),
         timeline: z.string(),
@@ -71,7 +105,47 @@ const ProposalBlocksSchema = z.object({
         ctaText: z.string(),
         aboutBoxTitle: z.string(),
     }).partial().optional(),
-}).passthrough()
+    benefits: z.object({
+        enabled: z.boolean(),
+        title: z.string(),
+        items: z.array(z.object({ icon: z.string(), title: z.string(), description: z.string() })),
+    }).partial().optional(),
+    process: z.object({
+        enabled: z.boolean(),
+        title: z.string(),
+        steps: z.array(z.object({ title: z.string(), description: z.string() })),
+    }).partial().optional(),
+    stats: z.object({
+        enabled: z.boolean(),
+        items: z.array(z.object({ value: z.string(), label: z.string() })),
+    }).partial().optional(),
+}).passthrough().superRefine((value, ctx) => {
+    // Structural integrity of the page layout. SectionKeySchema already restricts the
+    // entries to known keys; here we catch the two ways a regeneration corrupts layout:
+    // a section listed twice on one page, or the same section placed on both pages
+    // (it would render twice). These are cheap, false-positive-free invariants.
+    const page1 = Array.isArray(value.page1Sections) ? (value.page1Sections as string[]) : []
+    const page2 = Array.isArray(value.page2Sections) ? (value.page2Sections as string[]) : []
+
+    const flagDuplicates = (arr: string[], path: 'page1Sections' | 'page2Sections') => {
+        const seen = new Set<string>()
+        for (const key of arr) {
+            if (seen.has(key)) {
+                ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Duplicate section "${key}" in ${path}`, path: [path] })
+            }
+            seen.add(key)
+        }
+    }
+    flagDuplicates(page1, 'page1Sections')
+    flagDuplicates(page2, 'page2Sections')
+
+    const onPage2 = new Set(page2)
+    for (const key of page1) {
+        if (onPage2.has(key)) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Section "${key}" appears on both pages`, path: ['page1Sections'] })
+        }
+    }
+})
 
 type ValidatedBlocks = z.infer<typeof ProposalBlocksSchema>
 
@@ -80,7 +154,7 @@ type ValidatedBlocks = z.infer<typeof ProposalBlocksSchema>
 // "substantive" — non-empty string or non-empty array.  This prevents the model
 // from accidentally clearing sections it was not asked to change.
 
-const SECTION_KEYS = ['intro', 'demo', 'structure', 'scope', 'testing', 'technology', 'pricingExtra', 'about'] as const
+const SECTION_KEYS = ['intro', 'demo', 'structure', 'scope', 'testing', 'technology', 'pricingExtra', 'about', 'benefits', 'process', 'stats'] as const
 
 function isSubstantive(value: unknown): boolean {
     if (Array.isArray(value)) return value.length > 0
@@ -94,10 +168,15 @@ function deepMergeSection(
     aiSection: Record<string, unknown>,
 ): Record<string, unknown> {
     const merged: Record<string, unknown> = { ...current }
+    const currentEnabled = current.enabled === true
     for (const [field, value] of Object.entries(aiSection)) {
         if (field === 'enabled') {
-            // Always take 'enabled' from AI — it explicitly enables/disables sections.
-            merged[field] = value
+            // Asymmetric: the AI may ENABLE a section (false→true) when it has content for
+            // it, but it must NEVER silently DISABLE one (true→false). A hallucinated
+            // regeneration that flips `enabled` off would make a populated section vanish
+            // from the rendered PDF — the hardest data loss for the user to notice.
+            // Disabling stays an explicit user action via the section manager UI.
+            merged[field] = currentEnabled ? true : value === true
         } else if (isSubstantive(value)) {
             merged[field] = value
         }
@@ -125,35 +204,56 @@ export function diffMergeBlocks(
     if (aiGenerated.header) result.header = deepMergeSection(current.header as Record<string, unknown> ?? {}, aiGenerated.header as Record<string, unknown>)
     if (aiGenerated.footer) result.footer = deepMergeSection(current.footer as Record<string, unknown> ?? {}, aiGenerated.footer as Record<string, unknown>)
 
+    // If the AI rewrote the page arrays but dropped a section that is still enabled,
+    // it would disappear from the layout entirely. Re-attach any such section to the
+    // page it previously lived on (page 2 as fallback) so nothing silently vanishes.
+    reattachEnabledSections(result, current)
+
     return result
 }
 
-// ── Gemini responseSchema ─────────────────────────────────────────────────────
-// The model always returns { message, isComplete, blocks }.
-// When isComplete=false, blocks is null (model is still asking questions).
-// When isComplete=true, blocks is the full ProposalBlocks JSON.
+function reattachEnabledSections(
+    result: Record<string, unknown>,
+    current: Record<string, unknown>,
+): void {
+    const page1 = Array.isArray(result.page1Sections) ? [...(result.page1Sections as string[])] : []
+    const page2 = Array.isArray(result.page2Sections) ? [...(result.page2Sections as string[])] : []
+    // No layout is being tracked at all — nothing to reconcile.
+    if (page1.length === 0 && page2.length === 0) return
 
-const OFFER_FILL_RESPONSE_SCHEMA = {
-    type: Type.OBJECT,
-    properties: {
-        message: {
-            type: Type.STRING,
-            description: 'The conversational reply shown to the user.',
-        },
-        isComplete: {
-            type: Type.BOOLEAN,
-            description: 'true when the full template has been generated and blocks is populated.',
-        },
-        blocks: {
-            type: Type.OBJECT,
-            description: 'Full ProposalBlocks JSON when isComplete=true, otherwise absent.',
-            nullable: true,
-        },
-    },
-    required: ['message', 'isComplete'],
+    const placed = new Set<string>([...page1, ...page2])
+    const prevPage1 = Array.isArray(current.page1Sections) ? (current.page1Sections as string[]) : []
+    let changed = false
+
+    for (const key of SECTION_KEYS) {
+        const section = result[key] as Record<string, unknown> | undefined
+        if (!section || section.enabled !== true || placed.has(key)) continue
+        if (prevPage1.includes(key)) page1.push(key)
+        else page2.push(key)
+        placed.add(key)
+        changed = true
+    }
+
+    if (!changed) return
+    if (page1.length || Array.isArray(result.page1Sections)) result.page1Sections = page1
+    if (page2.length || Array.isArray(result.page2Sections)) result.page2Sections = page2
 }
 
 // ── System prompt ─────────────────────────────────────────────────────────────
+
+// Reports the enabled-state of EVERY section plus a short content indicator.
+// This is critical for section protection: the model regenerates the full blocks
+// JSON on every edit and always reports `enabled` back. If it cannot see which
+// sections are currently enabled, it guesses (usually `false` from the schema
+// defaults) and silently disables sections the user never touched.
+function describeSectionState(section: unknown): { enabled: boolean; filled: boolean } {
+    if (!section || typeof section !== 'object') return { enabled: false, filled: false }
+    const s = section as Record<string, unknown>
+    const enabled = s.enabled === true
+    // "filled" = any array/string field carries substantive content.
+    const filled = Object.entries(s).some(([k, v]) => k !== 'enabled' && isSubstantive(v))
+    return { enabled, filled }
+}
 
 function buildCurrentBlocksSummary(blocks: Record<string, unknown>): string {
     try {
@@ -164,6 +264,22 @@ function buildCurrentBlocksSummary(blocks: Record<string, unknown>): string {
         const about = blocks.about as { enabled?: boolean; ctaText?: string } | undefined
 
         const lines: string[] = ['=== AKTUALNY STAN SZABLONU ===']
+
+        // Layout — which sections sit on which page, and in what order.
+        const page1 = Array.isArray(blocks.page1Sections) ? (blocks.page1Sections as string[]) : []
+        const page2 = Array.isArray(blocks.page2Sections) ? (blocks.page2Sections as string[]) : []
+        if (page1.length || page2.length) {
+            lines.push(`UKŁAD STRON: strona 1 = [${page1.join(', ')}]; strona 2 = [${page2.join(', ')}]`)
+        }
+
+        // Per-section on/off map for ALL sections — so the model can preserve enabled flags.
+        const statusMap = SECTION_KEYS.map(key => {
+            const { enabled, filled } = describeSectionState(blocks[key])
+            const mark = enabled ? (filled ? 'WŁ.' : 'wł. (pusta)') : 'wył.'
+            return `${key}=${mark}`
+        }).join(', ')
+        lines.push(`SEKCJE (enabled): ${statusMap}`)
+        lines.push('⚠️ Zachowaj powyższe flagi enabled DOKŁADNIE, chyba że użytkownik prosi o ich zmianę.')
 
         if (intro?.enabled && intro.paragraphs?.length) {
             lines.push(`WSTĘP (${intro.paragraphs.length} akapity):`)
@@ -212,15 +328,23 @@ function buildSystemPrompt(ctx: OfferFillContext): string {
         ? `Szablon jest już częściowo wypełniony — widzisz jego aktualny stan powyżej.
 Możesz modyfikować dowolną sekcję na prośbę użytkownika.
 Gdy użytkownik pyta "co jest już wypełnione" — opisz mu aktualny stan z powyższego zestawienia.
-Gdy prosi o zmianę — wprowadź zmiany i ustaw isComplete=true z pełnym blokiem JSON.
-Gdy prosi o wygenerowanie od zera — wygeneruj kompletny nowy szablon.`
-        : `Przeprowadź krótką rozmowę (maksymalnie 3-4 pytania) aby zebrać:
-1. Opis branży / działalności klienta
-2. Główne podstrony / funkcje serwisu (5-10 elementów)
-3. Przybliżony termin realizacji
-Gdy masz te informacje — od razu generuj szablon (isComplete=true). Nie pytaj o więcej.`
+Gdy prosi o zmianę — od razu wprowadź zmiany i ustaw isComplete=true z pełnym blokiem JSON. NIE pytaj o potwierdzenie.
+Gdy prosi o wygenerowanie od zera — wygeneruj kompletny nowy szablon.
+AKTYWOWANIE SEKCJI: jeśli treść tego wymaga (np. masz info o technologiach, testach, demo), ustaw enabled:true w tych sekcjach.`
+        : `Jeśli użytkownik podał wystarczające informacje w swojej wiadomości (branża, zakres, opis projektu) — NATYCHMIAST generuj szablon (isComplete=true). NIE pytaj o potwierdzenie.
+Jeśli informacje są niewystarczające, zadaj JEDNO konkretne pytanie:
+1. Opis branży / działalności klienta i zakres zlecenia
+Po otrzymaniu opisu — od razu generuj szablon. Nie pytaj o więcej.
+AKTYWOWANIE SEKCJI: aktywuj wszystkie sekcje (enabled:true) dla których masz treść. Możesz aktywować testing, technology, demo jeśli informacje na to pozwalają.`
+
+    const language = ctx.language === 'en' ? 'en' : 'pl'
+    const languageInstruction = language === 'en'
+        ? `JĘZYK (KRYTYCZNE): Pisz WSZYSTKO po ANGIELSKU — zarówno wiadomości czatu, jak i CAŁĄ treść szablonu (intro, scope, CTA, tytuły sekcji itd.) — niezależnie od języka nazwy klienta, tytułu oferty czy aktualnych danych.`
+        : `JĘZYK (KRYTYCZNE): Pisz WSZYSTKO po POLSKU — zarówno wiadomości czatu, jak i całą treść szablonu — niezależnie od języka danych wejściowych.`
 
     return `Jesteś Markiem — doświadczonym copywriterem i handlowcem B2B z 15 latami praktyki w tworzeniu ofert na usługi IT i strony internetowe. Twoje oferty wygrywają przetargi.
+
+${languageInstruction}
 
 KONTEKST:
 Klient: "${ctx.clientName}"
@@ -234,7 +358,7 @@ ZASADY PISANIA:
 - Konkretnie i branżowo — zero ogólników jak "profesjonalna strona"
 - Ikony w zakresie dobieraj tematycznie (🏠 nieruchomości, ⚖️ prawnik, 🍕 gastronomia)
 - CTA ciepłe ale asertywne — bez "zachęcam", bez "proszę o kontakt"
-- Wstęp zaczyna się od empatii wobec potrzeby klienta
+- WSTĘP (intro): 2–3 krótkie akapity. Pierwszy zaczyna się od empatii wobec potrzeby klienta i ma 1 emoji pasujące do branży na początku (👋/🚀/🏗️). W którymś akapicie wyróżnij JEDNĄ kluczową korzyść tagiem <strong>...</strong>. Możesz wpleść 1–2 dodatkowe emoji. Zwróć każdy akapit jako osobny element tablicy paragraphs.
 
 ZASADY ROZMOWY:
 - Jedno pytanie na raz, krótko i konkretnie
@@ -242,6 +366,7 @@ ZASADY ROZMOWY:
 - Gdy masz wystarczające informacje — DZIAŁAJ natychmiast, nie pytaj o potwierdzenie
 - Gdy użytkownik prosi o zmianę czegoś konkretnego — zrób to od razu
 - NIE pytaj o cenę (pobierana z systemu automatycznie)
+- Gdy użytkownik przesyła gotowy brief/opis projektu — traktuj go jako kompletne dane i NATYCHMIAST generuj (isComplete=true)
 
 OCHRONA SEKCJI (KRYTYCZNE):
 - Gdy użytkownik prosi o zmianę KONKRETNEJ sekcji, zmieniaj TYLKO tę sekcję.
@@ -262,15 +387,20 @@ SCHEMAT blocks gdy isComplete=true:
   "page2Sections": ["scope", "pricingExtra", "about"],
   "header": { "enabled": true, "tag": "Oferta handlowa" },
   "footer": { "enabled": true, "customNote": "indywidualnie", "showAuthor": true },
-  "intro": { "enabled": true, "paragraphs": ["Akapit 1.", "Akapit 2."] },
+  "intro": { "enabled": true, "paragraphs": ["👋 Akapit powitalny z empatią wobec potrzeby.", "Akapit z korzyściami, w którym <strong>kluczowa korzyść</strong> jest wyróżniona."] },
   "demo": { "enabled": false, "title": "", "body": "", "urls": [] },
   "structure": { "enabled": true, "title": "Proponowana struktura strony", "items": [{"icon":"📋","name":"Nazwa","description":"Opis"}], "note": "" },
   "scope": { "enabled": true, "title": "Pełny zakres realizacji", "items": [{"html":"Pozycja zakresu"}] },
   "testing": { "enabled": false, "intro": "", "cards": [] },
   "technology": { "enabled": false, "body": "", "options": [] },
   "pricingExtra": { "enabled": true, "timeline": "X tygodnie", "timelineSub": "od ustalenia szczegółów", "contractType": "Umowa, faktura VAT", "contractSub": "pełna transparentność", "priceOverride": null, "priceType": "gross" },
-  "about": { "enabled": true, "ctaText": "2-3 zdania CTA.", "aboutBoxTitle": "Więcej o nas i naszych realizacjach" }
-}`
+  "about": { "enabled": true, "ctaText": "2-3 zdania CTA.", "aboutBoxTitle": "Więcej o nas i naszych realizacjach" },
+  "benefits": { "enabled": false, "title": "Dlaczego warto nam zaufać", "items": [{"icon":"⚡","title":"Korzyść","description":"Krótki opis"}] },
+  "process": { "enabled": false, "title": "Jak przebiega współpraca", "steps": [{"title":"Krok","description":"Opis kroku"}] },
+  "stats": { "enabled": false, "items": [{"value":"50+","label":"realizacji"}] }
+}
+
+DODATKOWE SEKCJE (opcjonalne — domyślnie enabled:false): "benefits" (karty korzyści), "process" (etapy współpracy 3-4 kroki), "stats" (pasek liczb budujących zaufanie). Możesz je AKTYWOWAĆ (enabled:true) i dodać do page1Sections/page2Sections, gdy wzbogacą ofertę.`
 }
 
 // ── Main function ─────────────────────────────────────────────────────────────
@@ -309,9 +439,16 @@ export async function offerFillChat(
     try {
         const systemPrompt = buildSystemPrompt(context)
 
+        // Keep only the most recent turns — bounds token cost and context-window pressure
+        // on long threads. The current blocks state is carried separately in the system
+        // prompt, so older chatter is safe to drop.
+        const recentHistory = history.length > MAX_HISTORY_MESSAGES
+            ? history.slice(-MAX_HISTORY_MESSAGES)
+            : history
+
         type GeminiContent = { role: 'user' | 'model'; parts: Array<{ text: string }> }
         const contents: GeminiContent[] = [
-            ...history.map((msg): GeminiContent => ({
+            ...recentHistory.map((msg): GeminiContent => ({
                 role: msg.role === 'user' ? 'user' : 'model',
                 parts: [{ text: msg.content }],
             })),
@@ -324,9 +461,13 @@ export async function offerFillChat(
             config: {
                 systemInstruction: systemPrompt,
                 temperature: 0.75,
-                maxOutputTokens: 8192,
+                // A full proposal (all sections enabled) plus the chat message can approach
+                // the old 8192 cap; truncation produces invalid JSON and a silent no-blocks
+                // result. gemini-2.5-flash supports far more, so give generous headroom.
+                maxOutputTokens: 16384,
                 responseMimeType: 'application/json',
-                responseSchema: OFFER_FILL_RESPONSE_SCHEMA,
+                // No responseSchema — structured schema for nested blocks causes Gemini to emit
+                // empty objects. JSON mode + Zod validation in this function is sufficient.
             },
         })
 
@@ -335,8 +476,16 @@ export async function offerFillChat(
         try {
             parsed = JSON.parse(raw) as typeof parsed
         } catch {
-            log.warn({ raw: raw.slice(0, 200) }, 'offer-fill: failed to parse structured response')
-            return { message: raw || 'Generuję ofertę...', blocks: null, isComplete: false }
+            log.warn({ raw: raw.slice(0, 200), len: raw.length }, 'offer-fill: failed to parse structured response')
+            // Truncated/garbled JSON — never surface raw JSON to the user.
+            const looksLikeJson = raw.trimStart().startsWith('{')
+            return {
+                message: looksLikeJson || !raw.trim()
+                    ? 'Odpowiedź była zbyt długa lub niekompletna. Spróbuj ponownie — np. poproś o zmianę pojedynczej sekcji.'
+                    : raw,
+                blocks: null,
+                isComplete: false,
+            }
         }
 
         const message = typeof parsed.message === 'string' ? parsed.message : 'Generuję ofertę...'
@@ -358,6 +507,20 @@ export async function offerFillChat(
             blocks = context.currentBlocks
                 ? diffMergeBlocks(context.currentBlocks, validation.data)
                 : (validation.data as Record<string, unknown>)
+        }
+
+        if (blocks !== null && context.currentBlocks) {
+            // Guard: if diff-merge produced no real changes, treat as incomplete so the user
+            // doesn't see a silent no-op when clicking "Apply".
+            const hasChanges = JSON.stringify(blocks) !== JSON.stringify(context.currentBlocks)
+            if (!hasChanges) {
+                log.warn('offer-fill: diff-merge produced no changes, returning isComplete=false')
+                return {
+                    message: 'Nie wykryłem zmian w stosunku do aktualnego szablonu. Spróbuj doprecyzować, co chcesz zmienić lub opisz projekt bardziej szczegółowo.',
+                    blocks: null,
+                    isComplete: false,
+                }
+            }
         }
 
         return { message, blocks, isComplete: blocks !== null }

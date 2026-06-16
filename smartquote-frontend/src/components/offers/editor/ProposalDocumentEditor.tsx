@@ -4,7 +4,7 @@
 // Panel edits → srcdoc is updated → iframe re-renders the updated document.
 'use client'
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Download, RefreshCw, ZoomIn, ZoomOut, Layers } from 'lucide-react'
 import { Button } from '@/components/ui'
 import {
@@ -16,6 +16,8 @@ import {
 import { buildProposalHtml, type ProposalOfferData } from '@/lib/pdf/proposal-html'
 import { mergeWithDefaults, type ProposalBlocks } from '@/lib/pdf/proposal-blocks'
 import { cn } from '@/lib/utils'
+import { useResizablePanel } from '@/hooks/useResizablePanel'
+import { useZoom, ZOOM_LEVELS, ZOOM_LABELS } from '@/hooks/useZoom'
 
 export interface ProposalDocumentEditorProps {
     /** Offer data used to render the document. `blocks` field may be null (defaults used). */
@@ -31,11 +33,6 @@ export interface ProposalDocumentEditorProps {
     showSaveButton?: boolean
     onSave?: () => void
     isSaving?: boolean
-}
-
-const ZOOM_LEVELS = [0.5, 0.65, 0.8, 1.0, 1.25, 1.5] as const
-const ZOOM_LABELS: Record<number, string> = {
-    0.5: '50%', 0.65: '65%', 0.8: '80%', 1.0: '100%', 1.25: '125%', 1.5: '150%',
 }
 
 const VALID_BLOCK_KEYS: EditableBlockKey[] = [
@@ -57,14 +54,14 @@ export function ProposalDocumentEditor({
     isSaving,
 }: ProposalDocumentEditorProps) {
     const [panelView, setPanelView] = useState<PanelView>(null)
-    const [zoom, setZoom] = useState<number>(0.8)
-    const [srcdoc, setSrcdoc] = useState<string>(() =>
-        buildProposalHtml(
-            { ...offer, blocks },
-            { editorMode: true, zoom: 0.8 },
-        ),
+    const { panelWidth, onResizeMouseDown } = useResizablePanel('sq_editor_panel_width')
+    const { zoom, zoomIn, zoomOut } = useZoom()
+    const [refreshKey, setRefreshKey] = useState(0)
+
+    const srcdoc = useMemo(
+        () => buildProposalHtml({ ...offer, blocks }, { editorMode: true, zoom }),
+        [offer, blocks, zoom],
     )
-    const iframeRef = useRef<HTMLIFrameElement>(null)
 
     // Build offer context for AI generation
     const offerContext = useMemo<OfferContext>(() => ({
@@ -73,12 +70,6 @@ export function ProposalDocumentEditor({
         totalGross: offer.totalGross,
         currency: offer.currency,
     }), [offer.title, offer.client.name, offer.totalGross, offer.currency])
-
-    // Rebuild srcdoc when blocks or zoom change
-    useEffect(() => {
-        const html = buildProposalHtml({ ...offer, blocks }, { editorMode: true, zoom })
-        setSrcdoc(html)
-    }, [offer, blocks, zoom])
 
     // Listen for postMessage events from the iframe
     useEffect(() => {
@@ -97,11 +88,9 @@ export function ProposalDocumentEditor({
     const handleSaveBlock = useCallback(
         (updatedBlocks: ProposalBlocks) => {
             onBlocksChange(updatedBlocks)
-            const html = buildProposalHtml({ ...offer, blocks: updatedBlocks }, { editorMode: true, zoom })
-            setSrcdoc(html)
             setPanelView(null)
         },
-        [offer, onBlocksChange, zoom],
+        [onBlocksChange],
     )
 
     const handleSaveSections = useCallback(
@@ -112,23 +101,8 @@ export function ProposalDocumentEditor({
         [onBlocksChange],
     )
 
-    const handleClosePanel = useCallback(() => {
-        setPanelView(null)
-    }, [])
-
-    const handleRefresh = useCallback(() => {
-        const html = buildProposalHtml({ ...offer, blocks }, { editorMode: true, zoom })
-        setSrcdoc(html + `<!-- refresh:${Date.now()} -->`)
-    }, [offer, blocks, zoom])
-
-    const zoomIn = () => {
-        const idx = ZOOM_LEVELS.indexOf(zoom as typeof ZOOM_LEVELS[number])
-        if (idx < ZOOM_LEVELS.length - 1) setZoom(ZOOM_LEVELS[idx + 1])
-    }
-    const zoomOut = () => {
-        const idx = ZOOM_LEVELS.indexOf(zoom as typeof ZOOM_LEVELS[number])
-        if (idx > 0) setZoom(ZOOM_LEVELS[idx - 1])
-    }
+    const handleClosePanel = useCallback(() => setPanelView(null), [])
+    const handleRefresh = useCallback(() => setRefreshKey(n => n + 1), [])
 
     const panelOpen = panelView !== null
     const showSections = panelView?.kind === 'sections'
@@ -223,7 +197,7 @@ export function ProposalDocumentEditor({
                 {/* Document iframe */}
                 <div className="flex-1 min-w-0 overflow-auto bg-[#CDD2E2] transition-all duration-300">
                     <iframe
-                        ref={iframeRef}
+                        key={refreshKey}
                         srcDoc={srcdoc}
                         title="Podgląd oferty"
                         sandbox="allow-scripts allow-same-origin"
@@ -234,11 +208,15 @@ export function ProposalDocumentEditor({
 
                 {/* Side panel */}
                 <div
-                    className={cn(
-                        'flex-shrink-0 overflow-hidden border-l border-border transition-all duration-300',
-                        panelOpen ? 'w-[380px]' : 'w-0',
-                    )}
+                    className={cn('flex-shrink-0 overflow-hidden border-l border-border relative', panelOpen ? '' : '!w-0')}
+                    style={panelOpen ? { width: panelWidth } : undefined}
                 >
+                    {panelOpen && (
+                        <div
+                            onMouseDown={onResizeMouseDown}
+                            className="absolute left-0 top-0 bottom-0 w-1.5 cursor-ew-resize z-20 hover:bg-primary/20 transition-colors"
+                        />
+                    )}
                     {showSections && (
                         <SectionManagerPanel
                             blocks={blocks}

@@ -1,6 +1,6 @@
 // src/lib/api/client.ts
 
-import { getSession } from 'next-auth/react';
+import { getSession, signOut } from 'next-auth/react';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
 
@@ -27,6 +27,8 @@ interface ApiResponseShape<T = unknown> {
         totalPages: number;
     };
 }
+
+let isSigningOut = false;
 
 export class ApiError extends Error {
     readonly code: string;
@@ -81,6 +83,37 @@ class ApiClient {
         return url.toString();
     }
 
+    private async parseJsonResponse<T>(response: Response): Promise<ApiResponseShape<T>> {
+        const text = await response.text();
+
+        if (!text) {
+            return { success: response.ok } as ApiResponseShape<T>;
+        }
+
+        try {
+            return JSON.parse(text) as ApiResponseShape<T>;
+        } catch {
+            return {
+                success: false,
+                error: {
+                    code: response.ok ? 'INVALID_RESPONSE' : 'HTTP_ERROR',
+                    message: response.ok ? 'Invalid response from server' : (response.statusText || 'An error occurred'),
+                },
+            };
+        }
+    }
+
+    private async handleUnauthorized(response: Response): Promise<void> {
+        if (response.status !== 401) return;
+
+        if (typeof window !== 'undefined' && !isSigningOut) {
+            isSigningOut = true;
+            await signOut({ callbackUrl: '/' });
+        }
+
+        throw new ApiError('Session expired. Please sign in again.', 'UNAUTHORIZED', 401);
+    }
+
     async request<T>(endpoint: string, options: FetchOptions = {}): Promise<ApiResponseShape<T>> {
         const { params, ...fetchOptions } = options;
         const url = this.buildUrl(endpoint, params);
@@ -94,9 +127,10 @@ class ApiClient {
             },
         });
 
-        const data: ApiResponseShape<T> = await response.json();
+        const data = await this.parseJsonResponse<T>(response);
 
         if (!response.ok) {
+            await this.handleUnauthorized(response);
             throw new ApiError(
                 data.error?.message || 'An error occurred',
                 data.error?.code || 'UNKNOWN_ERROR',
@@ -120,7 +154,7 @@ class ApiClient {
             },
         });
 
-        const data: ApiResponseShape<T> = await response.json();
+        const data = await this.parseJsonResponse<T>(response);
 
         if (!response.ok) {
             throw new ApiError(
@@ -175,7 +209,14 @@ class ApiClient {
         const response = await fetch(url, { headers });
 
         if (!response.ok) {
-            throw new ApiError('Failed to download file', 'DOWNLOAD_ERROR', response.status);
+            const data = await this.parseJsonResponse<never>(response);
+            await this.handleUnauthorized(response);
+            throw new ApiError(
+                data.error?.message || 'Failed to download file',
+                data.error?.code || 'DOWNLOAD_ERROR',
+                response.status,
+                data.error?.details
+            );
         }
 
         return response.blob();
@@ -197,9 +238,10 @@ class ApiClient {
             body: formData,
         });
 
-        const data: ApiResponseShape<T> = await response.json();
+        const data = await this.parseJsonResponse<T>(response);
 
         if (!response.ok) {
+            await this.handleUnauthorized(response);
             throw new ApiError(
                 data.error?.message || 'An error occurred',
                 data.error?.code || 'UPLOAD_ERROR',

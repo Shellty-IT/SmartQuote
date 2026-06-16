@@ -4,6 +4,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import type { NextAuthOptions } from 'next-auth';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8080';
+const SESSION_MAX_AGE = 7 * 24 * 60 * 60;
 
 export const authOptions: NextAuthOptions = {
     providers: [
@@ -85,7 +86,7 @@ export const authOptions: NextAuthOptions = {
 
     session: {
         strategy: 'jwt',
-        maxAge: 24 * 60 * 60,
+        maxAge: SESSION_MAX_AGE,
     },
 
     secret: process.env.NEXTAUTH_SECRET,

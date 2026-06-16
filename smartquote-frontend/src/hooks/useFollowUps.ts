@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { followUpsApi } from '@/lib/api';
+import { followUpKeys } from '@/lib/queryKeys';
 import { FollowUp } from '@/types';
 
 interface UseFollowUpsOptions {
@@ -44,7 +45,7 @@ export function useFollowUps(initialOptions: UseFollowUpsOptions = {}) {
     const [filters, setFiltersState] = useState<UseFollowUpsOptions>(initialOptions);
 
     const { data, isLoading, error, refetch } = useQuery({
-        queryKey: ['followups', filters],
+        queryKey: followUpKeys.list(filters),
         queryFn: () => followUpsApi.list(buildParams(filters)),
     });
 
@@ -54,8 +55,8 @@ export function useFollowUps(initialOptions: UseFollowUpsOptions = {}) {
 
     const invalidateAll = async () => {
         await Promise.all([
-            queryClient.invalidateQueries({ queryKey: ['followups'] }),
-            queryClient.invalidateQueries({ queryKey: ['followups-stats'] }),
+            queryClient.invalidateQueries({ queryKey: followUpKeys.all }),
+            queryClient.invalidateQueries({ queryKey: followUpKeys.stats }),
         ]);
     };
 
@@ -100,7 +101,7 @@ export function useFollowUps(initialOptions: UseFollowUpsOptions = {}) {
 
 export function useFollowUp(id: string) {
     const { data, isLoading, error, refetch } = useQuery({
-        queryKey: ['followup', id],
+        queryKey: followUpKeys.detail(id),
         queryFn: () => followUpsApi.get(id),
         enabled: !!id,
         staleTime: 60_000,
@@ -116,7 +117,7 @@ export function useFollowUp(id: string) {
 
 export function useFollowUpStats() {
     const { data, isLoading, error, refetch } = useQuery({
-        queryKey: ['followups-stats'],
+        queryKey: followUpKeys.stats,
         queryFn: () => followUpsApi.stats(),
         staleTime: 60_000,
     });

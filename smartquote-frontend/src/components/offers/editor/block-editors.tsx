@@ -3,9 +3,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Trash2, Sparkles } from 'lucide-react'
+import { Plus, Trash2, Sparkles, Search, Loader2, ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ai } from '@/lib/api'
+import type { PriceSuggestion } from '@/types/ai'
 import type {
     HeaderBlock,
     FooterBlock,
@@ -22,6 +23,12 @@ import type {
     TestingCard,
     TechOption,
     DemoUrl,
+    BenefitsBlock,
+    BenefitItem,
+    ProcessBlock,
+    ProcessStep,
+    StatsBlock,
+    StatItem,
 } from '@/lib/pdf/proposal-blocks'
 
 // ── Shared primitives ─────────────────────────────────────────────────────────
@@ -510,14 +517,122 @@ export function TechnologyEditor({
     )
 }
 
+// AI price suggestion — searches the web for market rates and proposes a range.
+function AiPriceSuggestButton({
+    offerContext,
+    scopeSummary,
+    onUsePrice,
+}: {
+    offerContext?: OfferContext
+    scopeSummary?: string
+    onUsePrice: (value: number) => void
+}) {
+    const [loading, setLoading] = useState(false)
+    const [result, setResult] = useState<PriceSuggestion | null>(null)
+    const [error, setError] = useState<string | null>(null)
+
+    if (!offerContext) return null
+
+    const currency = offerContext.currency ?? 'PLN'
+    const fmt = (n: number) => `${n.toLocaleString('pl-PL')} ${currency}`
+
+    const handleSuggest = async () => {
+        setLoading(true)
+        setError(null)
+        try {
+            const res = await ai.priceSuggestion({
+                offerTitle: offerContext.title,
+                clientName: offerContext.clientName,
+                scopeSummary,
+                currency,
+            })
+            setResult(res)
+        } catch {
+            setError('Nie udało się pobrać podpowiedzi ceny. Spróbuj ponownie.')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    return (
+        <div className="mb-3 rounded-xl border border-border bg-muted/30 p-3">
+            <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                    <p className="text-xs font-semibold text-foreground">💡 Podpowiedź ceny (AI + web)</p>
+                    <p className="text-[11px] text-muted-foreground">Wyszukuje rynkowe stawki dla tej usługi w sieci.</p>
+                </div>
+                <button
+                    type="button"
+                    onClick={handleSuggest}
+                    disabled={loading}
+                    className="flex shrink-0 items-center gap-1.5 rounded-lg bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
+                >
+                    {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Search className="h-3.5 w-3.5" />}
+                    {loading ? 'Szukam w sieci…' : 'Podpowiedz cenę'}
+                </button>
+            </div>
+
+            {error && <p className="mt-2 text-xs text-destructive">{error}</p>}
+
+            {result && (
+                <div className="mt-3 space-y-2 border-t border-border pt-3">
+                    {(result.min != null || result.max != null) && (
+                        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                            <span className="text-xs text-muted-foreground">Widełki rynkowe:</span>
+                            <span className="text-sm font-bold text-foreground">
+                                {result.min != null ? fmt(result.min) : '—'} – {result.max != null ? fmt(result.max) : '—'}
+                            </span>
+                        </div>
+                    )}
+                    {result.recommended != null && (
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-xs text-muted-foreground">Rekomendacja:</span>
+                            <span className="text-sm font-bold text-primary">{fmt(result.recommended)}</span>
+                            <button
+                                type="button"
+                                onClick={() => onUsePrice(result.recommended as number)}
+                                className="rounded-md border border-primary/40 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary transition-colors hover:bg-primary/20"
+                            >
+                                Użyj tej ceny
+                            </button>
+                        </div>
+                    )}
+                    {result.reasoning && (
+                        <p className="whitespace-pre-line text-[11px] leading-relaxed text-muted-foreground">{result.reasoning}</p>
+                    )}
+                    {result.sources.length > 0 && (
+                        <div className="space-y-1">
+                            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/70">Źródła</p>
+                            {result.sources.map((src, i) => (
+                                <a
+                                    key={i}
+                                    href={src.uri}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-1 truncate text-[11px] text-primary hover:underline"
+                                >
+                                    <ExternalLink className="h-3 w-3 shrink-0" />
+                                    <span className="truncate">{src.title}</span>
+                                </a>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    )
+}
+
 export function PricingEditor({
     block,
     onChange,
     offerContext,
+    scopeSummary,
 }: {
     block: PricingExtraBlock
     onChange: (b: PricingExtraBlock) => void
     offerContext?: OfferContext
+    scopeSummary?: string
 }) {
     const s = (p: Partial<PricingExtraBlock>) => onChange({ ...block, ...p })
     const currency = offerContext?.currency ?? 'PLN'
@@ -532,6 +647,11 @@ export function PricingEditor({
 
     return (
         <div className="space-y-3">
+            <AiPriceSuggestButton
+                offerContext={offerContext}
+                scopeSummary={scopeSummary}
+                onUsePrice={(value) => s({ priceOverride: value })}
+            />
             <p className="rounded-lg bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
                 💡 Cena pobierana automatycznie z pozycji oferty. Wpisz wartość poniżej, aby ją nadpisać w dokumencie.
             </p>
@@ -619,6 +739,162 @@ export function AboutEditor({
                     onChange={(e) => onChange({ ...block, ctaText: e.target.value })}
                 />
             </Field>
+        </div>
+    )
+}
+
+export function BenefitsEditor({
+    block, onChange, offerContext,
+}: { block: BenefitsBlock; onChange: (b: BenefitsBlock) => void; offerContext?: OfferContext }) {
+    const s = (p: Partial<BenefitsBlock>) => onChange({ ...block, ...p })
+    const upItem = (i: number, p: Partial<BenefitItem>) =>
+        s({ items: block.items.map((it, j) => (j === i ? { ...it, ...p } : it)) })
+    return (
+        <div>
+            <AiGenerateButton
+                sectionKey="benefits"
+                offerContext={offerContext}
+                onResult={(data) => {
+                    if (typeof data.title === 'string') s({ title: data.title })
+                    if (Array.isArray(data.items)) s({ items: data.items as BenefitItem[] })
+                }}
+            />
+            <Field label="Tytuł sekcji">
+                <input className={inputCls} value={block.title} onChange={(e) => s({ title: e.target.value })} />
+            </Field>
+            {block.items.map((item, i) => (
+                <div key={i} className="mb-2 rounded-lg border border-border p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                        <span className="text-xs font-medium text-muted-foreground">Korzyść #{i + 1}</span>
+                        <button
+                            type="button"
+                            onClick={() => s({ items: block.items.filter((_, j) => j !== i) })}
+                            className="rounded-md p-1 text-destructive hover:bg-destructive/10"
+                        >
+                            <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-[56px_1fr] gap-2">
+                        <Field label="Ikona">
+                            <input className={inputCls} value={item.icon} onChange={(e) => upItem(i, { icon: e.target.value })} />
+                        </Field>
+                        <Field label="Tytuł">
+                            <input className={inputCls} value={item.title} onChange={(e) => upItem(i, { title: e.target.value })} />
+                        </Field>
+                    </div>
+                    <Field label="Opis">
+                        <input className={inputCls} value={item.description} onChange={(e) => upItem(i, { description: e.target.value })} />
+                    </Field>
+                </div>
+            ))}
+            <button
+                type="button"
+                onClick={() => s({ items: [...block.items, { icon: '✅', title: '', description: '' }] })}
+                className="flex items-center gap-1 text-xs text-primary hover:underline"
+            >
+                <Plus className="h-3 w-3" /> Dodaj korzyść
+            </button>
+        </div>
+    )
+}
+
+export function ProcessEditor({
+    block, onChange, offerContext,
+}: { block: ProcessBlock; onChange: (b: ProcessBlock) => void; offerContext?: OfferContext }) {
+    const s = (p: Partial<ProcessBlock>) => onChange({ ...block, ...p })
+    const upStep = (i: number, p: Partial<ProcessStep>) =>
+        s({ steps: block.steps.map((st, j) => (j === i ? { ...st, ...p } : st)) })
+    return (
+        <div>
+            <AiGenerateButton
+                sectionKey="process"
+                offerContext={offerContext}
+                onResult={(data) => {
+                    if (typeof data.title === 'string') s({ title: data.title })
+                    if (Array.isArray(data.steps)) s({ steps: data.steps as ProcessStep[] })
+                }}
+            />
+            <Field label="Tytuł sekcji">
+                <input className={inputCls} value={block.title} onChange={(e) => s({ title: e.target.value })} />
+            </Field>
+            {block.steps.map((step, i) => (
+                <div key={i} className="mb-2 rounded-lg border border-border p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                        <span className="text-xs font-medium text-muted-foreground">Krok #{i + 1}</span>
+                        <button
+                            type="button"
+                            onClick={() => s({ steps: block.steps.filter((_, j) => j !== i) })}
+                            className="rounded-md p-1 text-destructive hover:bg-destructive/10"
+                        >
+                            <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                    </div>
+                    <Field label="Tytuł kroku">
+                        <input className={inputCls} value={step.title} onChange={(e) => upStep(i, { title: e.target.value })} />
+                    </Field>
+                    <Field label="Opis">
+                        <input className={inputCls} value={step.description} onChange={(e) => upStep(i, { description: e.target.value })} />
+                    </Field>
+                </div>
+            ))}
+            <button
+                type="button"
+                onClick={() => s({ steps: [...block.steps, { title: '', description: '' }] })}
+                className="flex items-center gap-1 text-xs text-primary hover:underline"
+            >
+                <Plus className="h-3 w-3" /> Dodaj krok
+            </button>
+        </div>
+    )
+}
+
+export function StatsEditor({
+    block, onChange, offerContext,
+}: { block: StatsBlock; onChange: (b: StatsBlock) => void; offerContext?: OfferContext }) {
+    const s = (p: Partial<StatsBlock>) => onChange({ ...block, ...p })
+    const upItem = (i: number, p: Partial<StatItem>) =>
+        s({ items: block.items.map((it, j) => (j === i ? { ...it, ...p } : it)) })
+    return (
+        <div>
+            <AiGenerateButton
+                sectionKey="stats"
+                offerContext={offerContext}
+                onResult={(data) => {
+                    if (Array.isArray(data.items)) s({ items: data.items as StatItem[] })
+                }}
+            />
+            <p className="mb-3 rounded-lg bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                📊 Pasek statystyk / social proof. Krótkie liczby budujące zaufanie, np. 50+, 10 lat, 100%.
+            </p>
+            {block.items.map((item, i) => (
+                <div key={i} className="mb-2 rounded-lg border border-border p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                        <span className="text-xs font-medium text-muted-foreground">Statystyka #{i + 1}</span>
+                        <button
+                            type="button"
+                            onClick={() => s({ items: block.items.filter((_, j) => j !== i) })}
+                            className="rounded-md p-1 text-destructive hover:bg-destructive/10"
+                        >
+                            <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-[1fr_2fr] gap-2">
+                        <Field label="Wartość">
+                            <input className={inputCls} value={item.value} onChange={(e) => upItem(i, { value: e.target.value })} />
+                        </Field>
+                        <Field label="Podpis">
+                            <input className={inputCls} value={item.label} onChange={(e) => upItem(i, { label: e.target.value })} />
+                        </Field>
+                    </div>
+                </div>
+            ))}
+            <button
+                type="button"
+                onClick={() => s({ items: [...block.items, { value: '', label: '' }] })}
+                className="flex items-center gap-1 text-xs text-primary hover:underline"
+            >
+                <Plus className="h-3 w-3" /> Dodaj statystykę
+            </button>
         </div>
     )
 }

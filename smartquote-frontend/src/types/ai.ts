@@ -189,6 +189,20 @@ export interface PriceCheckResult {
     suggestedRange?: { min: number; max: number } | null;
 }
 
+export interface PriceSuggestionSource {
+    title: string;
+    uri: string;
+}
+
+export interface PriceSuggestion {
+    min: number | null;
+    max: number | null;
+    recommended: number | null;
+    currency: string;
+    reasoning: string;
+    sources: PriceSuggestionSource[];
+}
+
 export interface InsightsListParams {
     page?: number;
     limit?: number;

@@ -105,6 +105,21 @@ export class AIController {
         }
     }
 
+    async priceSuggestion(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+        try {
+            const { offerTitle, clientName, scopeSummary, currency } = req.body;
+            const result = await aiService.priceSuggestion({
+                offerTitle,
+                clientName,
+                scopeSummary: scopeSummary ?? '',
+                currency: currency ?? 'PLN',
+            });
+            return successResponse(res, result);
+        } catch (err) {
+            next(err);
+        }
+    }
+
     async clearHistory(_req: AuthenticatedRequest, res: Response, _next: NextFunction) {
         // Chat history is managed client-side; this endpoint exists for frontend compatibility.
         return successResponse(res, { message: 'Historia konwersacji wyczyszczona' });

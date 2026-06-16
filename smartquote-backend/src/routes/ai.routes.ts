@@ -18,6 +18,7 @@ import {
     generateSectionSchema,
     offerFillSchema,
     priceCheckSchema,
+    priceSuggestionSchema,
 } from '../validators/ai.validator';
 
 const router = Router();
@@ -51,6 +52,7 @@ router.post('/price-insight', validate(priceInsightSchema), aiController.priceIn
 router.post('/generate-section', validate(generateSectionSchema), aiController.generateSection.bind(aiController));
 router.post('/offer-fill', validate(offerFillSchema), aiController.offerFill.bind(aiController));
 router.post('/price-check', validate(priceCheckSchema), aiController.priceCheck.bind(aiController));
+router.post('/price-suggestion', validate(priceSuggestionSchema), aiController.priceSuggestion.bind(aiController));
 
 router.get('/analyze-client/:clientId', validate(analyzeClientSchema), aiController.analyzeClient.bind(aiController));
 router.get('/alerts', aiController.getAlerts.bind(aiController));

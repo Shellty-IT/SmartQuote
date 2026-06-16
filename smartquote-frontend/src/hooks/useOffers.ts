@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { offersApi, ApiError } from '@/lib/api';
+import { offerKeys, queryStaleTime } from '@/lib/queryKeys';
 import type {
     Offer,
     OfferFilters,
@@ -24,8 +25,9 @@ export function useOffers(initialFilters: OfferFilters = {}) {
     });
 
     const { data, isLoading, error, refetch } = useQuery({
-        queryKey: ['offers', filters],
+        queryKey: offerKeys.list(filters),
         queryFn: () => offersApi.list(filters as Record<string, string | number | boolean | undefined>),
+        staleTime: queryStaleTime.offers.list,
     });
 
     const setFilters = useCallback((newFilters: Partial<OfferFilters>) => {
@@ -34,8 +36,8 @@ export function useOffers(initialFilters: OfferFilters = {}) {
 
     const invalidateAll = useCallback(async () => {
         await Promise.all([
-            queryClient.invalidateQueries({ queryKey: ['offers'] }),
-            queryClient.invalidateQueries({ queryKey: ['offers-stats'] }),
+            queryClient.invalidateQueries({ queryKey: offerKeys.all }),
+            queryClient.invalidateQueries({ queryKey: offerKeys.stats }),
         ]);
     }, [queryClient]);
 
@@ -49,7 +51,7 @@ export function useOffers(initialFilters: OfferFilters = {}) {
             offersApi.update(id, input),
         onSuccess: async (_, { id }) => {
             await invalidateAll();
-            await queryClient.invalidateQueries({ queryKey: ['offer', id] });
+            await queryClient.invalidateQueries({ queryKey: offerKeys.detail(id) });
         },
     });
 
@@ -104,10 +106,10 @@ export function useOffers(initialFilters: OfferFilters = {}) {
 
 export function useOffer(id: string) {
     const { data, isLoading, error, refetch } = useQuery({
-        queryKey: ['offer', id],
+        queryKey: offerKeys.detail(id),
         queryFn: () => offersApi.get(id),
         enabled: !!id,
-        staleTime: 60_000,
+        staleTime: queryStaleTime.offers.detail,
     });
 
     return {
@@ -120,9 +122,9 @@ export function useOffer(id: string) {
 
 export function useOffersStats() {
     const { data, isLoading, error, refetch } = useQuery({
-        queryKey: ['offers-stats'],
+        queryKey: offerKeys.stats,
         queryFn: () => offersApi.stats(),
-        staleTime: 60_000,
+        staleTime: queryStaleTime.offers.stats,
     });
 
     return {
@@ -140,8 +142,9 @@ export function useOfferPublish(id: string) {
         mutationFn: () => offersApi.publish(id),
         onSuccess: async () => {
             await Promise.all([
-                queryClient.invalidateQueries({ queryKey: ['offer', id] }),
-                queryClient.invalidateQueries({ queryKey: ['offers'] }),
+                queryClient.invalidateQueries({ queryKey: offerKeys.detail(id) }),
+                queryClient.invalidateQueries({ queryKey: offerKeys.all }),
+                queryClient.invalidateQueries({ queryKey: offerKeys.stats }),
             ]);
         },
     });
@@ -150,8 +153,9 @@ export function useOfferPublish(id: string) {
         mutationFn: () => offersApi.unpublish(id),
         onSuccess: async () => {
             await Promise.all([
-                queryClient.invalidateQueries({ queryKey: ['offer', id] }),
-                queryClient.invalidateQueries({ queryKey: ['offers'] }),
+                queryClient.invalidateQueries({ queryKey: offerKeys.detail(id) }),
+                queryClient.invalidateQueries({ queryKey: offerKeys.all }),
+                queryClient.invalidateQueries({ queryKey: offerKeys.stats }),
             ]);
         },
     });
@@ -194,7 +198,7 @@ export function useOfferSendToClient(id: string) {
 
 export function useOfferAnalytics(id: string) {
     const { data, isLoading, error, refetch } = useQuery({
-        queryKey: ['offer-analytics', id],
+        queryKey: offerKeys.analytics(id),
         queryFn: () => offersApi.analytics(id),
         enabled: !!id,
         staleTime: 60_000,
@@ -212,7 +216,7 @@ export function useOfferComments(id: string) {
     const queryClient = useQueryClient();
 
     const { data, isLoading, error, refetch } = useQuery({
-        queryKey: ['offer-comments', id],
+        queryKey: offerKeys.comments(id),
         queryFn: () => offersApi.getComments(id),
         enabled: !!id,
     });
@@ -222,7 +226,7 @@ export function useOfferComments(id: string) {
         onSuccess: (response) => {
             if (response.data) {
                 queryClient.setQueryData(
-                    ['offer-comments', id],
+                    offerKeys.comments(id),
                     (old: typeof data) => old
                         ? { ...old, data: [...(old.data ?? []), response.data!] }
                         : old,

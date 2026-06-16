@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { contractsApi } from '@/lib/api';
+import { contractKeys } from '@/lib/queryKeys';
 import type { ContractsStats, CreateContractInput, ContractStatus } from '@/types';
 
 interface UseContractsParams {
@@ -14,22 +15,23 @@ interface UseContractsParams {
 
 export function useContracts(params: UseContractsParams = {}) {
     const queryClient = useQueryClient();
+    const queryParams = {
+        page: params.page,
+        limit: params.limit,
+        status: params.status,
+        clientId: params.clientId,
+        search: params.search,
+    };
 
     const { data, isLoading, error, refetch } = useQuery({
-        queryKey: ['contracts', params],
-        queryFn: () => contractsApi.list({
-            page: params.page,
-            limit: params.limit,
-            status: params.status,
-            clientId: params.clientId,
-            search: params.search,
-        }),
+        queryKey: contractKeys.list(queryParams),
+        queryFn: () => contractsApi.list(queryParams),
     });
 
     const invalidateAll = async () => {
         await Promise.all([
-            queryClient.invalidateQueries({ queryKey: ['contracts'] }),
-            queryClient.invalidateQueries({ queryKey: ['contracts-stats'] }),
+            queryClient.invalidateQueries({ queryKey: contractKeys.all }),
+            queryClient.invalidateQueries({ queryKey: contractKeys.stats }),
         ]);
     };
 
@@ -48,7 +50,7 @@ export function useContracts(params: UseContractsParams = {}) {
             contractsApi.update(id, input),
         onSuccess: async (_, { id }) => {
             await invalidateAll();
-            await queryClient.invalidateQueries({ queryKey: ['contract', id] });
+            await queryClient.invalidateQueries({ queryKey: contractKeys.detail(id) });
         },
     });
 
@@ -57,7 +59,7 @@ export function useContracts(params: UseContractsParams = {}) {
             contractsApi.updateStatus(id, status),
         onSuccess: async (_, { id }) => {
             await invalidateAll();
-            await queryClient.invalidateQueries({ queryKey: ['contract', id] });
+            await queryClient.invalidateQueries({ queryKey: contractKeys.detail(id) });
         },
     });
 
@@ -89,7 +91,7 @@ export function useContracts(params: UseContractsParams = {}) {
 
 export function useContract(id: string) {
     const { data, isLoading, error, refetch } = useQuery({
-        queryKey: ['contract', id],
+        queryKey: contractKeys.detail(id),
         queryFn: () => contractsApi.get(id),
         enabled: !!id,
         staleTime: 60_000,
@@ -105,7 +107,7 @@ export function useContract(id: string) {
 
 export function useContractsStats() {
     const { data, isLoading, error } = useQuery({
-        queryKey: ['contracts-stats'],
+        queryKey: contractKeys.stats,
         queryFn: () => contractsApi.stats(),
         staleTime: 60_000,
     });

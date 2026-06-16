@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { calendarApi } from '@/lib/api/calendar.api';
 import type { CalendarEvent } from '@/types/calendar.types';
 
@@ -12,29 +13,25 @@ interface UseCalendarEventsResult {
 }
 
 export function useCalendarEvents(params?: { from?: string; to?: string }): UseCalendarEventsResult {
-    const [events, setEvents] = useState<CalendarEvent[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const { data: rawData, isLoading, error, refetch } = useQuery({
+        queryKey: ['calendar-events', params],
+        queryFn: () => calendarApi.list(params),
+    });
 
-    const paramsKey = JSON.stringify(params);
-    const fetchEvents = useCallback(async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            const response = await calendarApi.list(params);
-            setEvents(response.data || []);
-        } catch {
-            setError('Nie udało się załadować zdarzeń');
-            setEvents([]);
-        } finally {
-            setIsLoading(false);
+    const events = useMemo(() => {
+        // Defensive: accept either a bare array or a legacy { events, total } envelope.
+        const data = rawData?.data as unknown;
+        if (Array.isArray(data)) return data as CalendarEvent[];
+        if (data && typeof data === 'object' && Array.isArray((data as { events?: unknown }).events)) {
+            return (data as { events: CalendarEvent[] }).events;
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [paramsKey]);
+        return [];
+    }, [rawData]);
 
-    useEffect(() => {
-        fetchEvents();
-    }, [fetchEvents]);
-
-    return { events, isLoading, error, refresh: fetchEvents };
+    return {
+        events,
+        isLoading,
+        error: error ? 'Nie udało się załadować zdarzeń' : null,
+        refresh: async () => { await refetch(); },
+    };
 }

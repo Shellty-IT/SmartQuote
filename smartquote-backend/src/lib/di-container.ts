@@ -1,5 +1,4 @@
 // src/lib/di-container.ts
-type Constructor<T = unknown> = new (...args: unknown[]) => T;
 
 class DIContainer {
     private instances = new Map<string, unknown>();

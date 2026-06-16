@@ -40,6 +40,21 @@ function esc(s: string | null | undefined): string {
         .replace(/"/g, '&quot;')
 }
 
+/**
+ * Returns an HTML-escaped href only if it uses a safe scheme (http/https) or is
+ * a protocol-relative/relative URL. Blocks javascript:, data:, vbscript: etc.
+ * Returns '' for anything unsafe so callers can drop the link.
+ */
+export function safeUrl(href: string | null | undefined): string {
+    if (!href) return ''
+    const trimmed = href.trim()
+    // Allow only absolute http(s) or relative URLs (no scheme, or //host).
+    if (/^https?:\/\//i.test(trimmed) || /^\/\//.test(trimmed) || /^\/(?!\/)/.test(trimmed)) {
+        return esc(trimmed)
+    }
+    return ''
+}
+
 function formatDate(d: string | Date): string {
     const dt = typeof d === 'string' ? new Date(d) : d
     return dt.toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -57,13 +72,56 @@ function formatMoney(amount: number, currency = 'PLN'): string {
 
 const SVG_CHECK = `<svg viewBox="0 0 10 10" fill="none"><path d="M2 5.2l2.2 2.2 3.6-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`
 
+const INLINE_HTML_TAGS = new Set(['strong', 'b', 'em', 'i', 'u', 'br'])
+
+/** Allow only a tiny safe subset of inline tags in AI-authored paragraph text. */
+export function sanitizeInlineHtml(s: string): string {
+    let out = ''
+    let i = 0
+
+    while (i < s.length) {
+        const lt = s.indexOf('<', i)
+        if (lt === -1) {
+            out += s.slice(i)
+            break
+        }
+
+        out += s.slice(i, lt)
+        const gt = s.indexOf('>', lt + 1)
+
+        if (gt === -1) {
+            out += '&lt;'
+            i = lt + 1
+            continue
+        }
+
+        const rawTag = s.slice(lt + 1, gt).trim()
+        const isClosing = rawTag.startsWith('/')
+        const tagBody = (isClosing ? rawTag.slice(1) : rawTag).trim()
+        const tagMatch = tagBody.match(/^([a-z][a-z0-9]*)(?=$|[\s/>])/i)
+        const tagName = tagMatch?.[1]?.toLowerCase()
+
+        if (tagName && INLINE_HTML_TAGS.has(tagName)) {
+            if (tagName === 'br') {
+                out += '<br>'
+            } else {
+                out += isClosing ? `</${tagName}>` : `<${tagName}>`
+            }
+        }
+
+        i = gt + 1
+    }
+
+    return out
+}
+
 // ── Section renderers (editorMode = always render for inline preview) ─────────
 
 function renderIntro(blocks: ProposalBlocks, editorMode = false): string {
     if (!blocks.intro.enabled && !editorMode) return ''
     const paragraphs = blocks.intro.paragraphs
         .filter(Boolean)
-        .map((p) => `<p>${p}</p>`)
+        .map((p, i) => `<p class="${i === 0 ? 'intro-lead' : ''}">${sanitizeInlineHtml(p)}</p>`)
         .join('\n      ')
     return `
     <div class="intro">
@@ -134,7 +192,7 @@ function renderScope(blocks: ProposalBlocks, editorMode = false): string {
             (item) => `
         <div class="scope-item">
           <span class="chk">${SVG_CHECK}</span>
-          <span>${item.html}</span>
+          <span>${sanitizeInlineHtml(item.html)}</span>
         </div>`,
         )
         .join('')
@@ -180,10 +238,11 @@ function renderTechnology(blocks: ProposalBlocks, editorMode = false): string {
           <div class="tech-card prime">
             <div class="tc-title">${opt.icon} ${esc(opt.title)}</div>
             ${opt.urls
-                .filter((u) => u.href && u.href !== 'https://')
+                .map((u) => ({ raw: u.href, safe: safeUrl(u.href) }))
+                .filter((u) => u.safe && u.raw !== 'https://')
                 .map(
                     (u) =>
-                        `<div class="tc-url"><span>👉</span><a href="${esc(u.href)}">${esc(u.href.replace(/^https?:\/\//, ''))}</a></div>`,
+                        `<div class="tc-url"><span>👉</span><a href="${u.safe}">${esc(u.raw.replace(/^https?:\/\//, ''))}</a></div>`,
                 )
                 .join('')}
           </div>`,
@@ -193,7 +252,7 @@ function renderTechnology(blocks: ProposalBlocks, editorMode = false): string {
     return `
       <div>
         <div class="sec"><span class="ico">💻</span><h2>Technologia</h2></div>
-        <p class="tech-body">${t.body}</p>
+        <p class="tech-body">${sanitizeInlineHtml(t.body)}</p>
         <div class="tech-cols">
           ${options}
         </div>
@@ -209,11 +268,14 @@ function renderPricingBox(
     const pe = blocks.pricingExtra
     const isNet = (pe.priceType ?? 'gross') === 'net'
 
-    // When priceOverride is set, derive both gross and net (assuming 23% VAT).
-    // When no override, fall back to offer.totalGross from line items.
+    // When priceOverride is set to a positive value, derive both gross and net
+    // (assuming 23% VAT). Zero is treated the same as null — falls back to
+    // offer.totalGross — matching the backend guard in syncTotalsFromBlocks
+    // (override <= 0 → return null). This prevents a 0.00 PLN display from
+    // an accidentally cleared input that stored 0 instead of null.
     let grossPrice: number
     let netPrice: number | null = null
-    if (pe.priceOverride != null) {
+    if (pe.priceOverride != null && pe.priceOverride > 0) {
         if (isNet) {
             netPrice = pe.priceOverride
             grossPrice = Math.round(pe.priceOverride * 1.23 * 100) / 100
@@ -285,6 +347,68 @@ function renderAbout(
       <div class="cta-box">
         <p>${esc(a.ctaText)}</p>
       </div>
+    </div>`
+}
+
+function renderBenefits(blocks: ProposalBlocks, editorMode = false): string {
+    const b = blocks.benefits
+    if (!b.enabled && !editorMode) return ''
+    const items = b.items
+        .map(
+            (it) => `
+        <div class="benefit-card">
+          <span class="benefit-ico">${it.icon}</span>
+          <div class="benefit-title">${esc(it.title)}</div>
+          <div class="benefit-desc">${esc(it.description)}</div>
+        </div>`,
+        )
+        .join('')
+    return `
+    <div style="margin-bottom:6mm;">
+      <div class="sec"><span class="ico">⭐</span><h2>${esc(b.title)}</h2></div>
+      <div class="benefit-grid">
+        ${items}
+      </div>
+    </div>`
+}
+
+function renderProcess(blocks: ProposalBlocks, editorMode = false): string {
+    const p = blocks.process
+    if (!p.enabled && !editorMode) return ''
+    const steps = p.steps
+        .map(
+            (st, i) => `
+        <div class="proc-step">
+          <div class="proc-num">${i + 1}</div>
+          <div class="proc-title">${esc(st.title)}</div>
+          <div class="proc-desc">${esc(st.description)}</div>
+        </div>`,
+        )
+        .join('')
+    return `
+    <div style="margin-bottom:6mm;">
+      <div class="sec"><span class="ico">🧭</span><h2>${esc(p.title)}</h2></div>
+      <div class="proc-grid">
+        ${steps}
+      </div>
+    </div>`
+}
+
+function renderStats(blocks: ProposalBlocks, editorMode = false): string {
+    const s = blocks.stats
+    if (!s.enabled && !editorMode) return ''
+    const items = s.items
+        .map(
+            (it) => `
+        <div class="stat-cell">
+          <div class="stat-val">${esc(it.value)}</div>
+          <div class="stat-label">${esc(it.label)}</div>
+        </div>`,
+        )
+        .join('')
+    return `
+    <div class="stats-band">
+      ${items}
     </div>`
 }
 
@@ -398,6 +522,9 @@ function renderSection(
             case 'technology':  return wrapEditable(renderTechnology(blocks, true), 'technology', blocks.technology.enabled)
             case 'pricingExtra':return wrapEditable(renderPricingBox(offer, blocks, true), 'pricingExtra', blocks.pricingExtra.enabled)
             case 'about':       return wrapEditable(renderAbout(offer, blocks, true), 'about', blocks.about.enabled)
+            case 'benefits':    return wrapEditable(renderBenefits(blocks, true), 'benefits', blocks.benefits.enabled)
+            case 'process':     return wrapEditable(renderProcess(blocks, true), 'process', blocks.process.enabled)
+            case 'stats':       return wrapEditable(renderStats(blocks, true), 'stats', blocks.stats.enabled)
             default:            return ''
         }
     } else {
@@ -410,6 +537,9 @@ function renderSection(
             case 'technology':  return renderTechnology(blocks)
             case 'pricingExtra':return renderPricingBox(offer, blocks)
             case 'about':       return renderAbout(offer, blocks)
+            case 'benefits':    return renderBenefits(blocks)
+            case 'process':     return renderProcess(blocks)
+            case 'stats':       return renderStats(blocks)
             default:            return ''
         }
     }
@@ -459,8 +589,15 @@ export function buildProposalHtml(offer: ProposalOfferData, options: BuildPropos
         while (i < sections.length) {
             const cur = sections[i]
             const next = sections[i + 1]
-            // Side-by-side when testing & technology are consecutive (in either order)
-            const isTT = (cur === 'testing' && next === 'technology') || (cur === 'technology' && next === 'testing')
+            // Side-by-side when testing & technology are consecutive (in either order).
+            // Only pair them when BOTH actually render — otherwise the disabled side
+            // returns '' and the survivor would be squeezed into a half-width column
+            // with an empty cell next to it. In editorMode both always render.
+            const bothRender = editorMode || (blocks.testing.enabled && blocks.technology.enabled)
+            const isTT = bothRender && (
+                (cur === 'testing' && next === 'technology') ||
+                (cur === 'technology' && next === 'testing')
+            )
             if (isTT) {
                 const leftHtml = renderSection(cur, blocks, offer, editorMode)
                 const rightHtml = renderSection(next, blocks, offer, editorMode)
@@ -559,9 +696,11 @@ export function buildProposalHtml(offer: ProposalOfferData, options: BuildPropos
     /* ── BODY ── */
     .body { padding: 7mm 16mm; flex: 1; }
     /* Intro */
-    .intro { padding-bottom: 5mm; border-bottom: 1px solid var(--grey-line); margin-bottom: 6mm; }
+    .intro { padding: 1mm 0 5mm 5mm; border-left: 3px solid var(--orange); border-bottom: 1px solid var(--grey-line); margin-bottom: 6mm; }
     .intro p { font-size: 11px; line-height: 1.78; color: var(--text); }
-    .intro p + p { margin-top: 5px; }
+    .intro p + p { margin-top: 6px; }
+    .intro p.intro-lead { font-size: 12.5px; font-weight: 600; color: var(--navy); line-height: 1.6; }
+    .intro p strong { color: var(--navy); font-weight: 700; }
     /* Section label */
     .sec { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
     .sec .ico { font-size: 13px; line-height: 1; flex-shrink: 0; }
@@ -673,6 +812,44 @@ export function buildProposalHtml(offer: ProposalOfferData, options: BuildPropos
       border-radius: 4px; padding: 5mm; display: flex; align-items: center;
     }
     .cta-box p { font-size: 11px; line-height: 1.7; color: var(--text); }
+    /* Benefits */
+    .benefit-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 5px; }
+    .benefit-card {
+      background: var(--grey-bg); border-top: 2.5px solid var(--orange);
+      border-radius: 0 0 4px 4px; padding: 4mm 4mm 4.5mm;
+    }
+    .benefit-ico { font-size: 18px; line-height: 1; display: block; margin-bottom: 5px; }
+    .benefit-title { font-size: 10.5px; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
+    .benefit-desc { font-size: 9px; color: var(--grey-text); line-height: 1.5; }
+    /* Process */
+    .proc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 6px; }
+    .proc-step {
+      position: relative; background: var(--grey-bg); border-radius: 4px;
+      padding: 7mm 3mm 4mm; text-align: center;
+    }
+    .proc-num {
+      position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
+      width: 20px; height: 20px; border-radius: 50%; background: var(--orange);
+      color: white; font-size: 10px; font-weight: 800; line-height: 20px;
+      box-shadow: 0 2px 6px rgba(232,113,26,0.35);
+    }
+    .proc-title { font-size: 10px; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
+    .proc-desc { font-size: 8.5px; color: var(--grey-text); line-height: 1.45; }
+    /* Stats band */
+    .stats-band {
+      display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+      background: var(--navy); border-radius: 6px; padding: 5mm 6mm;
+      margin: 0 0 6mm; position: relative; overflow: hidden;
+    }
+    .stats-band::after {
+      content: ''; position: absolute; top: 0; right: 0; bottom: 0;
+      width: 34%; background: var(--navy-mid);
+      clip-path: polygon(24% 0, 100% 0, 100% 100%, 0% 100%);
+    }
+    .stat-cell { text-align: center; position: relative; z-index: 1; }
+    .stat-cell + .stat-cell { border-left: 1px solid rgba(255,255,255,0.1); }
+    .stat-val { font-size: 22px; font-weight: 800; color: var(--orange); line-height: 1; }
+    .stat-label { font-size: 8.5px; color: rgba(255,255,255,0.6); margin-top: 4px; line-height: 1.4; }
     /* Footer */
     .footer {
       background: var(--navy); padding: 3.5mm 16mm;

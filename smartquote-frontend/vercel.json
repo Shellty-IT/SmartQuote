@@ -1,15 +1,75 @@
 {
   "functions": {
     "src/app/api/offers/[id]/pdf/proposal/route.ts": {
-      "memory": 1024,
+      "memory": 1536,
+      "maxDuration": 30
+    },
+    "src/app/api/offers/[id]/pdf/shop/route.ts": {
+      "memory": 1536,
+      "maxDuration": 30
+    },
+    "src/app/api/offers/[id]/pdf/website-v2/route.ts": {
+      "memory": 1536,
+      "maxDuration": 30
+    },
+    "src/app/api/offers/[id]/pdf/website-v3/route.ts": {
+      "memory": 1536,
+      "maxDuration": 30
+    },
+    "src/app/api/offers/[id]/pdf/support/route.ts": {
+      "memory": 1536,
+      "maxDuration": 30
+    },
+    "src/app/api/offers/[id]/pdf/mobile-app/route.ts": {
+      "memory": 1536,
+      "maxDuration": 30
+    },
+    "src/app/api/offers/[id]/pdf/mobile-simple/route.ts": {
+      "memory": 1536,
+      "maxDuration": 30
+    },
+    "src/app/api/offers/[id]/pdf/universal/route.ts": {
+      "memory": 1536,
       "maxDuration": 30
     },
     "src/app/api/contracts/[id]/pdf/short/route.ts": {
-      "memory": 1024,
+      "memory": 1536,
       "maxDuration": 30
     },
     "src/app/api/public/contracts/[token]/pdf/short/route.ts": {
-      "memory": 1024,
+      "memory": 1536,
+      "maxDuration": 30
+    },
+    "src/app/api/contracts/[id]/pdf/services/route.ts": {
+      "memory": 1536,
+      "maxDuration": 30
+    },
+    "src/app/api/public/contracts/[token]/pdf/services/route.ts": {
+      "memory": 1536,
+      "maxDuration": 30
+    },
+    "src/app/api/contracts/[id]/pdf/dedicated/route.ts": {
+      "memory": 1536,
+      "maxDuration": 30
+    },
+    "src/app/api/public/contracts/[token]/pdf/dedicated/route.ts": {
+      "memory": 1536,
+      "maxDuration": 30
+    },
+    "src/app/api/contracts/[id]/pdf/sla/route.ts": {
+      "memory": 1536,
+      "maxDuration": 30
+    },
+    "src/app/api/public/contracts/[token]/pdf/sla/route.ts": {
+      "memory": 1536,
+      "maxDuration": 30
+    },
+    "src/app/api/contracts/[id]/pdf/mobile/route.ts": {
+      "memory": 1536,
+      "maxDuration": 30
+    },
+    "src/app/api/public/contracts/[token]/pdf/mobile/route.ts": {
+      "memory": 1536,
       "maxDuration": 30
     }
   }

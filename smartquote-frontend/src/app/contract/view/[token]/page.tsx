@@ -64,7 +64,7 @@ interface PublicContractData {
         title: string;
         description: string | null;
         status: string;
-        templateType: 'classic' | 'short';
+        templateType: 'classic' | 'short' | 'services' | 'dedicated' | 'sla' | 'mobile';
         blocks: unknown | null;
         totalNet: number;
         totalVat: number;
@@ -173,11 +173,14 @@ export default function PublicContractPage({ params }: PageProps) {
         setIsDownloading(true);
         setDownloadError(null);
         try {
-            const isShort = data?.contract.templateType === 'short';
-            // Short template: rendered by Vercel/Puppeteer (public route, no auth)
-            // Classic template: rendered by backend (direct call)
-            const pdfUrl = isShort
-                ? `/api/public/contracts/${token}/pdf/short`
+            const templateType = data?.contract.templateType;
+            // Puppeteer templates (short, services, dedicated, sla, mobile): Vercel public routes
+            // Classic template: backend direct call
+            const pdfUrl = templateType === 'short' ? `/api/public/contracts/${token}/pdf/short`
+                : templateType === 'services' ? `/api/public/contracts/${token}/pdf/services`
+                : templateType === 'dedicated' ? `/api/public/contracts/${token}/pdf/dedicated`
+                : templateType === 'sla' ? `/api/public/contracts/${token}/pdf/sla`
+                : templateType === 'mobile' ? `/api/public/contracts/${token}/pdf/mobile`
                 : `${API_URL}/api/public/contracts/${token}/pdf`;
             const response = await fetch(pdfUrl);
             if (!response.ok) throw new Error(tr.pdfDownloadError);
@@ -377,7 +380,7 @@ export default function PublicContractPage({ params }: PageProps) {
                 </div>
             </div>
 
-            {/* Short template: full-page HTML document rendered in iframe */}
+            {/* HTML templates: full-page document rendered in iframe */}
             {contract.templateType === 'short' ? (
                 <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
                     <div className="px-6 py-4 border-b border-slate-100">
@@ -385,6 +388,54 @@ export default function PublicContractPage({ params }: PageProps) {
                     </div>
                     <iframe
                         src={`/api/public/contracts/${token}/short/preview`}
+                        className="w-full border-0"
+                        style={{ height: '80vh', minHeight: 600 }}
+                        title="Treść umowy"
+                    />
+                </div>
+            ) : contract.templateType === 'services' ? (
+                <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-slate-100">
+                        <h2 className="text-lg font-semibold text-slate-900">Treść umowy</h2>
+                    </div>
+                    <iframe
+                        src={`/api/public/contracts/${token}/services/preview`}
+                        className="w-full border-0"
+                        style={{ height: '80vh', minHeight: 600 }}
+                        title="Treść umowy"
+                    />
+                </div>
+            ) : contract.templateType === 'dedicated' ? (
+                <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-slate-100">
+                        <h2 className="text-lg font-semibold text-slate-900">Treść umowy</h2>
+                    </div>
+                    <iframe
+                        src={`/api/public/contracts/${token}/dedicated/preview`}
+                        className="w-full border-0"
+                        style={{ height: '80vh', minHeight: 600 }}
+                        title="Treść umowy"
+                    />
+                </div>
+            ) : contract.templateType === 'sla' ? (
+                <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-slate-100">
+                        <h2 className="text-lg font-semibold text-slate-900">Treść umowy</h2>
+                    </div>
+                    <iframe
+                        src={`/api/public/contracts/${token}/sla/preview`}
+                        className="w-full border-0"
+                        style={{ height: '80vh', minHeight: 600 }}
+                        title="Treść umowy"
+                    />
+                </div>
+            ) : contract.templateType === 'mobile' ? (
+                <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-slate-100">
+                        <h2 className="text-lg font-semibold text-slate-900">Treść umowy</h2>
+                    </div>
+                    <iframe
+                        src={`/api/public/contracts/${token}/mobile/preview`}
                         className="w-full border-0"
                         style={{ height: '80vh', minHeight: 600 }}
                         title="Treść umowy"

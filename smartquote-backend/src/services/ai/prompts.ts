@@ -211,6 +211,7 @@ export function buildPriceInsightPrompt(
     historicalSummary: string,
     legacySummary: string
 ): string {
+    const noHistoricalData = historicalSummary.startsWith('Brak danych historycznych');
     return `Przeanalizuj cenę usługi/produktu i zasugeruj optymalne widełki cenowe.
 
 USŁUGA/PRODUKT: "${itemName}"
@@ -222,7 +223,14 @@ ${historicalSummary}
 WNIOSKI Z ZAKOŃCZONYCH OFERT (Feedback Loop):
 ${legacySummary}
 
-Na podstawie danych historycznych użytkownika i Twojej wiedzy o cenach rynkowych w Polsce, zwróć TYLKO JSON (bez markdown):
+${noHistoricalData ? `WAŻNE — BRAK DANYCH HISTORYCZNYCH:
+Użytkownik nie ma żadnych historycznych transakcji dla tej pozycji.
+ZAKAZ: Nie wymyślaj, nie fabrykowaj i nie opisuj żadnych historycznych transakcji, ofert ani akceptacji — nawet jako przykład.
+W marketAnalysis napisz wprost, że brak danych historycznych i podaj ogólny szacunek rynkowy oparty wyłącznie na wiedzy o polskim rynku IT.
+Ustaw confidence na "low".
+
+` : ''
+}Na podstawie danych historycznych użytkownika i Twojej wiedzy o cenach rynkowych w Polsce, zwróć TYLKO JSON (bez markdown):
 {
   "suggestedMin": <number - dolna granica sugerowanej ceny netto w PLN>,
   "suggestedMax": <number - górna granica sugerowanej ceny netto w PLN>,

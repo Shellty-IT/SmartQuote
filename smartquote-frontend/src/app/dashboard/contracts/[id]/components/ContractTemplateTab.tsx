@@ -8,10 +8,19 @@ import { Eye, Download } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { PdfPreviewModal } from '@/components/pdf/PdfPreviewModal'
 import { ContractDocumentEditor } from '@/components/contracts/editor/ContractDocumentEditor'
+import { ContractServicesDocumentEditor } from '@/components/contracts/editor/ContractServicesDocumentEditor'
+import { ContractDedicatedDocumentEditor } from '@/components/contracts/editor/ContractDedicatedDocumentEditor'
+import { ContractSlaDocumentEditor } from '@/components/contracts/editor/ContractSlaDocumentEditor'
+import { ContractMobileDocumentEditor } from '@/components/contracts/editor/ContractMobileDocumentEditor'
 import { contractsApi } from '@/lib/api'
 import { useToast } from '@/contexts/ToastContext'
 import { useTranslations } from '@/i18n'
 import { mergeContractWithDefaults, type ContractShortBlocks } from '@/lib/pdf/contract-short-blocks'
+import { mergeServicesWithDefaults, type ContractServicesBlocks } from '@/lib/pdf/contract-services-blocks'
+import { mergeDedicatedWithDefaults, type ContractDedicatedBlocks } from '@/lib/pdf/contract-dedicated-blocks'
+import { mergeSlaWithDefaults, type ContractSlaBlocks } from '@/lib/pdf/contract-sla-blocks'
+import { mergeMobileWithDefaults, type ContractMobileBlocks } from '@/lib/pdf/contract-mobile-blocks'
+import type { OfferContext } from '@/components/offers/editor/block-editors'
 import type { Contract } from '@/types'
 
 interface ContractTemplateTabProps {
@@ -23,9 +32,27 @@ export function ContractTemplateTab({ contract, onSaved }: ContractTemplateTabPr
     const t = useTranslations('contractDetailPage')
     const toast = useToast()
 
-    const templateType = (contract.templateType ?? 'classic') as 'classic' | 'short'
+    const templateType = contract.templateType ?? 'classic'
+    const aiContext = useMemo<OfferContext>(() => ({
+        title: contract.title,
+        clientName: contract.client?.name ?? '',
+        totalGross: 0,
+        currency: 'PLN',
+    }), [contract.title, contract.client?.name])
     const [blocks, setBlocks] = useState<ContractShortBlocks>(() =>
         mergeContractWithDefaults(contract.blocks as Partial<ContractShortBlocks> | null),
+    )
+    const [servicesBlocks, setServicesBlocks] = useState<ContractServicesBlocks>(() =>
+        mergeServicesWithDefaults(contract.blocks as Partial<ContractServicesBlocks> | null),
+    )
+    const [dedicatedBlocks, setDedicatedBlocks] = useState<ContractDedicatedBlocks>(() =>
+        mergeDedicatedWithDefaults(contract.blocks as Partial<ContractDedicatedBlocks> | null),
+    )
+    const [slaBlocks, setSlaBlocks] = useState<ContractSlaBlocks>(() =>
+        mergeSlaWithDefaults(contract.blocks as Partial<ContractSlaBlocks> | null),
+    )
+    const [mobileBlocks, setMobileBlocks] = useState<ContractMobileBlocks>(() =>
+        mergeMobileWithDefaults(contract.blocks as Partial<ContractMobileBlocks> | null),
     )
     const [isDownloading, setIsDownloading] = useState(false)
 
@@ -48,6 +75,122 @@ export function ContractTemplateTab({ contract, onSaved }: ContractTemplateTabPr
             toast.error(t.toasts.pdfError, t.toasts.pdfErrorDesc)
         } finally {
             setIsDownloading(false)
+        }
+    }
+
+    // ── Services template — download PDF ────────────────────────────────────────
+
+    const [isServicesDownloading, setIsServicesDownloading] = useState(false)
+
+    const handleServicesDownload = async () => {
+        setIsServicesDownloading(true)
+        try {
+            const resp = await fetch(`/api/contracts/${contract.id}/pdf/services`)
+            if (!resp.ok) throw new Error('PDF generation failed')
+            const blob = await resp.blob()
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `Umowa_${contract.number.replace(/\//g, '-')}_sklep.pdf`
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+            URL.revokeObjectURL(url)
+            toast.success(t.toasts.pdfDownloaded, contract.number)
+        } catch {
+            toast.error(t.toasts.pdfError, t.toasts.pdfErrorDesc)
+        } finally {
+            setIsServicesDownloading(false)
+        }
+    }
+
+    const [servicesPreviewOpen, setServicesPreviewOpen] = useState(false)
+    const servicesPreviewUrl = useMemo(
+        () => `/api/contracts/${contract.id}/services/preview`,
+        [contract.id],
+    )
+
+    // ── Dedicated template ──────────────────────────────────────────────────────
+
+    const [isDedicatedDownloading, setIsDedicatedDownloading] = useState(false)
+    const [dedicatedPreviewOpen, setDedicatedPreviewOpen] = useState(false)
+    const dedicatedPreviewUrl = useMemo(() => `/api/contracts/${contract.id}/dedicated/preview`, [contract.id])
+
+    const handleDedicatedDownload = async () => {
+        setIsDedicatedDownloading(true)
+        try {
+            const resp = await fetch(`/api/contracts/${contract.id}/pdf/dedicated`)
+            if (!resp.ok) throw new Error('PDF generation failed')
+            const blob = await resp.blob()
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `Umowa_${contract.number.replace(/\//g, '-')}_system_dedykowany.pdf`
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+            URL.revokeObjectURL(url)
+            toast.success(t.toasts.pdfDownloaded, contract.number)
+        } catch {
+            toast.error(t.toasts.pdfError, t.toasts.pdfErrorDesc)
+        } finally {
+            setIsDedicatedDownloading(false)
+        }
+    }
+
+    // ── SLA template ────────────────────────────────────────────────────────────
+
+    const [isSlaDownloading, setIsSlaDownloading] = useState(false)
+    const [slaPreviewOpen, setSlaPreviewOpen] = useState(false)
+    const slaPreviewUrl = useMemo(() => `/api/contracts/${contract.id}/sla/preview`, [contract.id])
+
+    const handleSlaDownload = async () => {
+        setIsSlaDownloading(true)
+        try {
+            const resp = await fetch(`/api/contracts/${contract.id}/pdf/sla`)
+            if (!resp.ok) throw new Error('PDF generation failed')
+            const blob = await resp.blob()
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `Umowa_${contract.number.replace(/\//g, '-')}_opieka_it.pdf`
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+            URL.revokeObjectURL(url)
+            toast.success(t.toasts.pdfDownloaded, contract.number)
+        } catch {
+            toast.error(t.toasts.pdfError, t.toasts.pdfErrorDesc)
+        } finally {
+            setIsSlaDownloading(false)
+        }
+    }
+
+    // ── Mobile template ─────────────────────────────────────────────────────────
+
+    const [isMobileDownloading, setIsMobileDownloading] = useState(false)
+    const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false)
+    const mobilePreviewUrl = useMemo(() => `/api/contracts/${contract.id}/mobile/preview`, [contract.id])
+
+    const handleMobileDownload = async () => {
+        setIsMobileDownloading(true)
+        try {
+            const resp = await fetch(`/api/contracts/${contract.id}/pdf/mobile`)
+            if (!resp.ok) throw new Error('PDF generation failed')
+            const blob = await resp.blob()
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `Umowa_${contract.number.replace(/\//g, '-')}_aplikacja_mobilna.pdf`
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+            URL.revokeObjectURL(url)
+            toast.success(t.toasts.pdfDownloaded, contract.number)
+        } catch {
+            toast.error(t.toasts.pdfError, t.toasts.pdfErrorDesc)
+        } finally {
+            setIsMobileDownloading(false)
         }
     }
 
@@ -122,6 +265,46 @@ export function ContractTemplateTab({ contract, onSaved }: ContractTemplateTabPr
         }
     }, [contract.id, contract.number, t.templateSaveError, toast, onSaved])
 
+    const handleServicesBlocksChange = useCallback(async (updatedBlocks: ContractServicesBlocks) => {
+        setServicesBlocks(updatedBlocks)
+        try {
+            await contractsApi.update(contract.id, { blocks: updatedBlocks as unknown })
+            onSaved()
+        } catch {
+            toast.error(t.templateSaveError, contract.number)
+        }
+    }, [contract.id, contract.number, t.templateSaveError, toast, onSaved])
+
+    const handleDedicatedBlocksChange = useCallback(async (updatedBlocks: ContractDedicatedBlocks) => {
+        setDedicatedBlocks(updatedBlocks)
+        try {
+            await contractsApi.update(contract.id, { blocks: updatedBlocks as unknown })
+            onSaved()
+        } catch {
+            toast.error(t.templateSaveError, contract.number)
+        }
+    }, [contract.id, contract.number, t.templateSaveError, toast, onSaved])
+
+    const handleSlaBlocksChange = useCallback(async (updatedBlocks: ContractSlaBlocks) => {
+        setSlaBlocks(updatedBlocks)
+        try {
+            await contractsApi.update(contract.id, { blocks: updatedBlocks as unknown })
+            onSaved()
+        } catch {
+            toast.error(t.templateSaveError, contract.number)
+        }
+    }, [contract.id, contract.number, t.templateSaveError, toast, onSaved])
+
+    const handleMobileBlocksChange = useCallback(async (updatedBlocks: ContractMobileBlocks) => {
+        setMobileBlocks(updatedBlocks)
+        try {
+            await contractsApi.update(contract.id, { blocks: updatedBlocks as unknown })
+            onSaved()
+        } catch {
+            toast.error(t.templateSaveError, contract.number)
+        }
+    }, [contract.id, contract.number, t.templateSaveError, toast, onSaved])
+
     return (
         <div className="space-y-6">
 
@@ -132,6 +315,7 @@ export function ContractTemplateTab({ contract, onSaved }: ContractTemplateTabPr
                     onBlocksChange={handleBlocksChange}
                     onDownloadPdf={handleShortDownload}
                     isDownloading={isDownloading}
+                    aiContext={aiContext}
                 />
             )}
 
@@ -147,7 +331,119 @@ export function ContractTemplateTab({ contract, onSaved }: ContractTemplateTabPr
                         {isDownloading ? '…' : t.templateDownloadBtn}
                     </Button>
                     <p className="flex-1 text-xs text-muted-foreground">
-                        Kliknij sekcję w podglądzie dokumentu aby ją edytować.
+                        {t.clickSectionHint}
+                    </p>
+                </div>
+            )}
+
+            {/* Services: inline document editor */}
+            {templateType === 'services' && (
+                <ContractServicesDocumentEditor
+                    blocks={servicesBlocks}
+                    onBlocksChange={handleServicesBlocksChange}
+                    onDownloadPdf={handleServicesDownload}
+                    isDownloading={isServicesDownloading}
+                    aiContext={aiContext}
+                />
+            )}
+
+            {/* Services: preview + download bar */}
+            {templateType === 'services' && (
+                <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-card">
+                    <Button variant="outline" onClick={() => setServicesPreviewOpen(true)}>
+                        <Eye className="h-4 w-4" />
+                        {t.templatePreviewBtn}
+                    </Button>
+                    <Button variant="outline" onClick={handleServicesDownload} disabled={isServicesDownloading}>
+                        <Download className="h-4 w-4" />
+                        {isServicesDownloading ? '…' : t.templateDownloadBtn}
+                    </Button>
+                    <p className="flex-1 text-xs text-muted-foreground">
+                        {t.clickSectionHint}
+                    </p>
+                </div>
+            )}
+
+            {/* Dedicated: inline document editor */}
+            {templateType === 'dedicated' && (
+                <ContractDedicatedDocumentEditor
+                    blocks={dedicatedBlocks}
+                    onBlocksChange={handleDedicatedBlocksChange}
+                    onDownloadPdf={handleDedicatedDownload}
+                    isDownloading={isDedicatedDownloading}
+                    aiContext={aiContext}
+                />
+            )}
+
+            {/* Dedicated: preview + download bar */}
+            {templateType === 'dedicated' && (
+                <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-card">
+                    <Button variant="outline" onClick={() => setDedicatedPreviewOpen(true)}>
+                        <Eye className="h-4 w-4" />
+                        {t.templatePreviewBtn}
+                    </Button>
+                    <Button variant="outline" onClick={handleDedicatedDownload} disabled={isDedicatedDownloading}>
+                        <Download className="h-4 w-4" />
+                        {isDedicatedDownloading ? '…' : t.templateDownloadBtn}
+                    </Button>
+                    <p className="flex-1 text-xs text-muted-foreground">
+                        {t.clickSectionHint}
+                    </p>
+                </div>
+            )}
+
+            {/* SLA: inline document editor */}
+            {templateType === 'sla' && (
+                <ContractSlaDocumentEditor
+                    blocks={slaBlocks}
+                    onBlocksChange={handleSlaBlocksChange}
+                    onDownloadPdf={handleSlaDownload}
+                    isDownloading={isSlaDownloading}
+                    aiContext={aiContext}
+                />
+            )}
+
+            {/* SLA: preview + download bar */}
+            {templateType === 'sla' && (
+                <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-card">
+                    <Button variant="outline" onClick={() => setSlaPreviewOpen(true)}>
+                        <Eye className="h-4 w-4" />
+                        {t.templatePreviewBtn}
+                    </Button>
+                    <Button variant="outline" onClick={handleSlaDownload} disabled={isSlaDownloading}>
+                        <Download className="h-4 w-4" />
+                        {isSlaDownloading ? '…' : t.templateDownloadBtn}
+                    </Button>
+                    <p className="flex-1 text-xs text-muted-foreground">
+                        {t.clickSectionHint}
+                    </p>
+                </div>
+            )}
+
+            {/* Mobile: inline document editor */}
+            {templateType === 'mobile' && (
+                <ContractMobileDocumentEditor
+                    blocks={mobileBlocks}
+                    onBlocksChange={handleMobileBlocksChange}
+                    onDownloadPdf={handleMobileDownload}
+                    isDownloading={isMobileDownloading}
+                    aiContext={aiContext}
+                />
+            )}
+
+            {/* Mobile: preview + download bar */}
+            {templateType === 'mobile' && (
+                <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-card">
+                    <Button variant="outline" onClick={() => setMobilePreviewOpen(true)}>
+                        <Eye className="h-4 w-4" />
+                        {t.templatePreviewBtn}
+                    </Button>
+                    <Button variant="outline" onClick={handleMobileDownload} disabled={isMobileDownloading}>
+                        <Download className="h-4 w-4" />
+                        {isMobileDownloading ? '…' : t.templateDownloadBtn}
+                    </Button>
+                    <p className="flex-1 text-xs text-muted-foreground">
+                        {t.clickSectionHint}
                     </p>
                 </div>
             )}
@@ -164,7 +460,7 @@ export function ContractTemplateTab({ contract, onSaved }: ContractTemplateTabPr
                         {isClassicDownloading ? '…' : t.templateDownloadBtn}
                     </Button>
                     <p className="flex-1 text-xs text-muted-foreground">
-                        Klasyczny szablon — tabela pozycji z warunkami umowy. Logo i dane firmy z <em>Ustawienia → Firma</em>.
+                        {t.classicTemplateHint}
                     </p>
                 </div>
             )}
@@ -177,6 +473,58 @@ export function ContractTemplateTab({ contract, onSaved }: ContractTemplateTabPr
                 error={shortPreviewError}
                 title={t.templateShortPreviewTitle.replace('{number}', contract.number)}
                 frameTitle="Podgląd umowy"
+                openInNewTabLabel={t.pdfPreview.openInNewTab}
+                loadingLabel={t.pdfPreview.loading}
+                frameType="html"
+            />
+
+            {/* Services: HTML preview modal */}
+            <PdfPreviewModal
+                isOpen={servicesPreviewOpen}
+                onClose={() => setServicesPreviewOpen(false)}
+                pdfUrl={servicesPreviewUrl}
+                error={null}
+                title={t.contractPreviewTitle.replace('{number}', contract.number)}
+                frameTitle={t.contractPreviewFrameTitle}
+                openInNewTabLabel={t.pdfPreview.openInNewTab}
+                loadingLabel={t.pdfPreview.loading}
+                frameType="html"
+            />
+
+            {/* Dedicated: HTML preview modal */}
+            <PdfPreviewModal
+                isOpen={dedicatedPreviewOpen}
+                onClose={() => setDedicatedPreviewOpen(false)}
+                pdfUrl={dedicatedPreviewUrl}
+                error={null}
+                title={t.contractPreviewTitle.replace('{number}', contract.number)}
+                frameTitle={t.contractPreviewFrameTitle}
+                openInNewTabLabel={t.pdfPreview.openInNewTab}
+                loadingLabel={t.pdfPreview.loading}
+                frameType="html"
+            />
+
+            {/* SLA: HTML preview modal */}
+            <PdfPreviewModal
+                isOpen={slaPreviewOpen}
+                onClose={() => setSlaPreviewOpen(false)}
+                pdfUrl={slaPreviewUrl}
+                error={null}
+                title={t.contractPreviewTitle.replace('{number}', contract.number)}
+                frameTitle={t.contractPreviewFrameTitle}
+                openInNewTabLabel={t.pdfPreview.openInNewTab}
+                loadingLabel={t.pdfPreview.loading}
+                frameType="html"
+            />
+
+            {/* Mobile: HTML preview modal */}
+            <PdfPreviewModal
+                isOpen={mobilePreviewOpen}
+                onClose={() => setMobilePreviewOpen(false)}
+                pdfUrl={mobilePreviewUrl}
+                error={null}
+                title={t.contractPreviewTitle.replace('{number}', contract.number)}
+                frameTitle={t.contractPreviewFrameTitle}
                 openInNewTabLabel={t.pdfPreview.openInNewTab}
                 loadingLabel={t.pdfPreview.loading}
                 frameType="html"

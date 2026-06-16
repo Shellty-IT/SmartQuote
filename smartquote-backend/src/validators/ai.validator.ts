@@ -115,6 +115,15 @@ export const priceCheckSchema = z.object({
     }),
 });
 
+export const priceSuggestionSchema = z.object({
+    body: z.object({
+        offerTitle: z.string().min(1).max(300),
+        clientName: z.string().min(1).max(200),
+        scopeSummary: z.string().max(4000).optional().default(''),
+        currency: z.string().min(1).max(10).default('PLN'),
+    }),
+});
+
 export const offerFillSchema = z.object({
     body: z.object({
         message: z.string().min(1).max(10000),
@@ -130,6 +139,7 @@ export const offerFillSchema = z.object({
         context: z.object({
             clientName: z.string().min(1).max(500),
             offerTitle: z.string().min(1).max(500),
+            language: z.enum(['pl', 'en']).optional(),
         }),
         currentBlocks: z.record(z.unknown()).optional(),
     }),

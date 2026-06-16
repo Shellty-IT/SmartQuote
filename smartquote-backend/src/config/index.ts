@@ -30,11 +30,22 @@ const configSchema = z.object({
     MAILERSEND_API_KEY: z.string().optional(),
     MAILERSEND_FROM_EMAIL: z.string().default('noreply@trial-xxx.mailersend.net'),
     MAILERSEND_FROM_NAME: z.string().default('SmartQuote AI'),
-    ENCRYPTION_KEY: z.string().optional(),
+    ENCRYPTION_KEY: z.string().min(32, 'ENCRYPTION_KEY musi mieć minimum 32 znaki').optional(),
     CRON_SECRET: z.string().optional(),
     KSEF_MASTER_URL: z.string().default('http://localhost:5000'),
     KSEF_MASTER_API_KEY: z.string().default(''),
     KSEF_AVAILABILITY_CACHE_TTL_MS: z.string().default('300000').transform((v) => parseInt(v, 10)),
+}).superRefine((data, ctx) => {
+    // ENCRYPTION_KEY is required whenever SMTP credentials are configured,
+    // because SMTP passwords are stored encrypted in the database.
+    const smtpNeedsKey = data.SMTP_USER || data.SMTP_PASS;
+    if (smtpNeedsKey && !data.ENCRYPTION_KEY) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['ENCRYPTION_KEY'],
+            message: 'ENCRYPTION_KEY (min 32 znaków) jest wymagany gdy SMTP_USER lub SMTP_PASS są ustawione',
+        });
+    }
 });
 
 function validateConfig() {

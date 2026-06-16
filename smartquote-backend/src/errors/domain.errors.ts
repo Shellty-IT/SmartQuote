@@ -41,8 +41,12 @@ export class UnauthorizedError extends DomainError {
 }
 
 export class ExternalServiceError extends DomainError {
-    constructor(service: string, message: string) {
-        super(`${service}_ERROR`, message, 502);
+    /** Original message from the external API — logged but never sent to the client. */
+    readonly internalMessage?: string;
+
+    constructor(service: string, publicMessage: string, internalMessage?: string) {
+        super(`${service}_ERROR`, publicMessage, 502);
         this.name = 'ExternalServiceError';
+        this.internalMessage = internalMessage;
     }
 }
