@@ -7,6 +7,14 @@ import type { Browser } from 'puppeteer-core'
 
 let _browser: Browser | null = null
 
+const SET_CONTENT_TIMEOUT_MS = Number(process.env.PDF_SET_CONTENT_TIMEOUT_MS ?? 15_000)
+const FONT_READY_TIMEOUT_MS = Number(process.env.PDF_FONT_READY_TIMEOUT_MS ?? 3_000)
+const PDF_RENDER_TIMEOUT_MS = Number(process.env.PDF_RENDER_TIMEOUT_MS ?? 15_000)
+
+function elapsed(startedAt: number): number {
+    return Date.now() - startedAt
+}
+
 async function getBrowser(): Promise<Browser> {
     // Re-use an existing browser instance within a single lambda invocation.
     if (_browser) return _browser
@@ -40,21 +48,76 @@ async function getBrowser(): Promise<Browser> {
 }
 
 export async function htmlToPdfBuffer(html: string): Promise<Buffer> {
+    const totalStartedAt = Date.now()
+    const browserStartedAt = Date.now()
     const browser = await getBrowser()
+    const browserMs = elapsed(browserStartedAt)
+    const pageStartedAt = Date.now()
     const page = await browser.newPage()
+    const pageMs = elapsed(pageStartedAt)
+    let contentMs = 0
+    let fontsMs = 0
+    let pdfMs = 0
+    let fontStatus: 'ready' | 'timeout' = 'ready'
 
     try {
-        await page.setContent(html, { waitUntil: 'load', timeout: 15_000 })
-        // Wait for all @font-face fonts to finish loading before printing
-        await page.evaluate(() => document.fonts.ready)
+        const contentStartedAt = Date.now()
+        await page.setContent(html, { waitUntil: 'load', timeout: SET_CONTENT_TIMEOUT_MS })
+        contentMs = elapsed(contentStartedAt)
 
+        // Wait for all @font-face fonts to finish loading before printing.
+        // Race against a hard cap so a font that never parses cannot hang the lambda.
+        const fontsStartedAt = Date.now()
+        fontStatus = await Promise.race([
+            page.evaluate(() => document.fonts.ready.then(() => 'ready' as const)),
+            new Promise<'timeout'>((resolve) => setTimeout(() => resolve('timeout'), FONT_READY_TIMEOUT_MS)),
+        ])
+        fontsMs = elapsed(fontsStartedAt)
+
+        if (fontStatus === 'timeout') {
+            console.warn('[pdf-render] font wait timed out', {
+                fontTimeoutMs: FONT_READY_TIMEOUT_MS,
+                htmlBytes: Buffer.byteLength(html, 'utf8'),
+            })
+        }
+
+        const pdfStartedAt = Date.now()
         const pdf = await page.pdf({
             format: 'A4',
             printBackground: true,
             margin: { top: '0', right: '0', bottom: '0', left: '0' },
+            timeout: PDF_RENDER_TIMEOUT_MS,
+        })
+        pdfMs = elapsed(pdfStartedAt)
+
+        console.info('[pdf-render] success', {
+            totalMs: elapsed(totalStartedAt),
+            browserMs,
+            pageMs,
+            contentMs,
+            fontsMs,
+            fontStatus,
+            pdfMs,
+            htmlBytes: Buffer.byteLength(html, 'utf8'),
+            pdfBytes: pdf.length,
+            memory: process.memoryUsage(),
         })
 
         return Buffer.from(pdf)
+    } catch (error) {
+        console.error('[pdf-render] failed', {
+            totalMs: elapsed(totalStartedAt),
+            browserMs,
+            pageMs,
+            contentMs,
+            fontsMs,
+            fontStatus,
+            pdfMs,
+            htmlBytes: Buffer.byteLength(html, 'utf8'),
+            error: error instanceof Error ? error.message : String(error),
+            memory: process.memoryUsage(),
+        })
+        throw error
     } finally {
         await page.close()
         // Close browser to free memory in serverless environment.
