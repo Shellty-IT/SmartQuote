@@ -3,13 +3,12 @@
 
 import { formatCurrency, getInitials } from '@/lib/utils';
 import { useTranslations } from '@/i18n';
-import type { Client } from '@/types';
 import type { ExtendedOfferItem, OfferDetails, OfferTotalsData } from '../types';
 import { calculateItemTotal } from '../../hooks/useOfferForm';
 import OfferTotals from './OfferTotals';
 
 interface StepSummaryProps {
-    client: Client;
+    client: { name: string; email: string | null };
     details: OfferDetails;
     items: ExtendedOfferItem[];
     totals: OfferTotalsData;

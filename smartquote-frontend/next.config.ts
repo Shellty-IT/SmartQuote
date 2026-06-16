@@ -66,6 +66,69 @@ const nextConfig: NextConfig = {
                 source: '/public/offers/:token',
                 headers: previewFrameHeaders,
             },
+            // Shop template preview — loaded in iframe inside ProposalDocumentEditor
+            {
+                source: '/api/offers/:id/shop/preview',
+                headers: previewFrameHeaders,
+            },
+            {
+                source: '/api/offers/:id/pdf/shop',
+                headers: previewFrameHeaders,
+            },
+            // Website v2 template preview — loaded in iframe inside WebsiteV2DocumentEditor
+            {
+                source: '/api/offers/:id/website-v2/preview',
+                headers: previewFrameHeaders,
+            },
+            {
+                source: '/api/offers/:id/pdf/website-v2',
+                headers: previewFrameHeaders,
+            },
+            // Website v3 template preview — loaded in iframe inside WebsiteV3DocumentEditor
+            {
+                source: '/api/offers/:id/website-v3/preview',
+                headers: previewFrameHeaders,
+            },
+            {
+                source: '/api/offers/:id/pdf/website-v3',
+                headers: previewFrameHeaders,
+            },
+            // Support template preview — loaded in iframe inside SupportDocumentEditor
+            {
+                source: '/api/offers/:id/support/preview',
+                headers: previewFrameHeaders,
+            },
+            {
+                source: '/api/offers/:id/pdf/support',
+                headers: previewFrameHeaders,
+            },
+            // Mobile App template preview — loaded in iframe inside MobileAppDocumentEditor
+            {
+                source: '/api/offers/:id/mobile-app/preview',
+                headers: previewFrameHeaders,
+            },
+            {
+                source: '/api/offers/:id/pdf/mobile-app',
+                headers: previewFrameHeaders,
+            },
+            // Mobile Simple template preview — loaded in iframe inside MobileSimpleDocumentEditor
+            {
+                source: '/api/offers/:id/mobile-simple/preview',
+                headers: previewFrameHeaders,
+            },
+            {
+                source: '/api/offers/:id/pdf/mobile-simple',
+                headers: previewFrameHeaders,
+            },
+            // Universal template preview — loaded in iframe inside UniversalDocumentEditor
+            {
+                source: '/api/offers/:id/universal/preview',
+                headers: previewFrameHeaders,
+            },
+            {
+                source: '/api/offers/:id/pdf/universal',
+                headers: previewFrameHeaders,
+            },
             // Contract short template preview — loaded in iframe inside dashboard + public contract page
             {
                 source: '/api/contracts/:id/short/preview',
@@ -81,6 +144,74 @@ const nextConfig: NextConfig = {
             },
             {
                 source: '/api/public/contracts/:token/pdf/short',
+                headers: previewFrameHeaders,
+            },
+            // Contract services (Sklep internetowy) template preview — loaded in iframe inside dashboard + public contract page
+            {
+                source: '/api/contracts/:id/services/preview',
+                headers: previewFrameHeaders,
+            },
+            {
+                source: '/api/contracts/:id/pdf/services',
+                headers: previewFrameHeaders,
+            },
+            {
+                source: '/api/public/contracts/:token/services/preview',
+                headers: previewFrameHeaders,
+            },
+            {
+                source: '/api/public/contracts/:token/pdf/services',
+                headers: previewFrameHeaders,
+            },
+            // Contract dedicated (System dedykowany) template preview — loaded in iframe inside dashboard + public contract page
+            {
+                source: '/api/contracts/:id/dedicated/preview',
+                headers: previewFrameHeaders,
+            },
+            {
+                source: '/api/contracts/:id/pdf/dedicated',
+                headers: previewFrameHeaders,
+            },
+            {
+                source: '/api/public/contracts/:token/dedicated/preview',
+                headers: previewFrameHeaders,
+            },
+            {
+                source: '/api/public/contracts/:token/pdf/dedicated',
+                headers: previewFrameHeaders,
+            },
+            // Contract SLA (Opieka IT) template preview — loaded in iframe inside dashboard + public contract page
+            {
+                source: '/api/contracts/:id/sla/preview',
+                headers: previewFrameHeaders,
+            },
+            {
+                source: '/api/contracts/:id/pdf/sla',
+                headers: previewFrameHeaders,
+            },
+            {
+                source: '/api/public/contracts/:token/sla/preview',
+                headers: previewFrameHeaders,
+            },
+            {
+                source: '/api/public/contracts/:token/pdf/sla',
+                headers: previewFrameHeaders,
+            },
+            // Contract mobile (Aplikacja mobilna) template preview — loaded in iframe inside dashboard + public contract page
+            {
+                source: '/api/contracts/:id/mobile/preview',
+                headers: previewFrameHeaders,
+            },
+            {
+                source: '/api/contracts/:id/pdf/mobile',
+                headers: previewFrameHeaders,
+            },
+            {
+                source: '/api/public/contracts/:token/mobile/preview',
+                headers: previewFrameHeaders,
+            },
+            {
+                source: '/api/public/contracts/:token/pdf/mobile',
                 headers: previewFrameHeaders,
             },
             {

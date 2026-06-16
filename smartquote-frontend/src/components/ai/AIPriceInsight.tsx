@@ -141,6 +141,15 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
 
                 {result && !isLoading && (
                     <div className="space-y-4">
+                        {result.historicalData.count === 0 && (
+                            <div className="flex items-start gap-2 p-2.5 rounded-lg bg-[oklch(0.72_0.16_60)/10%] text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)] text-xs">
+                                <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
+                                </svg>
+                                <span>Brak historycznych danych dla tej usługi. Widełki poniżej to wyłącznie szacunek ogólnorynkowy AI — mogą znacznie odbiegać od rzeczywistości.</span>
+                            </div>
+                        )}
+
                         <div>
                             <div className="flex items-baseline justify-between mb-2">
                                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t.priceInsight.suggestedNet}</span>
@@ -153,7 +162,7 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
                                     {formatCurrency(result.aiSuggestion.suggestedMin)}
                                 </span>
                                 <div className="flex-1 h-2 rounded-full bg-surface-subtle relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-primary rounded-full" />
+                                    <div className={`absolute inset-0 rounded-full ${result.historicalData.count === 0 ? 'bg-muted-foreground/30' : 'bg-gradient-primary'}`} />
                                     {currentPrice !== undefined && currentPrice > 0 && result.aiSuggestion.suggestedMax > result.aiSuggestion.suggestedMin && (
                                         <div
                                             className={`absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-white shadow-sm ${
@@ -208,7 +217,7 @@ export default function AIPriceInsight({ itemName, currentPrice, onPriceSelect }
                             </div>
                         )}
 
-                        {onPriceSelect && suggestedAvg > 0 && (
+                        {onPriceSelect && suggestedAvg > 0 && result.historicalData.count > 0 && (
                             <button
                                 type="button"
                                 onClick={() => onPriceSelect(suggestedAvg)}

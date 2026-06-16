@@ -57,10 +57,8 @@ export class NotesRepository {
     }
 
     async delete(id: string, userId: string): Promise<boolean> {
-        const note = await prisma.note.findFirst({ where: { id, userId } });
-        if (!note) return false;
-        await prisma.note.delete({ where: { id } });
-        return true;
+        const result = await prisma.note.deleteMany({ where: { id, userId } });
+        return result.count > 0;
     }
 }
 

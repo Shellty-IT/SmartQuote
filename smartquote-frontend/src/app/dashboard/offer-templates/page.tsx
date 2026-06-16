@@ -2,7 +2,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FileText, FileSignature } from 'lucide-react';
 import { Button, ConfirmDialog } from '@/components/ui';
@@ -83,19 +82,9 @@ function OfferItemTemplates() {
     return (
         <div className="space-y-4">
             {/* Section header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-base font-semibold text-foreground">{tr.itemSetsSection}</h2>
-                    <p className="text-xs text-muted-foreground mt-0.5">{tr.itemSetsSectionSub}</p>
-                </div>
-                <Link href="/dashboard/offer-templates/new">
-                    <Button size="sm">
-                        <svg className="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                        {tr.newTemplate}
-                    </Button>
-                </Link>
+            <div>
+                <h2 className="text-base font-semibold text-foreground">{tr.itemSetsSection}</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">{tr.itemSetsSectionSub}</p>
             </div>
 
             {/* Filters */}
@@ -160,8 +149,7 @@ function OfferItemTemplates() {
                             </svg>
                         }
                         title={hasFilters ? tr.noResults : tr.noTemplates}
-                        description={hasFilters ? tr.noResultsDesc : tr.createFirst}
-                        action={!hasFilters ? { label: tr.createBtn, onClick: () => router.push('/dashboard/offer-templates/new') } : undefined}
+                        description={hasFilters ? tr.noResultsDesc : tr.noTemplates}
                     />
                 </div>
             ) : (

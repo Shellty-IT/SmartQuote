@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test:unit": "vitest run",
     "test:e2e": "playwright test",
     "test:e2e:ci": "playwright test --project=chromium",
     "test:e2e:ui": "playwright test --ui",
@@ -90,6 +91,7 @@
     "eslint": "^9",
     "eslint-config-next": "^16.1.6",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.8"
   }
 }

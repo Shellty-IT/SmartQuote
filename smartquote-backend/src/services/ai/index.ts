@@ -26,9 +26,11 @@ import { getPriceInsight, getObserverInsight, getClosingStrategy } from './analy
 import { generatePostMortem, getLatestInsights, getInsightsList } from './feedback';
 import { offerFillChat, type OfferFillMessage, type OfferFillContext, type OfferFillResult } from './offer-fill';
 import { priceCheck, type PriceCheckInput, type PriceCheckResult } from './price-check';
+import { priceSuggestion, type PriceSuggestionInput, type PriceSuggestionResult } from './price-suggestion';
 
 export type { OfferFillMessage, OfferFillContext, OfferFillResult };
 export type { PriceCheckInput, PriceCheckResult };
+export type { PriceSuggestionInput, PriceSuggestionResult };
 
 class AIService {
     private readonly ai: GoogleGenAI | null;
@@ -105,6 +107,10 @@ class AIService {
 
     priceCheck(userId: string, input: PriceCheckInput): Promise<PriceCheckResult[]> {
         return priceCheck(this.ai, userId, input);
+    }
+
+    priceSuggestion(input: PriceSuggestionInput): Promise<PriceSuggestionResult> {
+        return priceSuggestion(this.ai, input);
     }
 
     async getSuggestions(userId: string): Promise<{ suggestions: AISuggestion[]; stats: AIStats | undefined }> {

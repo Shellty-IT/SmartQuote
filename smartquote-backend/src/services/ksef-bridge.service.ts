@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import prisma from '../lib/prisma';
 import { config } from '../config';
 import { createModuleLogger } from '../lib/logger';
+import { ExternalServiceError } from '../errors/domain.errors';
 
 const log = createModuleLogger('ksef-bridge');
 
@@ -309,7 +310,11 @@ export class KsefBridgeService {
         }
 
         if (!response.ok) {
-            throw new Error(parsed?.message || 'KSEF_MASTER_ERROR');
+            throw new ExternalServiceError(
+                'KSEF',
+                'Nie udało się przesłać faktury do KSeF Master',
+                parsed?.message || `HTTP ${response.status}`,
+            );
         }
 
         await prisma.offer.update({

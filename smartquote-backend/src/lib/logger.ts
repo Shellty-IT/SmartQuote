@@ -3,7 +3,7 @@ import pino from 'pino';
 import { config, isDev } from '../config';
 
 export const logger = pino({
-    level: isDev ? 'debug' : 'info',
+    level: process.env.LOG_LEVEL ?? (isDev ? 'debug' : 'info'),
     transport: isDev
         ? {
             target: 'pino-pretty',

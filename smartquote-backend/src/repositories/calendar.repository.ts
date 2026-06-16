@@ -70,28 +70,30 @@ export class CalendarRepository {
     }
 
     async update(id: string, userId: string, data: UpdateCalendarEventInput) {
-        return prisma.calendarEvent.update({
-            where: { id },
-            data: {
-                ...(data.title !== undefined ? { title: data.title } : {}),
-                ...(data.description !== undefined ? { description: data.description } : {}),
-                ...(data.startAt !== undefined ? { startAt: new Date(data.startAt) } : {}),
-                ...(data.endAt !== undefined ? { endAt: data.endAt ? new Date(data.endAt) : null } : {}),
-                ...(data.allDay !== undefined ? { allDay: data.allDay } : {}),
-                ...(data.color !== undefined ? { color: data.color } : {}),
-                ...(data.clientId !== undefined ? { clientId: data.clientId } : {}),
-                ...(data.offerId !== undefined ? { offerId: data.offerId } : {}),
-                ...(data.leadId !== undefined ? { leadId: data.leadId } : {}),
-            },
-            include: eventInclude,
+        return prisma.$transaction(async (tx) => {
+            const record = await tx.calendarEvent.findFirst({ where: { id, userId }, select: { id: true } });
+            if (!record) return null;
+            return tx.calendarEvent.update({
+                where: { id },
+                data: {
+                    ...(data.title !== undefined ? { title: data.title } : {}),
+                    ...(data.description !== undefined ? { description: data.description } : {}),
+                    ...(data.startAt !== undefined ? { startAt: new Date(data.startAt) } : {}),
+                    ...(data.endAt !== undefined ? { endAt: data.endAt ? new Date(data.endAt) : null } : {}),
+                    ...(data.allDay !== undefined ? { allDay: data.allDay } : {}),
+                    ...(data.color !== undefined ? { color: data.color } : {}),
+                    ...(data.clientId !== undefined ? { clientId: data.clientId } : {}),
+                    ...(data.offerId !== undefined ? { offerId: data.offerId } : {}),
+                    ...(data.leadId !== undefined ? { leadId: data.leadId } : {}),
+                },
+                include: eventInclude,
+            });
         });
     }
 
     async delete(id: string, userId: string): Promise<boolean> {
-        const event = await prisma.calendarEvent.findFirst({ where: { id, userId } });
-        if (!event) return false;
-        await prisma.calendarEvent.delete({ where: { id } });
-        return true;
+        const result = await prisma.calendarEvent.deleteMany({ where: { id, userId } });
+        return result.count > 0;
     }
 }
 

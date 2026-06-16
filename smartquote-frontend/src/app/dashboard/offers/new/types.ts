@@ -17,7 +17,7 @@ export interface OfferDetails {
     terms: string;
     paymentDays: number;
     requireAuditTrail: boolean;
-    templateType: 'classic' | 'proposal';
+    templateType: 'classic' | 'proposal' | 'shop' | 'website_v2' | 'website_v3' | 'support' | 'mobile_app' | 'mobile_simple' | 'universal';
 }
 
 export interface OfferTotalsData {

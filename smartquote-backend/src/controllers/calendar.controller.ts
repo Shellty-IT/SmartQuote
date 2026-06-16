@@ -33,7 +33,8 @@ export class CalendarController {
                 offerId,
                 leadId,
             });
-            return successResponse(res, { events, total: events.length });
+            // Return the array directly — matches the frontend contract `CalendarEvent[]`.
+            return successResponse(res, events);
         } catch (err) {
             return next(err);
         }

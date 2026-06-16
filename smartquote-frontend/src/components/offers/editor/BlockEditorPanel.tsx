@@ -21,6 +21,9 @@ import {
     TechnologyEditor,
     PricingEditor,
     AboutEditor,
+    BenefitsEditor,
+    ProcessEditor,
+    StatsEditor,
 } from './block-editors'
 import type {
     HeaderBlock,
@@ -33,9 +36,37 @@ import type {
     TechnologyBlock,
     PricingExtraBlock,
     AboutBlock,
+    BenefitsBlock,
+    ProcessBlock,
+    StatsBlock,
 } from '@/lib/pdf/proposal-blocks'
 
 export type { OfferContext }
+
+// Build a plain-text summary of what the offer covers — fed to the AI price suggester.
+function stripHtmlText(html: string): string {
+    return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+}
+
+function buildScopeSummary(blocks: ProposalBlocks): string {
+    const lines: string[] = []
+    if (blocks.structure.enabled && blocks.structure.items.length) {
+        lines.push('Struktura:')
+        blocks.structure.items.forEach((it) => {
+            const name = stripHtmlText(it.name)
+            const desc = stripHtmlText(it.description)
+            if (name || desc) lines.push(`- ${name}${desc ? ` — ${desc}` : ''}`)
+        })
+    }
+    if (blocks.scope.enabled && blocks.scope.items.length) {
+        lines.push('Zakres:')
+        blocks.scope.items.forEach((it) => {
+            const t = stripHtmlText(it.html)
+            if (t) lines.push(`- ${t}`)
+        })
+    }
+    return lines.join('\n').slice(0, 3500)
+}
 
 // ── Block metadata ────────────────────────────────────────────────────────────
 
@@ -53,6 +84,9 @@ const BLOCK_META: Record<
     technology:   { label: 'Technologia',         icon: '⚙️' },
     pricingExtra: { label: 'Wycena i termin',     icon: '💰' },
     about:        { label: 'CTA / O nas',         icon: '🙋' },
+    benefits:     { label: 'Korzyści / Dlaczego my', icon: '⭐' },
+    process:      { label: 'Etapy współpracy',    icon: '🧭' },
+    stats:        { label: 'Statystyki',          icon: '📊' },
 }
 
 // ── Section manager ───────────────────────────────────────────────────────────
@@ -66,6 +100,9 @@ const SECTION_META: Record<SectionKey, { label: string; icon: string }> = {
     technology:   { label: 'Technologia',        icon: '⚙️' },
     pricingExtra: { label: 'Wycena i termin',    icon: '💰' },
     about:        { label: 'CTA / O nas',        icon: '🙋' },
+    benefits:     { label: 'Korzyści / Dlaczego my', icon: '⭐' },
+    process:      { label: 'Etapy współpracy',   icon: '🧭' },
+    stats:        { label: 'Statystyki',         icon: '📊' },
 }
 
 export interface SectionManagerPanelProps {
@@ -357,8 +394,11 @@ export function BlockEditorPanel({ blockKey, blocks, onSave, onClose, offerConte
             case 'scope':        return <ScopeEditor block={draft.scope} onChange={updateBlock as (b: ScopeBlock) => void} offerContext={offerContext} />
             case 'testing':      return <TestingEditor block={draft.testing} onChange={updateBlock as (b: TestingBlock) => void} offerContext={offerContext} />
             case 'technology':   return <TechnologyEditor block={draft.technology} onChange={updateBlock as (b: TechnologyBlock) => void} offerContext={offerContext} />
-            case 'pricingExtra': return <PricingEditor block={draft.pricingExtra} onChange={updateBlock as (b: PricingExtraBlock) => void} offerContext={offerContext} />
+            case 'pricingExtra': return <PricingEditor block={draft.pricingExtra} onChange={updateBlock as (b: PricingExtraBlock) => void} offerContext={offerContext} scopeSummary={buildScopeSummary(draft)} />
             case 'about':        return <AboutEditor block={draft.about} onChange={updateBlock as (b: AboutBlock) => void} offerContext={offerContext} />
+            case 'benefits':     return <BenefitsEditor block={draft.benefits} onChange={updateBlock as (b: BenefitsBlock) => void} offerContext={offerContext} />
+            case 'process':      return <ProcessEditor block={draft.process} onChange={updateBlock as (b: ProcessBlock) => void} offerContext={offerContext} />
+            case 'stats':        return <StatsEditor block={draft.stats} onChange={updateBlock as (b: StatsBlock) => void} offerContext={offerContext} />
             default:             return null
         }
     }

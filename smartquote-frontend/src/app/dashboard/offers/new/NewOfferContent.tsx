@@ -14,16 +14,26 @@ import StepSummary from './components/StepSummary';
 import StepTemplate from './components/StepTemplate';
 import StepTypeChoice from './components/StepTypeChoice';
 import TemplateSelector from '@/components/offer-templates/TemplateSelector';
+import StepShopTemplate from './components/StepShopTemplate';
+import StepWebsiteV2Template from './components/StepWebsiteV2Template';
+import StepWebsiteV3Template from './components/StepWebsiteV3Template';
+import StepSupportTemplate from './components/StepSupportTemplate';
+import StepMobileAppTemplate from './components/StepMobileAppTemplate';
+import StepMobileSimpleTemplate from './components/StepMobileSimpleTemplate';
+import StepUniversalTemplate from './components/StepUniversalTemplate';
 
 export default function NewOfferContent() {
     const tr = useTranslations('offerNew');
     const {
         clients,
         isLoadingClients,
+        leads,
         currentStep,
         isSubmitting,
         selectedClient,
         setSelectedClient,
+        selectedLead,
+        setSelectedLead,
         offerDetails,
         updateDetails,
         items,
@@ -43,6 +53,20 @@ export default function NewOfferContent() {
         setTemplateSelectorOpen,
         proposalBlocks,
         setProposalBlocks,
+        shopBlocks,
+        setShopBlocks,
+        websiteV2Blocks,
+        setWebsiteV2Blocks,
+        websiteV3Blocks,
+        setWebsiteV3Blocks,
+        supportBlocks,
+        setSupportBlocks,
+        mobileAppBlocks,
+        setMobileAppBlocks,
+        mobileSimpleBlocks,
+        setMobileSimpleBlocks,
+        universalBlocks,
+        setUniversalBlocks,
         router,
     } = useOfferForm();
 
@@ -88,7 +112,14 @@ export default function NewOfferContent() {
 
             <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
                 {currentStep === 'client' && (
-                    <StepClient clients={clients} selectedClient={selectedClient} onSelectClient={setSelectedClient} />
+                    <StepClient
+                        clients={clients}
+                        leads={leads}
+                        selectedClient={selectedClient}
+                        selectedLead={selectedLead}
+                        onSelectClient={(client) => { setSelectedClient(client); setSelectedLead(null); }}
+                        onSelectLead={(lead) => { setSelectedLead(lead); setSelectedClient(null); }}
+                    />
                 )}
                 {currentStep === 'type_choice' && (
                     <StepTypeChoice
@@ -114,7 +145,7 @@ export default function NewOfferContent() {
                         onUpdateItem={updateItem}
                     />
                 )}
-                {currentStep === 'template' && (
+                {currentStep === 'template' && offerDetails.templateType === 'proposal' && (
                     <StepTemplate
                         client={selectedClient}
                         offerTitle={offerDetails.title}
@@ -126,8 +157,86 @@ export default function NewOfferContent() {
                         onBlocksChange={setProposalBlocks}
                     />
                 )}
-                {currentStep === 'summary' && selectedClient && (
-                    <StepSummary client={selectedClient} details={offerDetails} items={items} totals={totals} uniqueVariants={uniqueVariants} />
+                {currentStep === 'template' && offerDetails.templateType === 'shop' && (
+                    <StepShopTemplate
+                        client={selectedClient}
+                        offerTitle={offerDetails.title}
+                        onTitleChange={(v) => updateDetails('title', v)}
+                        totalGross={totals.totalGross}
+                        currency="PLN"
+                        paymentDays={offerDetails.paymentDays}
+                        blocks={shopBlocks}
+                        onBlocksChange={setShopBlocks}
+                    />
+                )}
+                {currentStep === 'template' && offerDetails.templateType === 'website_v2' && (
+                    <StepWebsiteV2Template
+                        client={selectedClient}
+                        offerTitle={offerDetails.title}
+                        onTitleChange={(v) => updateDetails('title', v)}
+                        totalGross={totals.totalGross}
+                        currency="PLN"
+                        paymentDays={offerDetails.paymentDays}
+                        blocks={websiteV2Blocks}
+                        onBlocksChange={setWebsiteV2Blocks}
+                    />
+                )}
+                {currentStep === 'template' && offerDetails.templateType === 'website_v3' && (
+                    <StepWebsiteV3Template
+                        client={selectedClient}
+                        offerTitle={offerDetails.title}
+                        onTitleChange={(v) => updateDetails('title', v)}
+                        totalGross={totals.totalGross}
+                        currency="PLN"
+                        paymentDays={offerDetails.paymentDays}
+                        blocks={websiteV3Blocks}
+                        onBlocksChange={setWebsiteV3Blocks}
+                    />
+                )}
+                {currentStep === 'template' && offerDetails.templateType === 'support' && (
+                    <StepSupportTemplate
+                        client={selectedClient}
+                        offerTitle={offerDetails.title}
+                        onTitleChange={(v) => updateDetails('title', v)}
+                        blocks={supportBlocks}
+                        onBlocksChange={setSupportBlocks}
+                    />
+                )}
+                {currentStep === 'template' && offerDetails.templateType === 'mobile_app' && (
+                    <StepMobileAppTemplate
+                        client={selectedClient}
+                        offerTitle={offerDetails.title}
+                        onTitleChange={(v) => updateDetails('title', v)}
+                        blocks={mobileAppBlocks}
+                        onBlocksChange={setMobileAppBlocks}
+                    />
+                )}
+                {currentStep === 'template' && offerDetails.templateType === 'mobile_simple' && (
+                    <StepMobileSimpleTemplate
+                        client={selectedClient}
+                        offerTitle={offerDetails.title}
+                        onTitleChange={(v) => updateDetails('title', v)}
+                        blocks={mobileSimpleBlocks}
+                        onBlocksChange={setMobileSimpleBlocks}
+                    />
+                )}
+                {currentStep === 'template' && offerDetails.templateType === 'universal' && (
+                    <StepUniversalTemplate
+                        client={selectedClient}
+                        offerTitle={offerDetails.title}
+                        onTitleChange={(v) => updateDetails('title', v)}
+                        blocks={universalBlocks}
+                        onBlocksChange={setUniversalBlocks}
+                    />
+                )}
+                {currentStep === 'summary' && (selectedClient || selectedLead) && (
+                    <StepSummary
+                        client={selectedClient ?? { name: selectedLead!.name, email: selectedLead!.email }}
+                        details={offerDetails}
+                        items={items}
+                        totals={totals}
+                        uniqueVariants={uniqueVariants}
+                    />
                 )}
             </div>
 

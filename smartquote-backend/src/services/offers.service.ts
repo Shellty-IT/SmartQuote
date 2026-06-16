@@ -194,9 +194,8 @@ export class OffersService {
     }
 
     async delete(id: string, userId: string) {
-        const existing = await offersRepository.findById(id, userId);
-        if (!existing) throw new NotFoundError('Oferta');
-        await offersRepository.delete(id, userId);
+        const deleted = await offersRepository.delete(id, userId);
+        if (!deleted) throw new NotFoundError('Oferta');
     }
 
     async getStats(userId: string) {

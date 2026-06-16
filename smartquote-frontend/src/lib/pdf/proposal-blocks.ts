@@ -107,14 +107,53 @@ export interface AboutBlock {
     aboutBoxTitle: string
 }
 
+// ── New optional sections (default disabled — existing offers unaffected) ───────
+
+export interface BenefitItem {
+    icon: string
+    title: string
+    description: string
+}
+
+export interface BenefitsBlock {
+    enabled: boolean
+    title: string
+    items: BenefitItem[]
+}
+
+export interface ProcessStep {
+    title: string
+    description: string
+}
+
+export interface ProcessBlock {
+    enabled: boolean
+    title: string
+    steps: ProcessStep[]
+}
+
+export interface StatItem {
+    value: string
+    label: string
+}
+
+export interface StatsBlock {
+    enabled: boolean
+    items: StatItem[]
+}
+
 /** Keys of all body sections (excludes header/footer which are always present) */
-export type SectionKey = 'intro' | 'demo' | 'structure' | 'scope' | 'testing' | 'technology' | 'pricingExtra' | 'about'
+export type SectionKey =
+    | 'intro' | 'demo' | 'structure' | 'scope' | 'testing' | 'technology' | 'pricingExtra' | 'about'
+    | 'benefits' | 'process' | 'stats'
 
 /** Default order — used by SectionManager when key is missing in saved data */
 export const DEFAULT_PAGE1_SECTIONS: SectionKey[] = ['intro', 'demo', 'structure']
 export const DEFAULT_PAGE2_SECTIONS: SectionKey[] = ['scope', 'testing', 'technology', 'pricingExtra', 'about']
-/** All section keys in default order (used to find "removed" sections) */
-export const ALL_SECTION_KEYS: SectionKey[] = [...DEFAULT_PAGE1_SECTIONS, ...DEFAULT_PAGE2_SECTIONS]
+/** Optional sections not placed on a page by default — available in the section manager. */
+export const OPTIONAL_SECTIONS: SectionKey[] = ['benefits', 'process', 'stats']
+/** All valid section keys (used to validate page arrays + find "removed"/available sections) */
+export const ALL_SECTION_KEYS: SectionKey[] = [...DEFAULT_PAGE1_SECTIONS, ...DEFAULT_PAGE2_SECTIONS, ...OPTIONAL_SECTIONS]
 
 export interface ProposalBlocks {
     version: 1
@@ -132,6 +171,9 @@ export interface ProposalBlocks {
     technology: TechnologyBlock
     pricingExtra: PricingExtraBlock
     about: AboutBlock
+    benefits: BenefitsBlock
+    process: ProcessBlock
+    stats: StatsBlock
 }
 
 // ── Default blocks ────────────────────────────────────────────────────────────
@@ -245,6 +287,36 @@ export function buildDefaultBlocks(clientName?: string): ProposalBlocks {
                 'Jeśli są Państwo zainteresowani współpracą, chętnie umówię się na krótką rozmowę, aby omówić szczegóły. Proszę o kontakt!',
             aboutBoxTitle: 'Więcej o nas i naszych realizacjach',
         },
+
+        benefits: {
+            enabled: false,
+            title: 'Dlaczego warto nam zaufać',
+            items: [
+                { icon: '⚡', title: 'Szybka realizacja', description: 'Terminowość potwierdzona w umowie.' },
+                { icon: '🛡️', title: 'Gwarancja jakości', description: 'Wsparcie i poprawki po wdrożeniu.' },
+                { icon: '🤝', title: 'Pełna transparentność', description: 'Stały kontakt i podgląd postępów.' },
+            ],
+        },
+
+        process: {
+            enabled: false,
+            title: 'Jak przebiega współpraca',
+            steps: [
+                { title: 'Konsultacja', description: 'Poznajemy Twoje potrzeby i cele.' },
+                { title: 'Projekt', description: 'Przygotowujemy koncepcję i wycenę.' },
+                { title: 'Realizacja', description: 'Wdrażamy z bieżącym podglądem postępów.' },
+                { title: 'Wdrożenie', description: 'Publikujemy i przekazujemy gotowy produkt.' },
+            ],
+        },
+
+        stats: {
+            enabled: false,
+            items: [
+                { value: '50+', label: 'zrealizowanych projektów' },
+                { value: '10 lat', label: 'doświadczenia' },
+                { value: '100%', label: 'terminowych wdrożeń' },
+            ],
+        },
     }
 }
 
@@ -272,5 +344,8 @@ export function mergeWithDefaults(
         technology: { ...defaults.technology, ...saved.technology },
         pricingExtra: { ...defaults.pricingExtra, ...saved.pricingExtra },
         about: { ...defaults.about, ...saved.about },
+        benefits: { ...defaults.benefits, ...saved.benefits },
+        process: { ...defaults.process, ...saved.process },
+        stats: { ...defaults.stats, ...saved.stats },
     }
 }

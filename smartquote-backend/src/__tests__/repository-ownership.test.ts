@@ -228,14 +228,16 @@ describe('OffersService — ownership (IDOR prevention)', () => {
             await expect(offersService.delete(RESOURCE_ID, OWNER_ID)).resolves.not.toThrow();
         });
 
-        it('throws NotFoundError when findById returns null (foreign userId)', async () => {
-            offersRepo.findById.mockResolvedValue(null);
+        it('throws NotFoundError when delete returns false (foreign userId or non-existent)', async () => {
+            // deleteMany with { id, userId } matches 0 rows → returns false → service throws NotFoundError.
+            // No prior findById needed — the atomic deleteMany is the ownership check.
+            offersRepo.delete.mockResolvedValue(false as never);
 
             await expect(
                 offersService.delete(RESOURCE_ID, ATTACKER_ID),
             ).rejects.toThrow(NotFoundError);
 
-            expect(offersRepo.delete).not.toHaveBeenCalled();
+            expect(offersRepo.delete).toHaveBeenCalledWith(RESOURCE_ID, ATTACKER_ID);
         });
     });
 

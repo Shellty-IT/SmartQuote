@@ -1,6 +1,6 @@
 // src/middleware/errorHandler.ts
 import { Request, Response, NextFunction } from 'express';
-import { DomainError } from '../errors/domain.errors';
+import { DomainError, ExternalServiceError } from '../errors/domain.errors';
 import { ZodError } from 'zod';
 import { logger } from '../lib/logger';
 
@@ -37,6 +37,10 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
                 code: err.code,
                 message: err.message,
                 statusCode: err.statusCode,
+                // Internal detail from external APIs — only in logs, never in response.
+                ...(err instanceof ExternalServiceError && err.internalMessage
+                    ? { internalMessage: err.internalMessage }
+                    : {}),
             },
             'Domain error',
         );

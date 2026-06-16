@@ -104,10 +104,8 @@ export class LeadsRepository {
     }
 
     async delete(id: string, userId: string) {
-        // Verify ownership before deleting
-        const lead = await prisma.lead.findFirst({ where: { id, userId } });
-        if (!lead) return null;
-        return prisma.lead.delete({ where: { id } });
+        const result = await prisma.lead.deleteMany({ where: { id, userId } });
+        return result.count > 0 ? result : null;
     }
 
     async countByStatus(userId: string): Promise<Record<LeadStatus, number>> {

@@ -32,13 +32,15 @@ import { useUnreadCount } from '@/hooks/useNotifications';
 
 type NavKey = 'dashboard' | 'offers' | 'offerTemplates' | 'contracts' | 'clients' | 'leads' | 'followups' | 'calendar' | 'correspondence' | 'notifications' | 'aiAssistant' | 'aiInsights';
 
+// Ordering follows the CRM sales funnel: capture (leads) → convert (clients) →
+// sell (offers → contracts) → supporting tools → activity/comms → AI.
 const NAV_ITEMS: { key: NavKey; href: string; icon: React.ElementType; stat: string | null; badgeTone: 'default' | 'primary' | 'success' | 'info' | 'warning' | 'violet' }[] = [
     { key: 'dashboard',      href: '/dashboard',                 icon: LayoutDashboard, stat: null,        badgeTone: 'default' },
-    { key: 'offers',         href: '/dashboard/offers',          icon: FileText,        stat: 'offers',    badgeTone: 'primary' },
-    { key: 'offerTemplates', href: '/dashboard/offer-templates', icon: FileStack,       stat: null,        badgeTone: 'default' },
-    { key: 'contracts',      href: '/dashboard/contracts',       icon: ScrollText,      stat: 'contracts', badgeTone: 'success' },
-    { key: 'clients',        href: '/dashboard/clients',         icon: Users,           stat: 'clients',   badgeTone: 'info'    },
     { key: 'leads',          href: '/dashboard/leads',           icon: UserSearch,      stat: 'leads',     badgeTone: 'warning' },
+    { key: 'clients',        href: '/dashboard/clients',         icon: Users,           stat: 'clients',   badgeTone: 'info'    },
+    { key: 'offers',         href: '/dashboard/offers',          icon: FileText,        stat: 'offers',    badgeTone: 'primary' },
+    { key: 'contracts',      href: '/dashboard/contracts',       icon: ScrollText,      stat: 'contracts', badgeTone: 'success' },
+    { key: 'offerTemplates', href: '/dashboard/offer-templates', icon: FileStack,       stat: null,        badgeTone: 'default' },
     { key: 'followups',      href: '/dashboard/followups',       icon: CalendarClock,   stat: 'followups', badgeTone: 'warning' },
     { key: 'calendar',       href: '/dashboard/calendar',        icon: CalendarDays,    stat: null,        badgeTone: 'default' },
     { key: 'correspondence', href: '/dashboard/emails',          icon: Mail,            stat: null,        badgeTone: 'default' },

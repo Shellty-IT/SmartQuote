@@ -2,13 +2,20 @@
 // Sliding panel with AI conversation for filling ProposalBlocks during offer creation.
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Send, Sparkles, CheckCircle } from 'lucide-react'
+import { X, Send, Sparkles, CheckCircle, Maximize2, Minimize2, GripVertical } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { ai } from '@/lib/api'
 import { useAIChat } from '@/contexts/AIChatContext'
+import { useLanguage } from '@/i18n'
 import { mergeWithDefaults, type ProposalBlocks } from '@/lib/pdf/proposal-blocks'
+
+const MIN_WIDTH = 420
+const MAX_WIDTH_RATIO = 0.5 // max 50vw
+const DEFAULT_INPUT_HEIGHT = 96
+const MAX_INPUT_HEIGHT_RATIO = 0.5 // textarea grows up to ~half the viewport (≈ half the bar)
+const LS_WIDTH_KEY = 'sq_ai_drawer_width'
 
 interface Message {
     id: string
@@ -37,10 +44,23 @@ function buildInitialMessage(hasContent: boolean): Message {
 
 export function OfferAIDrawer({ isOpen, onClose, clientName, offerTitle, currentBlocks, onApply }: OfferAIDrawerProps) {
     const { setHideGlobalFab } = useAIChat()
+    const { language } = useLanguage()
     const [messages, setMessages] = useState<Message[]>(() => [buildInitialMessage(false)])
     const [input, setInput] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [generatedBlocks, setGeneratedBlocks] = useState<Record<string, unknown> | null>(null)
+    const [drawerWidth, setDrawerWidth] = useState<number>(() => {
+        if (typeof window === 'undefined') return MIN_WIDTH
+        const saved = parseInt(localStorage.getItem(LS_WIDTH_KEY) ?? '', 10)
+        // Clamp against the current viewport's MAX as well — a width saved on a wide
+        // monitor would make the drawer overflow a narrower screen.
+        const maxWidth = Math.floor(window.innerWidth * MAX_WIDTH_RATIO)
+        if (!isNaN(saved) && saved >= MIN_WIDTH && saved <= maxWidth) return saved
+        return MIN_WIDTH
+    })
+    const [inputHeight, setInputHeight] = useState<number>(DEFAULT_INPUT_HEIGHT)
+    const drawerWidthRef = useRef(drawerWidth)
+    const inputHeightRef = useRef(inputHeight)
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLTextAreaElement>(null)
 
@@ -67,6 +87,71 @@ export function OfferAIDrawer({ isOpen, onClose, clientName, offerTitle, current
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }, [messages, isLoading])
 
+    // Drag-to-resize the drawer width (handle on the left edge). Grows leftward → wider.
+    const handleWidthDragStart = useCallback((e: React.MouseEvent) => {
+        e.preventDefault()
+        const startX = e.clientX
+        const startWidth = drawerWidthRef.current
+        const maxWidth = Math.floor(window.innerWidth * MAX_WIDTH_RATIO)
+        document.body.style.userSelect = 'none'
+        document.body.style.cursor = 'col-resize'
+
+        const onMove = (ev: MouseEvent) => {
+            const next = Math.min(maxWidth, Math.max(MIN_WIDTH, startWidth + (startX - ev.clientX)))
+            drawerWidthRef.current = next
+            setDrawerWidth(next)
+        }
+        const onUp = () => {
+            localStorage.setItem(LS_WIDTH_KEY, String(drawerWidthRef.current))
+            document.body.style.userSelect = ''
+            document.body.style.cursor = ''
+            window.removeEventListener('mousemove', onMove)
+            window.removeEventListener('mouseup', onUp)
+        }
+        window.addEventListener('mousemove', onMove)
+        window.addEventListener('mouseup', onUp)
+    }, [])
+
+    // Drag-to-resize the message textarea (handle on the top edge). Grows upward.
+    // Supports both mouse (desktop) and touch (mobile) so the handle works on all devices.
+    const handleHeightDragStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+        e.preventDefault()
+        const startY = 'touches' in e ? e.touches[0].clientY : e.clientY
+        const startHeight = inputHeightRef.current
+        const maxHeight = Math.floor(window.innerHeight * MAX_INPUT_HEIGHT_RATIO)
+        document.body.style.userSelect = 'none'
+        document.body.style.cursor = 'row-resize'
+
+        const getClientY = (ev: MouseEvent | TouchEvent) =>
+            'touches' in ev ? (ev as TouchEvent).touches[0].clientY : (ev as MouseEvent).clientY
+
+        const onMove = (ev: MouseEvent | TouchEvent) => {
+            const next = Math.min(maxHeight, Math.max(DEFAULT_INPUT_HEIGHT, startHeight + (startY - getClientY(ev))))
+            inputHeightRef.current = next
+            setInputHeight(next)
+        }
+        const onUp = () => {
+            document.body.style.userSelect = ''
+            document.body.style.cursor = ''
+            window.removeEventListener('mousemove', onMove)
+            window.removeEventListener('mouseup', onUp)
+            window.removeEventListener('touchmove', onMove)
+            window.removeEventListener('touchend', onUp)
+        }
+        window.addEventListener('mousemove', onMove)
+        window.addEventListener('mouseup', onUp)
+        window.addEventListener('touchmove', onMove, { passive: false })
+        window.addEventListener('touchend', onUp)
+    }, [])
+
+    // Quick toggle: snap textarea between default and ~half-bar height.
+    const toggleInputHeight = useCallback(() => {
+        const maxHeight = Math.floor(window.innerHeight * MAX_INPUT_HEIGHT_RATIO)
+        const next = inputHeightRef.current > DEFAULT_INPUT_HEIGHT + 20 ? DEFAULT_INPUT_HEIGHT : maxHeight
+        inputHeightRef.current = next
+        setInputHeight(next)
+    }, [])
+
     const getHistory = () =>
         messages
             .filter((m) => m.id !== 'init')
@@ -88,6 +173,7 @@ export function OfferAIDrawer({ isOpen, onClose, clientName, offerTitle, current
                 context: {
                     clientName: clientName || 'Klient',
                     offerTitle: offerTitle || 'Nowa oferta',
+                    language,
                 },
                 currentBlocks: currentBlocks as unknown as Record<string, unknown>,
             })
@@ -150,8 +236,20 @@ export function OfferAIDrawer({ isOpen, onClose, clientName, offerTitle, current
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 28, stiffness: 280 }}
-                        className="fixed right-0 top-0 z-40 flex h-full w-full flex-col bg-card border-l border-border shadow-2xl md:w-[420px]"
+                        className="fixed right-0 top-0 z-40 flex h-full flex-col bg-card border-l border-border shadow-2xl w-full"
+                        style={{ width: typeof window !== 'undefined' && window.innerWidth >= 768 ? drawerWidth : undefined }}
                     >
+                        {/* Drag-to-resize handle — left edge, desktop only. Wide hit area for easy grab. */}
+                        <div
+                            onMouseDown={handleWidthDragStart}
+                            className="group absolute left-0 top-0 z-50 hidden h-full w-3 -translate-x-1/2 cursor-col-resize items-center justify-center md:flex"
+                            title="Przeciągnij, aby zmienić szerokość panelu"
+                        >
+                            <span className="absolute inset-y-0 left-1/2 w-[3px] -translate-x-1/2 bg-border transition-colors group-hover:bg-primary" />
+                            <span className="relative flex h-12 w-5 items-center justify-center rounded-full border border-border bg-card shadow-sm transition-colors group-hover:border-primary/60">
+                                <GripVertical className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                            </span>
+                        </div>
                         {/* Header */}
                         <div className="flex items-center justify-between border-b border-border px-4 py-3 shrink-0">
                             <div className="flex items-center gap-2">
@@ -237,16 +335,38 @@ export function OfferAIDrawer({ isOpen, onClose, clientName, offerTitle, current
                         {/* Input */}
                         {!generatedBlocks && (
                             <div className="border-t border-border px-3 py-3 shrink-0">
-                                <div className="flex gap-2 items-end">
+                                {/* Drag handle on the top edge — resize the textarea upward */}
+                                <div
+                                    onMouseDown={handleHeightDragStart}
+                                    onTouchStart={handleHeightDragStart}
+                                    className="group mx-auto mb-1 flex h-3 w-full cursor-row-resize items-center justify-center"
+                                    title="Przeciągnij w górę, aby powiększyć pole"
+                                >
+                                    <span className="h-1 w-10 rounded-full bg-border transition-colors group-hover:bg-primary" />
+                                </div>
+                                <div className="relative flex items-end gap-2">
+                                    {/* Quick expand/collapse toggle — top-right of the textarea */}
+                                    <button
+                                        type="button"
+                                        onClick={toggleInputHeight}
+                                        className="absolute z-10 rounded p-1 text-muted-foreground transition-colors hover:bg-secondary/60 hover:text-foreground"
+                                        style={{ right: '3.25rem', top: '0.375rem' }}
+                                        title={inputHeight > DEFAULT_INPUT_HEIGHT + 20 ? 'Zwiń pole tekstowe' : 'Powiększ pole tekstowe'}
+                                    >
+                                        {inputHeight > DEFAULT_INPUT_HEIGHT + 20
+                                            ? <Minimize2 className="h-3.5 w-3.5" />
+                                            : <Maximize2 className="h-3.5 w-3.5" />
+                                        }
+                                    </button>
                                     <textarea
                                         ref={inputRef}
                                         value={input}
                                         onChange={(e) => setInput(e.target.value)}
                                         onKeyDown={handleKeyDown}
                                         placeholder="Napisz wiadomość… (Enter = wyślij)"
-                                        rows={4}
                                         disabled={isLoading}
-                                        className="flex-1 resize-y min-h-[80px] max-h-[240px] rounded-xl border border-border bg-secondary/40 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50"
+                                        className="flex-1 resize-none rounded-xl border border-border bg-secondary/40 px-3 py-2.5 pr-9 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50"
+                                        style={{ height: inputHeight }}
                                     />
                                     <Button
                                         type="button"
@@ -259,7 +379,7 @@ export function OfferAIDrawer({ isOpen, onClose, clientName, offerTitle, current
                                     </Button>
                                 </div>
                                 <p className="mt-1.5 text-center text-xs text-muted-foreground">
-                                    Shift+Enter = nowa linia
+                                    Shift+Enter = nowa linia · przeciągnij górną krawędź, aby powiększyć
                                 </p>
                             </div>
                         )}
