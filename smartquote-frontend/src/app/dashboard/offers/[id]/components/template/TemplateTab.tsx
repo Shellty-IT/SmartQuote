@@ -3,6 +3,7 @@
 
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
+import { useQueryClient } from '@tanstack/react-query'
 import { Eye, Download } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { PdfPreviewModal } from '@/components/pdf/PdfPreviewModal'
@@ -15,6 +16,7 @@ import { MobileAppDocumentEditorFromOffer } from '@/components/offers/MobileAppD
 import { MobileSimpleDocumentEditorFromOffer } from '@/components/offers/MobileSimpleDocumentEditor'
 import { UniversalDocumentEditorFromOffer } from '@/components/offers/UniversalDocumentEditor'
 import { offersApi, settingsApi } from '@/lib/api'
+import { offerKeys } from '@/lib/queryKeys'
 import { useToast } from '@/contexts/ToastContext'
 import { useTranslations } from '@/i18n'
 import { mergeWithDefaults, type ProposalBlocks } from '@/lib/pdf/proposal-blocks'
@@ -43,6 +45,7 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
     const tr = useTranslations('offerDetail')
     const ttr = tr.template
     const { data: session } = useSession()
+    const queryClient = useQueryClient()
     const toast = useToast()
 
     const templateType = (offer.templateType ?? 'classic') as 'classic' | 'proposal' | 'shop' | 'website_v2' | 'website_v3' | 'support' | 'mobile_app' | 'mobile_simple' | 'universal'
@@ -221,27 +224,33 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
         blocks: shopBlocks,
     }), [offer, session, companyInfo, shopBlocks])
 
+    const saveBlocks = useCallback(async (updatedBlocks: unknown) => {
+        await offersApi.update(offer.id, { blocks: updatedBlocks })
+        await Promise.all([
+            queryClient.invalidateQueries({ queryKey: offerKeys.detail(offer.id) }),
+            queryClient.invalidateQueries({ queryKey: offerKeys.all }),
+            queryClient.invalidateQueries({ queryKey: offerKeys.stats }),
+        ])
+        onSaved()
+    }, [offer.id, queryClient, onSaved])
+
     const handleProposalBlocksChange = useCallback(async (updatedBlocks: ProposalBlocks) => {
         setBlocks(updatedBlocks)
-        // Auto-save silently
         try {
-            await offersApi.update(offer.id, { blocks: updatedBlocks as unknown })
-            // Refresh offer so all tabs (Details, header) reflect updated totals
-            onSaved()
+            await saveBlocks(updatedBlocks)
         } catch {
             toast.error(ttr.saveError, offer.number)
         }
-    }, [offer.id, offer.number, ttr.saveError, toast, onSaved])
+    }, [offer.number, ttr.saveError, toast, saveBlocks])
 
     const handleShopBlocksChange = useCallback(async (updatedBlocks: ShopBlocks) => {
         setShopBlocks(updatedBlocks)
         try {
-            await offersApi.update(offer.id, { blocks: updatedBlocks as unknown })
-            onSaved()
+            await saveBlocks(updatedBlocks)
         } catch {
             toast.error(ttr.saveError, offer.number)
         }
-    }, [offer.id, offer.number, ttr.saveError, toast, onSaved])
+    }, [offer.number, ttr.saveError, toast, saveBlocks])
 
     const websiteV2OfferData = useMemo(() => ({
         id: offer.id,
@@ -272,12 +281,11 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
     const handleWebsiteV2BlocksChange = useCallback(async (updatedBlocks: WebsiteV2Blocks) => {
         setWebsiteV2Blocks(updatedBlocks)
         try {
-            await offersApi.update(offer.id, { blocks: updatedBlocks as unknown })
-            onSaved()
+            await saveBlocks(updatedBlocks)
         } catch {
             toast.error(ttr.saveError, offer.number)
         }
-    }, [offer.id, offer.number, ttr.saveError, toast, onSaved])
+    }, [offer.number, ttr.saveError, toast, saveBlocks])
 
     const websiteV3OfferData = useMemo(() => ({
         id: offer.id,
@@ -299,12 +307,11 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
     const handleWebsiteV3BlocksChange = useCallback(async (updatedBlocks: WebsiteV3Blocks) => {
         setWebsiteV3Blocks(updatedBlocks)
         try {
-            await offersApi.update(offer.id, { blocks: updatedBlocks as unknown })
-            onSaved()
+            await saveBlocks(updatedBlocks)
         } catch {
             toast.error(ttr.saveError, offer.number)
         }
-    }, [offer.id, offer.number, ttr.saveError, toast, onSaved])
+    }, [offer.number, ttr.saveError, toast, saveBlocks])
 
     const supportOfferData = useMemo<SupportOfferData>(() => ({
         offerNumber: offer.number,
@@ -321,12 +328,11 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
     const handleSupportBlocksChange = useCallback(async (updatedBlocks: SupportBlocks) => {
         setSupportBlocks(updatedBlocks)
         try {
-            await offersApi.update(offer.id, { blocks: updatedBlocks as unknown })
-            onSaved()
+            await saveBlocks(updatedBlocks)
         } catch {
             toast.error(ttr.saveError, offer.number)
         }
-    }, [offer.id, offer.number, ttr.saveError, toast, onSaved])
+    }, [offer.number, ttr.saveError, toast, saveBlocks])
 
     const mobileAppOfferData = useMemo<MobileAppOfferData>(() => ({
         offerNumber: offer.number,
@@ -343,12 +349,11 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
     const handleMobileAppBlocksChange = useCallback(async (updatedBlocks: MobileAppBlocks) => {
         setMobileAppBlocks(updatedBlocks)
         try {
-            await offersApi.update(offer.id, { blocks: updatedBlocks as unknown })
-            onSaved()
+            await saveBlocks(updatedBlocks)
         } catch {
             toast.error(ttr.saveError, offer.number)
         }
-    }, [offer.id, offer.number, ttr.saveError, toast, onSaved])
+    }, [offer.number, ttr.saveError, toast, saveBlocks])
 
     const mobileSimpleOfferData = useMemo<MobileSimpleOfferData>(() => ({
         offerNumber: offer.number,
@@ -365,12 +370,11 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
     const handleMobileSimpleBlocksChange = useCallback(async (updatedBlocks: MobileSimpleBlocks) => {
         setMobileSimpleBlocks(updatedBlocks)
         try {
-            await offersApi.update(offer.id, { blocks: updatedBlocks as unknown })
-            onSaved()
+            await saveBlocks(updatedBlocks)
         } catch {
             toast.error(ttr.saveError, offer.number)
         }
-    }, [offer.id, offer.number, ttr.saveError, toast, onSaved])
+    }, [offer.number, ttr.saveError, toast, saveBlocks])
 
     const universalOfferData = useMemo<UniversalOfferData>(() => ({
         offerNumber: offer.number,
@@ -393,12 +397,11 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
     const handleUniversalBlocksChange = useCallback(async (updatedBlocks: UniversalBlocks) => {
         setUniversalBlocks(updatedBlocks)
         try {
-            await offersApi.update(offer.id, { blocks: updatedBlocks as unknown })
-            onSaved()
+            await saveBlocks(updatedBlocks)
         } catch {
             toast.error(ttr.saveError, offer.number)
         }
-    }, [offer.id, offer.number, ttr.saveError, toast, onSaved])
+    }, [offer.number, ttr.saveError, toast, saveBlocks])
 
     return (
         <div className="space-y-6">

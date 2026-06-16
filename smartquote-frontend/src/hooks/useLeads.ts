@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { leadsApi } from '@/lib/api/leads.api';
+import { leadKeys } from '@/lib/queryKeys';
 import type { Lead, LeadsStats } from '@/types/lead.types';
 
 interface UseLeadsResult {
@@ -14,7 +15,7 @@ interface UseLeadsResult {
 
 export function useLeads(params?: Record<string, string | number | boolean | undefined>): UseLeadsResult {
     const { data, isLoading, error, refetch } = useQuery({
-        queryKey: ['leads', params],
+        queryKey: leadKeys.list(params),
         queryFn: () => leadsApi.list(params),
     });
 
@@ -29,7 +30,7 @@ export function useLeads(params?: Record<string, string | number | boolean | und
 
 export function useLead(id: string) {
     const { data, isLoading, error, refetch } = useQuery({
-        queryKey: ['lead', id],
+        queryKey: leadKeys.detail(id),
         queryFn: () => leadsApi.get(id),
         enabled: !!id,
     });
@@ -44,7 +45,7 @@ export function useLead(id: string) {
 
 export function useLeadsStats() {
     const { data, isLoading } = useQuery({
-        queryKey: ['leads-stats'],
+        queryKey: leadKeys.stats,
         queryFn: () => leadsApi.stats(),
         retry: false,
     });

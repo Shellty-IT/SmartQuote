@@ -21,19 +21,31 @@ export const LanguageContext = createContext<LanguageContextType>({
     setLanguage: () => {},
 });
 
-function LanguageProvider({ children }: { children: ReactNode }) {
-    const [language, setLanguageState] = useState<Language>('pl');
+function LanguageProvider({
+    children,
+    initialLanguage = 'pl',
+}: {
+    children: ReactNode;
+    initialLanguage?: Language;
+}) {
+    const [language, setLanguageState] = useState<Language>(initialLanguage);
 
     useEffect(() => {
-        const saved = localStorage.getItem('smartquote-lang') as Language | null;
-        if (saved === 'pl' || saved === 'en') {
-            setLanguageState(saved);
+        try {
+            localStorage.setItem('smartquote-lang', language);
+            document.cookie = `smartquote-lang=${language}; path=/; max-age=31536000; SameSite=Lax`;
+            document.documentElement.lang = language;
+        } catch {
         }
-    }, []);
+    }, [language]);
 
     const setLanguage = useCallback((lang: Language) => {
         setLanguageState(lang);
-        localStorage.setItem('smartquote-lang', lang);
+        try {
+            localStorage.setItem('smartquote-lang', lang);
+            document.cookie = `smartquote-lang=${lang}; path=/; max-age=31536000; SameSite=Lax`;
+        } catch {
+        }
     }, []);
 
     return (
@@ -129,7 +141,13 @@ function SidebarProvider({ children }: { children: ReactNode }) {
     );
 }
 
-export function Providers({ children }: { children: ReactNode }) {
+export function Providers({
+    children,
+    initialLanguage = 'pl',
+}: {
+    children: ReactNode;
+    initialLanguage?: Language;
+}) {
     const [queryClient] = useState(() => new QueryClient({
         defaultOptions: {
             queries: {
@@ -143,7 +161,7 @@ export function Providers({ children }: { children: ReactNode }) {
         <QueryClientProvider client={queryClient}>
             <SessionProvider>
                 <ThemeProvider>
-                    <LanguageProvider>
+                    <LanguageProvider initialLanguage={initialLanguage}>
                         <SidebarProvider>
                             <ToastProvider>
                                 <AIChatProvider>

@@ -1,6 +1,7 @@
 // SmartQuote-AI/src/app/layout.tsx
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { cookies } from 'next/headers';
 import { Providers } from './providers';
 import './globals.css';
 
@@ -68,20 +69,27 @@ function ServiceWorkerRegistration() {
     );
 }
 
-export default function RootLayout({
-                                       children,
-                                   }: Readonly<{
+function resolveLanguage(value?: string): 'pl' | 'en' {
+    return value === 'en' ? 'en' : 'pl';
+}
+
+export default async function RootLayout({
+                                             children,
+                                         }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const cookieStore = await cookies();
+    const initialLanguage = resolveLanguage(cookieStore.get('smartquote-lang')?.value);
+
     return (
-        <html lang="pl">
+        <html lang={initialLanguage}>
         <head>
             <meta name="apple-mobile-web-app-capable" content="yes" />
             <meta name="mobile-web-app-capable" content="yes" />
             <ServiceWorkerRegistration />
         </head>
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Providers>{children}</Providers>
+        <Providers initialLanguage={initialLanguage}>{children}</Providers>
         </body>
         </html>
     );

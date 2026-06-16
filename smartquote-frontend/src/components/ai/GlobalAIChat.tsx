@@ -12,6 +12,7 @@ import { offersApi } from '@/lib/api/offers.api';
 import { contractsApi } from '@/lib/api/contracts.api';
 import { leadsApi } from '@/lib/api/leads.api';
 import { followUpsApi } from '@/lib/api/follow-ups.api';
+import { contractKeys, followUpKeys, leadKeys, offerKeys } from '@/lib/queryKeys';
 import { useToast } from '@/contexts/ToastContext';
 import { useAIChat } from '@/contexts/AIChatContext';
 import { usePageContext } from '@/hooks/usePageContext';
@@ -165,12 +166,14 @@ export function GlobalAIChat() {
                 try {
                     if (p.entityType === 'contract') {
                         await contractsApi.updateStatus(p.entityId, p.status);
-                        queryClient.invalidateQueries({ queryKey: ['contract', p.entityId] });
-                        queryClient.invalidateQueries({ queryKey: ['contracts'] });
+                        queryClient.invalidateQueries({ queryKey: contractKeys.detail(p.entityId) });
+                        queryClient.invalidateQueries({ queryKey: contractKeys.all });
+                        queryClient.invalidateQueries({ queryKey: contractKeys.stats });
                     } else {
                         await offersApi.update(p.entityId, { status: p.status as import('@/types').OfferStatus });
-                        queryClient.invalidateQueries({ queryKey: ['offer', p.entityId] });
-                        queryClient.invalidateQueries({ queryKey: ['offers'] });
+                        queryClient.invalidateQueries({ queryKey: offerKeys.detail(p.entityId) });
+                        queryClient.invalidateQueries({ queryKey: offerKeys.all });
+                        queryClient.invalidateQueries({ queryKey: offerKeys.stats });
                     }
                     addMessage({ id: crypto.randomUUID(), role: 'assistant', content: `✅ Status zmieniony na: ${p.status}.`, timestamp: new Date() });
                 } catch {
@@ -195,7 +198,8 @@ export function GlobalAIChat() {
                         source: p.source ?? 'AI',
                         notes: '',
                     });
-                    queryClient.invalidateQueries({ queryKey: ['leads'] });
+                    queryClient.invalidateQueries({ queryKey: leadKeys.all });
+                    queryClient.invalidateQueries({ queryKey: leadKeys.stats });
                     addMessage({ id: crypto.randomUUID(), role: 'assistant', content: `✅ Lead "${p.name}" zapisany.`, timestamp: new Date() });
                     if (lead.data?.id) {
                         router.push(`/dashboard/leads/${lead.data.id}`);
@@ -225,7 +229,8 @@ export function GlobalAIChat() {
                         dueDate: dueDate.toISOString(),
                         clientId: p.clientId,
                     });
-                    queryClient.invalidateQueries({ queryKey: ['followups'] });
+                    queryClient.invalidateQueries({ queryKey: followUpKeys.all });
+                    queryClient.invalidateQueries({ queryKey: followUpKeys.stats });
                     addMessage({ id: crypto.randomUUID(), role: 'assistant', content: `✅ Follow-up "${p.title}" zaplanowany na jutro o 10:00.`, timestamp: new Date() });
                 } catch {
                     toast.error('Nie udało się zapisać follow-up.');

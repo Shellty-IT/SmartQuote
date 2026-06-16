@@ -61,7 +61,7 @@ const BADGE_TONE: Record<string, string> = {
 export default function Sidebar() {
     const pathname = usePathname();
     const { collapsed, setCollapsed } = useSidebarCollapsed();
-    const { stats, isLoading } = useSidebarStats();
+    const { stats, loading } = useSidebarStats();
     const { count: unreadNotifications } = useUnreadCount();
     const tr = useTranslations('sidebar');
     const commonTr = useTranslations('common');
@@ -81,9 +81,10 @@ export default function Sidebar() {
         return () => { document.body.style.overflow = ''; };
     }, [mobileOpen]);
 
-    function getBadge(stat: string | null, notif: number): number | null {
+    function getBadge(stat: string | null, notif: number): number | 'loading' | null {
         if (stat === 'notif') return notif > 0 ? notif : null;
         if (!stat) return null;
+        if (loading[stat as keyof typeof loading]) return 'loading';
         const v = stats[stat as keyof typeof stats];
         return typeof v === 'number' && v > 0 ? v : null;
     }
@@ -155,10 +156,10 @@ export default function Sidebar() {
                                     {badge !== null && (
                                         <span className={cn(
                                             'rounded-full px-2 py-0.5 text-[10px] font-semibold tabular-nums',
-                                            isLoading ? 'animate-pulse' : '',
+                                            badge === 'loading' ? 'animate-pulse' : '',
                                             active ? 'bg-gradient-primary text-white' : BADGE_TONE[item.badgeTone],
                                         )}>
-                                            {isLoading ? '·' : badge > 9999 ? '9999+' : badge}
+                                            {badge === 'loading' ? '...' : badge > 9999 ? '9999+' : badge}
                                         </span>
                                     )}
                                 </>

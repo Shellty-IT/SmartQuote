@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { clientsApi, ApiError } from '@/lib/api';
+import { clientKeys, queryStaleTime } from '@/lib/queryKeys';
 import { Client, ClientFilters, CreateClientInput, UpdateClientInput } from '@/types';
 
 export function useClients(initialFilters: ClientFilters = {}) {
@@ -16,8 +17,9 @@ export function useClients(initialFilters: ClientFilters = {}) {
     });
 
     const { data, isLoading, error, refetch } = useQuery({
-        queryKey: ['clients', filters],
+        queryKey: clientKeys.list(filters),
         queryFn: () => clientsApi.list(filters as Record<string, string | number | boolean | undefined>),
+        staleTime: queryStaleTime.clients.list,
     });
 
     const setFilters = useCallback((newFilters: Partial<ClientFilters>) => {
@@ -26,8 +28,8 @@ export function useClients(initialFilters: ClientFilters = {}) {
 
     const invalidateAll = useCallback(async () => {
         await Promise.all([
-            queryClient.invalidateQueries({ queryKey: ['clients'] }),
-            queryClient.invalidateQueries({ queryKey: ['clients-stats'] }),
+            queryClient.invalidateQueries({ queryKey: clientKeys.all }),
+            queryClient.invalidateQueries({ queryKey: clientKeys.stats }),
         ]);
     }, [queryClient]);
 
@@ -41,7 +43,7 @@ export function useClients(initialFilters: ClientFilters = {}) {
             clientsApi.update(id, input),
         onSuccess: async (_, { id }) => {
             await invalidateAll();
-            await queryClient.invalidateQueries({ queryKey: ['client', id] });
+            await queryClient.invalidateQueries({ queryKey: clientKeys.detail(id) });
         },
     });
 
@@ -84,10 +86,10 @@ export function useClients(initialFilters: ClientFilters = {}) {
 
 export function useClient(id: string) {
     const { data, isLoading, error, refetch } = useQuery({
-        queryKey: ['client', id],
+        queryKey: clientKeys.detail(id),
         queryFn: () => clientsApi.get(id),
         enabled: !!id,
-        staleTime: 60_000,
+        staleTime: queryStaleTime.clients.detail,
     });
 
     return {
@@ -100,9 +102,9 @@ export function useClient(id: string) {
 
 export function useClientsStats() {
     const { data, isLoading, error, refetch } = useQuery({
-        queryKey: ['clients-stats'],
+        queryKey: clientKeys.stats,
         queryFn: () => clientsApi.stats(),
-        staleTime: 60_000,
+        staleTime: queryStaleTime.clients.stats,
     });
 
     return {
