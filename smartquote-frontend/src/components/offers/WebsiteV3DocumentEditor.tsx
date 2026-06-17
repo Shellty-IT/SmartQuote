@@ -5,6 +5,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Download, RefreshCw, ZoomIn, ZoomOut, Layers } from 'lucide-react'
 import { Button } from '@/components/ui'
+import { TemplateAIFillButton } from './TemplateAIFillButton'
 import { WebsiteV3BlockEditorPanel, WebsiteV3SectionManagerPanel, type EditableWV3BlockKey } from './editor/WebsiteV3BlockEditorPanel'
 import { buildWebsiteV3Html, type WebsiteV3OfferData } from '@/lib/pdf/website-v3-html'
 import { mergeWebsiteV3WithDefaults, buildDefaultWebsiteV3Blocks, type WebsiteV3Blocks } from '@/lib/pdf/website-v3-blocks'
@@ -86,6 +87,13 @@ export function WebsiteV3DocumentEditor({
         <div className="flex flex-col gap-3">
             {/* Toolbar */}
             <div className="flex items-center gap-2 flex-wrap">
+                <TemplateAIFillButton
+                    blocks={blocks}
+                    onBlocksChange={onBlocksChange}
+                    clientName={offer.client.name}
+                    title={offer.title}
+                    templateType="website_v3"
+                />
                 <Button variant="outline" size="sm" onClick={handleRefresh}>
                     <RefreshCw className="w-4 h-4" />
                     Odśwież

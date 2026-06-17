@@ -1,5 +1,5 @@
 // src/components/offers/OfferAIDrawer.tsx
-// Sliding panel with AI conversation for filling ProposalBlocks during offer creation.
+// Sliding panel with AI conversation for filling an offer or contract template.
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
@@ -9,10 +9,9 @@ import { Button } from '@/components/ui'
 import { ai } from '@/lib/api'
 import { useAIChat } from '@/contexts/AIChatContext'
 import { useLanguage } from '@/i18n'
-import { mergeWithDefaults, type ProposalBlocks } from '@/lib/pdf/proposal-blocks'
 
-const MIN_WIDTH = 420
-const MAX_WIDTH_RATIO = 0.5 // max 50vw
+const MIN_WIDTH = 320
+const MAX_WIDTH_RATIO = 0.85 // max 85vw
 const DEFAULT_INPUT_HEIGHT = 96
 const MAX_INPUT_HEIGHT_RATIO = 0.5 // textarea grows up to ~half the viewport (≈ half the bar)
 const LS_WIDTH_KEY = 'sq_ai_drawer_width'
@@ -28,24 +27,50 @@ interface OfferAIDrawerProps {
     onClose: () => void
     clientName: string
     offerTitle: string
-    currentBlocks: ProposalBlocks
-    onApply: (blocks: ProposalBlocks) => void
+    currentBlocks: Record<string, unknown>
+    onApply: (blocks: Record<string, unknown>) => void
+    templateType?: string
+    entityType?: 'offer' | 'contract'
 }
 
-function buildInitialMessage(hasContent: boolean): Message {
+function buildInitialMessage(hasContent: boolean, entityType: 'offer' | 'contract' = 'offer'): Message {
+    const documentLabel = entityType === 'contract' ? 'umowy' : 'oferty'
     return {
         id: 'init',
         role: 'assistant',
         content: hasContent
             ? 'Cześć! Widzę że szablon jest już częściowo wypełniony. Mogę go zmodyfikować, poprawić lub rozwinąć wybrane sekcje. Co chciałbyś zmienić lub ulepszyć?'
-            : 'Cześć! Pomogę Ci wypełnić szablon oferty. Zacznijmy od podstaw — opisz krótko projekt lub branżę klienta. Czym się zajmuje firma i czego potrzebuje?',
+            : `Cześć! Pomogę Ci wypełnić szablon ${documentLabel}. Zacznijmy od podstaw - opisz krótko projekt lub branżę klienta. Czym się zajmuje firma i czego potrzebuje?`,
     }
 }
 
-export function OfferAIDrawer({ isOpen, onClose, clientName, offerTitle, currentBlocks, onApply }: OfferAIDrawerProps) {
+function hasMeaningfulTemplateContent(blocks: Record<string, unknown>): boolean {
+    const seen = new Set<unknown>()
+    const walk = (value: unknown): boolean => {
+        if (typeof value === 'string') return value.trim().length > 60
+        if (Array.isArray(value)) return value.length > 3 || value.some(walk)
+        if (!value || typeof value !== 'object') return false
+        if (seen.has(value)) return false
+        seen.add(value)
+        return Object.entries(value as Record<string, unknown>)
+            .some(([key, child]) => key !== 'version' && key !== 'sections' && key !== 'page1Sections' && key !== 'page2Sections' && walk(child))
+    }
+    return walk(blocks)
+}
+
+export function OfferAIDrawer({
+    isOpen,
+    onClose,
+    clientName,
+    offerTitle,
+    currentBlocks,
+    onApply,
+    templateType = 'proposal',
+    entityType = 'offer',
+}: OfferAIDrawerProps) {
     const { setHideGlobalFab } = useAIChat()
     const { language } = useLanguage()
-    const [messages, setMessages] = useState<Message[]>(() => [buildInitialMessage(false)])
+    const [messages, setMessages] = useState<Message[]>(() => [buildInitialMessage(false, entityType)])
     const [input, setInput] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [generatedBlocks, setGeneratedBlocks] = useState<Record<string, unknown> | null>(null)
@@ -59,6 +84,7 @@ export function OfferAIDrawer({ isOpen, onClose, clientName, offerTitle, current
         return MIN_WIDTH
     })
     const [inputHeight, setInputHeight] = useState<number>(DEFAULT_INPUT_HEIGHT)
+    const [isWidthDragging, setIsWidthDragging] = useState(false)
     const drawerWidthRef = useRef(drawerWidth)
     const inputHeightRef = useRef(inputHeight)
     const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -73,9 +99,8 @@ export function OfferAIDrawer({ isOpen, onClose, clientName, offerTitle, current
     // Reset conversation when drawer opens fresh
     useEffect(() => {
         if (isOpen) {
-            const hasContent = currentBlocks.intro.paragraphs.some((p) => p.length > 60)
-                || currentBlocks.scope.items.length > 3
-            setMessages([buildInitialMessage(hasContent)])
+            const hasContent = hasMeaningfulTemplateContent(currentBlocks)
+            setMessages([buildInitialMessage(hasContent, entityType)])
             setInput('')
             setGeneratedBlocks(null)
             setTimeout(() => inputRef.current?.focus(), 300)
@@ -88,28 +113,52 @@ export function OfferAIDrawer({ isOpen, onClose, clientName, offerTitle, current
     }, [messages, isLoading])
 
     // Drag-to-resize the drawer width (handle on the left edge). Grows leftward → wider.
-    const handleWidthDragStart = useCallback((e: React.MouseEvent) => {
+    const handleWidthDragStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
         e.preventDefault()
-        const startX = e.clientX
-        const startWidth = drawerWidthRef.current
         const maxWidth = Math.floor(window.innerWidth * MAX_WIDTH_RATIO)
+        const previousUserSelect = document.body.style.userSelect
+        const previousCursor = document.body.style.cursor
         document.body.style.userSelect = 'none'
         document.body.style.cursor = 'col-resize'
+        setIsWidthDragging(true)
 
-        const onMove = (ev: MouseEvent) => {
-            const next = Math.min(maxWidth, Math.max(MIN_WIDTH, startWidth + (startX - ev.clientX)))
+        const getClientX = (ev: MouseEvent | TouchEvent) =>
+            'touches' in ev ? (ev as TouchEvent).touches[0]?.clientX : (ev as MouseEvent).clientX
+
+        const resizeFromClientX = (clientX: number) => {
+            const next = Math.min(maxWidth, Math.max(MIN_WIDTH, window.innerWidth - clientX))
             drawerWidthRef.current = next
             setDrawerWidth(next)
         }
+
+        const initialClientX = 'touches' in e ? e.touches[0]?.clientX : e.clientX
+        if (typeof initialClientX === 'number') {
+            resizeFromClientX(initialClientX)
+        }
+
+        const onMove = (ev: MouseEvent | TouchEvent) => {
+            ev.preventDefault()
+            const clientX = getClientX(ev)
+            if (typeof clientX === 'number') {
+                resizeFromClientX(clientX)
+            }
+        }
+
         const onUp = () => {
             localStorage.setItem(LS_WIDTH_KEY, String(drawerWidthRef.current))
-            document.body.style.userSelect = ''
-            document.body.style.cursor = ''
-            window.removeEventListener('mousemove', onMove)
-            window.removeEventListener('mouseup', onUp)
+            document.body.style.userSelect = previousUserSelect
+            document.body.style.cursor = previousCursor
+            setIsWidthDragging(false)
+            document.removeEventListener('mousemove', onMove)
+            document.removeEventListener('mouseup', onUp)
+            document.removeEventListener('touchmove', onMove)
+            document.removeEventListener('touchend', onUp)
         }
-        window.addEventListener('mousemove', onMove)
-        window.addEventListener('mouseup', onUp)
+
+        document.addEventListener('mousemove', onMove)
+        document.addEventListener('mouseup', onUp)
+        document.addEventListener('touchmove', onMove, { passive: false })
+        document.addEventListener('touchend', onUp)
     }, [])
 
     // Drag-to-resize the message textarea (handle on the top edge). Grows upward.
@@ -173,6 +222,8 @@ export function OfferAIDrawer({ isOpen, onClose, clientName, offerTitle, current
                 context: {
                     clientName: clientName || 'Klient',
                     offerTitle: offerTitle || 'Nowa oferta',
+                    templateType,
+                    entityType,
                     language,
                 },
                 currentBlocks: currentBlocks as unknown as Record<string, unknown>,
@@ -194,7 +245,7 @@ export function OfferAIDrawer({ isOpen, onClose, clientName, offerTitle, current
                 {
                     id: crypto.randomUUID(),
                     role: 'assistant',
-                    content: '❌ Błąd komunikacji z AI. Spróbuj ponownie.',
+                    content: 'Błąd komunikacji z AI. Spróbuj ponownie.',
                 },
             ])
         } finally {
@@ -204,9 +255,8 @@ export function OfferAIDrawer({ isOpen, onClose, clientName, offerTitle, current
 
     const handleApply = () => {
         if (!generatedBlocks) return
-        // Backend already ran diffMergeBlocks against currentBlocks — blocks are safe to apply directly.
-        const blocks = mergeWithDefaults(generatedBlocks as Partial<ProposalBlocks>, clientName)
-        onApply(blocks)
+        // Backend already merged the generated content into the current template.
+        onApply(generatedBlocks)
         onClose()
     }
 
@@ -216,6 +266,8 @@ export function OfferAIDrawer({ isOpen, onClose, clientName, offerTitle, current
             handleSend()
         }
     }
+
+    const drawerTitle = entityType === 'contract' ? 'AI - Wypełnij umowę' : 'AI - Wypełnij ofertę'
 
     return (
         <AnimatePresence>
@@ -237,11 +289,15 @@ export function OfferAIDrawer({ isOpen, onClose, clientName, offerTitle, current
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 28, stiffness: 280 }}
                         className="fixed right-0 top-0 z-40 flex h-full flex-col bg-card border-l border-border shadow-2xl w-full"
-                        style={{ width: typeof window !== 'undefined' && window.innerWidth >= 768 ? drawerWidth : undefined }}
+                        style={{
+                            width: typeof window !== 'undefined' && window.innerWidth >= 768 ? drawerWidth : undefined,
+                            transition: isWidthDragging ? 'none' : undefined,
+                        }}
                     >
                         {/* Drag-to-resize handle — left edge, desktop only. Wide hit area for easy grab. */}
                         <div
                             onMouseDown={handleWidthDragStart}
+                            onTouchStart={handleWidthDragStart}
                             className="group absolute left-0 top-0 z-50 hidden h-full w-3 -translate-x-1/2 cursor-col-resize items-center justify-center md:flex"
                             title="Przeciągnij, aby zmienić szerokość panelu"
                         >
@@ -257,7 +313,7 @@ export function OfferAIDrawer({ isOpen, onClose, clientName, offerTitle, current
                                     <Sparkles className="h-4 w-4" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-semibold text-foreground">AI — Wypełnij ofertę</p>
+                                    <p className="text-sm font-semibold text-foreground">{drawerTitle}</p>
                                     <p className="text-xs text-muted-foreground truncate max-w-[240px]">
                                         {clientName || 'Klient'} · {offerTitle || 'Nowa oferta'}
                                     </p>

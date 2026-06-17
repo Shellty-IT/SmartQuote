@@ -9,6 +9,7 @@ import { WebsiteV2DocumentEditor } from '@/components/offers/WebsiteV2DocumentEd
 import { settingsApi } from '@/lib/api'
 import type { CompanyInfo, Client } from '@/types'
 import type { WebsiteV2Blocks } from '@/lib/pdf/website-v2-blocks'
+import type { OfferContext } from '@/components/offers/editor/block-editors'
 
 interface StepWebsiteV2TemplateProps {
     client: Client | null
@@ -63,6 +64,13 @@ export default function StepWebsiteV2Template({
         blocks,
     }), [offerTitle, totalGross, currency, paymentDays, client, session, companyInfo, blocks])
 
+    const offerContext = useMemo<OfferContext>(() => ({
+        title: offerTitle || 'Nowa oferta',
+        clientName: client?.name ?? 'Klient',
+        totalGross,
+        currency,
+    }), [offerTitle, client, totalGross, currency])
+
     return (
         <div className="flex flex-col gap-4">
             <div>
@@ -87,6 +95,7 @@ export default function StepWebsiteV2Template({
                 offer={previewOffer}
                 blocks={blocks}
                 onBlocksChange={onBlocksChange}
+                offerContext={offerContext}
             />
         </div>
     )

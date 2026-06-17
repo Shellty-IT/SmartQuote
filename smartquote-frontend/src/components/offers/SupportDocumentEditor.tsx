@@ -5,6 +5,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Download, ZoomIn, ZoomOut } from 'lucide-react'
 import { Button } from '@/components/ui'
+import { TemplateAIFillButton } from './TemplateAIFillButton'
 import { SupportBlockEditorPanel, type EditableSupportBlockKey } from './editor/SupportBlockEditorPanel'
 import { buildSupportHtml, type SupportOfferData } from '@/lib/pdf/support-html'
 import type { SupportBlocks } from '@/lib/pdf/support-blocks'
@@ -62,6 +63,13 @@ export function SupportDocumentEditor({
         <div className="flex flex-col gap-3">
             {/* Toolbar */}
             <div className="flex items-center gap-2 flex-wrap">
+                <TemplateAIFillButton
+                    blocks={blocks}
+                    onBlocksChange={onBlocksChange}
+                    clientName={offer.clientName ?? 'Klient'}
+                    title={offer.offerNumber ?? 'Oferta wsparcia IT'}
+                    templateType="support"
+                />
                 <div className="flex items-center gap-1">
                     <button
                         type="button"
@@ -143,12 +151,14 @@ export function SupportDocumentEditorWizard({
     offer,
     blocks,
     onBlocksChange,
+    offerContext,
 }: {
     offer: SupportOfferData
     blocks: SupportBlocks
     onBlocksChange: (blocks: SupportBlocks) => void
+    offerContext?: OfferContext
 }) {
-    return <SupportDocumentEditor offer={offer} blocks={blocks} onBlocksChange={onBlocksChange} />
+    return <SupportDocumentEditor offer={offer} blocks={blocks} onBlocksChange={onBlocksChange} offerContext={offerContext} />
 }
 
 // ── Detail page variant ───────────────────────────────────────────────────────

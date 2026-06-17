@@ -10,6 +10,7 @@ import {
     type ServicesEditableSectionKey,
 } from './ContractServicesBlockEditorPanel'
 import { ContractEditorToolbar } from './ContractEditorToolbar'
+import { TemplateAIFillButton } from '@/components/offers/TemplateAIFillButton'
 import { buildContractServicesHtml } from '@/lib/pdf/contract-services-html'
 import { mergeServicesWithDefaults, type ContractServicesBlocks } from '@/lib/pdf/contract-services-blocks'
 import { useZoom } from '@/hooks/useZoom'
@@ -86,6 +87,16 @@ export function ContractServicesDocumentEditor({
                 onRefresh={handleRefresh}
                 onDownloadPdf={onDownloadPdf} isDownloading={isDownloading}
                 showSaveButton={showSaveButton} onSave={onSave} isSaving={isSaving}
+                aiFill={(
+                    <TemplateAIFillButton
+                        blocks={blocks}
+                        onBlocksChange={onBlocksChange}
+                        clientName={aiContext?.clientName ?? 'Klient'}
+                        title={aiContext?.title ?? 'Umowa'}
+                        templateType="services"
+                        entityType="contract"
+                    />
+                )}
             />
             <div className="flex flex-1 min-h-0">
                 <div className="flex-1 min-w-0 overflow-auto bg-[#CDD2E2] transition-all duration-300">

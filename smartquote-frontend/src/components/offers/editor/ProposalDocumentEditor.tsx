@@ -7,6 +7,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Download, RefreshCw, ZoomIn, ZoomOut, Layers } from 'lucide-react'
 import { Button } from '@/components/ui'
+import { TemplateAIFillButton } from '@/components/offers/TemplateAIFillButton'
 import {
     BlockEditorPanel,
     SectionManagerPanel,
@@ -54,7 +55,14 @@ export function ProposalDocumentEditor({
     isSaving,
 }: ProposalDocumentEditorProps) {
     const [panelView, setPanelView] = useState<PanelView>(null)
-    const { panelWidth, onResizeMouseDown } = useResizablePanel('sq_editor_panel_width')
+    const {
+        containerRef,
+        previewPanelStyle,
+        editorPanelStyle,
+        handleStyle,
+        isDragging,
+        onResizeMouseDown,
+    } = useResizablePanel('sq_preview_ratio_offer', { mode: 'preview-ratio' })
     const { zoom, zoomIn, zoomOut } = useZoom()
     const [refreshKey, setRefreshKey] = useState(0)
 
@@ -121,6 +129,16 @@ export function ProposalDocumentEditor({
                     </p>
                 </div>
                 <div className="flex items-center gap-1">
+                    <TemplateAIFillButton
+                        blocks={blocks}
+                        onBlocksChange={onBlocksChange}
+                        clientName={offer.client.name}
+                        title={offer.title}
+                        templateType="proposal"
+                    />
+
+                    <div className="mx-1 h-4 w-px bg-border" />
+
                     {/* Sections manager button */}
                     <button
                         type="button"
@@ -193,9 +211,16 @@ export function ProposalDocumentEditor({
             </div>
 
             {/* Main area: document + optional editor panel */}
-            <div className="flex flex-1 min-h-0">
+            <div ref={containerRef} className="flex flex-1 min-h-0">
                 {/* Document iframe */}
-                <div className="flex-1 min-w-0 overflow-auto bg-[#CDD2E2] transition-all duration-300">
+                <div
+                    className={cn(
+                        'min-w-0 overflow-auto bg-[#CDD2E2]',
+                        panelOpen ? 'flex-shrink-0' : 'flex-1',
+                        !isDragging && 'transition-all duration-300',
+                    )}
+                    style={panelOpen ? previewPanelStyle : undefined}
+                >
                     <iframe
                         key={refreshKey}
                         srcDoc={srcdoc}
@@ -206,17 +231,32 @@ export function ProposalDocumentEditor({
                     />
                 </div>
 
+                {panelOpen && (
+                    <div
+                        role="separator"
+                        aria-orientation="vertical"
+                        title="Zmień szerokość podglądu"
+                        onMouseDown={onResizeMouseDown}
+                        className={cn(
+                            'group relative z-20 cursor-col-resize bg-border/70 hover:bg-primary/30',
+                            !isDragging && 'transition-colors',
+                            isDragging && 'bg-primary/30',
+                        )}
+                        style={handleStyle}
+                    >
+                        <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-border group-hover:bg-primary/50" />
+                    </div>
+                )}
+
                 {/* Side panel */}
                 <div
-                    className={cn('flex-shrink-0 overflow-hidden border-l border-border relative', panelOpen ? '' : '!w-0')}
-                    style={panelOpen ? { width: panelWidth } : undefined}
-                >
-                    {panelOpen && (
-                        <div
-                            onMouseDown={onResizeMouseDown}
-                            className="absolute left-0 top-0 bottom-0 w-1.5 cursor-ew-resize z-20 hover:bg-primary/20 transition-colors"
-                        />
+                    className={cn(
+                        'min-w-0 overflow-hidden border-l border-border',
+                        panelOpen ? '' : 'w-0 flex-shrink-0',
+                        !isDragging && 'transition-all duration-300',
                     )}
+                    style={panelOpen ? editorPanelStyle : undefined}
+                >
                     {showSections && (
                         <SectionManagerPanel
                             blocks={blocks}

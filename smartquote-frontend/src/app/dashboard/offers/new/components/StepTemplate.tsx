@@ -5,9 +5,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
-import { Sparkles } from 'lucide-react'
 import { ProposalDocumentEditor } from '@/components/offers/editor/ProposalDocumentEditor'
-import { OfferAIDrawer } from '@/components/offers/OfferAIDrawer'
 import { settingsApi } from '@/lib/api'
 import type { CompanyInfo } from '@/types'
 import type { ProposalBlocks } from '@/lib/pdf/proposal-blocks'
@@ -36,7 +34,6 @@ export default function StepTemplate({
 }: StepTemplateProps) {
     const { data: session } = useSession()
     const [companyInfo, setCompanyInfo] = useState<CompanyInfo | null>(null)
-    const [aiDrawerOpen, setAiDrawerOpen] = useState(false)
 
     useEffect(() => {
         settingsApi.getCompany().then(setCompanyInfo).catch(() => {})
@@ -68,7 +65,6 @@ export default function StepTemplate({
     }), [offerTitle, totalGross, currency, paymentDays, client, session, companyInfo, blocks])
 
     return (
-        <>
             <div className="flex flex-col gap-4">
                 <div className="flex items-start justify-between gap-4">
                     <div>
@@ -78,14 +74,6 @@ export default function StepTemplate({
                             Szare sekcje są wyłączone — kliknij aby włączyć i edytować.
                         </p>
                     </div>
-                    <button
-                        type="button"
-                        onClick={() => setAiDrawerOpen(true)}
-                        className="flex shrink-0 items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-3 py-2 text-sm font-medium text-primary hover:bg-primary/15 transition-colors"
-                    >
-                        <Sparkles className="h-4 w-4" />
-                        Wypełnij z AI
-                    </button>
                 </div>
 
                 <div className="flex flex-col gap-1">
@@ -105,15 +93,5 @@ export default function StepTemplate({
                     onBlocksChange={onBlocksChange}
                 />
             </div>
-
-            <OfferAIDrawer
-                isOpen={aiDrawerOpen}
-                onClose={() => setAiDrawerOpen(false)}
-                clientName={client?.name ?? ''}
-                offerTitle={offerTitle}
-                currentBlocks={blocks}
-                onApply={onBlocksChange}
-            />
-        </>
     )
 }

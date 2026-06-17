@@ -115,7 +115,13 @@ export const ai = {
     offerFill: async (params: {
         message: string
         history: Array<{ role: 'user' | 'assistant'; content: string }>
-        context: { clientName: string; offerTitle: string; language?: 'pl' | 'en' }
+        context: {
+            clientName: string
+            offerTitle: string
+            templateType?: string
+            entityType?: 'offer' | 'contract'
+            language?: 'pl' | 'en'
+        }
         currentBlocks?: Record<string, unknown>
     }): Promise<{ message: string; blocks: Record<string, unknown> | null; isComplete: boolean }> => {
         const response = await api.post<{ message: string; blocks: Record<string, unknown> | null; isComplete: boolean }>(
