@@ -9,6 +9,7 @@ import {
     type MobileEditableSectionKey,
 } from './ContractMobileBlockEditorPanel'
 import { ContractEditorToolbar } from './ContractEditorToolbar'
+import { TemplateAIFillButton } from '@/components/offers/TemplateAIFillButton'
 import { buildContractMobileHtml } from '@/lib/pdf/contract-mobile-html'
 import { mergeMobileWithDefaults, type ContractMobileBlocks } from '@/lib/pdf/contract-mobile-blocks'
 import { useZoom } from '@/hooks/useZoom'
@@ -83,6 +84,16 @@ export function ContractMobileDocumentEditor({
                 onRefresh={handleRefresh}
                 onDownloadPdf={onDownloadPdf} isDownloading={isDownloading}
                 showSaveButton={showSaveButton} onSave={onSave} isSaving={isSaving}
+                aiFill={(
+                    <TemplateAIFillButton
+                        blocks={blocks}
+                        onBlocksChange={onBlocksChange}
+                        clientName={aiContext?.clientName ?? 'Klient'}
+                        title={aiContext?.title ?? 'Umowa aplikacji mobilnej'}
+                        templateType="mobile"
+                        entityType="contract"
+                    />
+                )}
             />
             <div className="flex flex-1 min-h-0">
                 <div className="flex-1 min-w-0 overflow-auto bg-[#CDD2E2]">

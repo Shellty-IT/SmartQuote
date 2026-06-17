@@ -5,6 +5,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Download, Layers, ZoomIn, ZoomOut } from 'lucide-react'
 import { Button } from '@/components/ui'
+import { TemplateAIFillButton } from './TemplateAIFillButton'
 import { UniversalBlockEditorPanel, type EditableUniversalBlockKey } from './editor/UniversalBlockEditorPanel'
 import { buildUniversalHtml, type UniversalOfferData } from '@/lib/pdf/universal-html'
 import type { UniversalBlocks, UniversalSectionKey } from '@/lib/pdf/universal-blocks'
@@ -63,6 +64,14 @@ export function UniversalDocumentEditor({
         <div className="flex flex-col gap-3">
             {/* Toolbar */}
             <div className="flex items-center gap-2 flex-wrap">
+                <TemplateAIFillButton
+                    blocks={blocks}
+                    onBlocksChange={onBlocksChange}
+                    clientName={offer.clientName ?? 'Klient'}
+                    title={offer.offerNumber ?? 'Oferta'}
+                    templateType="universal"
+                />
+                <div className="mx-1 h-4 w-px bg-border" />
                 <div className="flex items-center gap-1">
                     <button
                         type="button"
@@ -155,12 +164,14 @@ export function UniversalDocumentEditorWizard({
     offer,
     blocks,
     onBlocksChange,
+    offerContext,
 }: {
     offer: UniversalOfferData
     blocks: UniversalBlocks
     onBlocksChange: (blocks: UniversalBlocks) => void
+    offerContext?: OfferContext
 }) {
-    return <UniversalDocumentEditor offer={offer} blocks={blocks} onBlocksChange={onBlocksChange} />
+    return <UniversalDocumentEditor offer={offer} blocks={blocks} onBlocksChange={onBlocksChange} offerContext={offerContext} />
 }
 
 // ── Detail page variant ───────────────────────────────────────────────────────

@@ -5,6 +5,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Download, Layers, ZoomIn, ZoomOut } from 'lucide-react'
 import { Button } from '@/components/ui'
+import { TemplateAIFillButton } from './TemplateAIFillButton'
 import { MobileSimpleBlockEditorPanel, type EditableMobileSimpleBlockKey } from './editor/MobileSimpleBlockEditorPanel'
 import { buildMobileSimpleHtml, type MobileSimpleOfferData } from '@/lib/pdf/mobile-simple-html'
 import type { MobileSimpleBlocks, MobileSimpleSectionKey } from '@/lib/pdf/mobile-simple-blocks'
@@ -63,6 +64,14 @@ export function MobileSimpleDocumentEditor({
         <div className="flex flex-col gap-3">
             {/* Toolbar */}
             <div className="flex items-center gap-2 flex-wrap">
+                <TemplateAIFillButton
+                    blocks={blocks}
+                    onBlocksChange={onBlocksChange}
+                    clientName={offer.clientName ?? 'Klient'}
+                    title={offer.offerNumber ?? 'Oferta aplikacji mobilnej'}
+                    templateType="mobile_simple"
+                />
+                <div className="mx-1 h-4 w-px bg-border" />
                 <div className="flex items-center gap-1">
                     <button
                         type="button"
@@ -155,12 +164,14 @@ export function MobileSimpleDocumentEditorWizard({
     offer,
     blocks,
     onBlocksChange,
+    offerContext,
 }: {
     offer: MobileSimpleOfferData
     blocks: MobileSimpleBlocks
     onBlocksChange: (blocks: MobileSimpleBlocks) => void
+    offerContext?: OfferContext
 }) {
-    return <MobileSimpleDocumentEditor offer={offer} blocks={blocks} onBlocksChange={onBlocksChange} />
+    return <MobileSimpleDocumentEditor offer={offer} blocks={blocks} onBlocksChange={onBlocksChange} offerContext={offerContext} />
 }
 
 // ── Detail page variant ───────────────────────────────────────────────────────

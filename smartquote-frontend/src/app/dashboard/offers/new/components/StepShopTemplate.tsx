@@ -9,6 +9,7 @@ import { ShopDocumentEditor } from '@/components/offers/ShopDocumentEditor'
 import { settingsApi } from '@/lib/api'
 import type { CompanyInfo, Client } from '@/types'
 import type { ShopBlocks } from '@/lib/pdf/shop-blocks'
+import type { OfferContext } from '@/components/offers/editor/block-editors'
 
 interface StepShopTemplateProps {
     client: Client | null
@@ -63,6 +64,13 @@ export default function StepShopTemplate({
         blocks,
     }), [offerTitle, totalGross, currency, paymentDays, client, session, companyInfo, blocks])
 
+    const offerContext = useMemo<OfferContext>(() => ({
+        title: offerTitle || 'Nowa oferta',
+        clientName: client?.name ?? 'Klient',
+        totalGross,
+        currency,
+    }), [offerTitle, client, totalGross, currency])
+
     return (
         <div className="flex flex-col gap-4">
             <div>
@@ -87,6 +95,7 @@ export default function StepShopTemplate({
                 offer={previewOffer}
                 blocks={blocks}
                 onBlocksChange={onBlocksChange}
+                offerContext={offerContext}
             />
         </div>
     )

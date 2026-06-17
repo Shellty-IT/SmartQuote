@@ -9,6 +9,7 @@ import {
     type DedicatedEditableSectionKey,
 } from './ContractDedicatedBlockEditorPanel'
 import { ContractEditorToolbar } from './ContractEditorToolbar'
+import { TemplateAIFillButton } from '@/components/offers/TemplateAIFillButton'
 import { buildContractDedicatedHtml } from '@/lib/pdf/contract-dedicated-html'
 import { mergeDedicatedWithDefaults, type ContractDedicatedBlocks } from '@/lib/pdf/contract-dedicated-blocks'
 import { useZoom } from '@/hooks/useZoom'
@@ -83,6 +84,16 @@ export function ContractDedicatedDocumentEditor({
                 onRefresh={handleRefresh}
                 onDownloadPdf={onDownloadPdf} isDownloading={isDownloading}
                 showSaveButton={showSaveButton} onSave={onSave} isSaving={isSaving}
+                aiFill={(
+                    <TemplateAIFillButton
+                        blocks={blocks}
+                        onBlocksChange={onBlocksChange}
+                        clientName={aiContext?.clientName ?? 'Klient'}
+                        title={aiContext?.title ?? 'Umowa'}
+                        templateType="dedicated"
+                        entityType="contract"
+                    />
+                )}
             />
             <div className="flex flex-1 min-h-0">
                 <div className="flex-1 min-w-0 overflow-auto bg-[#CDD2E2] transition-all duration-300">

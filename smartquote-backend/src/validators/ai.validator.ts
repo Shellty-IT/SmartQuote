@@ -139,6 +139,8 @@ export const offerFillSchema = z.object({
         context: z.object({
             clientName: z.string().min(1).max(500),
             offerTitle: z.string().min(1).max(500),
+            templateType: z.string().min(1).max(50).optional(),
+            entityType: z.enum(['offer', 'contract']).optional(),
             language: z.enum(['pl', 'en']).optional(),
         }),
         currentBlocks: z.record(z.unknown()).optional(),

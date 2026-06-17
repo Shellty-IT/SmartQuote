@@ -9,6 +9,7 @@ import { settingsApi } from '@/lib/api'
 import type { CompanyInfo, Client } from '@/types'
 import type { MobileAppBlocks } from '@/lib/pdf/mobile-app-blocks'
 import type { MobileAppOfferData } from '@/lib/pdf/mobile-app-html'
+import type { OfferContext } from '@/components/offers/editor/block-editors'
 
 interface StepMobileAppTemplateProps {
     client: Client | null
@@ -43,6 +44,13 @@ export default function StepMobileAppTemplate({
         userWebsite: companyInfo?.website ?? undefined,
     }), [client, session, companyInfo])
 
+    const offerContext = useMemo<OfferContext>(() => ({
+        title: offerTitle || 'Oferta aplikacji mobilnej',
+        clientName: client?.name ?? 'Klient',
+        totalGross: 0,
+        currency: 'PLN',
+    }), [offerTitle, client])
+
     return (
         <div className="flex flex-col gap-4">
             <div>
@@ -67,6 +75,7 @@ export default function StepMobileAppTemplate({
                 offer={offerData}
                 blocks={blocks}
                 onBlocksChange={onBlocksChange}
+                offerContext={offerContext}
             />
         </div>
     )

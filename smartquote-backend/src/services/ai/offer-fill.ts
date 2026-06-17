@@ -19,6 +19,8 @@ export interface OfferFillContext {
     clientName: string
     offerTitle: string
     currentBlocks?: Record<string, unknown>
+    templateType?: string
+    entityType?: 'offer' | 'contract'
     // Language for BOTH the chat reply and the generated template content.
     // Defaults to Polish when omitted.
     language?: 'pl' | 'en'
@@ -149,6 +151,10 @@ const ProposalBlocksSchema = z.object({
 
 type ValidatedBlocks = z.infer<typeof ProposalBlocksSchema>
 
+function isProposalTemplate(ctx: OfferFillContext): boolean {
+    return (ctx.entityType ?? 'offer') === 'offer' && (!ctx.templateType || ctx.templateType === 'proposal')
+}
+
 // ── Non-destructive diff-merge ────────────────────────────────────────────────
 // Rule: a field from the AI output overwrites the current value ONLY if it is
 // "substantive" — non-empty string or non-empty array.  This prevents the model
@@ -246,6 +252,119 @@ function reattachEnabledSections(
 // JSON on every edit and always reports `enabled` back. If it cannot see which
 // sections are currently enabled, it guesses (usually `false` from the schema
 // defaults) and silently disables sections the user never touched.
+function deepMergeGeneric(current: unknown, generated: unknown): unknown {
+    if (Array.isArray(current)) {
+        return Array.isArray(generated) && generated.length > 0 ? generated : current
+    }
+    if (current && typeof current === 'object') {
+        if (!generated || typeof generated !== 'object' || Array.isArray(generated)) return current
+        const currentObj = current as Record<string, unknown>
+        const generatedObj = generated as Record<string, unknown>
+        const merged: Record<string, unknown> = { ...currentObj }
+        for (const key of Object.keys(currentObj)) {
+            if (Object.prototype.hasOwnProperty.call(generatedObj, key)) {
+                merged[key] = deepMergeGeneric(currentObj[key], generatedObj[key])
+            }
+        }
+        return merged
+    }
+    if (typeof current === 'string') {
+        return typeof generated === 'string' && generated.trim().length > 0 ? generated : current
+    }
+    if (typeof current === 'number') {
+        return typeof generated === 'number' && Number.isFinite(generated) ? generated : current
+    }
+    if (typeof current === 'boolean') {
+        return typeof generated === 'boolean' ? generated : current
+    }
+    if (current === null) {
+        if (generated === null || generated === undefined) return current
+        if (typeof generated === 'string' && generated.trim().length === 0) return current
+        return generated
+    }
+    return generated ?? current
+}
+
+function mergeGenericBlocks(
+    current: Record<string, unknown>,
+    generated: Record<string, unknown>,
+): Record<string, unknown> {
+    const merged = deepMergeGeneric(current, generated)
+    return merged && typeof merged === 'object' && !Array.isArray(merged)
+        ? merged as Record<string, unknown>
+        : current
+}
+
+async function genericOfferFillChat(
+    ai: GoogleGenAI,
+    context: OfferFillContext,
+    history: OfferFillMessage[],
+    userMessage: string,
+): Promise<OfferFillResult> {
+    const currentBlocks = context.currentBlocks
+    if (!currentBlocks || Object.keys(currentBlocks).length === 0) {
+        return {
+            message: 'Nie mam aktualnej struktury szablonu do wypelnienia. Odswiez edytor i sproboj ponownie.',
+            blocks: null,
+            isComplete: false,
+        }
+    }
+
+    const recentHistory = history.length > MAX_HISTORY_MESSAGES
+        ? history.slice(-MAX_HISTORY_MESSAGES)
+        : history
+
+    type GeminiContent = { role: 'user' | 'model'; parts: Array<{ text: string }> }
+    const contents: GeminiContent[] = [
+        ...recentHistory.map((msg): GeminiContent => ({
+            role: msg.role === 'user' ? 'user' : 'model',
+            parts: [{ text: msg.content }],
+        })),
+        { role: 'user', parts: [{ text: userMessage }] },
+    ]
+
+    const response = await ai.models.generateContent({
+        model: config.gemini.model,
+        contents,
+        config: {
+            systemInstruction: buildGenericSystemPrompt(context),
+            temperature: 0.65,
+            maxOutputTokens: 24576,
+            responseMimeType: 'application/json',
+        },
+    })
+
+    const raw = response.text ?? ''
+    let parsed: { message?: string; isComplete?: boolean; blocks?: unknown }
+    try {
+        parsed = JSON.parse(raw) as typeof parsed
+    } catch {
+        log.warn({ raw: raw.slice(0, 200), len: raw.length }, 'offer-fill generic: failed to parse structured response')
+        return {
+            message: 'Odpowiedz AI byla niekompletna. Sprobuj ponownie albo podaj krotszy opis projektu.',
+            blocks: null,
+            isComplete: false,
+        }
+    }
+
+    const message = typeof parsed.message === 'string' ? parsed.message : 'Wypelnilem szablon.'
+    if (parsed.isComplete !== true || !parsed.blocks || typeof parsed.blocks !== 'object' || Array.isArray(parsed.blocks)) {
+        return { message, blocks: null, isComplete: false }
+    }
+
+    const blocks = mergeGenericBlocks(currentBlocks, parsed.blocks as Record<string, unknown>)
+    const hasChanges = JSON.stringify(blocks) !== JSON.stringify(currentBlocks)
+    if (!hasChanges) {
+        return {
+            message: 'Nie wykrylem zmian w szablonie. Doprecyzuj prosze, jaki projekt lub dokument mam opisac.',
+            blocks: null,
+            isComplete: false,
+        }
+    }
+
+    return { message, blocks, isComplete: true }
+}
+
 function describeSectionState(section: unknown): { enabled: boolean; filled: boolean } {
     if (!section || typeof section !== 'object') return { enabled: false, filled: false }
     const s = section as Record<string, unknown>
@@ -316,6 +435,89 @@ function buildCurrentBlocksSummary(blocks: Record<string, unknown>): string {
     } catch {
         return ''
     }
+}
+
+function buildGenericBlocksSummary(blocks: Record<string, unknown>): string {
+    const lines: string[] = ['=== AKTUALNY STAN BLOKOW ===']
+    const sections = Array.isArray(blocks.sections) ? (blocks.sections as string[]) : []
+    const page1 = Array.isArray(blocks.page1Sections) ? (blocks.page1Sections as string[]) : []
+    const page2 = Array.isArray(blocks.page2Sections) ? (blocks.page2Sections as string[]) : []
+    if (sections.length) lines.push(`SEKCJE: [${sections.join(', ')}]`)
+    if (page1.length || page2.length) lines.push(`UKLAD: page1=[${page1.join(', ')}], page2=[${page2.join(', ')}]`)
+
+    const blockKeys = Object.keys(blocks).filter((key) => {
+        const value = blocks[key]
+        return value && typeof value === 'object' && !Array.isArray(value)
+    })
+    if (blockKeys.length) lines.push(`BLOKI: ${blockKeys.join(', ')}`)
+
+    for (const key of blockKeys) {
+        const block = blocks[key] as Record<string, unknown>
+        const enabled = typeof block.enabled === 'boolean' ? `enabled=${block.enabled}` : ''
+        const textFields = Object.entries(block)
+            .filter(([, value]) => typeof value === 'string' && value.trim())
+            .slice(0, 4)
+            .map(([field, value]) => `${field}="${String(value).slice(0, 80)}"`)
+        const arrays = Object.entries(block)
+            .filter(([, value]) => Array.isArray(value))
+            .slice(0, 4)
+            .map(([field, value]) => `${field}[${(value as unknown[]).length}]`)
+        const summary = [enabled, ...textFields, ...arrays].filter(Boolean).join('; ')
+        if (summary) lines.push(`${key}: ${summary}`)
+    }
+
+    lines.push('=== KONIEC STANU ===')
+    return lines.join('\n')
+}
+
+function buildGenericSystemPrompt(ctx: OfferFillContext): string {
+    const language = ctx.language === 'en' ? 'en' : 'pl'
+    const languageInstruction = language === 'en'
+        ? 'Write every chat message and every generated template text in English.'
+        : 'Pisz wszystkie wiadomosci czatu i cala tresc szablonu po polsku.'
+
+    const entityLabel = ctx.entityType === 'contract' ? 'umowy' : 'oferty'
+    const templateType = ctx.templateType ?? 'proposal'
+    const currentBlocks = ctx.currentBlocks ?? {}
+    const currentBlocksJson = JSON.stringify(currentBlocks, null, 2)
+    const clippedBlocksJson = currentBlocksJson.length > 45000
+        ? `${currentBlocksJson.slice(0, 45000)}\n... [JSON skrocony, zachowaj widoczna strukture i aktualne wartosci]`
+        : currentBlocksJson
+
+    return `Jestes doswiadczonym copywriterem B2B i specjalista od dokumentow handlowych IT. Pomagasz wypelniac szablon ${entityLabel} w aplikacji SmartQuote.
+
+${languageInstruction}
+
+KONTEKST:
+Klient: "${ctx.clientName}"
+Tytul: "${ctx.offerTitle}"
+Typ dokumentu: ${entityLabel}
+Typ szablonu: ${templateType}
+
+${buildGenericBlocksSummary(currentBlocks)}
+
+AKTUALNY JSON BLOKOW JEST JEDNOCZESNIE SCHEMATEM WYJSCIA:
+${clippedBlocksJson}
+
+TRYB PRACY:
+- Jezeli uzytkownik podal wystarczajacy opis projektu, branzy, uslugi lub oczekiwanej umowy, natychmiast wypelnij caly szablon.
+- Jezeli brakuje podstawowego kontekstu, zadaj jedno krotkie pytanie i ustaw isComplete=false.
+- Jezeli uzytkownik prosi o zmiane konkretnej sekcji, zmien tylko te sekcje i zachowaj reszte.
+- Jezeli uzytkownik prosi o wypelnienie od zera lub automatycznie, wypelnij wszystkie pola tekstowe we wszystkich blokach, ktore maja sens biznesowy.
+
+ZASADY STRUKTURY JSON:
+- Zwracaj dokladnie obiekt JSON: { "message": string, "isComplete": boolean, "blocks": null | object }.
+- Gdy isComplete=true, "blocks" musi byc kompletnym JSON-em w tej samej strukturze co AKTUALNY JSON BLOKOW.
+- Zachowaj top-level keys, version, sections/page arrays oraz typy pol: string zostaje stringiem, number numberem, boolean booleanem, array arrayem, object objectem.
+- Nie dodawaj markdowna, komentarzy ani tekstu poza JSON.
+- Nie usuwaj pol. Nie zamieniaj obiektow na tekst.
+- Zachowaj kontrolne pola techniczne i URL-e, chyba ze user wyraznie prosi o zmiane.
+- Pola cenowe i kwoty dostosuj tylko tekstowo do kontekstu; priceOverride zostaw null, chyba ze user podal konkretna cene.
+- Dla list generuj kompletne, konkretne pozycje zamiast pustych placeholderow.
+- Dla umow zachowaj formalny, precyzyjny jezyk prawniczo-biznesowy, bez przesadnego marketingu.
+- Dla ofert uzywaj jezyka korzysci, konkretow branzowych i naturalnego tonu.
+
+ODPOWIEDZ ZAWSZE W JSON.`
 }
 
 function buildSystemPrompt(ctx: OfferFillContext): string {
@@ -437,6 +639,10 @@ export async function offerFillChat(
     }
 
     try {
+        if (!isProposalTemplate(context)) {
+            return await genericOfferFillChat(ai, context, history, userMessage)
+        }
+
         const systemPrompt = buildSystemPrompt(context)
 
         // Keep only the most recent turns — bounds token cost and context-window pressure

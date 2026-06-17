@@ -5,6 +5,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Download, RefreshCw, ZoomIn, ZoomOut, Layers } from 'lucide-react'
 import { Button } from '@/components/ui'
+import { TemplateAIFillButton } from './TemplateAIFillButton'
 import { WebsiteV2BlockEditorPanel, WebsiteV2SectionManagerPanel, type EditableWV2BlockKey } from './editor/WebsiteV2BlockEditorPanel'
 import { buildWebsiteV2Html, type WebsiteV2OfferData } from '@/lib/pdf/website-v2-html'
 import { mergeWebsiteV2WithDefaults, buildDefaultWebsiteV2Blocks, type WebsiteV2Blocks } from '@/lib/pdf/website-v2-blocks'
@@ -94,6 +95,16 @@ export function WebsiteV2DocumentEditor({
                     </p>
                 </div>
                 <div className="flex items-center gap-1">
+                    <TemplateAIFillButton
+                        blocks={blocks}
+                        onBlocksChange={onBlocksChange}
+                        clientName={offer.client.name}
+                        title={offer.title}
+                        templateType="website_v2"
+                    />
+
+                    <div className="mx-1 h-4 w-px bg-border" />
+
                     <button
                         type="button"
                         onClick={() => setPanelView(showSections ? null : { kind: 'sections' })}

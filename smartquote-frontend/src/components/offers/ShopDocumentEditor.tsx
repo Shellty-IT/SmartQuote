@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Download, RefreshCw, ZoomIn, ZoomOut, Layers } from 'lucide-react'
 import { Button } from '@/components/ui'
+import { TemplateAIFillButton } from './TemplateAIFillButton'
 import {
     ShopBlockEditorPanel,
     ShopSectionManagerPanel,
@@ -102,6 +103,16 @@ export function ShopDocumentEditor({
                     </p>
                 </div>
                 <div className="flex items-center gap-1">
+                    <TemplateAIFillButton
+                        blocks={blocks}
+                        onBlocksChange={onBlocksChange}
+                        clientName={offer.client.name}
+                        title={offer.title}
+                        templateType="shop"
+                    />
+
+                    <div className="mx-1 h-4 w-px bg-border" />
+
                     <button
                         type="button"
                         onClick={() => setPanelView(showSections ? null : { kind: 'sections' })}

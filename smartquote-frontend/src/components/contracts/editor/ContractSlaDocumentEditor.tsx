@@ -9,6 +9,7 @@ import {
     type SlaEditableSectionKey,
 } from './ContractSlaBlockEditorPanel'
 import { ContractEditorToolbar } from './ContractEditorToolbar'
+import { TemplateAIFillButton } from '@/components/offers/TemplateAIFillButton'
 import { buildContractSlaHtml } from '@/lib/pdf/contract-sla-html'
 import { mergeSlaWithDefaults, type ContractSlaBlocks } from '@/lib/pdf/contract-sla-blocks'
 import { useZoom } from '@/hooks/useZoom'
@@ -83,6 +84,16 @@ export function ContractSlaDocumentEditor({
                 onRefresh={handleRefresh}
                 onDownloadPdf={onDownloadPdf} isDownloading={isDownloading}
                 showSaveButton={showSaveButton} onSave={onSave} isSaving={isSaving}
+                aiFill={(
+                    <TemplateAIFillButton
+                        blocks={blocks}
+                        onBlocksChange={onBlocksChange}
+                        clientName={aiContext?.clientName ?? 'Klient'}
+                        title={aiContext?.title ?? 'Umowa SLA'}
+                        templateType="sla"
+                        entityType="contract"
+                    />
+                )}
             />
             <div className="flex flex-1 min-h-0">
                 <div className="flex-1 min-w-0 overflow-auto bg-[#CDD2E2]">

@@ -10,9 +10,11 @@ import {
     type EditableSectionKey,
 } from './ContractBlockEditorPanel'
 import { ContractEditorToolbar } from './ContractEditorToolbar'
+import { TemplateAIFillButton } from '@/components/offers/TemplateAIFillButton'
 import { buildContractShortHtml } from '@/lib/pdf/contract-short-html'
 import { mergeContractWithDefaults, type ContractShortBlocks } from '@/lib/pdf/contract-short-blocks'
 import { cn } from '@/lib/utils'
+import { useResizablePanel } from '@/hooks/useResizablePanel'
 import { useZoom } from '@/hooks/useZoom'
 import type { OfferContext } from '@/components/offers/editor/block-editors'
 
@@ -48,6 +50,14 @@ export function ContractDocumentEditor({
 }: ContractDocumentEditorProps) {
     const [panelView, setPanelView] = useState<PanelView>(null)
     const [refreshKey, setRefreshKey] = useState(0)
+    const {
+        containerRef,
+        previewPanelStyle,
+        editorPanelStyle,
+        handleStyle,
+        isDragging,
+        onResizeMouseDown,
+    } = useResizablePanel('sq_preview_ratio_contract', { mode: 'preview-ratio' })
     const { zoom, zoomIn, zoomOut } = useZoom()
 
     const activeKey = panelView?.kind === 'section' ? panelView.key : null
@@ -110,12 +120,29 @@ export function ContractDocumentEditor({
                 showSaveButton={showSaveButton}
                 onSave={onSave}
                 isSaving={isSaving}
+                aiFill={(
+                    <TemplateAIFillButton
+                        blocks={blocks}
+                        onBlocksChange={onBlocksChange}
+                        clientName={aiContext?.clientName ?? 'Klient'}
+                        title={aiContext?.title ?? 'Umowa'}
+                        templateType="short"
+                        entityType="contract"
+                    />
+                )}
             />
 
             {/* Main area: document + optional editor panel */}
-            <div className="flex flex-1 min-h-0">
+            <div ref={containerRef} className="flex flex-1 min-h-0">
                 {/* Document iframe */}
-                <div className="flex-1 min-w-0 overflow-auto bg-[#CDD2E2] transition-all duration-300">
+                <div
+                    className={cn(
+                        'min-w-0 overflow-auto bg-[#CDD2E2]',
+                        panelOpen ? 'flex-shrink-0' : 'flex-1',
+                        !isDragging && 'transition-all duration-300',
+                    )}
+                    style={panelOpen ? previewPanelStyle : undefined}
+                >
                     <iframe
                         key={refreshKey}
                         srcDoc={srcdoc}
@@ -126,12 +153,31 @@ export function ContractDocumentEditor({
                     />
                 </div>
 
+                {panelOpen && (
+                    <div
+                        role="separator"
+                        aria-orientation="vertical"
+                        title="Zmień szerokość podglądu"
+                        onMouseDown={onResizeMouseDown}
+                        className={cn(
+                            'group relative z-20 cursor-col-resize bg-border/70 hover:bg-primary/30',
+                            !isDragging && 'transition-colors',
+                            isDragging && 'bg-primary/30',
+                        )}
+                        style={handleStyle}
+                    >
+                        <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-border group-hover:bg-primary/50" />
+                    </div>
+                )}
+
                 {/* Side panel */}
                 <div
                     className={cn(
-                        'flex-shrink-0 overflow-hidden border-l border-border transition-all duration-300',
-                        panelOpen ? 'w-[380px]' : 'w-0',
+                        'min-w-0 overflow-hidden border-l border-border',
+                        panelOpen ? '' : 'w-0 flex-shrink-0',
+                        !isDragging && 'transition-all duration-300',
                     )}
+                    style={panelOpen ? editorPanelStyle : undefined}
                 >
                     {showSections && (
                         <SectionManagerPanel

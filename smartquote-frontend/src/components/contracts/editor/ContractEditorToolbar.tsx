@@ -1,6 +1,7 @@
 // Shared toolbar for all contract document editors (SLA, Mobile, Dedicated, Services).
 'use client'
 
+import type { ReactNode } from 'react'
 import { Download, RefreshCw, ZoomIn, ZoomOut, Layers } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { ZOOM_LEVELS, ZOOM_LABELS } from '@/hooks/useZoom'
@@ -18,11 +19,12 @@ export interface ContractEditorToolbarProps {
     showSaveButton?: boolean
     onSave?: () => void
     isSaving?: boolean
+    aiFill?: ReactNode
 }
 
 export function ContractEditorToolbar({
     zoom, zoomIn, zoomOut, showSections, onToggleSections, onRefresh,
-    onDownloadPdf, isDownloading, showSaveButton, onSave, isSaving,
+    onDownloadPdf, isDownloading, showSaveButton, onSave, isSaving, aiFill,
 }: ContractEditorToolbarProps) {
     return (
         <div className="flex items-center gap-2 border-b border-border bg-card px-4 py-2.5">
@@ -33,6 +35,8 @@ export function ContractEditorToolbar({
                 </p>
             </div>
             <div className="flex items-center gap-1">
+                {aiFill}
+                {aiFill && <div className="mx-1 h-4 w-px bg-border" />}
                 <button type="button" onClick={onToggleSections} title="Zarządzaj sekcjami"
                     className={cn('flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors',
                         showSections ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground')}>

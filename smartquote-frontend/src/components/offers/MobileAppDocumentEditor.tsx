@@ -5,6 +5,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Download, Layers, ZoomIn, ZoomOut } from 'lucide-react'
 import { Button } from '@/components/ui'
+import { TemplateAIFillButton } from './TemplateAIFillButton'
 import { MobileAppBlockEditorPanel, type EditableMobileAppBlockKey } from './editor/MobileAppBlockEditorPanel'
 import { buildMobileAppHtml, type MobileAppOfferData } from '@/lib/pdf/mobile-app-html'
 import type { MobileAppBlocks, MobileAppSectionKey } from '@/lib/pdf/mobile-app-blocks'
@@ -66,6 +67,13 @@ export function MobileAppDocumentEditor({
         <div className="flex flex-col gap-3">
             {/* Toolbar */}
             <div className="flex items-center gap-2 flex-wrap">
+                <TemplateAIFillButton
+                    blocks={blocks}
+                    onBlocksChange={onBlocksChange}
+                    clientName={offer.clientName ?? 'Klient'}
+                    title={offer.offerNumber ?? 'Oferta aplikacji mobilnej'}
+                    templateType="mobile_app"
+                />
                 <div className="flex items-center gap-1">
                     <button
                         type="button"
@@ -158,12 +166,14 @@ export function MobileAppDocumentEditorWizard({
     offer,
     blocks,
     onBlocksChange,
+    offerContext,
 }: {
     offer: MobileAppOfferData
     blocks: MobileAppBlocks
     onBlocksChange: (blocks: MobileAppBlocks) => void
+    offerContext?: OfferContext
 }) {
-    return <MobileAppDocumentEditor offer={offer} blocks={blocks} onBlocksChange={onBlocksChange} />
+    return <MobileAppDocumentEditor offer={offer} blocks={blocks} onBlocksChange={onBlocksChange} offerContext={offerContext} />
 }
 
 // ── Detail page variant ───────────────────────────────────────────────────────
