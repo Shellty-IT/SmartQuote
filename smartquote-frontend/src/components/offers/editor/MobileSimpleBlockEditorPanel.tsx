@@ -1,5 +1,5 @@
 // src/components/offers/editor/MobileSimpleBlockEditorPanel.tsx
-// Side panel for editing blocks in the "Aplikacja mobilna - simple" template.
+// Side panel for editing blocks in the "Aplikacja mobilna - domyślny" template.
 
 'use client'
 
@@ -119,7 +119,7 @@ function renderEditor(
     offerContext?: OfferContext,
 ) {
     switch (key) {
-        case 'cover': return <CoverEditor blocks={blocks} onChange={onChange} />
+        case 'cover': return <CoverEditor blocks={blocks} onChange={onChange} offerContext={offerContext} />
         case 'checklist': return <ChecklistEditor blocks={blocks} onChange={onChange} offerContext={offerContext} />
         case 'tech': return <TechEditor blocks={blocks} onChange={onChange} offerContext={offerContext} />
         case 'process': return <ProcessEditor blocks={blocks} onChange={onChange} offerContext={offerContext} />

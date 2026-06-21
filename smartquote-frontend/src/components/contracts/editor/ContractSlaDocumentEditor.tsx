@@ -13,8 +13,10 @@ import { TemplateAIFillButton } from '@/components/offers/TemplateAIFillButton'
 import { buildContractSlaHtml } from '@/lib/pdf/contract-sla-html'
 import { mergeSlaWithDefaults, type ContractSlaBlocks } from '@/lib/pdf/contract-sla-blocks'
 import { useZoom } from '@/hooks/useZoom'
+import { useResizablePanel } from '@/hooks/useResizablePanel'
 import { cn } from '@/lib/utils'
 import type { OfferContext } from '@/components/offers/editor/block-editors'
+import { useContractCompanyLogo } from '@/hooks/useContractCompanyLogo'
 
 export interface ContractSlaDocumentEditorProps {
     blocks: ContractSlaBlocks
@@ -41,8 +43,17 @@ export function ContractSlaDocumentEditor({
     const [panelView, setPanelView] = useState<PanelView>(null)
     const { zoom, zoomIn, zoomOut } = useZoom()
     const [refreshKey, setRefreshKey] = useState(0)
+    const {
+        containerRef,
+        previewPanelStyle,
+        editorPanelStyle,
+        handleStyle,
+        isDragging,
+        onResizeMouseDown,
+    } = useResizablePanel('sq_preview_ratio_contract_sla', { mode: 'preview-ratio' })
 
     const activeKey = panelView?.kind === 'section' ? panelView.key : null
+    useContractCompanyLogo(blocks, onBlocksChange)
 
     const srcdoc = useMemo(
         () => buildContractSlaHtml(blocks, { editorMode: true, zoom, activeSection: activeKey }),
@@ -95,11 +106,41 @@ export function ContractSlaDocumentEditor({
                     />
                 )}
             />
-            <div className="flex flex-1 min-h-0">
-                <div className="flex-1 min-w-0 overflow-auto bg-[#CDD2E2]">
-                    <iframe key={refreshKey} srcDoc={srcdoc} title="Podgląd umowy" sandbox="allow-scripts allow-same-origin" className="h-full w-full" style={{ minHeight: 700 }} />
+            <div ref={containerRef} className="flex flex-1 min-h-0">
+                <div
+                    className={cn(
+                        'min-w-0 overflow-auto bg-[#CDD2E2]',
+                        panelOpen ? 'flex-shrink-0' : 'flex-1',
+                        !isDragging && 'transition-all duration-300',
+                    )}
+                    style={panelOpen ? previewPanelStyle : undefined}
+                >
+                    <iframe key={refreshKey} srcDoc={srcdoc} title="Podgląd umowy" sandbox="allow-scripts allow-same-origin" className={cn('h-full w-full', isDragging && 'pointer-events-none')} style={{ minHeight: 700 }} />
                 </div>
-                <div className={cn('flex-shrink-0 overflow-hidden border-l border-border transition-all duration-300', panelOpen ? 'w-[380px]' : 'w-0')}>
+                {panelOpen && (
+                    <div
+                        role="separator"
+                        aria-orientation="vertical"
+                        title="Zmień szerokość podglądu"
+                        onMouseDown={onResizeMouseDown}
+                        className={cn(
+                            'group relative z-20 cursor-col-resize bg-border/70 hover:bg-primary/30',
+                            !isDragging && 'transition-colors',
+                            isDragging && 'bg-primary/30',
+                        )}
+                        style={handleStyle}
+                    >
+                        <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-border group-hover:bg-primary/50" />
+                    </div>
+                )}
+                <div
+                    className={cn(
+                        'min-w-0 overflow-hidden border-l border-border',
+                        panelOpen ? '' : 'w-0 flex-shrink-0',
+                        !isDragging && 'transition-all duration-300',
+                    )}
+                    style={panelOpen ? editorPanelStyle : undefined}
+                >
                     {showSections && <SlaSectionManagerPanel blocks={blocks} onSave={handleSaveSections} onClose={() => setPanelView(null)} />}
                     {editingSection && <ContractSlaBlockEditorPanel key={editingSection} sectionKey={editingSection} blocks={blocks} onSave={handleSaveSection} onClose={() => setPanelView(null)} aiContext={aiContext} />}
                 </div>

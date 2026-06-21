@@ -114,7 +114,7 @@ function UniversalSectionManagerPanel({
 
 function renderEditor(key: EditableUniversalBlockKey, blocks: UniversalBlocks, onChange: (b: UniversalBlocks) => void, offerContext?: OfferContext) {
     switch (key) {
-        case 'cover':    return <CoverEditor blocks={blocks} onChange={onChange} />
+        case 'cover':    return <CoverEditor blocks={blocks} onChange={onChange} offerContext={offerContext} />
         case 'footer':   return <FooterEditor blocks={blocks} onChange={onChange} />
         case 'summary':  return <SummaryEditor blocks={blocks} onChange={onChange} offerContext={offerContext} />
         case 'needs':    return <NeedsEditor blocks={blocks} onChange={onChange} offerContext={offerContext} />

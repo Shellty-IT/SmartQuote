@@ -5,7 +5,7 @@ import { contractsRepository } from '../repositories/contracts.repository';
 import { pdfService } from '../services/pdf';
 import { successResponse, paginatedResponse } from '../utils/apiResponse';
 import { mapToPDFUser, mapToPDFClient } from '../services/pdf/data-mapper';
-import { NotFoundError } from '../errors/domain.errors';
+import { NotFoundError, ValidationError } from '../errors/domain.errors';
 import { ContractStatus } from '@prisma/client';
 import { parseQueryInt } from '../utils/queryParsers';
 
@@ -62,6 +62,9 @@ export class ContractsController {
 
             const contract = await contractsRepository.findByIdWithUser(id, userId);
             if (!contract) throw new NotFoundError('Umowa');
+            if ((contract.templateType ?? 'classic') !== 'classic') {
+                throw new ValidationError('Ta umowa musi być generowana w zapisanym szablonie');
+            }
 
             const pdfContract = {
                 ...contract,

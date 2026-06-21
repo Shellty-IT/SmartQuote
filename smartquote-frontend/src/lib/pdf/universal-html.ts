@@ -10,6 +10,7 @@ export interface UniversalOfferData {
     offerDate?: string
     clientName?: string
     userLogoUrl?: string
+    userLogoDarkUrl?: string
     userCompanyName?: string
     userEmail?: string
     userPhone?: string
@@ -27,7 +28,7 @@ function esc(s: string | undefined | null): string {
 
 function editorWrap(editorMode: boolean, key: string, inner: string): string {
     if (!editorMode) return inner
-    return `<div class="sq-block" data-key="${key}" style="cursor:pointer;outline-offset:2px;" onclick="window.parent.postMessage({type:'sq:editBlock',blockKey:'${key}'},\\"*\\")">${inner}</div>`
+    return `<div class="sq-block" data-key="${key}" style="cursor:pointer;outline-offset:2px;" onclick="event.stopPropagation();window.parent.postMessage({type:'sq:editBlock',blockKey:'${key}'},'*')">${inner}</div>`
 }
 
 // ── Cover ─────────────────────────────────────────────────────────────────────
@@ -36,11 +37,11 @@ function renderCover(blocks: UniversalBlocks, offer: UniversalOfferData, editorM
     const c = blocks.cover
     const offerDate = c.offerDate || offer.offerDate || ''
     const validUntil = c.validUntil || ''
-    const logoUrl = offer.userLogoUrl || ''
+    const logoUrl = offer.userLogoDarkUrl || offer.userLogoUrl || ''
     const websiteUrl = c.websiteUrl || offer.userWebsite || ''
 
     const logoImg = logoUrl
-        ? `<img src="${esc(logoUrl)}" alt="Logo" style="max-height:56px;max-width:180px;object-fit:contain;filter:brightness(0) invert(1);" />`
+        ? `<img src="${esc(logoUrl)}" alt="Logo" style="max-height:88px;max-width:260px;object-fit:contain;object-position:left top;" />`
         : `<span style="font-size:1.35rem;font-weight:700;letter-spacing:.03em;color:#fff;">${esc(c.contractorName)}</span>`
 
     const inner = `
@@ -391,10 +392,10 @@ function renderFooter(
     editorMode: boolean,
 ): string {
     const f = blocks.footer
-    const logoUrl = offer.userLogoUrl || ''
+    const logoUrl = offer.userLogoDarkUrl || offer.userLogoUrl || ''
 
     const logoImg = logoUrl
-        ? `<img src="${esc(logoUrl)}" alt="Logo" style="max-height:44px;max-width:140px;object-fit:contain;filter:brightness(0) invert(1);margin-bottom:10px;" />`
+        ? `<img src="${esc(logoUrl)}" alt="Logo" style="max-height:44px;max-width:140px;object-fit:contain;margin-bottom:10px;" />`
         : `<div style="font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:10px;">${esc(offer.userCompanyName || blocks.cover.contractorName)}</div>`
 
     const inner = `

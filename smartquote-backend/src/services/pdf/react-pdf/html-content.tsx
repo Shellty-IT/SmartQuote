@@ -39,6 +39,16 @@ function buildOptions(baseColor?: string): HTMLReactParserOptions {
         replace(domNode) {
             const node = domNode as DOMNode
 
+            if (node.type === 'text') {
+                const text = 'data' in node ? node.data : ''
+                if (!text) return
+
+                const textStyle = baseColor
+                    ? [styles.paragraph, { color: baseColor }]
+                    : styles.paragraph
+                return <Text style={textStyle}>{text}</Text>
+            }
+
             if (node.type !== 'tag') return
 
             const el = node as Element

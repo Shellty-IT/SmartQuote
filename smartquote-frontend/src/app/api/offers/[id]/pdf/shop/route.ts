@@ -5,7 +5,9 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { buildShopHtml } from '@/lib/pdf/shop-html'
+import { addDocumentActionLinks, publicDocumentUrl } from '@/lib/pdf/document-action-links'
 import { htmlToPdfBuffer } from '@/lib/pdf/puppeteer'
+import { documentTemplateMismatch } from '@/lib/pdf/template-guard'
 
 export const maxDuration = 10
 export const dynamic = 'force-dynamic'
@@ -47,6 +49,8 @@ export async function GET(
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: offerRaw } = (await offerRes.json()) as { data: Record<string, any> }
+    const mismatch = documentTemplateMismatch(offerRaw, 'shop')
+    if (mismatch) return mismatch
 
     let profileName: string | null = null
     let profileEmail = ''
@@ -54,6 +58,8 @@ export async function GET(
         name: string | null
         website: string | null
         logo: string | null
+        logoLight: string | null
+        logoDark: string | null
         phone: string | null
         email: string | null
     } | null = null
@@ -69,6 +75,8 @@ export async function GET(
                     name: settings.companyInfo.name ?? null,
                     website: settings.companyInfo.website ?? null,
                     logo: settings.companyInfo.logo ?? null,
+                    logoLight: settings.companyInfo.logoLight ?? settings.companyInfo.logo ?? null,
+                    logoDark: settings.companyInfo.logoDark ?? null,
                     phone: settings.companyInfo.phone ?? null,
                     email: settings.companyInfo.email ?? settings?.profile?.email ?? null,
                 }
@@ -99,7 +107,7 @@ export async function GET(
 
     let html: string
     try {
-        html = buildShopHtml(shopOffer)
+        html = addDocumentActionLinks(buildShopHtml(shopOffer), publicDocumentUrl('offer', offerRaw.publicToken, 'accept'), 'accept')
     } catch (err) {
         const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
         console.error('[shop-pdf] buildShopHtml threw:', detail)

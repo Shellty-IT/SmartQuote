@@ -36,6 +36,8 @@ export interface ContractHeaderBlock {
     date: string
     /** Website shown in the screen footer (right side). Leave empty to use brand from kicker. */
     footerWebsite: string
+    logoUrl: string
+    logoDarkUrl: string
 }
 
 export interface ContractParty {
@@ -169,6 +171,8 @@ export function buildDefaultContractBlocks(): ContractShortBlocks {
             city: '',
             date: '',
             footerWebsite: '',
+            logoUrl: '',
+            logoDarkUrl: '',
         },
 
         parties: {

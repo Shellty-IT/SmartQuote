@@ -22,7 +22,7 @@ function blank(val: string | undefined | null, label: string): string {
     const v = (val ?? '').trim()
     return v
         ? `<span>${esc(v)}</span>`
-        : `<span style="background:#FEF3C7;color:#92400E;border-radius:3px;padding:1px 5px;font-weight:500;">${esc(label)}</span>`
+        : `<span style="color:inherit;font-weight:500;">${esc(label)}</span>`
 }
 
 function sectionAttr(key: string, editorMode: boolean, activeSection?: string | null): string {
@@ -37,7 +37,7 @@ ${EMBEDDED_FONTS_CSS}
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
 body{background:#EEF1F5;font-family:'Source Sans 3',system-ui,sans-serif;color:#0F172A;font-size:${zoom < 0.8 ? 13 : 13.5}px;line-height:1.65;-webkit-font-smoothing:antialiased;}
-.doc{max-width:800px;margin:0 auto;background:#fff;box-shadow:0 1px 8px rgba(15,23,42,0.12);}
+.doc{max-width:800px;margin:0 auto;background:#fff;box-shadow:0 1px 8px rgba(15,23,42,0.12);overflow:hidden;}
 .bar-inner{max-width:800px;margin:0 auto;padding:18px 48px;}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 table{border-collapse:collapse;width:100%;}
@@ -68,13 +68,17 @@ function h2(text: string): string {
 }
 
 function renderHeader(b: ContractMobileBlocks): string {
+    const logoUrl = b.header.logoDarkUrl || b.header.logoUrl
+    const logo = logoUrl
+        ? `<img src="${esc(logoUrl)}" alt="Logo firmy" style="display:block;max-width:120px;max-height:48px;object-fit:contain;object-position:left center;" />`
+        : `<div style="width:68px;height:40px;border:1px solid rgba(201,168,76,.6);display:flex;align-items:center;justify-content:center;color:#C9A84C;font-size:10px;font-weight:600;letter-spacing:2px;">LOGO</div>`
     return `<div style="width:100%;background:#1B3A5C;">
   <div class="bar-inner" style="display:flex;justify-content:space-between;align-items:center;gap:16px;">
-    <div style="display:flex;align-items:center;gap:14px;">
-      <div style="width:54px;height:38px;border:1px solid rgba(201,168,76,.6);display:flex;align-items:center;justify-content:center;color:#C9A84C;font-size:10px;font-weight:600;letter-spacing:2px;">LOGO</div>
-      <span style="color:#C9A84C;font-size:13px;font-weight:500;">${esc(b.header.website || 'www.twoja-strona.pl')}</span>
+    <div style="display:flex;align-items:center;gap:14px;min-width:0;">
+      ${logo}
+      <span style="color:#C9A84C;font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(b.header.website || 'www.twoja-strona.pl')}</span>
     </div>
-    <div style="text-align:right;color:#fff;font-size:11px;line-height:1.8;">
+    <div style="text-align:right;color:#fff;font-size:11px;line-height:1.8;white-space:nowrap;">
       <div>Nr umowy: <span style="color:#C9A84C;font-weight:600;">${esc(b.header.contractNumber)}</span></div>
       <div>Data: ${blank(b.header.date, 'DD.MM.RRRR')}</div>
     </div>
@@ -83,7 +87,7 @@ function renderHeader(b: ContractMobileBlocks): string {
 }
 
 function renderTitle(b: ContractMobileBlocks): string {
-    return `<div class="doc" style="padding-top:36px;padding-bottom:0;">
+    return `<div style="padding:36px 48px 0;">
   <h1 style="text-align:center;color:#1B3A5C;font-size:22px;font-weight:700;margin:0 0 8px;letter-spacing:.3px;">UMOWA O WYKONANIE APLIKACJI MOBILNEJ</h1>
   <p style="text-align:center;color:#475569;font-style:italic;font-size:13px;margin:0 0 8px;">zawarta dnia ${blank(b.header.date, 'DD.MM.RRRR')} w ${blank(b.header.city, 'MIEJSCOWOŚĆ')}</p>
 </div>`
@@ -353,17 +357,19 @@ export function buildContractMobileHtml(
 ${buildCss(editorMode, zoom)}
 </head>
 <body>
-<div${headerAttr}>${renderHeader(b)}${renderTitle(b)}</div>
-<div class="doc" style="padding:0 48px 40px;">
-  ${sectionsHtml}
-  <div${sigAttr}>${renderSignatures(b)}</div>
-</div>
-<div style="width:100%;background:#F8FAFC;border-top:1px solid #E2E8F0;">
-  <div class="bar-inner" style="text-align:center;padding-top:14px;padding-bottom:14px;">
-    <p style="margin:0;color:#475569;font-size:11px;">${esc(b.parties.contractor.name || 'NAZWA WYKONAWCY')} · ${esc(b.parties.contractor.email || 'EMAIL')} · ${esc(b.header.website || 'www.twoja-strona.pl')}</p>
-    <p style="margin:6px 0 0;color:#475569;font-size:11px;">Nr umowy: ${esc(b.header.contractNumber)}</p>
+<main class="doc">
+  <div${headerAttr}>${renderHeader(b)}${renderTitle(b)}</div>
+  <div class="content" style="padding:1px 48px 40px;">
+    ${sectionsHtml}
+    <div${sigAttr}>${renderSignatures(b)}</div>
   </div>
-</div>
+  <div style="background:#F8FAFC;border-top:1px solid #E2E8F0;">
+    <div class="bar-inner" style="text-align:center;padding-top:14px;padding-bottom:14px;">
+      <p style="margin:0;color:#475569;font-size:11px;">${esc(b.parties.contractor.name || 'NAZWA WYKONAWCY')} · ${esc(b.parties.contractor.email || 'EMAIL')} · ${esc(b.header.website || 'www.twoja-strona.pl')}</p>
+      <p style="margin:6px 0 0;color:#475569;font-size:11px;">Nr umowy: ${esc(b.header.contractNumber)}</p>
+    </div>
+  </div>
+</main>
 ${editorMode ? buildEditorScript() : ''}
 </body>
 </html>`

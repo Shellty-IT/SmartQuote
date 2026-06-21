@@ -142,11 +142,13 @@ function buildCss(editorMode: boolean, zoom: number): string {
 
     /* ── HEADER ── */
     .c-header {
+      position: relative;
       text-align: center;
       padding-bottom: 6mm;
       border-bottom: 2px solid var(--gd);
       margin-bottom: 6mm;
     }
+    .c-header-logo { position: absolute; left: 0; top: 0; display: block; max-width: 34mm; max-height: 14mm; object-fit: contain; object-position: left top; }
     .c-kicker { font-size: 7.5pt; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--gm); margin-bottom: 2.5mm; }
     .c-title { font-size: 13.5pt; font-weight: 700; color: var(--gd); text-transform: uppercase; letter-spacing: 0.4px; line-height: 1.2; }
     .c-meta { margin-top: 4.5mm; display: flex; justify-content: center; gap: 7mm; flex-wrap: wrap; }
@@ -264,11 +266,13 @@ function sectionAttr(key: ContractSectionKey, disabled: boolean, active: boolean
 
 function renderHeader(blocks: ContractShortBlocks, editorMode: boolean, activeSection: string | null): string {
     const h = blocks.header
+    const logoUrl = h.logoDarkUrl || h.logoUrl
     const attr = editorMode
         ? ` data-sq-section="header"${activeSection === 'header' ? ' class="sq-active"' : ''}`
         : ''
     return `
   <div class="c-header"${attr}>
+    ${logoUrl ? `<img class="c-header-logo" src="${esc(logoUrl)}" alt="Logo firmy" />` : ''}
     <div class="c-kicker">${esc(h.kicker)}</div>
     <div class="c-title">${esc(h.title)}</div>
     <div class="c-meta">

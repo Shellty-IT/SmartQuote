@@ -76,6 +76,14 @@ export class LeadsService {
         const lead = await leadsRepository.findById(id, userId);
         if (!lead) throw new NotFoundError('Lead');
 
+        // Retrying a conversion must not create duplicate clients.
+        if (lead.clientId) {
+            const client = await prisma.client.findFirst({
+                where: { id: lead.clientId, userId },
+            });
+            if (client) return { clientId: client.id, lead, client };
+        }
+
         logger.info('Converting lead to client', { leadId: id, userId });
 
         const client = await prisma.client.create({
@@ -94,7 +102,7 @@ export class LeadsService {
             clientId: client.id,
         });
 
-        return { lead: updatedLead, client };
+        return { clientId: client.id, lead: updatedLead, client };
     }
 
     async getStats(userId: string) {

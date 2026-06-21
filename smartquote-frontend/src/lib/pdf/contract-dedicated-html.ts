@@ -24,7 +24,7 @@ function blank(val: string | undefined | null, label: string): string {
     const v = (val ?? '').trim()
     return v
         ? `<span>${esc(v)}</span>`
-        : `<span style="background:#FEF3C7;color:#92400E;border-radius:3px;padding:1px 5px;font-weight:500;">${esc(label)}</span>`
+        : `<span style="color:inherit;font-weight:500;">${esc(label)}</span>`
 }
 
 function sectionAttr(key: string, editorMode: boolean, activeSection?: string | null): string {
@@ -71,11 +71,15 @@ function buildEditorScript(): string {
 // ── Section renderers ─────────────────────────────────────────────────────────
 
 function renderHeader(b: ContractDedicatedBlocks): string {
+    const logoUrl = b.header.logoDarkUrl || b.header.logoUrl
+    const logo = logoUrl
+        ? `<img src="${esc(logoUrl)}" alt="Logo firmy" style="display:block;max-width:120px;max-height:48px;object-fit:contain;object-position:left center;" />`
+        : `<div style="width:68px;height:40px;border:1px solid rgba(201,168,76,.6);display:flex;align-items:center;justify-content:center;color:#C9A84C;font-size:10px;font-weight:600;letter-spacing:2px;">LOGO</div>`
     return `
 <div style="width:100%;background:#1B3A5C;">
   <div class="bar-inner" style="display:flex;justify-content:space-between;align-items:center;gap:16px;">
     <div style="display:flex;align-items:center;gap:14px;">
-      <div style="width:54px;height:38px;border:1px solid rgba(201,168,76,.6);display:flex;align-items:center;justify-content:center;color:#C9A84C;font-size:10px;font-weight:600;letter-spacing:2px;">LOGO</div>
+      ${logo}
       <span style="color:#C9A84C;font-size:13px;font-weight:500;">${esc(b.header.website || 'www.twoja-strona.pl')}</span>
     </div>
     <div style="text-align:right;color:#fff;font-size:11px;line-height:1.8;">

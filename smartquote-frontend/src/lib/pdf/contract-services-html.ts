@@ -144,6 +144,7 @@ function buildCss(editorMode: boolean, zoom: number): string {
       letter-spacing: 2px;
       padding: 6px 10px;
     }
+    .c-logo-img { display: block; max-width: 120px; max-height: 48px; object-fit: contain; object-position: left center; }
     .c-url { color: var(--gd); font-size: 11px; letter-spacing: 0.3px; }
     .c-meta-right {
       text-align: right;
@@ -619,6 +620,10 @@ export function buildContractServicesHtml(
         .join('\n')
 
     const h = blocks.header
+    const logoUrl = h.logoDarkUrl || h.logoUrl
+    const logo = logoUrl
+        ? `<img class="c-logo-img" src="${esc(logoUrl)}" alt="Logo firmy" />`
+        : '<div class="c-logo-label">LOGO</div>'
     const contractorName = blocks.parties.contractor.firmName || blocks.parties.contractor.representative
     const contractorEmail = blocks.parties.contractor.email
     const contractorPhone = blocks.parties.contractor.phone
@@ -648,7 +653,7 @@ ${editorMode ? '<div class="sq-edit-hint">Kliknij sekcję aby edytować</div>' :
 
   <div${headerAttr}>
     <div class="c-logo-box">
-      <div class="c-logo-label">LOGO</div>
+      ${logo}
       ${h.websiteUrl ? `<span class="c-url">${esc(h.websiteUrl)}</span>` : '<span class="c-url"><span style="color:rgba(201,168,76,0.5)">www.twoja-strona.pl</span></span>'}
     </div>
     <div class="c-meta-right">

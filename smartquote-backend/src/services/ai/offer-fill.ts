@@ -53,9 +53,9 @@ const ProposalBlocksSchema = z.object({
     version: z.literal(1).optional(),
     page1Sections: z.array(SectionKeySchema).optional(),
     page2Sections: z.array(SectionKeySchema).optional(),
-    header: z.object({ enabled: z.boolean(), tag: z.string() }).optional(),
-    footer: z.object({ enabled: z.boolean(), customNote: z.string(), showAuthor: z.boolean() }).optional(),
-    intro: z.object({ enabled: z.boolean(), paragraphs: z.array(z.string()) }).optional(),
+    header: z.object({ enabled: z.boolean(), tag: z.string() }).partial().optional(),
+    footer: z.object({ enabled: z.boolean(), customNote: z.string(), showAuthor: z.boolean() }).partial().optional(),
+    intro: z.object({ enabled: z.boolean(), paragraphs: z.array(z.string()) }).partial().optional(),
     demo: z.object({
         enabled: z.boolean(),
         title: z.string(),
@@ -70,18 +70,18 @@ const ProposalBlocksSchema = z.object({
         title: z.string(),
         items: z.array(z.object({ icon: z.string(), name: z.string(), description: z.string() })),
         note: z.string().optional(),   // renderStructure() reads s.note
-    }).optional(),
+    }).partial().optional(),
     scope: z.object({
         enabled: z.boolean(),
         title: z.string(),
         items: z.array(z.object({ html: z.string() })),
-    }).optional(),
+    }).partial().optional(),
     testing: z.object({
         enabled: z.boolean(),
         intro: z.string(),
         cards: z.array(z.object({ icon: z.string(), title: z.string(), description: z.string() })),
         note: z.string().optional(),   // renderTesting() reads t.note
-    }).optional(),
+    }).partial().optional(),
     technology: z.object({
         enabled: z.boolean(),
         body: z.string(),
@@ -151,6 +151,14 @@ const ProposalBlocksSchema = z.object({
 
 type ValidatedBlocks = z.infer<typeof ProposalBlocksSchema>
 
+const NO_APPLICABLE_BLOCKS_MESSAGE = 'Nie udało mi się przygotować poprawnych danych do zastosowania. Spróbuj ponownie lub poproś o wypełnienie jednej konkretnej sekcji.'
+
+export function completionMessageWithoutBlocks(message: string): string {
+    return /(?:wypełni|uzupełni|zaktualiz|gotow|fill|updated|complete)/i.test(message)
+        ? NO_APPLICABLE_BLOCKS_MESSAGE
+        : message
+}
+
 function isProposalTemplate(ctx: OfferFillContext): boolean {
     return (ctx.entityType ?? 'offer') === 'offer' && (!ctx.templateType || ctx.templateType === 'proposal')
 }
@@ -216,6 +224,17 @@ export function diffMergeBlocks(
     reattachEnabledSections(result, current)
 
     return result
+}
+
+export function mergeProposalPatch(
+    current: Record<string, unknown> | undefined,
+    rawPatch: unknown,
+): Record<string, unknown> | null {
+    const validation = ProposalBlocksSchema.safeParse(rawPatch)
+    if (!validation.success) return null
+    return current
+        ? diffMergeBlocks(current, validation.data)
+        : validation.data as Record<string, unknown>
 }
 
 function reattachEnabledSections(
@@ -349,7 +368,7 @@ async function genericOfferFillChat(
 
     const message = typeof parsed.message === 'string' ? parsed.message : 'Wypelnilem szablon.'
     if (parsed.isComplete !== true || !parsed.blocks || typeof parsed.blocks !== 'object' || Array.isArray(parsed.blocks)) {
-        return { message, blocks: null, isComplete: false }
+        return { message: completionMessageWithoutBlocks(message), blocks: null, isComplete: false }
     }
 
     const blocks = mergeGenericBlocks(currentBlocks, parsed.blocks as Record<string, unknown>)
@@ -507,8 +526,9 @@ TRYB PRACY:
 
 ZASADY STRUKTURY JSON:
 - Zwracaj dokladnie obiekt JSON: { "message": string, "isComplete": boolean, "blocks": null | object }.
-- Gdy isComplete=true, "blocks" musi byc kompletnym JSON-em w tej samej strukturze co AKTUALNY JSON BLOKOW.
-- Zachowaj top-level keys, version, sections/page arrays oraz typy pol: string zostaje stringiem, number numberem, boolean booleanem, array arrayem, object objectem.
+- Gdy isComplete=true, "blocks" ma zawierac tylko zmienione bloki jako czesciowy patch w tej samej strukturze co AKTUALNY JSON BLOKOW.
+- Nie kopiuj niezmienionych blokow. sections/page arrays zwracaj tylko, gdy uzytkownik prosi o zmiane ukladu.
+- Zachowaj typy pol: string zostaje stringiem, number numberem, boolean booleanem, array arrayem, object objectem.
 - Nie dodawaj markdowna, komentarzy ani tekstu poza JSON.
 - Nie usuwaj pol. Nie zamieniaj obiektow na tekst.
 - Zachowaj kontrolne pola techniczne i URL-e, chyba ze user wyraznie prosi o zmiane.
@@ -530,8 +550,8 @@ function buildSystemPrompt(ctx: OfferFillContext): string {
         ? `Szablon jest już częściowo wypełniony — widzisz jego aktualny stan powyżej.
 Możesz modyfikować dowolną sekcję na prośbę użytkownika.
 Gdy użytkownik pyta "co jest już wypełnione" — opisz mu aktualny stan z powyższego zestawienia.
-Gdy prosi o zmianę — od razu wprowadź zmiany i ustaw isComplete=true z pełnym blokiem JSON. NIE pytaj o potwierdzenie.
-Gdy prosi o wygenerowanie od zera — wygeneruj kompletny nowy szablon.
+Gdy prosi o zmianę — od razu wprowadź zmiany i ustaw isComplete=true z częściowym patchem JSON. NIE pytaj o potwierdzenie.
+Gdy prosi o wygenerowanie od zera — wygeneruj patch wszystkich sekcji, które wypełniasz.
 AKTYWOWANIE SEKCJI: jeśli treść tego wymaga (np. masz info o technologiach, testach, demo), ustaw enabled:true w tych sekcjach.`
         : `Jeśli użytkownik podał wystarczające informacje w swojej wiadomości (branża, zakres, opis projektu) — NATYCHMIAST generuj szablon (isComplete=true). NIE pytaj o potwierdzenie.
 Jeśli informacje są niewystarczające, zadaj JEDNO konkretne pytanie:
@@ -572,17 +592,18 @@ ZASADY ROZMOWY:
 
 OCHRONA SEKCJI (KRYTYCZNE):
 - Gdy użytkownik prosi o zmianę KONKRETNEJ sekcji, zmieniaj TYLKO tę sekcję.
-- Wszystkie pozostałe sekcje przepisz DOKŁADNIE tak jak są w AKTUALNYM STANIE SZABLONU.
+- Pozostałe sekcje pomiń w patchu. Aplikacja zachowa je bez zmian.
 - NIGDY nie usuwaj, nie czyść, nie "resetuj" sekcji których użytkownik nie wymienił.
 - Jeśli sekcja ma enabled:true w aktualnym stanie — w JSON też musi mieć enabled:true.
-- page1Sections i page2Sections: zachowaj DOKŁADNIE tak jak są, chyba że user prosił o reorganizację.
+- page1Sections i page2Sections: pomiń, chyba że user prosił o reorganizację.
 
 FORMAT ODPOWIEDZI (ZAWSZE):
 Zwróć obiekt JSON: { "message": "...", "isComplete": false/true, "blocks": null | { ... } }
 - Gdy pytasz o informacje: isComplete=false, blocks=null
-- Gdy generujesz/modyfikujesz szablon: isComplete=true, blocks=pełny_JSON_szablonu
+- Gdy generujesz/modyfikujesz szablon: isComplete=true, blocks=częściowy_patch zawierający tylko zmieniane sekcje
+- NIGDY nie pisz, że szablon został wypełniony, jeśli isComplete=false lub blocks=null
 
-SCHEMAT blocks gdy isComplete=true:
+PRZYKŁADOWY SCHEMAT patcha blocks gdy isComplete=true (zwróć tylko potrzebne klucze):
 {
   "version": 1,
   "page1Sections": ["intro", "structure"],
@@ -700,19 +721,11 @@ export async function offerFillChat(
         let blocks: Record<string, unknown> | null = null
 
         if (isComplete && parsed.blocks != null && typeof parsed.blocks === 'object' && !Array.isArray(parsed.blocks)) {
-            const rawBlocks = parsed.blocks as Record<string, unknown>
-
-            // Validate with Zod — reject garbage before it reaches the DB.
-            const validation = ProposalBlocksSchema.safeParse(rawBlocks)
-            if (!validation.success) {
-                log.warn({ issues: validation.error.issues.slice(0, 5) }, 'offer-fill: blocks failed Zod validation, discarding')
-                return { message, blocks: null, isComplete: false }
+            blocks = mergeProposalPatch(context.currentBlocks, parsed.blocks)
+            if (!blocks) {
+                log.warn('offer-fill: blocks failed validation, discarding')
+                return { message: NO_APPLICABLE_BLOCKS_MESSAGE, blocks: null, isComplete: false }
             }
-
-            // Apply non-destructive diff-merge against current blocks.
-            blocks = context.currentBlocks
-                ? diffMergeBlocks(context.currentBlocks, validation.data)
-                : (validation.data as Record<string, unknown>)
         }
 
         if (blocks !== null && context.currentBlocks) {
@@ -729,9 +742,17 @@ export async function offerFillChat(
             }
         }
 
-        return { message, blocks, isComplete: blocks !== null }
+        return {
+            message: blocks === null ? completionMessageWithoutBlocks(message) : message,
+            blocks,
+            isComplete: blocks !== null,
+        }
     } catch (error) {
-        log.error({ error }, 'offer-fill chat failed')
+        log.error({
+            error: error instanceof Error
+                ? { name: error.name, message: error.message, stack: error.stack }
+                : String(error),
+        }, 'offer-fill chat failed')
         return {
             message: '❌ Błąd komunikacji z AI. Spróbuj ponownie.',
             blocks: null,

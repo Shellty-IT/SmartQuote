@@ -21,7 +21,7 @@ export const leadsApi = {
     delete: (id: string) =>
         api.delete<{ message: string }>(`/leads/${id}`),
     convert: (id: string, data?: ConvertLeadInput) =>
-        api.post<{ clientId: string }>(`/leads/${id}/convert`, data),
+        api.post<{ clientId: string; lead: Lead; client: { id: string } }>(`/leads/${id}/convert`, data),
     stats: () =>
         api.get<LeadsStats>('/leads/stats'),
 };

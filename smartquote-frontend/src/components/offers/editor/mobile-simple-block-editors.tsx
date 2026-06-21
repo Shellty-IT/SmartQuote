@@ -1,5 +1,5 @@
 // src/components/offers/editor/mobile-simple-block-editors.tsx
-// Per-block editors for the "Aplikacja mobilna - simple" offer template.
+// Per-block editors for the "Aplikacja mobilna - domyślny" offer template.
 
 'use client'
 
@@ -96,9 +96,11 @@ function SectionHeader({ title }: { title: string }) {
 export function CoverEditor({
     blocks,
     onChange,
+    offerContext,
 }: {
     blocks: MobileSimpleBlocks
     onChange: (b: MobileSimpleBlocks) => void
+    offerContext?: OfferContext
 }) {
     const b = blocks.cover
     const set = (patch: Partial<typeof b>) => onChange({ ...blocks, cover: { ...b, ...patch } })
@@ -106,8 +108,27 @@ export function CoverEditor({
     return (
         <div className="flex flex-col gap-4">
             <SectionHeader title="Okładka" />
+            <AiGenerateButton
+                sectionKey="mobile_simple.cover"
+                offerContext={offerContext}
+                onResult={(data) => onChange({
+                    ...blocks,
+                    cover: {
+                        ...blocks.cover,
+                        projectName: (data.projectName as string) || blocks.cover.projectName,
+                        subtitlePrefix: (data.subtitlePrefix as string) || blocks.cover.subtitlePrefix,
+                        promises: Array.isArray(data.promises) ? data.promises as string[] : blocks.cover.promises,
+                    },
+                })}
+            />
+            <Field label="Etykieta nad tytułem">
+                <TextInput value={b.coverTag ?? ''} onChange={v => set({ coverTag: v })} placeholder="Oferta handlowa" />
+            </Field>
             <Field label="Nazwa projektu (w telefonie)">
                 <TextInput value={b.projectName} onChange={v => set({ projectName: v })} placeholder="MyApp" />
+            </Field>
+            <Field label="Tekst przed nazwą klienta">
+                <TextInput value={b.subtitlePrefix ?? ''} onChange={v => set({ subtitlePrefix: v })} placeholder="Aplikacja mobilna dla" />
             </Field>
             <Field label="Nazwa klienta">
                 <TextInput value={b.clientName} onChange={v => set({ clientName: v })} placeholder="Nazwa Firmy" />
@@ -118,6 +139,21 @@ export function CoverEditor({
                 </Field>
                 <Field label="Cena (netto, tekst)">
                     <TextInput value={b.priceText} onChange={v => set({ priceText: v })} placeholder="12 000" />
+                </Field>
+            </div>
+            <SectionHeader title="Etykiety kart" />
+            <Field label="Etykieta czasu realizacji">
+                <TextInput value={b.deliveryLabel ?? ''} onChange={v => set({ deliveryLabel: v })} placeholder="Czas realizacji" />
+            </Field>
+            <Field label="Etykieta ceny">
+                <TextInput value={b.priceLabel ?? ''} onChange={v => set({ priceLabel: v })} placeholder="Cena netto" />
+            </Field>
+            <div className="grid grid-cols-2 gap-3">
+                <Field label="Liczba platform">
+                    <TextInput value={b.platformCount ?? ''} onChange={v => set({ platformCount: v })} placeholder="2" />
+                </Field>
+                <Field label="Etykieta platform">
+                    <TextInput value={b.platformLabel ?? ''} onChange={v => set({ platformLabel: v })} placeholder="Platformy" />
                 </Field>
             </div>
             <SectionHeader title="Obietnice (pasek dolny)" />

@@ -12,7 +12,7 @@ import type { ProposalBlocks } from '@/lib/pdf/proposal-blocks'
 import type { Client } from '@/types'
 
 interface StepTemplateProps {
-    client: Client | null
+    client: Pick<Client, 'name' | 'company'> | null
     offerTitle: string
     onTitleChange: (title: string) => void
     totalGross: number
@@ -58,6 +58,8 @@ export default function StepTemplate({
                 name: companyInfo.name,
                 website: companyInfo.website,
                 logo: companyInfo.logo,
+                logoLight: companyInfo.logoLight,
+                logoDark: companyInfo.logoDark,
                 phone: companyInfo.phone,
             } : null,
         },
@@ -68,7 +70,7 @@ export default function StepTemplate({
             <div className="flex flex-col gap-4">
                 <div className="flex items-start justify-between gap-4">
                     <div>
-                        <h2 className="text-lg font-semibold text-foreground">Szablon: Strona internetowa</h2>
+                        <h2 className="text-lg font-semibold text-foreground">Szablon: Strona internetowa - v1</h2>
                         <p className="text-sm text-muted-foreground mt-0.5">
                             Kliknij dowolną sekcję na dokumencie aby edytować jej treść.
                             Szare sekcje są wyłączone — kliknij aby włączyć i edytować.

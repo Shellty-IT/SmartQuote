@@ -3,7 +3,6 @@
 
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import { useContracts } from '@/hooks/useContracts';
 import { useClients } from '@/hooks/useClients';
 import { Button, Input, Textarea, LoadingSpinner } from '@/components/ui';
@@ -42,6 +41,10 @@ import { ContractServicesDocumentEditor } from '@/components/contracts/editor/Co
 import { ContractDedicatedDocumentEditor } from '@/components/contracts/editor/ContractDedicatedDocumentEditor';
 import { ContractSlaDocumentEditor } from '@/components/contracts/editor/ContractSlaDocumentEditor';
 import { ContractMobileDocumentEditor } from '@/components/contracts/editor/ContractMobileDocumentEditor';
+import { TemplateAIFillButton } from '@/components/offers/TemplateAIFillButton';
+import WizardHeader from '@/components/ui/WizardHeader';
+import { ApiError } from '@/lib/api';
+import { prepareContractItems } from '@/lib/contract-form';
 
 const LS_KEY = 'sq_default_contract_short_blocks';
 const LS_KEY_SERVICES = 'sq_default_contract_services_blocks';
@@ -148,7 +151,7 @@ function ContractStepper({ currentStep, templateType, stepLabels }: StepperProps
     const currentIndex = steps.indexOf(currentStep);
 
     return (
-        <div className="mb-8 flex items-center justify-between">
+        <div className="flex min-w-0 flex-1 items-center justify-between">
             {steps.map((stepId, index) => {
                 const isActive = stepId === currentStep;
                 const isCompleted = index < currentIndex;
@@ -160,9 +163,9 @@ function ContractStepper({ currentStep, templateType, stepLabels }: StepperProps
 
                 return (
                     <div key={stepId} className="flex items-center flex-1">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
                             <div className={cn(
-                                'grid h-10 w-10 place-items-center rounded-full text-sm font-semibold transition-all',
+                                'grid h-8 w-8 place-items-center rounded-full text-xs font-semibold transition-all',
                                 isActive
                                     ? 'bg-gradient-primary text-white shadow-glow ring-1 ring-white/15'
                                     : isCompleted
@@ -170,7 +173,7 @@ function ContractStepper({ currentStep, templateType, stepLabels }: StepperProps
                                         : 'border border-border bg-card text-muted-foreground',
                             )}>
                                 {isCompleted ? (
-                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
                                 ) : (
@@ -178,14 +181,14 @@ function ContractStepper({ currentStep, templateType, stepLabels }: StepperProps
                                 )}
                             </div>
                             <span className={cn(
-                                'hidden md:block text-sm font-medium',
+                                'hidden xl:block text-xs font-medium',
                                 isActive ? 'text-foreground' : 'text-muted-foreground',
                             )}>
                                 {label}
                             </span>
                         </div>
                         {index < steps.length - 1 && (
-                            <div className="flex-1 h-0.5 mx-2 md:mx-4 bg-surface-subtle" />
+                            <div className="flex-1 h-px mx-2 md:mx-3 bg-surface-subtle" />
                         )}
                     </div>
                 );
@@ -209,6 +212,7 @@ function NewContractForm() {
     const { clients } = useClients({ limit: 100 });
 
     const [loading, setLoading] = useState(false);
+    const [formErrors, setFormErrors] = useState<string[]>([]);
     const [step, setStep] = useState<ContractStep>('client');
     const [templateType, setTemplateType] = useState<TemplateType>('classic');
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -266,10 +270,29 @@ function NewContractForm() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
 
         const clientId = selectedClient?.id ?? '';
         const title = formData.title || (selectedClient ? `Umowa — ${selectedClient.name}` : 'Nowa umowa');
+        const items = prepareContractItems(formData.items, templateType, title);
+
+        const errors: string[] = [];
+        if (!clientId) errors.push(t.validation.clientRequired);
+        if (!title.trim()) errors.push(t.validation.titleRequired);
+        items.forEach((item, index) => {
+            if (!item.name) errors.push(t.validation.itemNameRequired.replace('{n}', String(index + 1)));
+            if (!Number.isFinite(item.quantity) || item.quantity <= 0) {
+                errors.push(t.validation.itemQuantityPositive.replace('{n}', String(index + 1)));
+            }
+        });
+
+        if (errors.length > 0) {
+            setFormErrors(errors);
+            toast.error(t.validation.title, errors[0]);
+            return;
+        }
+
+        setFormErrors([]);
+        setLoading(true);
 
         try {
             const blocksForTemplate =
@@ -287,14 +310,7 @@ function NewContractForm() {
                 paymentDays: Number(formData.paymentDays),
                 templateType,
                 blocks: blocksForTemplate,
-                items: formData.items.map((item, index) => ({
-                    ...item,
-                    quantity: Number(item.quantity),
-                    unitPrice: Number(item.unitPrice),
-                    vatRate: Number(item.vatRate),
-                    discount: Number(item.discount),
-                    position: index,
-                })),
+                items,
             });
 
             if (response.success && response.data) {
@@ -304,8 +320,19 @@ function NewContractForm() {
                 toast.error(t.toasts.error, t.toasts.createError);
                 setLoading(false);
             }
-        } catch {
-            toast.error(t.toasts.error, t.toasts.createError);
+        } catch (error) {
+            const details = error instanceof ApiError && Array.isArray(error.details)
+                ? error.details
+                    .map((detail) => detail && typeof detail === 'object' && 'message' in detail
+                        ? String((detail as { message: unknown }).message)
+                        : '')
+                    .filter(Boolean)
+                : [];
+            const messages = details.length > 0
+                ? details
+                : [error instanceof Error ? error.message : t.toasts.createError];
+            setFormErrors(messages);
+            toast.error(t.validation.title, messages[0]);
             setLoading(false);
         }
     };
@@ -351,29 +378,24 @@ function NewContractForm() {
     );
 
     return (
-        <div className="space-y-6 p-4 md:p-8">
-            {/* Header */}
-            <div className="flex items-center gap-4">
-                <Link href="/dashboard/contracts">
-                    <Button variant="ghost" size="sm">
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                    </Button>
-                </Link>
-                <div>
-                    <h1 className="text-2xl font-bold text-foreground">{t.newTitle}</h1>
-                    <p className="text-muted-foreground">{t.newSubtitle}</p>
-                </div>
-            </div>
+        <div className="w-full max-w-[1400px] space-y-4 px-4 py-3 md:px-6">
+            <WizardHeader
+                title={t.newTitle}
+                subtitle={t.newSubtitle}
+                backLabel={t.back}
+                onBack={() => router.push('/dashboard/contracts')}
+                progress={!fromOfferId
+                    ? <ContractStepper currentStep={step} templateType={templateType} stepLabels={tn.steps} />
+                    : null}
+            />
 
-            {/* Step indicator (hidden on first step if fromOffer) */}
-            {!fromOfferId && (
-                <ContractStepper
-                    currentStep={step}
-                    templateType={templateType}
-                    stepLabels={tn.steps}
-                />
+            {formErrors.length > 0 && (
+                <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                    <p className="font-semibold">{t.validation.title}</p>
+                    <ul className="mt-1 list-disc space-y-0.5 pl-5">
+                        {formErrors.map((message, index) => <li key={`${message}-${index}`}>{message}</li>)}
+                    </ul>
+                </div>
             )}
 
             {/* ── STEP: client ─────────────────────────────────────────────────── */}
@@ -590,7 +612,17 @@ function NewContractForm() {
             {step === 'classic_form' && (
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                        <h2 className="text-lg font-semibold text-foreground mb-4">{t.basicInfo}</h2>
+                        <div className="mb-4 flex items-center justify-between gap-3">
+                            <h2 className="text-lg font-semibold text-foreground">{t.basicInfo}</h2>
+                            <TemplateAIFillButton
+                                blocks={formData}
+                                onBlocksChange={(updated) => setFormData((current) => ({ ...current, ...updated }))}
+                                clientName={selectedClient?.name ?? ''}
+                                title={formData.title}
+                                templateType="classic"
+                                entityType="contract"
+                            />
+                        </div>
 
                         {selectedClient && (
                             <div className="mb-4 flex items-center gap-3 rounded-xl border border-border bg-secondary/30 px-4 py-3">

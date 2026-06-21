@@ -21,6 +21,7 @@ import StepSupportTemplate from './components/StepSupportTemplate';
 import StepMobileAppTemplate from './components/StepMobileAppTemplate';
 import StepMobileSimpleTemplate from './components/StepMobileSimpleTemplate';
 import StepUniversalTemplate from './components/StepUniversalTemplate';
+import WizardHeader from '@/components/ui/WizardHeader';
 
 export default function NewOfferContent() {
     const tr = useTranslations('offerNew');
@@ -70,6 +71,10 @@ export default function NewOfferContent() {
         router,
     } = useOfferForm();
 
+    const documentClient = selectedClient ?? (selectedLead
+        ? { name: selectedLead.name, company: selectedLead.company ?? null }
+        : null);
+
     // Initialize terms from i18n once on mount (can't use i18n value in useState initializer)
     useEffect(() => {
         if (!offerDetails.terms) {
@@ -81,34 +86,27 @@ export default function NewOfferContent() {
     if (isLoadingClients && clients.length === 0) return <PageLoader />;
 
     return (
-        <div className="p-4 md:p-8 max-w-4xl mx-auto">
-            <div className="mb-8">
-                <button onClick={() => router.back()} className="flex items-center gap-2 text-muted-foreground hover:opacity-70 mb-4">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                    {tr.back}
-                </button>
-                <div className="flex items-start justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl font-bold text-foreground">{tr.title}</h1>
-                        <p className="text-muted-foreground mt-1">{tr.subtitle}</p>
-                    </div>
-                    {currentStep === 'items' && (
+        <div className="w-full max-w-[1400px] px-4 py-3 md:px-6">
+            <div className="mb-4">
+                <WizardHeader
+                    title={tr.title}
+                    subtitle={tr.subtitle}
+                    backLabel={tr.back}
+                    onBack={() => router.back()}
+                    progress={<OfferStepper currentStep={currentStep} stepIds={stepIds} onStepClick={goToStep} />}
+                    action={currentStep === 'items' ? (
                         <button
                             onClick={() => setTemplateSelectorOpen(true)}
-                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-primary/40 bg-primary/10 text-primary text-sm font-medium hover:bg-primary/15 transition-colors shrink-0"
+                            className="flex h-9 items-center gap-1.5 rounded-lg border border-primary/40 bg-primary/10 px-3 text-xs font-medium text-primary transition-colors hover:bg-primary/15"
                         >
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
                             </svg>
                             {tr.useTemplate}
                         </button>
-                    )}
-                </div>
+                    ) : undefined}
+                />
             </div>
-
-            <OfferStepper currentStep={currentStep} stepIds={stepIds} onStepClick={goToStep} />
 
             <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
                 {currentStep === 'client' && (
@@ -147,7 +145,7 @@ export default function NewOfferContent() {
                 )}
                 {currentStep === 'template' && offerDetails.templateType === 'proposal' && (
                     <StepTemplate
-                        client={selectedClient}
+                        client={documentClient}
                         offerTitle={offerDetails.title}
                         onTitleChange={(v) => updateDetails('title', v)}
                         totalGross={totals.totalGross}
@@ -159,7 +157,7 @@ export default function NewOfferContent() {
                 )}
                 {currentStep === 'template' && offerDetails.templateType === 'shop' && (
                     <StepShopTemplate
-                        client={selectedClient}
+                        client={documentClient}
                         offerTitle={offerDetails.title}
                         onTitleChange={(v) => updateDetails('title', v)}
                         totalGross={totals.totalGross}
@@ -171,7 +169,7 @@ export default function NewOfferContent() {
                 )}
                 {currentStep === 'template' && offerDetails.templateType === 'website_v2' && (
                     <StepWebsiteV2Template
-                        client={selectedClient}
+                        client={documentClient}
                         offerTitle={offerDetails.title}
                         onTitleChange={(v) => updateDetails('title', v)}
                         totalGross={totals.totalGross}
@@ -183,7 +181,7 @@ export default function NewOfferContent() {
                 )}
                 {currentStep === 'template' && offerDetails.templateType === 'website_v3' && (
                     <StepWebsiteV3Template
-                        client={selectedClient}
+                        client={documentClient}
                         offerTitle={offerDetails.title}
                         onTitleChange={(v) => updateDetails('title', v)}
                         totalGross={totals.totalGross}
@@ -195,7 +193,7 @@ export default function NewOfferContent() {
                 )}
                 {currentStep === 'template' && offerDetails.templateType === 'support' && (
                     <StepSupportTemplate
-                        client={selectedClient}
+                        client={documentClient}
                         offerTitle={offerDetails.title}
                         onTitleChange={(v) => updateDetails('title', v)}
                         blocks={supportBlocks}
@@ -204,7 +202,7 @@ export default function NewOfferContent() {
                 )}
                 {currentStep === 'template' && offerDetails.templateType === 'mobile_app' && (
                     <StepMobileAppTemplate
-                        client={selectedClient}
+                        client={documentClient}
                         offerTitle={offerDetails.title}
                         onTitleChange={(v) => updateDetails('title', v)}
                         blocks={mobileAppBlocks}
@@ -213,7 +211,7 @@ export default function NewOfferContent() {
                 )}
                 {currentStep === 'template' && offerDetails.templateType === 'mobile_simple' && (
                     <StepMobileSimpleTemplate
-                        client={selectedClient}
+                        client={documentClient}
                         offerTitle={offerDetails.title}
                         onTitleChange={(v) => updateDetails('title', v)}
                         blocks={mobileSimpleBlocks}
@@ -222,7 +220,7 @@ export default function NewOfferContent() {
                 )}
                 {currentStep === 'template' && offerDetails.templateType === 'universal' && (
                     <StepUniversalTemplate
-                        client={selectedClient}
+                        client={documentClient}
                         offerTitle={offerDetails.title}
                         onTitleChange={(v) => updateDetails('title', v)}
                         blocks={universalBlocks}

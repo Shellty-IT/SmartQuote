@@ -35,6 +35,10 @@ export interface HeaderBlock {
     enabled: boolean
     /** Tag label shown above offer title, e.g. "Oferta handlowa" */
     tag: string
+    /** Optional override for the title shown in the document header. Empty = use offer title. */
+    titleOverride?: string
+    /** Optional override for the client line shown below the title. Empty = use offer client. */
+    clientLabelOverride?: string
 }
 
 export interface FooterBlock {
@@ -192,6 +196,8 @@ export function buildDefaultBlocks(clientName?: string): ProposalBlocks {
         header: {
             enabled: true,
             tag: 'Oferta handlowa',
+            titleOverride: '',
+            clientLabelOverride: '',
         },
 
         footer: {

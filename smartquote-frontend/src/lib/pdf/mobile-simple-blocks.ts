@@ -1,5 +1,5 @@
 // src/lib/pdf/mobile-simple-blocks.ts
-// Block types and defaults for the "Aplikacja mobilna - simple" offer template.
+// Block types and defaults for the "Aplikacja mobilna - domyślny" offer template.
 // Design: teal #0D9488 + orange #F97316, clean Nunito-style layout.
 
 export type MobileSimpleSectionKey = 'checklist' | 'tech' | 'process'
@@ -40,10 +40,16 @@ export interface MobileSimpleGuarantee {
 // ── Block interfaces ──────────────────────────────────────────────────────────
 
 export interface MobileSimpleCoverBlock {
+    coverTag: string
     projectName: string
+    subtitlePrefix: string
     clientName: string
     readyWeeks: string
     priceText: string
+    deliveryLabel: string
+    priceLabel: string
+    platformCount: string
+    platformLabel: string
     promises: string[]
 }
 
@@ -108,10 +114,16 @@ export function buildDefaultMobileSimpleBlocks(): MobileSimpleBlocks {
         version: 1,
         sections: ['checklist', 'tech', 'process'],
         cover: {
+            coverTag: 'Oferta handlowa',
             projectName: 'MyApp',
+            subtitlePrefix: 'Aplikacja mobilna dla',
             clientName: 'Nazwa Firmy',
             readyWeeks: '8',
             priceText: '12 000',
+            deliveryLabel: 'Czas realizacji',
+            priceLabel: 'Cena netto',
+            platformCount: '2',
+            platformLabel: 'Platformy',
             promises: [
                 'Jedna cena, bez niespodzianek',
                 'Działasz na iPhonie i Androidzie',

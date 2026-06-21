@@ -6,7 +6,9 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { buildProposalHtml } from '@/lib/pdf/proposal-html'
+import { addDocumentActionLinks, publicDocumentUrl } from '@/lib/pdf/document-action-links'
 import { htmlToPdfBuffer } from '@/lib/pdf/puppeteer'
+import { documentTemplateMismatch } from '@/lib/pdf/template-guard'
 
 // Vercel route config — require adequate memory + allow up to 10s (Hobby limit)
 export const maxDuration = 10
@@ -57,11 +59,13 @@ export async function GET(
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: offerRaw } = (await offerRes.json()) as { data: Record<string, any> }
+    const mismatch = documentTemplateMismatch(offerRaw, 'proposal')
+    if (mismatch) return mismatch
 
     // Settings may be unavailable — fail-open with empty data
     let profileName: string | null = null
     let profileEmail = ''
-    let companyData: { name: string | null; website: string | null; logo: string | null; phone: string | null } | null = null
+    let companyData: { name: string | null; website: string | null; logo: string | null; logoLight: string | null; logoDark: string | null; phone: string | null } | null = null
 
     if (settingsRes.ok) {
         try {
@@ -74,6 +78,8 @@ export async function GET(
                     name: settings.companyInfo.name ?? null,
                     website: settings.companyInfo.website ?? null,
                     logo: settings.companyInfo.logo ?? null,
+                    logoLight: settings.companyInfo.logoLight ?? settings.companyInfo.logo ?? null,
+                    logoDark: settings.companyInfo.logoDark ?? null,
                     phone: settings.companyInfo.phone ?? null,
                 }
             }
@@ -105,7 +111,7 @@ export async function GET(
     // 4. Build HTML
     let html: string
     try {
-        html = buildProposalHtml(proposalOffer)
+        html = addDocumentActionLinks(buildProposalHtml(proposalOffer), publicDocumentUrl('offer', offerRaw.publicToken, 'accept'), 'accept')
     } catch (err) {
         const stack = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
         console.error('[proposal-pdf] buildProposalHtml threw:', stack)

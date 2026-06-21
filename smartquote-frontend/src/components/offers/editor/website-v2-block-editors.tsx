@@ -3,7 +3,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Trash2 } from 'lucide-react'
+import { ImagePlus, Plus, Trash2 } from 'lucide-react'
 import type {
     WebsiteV2Blocks,
     WV2PainPoint,
@@ -16,6 +16,7 @@ import type {
     WV2FaqItem,
 } from '@/lib/pdf/website-v2-blocks'
 import { AiGenerateButton, type OfferContext } from './block-editors'
+import { compressImage } from '@/lib/imageUtils'
 
 // ── Shared helpers ────────────────────────────────────────────────────────────
 
@@ -75,13 +76,22 @@ function RemoveBtn({ onClick }: { onClick: () => void }) {
 
 // ── Cover ─────────────────────────────────────────────────────────────────────
 
-export function CoverEditorV2({ blocks, onChange }: { blocks: WebsiteV2Blocks; onChange: (b: WebsiteV2Blocks) => void }) {
+export function CoverEditorV2({ blocks, onChange, offerContext }: { blocks: WebsiteV2Blocks; onChange: (b: WebsiteV2Blocks) => void; offerContext?: OfferContext }) {
     const c = blocks.cover
     return (
         <div className="flex flex-col gap-4">
-            <p className="text-xs text-muted-foreground">Imię/logo i dane firmy uzupełniane automatycznie z Ustawień → Firma.</p>
+            <p className="text-xs text-muted-foreground">Logo i dane firmy są uzupełniane automatycznie z Ustawień → Firma.</p>
+            <Field label="Tytuł główny">
+                <Input value={c.title ?? ''} onChange={e => onChange({ ...blocks, cover: { ...c, title: e.target.value } })} />
+            </Field>
+            <Field label="Nazwa odbiorcy">
+                <Input value={c.recipientName || offerContext?.clientName || ''} onChange={e => onChange({ ...blocks, cover: { ...c, recipientName: e.target.value } })} placeholder="Nazwa klienta lub leada" />
+            </Field>
             <Field label="Podtytuł (opis pod nagłówkiem)">
                 <Textarea value={c.subtitle} onChange={e => onChange({ ...blocks, cover: { ...c, subtitle: e.target.value } })} />
+            </Field>
+            <Field label="Pill / obietnica">
+                <Input value={c.knowledgePill ?? ''} onChange={e => onChange({ ...blocks, cover: { ...c, knowledgePill: e.target.value } })} />
             </Field>
             <Field label="Realizacja do X dni">
                 <NumberInput value={c.deadlineDays} onChange={e => onChange({ ...blocks, cover: { ...c, deadlineDays: Number(e.target.value) } })} />
@@ -247,12 +257,24 @@ export function FeaturesEditor({ blocks, onChange, offerContext }: { blocks: Web
 
 export function PortfolioEditor({ blocks, onChange }: { blocks: WebsiteV2Blocks; onChange: (b: WebsiteV2Blocks) => void }) {
     const b = blocks.portfolio
+    const [imageError, setImageError] = useState('')
     const update = (patch: Partial<typeof b>) => onChange({ ...blocks, portfolio: { ...b, ...patch } })
     const updateWork = (i: number, patch: Partial<WV2PortfolioItem>) => {
         const works = [...b.works]; works[i] = { ...works[i], ...patch }; update({ works })
     }
     const updateTestimonial = (i: number, patch: Partial<WV2Testimonial>) => {
         const ts = [...b.testimonials]; ts[i] = { ...ts[i], ...patch }; update({ testimonials: ts })
+    }
+    const uploadWorkImage = async (i: number, file?: File) => {
+        if (!file) return
+        if (!file.type.startsWith('image/')) { setImageError('Wybierz plik graficzny.'); return }
+        if (file.size > 5 * 1024 * 1024) { setImageError('Plik jest za duży (maks. 5 MB).'); return }
+        try {
+            setImageError('')
+            updateWork(i, { imageUrl: await compressImage(file, 1400, 900, 0.82) })
+        } catch {
+            setImageError('Nie udało się przetworzyć obrazu.')
+        }
     }
     return (
         <div className="flex flex-col gap-4">
@@ -261,13 +283,25 @@ export function PortfolioEditor({ blocks, onChange }: { blocks: WebsiteV2Blocks;
             <div className="flex flex-col gap-2">
                 <span className="text-xs font-medium text-muted-foreground">Realizacje</span>
                 {b.works.map((w, i) => (
-                    <div key={i} className="flex gap-2 items-center">
-                        <Input value={w.name} onChange={e => updateWork(i, { name: e.target.value })} placeholder="Nazwa firmy / branża" />
-                        <Input value={w.url} onChange={e => updateWork(i, { url: e.target.value })} placeholder="https://..." />
-                        <RemoveBtn onClick={() => update({ works: b.works.filter((_, j) => j !== i) })} />
+                    <div key={i} className="rounded-lg border border-border p-2.5">
+                        <div className="flex gap-2 items-center">
+                            <Input value={w.name} onChange={e => updateWork(i, { name: e.target.value })} placeholder="Nazwa firmy / branża" />
+                            <Input value={w.url} onChange={e => updateWork(i, { url: e.target.value })} placeholder="https://..." />
+                            <RemoveBtn onClick={() => update({ works: b.works.filter((_, j) => j !== i) })} />
+                        </div>
+                        <div className="mt-2 flex items-center gap-2">
+                            {w.imageUrl && <div aria-label="Podgląd screenshotu" className="h-12 w-20 rounded border border-border bg-cover bg-center" style={{ backgroundImage: `url(${w.imageUrl})` }} />}
+                            <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium hover:bg-secondary">
+                                <ImagePlus className="h-3.5 w-3.5" />
+                                {w.imageUrl ? 'Zmień screenshot' : 'Dodaj screenshot'}
+                                <input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={e => { void uploadWorkImage(i, e.target.files?.[0]); e.currentTarget.value = '' }} />
+                            </label>
+                            {w.imageUrl && <button type="button" onClick={() => updateWork(i, { imageUrl: '' })} className="text-xs text-destructive hover:underline">Usuń obraz</button>}
+                        </div>
                     </div>
                 ))}
-                <AddBtn onClick={() => update({ works: [...b.works, { name: 'Nowa realizacja', url: '#' }] })} label="Dodaj realizację" />
+                {imageError && <p className="text-xs text-destructive">{imageError}</p>}
+                <AddBtn onClick={() => update({ works: [...b.works, { name: 'Nowa realizacja', url: '#', imageUrl: '' }] })} label="Dodaj realizację" />
             </div>
             <div className="flex flex-col gap-3">
                 <span className="text-xs font-medium text-muted-foreground">Opinie klientów</span>

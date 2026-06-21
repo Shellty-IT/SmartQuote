@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { getContractEditPath } from '@/lib/document-pdf';
 import Link from 'next/link';
 import {
     Search, Plus, RefreshCw, ScrollText,
@@ -234,7 +235,7 @@ export default function ContractsPage() {
                                         </td>
                                         <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                                             <div className="flex items-center justify-end gap-0.5">
-                                                <button onClick={() => router.push(`/dashboard/contracts/${contract.id}/edit`)} title={commonTr.edit} className="rounded-lg p-2 text-muted-foreground hover:text-primary"><Pencil className="h-4 w-4" /></button>
+                                                <button onClick={() => router.push(getContractEditPath(contract.id, contract.templateType))} title={commonTr.edit} className="rounded-lg p-2 text-muted-foreground hover:text-primary"><Pencil className="h-4 w-4" /></button>
                                                 <button onClick={() => setDeleteModal(contract)} title={commonTr.delete} className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
                                             </div>
                                         </td>

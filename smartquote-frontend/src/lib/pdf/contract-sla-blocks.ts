@@ -46,6 +46,8 @@ export interface SlaHeaderBlock {
     date: string
     website: string
     city: string
+    logoUrl: string
+    logoDarkUrl: string
 }
 
 export interface SlaPartiesBlock {
@@ -157,6 +159,8 @@ export function buildDefaultContractSlaBlocks(): ContractSlaBlocks {
             date: '',
             website: 'www.twoja-strona.pl',
             city: '',
+            logoUrl: '',
+            logoDarkUrl: '',
         },
         parties: {
             provider: { name: '', address: '', nip: '', email: '', phone: '' },

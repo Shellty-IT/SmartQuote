@@ -5,7 +5,9 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { buildWebsiteV3Html, type WebsiteV3OfferData } from '@/lib/pdf/website-v3-html'
+import { addDocumentActionLinks, publicDocumentUrl } from '@/lib/pdf/document-action-links'
 import { htmlToPdfBuffer } from '@/lib/pdf/puppeteer'
+import { documentTemplateMismatch } from '@/lib/pdf/template-guard'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -42,6 +44,8 @@ export async function GET(
     }
 
     const { data: offer } = (await offerRes.json()) as { data: WebsiteV3OfferData }
+    const mismatch = documentTemplateMismatch(offer, 'website_v3')
+    if (mismatch) return mismatch
     const companyInfo = settingsRes.ok ? ((await settingsRes.json()) as { data: WebsiteV3OfferData['user']['companyInfo'] }).data : null
 
     const offerData: WebsiteV3OfferData = {
@@ -54,7 +58,7 @@ export async function GET(
 
     let html: string
     try {
-        html = buildWebsiteV3Html(offerData)
+        html = addDocumentActionLinks(buildWebsiteV3Html(offerData), publicDocumentUrl('offer', (offer as WebsiteV3OfferData & { publicToken?: string }).publicToken, 'accept'), 'accept')
     } catch (err) {
         const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
         console.error('[website-v3-pdf] buildWebsiteV3Html threw:', detail)

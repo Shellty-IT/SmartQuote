@@ -18,10 +18,13 @@ export interface WebsiteV2OfferData {
     user: {
         name: string | null
         email: string
+        avatar?: string | null
         companyInfo: {
             name: string | null
             website: string | null
             logo: string | null
+            logoLight?: string | null
+            logoDark?: string | null
             phone: string | null
             email: string | null
         } | null
@@ -54,7 +57,7 @@ function addDays(iso: string, days: number): string {
 }
 
 function ph(text: string): string {
-    return `<span style="background:#FEF3C7; color:#92400E; border-radius:4px; padding:2px 6px; font-weight:600; white-space:nowrap;">${text}</span>`
+    return `<span style="color:inherit; font-weight:700; white-space:nowrap;">${esc(text)}</span>`
 }
 
 function secnum(n: string): string {
@@ -95,9 +98,19 @@ a { color: inherit; text-decoration: none; }
 
 @media print {
   .dot-grid { background: #FFFFFF !important; }
-  .pb-tech, .pb-price { page-break-before: always; }
   body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  section { break-inside: avoid; }
+  section { break-inside: auto; overflow:visible !important; }
+  .inner { width:100% !important; max-width:100% !important; padding:52px 44px !important; }
+  .print-keep.print-keep-active { break-inside:avoid-page !important; page-break-inside:avoid !important; }
+  .price-wrap { grid-template-columns:minmax(0,1fr) !important; align-items:start !important; }
+  .price-wrap > div { width:100% !important; max-width:100% !important; }
+  .price-wrap > div:last-child { display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px !important; }
+  .price-wrap > div:last-child > div { padding:14px !important; align-items:flex-start !important; }
+  .price-wrap > div:last-child span { min-width:0 !important; overflow-wrap:anywhere !important; }
+  .work-grid > div, .faq-grid > div, .costs-grid > div, .checklist-grid > div { break-inside: avoid; }
+  footer { break-inside:avoid-page !important; page-break-inside:avoid !important; }
+  footer .inner { padding:28px 44px 20px !important; }
+  footer .footer-grid + div { margin:20px 0 12px !important; }
 }
 </style>`
 }
@@ -107,10 +120,11 @@ a { color: inherit; text-decoration: none; }
 function renderCover(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editorMode: boolean): string {
     const c = blocks.cover
     const ci = data.user.companyInfo
-    const clientName = data.client.company || data.client.name || 'NAZWA FIRMY'
-    const logoHtml = ci?.logo
-        ? `<img src="${esc(ci.logo)}" alt="logo" style="max-width:128px; max-height:52px; object-fit:contain; border-radius:8px;" />`
-        : `<div style="width:128px; height:52px; border:1.5px dashed #BFDBFE; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:700; letter-spacing:2px; color:#94A3B8; font-size:13px; background:rgba(255,255,255,0.7);">LOGO</div>`
+    const clientName = c.recipientName.trim() || data.client.company || data.client.name || 'NAZWA FIRMY'
+    const lightLogo = ci?.logoLight || ci?.logo
+    const logoHtml = lightLogo
+        ? `<img src="${esc(lightLogo)}" alt="logo" style="max-width:196px; max-height:78px; object-fit:contain;" />`
+        : `<div style="width:196px; height:78px; border:1.5px dashed #BFDBFE; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:700; letter-spacing:2px; color:#94A3B8; font-size:13px; background:rgba(255,255,255,0.7);">LOGO</div>`
     const website = ci?.website ? `<a href="${esc(ci.website)}" style="color:#2563EB; font-weight:600; font-size:14px;">${esc(ci.website.replace(/^https?:\/\//, ''))}</a>` : ''
     const priceText = blocks.pricing.priceOverride != null
         ? `${blocks.pricing.priceOverride.toLocaleString('pl-PL')} zł`
@@ -125,8 +139,8 @@ function renderCover(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editorMo
           ${website}
         </div>
         <div style="text-align:right; color:#64748B; font-size:13.5px; line-height:1.7;">
-          <div>Oferta nr ${ph(esc(data.number))}</div>
-          <div>${ph(formatDate(data.createdAt))}</div>
+          <div>Oferta nr <strong style="color:#334155;">${esc(data.number)}</strong></div>
+          <div>${formatDate(data.createdAt)}</div>
         </div>
       </div>
 
@@ -134,13 +148,13 @@ function renderCover(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editorMo
         <div>
           <div style="text-transform:uppercase; letter-spacing:4px; color:#2563EB; font-weight:700; font-size:13px; margin-bottom:18px;">Oferta</div>
           <h1 class="headline" style="margin:0; font-size:58px; line-height:1.04; font-weight:700; letter-spacing:-1.5px;">
-            <span style="color:#1E293B;">Strona internetowa</span><br>
-            <span style="color:#2563EB;">dla ${ph(esc(clientName))}</span>
+            <span style="color:#1E293B;">${esc(c.title)}</span><br>
+            <span style="color:#2563EB;">dla ${esc(clientName)}</span>
           </h1>
           <p style="margin:26px 0 0; font-size:19px; color:#64748B; max-width:460px;">${esc(c.subtitle)}</p>
           <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:34px;">
             <span style="display:inline-flex; align-items:center; gap:7px; background:#EFF6FF; color:#2563EB; border:1px solid #BFDBFE; border-radius:999px; padding:9px 16px; font-size:14px; font-weight:600;"><span style="color:#16A34A;">✓</span> Realizacja do ${ph(String(c.deadlineDays))} dni</span>
-            <span style="display:inline-flex; align-items:center; gap:7px; background:#EFF6FF; color:#2563EB; border:1px solid #BFDBFE; border-radius:999px; padding:9px 16px; font-size:14px; font-weight:600;"><span style="color:#16A34A;">✓</span> Obsługa bez technicznej wiedzy</span>
+            <span style="display:inline-flex; align-items:center; gap:7px; background:#EFF6FF; color:#2563EB; border:1px solid #BFDBFE; border-radius:999px; padding:9px 16px; font-size:14px; font-weight:600;"><span style="color:#16A34A;">✓</span> ${esc(c.knowledgePill)}</span>
             <span style="display:inline-flex; align-items:center; gap:7px; background:#EFF6FF; color:#2563EB; border:1px solid #BFDBFE; border-radius:999px; padding:9px 16px; font-size:14px; font-weight:600;"><span style="color:#16A34A;">✓</span> Cena: ${ph(priceText)}</span>
           </div>
         </div>
@@ -213,8 +227,8 @@ function renderProblem(blocks: WebsiteV2Blocks, editorMode: boolean): string {
 function renderAbout(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editorMode: boolean): string {
     const b = blocks.about
     if (!b.enabled) return ''
-    const logoHtml = data.user.companyInfo?.logo
-        ? `<img src="${esc(data.user.companyInfo.logo)}" alt="logo" style="width:220px; height:220px; object-fit:cover; border-radius:16px;" />`
+    const logoHtml = data.user.avatar
+        ? `<img src="${esc(data.user.avatar)}" alt="Zdjęcie wykonawcy" style="width:220px; height:220px; object-fit:cover; border-radius:16px;" />`
         : `<div style="width:220px; height:220px; background:repeating-linear-gradient(45deg,#EFF6FF,#EFF6FF 11px,#F8FAFC 11px,#F8FAFC 22px); border:1px dashed #BFDBFE; border-radius:16px; display:flex; align-items:center; justify-content:center; color:#94A3B8; font-size:13px; text-align:center;">zdjęcie<br>wykonawcy</div>`
     const inner = `
   <section style="position:relative; background:#FFFFFF; overflow:hidden;">
@@ -283,7 +297,9 @@ function renderPortfolio(blocks: WebsiteV2Blocks, editorMode: boolean, sectionNu
       <div class="work-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:24px;">
         ${b.works.map(w => `
         <div style="border:1px solid #E2E8F0; border-radius:12px; overflow:hidden; box-shadow:0 4px 24px rgba(37,99,235,0.08);">
-          <div style="height:180px; background:repeating-linear-gradient(45deg,#EFF6FF,#EFF6FF 11px,#F8FAFC 11px,#F8FAFC 22px); border-bottom:1px dashed #BFDBFE; display:flex; align-items:center; justify-content:center; color:#94A3B8; font-size:12px;">screenshot realizacji</div>
+          ${w.imageUrl
+            ? `<img src="${esc(w.imageUrl)}" alt="${esc(w.name)}" style="display:block;width:100%;height:180px;object-fit:cover;border-bottom:1px solid #E2E8F0;" />`
+            : `<div style="height:180px; background:repeating-linear-gradient(45deg,#EFF6FF,#EFF6FF 11px,#F8FAFC 11px,#F8FAFC 22px); border-bottom:1px dashed #BFDBFE; display:flex; align-items:center; justify-content:center; color:#94A3B8; font-size:12px;">screenshot realizacji</div>`}
           <div style="padding:16px 18px;">
             <div style="font-weight:600; font-size:15px;">${esc(w.name)}</div>
             ${w.url && w.url !== '#' ? `<a href="${esc(w.url)}" style="color:#2563EB; font-size:13.5px; font-weight:600;">zobacz stronę →</a>` : `<span style="color:#2563EB; font-size:13.5px; font-weight:600;">zobacz stronę →</span>`}
@@ -328,7 +344,7 @@ function renderProcess(blocks: WebsiteV2Blocks, editorMode: boolean, sectionNum:
         </div>`).join('')}
       </div>
       ${b.timelineNote ? `
-      <div style="margin-top:48px; background:#FFFFFF; border:1px solid #BFDBFE; border-radius:12px; padding:22px 28px; display:flex; align-items:center; gap:14px; justify-content:center;">
+      <div class="print-keep" style="margin-top:48px; background:#FFFFFF; border:1px solid #BFDBFE; border-radius:12px; padding:22px 28px; display:flex; align-items:center; gap:14px; justify-content:center;">
         <span style="font-size:24px;">⏱</span>
         <span style="color:#2563EB; font-weight:600; font-size:17px;">${esc(b.timelineNote)}</span>
       </div>` : ''}
@@ -348,7 +364,7 @@ function renderTechnology(blocks: WebsiteV2Blocks, editorMode: boolean, sectionN
       <h2 style="margin:0 0 6px; font-size:40px; font-weight:700; letter-spacing:-1px; color:#1E293B;">${esc(b.title)}</h2>
       <p style="margin:0 0 36px; font-size:16px; color:#64748B; max-width:680px;">${esc(b.subtitle)}</p>
 
-      <div style="position:relative; display:grid; grid-template-columns:auto minmax(0,1fr); gap:28px; align-items:start; background:#FFFFFF; border:2px solid #2563EB; border-radius:12px; padding:32px 30px; box-shadow:0 8px 32px rgba(37,99,235,0.15);">
+      <div class="print-keep" style="position:relative; display:grid; grid-template-columns:auto minmax(0,1fr); gap:28px; align-items:start; background:#FFFFFF; border:2px solid #2563EB; border-radius:12px; padding:32px 30px; box-shadow:0 8px 32px rgba(37,99,235,0.15);">
         <span style="position:absolute; top:-13px; left:30px; background:#2563EB; color:#FFFFFF; border-radius:999px; padding:6px 16px; font-size:12px; font-weight:700; letter-spacing:0.5px;">★ MOJA REKOMENDACJA DLA CIEBIE</span>
         <div style="width:64px; height:64px; border-radius:50%; background:${esc(r.iconBg)}; color:#FFFFFF; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:700; margin-top:6px;">${esc(r.iconChar)}</div>
         <div>
@@ -364,7 +380,7 @@ function renderTechnology(blocks: WebsiteV2Blocks, editorMode: boolean, sectionN
       <div style="font-weight:600; color:#64748B; font-size:14px; margin:34px 0 16px; text-transform:uppercase; letter-spacing:1px;">Mogę też pracować na:</div>
       <div class="tech-secondary" style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
         ${b.alternatives.map(a => `
-        <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:24px 26px;">
+        <div class="print-keep" style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:24px 26px;">
           <div style="display:flex; align-items:center; gap:14px; margin-bottom:12px;">
             <div style="width:44px; height:44px; border-radius:50%; background:#1E293B; color:#FFFFFF; display:flex; align-items:center; justify-content:center; font-size:18px;">▲</div>
             <div>
@@ -399,6 +415,7 @@ function renderPricing(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editor
     const inner = `
   <section class="pb-price" style="position:relative; background:#EFF6FF; overflow:hidden;">
     <div class="inner" style="max-width:1080px; margin:0 auto; padding:80px 48px; position:relative; z-index:1;">
+      <div class="print-keep">
       <h2 style="margin:0 0 44px; font-size:40px; font-weight:700; letter-spacing:-1px; color:#1E293B; text-align:center;">Ile to kosztuje</h2>
 
       <div class="price-wrap" style="display:grid; grid-template-columns:minmax(0,600px) minmax(0,1fr); gap:32px; align-items:center; justify-content:center;">
@@ -433,8 +450,8 @@ function renderPricing(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editor
 
             <div style="height:1px; background:#E2E8F0; margin:28px 0;"></div>
             ${ci?.email
-                ? `<a href="mailto:${esc(ci.email)}?subject=Akceptuję%20ofertę%20nr%20${encodeURIComponent(data.number)}" style="display:block; text-align:center; background:#2563EB; color:#FFFFFF; font-weight:700; font-size:18px; border-radius:999px; padding:16px; text-decoration:none; letter-spacing:0.5px;">AKCEPTUJĘ OFERTĘ</a>`
-                : `<div style="display:block; text-align:center; background:#2563EB; color:#FFFFFF; font-weight:700; font-size:18px; border-radius:999px; padding:16px; letter-spacing:0.5px;">AKCEPTUJĘ OFERTĘ</div>`
+                ? `<a data-sq-action="accept" href="mailto:${esc(ci.email)}?subject=Akceptuję%20ofertę%20nr%20${encodeURIComponent(data.number)}" style="display:block; text-align:center; background:#2563EB; color:#FFFFFF; font-weight:700; font-size:18px; border-radius:999px; padding:16px; text-decoration:none; letter-spacing:0.5px;">AKCEPTUJĘ OFERTĘ</a>`
+                : `<div data-sq-action="accept" style="display:block; text-align:center; background:#2563EB; color:#FFFFFF; font-weight:700; font-size:18px; border-radius:999px; padding:16px; letter-spacing:0.5px;">AKCEPTUJĘ OFERTĘ</div>`
             }
             <div style="text-align:center; color:#64748B; font-style:italic; font-size:13.5px; margin-top:12px;">Oferta ważna do ${ph(validDate)}</div>
           </div>
@@ -448,16 +465,17 @@ function renderPricing(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editor
           </div>`).join('')}
         </div>
       </div>
+      </div>
 
       ${b.costs.length ? `
-      <div style="margin-top:36px; background:#FFFFFF; border:1px solid #BFDBFE; border-radius:12px; padding:30px 32px;">
+      <div class="print-keep" style="margin-top:36px; background:#FFFFFF; border:1px solid #BFDBFE; border-radius:12px; padding:30px 32px;">
         <div style="font-weight:700; font-size:18px; margin-bottom:4px;">Koszty jednorazowe i roczne — wszystko jawnie</div>
         <p style="margin:0 0 22px; color:#64748B; font-size:14.5px;">Nie ukrywam żadnych opłat. Poza wykonaniem strony są tylko niewielkie koszty roczne za jej działanie.</p>
         <div class="costs-grid" style="display:grid; grid-template-columns:${b.costs.length === 1 ? '1fr' : '1fr 1fr'}; gap:20px;">
           ${b.costs.map((cost, i) => `
           <div style="background:${i === 0 ? '#EFF6FF' : '#FFF7ED'}; border:${i === 0 ? 'none' : '1px solid #FED7AA'}; border-radius:10px; padding:20px 22px;">
             <div style="font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:${i === 0 ? '#2563EB' : '#B45309'}; margin-bottom:8px;">${esc(cost.type)}</div>
-            <div style="font-size:28px; font-weight:700; color:#1E293B;">${ph(esc(cost.amount))}</div>
+            <div style="font-size:28px; font-weight:700; color:#1E293B;">${ph(cost.amount)}</div>
             <div style="color:#64748B; font-size:13.5px; margin-top:4px;">${esc(cost.description)}</div>
           </div>`).join('')}
         </div>
@@ -492,8 +510,9 @@ function renderFaq(blocks: WebsiteV2Blocks, editorMode: boolean, sectionNum: num
 function renderFooter(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editorMode: boolean): string {
     const b = blocks.footer
     const ci = data.user.companyInfo
-    const logoHtml = ci?.logo
-        ? `<img src="${esc(ci.logo)}" alt="logo" style="max-width:128px; max-height:52px; object-fit:contain; border-radius:8px; filter:brightness(0) invert(1) opacity(0.6);" />`
+    const darkLogo = ci?.logoDark || ci?.logoLight || ci?.logo
+    const logoHtml = darkLogo
+        ? `<img src="${esc(darkLogo)}" alt="logo" style="max-width:160px; max-height:64px; object-fit:contain;" />`
         : `<div style="width:128px; height:52px; border:1.5px dashed #475569; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:700; letter-spacing:2px; color:#94A3B8; font-size:13px; margin-bottom:16px;">LOGO</div>`
     const validDate = addDays(data.createdAt, data.paymentDays ?? 14)
 
@@ -516,8 +535,8 @@ function renderFooter(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editorM
       </div>
       <div style="height:1px; background:#334155; margin:36px 0 20px;"></div>
       <div style="color:#64748B; font-size:13px; display:flex; flex-wrap:wrap; gap:6px 14px;">
-        <span>Oferta nr ${ph(esc(data.number))}</span><span>·</span>
-        <span>Przygotowana ${ph(formatDate(data.createdAt))}</span><span>·</span>
+        <span>Oferta nr ${esc(data.number)}</span><span>·</span>
+        <span>Przygotowana ${formatDate(data.createdAt)}</span><span>·</span>
         <span>Ważna do ${ph(validDate)}</span><span>·</span>
         <span>Dokument poufny</span>
       </div>
@@ -576,6 +595,19 @@ export function buildWebsiteV2Html(
 <meta name="viewport" content="width=device-width, initial-scale=1">
 ${buildCss()}
 ${zoomStyle}
+<script data-smartquote-template-pagination>
+(function () {
+  function updatePrintKeeps() {
+    var nodes = document.querySelectorAll('.print-keep');
+    for (var i = 0; i < nodes.length; i++) {
+      nodes[i].classList.toggle('print-keep-active', nodes[i].getBoundingClientRect().height <= 1030);
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', updatePrintKeeps);
+  else updatePrintKeeps();
+  window.addEventListener('beforeprint', updatePrintKeeps);
+}());
+</script>
 </head>
 <body>
 <div>

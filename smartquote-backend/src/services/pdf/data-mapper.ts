@@ -16,6 +16,7 @@ export interface UserWithCompany {
         email: string | null;
         website?: string | null;
         logo?: string | null;
+        logoLight?: string | null;
     } | null;
 }
 
@@ -43,7 +44,7 @@ export function mapToPDFUser(user: UserWithCompany): PDFUser {
         address: user.companyInfo?.address || null,
         city: user.companyInfo?.city || null,
         postalCode: user.companyInfo?.postalCode || null,
-        logo: user.companyInfo?.logo || null,
+        logo: user.companyInfo?.logoLight || user.companyInfo?.logo || null,
         website: user.companyInfo?.website || null,
     };
 }

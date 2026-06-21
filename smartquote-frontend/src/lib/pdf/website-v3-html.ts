@@ -22,6 +22,8 @@ export interface WebsiteV3OfferData {
             name: string | null
             website: string | null
             logo: string | null
+            logoLight?: string | null
+            logoDark?: string | null
             phone: string | null
             email: string | null
         } | null
@@ -54,7 +56,7 @@ function addDays(iso: string, days: number): string {
 }
 
 function ph(text: string): string {
-    return `<span style="background:#FEF9C3;color:#92400E;border-radius:4px;padding:0 5px;font-weight:600;white-space:nowrap;">${esc(text)}</span>`
+    return `<span style="color:inherit;font-weight:600;white-space:nowrap;">${esc(text)}</span>`
 }
 
 function secNum(n: string): string {
@@ -100,6 +102,14 @@ ${zoom !== 1 ? `body{zoom:${zoom};}` : ''}
 @media print{
   .no-print{display:none !important;}
   *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
+  section{max-width:100% !important;overflow:visible !important;}
+  section > div{max-width:100% !important;}
+  .grid-2,.grid-3,.pkg-grid{grid-template-columns:minmax(0,1fr) !important;}
+  .port-card{grid-template-columns:minmax(0,1fr) !important;}
+  .stepper{flex-wrap:wrap !important;justify-content:center !important;}
+  .stepper > *{flex:0 1 30% !important;min-width:150px !important;}
+  table{width:100% !important;table-layout:fixed !important;}
+  td,th{overflow-wrap:anywhere !important;}
   .pagebreak{break-before:page;page-break-before:always;}
   @page{size:A4;margin:0;}
 }
@@ -112,8 +122,9 @@ function renderCover(data: WebsiteV3OfferData, blocks: WebsiteV3Blocks, editorMo
     const c = blocks.cover
     const ci = data.user.companyInfo
     const clientName = data.client.company || data.client.name || 'NAZWA FIRMY'
-    const logoHtml = ci?.logo
-        ? `<img src="${esc(ci.logo)}" alt="logo" style="max-width:44px;max-height:44px;object-fit:contain;border-radius:8px;" />`
+    const logo = ci?.logoDark || ci?.logoLight || ci?.logo
+    const logoHtml = logo
+        ? `<img src="${esc(logo)}" alt="logo" style="max-width:72px;max-height:52px;object-fit:contain;" />`
         : `<div style="display:flex;align-items:center;justify-content:center;width:48px;height:48px;border:1.5px solid rgba(255,255,255,0.25);border-radius:12px;font-weight:800;font-size:13px;letter-spacing:0.05em;background:rgba(255,255,255,0.06);">${ci?.name ? esc(ci.name.slice(0, 3).toUpperCase()) : 'LOGO'}</div>`
     const website = ci?.website ?? ''
     const websiteDisplay = website.replace(/^https?:\/\//, '')
@@ -141,7 +152,7 @@ function renderCover(data: WebsiteV3OfferData, blocks: WebsiteV3Blocks, editorMo
       </div>
     </nav>
     <div style="text-align:center;padding:88px 0 0;">
-      <div style="display:inline-flex;align-items:center;gap:8px;padding:7px 16px;border-radius:999px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.16);font-size:12px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.75);margin-bottom:28px;">✦ Oferta handlowa</div>
+      <div style="display:inline-flex;align-items:center;gap:8px;padding:7px 16px;border-radius:999px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.16);font-size:12px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.75);margin-bottom:28px;">✦ ${esc(c.badgeLabel)}</div>
       <h1 class="cover-h1" style="margin:0;font-weight:300;font-size:72px;line-height:1.04;letter-spacing:-0.02em;">
         ${esc(c.subtitle)}<br>
         <span class="gradient-text" style="font-weight:800;">${esc(data.title || 'STRONA INTERNETOWA')}</span>
@@ -577,8 +588,9 @@ function renderFooter(data: WebsiteV3OfferData, blocks: WebsiteV3Blocks, editorM
     const ci = data.user.companyInfo
     const website = ci?.website ?? ''
     const websiteDisplay = website.replace(/^https?:\/\//, '')
-    const logoHtml = ci?.logo
-        ? `<img src="${esc(ci.logo)}" alt="logo" style="max-width:44px;max-height:44px;object-fit:contain;border-radius:8px;" />`
+    const logo = ci?.logoDark || ci?.logoLight || ci?.logo
+    const logoHtml = logo
+        ? `<img src="${esc(logo)}" alt="logo" style="max-width:72px;max-height:52px;object-fit:contain;" />`
         : `<div style="display:flex;align-items:center;justify-content:center;width:44px;height:44px;border:1.5px solid rgba(255,255,255,0.4);border-radius:11px;font-weight:800;font-size:12px;">${ci?.name ? esc(ci.name.slice(0, 3).toUpperCase()) : 'LOGO'}</div>`
     const validUntil = addDays(data.createdAt, blocks.cover.validityDays)
     const inner = `
@@ -587,7 +599,7 @@ function renderFooter(data: WebsiteV3OfferData, blocks: WebsiteV3Blocks, editorM
   <div style="max-width:760px;margin:0 auto;position:relative;z-index:1;">
     <h2 style="margin:0;font-size:52px;font-weight:800;letter-spacing:-0.02em;line-height:1.05;">${esc(b.ctaHeadline)}</h2>
     <p style="margin:18px 0 36px;font-size:18px;color:rgba(255,255,255,0.9);">${esc(b.ctaSubtitle)}</p>
-    <div class="no-print" style="display:inline-block;padding:18px 44px;border-radius:999px;background:#fff;color:var(--violet);font-weight:800;font-size:17px;letter-spacing:0.01em;box-shadow:0 14px 40px rgba(0,0,0,0.2);">AKCEPTUJĘ OFERTĘ I CHCĘ ZACZĄĆ →</div>
+    <div class="no-print" data-sq-action="accept" style="display:inline-block;padding:18px 44px;border-radius:999px;background:#fff;color:var(--violet);font-weight:800;font-size:17px;letter-spacing:0.01em;box-shadow:0 14px 40px rgba(0,0,0,0.2);">AKCEPTUJĘ OFERTĘ I CHCĘ ZACZĄĆ →</div>
     <div style="margin-top:48px;padding-top:32px;border-top:1px solid rgba(255,255,255,0.2);display:flex;flex-direction:column;align-items:center;gap:14px;">
       <div style="display:flex;align-items:center;gap:12px;">
         ${logoHtml}

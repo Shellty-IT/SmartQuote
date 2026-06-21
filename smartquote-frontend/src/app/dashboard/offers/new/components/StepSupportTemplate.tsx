@@ -12,7 +12,7 @@ import type { SupportOfferData } from '@/lib/pdf/support-html'
 import type { OfferContext } from '@/components/offers/editor/block-editors'
 
 interface StepSupportTemplateProps {
-    client: Client | null
+    client: Pick<Client, 'name' | 'company'> | null
     offerTitle: string
     onTitleChange: (title: string) => void
     blocks: SupportBlocks
@@ -38,6 +38,7 @@ export default function StepSupportTemplate({
         offerDate: new Date().toLocaleDateString('pl-PL'),
         clientName: client?.name ?? 'Klient',
         userLogoUrl: companyInfo?.logo ?? undefined,
+        userLogoDarkUrl: companyInfo?.logoDark ?? undefined,
         userCompanyName: companyInfo?.name ?? session?.user?.name ?? undefined,
         userEmail: companyInfo?.email ?? session?.user?.email ?? undefined,
         userPhone: companyInfo?.phone ?? undefined,

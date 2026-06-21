@@ -16,6 +16,7 @@ const offerPublicIncludeFull = {
             name: true,
             email: true,
             phone: true,
+            avatar: true,
             companyInfo: {
                 select: {
                     name: true,
@@ -27,6 +28,8 @@ const offerPublicIncludeFull = {
                     email: true,
                     website: true,
                     logo: true,
+                    logoLight: true,
+                    logoDark: true,
                     primaryColor: true,
                 },
             },

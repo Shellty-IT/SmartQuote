@@ -22,6 +22,7 @@ import { mergeSlaWithDefaults, type ContractSlaBlocks } from '@/lib/pdf/contract
 import { mergeMobileWithDefaults, type ContractMobileBlocks } from '@/lib/pdf/contract-mobile-blocks'
 import type { OfferContext } from '@/components/offers/editor/block-editors'
 import type { Contract } from '@/types'
+import { downloadContractDocument, getContractHtmlPreviewUrl } from '@/lib/document-pdf'
 
 interface ContractTemplateTabProps {
     contract: Contract
@@ -61,7 +62,7 @@ export function ContractTemplateTab({ contract, onSaved }: ContractTemplateTabPr
     const handleShortDownload = async () => {
         setIsDownloading(true)
         try {
-            const blob = await contractsApi.downloadShortPdf(contract.id)
+            const blob = await downloadContractDocument(contract.id, 'short')
             const url = URL.createObjectURL(blob)
             const a = document.createElement('a')
             a.href = url
@@ -85,9 +86,7 @@ export function ContractTemplateTab({ contract, onSaved }: ContractTemplateTabPr
     const handleServicesDownload = async () => {
         setIsServicesDownloading(true)
         try {
-            const resp = await fetch(`/api/contracts/${contract.id}/pdf/services`)
-            if (!resp.ok) throw new Error('PDF generation failed')
-            const blob = await resp.blob()
+            const blob = await downloadContractDocument(contract.id, 'services')
             const url = URL.createObjectURL(blob)
             const a = document.createElement('a')
             a.href = url
@@ -106,7 +105,7 @@ export function ContractTemplateTab({ contract, onSaved }: ContractTemplateTabPr
 
     const [servicesPreviewOpen, setServicesPreviewOpen] = useState(false)
     const servicesPreviewUrl = useMemo(
-        () => `/api/contracts/${contract.id}/services/preview`,
+        () => getContractHtmlPreviewUrl(contract.id, 'services'),
         [contract.id],
     )
 
@@ -114,14 +113,12 @@ export function ContractTemplateTab({ contract, onSaved }: ContractTemplateTabPr
 
     const [isDedicatedDownloading, setIsDedicatedDownloading] = useState(false)
     const [dedicatedPreviewOpen, setDedicatedPreviewOpen] = useState(false)
-    const dedicatedPreviewUrl = useMemo(() => `/api/contracts/${contract.id}/dedicated/preview`, [contract.id])
+    const dedicatedPreviewUrl = useMemo(() => getContractHtmlPreviewUrl(contract.id, 'dedicated'), [contract.id])
 
     const handleDedicatedDownload = async () => {
         setIsDedicatedDownloading(true)
         try {
-            const resp = await fetch(`/api/contracts/${contract.id}/pdf/dedicated`)
-            if (!resp.ok) throw new Error('PDF generation failed')
-            const blob = await resp.blob()
+            const blob = await downloadContractDocument(contract.id, 'dedicated')
             const url = URL.createObjectURL(blob)
             const a = document.createElement('a')
             a.href = url
@@ -142,14 +139,12 @@ export function ContractTemplateTab({ contract, onSaved }: ContractTemplateTabPr
 
     const [isSlaDownloading, setIsSlaDownloading] = useState(false)
     const [slaPreviewOpen, setSlaPreviewOpen] = useState(false)
-    const slaPreviewUrl = useMemo(() => `/api/contracts/${contract.id}/sla/preview`, [contract.id])
+    const slaPreviewUrl = useMemo(() => getContractHtmlPreviewUrl(contract.id, 'sla'), [contract.id])
 
     const handleSlaDownload = async () => {
         setIsSlaDownloading(true)
         try {
-            const resp = await fetch(`/api/contracts/${contract.id}/pdf/sla`)
-            if (!resp.ok) throw new Error('PDF generation failed')
-            const blob = await resp.blob()
+            const blob = await downloadContractDocument(contract.id, 'sla')
             const url = URL.createObjectURL(blob)
             const a = document.createElement('a')
             a.href = url
@@ -170,14 +165,12 @@ export function ContractTemplateTab({ contract, onSaved }: ContractTemplateTabPr
 
     const [isMobileDownloading, setIsMobileDownloading] = useState(false)
     const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false)
-    const mobilePreviewUrl = useMemo(() => `/api/contracts/${contract.id}/mobile/preview`, [contract.id])
+    const mobilePreviewUrl = useMemo(() => getContractHtmlPreviewUrl(contract.id, 'mobile'), [contract.id])
 
     const handleMobileDownload = async () => {
         setIsMobileDownloading(true)
         try {
-            const resp = await fetch(`/api/contracts/${contract.id}/pdf/mobile`)
-            if (!resp.ok) throw new Error('PDF generation failed')
-            const blob = await resp.blob()
+            const blob = await downloadContractDocument(contract.id, 'mobile')
             const url = URL.createObjectURL(blob)
             const a = document.createElement('a')
             a.href = url
@@ -205,7 +198,7 @@ export function ContractTemplateTab({ contract, onSaved }: ContractTemplateTabPr
     }
 
     const shortPreviewUrl = useMemo(
-        () => contractsApi.getShortPreviewUrl(contract.id),
+        () => getContractHtmlPreviewUrl(contract.id, 'short'),
         [contract.id],
     )
 
@@ -221,7 +214,7 @@ export function ContractTemplateTab({ contract, onSaved }: ContractTemplateTabPr
         setIsClassicPreviewing(true)
         setClassicPreviewError(null)
         try {
-            const blob = await contractsApi.downloadPdf(contract.id)
+            const blob = await downloadContractDocument(contract.id, 'classic')
             const url = URL.createObjectURL(blob)
             setClassicPreviewUrl((old) => { if (old) URL.revokeObjectURL(old); return url })
             setClassicPreviewOpen(true)
@@ -236,7 +229,7 @@ export function ContractTemplateTab({ contract, onSaved }: ContractTemplateTabPr
     const handleClassicDownload = async () => {
         setIsClassicDownloading(true)
         try {
-            const blob = await contractsApi.downloadPdf(contract.id)
+            const blob = await downloadContractDocument(contract.id, 'classic')
             const url = URL.createObjectURL(blob)
             const a = document.createElement('a')
             a.href = url

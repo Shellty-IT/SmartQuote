@@ -16,7 +16,7 @@ export type WebsiteV2SectionKey =
 export interface WV2PainPoint { emoji: string; text: string }
 export interface WV2StatItem { value: string; label: string }
 export interface WV2FeatureItem { title: string; description: string }
-export interface WV2PortfolioItem { name: string; url: string }
+export interface WV2PortfolioItem { name: string; url: string; imageUrl?: string }
 export interface WV2Testimonial { stars: number; text: string; name: string; company: string }
 export interface WV2ProcessStep { title: string; description: string }
 export interface WV2TechRecommended {
@@ -41,7 +41,10 @@ export interface WV2FaqItem { question: string; answer: string }
 // ── Block interfaces ──────────────────────────────────────────────────────────
 
 export interface WV2CoverBlock {
+    title: string
+    recipientName: string
     subtitle: string
+    knowledgePill: string
     deadlineDays: number
     validityDays: number
 }
@@ -146,7 +149,10 @@ export function buildDefaultWebsiteV2Blocks(): WebsiteV2Blocks {
         version: 1,
         sections: [...DEFAULT_WV2_SECTIONS],
         cover: {
+            title: 'Strona internetowa',
+            recipientName: '',
             subtitle: 'Prosta, nowoczesna strona, która sprawi, że klienci znajdą Cię w internecie.',
+            knowledgePill: 'Obsługa bez technicznej wiedzy',
             deadlineDays: 14,
             validityDays: 14,
         },
@@ -196,9 +202,9 @@ export function buildDefaultWebsiteV2Blocks(): WebsiteV2Blocks {
             title: 'Wybrane realizacje',
             subtitle: 'Kilka stron, które zbudowałem dla podobnych firm. Najlepiej zobacz na żywo.',
             works: [
-                { name: 'Nazwa firmy / branża', url: '#' },
-                { name: 'Nazwa firmy / branża', url: '#' },
-                { name: 'Nazwa firmy / branża', url: '#' },
+                { name: 'Nazwa firmy / branża', url: '#', imageUrl: '' },
+                { name: 'Nazwa firmy / branża', url: '#', imageUrl: '' },
+                { name: 'Nazwa firmy / branża', url: '#', imageUrl: '' },
             ],
             testimonials: [
                 { stars: 5, text: 'Krótka, autentyczna opinia klienta — co się zmieniło dzięki stronie.', name: 'Jan K.', company: 'Firma XYZ' },

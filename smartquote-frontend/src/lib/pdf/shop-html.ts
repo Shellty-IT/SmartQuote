@@ -23,6 +23,8 @@ export interface ShopOfferData {
             name?: string | null
             website?: string | null
             logo?: string | null
+            logoLight?: string | null
+            logoDark?: string | null
             phone?: string | null
             email?: string | null
         } | null
@@ -59,7 +61,7 @@ function editorWrap(key: string, html: string, label: string, editorMode: boolea
     return `<div
   class="sq-editable"
   data-block="${key}"
-  onclick="window.parent.postMessage({type:'sq:editBlock',blockKey:'${key}'},location.origin)"
+  onclick="event.stopPropagation();window.parent.postMessage({type:'sq:editBlock',blockKey:'${key}'},'*')"
   title="Edytuj: ${label}"
   style="position:relative;cursor:pointer;outline:none;transition:box-shadow .15s"
   onmouseenter="this.style.boxShadow='inset 0 0 0 2px #F4A261'"
@@ -194,7 +196,7 @@ a { color: inherit; text-decoration: none; }
 .price-name { font-weight: 600; color: #1A1A2A; }
 .price-desc { color: #6B7280; }
 .price-amount { text-align: right; font-weight: 700; white-space: nowrap; }
-.highlight { background: #FFF3CD; color: #92400E; padding: 1px 6px; border-radius: 4px; }
+.highlight { color: inherit; font-weight: 600; }
 .price-summary { background: #F8F9FC; padding: 8px 22px; border-top: 1px solid #E5E8F0; }
 .price-summary-row {
   display: flex; justify-content: space-between;
@@ -317,10 +319,11 @@ a { color: inherit; text-decoration: none; }
 
 // ── Section renderers ─────────────────────────────────────────────────────────
 
-function renderCover(data: ShopOfferData, blocks: ShopBlocks): string {
+function renderCover(data: ShopOfferData, blocks: ShopBlocks, editorMode: boolean): string {
     const co = data.user?.companyInfo
-    const logoHtml = co?.logo
-        ? `<img src="${esc(co.logo)}" alt="logo" />`
+    const logo = co?.logoDark || co?.logoLight || co?.logo
+    const logoHtml = logo
+        ? `<img src="${esc(logo)}" alt="logo" />`
         : `<span style="font-size:10px;font-weight:800;letter-spacing:1px;color:#F4A261;">LOGO</span>`
     const website = co?.website ?? ''
     const clientDisplay = data.client.company || data.client.name
@@ -329,7 +332,7 @@ function renderCover(data: ShopOfferData, blocks: ShopBlocks): string {
     const validUntil = addDays(data.createdAt, blocks.cover.validityDays)
     const offerNumber = esc(data.number)
 
-    return `
+    const inner = `
   <section class="sec cover" style="position:relative;">
     <div class="cover-deco1"></div>
     <div class="cover-deco2"></div>
@@ -347,7 +350,7 @@ function renderCover(data: ShopOfferData, blocks: ShopBlocks): string {
       <h1 class="cover-h1">${esc(blocks.cover.subtitle).replace(/(\S+)$/, `<span style="color:#F4A261;">$1</span>`)}</h1>
       <div style="font-size:17px;color:rgba(255,255,255,.8);margin-bottom:8px;">Przygotowana dla:</div>
       <div style="font-size:26px;font-weight:700;margin-bottom:110px;">
-        <span style="background:#FFF3CD;color:#92400E;padding:2px 10px;border-radius:6px;font-weight:700;">${esc(clientDisplay)}</span>
+        <span style="color:inherit;font-weight:700;">${esc(clientDisplay)}</span>
       </div>
       <!-- bottom bar -->
       <div style="display:flex;flex-wrap:wrap;gap:40px;padding-top:24px;border-top:1px solid rgba(255,255,255,.14);">
@@ -366,6 +369,7 @@ function renderCover(data: ShopOfferData, blocks: ShopBlocks): string {
       </div>
     </div>
   </section>`
+    return editorWrap('cover', inner, 'Okładka', editorMode)
 }
 
 function renderSummary(blocks: ShopBlocks, editorMode: boolean, num: number): string {
@@ -629,10 +633,11 @@ function renderAbout(data: ShopOfferData, blocks: ShopBlocks, editorMode: boolea
     </section>`
 }
 
-function renderFooter(data: ShopOfferData, blocks: ShopBlocks): string {
+function renderFooter(data: ShopOfferData, blocks: ShopBlocks, editorMode: boolean): string {
     const co = data.user?.companyInfo
-    const logoHtml = co?.logo
-        ? `<img src="${esc(co.logo)}" alt="logo" />`
+    const logo = co?.logoDark || co?.logoLight || co?.logo
+    const logoHtml = logo
+        ? `<img src="${esc(logo)}" alt="logo" />`
         : `<span style="font-size:10px;font-weight:800;letter-spacing:1px;color:#F4A261;">LOGO</span>`
     const website = co?.website ?? ''
     const email = co?.email ?? data.user?.email ?? ''
@@ -641,14 +646,14 @@ function renderFooter(data: ShopOfferData, blocks: ShopBlocks): string {
     const validUntil = addDays(data.createdAt, blocks.cover.validityDays)
     const f = blocks.footer
 
-    return `
+    const inner = `
   <section class="sec shop-footer" style="position:relative;">
     <div class="footer-deco"></div>
     <div style="position:relative;">
       <div style="display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:40px;">
         <div style="font-size:22px;font-weight:800;margin-bottom:8px;">${esc(f.ctaTitle)}</div>
         <p style="font-size:14px;color:rgba(255,255,255,.7);max-width:440px;margin:0 0 24px;">${esc(f.ctaSubtitle)}</p>
-        <span class="cta-btn">${esc(f.ctaButtonText)}</span>
+        <span class="cta-btn" data-sq-action="accept">${esc(f.ctaButtonText)}</span>
       </div>
       <div class="footer-grid">
         <div style="display:flex;align-items:center;gap:12px;">
@@ -670,6 +675,7 @@ function renderFooter(data: ShopOfferData, blocks: ShopBlocks): string {
       </p>
     </div>
   </section>`
+    return editorWrap('footer', inner, 'Stopka', editorMode)
 }
 
 // ── Section dispatcher ────────────────────────────────────────────────────────
@@ -720,7 +726,7 @@ export function buildShopHtml(
       el.addEventListener('click', function(e) {
         e.stopPropagation();
         var key = el.getAttribute('data-block');
-        window.parent.postMessage({type: 'sq:editBlock', blockKey: key}, location.origin);
+        window.parent.postMessage({type: 'sq:editBlock', blockKey: key}, '*');
       });
     });
   </script>` : ''
@@ -743,9 +749,9 @@ ${zoomStyle}
 </head>
 <body>
 <div class="doc">
-  ${renderCover(data, blocks)}
+  ${renderCover(data, blocks, editorMode)}
   ${sectionsHtml}
-  ${renderFooter(data, blocks)}
+  ${renderFooter(data, blocks, editorMode)}
 </div>
 ${editorScript}
 </body>

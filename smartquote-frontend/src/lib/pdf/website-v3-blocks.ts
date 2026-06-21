@@ -70,6 +70,7 @@ export interface WV3Guarantee { emoji: string; title: string; description: strin
 // ── Block interfaces ──────────────────────────────────────────────────────────
 
 export interface WV3CoverBlock {
+    badgeLabel: string
     subtitle: string
     promisePills: string[]
     deadlineDays: number
@@ -199,6 +200,7 @@ export function buildDefaultWebsiteV3Blocks(): WebsiteV3Blocks {
         version: 1,
         sections: [...DEFAULT_WV3_SECTIONS],
         cover: {
+            badgeLabel: 'Oferta handlowa',
             subtitle: 'PROPOZYCJA REALIZACJI STRONY INTERNETOWEJ',
             promisePills: ['Nowoczesny design', 'Responsywność', 'Gotowe w 21 dni'],
             deadlineDays: 21,

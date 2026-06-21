@@ -3,6 +3,7 @@
 // GET /api/public/contracts/:token/mobile/preview  →  text/html
 
 import { buildContractMobileHtmlFromSaved } from '@/lib/pdf/contract-mobile-html'
+import { addDocumentActionLinks } from '@/lib/pdf/document-action-links'
 
 export const maxDuration = 10
 export const dynamic = 'force-dynamic'
@@ -34,7 +35,7 @@ export async function GET(
 
     let html: string
     try {
-        html = buildContractMobileHtmlFromSaved(contract.blocks, { editorMode: false })
+        html = addDocumentActionLinks(buildContractMobileHtmlFromSaved(contract.blocks, { editorMode: false }), `/contract/view/${token}#sign`, 'sign')
     } catch (err) {
         const detail = err instanceof Error ? err.message : String(err)
         return new Response(`<pre>Error: ${detail}</pre>`, {

@@ -12,7 +12,7 @@ import type { UniversalOfferData } from '@/lib/pdf/universal-html'
 import type { OfferContext } from '@/components/offers/editor/block-editors'
 
 interface StepUniversalTemplateProps {
-    client: Client | null
+    client: Pick<Client, 'name' | 'company'> | null
     offerTitle: string
     onTitleChange: (title: string) => void
     blocks: UniversalBlocks
@@ -38,6 +38,7 @@ export default function StepUniversalTemplate({
         offerDate: new Date().toLocaleDateString('pl-PL'),
         clientName: client?.name ?? 'Klient',
         userLogoUrl: companyInfo?.logo ?? undefined,
+        userLogoDarkUrl: companyInfo?.logoDark ?? undefined,
         userCompanyName: companyInfo?.name ?? session?.user?.name ?? undefined,
         userEmail: companyInfo?.email ?? session?.user?.email ?? undefined,
         userPhone: companyInfo?.phone ?? undefined,
@@ -54,7 +55,7 @@ export default function StepUniversalTemplate({
     return (
         <div className="flex flex-col gap-4">
             <div>
-                <h2 className="text-lg font-semibold text-foreground">Szablon: Szablon uniwersalny</h2>
+                <h2 className="text-lg font-semibold text-foreground">Szablon: Uniwersalny - klasyczny</h2>
                 <p className="text-sm text-muted-foreground mt-0.5">
                     Kliknij dowolną sekcję na dokumencie, aby edytować jej treść.
                 </p>

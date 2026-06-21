@@ -168,7 +168,7 @@ export function useResizablePanel(storageKey: string, options: number | Resizabl
     )
 
     const previewPanelStyle: CSSProperties = {
-        flex: `0 0 calc((100% - ${handleWidth}px) * ${previewRatio})`,
+        flex: `0 0 calc(${previewRatio * 100}% - ${handleWidth * previewRatio}px)`,
         minWidth: minPreviewWidth,
         transition: isDragging ? 'none' : undefined,
     }

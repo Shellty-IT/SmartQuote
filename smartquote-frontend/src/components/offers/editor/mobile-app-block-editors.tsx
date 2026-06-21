@@ -93,8 +93,12 @@ export function CoverEditor({
 
     return (
         <div className="flex flex-col gap-3">
+            <Field label="Etykieta nad tytułem"><TextInput value={b.eyebrow ?? ''} onChange={v => set({ eyebrow: v })} placeholder="Propozycja realizacji" /></Field>
+            <Field label="Pierwsza linia tytułu"><TextInput value={b.titlePrefix ?? ''} onChange={v => set({ titlePrefix: v })} placeholder="Twoja aplikacja" /></Field>
+            <Field label="Wyróżnione słowo w tytule"><TextInput value={b.titleAccent ?? ''} onChange={v => set({ titleAccent: v })} placeholder="mobilna" /></Field>
             <Field label="Nazwa projektu"><TextInput value={b.projectName} onChange={v => set({ projectName: v })} placeholder="Nazwa aplikacji" /></Field>
             <Field label="Klient (karta okładki)"><TextInput value={b.clientName} onChange={v => set({ clientName: v })} placeholder="Nazwa klienta" /></Field>
+            <Field label="Pill platformy"><TextInput value={b.platformPill ?? ''} onChange={v => set({ platformPill: v })} placeholder="iOS + Android" /></Field>
             <Field label="MVP od (tygodnie)"><TextInput value={b.mvpWeeks} onChange={v => set({ mvpWeeks: v })} placeholder="8" /></Field>
             <Field label="Cena od (zł)"><TextInput value={b.priceFrom} onChange={v => set({ priceFrom: v })} placeholder="25 000" /></Field>
             <SectionHeader title="Obietnice (promise bar)" />

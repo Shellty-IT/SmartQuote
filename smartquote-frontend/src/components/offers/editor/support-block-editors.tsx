@@ -88,6 +88,9 @@ export function CoverEditorSupport({
             <Field label="Tytuł (H1, pierwsza linia)">
                 <input className={inputCls} value={block.heroTitle} onChange={(e) => upd({ heroTitle: e.target.value })} />
             </Field>
+            <Field label="Dopisek tytułu (druga linia)">
+                <input className={inputCls} value={block.heroTitleSuffix ?? ''} onChange={(e) => upd({ heroTitleSuffix: e.target.value })} />
+            </Field>
             <Field label="Podtytuł">
                 <textarea className={textareaCls} value={block.heroSubtitle} onChange={(e) => upd({ heroSubtitle: e.target.value })} />
             </Field>
@@ -122,6 +125,9 @@ export function CoverEditorSupport({
             <AddBtn onClick={() => upd({ pills: [...block.pills, ''] })} label="Dodaj pill" />
 
             <SectionDivider label="Monitor — wiersze statusu" />
+            <Field label="Etykieta monitora">
+                <input className={inputCls} value={block.monitorLabel ?? ''} onChange={(e) => upd({ monitorLabel: e.target.value })} />
+            </Field>
             {block.monitorRows.map((row, i) => (
                 <div key={i} className="mb-2 flex gap-2">
                     <input
@@ -148,6 +154,14 @@ export function CoverEditorSupport({
                 </div>
             ))}
             <AddBtn onClick={() => upd({ monitorRows: [...block.monitorRows, { label: '', status: 'ONLINE' }] })} label="Dodaj wiersz" />
+            <Row2>
+                <Field label="Etykieta dostępności">
+                    <input className={inputCls} value={block.availabilityLabel ?? ''} onChange={(e) => upd({ availabilityLabel: e.target.value })} />
+                </Field>
+                <Field label="Wartość dostępności">
+                    <input className={inputCls} value={block.availabilityValue ?? ''} onChange={(e) => upd({ availabilityValue: e.target.value })} />
+                </Field>
+            </Row2>
 
             <div className="mt-3 rounded-lg bg-muted/40 px-3 py-2.5 text-xs text-muted-foreground leading-relaxed">
                 💡 <strong>Logo</strong> pochodzi z <em>Ustawień firmy</em>. <strong>Numer oferty</strong> i <strong>data</strong> generowane automatycznie.

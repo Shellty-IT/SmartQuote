@@ -39,7 +39,14 @@ export function WebsiteV3DocumentEditor({
     offerContext,
 }: WebsiteV3DocumentEditorProps) {
     const [panelView, setPanelView] = useState<PanelView>(null)
-    const { panelWidth, onResizeMouseDown } = useResizablePanel('sq_editor_panel_width')
+    const {
+        containerRef,
+        previewPanelStyle,
+        editorPanelStyle,
+        handleStyle,
+        isDragging,
+        onResizeMouseDown,
+    } = useResizablePanel('sq_preview_ratio_website_v3', { mode: 'preview-ratio' })
     const { zoom, zoomIn, zoomOut } = useZoom()
     const [refreshKey, setRefreshKey] = useState(0)
 
@@ -84,9 +91,9 @@ export function WebsiteV3DocumentEditor({
     const editingBlock = panelView?.kind === 'block' ? panelView.key : null
 
     return (
-        <div className="flex flex-col gap-3">
+        <div className="flex h-full min-h-[700px] flex-col gap-0 rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
             {/* Toolbar */}
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap border-b border-border bg-card px-4 py-2.5">
                 <TemplateAIFillButton
                     blocks={blocks}
                     onBlocksChange={onBlocksChange}
@@ -128,31 +135,53 @@ export function WebsiteV3DocumentEditor({
                 )}
             </div>
 
-            <p className="text-xs text-muted-foreground">
+            <p className="border-b border-border bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
                 Kliknij dowolną sekcję na podglądzie dokumentu, aby otworzyć edytor.
             </p>
 
             {/* Editor + side panel */}
-            <div className="flex border border-border rounded-xl overflow-hidden" style={{ minHeight: 700 }}>
-                <div className="flex-1 overflow-hidden">
+            <div ref={containerRef} className="flex flex-1 min-h-0">
+                <div
+                    className={cn(
+                        'min-w-0 overflow-hidden',
+                        panelOpen ? 'flex-shrink-0' : 'flex-1',
+                        !isDragging && 'transition-all duration-300',
+                    )}
+                    style={panelOpen ? previewPanelStyle : undefined}
+                >
                     <iframe
                         key={refreshKey}
                         srcDoc={srcdoc}
-                        className="w-full border-0"
+                        className={cn('w-full border-0', isDragging && 'pointer-events-none')}
                         style={{ minHeight: 700 }}
                     />
                 </div>
 
+                {panelOpen && (
+                    <div
+                        role="separator"
+                        aria-orientation="vertical"
+                        title="ZmieĹ„ szerokoĹ›Ä‡ podglÄ…du"
+                        onMouseDown={onResizeMouseDown}
+                        className={cn(
+                            'group relative z-20 cursor-col-resize bg-border/70 hover:bg-primary/30',
+                            !isDragging && 'transition-colors',
+                            isDragging && 'bg-primary/30',
+                        )}
+                        style={handleStyle}
+                    >
+                        <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-border group-hover:bg-primary/50" />
+                    </div>
+                )}
+
                 <div
-                    className={cn('flex-shrink-0 overflow-hidden border-l border-border relative', panelOpen ? '' : '!w-0')}
-                    style={panelOpen ? { width: panelWidth } : undefined}
-                >
-                    {panelOpen && (
-                        <div
-                            onMouseDown={onResizeMouseDown}
-                            className="absolute left-0 top-0 bottom-0 w-1.5 cursor-ew-resize z-20 hover:bg-primary/20 transition-colors"
-                        />
+                    className={cn(
+                        'min-w-0 overflow-hidden border-l border-border',
+                        panelOpen ? '' : 'w-0 flex-shrink-0',
+                        !isDragging && 'transition-all duration-300',
                     )}
+                    style={panelOpen ? editorPanelStyle : undefined}
+                >
                     {showSections && (
                         <WebsiteV3SectionManagerPanel
                             blocks={blocks}

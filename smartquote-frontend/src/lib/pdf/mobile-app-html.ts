@@ -18,6 +18,7 @@ export interface MobileAppOfferData {
     validUntil?: string
     clientName?: string
     userLogoUrl?: string
+    userLogoDarkUrl?: string
     userCompanyName?: string
     userEmail?: string
     userPhone?: string
@@ -75,8 +76,12 @@ a{color:inherit;text-decoration:none;}
   .orb,.no-print{display:none !important;}
   body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   .pb{page-break-before:always;}
-  .scroll-x{overflow-x:visible !important;}
-  section{break-inside:avoid-page;}
+  .scroll-x{overflow-x:visible !important;max-width:100% !important;}
+  .scroll-x table{width:100% !important;min-width:0 !important;table-layout:fixed !important;}
+  .scroll-x td,.scroll-x th{overflow-wrap:anywhere !important;}
+  section{break-inside:auto;max-width:100% !important;}
+  .g2,.g3,.g4{grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;}
+  .pad,.cover-pad{max-width:100% !important;padding-left:44px !important;padding-right:44px !important;}
   .doc{box-shadow:none !important;}
 }
 ${editorMode ? `
@@ -89,11 +94,11 @@ ${editorMode ? `
 
 // ── S1 — Cover ────────────────────────────────────────────────────────────────
 
-function renderCover(b: MobileAppBlocks, offer: MobileAppOfferData): string {
+function renderCover(b: MobileAppBlocks, offer: MobileAppOfferData, editorMode: boolean): string {
     const offerNum = esc(offer.offerNumber ?? '2025/APP/001')
     const offerDate = esc(offer.offerDate ?? '')
     const website = esc(b.cover ? offer.userWebsite || b.footer.websiteUrl || 'www.twoja-strona.pl' : 'www.twoja-strona.pl')
-    const logoUrl = offer.userLogoUrl
+    const logoUrl = offer.userLogoDarkUrl || offer.userLogoUrl
 
     const logoEl = logoUrl
         ? `<img src="${esc(logoUrl)}" alt="logo" style="width:54px;height:54px;border-radius:14px;object-fit:contain;">`
@@ -103,7 +108,7 @@ function renderCover(b: MobileAppBlocks, offer: MobileAppOfferData): string {
         `<span style="display:flex;align-items:center;gap:9px;"><span style="color:#F43F5E;">&#10022;</span> ${esc(p)}</span>`
     ).join('')
 
-    return `
+    const inner = `
 <section style="position:relative;background:#1E1B4B;color:#fff;overflow:hidden;">
   <div class="orb" style="position:absolute;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,#F43F5E,transparent 70%);filter:blur(60px);opacity:0.18;top:-160px;right:-120px;pointer-events:none;"></div>
   <div class="orb" style="position:absolute;width:460px;height:460px;border-radius:50%;background:radial-gradient(circle,#818CF8,transparent 70%);filter:blur(60px);opacity:0.20;bottom:-180px;left:-140px;pointer-events:none;"></div>
@@ -115,15 +120,15 @@ function renderCover(b: MobileAppBlocks, offer: MobileAppOfferData): string {
     </div>
     <div class="cover-grid" style="display:grid;grid-template-columns:1.5fr 1fr;gap:48px;align-items:center;">
       <div>
-        <div style="text-transform:uppercase;letter-spacing:3px;color:#F43F5E;font-size:11px;font-weight:700;margin-bottom:22px;">Propozycja realizacji</div>
+        <div style="text-transform:uppercase;letter-spacing:3px;color:#F43F5E;font-size:11px;font-weight:700;margin-bottom:22px;">${esc(b.cover.eyebrow)}</div>
         <h1 style="margin:0;line-height:1.02;">
-          <span style="display:block;font-weight:300;color:#fff;font-size:28px;letter-spacing:0.5px;">Twoja aplikacja</span>
-          <span style="display:block;font-weight:800;font-size:64px;background:linear-gradient(135deg,#F43F5E,#818CF8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;">mobilna</span>
+          <span style="display:block;font-weight:300;color:#fff;font-size:28px;letter-spacing:0.5px;">${esc(b.cover.titlePrefix)}</span>
+          <span style="display:block;font-weight:800;font-size:64px;background:linear-gradient(135deg,#F43F5E,#818CF8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;">${esc(b.cover.titleAccent)}</span>
           <span style="display:block;font-weight:400;font-size:28px;margin-top:8px;color:#fff;">${esc(b.cover.projectName)}</span>
         </h1>
         <p style="margin:18px 0 30px;color:rgba(255,255,255,0.6);font-style:italic;font-size:16px;">Dla: <strong style="color:#fff;">${esc(b.cover.clientName || offer.clientName || 'Nazwa firmy / klienta')}</strong></p>
         <div style="display:flex;flex-wrap:wrap;gap:12px;">
-          <span style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:999px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);font-size:14px;font-weight:600;">&#128241; iOS + Android</span>
+          <span style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:999px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);font-size:14px;font-weight:600;">&#128241; ${esc(b.cover.platformPill)}</span>
           <span style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:999px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);font-size:14px;font-weight:600;">&#128640; MVP od ${esc(b.cover.mvpWeeks)} tyg.</span>
           <span style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:999px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);font-size:14px;font-weight:600;">&#128176; Od ${esc(b.cover.priceFrom)} z&#322;</span>
         </div>
@@ -146,6 +151,7 @@ function renderCover(b: MobileAppBlocks, offer: MobileAppOfferData): string {
     <div class="promise-bar" style="display:flex;align-items:center;justify-content:space-between;gap:24px;margin-top:48px;padding:20px 28px;border-radius:18px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);font-size:14px;">${promises}</div>
   </div>
 </section>`
+    return editorWrap(editorMode, 'cover', inner)
 }
 
 // ── S2 — Vision ───────────────────────────────────────────────────────────────
@@ -634,7 +640,7 @@ function renderFooter(b: MobileAppBlocks, offer: MobileAppOfferData, editorMode:
     const offerNum = esc(offer.offerNumber ?? '')
     const offerDate = esc(offer.offerDate ?? '')
     const validUntil = esc(offer.validUntil ?? foot.validityDate ?? '')
-    const logoUrl = offer.userLogoUrl
+    const logoUrl = offer.userLogoDarkUrl || offer.userLogoUrl
 
     const logoEl = logoUrl
         ? `<img src="${esc(logoUrl)}" alt="logo" style="width:54px;height:54px;border-radius:14px;object-fit:contain;">`
@@ -650,7 +656,7 @@ function renderFooter(b: MobileAppBlocks, offer: MobileAppOfferData, editorMode:
       <p style="color:rgba(255,255,255,0.7);font-size:16px;margin:18px 0 32px;">${esc(foot.ctaLead)}</p>
       <div class="footer-btns" style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
         <a href="#" class="lift" style="padding:16px 32px;border-radius:999px;background:#F43F5E;color:#fff;text-decoration:none;font-weight:700;font-size:15px;box-shadow:0 10px 30px rgba(244,63,94,0.4);">UM&#211;W BEZP&#321;ATN&#260; KONSULTACJ&#280;</a>
-        <a href="#" style="padding:16px 32px;border-radius:999px;background:rgba(255,255,255,0.1);color:#fff;text-decoration:none;font-weight:700;font-size:15px;border:1px solid rgba(255,255,255,0.3);">AKCEPTUJ&#280; OFERT&#280;</a>
+        <a href="#" data-sq-action="accept" style="padding:16px 32px;border-radius:999px;background:rgba(255,255,255,0.1);color:#fff;text-decoration:none;font-weight:700;font-size:15px;border:1px solid rgba(255,255,255,0.3);">AKCEPTUJ&#280; OFERT&#280;</a>
       </div>
       ${validUntil ? `<div style="margin-top:18px;font-size:12px;color:rgba(255,255,255,0.4);">Oferta wa&#380;na do ${validUntil}</div>` : ''}
     </div>
@@ -717,7 +723,7 @@ export function buildMobileAppHtml(
 </head>
 <body>
 <div style="width:100%;overflow-x:hidden;">
-${renderCover(blocks, offer)}
+${renderCover(blocks, offer, editorMode)}
 ${sectionsHtml}
 ${renderFooter(blocks, offer, editorMode)}
 </div>

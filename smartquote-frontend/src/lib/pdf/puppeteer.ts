@@ -15,6 +15,50 @@ function elapsed(startedAt: number): number {
     return Date.now() - startedAt
 }
 
+const PRINT_PAGINATION_STYLES = `<style data-smartquote-print-pagination>
+@media print {
+  html, body { max-width: 100% !important; overflow-x: hidden !important; }
+  *, *::before, *::after { min-width: 0; overflow-wrap: anywhere; }
+  [style*="white-space:nowrap"], [style*="white-space: nowrap"] { white-space: normal !important; }
+  section, article, .section, .sec { break-inside: auto !important; page-break-inside: auto !important; }
+  .sq-keep-together {
+    break-inside: avoid-page !important;
+    page-break-inside: avoid !important;
+  }
+  table tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    break-after: avoid-page !important;
+    page-break-after: avoid !important;
+  }
+  p, li { orphans: 3; widows: 3; }
+}
+</style>
+<script data-smartquote-print-pagination-script>
+(function(){
+  function preparePagination(){
+    var maxHeight = 1030;
+    var nodes = document.querySelectorAll('section,article,.section,.sec,.card,.pkg-card,.prio-card,.avoid-break,.print-keep,.sig-wrap,.signature,.summary,.totals,.grid > *,[class*="grid"] > *');
+    for(var i=0;i<nodes.length;i++){
+      var node=nodes[i];
+      node.classList.toggle('sq-keep-together', node.getBoundingClientRect().height <= maxHeight);
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',preparePagination);
+  else preparePagination();
+  window.addEventListener('beforeprint',preparePagination);
+})();
+</script>`
+
+export function applyPrintPagination(html: string): string {
+    if (html.includes('data-smartquote-print-pagination')) return html
+    return html.includes('</head>')
+        ? html.replace('</head>', `${PRINT_PAGINATION_STYLES}</head>`)
+        : `${PRINT_PAGINATION_STYLES}${html}`
+}
+
 async function getBrowser(): Promise<Browser> {
     // Re-use an existing browser instance within a single lambda invocation.
     if (_browser) return _browser
@@ -48,6 +92,7 @@ async function getBrowser(): Promise<Browser> {
 }
 
 export async function htmlToPdfBuffer(html: string): Promise<Buffer> {
+    html = applyPrintPagination(html)
     const totalStartedAt = Date.now()
     const browserStartedAt = Date.now()
     const browser = await getBrowser()

@@ -240,7 +240,7 @@ function ContractDocumentContent({ contract }: { contract: PDFContract }) {
                     </View>
 
                     {/* Parties */}
-                    <View style={s.partiesRow}>
+                    <View style={s.partiesRow} wrap={false}>
                         <View style={s.partyBox}>
                             <View style={s.partyLabel}>
                                 <Text style={s.partyLabelText}>WYKONAWCA</Text>
@@ -294,7 +294,7 @@ function ContractDocumentContent({ contract }: { contract: PDFContract }) {
                     </View>
 
                     {/* Metadata */}
-                    <View style={s.metaBar}>
+                    <View style={s.metaBar} wrap={false}>
                         {infos.map(([label, value]) => (
                             <View key={label} style={s.metaCell}>
                                 <Text style={s.metaLabel}>{label}</Text>
@@ -335,7 +335,7 @@ function ContractDocumentContent({ contract }: { contract: PDFContract }) {
 
                     {/* Terms */}
                     {contract.terms ? (
-                        <View style={{ marginBottom: 10 }}>
+                        <View style={{ marginBottom: 10 }} wrap={false}>
                             <Text style={s.sectionLabel}>Warunki umowy:</Text>
                             <HtmlContent html={contract.terms} textColor={TEXT_LIGHT} />
                         </View>
@@ -343,7 +343,7 @@ function ContractDocumentContent({ contract }: { contract: PDFContract }) {
 
                     {/* Payment terms */}
                     {contract.paymentTerms ? (
-                        <View style={{ marginBottom: 10 }}>
+                        <View style={{ marginBottom: 10 }} wrap={false}>
                             <Text style={s.sectionLabel}>Warunki płatności:</Text>
                             <HtmlContent html={contract.paymentTerms} textColor={TEXT_LIGHT} />
                         </View>

@@ -2,6 +2,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { getOfferEditPath } from '@/lib/document-pdf';
 import {
     ArrowLeft, Pencil, Copy, Link as LinkIcon,
     Mail, FileText, ChevronDown,
@@ -156,7 +157,7 @@ export function OfferHeader({
                 </button>
 
                 <button
-                    onClick={() => router.push(`/dashboard/offers/${offer.id}/edit`)}
+                    onClick={() => router.push(getOfferEditPath(offer.id, offer.templateType))}
                     className="inline-flex h-10 items-center gap-2 rounded-xl bg-gradient-primary px-4 text-sm font-semibold text-white shadow-glow ring-1 ring-white/15 transition hover:brightness-110"
                 >
                     <Pencil className="h-4 w-4" /> {tr.edit}

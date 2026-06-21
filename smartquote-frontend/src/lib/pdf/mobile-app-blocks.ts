@@ -113,8 +113,12 @@ export interface MobileAppPortfolioCard {
 // ── Block interfaces ──────────────────────────────────────────────────────────
 
 export interface MobileAppCoverBlock {
+    eyebrow: string
+    titlePrefix: string
+    titleAccent: string
     projectName: string
     clientName: string
+    platformPill: string
     mvpWeeks: string
     priceFrom: string
     promises: string[]
@@ -232,8 +236,12 @@ export function buildDefaultMobileAppBlocks(): MobileAppBlocks {
         version: 1,
         sections: ['vision', 'platform', 'scope', 'architecture', 'timeline', 'pricing', 'postlaunch', 'about'],
         cover: {
+            eyebrow: 'Propozycja realizacji',
+            titlePrefix: 'Twoja aplikacja',
+            titleAccent: 'mobilna',
             projectName: 'Nazwa projektu',
             clientName: 'Nazwa firmy / klienta',
+            platformPill: 'iOS + Android',
             mvpWeeks: '8',
             priceFrom: 'XXX',
             promises: [

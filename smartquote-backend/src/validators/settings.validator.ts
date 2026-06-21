@@ -59,6 +59,14 @@ export const updateCompanyInfoSchema = z.object({
             (v) => (v === '' ? null : v),
             z.string().url('Nieprawidłowy URL').optional().nullable(),
         ),
+        logoLight: z.preprocess(
+            (v) => (v === '' ? null : v),
+            z.string().url('Nieprawidłowy URL').optional().nullable(),
+        ),
+        logoDark: z.preprocess(
+            (v) => (v === '' ? null : v),
+            z.string().url('Nieprawidłowy URL').optional().nullable(),
+        ),
         defaultPaymentDays: z.number().int().min(0).max(365).optional(),
         defaultTerms: z.string().max(5000).optional().nullable(),
         defaultNotes: z.string().max(2000).optional().nullable(),

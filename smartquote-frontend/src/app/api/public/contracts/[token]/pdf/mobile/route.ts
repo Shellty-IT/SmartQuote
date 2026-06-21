@@ -3,6 +3,7 @@
 // GET /api/public/contracts/:token/pdf/mobile  →  application/pdf
 
 import { buildContractMobileHtmlFromSaved } from '@/lib/pdf/contract-mobile-html'
+import { addDocumentActionLinks, publicDocumentUrl } from '@/lib/pdf/document-action-links'
 import { htmlToPdfBuffer } from '@/lib/pdf/puppeteer'
 
 export const maxDuration = 10
@@ -35,7 +36,7 @@ export async function GET(
 
     let html: string
     try {
-        html = buildContractMobileHtmlFromSaved(contract.blocks, { editorMode: false })
+        html = addDocumentActionLinks(buildContractMobileHtmlFromSaved(contract.blocks, { editorMode: false }), publicDocumentUrl('contract', token, 'sign'), 'sign')
     } catch (err) {
         const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
         console.error('[public-contract-mobile-pdf] buildContractMobileHtmlFromSaved threw:', detail)

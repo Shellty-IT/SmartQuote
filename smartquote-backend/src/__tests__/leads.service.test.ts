@@ -15,7 +15,7 @@ jest.mock('../lib/prisma', () => ({
     __esModule: true,
     default: {
         lead: { count: jest.fn() },
-        client: { create: jest.fn() },
+        client: { create: jest.fn(), findFirst: jest.fn() },
     },
 }));
 
@@ -27,7 +27,7 @@ import { NotFoundError } from '../errors/domain.errors';
 const repo = leadsRepository as jest.Mocked<typeof leadsRepository>;
 const prismaMock = prisma as unknown as {
     lead: { count: jest.Mock };
-    client: { create: jest.Mock };
+    client: { create: jest.Mock; findFirst: jest.Mock };
 };
 
 const service = new LeadsService();
@@ -184,6 +184,7 @@ describe('LeadsService.convert', () => {
             expect.objectContaining({ status: 'CONVERTED', clientId: MOCK_CLIENT.id }),
         );
         expect(result.client).toBe(MOCK_CLIENT);
+        expect(result.clientId).toBe(MOCK_CLIENT.id);
     });
 
     it('uses provided convert data over lead defaults', async () => {
@@ -204,6 +205,17 @@ describe('LeadsService.convert', () => {
         repo.findById.mockResolvedValue(null);
         await expect(service.convert(LEAD_ID, USER_ID, {})).rejects.toThrow(NotFoundError);
         expect(prismaMock.client.create).not.toHaveBeenCalled();
+    });
+
+    it('returns the existing client when the lead was already converted', async () => {
+        repo.findById.mockResolvedValue({ ...MOCK_LEAD, clientId: MOCK_CLIENT.id, status: 'CONVERTED' } as never);
+        prismaMock.client.findFirst.mockResolvedValue(MOCK_CLIENT as never);
+
+        const result = await service.convert(LEAD_ID, USER_ID, {});
+
+        expect(result.clientId).toBe(MOCK_CLIENT.id);
+        expect(prismaMock.client.create).not.toHaveBeenCalled();
+        expect(repo.update).not.toHaveBeenCalled();
     });
 });
 

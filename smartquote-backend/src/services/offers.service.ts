@@ -128,8 +128,8 @@ export class OffersService {
             updateData.requireAuditTrail = data.requireAuditTrail;
         }
 
-        if (data.templateType !== undefined) {
-            updateData.templateType = data.templateType;
+        if (data.templateType !== undefined && data.templateType !== (existing.templateType ?? 'classic')) {
+            throw new ValidationError('Nie można zmienić szablonu istniejącej oferty');
         }
 
         if (data.blocks !== undefined) {
@@ -245,6 +245,8 @@ export class OffersService {
             totalGross: original.totalGross,
             userId,
             clientId: original.clientId,
+            templateType: original.templateType ?? 'classic',
+            blocks: original.blocks ?? undefined,
             items: original.items.map((item) => ({
                 name: item.name,
                 description: item.description,
@@ -314,6 +316,9 @@ export class OffersService {
     async generatePDF(offerId: string, userId: string): Promise<{ buffer: Buffer; filename: string }> {
         const offer = await offersRepository.findByIdWithUser(offerId, userId);
         if (!offer) throw new NotFoundError('Oferta');
+        if ((offer.templateType ?? 'classic') !== 'classic') {
+            throw new ValidationError('Ta oferta musi być generowana w zapisanym szablonie');
+        }
 
         const pdfOffer = {
             ...offer,

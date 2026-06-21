@@ -12,7 +12,7 @@ import type { WebsiteV3Blocks } from '@/lib/pdf/website-v3-blocks'
 import type { OfferContext } from '@/components/offers/editor/block-editors'
 
 interface StepWebsiteV3TemplateProps {
-    client: Client | null
+    client: Pick<Client, 'name' | 'company'> | null
     offerTitle: string
     onTitleChange: (title: string) => void
     totalGross: number
@@ -57,6 +57,8 @@ export default function StepWebsiteV3Template({
                 name: companyInfo.name,
                 website: companyInfo.website,
                 logo: companyInfo.logo,
+                logoLight: companyInfo.logoLight,
+                logoDark: companyInfo.logoDark,
                 phone: companyInfo.phone,
                 email: companyInfo.email ?? null,
             } : null,
@@ -74,7 +76,7 @@ export default function StepWebsiteV3Template({
     return (
         <div className="flex flex-col gap-4">
             <div>
-                <h2 className="text-lg font-semibold text-foreground">Szablon: Strona internetowa v3</h2>
+                <h2 className="text-lg font-semibold text-foreground">Szablon: Strona internetowa - zaawansowany</h2>
                 <p className="text-sm text-muted-foreground mt-0.5">
                     Kliknij dowolną sekcję na dokumencie aby edytować jej treść.
                 </p>

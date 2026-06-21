@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils'
 import { useResizablePanel } from '@/hooks/useResizablePanel'
 import { useZoom } from '@/hooks/useZoom'
 import type { OfferContext } from '@/components/offers/editor/block-editors'
+import { useContractCompanyLogo } from '@/hooks/useContractCompanyLogo'
 
 export interface ContractDocumentEditorProps {
     blocks: ContractShortBlocks
@@ -61,6 +62,7 @@ export function ContractDocumentEditor({
     const { zoom, zoomIn, zoomOut } = useZoom()
 
     const activeKey = panelView?.kind === 'section' ? panelView.key : null
+    useContractCompanyLogo(blocks, onBlocksChange)
 
     const srcdoc = useMemo(
         () => buildContractShortHtml(blocks, { editorMode: true, zoom, activeSection: activeKey }),
@@ -148,7 +150,7 @@ export function ContractDocumentEditor({
                         srcDoc={srcdoc}
                         title="Podgląd umowy"
                         sandbox="allow-scripts allow-same-origin"
-                        className="h-full w-full"
+                        className={cn('h-full w-full', isDragging && 'pointer-events-none')}
                         style={{ minHeight: 700 }}
                     />
                 </div>
