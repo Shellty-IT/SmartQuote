@@ -23,6 +23,8 @@ export interface ProposalOfferData {
             name?: string | null
             website?: string | null
             logo?: string | null
+            logoLight?: string | null
+            logoDark?: string | null
             phone?: string | null
         } | null
     } | null
@@ -567,8 +569,10 @@ export function buildProposalHtml(offer: ProposalOfferData, options: BuildPropos
     const clientLabel = offer.client.company
         ? `${offer.client.name} · ${offer.client.company}`
         : offer.client.name
+    const headerTitle = blocks.header.titleOverride?.trim() || offer.title
+    const headerClientLabel = blocks.header.clientLabelOverride?.trim() || clientLabel
     const website = user.companyInfo?.website ?? ''
-    const logo = user.companyInfo?.logo ?? ''
+    const logo = user.companyInfo?.logoDark || user.companyInfo?.logoLight || user.companyInfo?.logo || ''
     const dateStr = formatDate(offer.createdAt)
 
     const logoHtml = logo
@@ -865,6 +869,28 @@ export function buildProposalHtml(offer: ProposalOfferData, options: BuildPropos
       content: ''; position: absolute; bottom: 0; left: 0;
       width: 28mm; height: 2px; background: var(--orange);
     }
+    /* ── PAGE-BREAK HYGIENE (print only) ──
+       Only compact, sub-page blocks get break-inside:avoid. Blanket avoid on a
+       whole section (or the testing|technology grid) backfires when it is taller
+       than a page — Chromium pushes it to a fresh page leaving a large gap, then
+       breaks it anyway. Tall content therefore relies on per-card avoid below. */
+    @media print {
+      /* keep a section header glued to the content that follows it */
+      .sec { break-after: avoid; page-break-after: avoid; }
+      /* never split these compact blocks across a page boundary */
+      .pricing, .stats-band, .demo-block, .about-box, .cta-box {
+        break-inside: avoid; page-break-inside: avoid;
+      }
+      /* keep individual cards / rows / steps whole */
+      .p-card, .struct-item, .scope-item, .test-item, .tech-card,
+      .benefit-card, .proc-step, .demo-url-row {
+        break-inside: avoid; page-break-inside: avoid;
+      }
+      /* orphan / widow control for running text */
+      .intro p, .demo-body, .test-intro, .tech-body, .cta-box p {
+        orphans: 3; widows: 3;
+      }
+    }
     ${editorMode ? editorCss() : ''}
   </style>
 </head>
@@ -878,8 +904,8 @@ export function buildProposalHtml(offer: ProposalOfferData, options: BuildPropos
     <div class="header-decor2"></div>
     <div class="header-left">
       <div class="header-tag">${esc(blocks.header.tag)}</div>
-      <h1 class="header-title">${esc(offer.title)}</h1>
-      <div class="header-subtitle">${esc(clientLabel)}</div>
+      <h1 class="header-title">${esc(headerTitle)}</h1>
+      <div class="header-subtitle">${esc(headerClientLabel)}</div>
     </div>
     <div class="header-meta">
       ${logoHtml}
