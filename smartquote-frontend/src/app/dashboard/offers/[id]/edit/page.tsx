@@ -1,7 +1,8 @@
 // src/app/dashboard/offers/[id]/edit/page.tsx
 'use client';
 
-import React, { use } from 'react';
+import React, { use, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useOffer } from '@/hooks/useOffers';
 import { Button } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
@@ -14,6 +15,16 @@ import StepItems from '../../new/components/StepItems';
 import StepSummary from '../../new/components/StepSummary';
 import StepTemplate from '../../new/components/StepTemplate';
 import type { Offer } from '@/types';
+
+function TemplateEditRedirect({ offerId }: { offerId: string }) {
+    const router = useRouter();
+
+    useEffect(() => {
+        router.replace(`/dashboard/offers/${offerId}?tab=template`);
+    }, [offerId, router]);
+
+    return <PageLoader />;
+}
 
 // ── Inner form — rendered only after offer is loaded ─────────────────────────
 
@@ -82,6 +93,7 @@ function EditOfferForm({ offer }: { offer: Offer }) {
                         details={offerDetails}
                         onUpdate={updateDetails}
                         clientName={selectedClient?.name}
+                        hideTemplateSelector
                     />
                 )}
 
@@ -172,6 +184,10 @@ export default function EditOfferPage({ params }: { params: Promise<{ id: string
                 </div>
             </div>
         );
+    }
+
+    if ((offer.templateType ?? 'classic') !== 'classic') {
+        return <TemplateEditRedirect offerId={offer.id} />;
     }
 
     // Key ensures that if the user navigates to a different edit page the form fully resets

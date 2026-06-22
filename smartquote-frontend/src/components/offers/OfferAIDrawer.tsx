@@ -90,6 +90,46 @@ export function OfferAIDrawer({
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLTextAreaElement>(null)
 
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+
+        const desktop = window.innerWidth >= 768
+        document.body.classList.toggle('sq-ai-drawer-open', isOpen && desktop)
+        document.body.classList.toggle('sq-ai-drawer-resizing', isOpen && desktop && isWidthDragging)
+
+        if (isOpen && desktop) {
+            document.body.style.setProperty('--sq-ai-drawer-width', `${drawerWidth}px`)
+        } else {
+            document.body.style.removeProperty('--sq-ai-drawer-width')
+        }
+    }, [drawerWidth, isOpen, isWidthDragging])
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+
+        const handleResize = () => {
+            const desktop = window.innerWidth >= 768
+            document.body.classList.toggle('sq-ai-drawer-open', isOpen && desktop)
+            document.body.classList.toggle('sq-ai-drawer-resizing', isOpen && desktop && isWidthDragging)
+
+            if (isOpen && desktop) {
+                document.body.style.setProperty('--sq-ai-drawer-width', `${drawerWidthRef.current}px`)
+            } else {
+                document.body.style.removeProperty('--sq-ai-drawer-width')
+            }
+        }
+
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [isOpen, isWidthDragging])
+
+    useEffect(() => {
+        return () => {
+            document.body.classList.remove('sq-ai-drawer-open', 'sq-ai-drawer-resizing')
+            document.body.style.removeProperty('--sq-ai-drawer-width')
+        }
+    }, [])
+
     // Hide global FAB when this drawer is open
     useEffect(() => {
         setHideGlobalFab(isOpen)
@@ -229,15 +269,20 @@ export function OfferAIDrawer({
                 currentBlocks: currentBlocks as unknown as Record<string, unknown>,
             })
 
+            const hasGeneratedBlocks = !!result.blocks && Object.keys(result.blocks).length > 0
             const assistantMsg: Message = {
                 id: crypto.randomUUID(),
                 role: 'assistant',
-                content: result.message,
+                content: hasGeneratedBlocks
+                    ? `${result.message}\n\nDane są gotowe. Kliknij „Zastosuj do szablonu”, aby zapisać zmiany.`
+                    : result.message,
             }
             setMessages((prev) => [...prev, assistantMsg])
 
-            if (result.isComplete && result.blocks) {
+            if (hasGeneratedBlocks && result.isComplete && result.blocks) {
                 setGeneratedBlocks(result.blocks)
+            } else {
+                setGeneratedBlocks(null)
             }
         } catch {
             setMessages((prev) => [

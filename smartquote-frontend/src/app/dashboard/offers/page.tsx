@@ -171,7 +171,7 @@ export default function OffersPage() {
                                                 key={offer.id}
                                                 offer={offer}
                                                 onView={() => navigateToOffer(offer.id)}
-                                                onEdit={() => navigateToEdit(offer.id)}
+                                                onEdit={() => navigateToEdit(offer)}
                                                 onDuplicate={() => handleDuplicate(offer)}
                                                 onDelete={() => setDeleteModal(offer)}
                                                 onCopyLink={() => handleCopyLink(offer)}
@@ -195,7 +195,7 @@ export default function OffersPage() {
                                 key={offer.id}
                                 offer={offer}
                                 onView={() => navigateToOffer(offer.id)}
-                                onEdit={() => navigateToEdit(offer.id)}
+                                onEdit={() => navigateToEdit(offer)}
                                 onDuplicate={() => handleDuplicate(offer)}
                                 onDelete={() => setDeleteModal(offer)}
                                 onCopyLink={() => handleCopyLink(offer)}

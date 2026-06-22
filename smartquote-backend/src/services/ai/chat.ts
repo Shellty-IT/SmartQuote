@@ -503,6 +503,10 @@ Zwróć każdy akapit jako osobny element tablicy paragraphs.`,
     stats: 'Napisz 3 krótkie statystyki budujące zaufanie (każda: zwięzła wartość np. "50+", "10 lat", "100%" + krótki podpis). Realistyczne, bez przesady.',
 
     // ── mobile_simple template ─────────────────────────────────────────────────
+    'mobile_simple.cover': `Przygotuj krótkie treści na okładkę oferty aplikacji mobilnej.
+projectName: zwięzła, atrakcyjna nazwa projektu lub aplikacji (maks. 4 słowa).
+subtitlePrefix: krótki tekst przed nazwą klienta, np. "Aplikacja mobilna dla".
+promises: dokładnie 3 krótkie korzyści projektu (każda maks. 5 słów), bez danych wymyślonych i bez cen.`,
     'mobile_simple.checklist': `Napisz listę funkcji aplikacji mobilnej po polsku (6–9 pozycji).
 Każda pozycja: krótki tytuł (5–7 słów, język korzyści) + opis (1–2 zdania, co klient z tego ma).
 Nie używaj technicznego żargonu — pisz jak do właściciela małej firmy.
@@ -519,6 +523,10 @@ priceIncludes: 4–5 rzeczy wchodzących w cenę (krótkie punkty).
 guarantees: 2–3 gwarancje: emoji + krótki label (max 6 słów). Ton ciepły, pisz "Ty" do klienta.`,
 
     // ── universal template ─────────────────────────────────────────────────────
+    'universal.cover': `Przygotuj dane tekstowe na okładkę uniwersalnej oferty B2B.
+serviceTitle: konkretna nazwa oferowanej usługi lub projektu (maks. 8 słów).
+clientName: nazwa klienta dokładnie zgodna z kontekstem oferty.
+Nie generuj dat, danych kontaktowych ani danych wykonawcy.`,
     'universal.summary': `Napisz streszczenie wykonawcze oferty B2B po polsku.
 eyebrow: krótki tag np. "Streszczenie".
 title: tytuł sekcji (np. "W skrócie").
@@ -794,6 +802,15 @@ const SECTION_SCHEMAS: Record<string, Schema> = {
     },
 
     // ── mobile_simple ─────────────────────────────────────────────────────────
+    'mobile_simple.cover': {
+        type: Type.OBJECT,
+        properties: {
+            projectName:    { type: Type.STRING },
+            subtitlePrefix: { type: Type.STRING },
+            promises:       { type: Type.ARRAY, items: { type: Type.STRING } },
+        },
+        required: ['projectName', 'subtitlePrefix', 'promises'],
+    },
     'mobile_simple.checklist': {
         type: Type.OBJECT,
         properties: {
@@ -855,6 +872,14 @@ const SECTION_SCHEMAS: Record<string, Schema> = {
     },
 
     // ── universal ─────────────────────────────────────────────────────────────
+    'universal.cover': {
+        type: Type.OBJECT,
+        properties: {
+            serviceTitle: { type: Type.STRING },
+            clientName:   { type: Type.STRING },
+        },
+        required: ['serviceTitle', 'clientName'],
+    },
     'universal.summary': {
         type: Type.OBJECT,
         properties: {

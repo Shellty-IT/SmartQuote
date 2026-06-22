@@ -23,6 +23,8 @@ export interface ProposalOfferData {
             name?: string | null
             website?: string | null
             logo?: string | null
+            logoLight?: string | null
+            logoDark?: string | null
             phone?: string | null
         } | null
     } | null
@@ -567,8 +569,10 @@ export function buildProposalHtml(offer: ProposalOfferData, options: BuildPropos
     const clientLabel = offer.client.company
         ? `${offer.client.name} · ${offer.client.company}`
         : offer.client.name
+    const headerTitle = blocks.header.titleOverride?.trim() || offer.title
+    const headerClientLabel = blocks.header.clientLabelOverride?.trim() || clientLabel
     const website = user.companyInfo?.website ?? ''
-    const logo = user.companyInfo?.logo ?? ''
+    const logo = user.companyInfo?.logoDark || user.companyInfo?.logoLight || user.companyInfo?.logo || ''
     const dateStr = formatDate(offer.createdAt)
 
     const logoHtml = logo
@@ -706,7 +710,8 @@ export function buildProposalHtml(offer: ProposalOfferData, options: BuildPropos
     .sec .ico { font-size: 13px; line-height: 1; flex-shrink: 0; }
     .sec h2 {
       font-size: 11px; font-weight: 700; color: var(--navy);
-      letter-spacing: 0.9px; text-transform: uppercase; white-space: nowrap;
+      letter-spacing: 0.9px; text-transform: uppercase;
+      overflow-wrap: anywhere; min-width: 0;
     }
     .sec::after {
       content: ''; flex: 1; height: 1.5px;
@@ -805,11 +810,11 @@ export function buildProposalHtml(offer: ProposalOfferData, options: BuildPropos
     .p-card.hot .pc-sub { color: rgba(255,255,255,0.8); font-weight: 600; font-size: 10px; }
     /* About + CTA */
     .bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
-    .about-box { background: var(--grey-bg); border-radius: 4px; padding: 5mm; }
-    .about-url { display: block; font-family: 'Courier New', monospace; font-size: 10.5px; font-weight: 700; color: var(--navy); text-decoration: none; margin-top: 4px; }
+    .about-box { background: var(--grey-bg); border-radius: 4px; padding: 5mm; min-width: 0; overflow: hidden; }
+    .about-url { display: block; font-family: 'Courier New', monospace; font-size: 10.5px; font-weight: 700; color: var(--navy); text-decoration: none; margin-top: 4px; word-break: break-all; overflow-wrap: anywhere; }
     .cta-box {
       background: var(--orange-dim); border: 1px solid var(--orange-border);
-      border-radius: 4px; padding: 5mm; display: flex; align-items: center;
+      border-radius: 4px; padding: 5mm; display: flex; align-items: center; min-width: 0;
     }
     .cta-box p { font-size: 11px; line-height: 1.7; color: var(--text); }
     /* Benefits */
@@ -865,6 +870,28 @@ export function buildProposalHtml(offer: ProposalOfferData, options: BuildPropos
       content: ''; position: absolute; bottom: 0; left: 0;
       width: 28mm; height: 2px; background: var(--orange);
     }
+    /* ── PAGE-BREAK HYGIENE (print only) ──
+       Only compact, sub-page blocks get break-inside:avoid. Blanket avoid on a
+       whole section (or the testing|technology grid) backfires when it is taller
+       than a page — Chromium pushes it to a fresh page leaving a large gap, then
+       breaks it anyway. Tall content therefore relies on per-card avoid below. */
+    @media print {
+      /* keep a section header glued to the content that follows it */
+      .sec { break-after: avoid; page-break-after: avoid; }
+      /* never split these compact blocks across a page boundary */
+      .pricing, .stats-band, .demo-block, .about-box, .cta-box {
+        break-inside: avoid; page-break-inside: avoid;
+      }
+      /* keep individual cards / rows / steps whole */
+      .p-card, .struct-item, .scope-item, .test-item, .tech-card,
+      .benefit-card, .proc-step, .demo-url-row {
+        break-inside: avoid; page-break-inside: avoid;
+      }
+      /* orphan / widow control for running text */
+      .intro p, .demo-body, .test-intro, .tech-body, .cta-box p {
+        orphans: 3; widows: 3;
+      }
+    }
     ${editorMode ? editorCss() : ''}
   </style>
 </head>
@@ -878,8 +905,8 @@ export function buildProposalHtml(offer: ProposalOfferData, options: BuildPropos
     <div class="header-decor2"></div>
     <div class="header-left">
       <div class="header-tag">${esc(blocks.header.tag)}</div>
-      <h1 class="header-title">${esc(offer.title)}</h1>
-      <div class="header-subtitle">${esc(clientLabel)}</div>
+      <h1 class="header-title">${esc(headerTitle)}</h1>
+      <div class="header-subtitle">${esc(headerClientLabel)}</div>
     </div>
     <div class="header-meta">
       ${logoHtml}
@@ -895,7 +922,7 @@ export function buildProposalHtml(offer: ProposalOfferData, options: BuildPropos
   </div>
 
   <footer class="footer"${editorMode ? ' data-block="footer"' : ''}>
-    <div class="footer-left">Oferta przygotowana ${footerCustomNote}dla: <strong>${esc(offer.client.name)}</strong> · <strong>Strona 1 / 2</strong>${authorSuffix}</div>
+    <div class="footer-left">Oferta przygotowana ${footerCustomNote}dla: <strong>${esc(offer.client.name)}</strong> · <strong>Strona 1</strong>${authorSuffix}</div>
     <div class="footer-divider"></div>
     <div class="footer-right">${footerRight}</div>
   </footer>
@@ -910,7 +937,7 @@ export function buildProposalHtml(offer: ProposalOfferData, options: BuildPropos
   </div>
 
   <footer class="footer"${editorMode ? ' data-block="footer"' : ''}>
-    <div class="footer-left">Oferta ${esc(offer.number)} · <strong>Strona 2 / 2</strong>${authorSuffix}</div>
+    <div class="footer-left">Oferta ${esc(offer.number)} · <strong>Strona 2</strong>${authorSuffix}</div>
     <div class="footer-divider"></div>
     <div class="footer-right">${footerRight}</div>
   </footer>

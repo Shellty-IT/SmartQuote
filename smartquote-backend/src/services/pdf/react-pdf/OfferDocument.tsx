@@ -223,7 +223,7 @@ function PartiesSection({ offer }: { offer: PDFOffer }) {
         .join(', ')
 
     return (
-        <View style={s.partiesRow}>
+        <View style={s.partiesRow} wrap={false}>
             {/* Sprzedawca */}
             <View style={s.partyBox}>
                 <View style={s.partyLabel}>
@@ -268,7 +268,7 @@ function MetaBar({ offer }: { offer: PDFOffer }) {
         ['Płatność', `${offer.paymentDays} dni`],
     ]
     return (
-        <View style={s.metaBar}>
+        <View style={s.metaBar} wrap={false}>
             {infos.map(([label, value]) => (
                 <View key={label} style={s.metaCell}>
                     <Text style={s.metaLabel}>{label}</Text>
@@ -420,7 +420,7 @@ export function OfferDocumentPage({ offer }: { offer: PDFOffer }) {
                 <TotalsSection offer={offer} />
 
                 {offer.terms ? (
-                    <View style={{ marginBottom: 12 }}>
+                    <View style={{ marginBottom: 12 }} wrap={false}>
                         <Text style={s.sectionLabel}>Warunki:</Text>
                         <HtmlContent html={offer.terms} textColor={TEXT_LIGHT} />
                     </View>

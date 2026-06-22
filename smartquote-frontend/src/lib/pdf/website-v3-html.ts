@@ -2,7 +2,7 @@
 // HTML generator for the "Strona internetowa v3" offer template.
 // Pure function — no side effects, no imports of React/server utilities.
 
-import { EMBEDDED_FONTS_CSS } from './embedded-fonts'
+import { buildHtmlDocument } from './html-shell'
 import { mergeWebsiteV3WithDefaults, type WebsiteV3Blocks, type WebsiteV3SectionKey } from './website-v3-blocks'
 
 // ── Offer data interface ──────────────────────────────────────────────────────
@@ -22,6 +22,8 @@ export interface WebsiteV3OfferData {
             name: string | null
             website: string | null
             logo: string | null
+            logoLight?: string | null
+            logoDark?: string | null
             phone: string | null
             email: string | null
         } | null
@@ -54,7 +56,7 @@ function addDays(iso: string, days: number): string {
 }
 
 function ph(text: string): string {
-    return `<span style="background:#FEF9C3;color:#92400E;border-radius:4px;padding:0 5px;font-weight:600;white-space:nowrap;">${esc(text)}</span>`
+    return `<span style="color:inherit;font-weight:600;white-space:nowrap;">${esc(text)}</span>`
 }
 
 function secNum(n: string): string {
@@ -78,7 +80,6 @@ function editorWrap(key: string, html: string, label: string, editorMode: boolea
 
 function buildCss(zoom: number): string {
     return `
-${EMBEDDED_FONTS_CSS}
 *,*::before,*::after{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
 body{font-family:'Outfit',system-ui,sans-serif;color:#0F172A;background:#fff;-webkit-font-smoothing:antialiased;}
@@ -100,8 +101,18 @@ ${zoom !== 1 ? `body{zoom:${zoom};}` : ''}
 @media print{
   .no-print{display:none !important;}
   *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
+  section{max-width:100% !important;overflow:visible !important;padding-top:52px !important;padding-bottom:52px !important;}
+  section > div{max-width:100% !important;}
+  .grid-2,.grid-3,.pkg-grid{grid-template-columns:minmax(0,1fr) !important;}
+  .port-card{grid-template-columns:minmax(0,1fr) !important;}
+  .stepper{flex-wrap:wrap !important;justify-content:center !important;}
+  .stepper > *{flex:0 1 30% !important;min-width:150px !important;}
+  table{width:100% !important;table-layout:fixed !important;}
+  td,th{overflow-wrap:anywhere !important;}
+  /* Cap large headings so stress-length text does not consume a full page */
+  section h2{font-size:26px !important;line-height:1.35 !important;margin-bottom:22px !important;}
   .pagebreak{break-before:page;page-break-before:always;}
-  @page{size:A4;margin:0;}
+  @page{size:A4;margin:10mm 0;}
 }
 `
 }
@@ -112,8 +123,9 @@ function renderCover(data: WebsiteV3OfferData, blocks: WebsiteV3Blocks, editorMo
     const c = blocks.cover
     const ci = data.user.companyInfo
     const clientName = data.client.company || data.client.name || 'NAZWA FIRMY'
-    const logoHtml = ci?.logo
-        ? `<img src="${esc(ci.logo)}" alt="logo" style="max-width:44px;max-height:44px;object-fit:contain;border-radius:8px;" />`
+    const logo = ci?.logoDark || ci?.logoLight || ci?.logo
+    const logoHtml = logo
+        ? `<img src="${esc(logo)}" alt="logo" style="max-width:72px;max-height:52px;object-fit:contain;" />`
         : `<div style="display:flex;align-items:center;justify-content:center;width:48px;height:48px;border:1.5px solid rgba(255,255,255,0.25);border-radius:12px;font-weight:800;font-size:13px;letter-spacing:0.05em;background:rgba(255,255,255,0.06);">${ci?.name ? esc(ci.name.slice(0, 3).toUpperCase()) : 'LOGO'}</div>`
     const website = ci?.website ?? ''
     const websiteDisplay = website.replace(/^https?:\/\//, '')
@@ -125,7 +137,7 @@ function renderCover(data: WebsiteV3OfferData, blocks: WebsiteV3Blocks, editorMo
     ).join('')
 
     const inner = `
-<section style="position:relative;padding:0;background:#0F172A;color:#fff;overflow:hidden;">
+<section class="pdf-full-bleed" style="position:relative;padding:0;background:#0F172A;color:#fff;overflow:hidden;">
   <div style="position:absolute;inset:0;background:radial-gradient(60% 55% at 18% 12%,rgba(124,58,237,0.55) 0%,rgba(124,58,237,0) 60%),radial-gradient(55% 60% at 88% 92%,rgba(6,182,212,0.45) 0%,rgba(6,182,212,0) 60%);"></div>
   <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px);background-size:48px 48px;"></div>
   <div style="position:relative;z-index:2;padding:32px 48px 72px;">
@@ -141,7 +153,7 @@ function renderCover(data: WebsiteV3OfferData, blocks: WebsiteV3Blocks, editorMo
       </div>
     </nav>
     <div style="text-align:center;padding:88px 0 0;">
-      <div style="display:inline-flex;align-items:center;gap:8px;padding:7px 16px;border-radius:999px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.16);font-size:12px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.75);margin-bottom:28px;">✦ Oferta handlowa</div>
+      <div style="display:inline-flex;align-items:center;gap:8px;padding:7px 16px;border-radius:999px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.16);font-size:12px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.75);margin-bottom:28px;">✦ ${esc(c.badgeLabel)}</div>
       <h1 class="cover-h1" style="margin:0;font-weight:300;font-size:72px;line-height:1.04;letter-spacing:-0.02em;">
         ${esc(c.subtitle)}<br>
         <span class="gradient-text" style="font-weight:800;">${esc(data.title || 'STRONA INTERNETOWA')}</span>
@@ -198,7 +210,7 @@ function renderNeeds(blocks: WebsiteV3Blocks, editorMode: boolean, num: number):
 <section style="position:relative;padding:96px 48px;background:#fff;overflow:hidden;">
   ${secNum(String(num).padStart(2, '0'))}
   <div style="max-width:1040px;margin:0 auto;position:relative;z-index:1;">
-    <div style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">Wstęp</div>
+    <div class="sec-eyebrow" style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">Wstęp</div>
     <h2 style="margin:12px 0 36px;font-size:40px;font-weight:700;letter-spacing:-0.02em;">${esc(b.title)}</h2>
     <p style="font-size:24px;line-height:1.5;font-weight:400;color:var(--violet);max-width:880px;margin:0 0 48px;">
       ${esc(b.intro)}
@@ -253,7 +265,7 @@ function renderPackages(blocks: WebsiteV3Blocks, editorMode: boolean, num: numbe
   ${secNum(String(num).padStart(2, '0'))}
   <div style="max-width:1160px;margin:0 auto;position:relative;z-index:1;">
     <div style="text-align:center;margin-bottom:48px;">
-      <div style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">${esc(b.subtitle)}</div>
+      <div class="sec-eyebrow" style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">${esc(b.subtitle)}</div>
       <h2 style="margin:12px 0 0;font-size:40px;font-weight:700;letter-spacing:-0.02em;">${esc(b.title)}</h2>
     </div>
     <div class="pkg-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;align-items:stretch;">${cards}</div>
@@ -276,7 +288,7 @@ function renderProcess(blocks: WebsiteV3Blocks, editorMode: boolean, num: number
   <div style="position:absolute;top:36px;left:40px;font-size:200px;font-weight:800;line-height:1;color:var(--violet);opacity:0.05;pointer-events:none;">${String(num).padStart(2, '0')}</div>
   <div style="max-width:1160px;margin:0 auto;position:relative;z-index:1;">
     <div style="text-align:center;margin-bottom:56px;">
-      <div style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">Jak pracuję</div>
+      <div class="sec-eyebrow" style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">Jak pracuję</div>
       <h2 style="margin:12px 0 0;font-size:40px;font-weight:700;letter-spacing:-0.02em;">${esc(b.title)}</h2>
     </div>
     <div style="position:relative;">
@@ -320,7 +332,7 @@ function renderScope(blocks: WebsiteV3Blocks, editorMode: boolean, num: number):
 <section style="position:relative;padding:96px 48px;background:#fff;overflow:hidden;">
   ${secNum(String(num).padStart(2, '0'))}
   <div style="max-width:1100px;margin:0 auto;position:relative;z-index:1;">
-    <div style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">Co dokładnie dostajesz</div>
+    <div class="sec-eyebrow" style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">Co dokładnie dostajesz</div>
     <h2 style="margin:12px 0 44px;font-size:40px;font-weight:700;letter-spacing:-0.02em;">${esc(b.title)}</h2>
     <div class="grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:44px;">
       <div style="display:flex;flex-direction:column;gap:30px;">${renderCat(left)}</div>
@@ -350,7 +362,7 @@ function renderTimeline(blocks: WebsiteV3Blocks, editorMode: boolean, num: numbe
 <section style="position:relative;padding:96px 48px;background:var(--bg-alt);overflow:hidden;">
   ${secNum(String(num).padStart(2, '0'))}
   <div style="max-width:1060px;margin:0 auto;position:relative;z-index:1;">
-    <div style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">Oś czasu</div>
+    <div class="sec-eyebrow" style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">Oś czasu</div>
     <h2 style="margin:12px 0 40px;font-size:40px;font-weight:700;letter-spacing:-0.02em;">${esc(b.title)}</h2>
     <div style="background:#fff;border-radius:16px;border:1px solid #E2E8F0;overflow:hidden;box-shadow:0 4px 18px rgba(15,23,42,0.05);">
       <table style="width:100%;border-collapse:collapse;font-size:14px;">
@@ -397,7 +409,7 @@ function renderPricing(data: WebsiteV3OfferData, blocks: WebsiteV3Blocks, editor
 <section style="position:relative;padding:96px 48px;background:#fff;overflow:hidden;">
   ${secNum(String(num).padStart(2, '0'))}
   <div style="max-width:1040px;margin:0 auto;position:relative;z-index:1;">
-    <div style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">Inwestycja</div>
+    <div class="sec-eyebrow" style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">Inwestycja</div>
     <h2 style="margin:12px 0 40px;font-size:40px;font-weight:700;letter-spacing:-0.02em;">${esc(b.title)}</h2>
     <div style="border-radius:16px;overflow:hidden;border:1px solid #E2E8F0;box-shadow:0 8px 32px rgba(124,58,237,0.1);">
       <table style="width:100%;border-collapse:collapse;font-size:15px;">
@@ -470,7 +482,7 @@ function renderPortfolio(blocks: WebsiteV3Blocks, editorMode: boolean, num: numb
 <section style="position:relative;padding:96px 48px;background:var(--bg-alt);overflow:hidden;">
   ${secNum(String(num).padStart(2, '0'))}
   <div style="max-width:1060px;margin:0 auto;position:relative;z-index:1;">
-    <div style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">Realizacje</div>
+    <div class="sec-eyebrow" style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">Realizacje</div>
     <h2 style="margin:12px 0 40px;font-size:40px;font-weight:700;letter-spacing:-0.02em;">${esc(b.title)}</h2>
     <div style="display:flex;flex-direction:column;gap:24px;">${cards}</div>
     ${portfolioLink}
@@ -494,7 +506,7 @@ function renderTestimonials(blocks: WebsiteV3Blocks, editorMode: boolean, num: n
 <section style="position:relative;padding:96px 48px;background:#fff;overflow:hidden;">
   ${secNum(String(num).padStart(2, '0'))}
   <div style="max-width:1000px;margin:0 auto;position:relative;z-index:1;">
-    <div style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">Opinie klientów</div>
+    <div class="sec-eyebrow" style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">Opinie klientów</div>
     <h2 style="margin:12px 0 40px;font-size:40px;font-weight:700;letter-spacing:-0.02em;">${esc(b.title)}</h2>
     <div class="grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">${cards}</div>
   </div>
@@ -513,7 +525,7 @@ function renderAbout(blocks: WebsiteV3Blocks, editorMode: boolean, num: number):
 <section style="position:relative;padding:96px 48px;background:var(--bg-alt);overflow:hidden;">
   ${secNum(String(num).padStart(2, '0'))}
   <div style="max-width:1040px;margin:0 auto;position:relative;z-index:1;">
-    <div style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">Kto to zrobi</div>
+    <div class="sec-eyebrow" style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">Kto to zrobi</div>
     <h2 style="margin:12px 0 40px;font-size:40px;font-weight:700;letter-spacing:-0.02em;">${esc(b.title)}</h2>
     <div class="about-grid" style="display:grid;grid-template-columns:1.4fr 1fr;gap:44px;align-items:center;">
       <div>
@@ -536,7 +548,7 @@ function renderStack(blocks: WebsiteV3Blocks, editorMode: boolean): string {
 <section style="position:relative;padding:88px 48px;background:#0F172A;color:#fff;overflow:hidden;">
   <div style="position:absolute;inset:0;background:radial-gradient(50% 60% at 80% 10%,rgba(124,58,237,0.25),transparent 60%),radial-gradient(50% 60% at 10% 90%,rgba(6,182,212,0.2),transparent 60%);"></div>
   <div style="max-width:1000px;margin:0 auto;position:relative;z-index:1;text-align:center;">
-    <div style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--cyan);">Technologie</div>
+    <div class="sec-eyebrow" style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--cyan);">Technologie</div>
     <h2 style="margin:12px 0 40px;font-size:40px;font-weight:700;letter-spacing:-0.02em;color:#fff;">${esc(b.title)}</h2>
     <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:14px;">${pills}</div>
   </div>
@@ -556,7 +568,7 @@ function renderTerms(blocks: WebsiteV3Blocks, editorMode: boolean, num: number):
 <section style="position:relative;padding:96px 48px;background:#fff;overflow:hidden;">
   ${secNum(String(num).padStart(2, '0'))}
   <div style="max-width:1040px;margin:0 auto;position:relative;z-index:1;">
-    <div style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">Spokój i bezpieczeństwo</div>
+    <div class="sec-eyebrow" style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">Spokój i bezpieczeństwo</div>
     <h2 style="margin:12px 0 44px;font-size:40px;font-weight:700;letter-spacing:-0.02em;">${esc(b.title)}</h2>
     <div class="grid-3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;">${cards}</div>
     <div style="margin-top:32px;padding:26px 30px;border-radius:12px;background:rgba(124,58,237,0.08);border-left:4px solid var(--violet);">
@@ -577,17 +589,18 @@ function renderFooter(data: WebsiteV3OfferData, blocks: WebsiteV3Blocks, editorM
     const ci = data.user.companyInfo
     const website = ci?.website ?? ''
     const websiteDisplay = website.replace(/^https?:\/\//, '')
-    const logoHtml = ci?.logo
-        ? `<img src="${esc(ci.logo)}" alt="logo" style="max-width:44px;max-height:44px;object-fit:contain;border-radius:8px;" />`
+    const logo = ci?.logoDark || ci?.logoLight || ci?.logo
+    const logoHtml = logo
+        ? `<img src="${esc(logo)}" alt="logo" style="max-width:72px;max-height:52px;object-fit:contain;" />`
         : `<div style="display:flex;align-items:center;justify-content:center;width:44px;height:44px;border:1.5px solid rgba(255,255,255,0.4);border-radius:11px;font-weight:800;font-size:12px;">${ci?.name ? esc(ci.name.slice(0, 3).toUpperCase()) : 'LOGO'}</div>`
     const validUntil = addDays(data.createdAt, blocks.cover.validityDays)
     const inner = `
-<section id="cta" style="position:relative;padding:88px 48px 56px;background:var(--grad);color:#fff;overflow:hidden;text-align:center;">
+<section id="cta" class="pdf-full-bleed" style="position:relative;padding:88px 48px 56px;background:var(--grad);color:#fff;overflow:hidden;text-align:center;">
   <div style="position:absolute;inset:0;background:radial-gradient(40% 60% at 50% 0%,rgba(255,255,255,0.18),transparent 60%);"></div>
   <div style="max-width:760px;margin:0 auto;position:relative;z-index:1;">
     <h2 style="margin:0;font-size:52px;font-weight:800;letter-spacing:-0.02em;line-height:1.05;">${esc(b.ctaHeadline)}</h2>
     <p style="margin:18px 0 36px;font-size:18px;color:rgba(255,255,255,0.9);">${esc(b.ctaSubtitle)}</p>
-    <div class="no-print" style="display:inline-block;padding:18px 44px;border-radius:999px;background:#fff;color:var(--violet);font-weight:800;font-size:17px;letter-spacing:0.01em;box-shadow:0 14px 40px rgba(0,0,0,0.2);">AKCEPTUJĘ OFERTĘ I CHCĘ ZACZĄĆ →</div>
+    <div class="no-print" data-sq-action="accept" style="display:inline-block;padding:18px 44px;border-radius:999px;background:#fff;color:var(--violet);font-weight:800;font-size:17px;letter-spacing:0.01em;box-shadow:0 14px 40px rgba(0,0,0,0.2);">AKCEPTUJĘ OFERTĘ I CHCĘ ZACZĄĆ →</div>
     <div style="margin-top:48px;padding-top:32px;border-top:1px solid rgba(255,255,255,0.2);display:flex;flex-direction:column;align-items:center;gap:14px;">
       <div style="display:flex;align-items:center;gap:12px;">
         ${logoHtml}
@@ -651,19 +664,13 @@ export function buildWebsiteV3Html(
         })
         .join('\n')
 
-    return `<!DOCTYPE html>
-<html lang="pl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>${buildCss(zoom)}</style>
-</head>
-<body>
-<div style="max-width:1280px;margin:0 auto;background:#fff;box-shadow:0 0 80px rgba(15,23,42,0.06);">
+    return buildHtmlDocument({
+        title: 'Oferta — Strona internetowa',
+        css: buildCss(zoom),
+        body: `<div style="max-width:1280px;margin:0 auto;background:#fff;box-shadow:0 0 80px rgba(15,23,42,0.06);">
 ${renderCover(data, blocks, editorMode)}
 ${sectionsHtml}
 ${renderFooter(data, blocks, editorMode)}
-</div>
-</body>
-</html>`
+</div>`,
+    })
 }

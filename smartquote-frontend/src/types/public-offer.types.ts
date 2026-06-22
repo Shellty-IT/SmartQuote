@@ -42,6 +42,8 @@ export interface PublicOfferData {
         title: string;
         description: string | null;
         status: OfferStatus;
+        templateType: string;
+        blocks: unknown | null;
         validUntil: string | null;
         totalNet: number;
         totalVat: number;
@@ -69,6 +71,9 @@ export interface PublicOfferData {
             postalCode: string | null;
             website: string | null;
             logo: string | null;
+            logoLight: string | null;
+            logoDark: string | null;
+            avatar: string | null;
             primaryColor: string | null;
         };
         comments: Array<{

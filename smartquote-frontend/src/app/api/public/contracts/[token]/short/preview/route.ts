@@ -3,6 +3,7 @@
 // GET /api/public/contracts/:token/short/preview  →  text/html
 
 import { buildContractShortHtmlFromSaved } from '@/lib/pdf/contract-short-html'
+import { addDocumentActionLinks } from '@/lib/pdf/document-action-links'
 
 export const maxDuration = 10
 export const dynamic = 'force-dynamic'
@@ -35,7 +36,11 @@ export async function GET(
 
     let html: string
     try {
-        html = buildContractShortHtmlFromSaved(contract.blocks, { editorMode: false })
+        html = addDocumentActionLinks(
+            buildContractShortHtmlFromSaved(contract.blocks, { editorMode: false }),
+            `/contract/view/${token}#sign`,
+            'sign',
+        )
     } catch (err) {
         const detail = err instanceof Error ? err.message : String(err)
         return new Response(`<pre>Error: ${detail}</pre>`, {

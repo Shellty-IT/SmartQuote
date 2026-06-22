@@ -5,7 +5,9 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { buildContractServicesHtmlFromSaved } from '@/lib/pdf/contract-services-html'
+import { addDocumentActionLinks, publicDocumentUrl } from '@/lib/pdf/document-action-links'
 import { htmlToPdfBuffer } from '@/lib/pdf/puppeteer'
+import { documentTemplateMismatch } from '@/lib/pdf/template-guard'
 
 export const maxDuration = 10
 export const dynamic = 'force-dynamic'
@@ -47,10 +49,12 @@ export async function GET(
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: contract } = (await contractRes.json()) as { data: Record<string, any> }
+    const mismatch = documentTemplateMismatch(contract, 'services')
+    if (mismatch) return mismatch
 
     let html: string
     try {
-        html = buildContractServicesHtmlFromSaved(contract.blocks, { editorMode: false })
+        html = addDocumentActionLinks(buildContractServicesHtmlFromSaved(contract.blocks, { editorMode: false }), publicDocumentUrl('contract', contract.publicToken, 'sign'), 'sign')
     } catch (err) {
         const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
         console.error('[contract-services-pdf] buildContractServicesHtmlFromSaved threw:', detail)

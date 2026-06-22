@@ -211,6 +211,16 @@
 }
 
 @layer utilities {
+    @media (min-width: 768px) {
+        body.sq-ai-drawer-open .sq-dashboard-content {
+            padding-right: var(--sq-ai-drawer-width, 320px);
+        }
+
+        body.sq-ai-drawer-open.sq-ai-drawer-resizing .sq-dashboard-content {
+            transition: none !important;
+        }
+    }
+
     .bg-gradient-primary { background-image: var(--gradient-primary); }
     .bg-gradient-sidebar { background-image: var(--gradient-sidebar); }
     .bg-gradient-mesh { background-image: var(--gradient-mesh); }

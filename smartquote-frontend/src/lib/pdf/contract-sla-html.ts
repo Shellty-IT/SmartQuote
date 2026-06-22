@@ -1,7 +1,7 @@
 // src/lib/pdf/contract-sla-html.ts
 // HTML generator for the "Opieka IT" (SLA) contract template.
 // Navy #1B3A5C / Gold #C9A84C design.
-import { EMBEDDED_FONTS_CSS } from './embedded-fonts'
+import { buildHtmlDocument, buildContractPageRule, CONTRACT_ORPHANS_CSS } from './html-shell'
 import {
     type ContractSlaBlocks,
     type SlaSectionKey,
@@ -22,7 +22,7 @@ function blank(val: string | undefined | null, label: string): string {
     const v = (val ?? '').trim()
     return v
         ? `<span>${esc(v)}</span>`
-        : `<span style="background:#FEF3C7;color:#92400E;border-radius:3px;padding:1px 5px;font-weight:500;">${esc(label)}</span>`
+        : `<span style="color:inherit;font-weight:500;">${esc(label)}</span>`
 }
 
 function sectionAttr(key: string, editorMode: boolean, activeSection?: string | null): string {
@@ -32,9 +32,7 @@ function sectionAttr(key: string, editorMode: boolean, activeSection?: string | 
 }
 
 function buildCss(editorMode: boolean, zoom: number): string {
-    return `<style>
-${EMBEDDED_FONTS_CSS}
-*{box-sizing:border-box;}
+    return `*{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
 body{background:#EEF1F5;font-family:'Source Sans 3',system-ui,sans-serif;color:#0F172A;font-size:${zoom < 0.8 ? 13 : 13.5}px;line-height:1.65;-webkit-font-smoothing:antialiased;}
 .doc{max-width:800px;margin:0 auto;background:#fff;box-shadow:0 1px 8px rgba(15,23,42,0.12);}
@@ -44,9 +42,12 @@ table{border-collapse:collapse;width:100%;}
 th,td{text-align:left;}
 p{margin:6px 0;}
 @media(max-width:768px){.two-col{grid-template-columns:1fr!important;}.bar-inner,.content{padding-left:20px!important;padding-right:20px!important;}}
+${buildContractPageRule()}
+${CONTRACT_ORPHANS_CSS}
+.content>div{break-inside:auto;page-break-inside:auto;}
+h2{break-after:avoid;page-break-after:avoid;}
 @media print{body{font-size:11pt;background:#fff;}.doc{box-shadow:none;}.page-break{page-break-before:always;}}
-${editorMode ? `[data-sq-section]:hover{outline:2px solid #C9A84C;outline-offset:2px;}` : ''}
-</style>`
+${editorMode ? `[data-sq-section]:hover{outline:2px solid #C9A84C;outline-offset:2px;}` : ''}`
 }
 
 function buildEditorScript(): string {
@@ -64,10 +65,14 @@ function buildEditorScript(): string {
 }
 
 function renderHeader(b: ContractSlaBlocks): string {
+    const logoUrl = b.header.logoDarkUrl || b.header.logoUrl
+    const logo = logoUrl
+        ? `<img src="${esc(logoUrl)}" alt="Logo firmy" style="display:block;max-width:120px;max-height:48px;object-fit:contain;object-position:left center;" />`
+        : `<div style="width:68px;height:40px;border:1px solid rgba(201,168,76,.6);display:flex;align-items:center;justify-content:center;color:#C9A84C;font-size:10px;font-weight:600;letter-spacing:2px;">LOGO</div>`
     return `<div style="width:100%;background:#1B3A5C;">
   <div class="bar-inner" style="display:flex;justify-content:space-between;align-items:center;gap:16px;">
     <div style="display:flex;align-items:center;gap:14px;">
-      <div style="width:54px;height:38px;border:1px solid rgba(201,168,76,.6);display:flex;align-items:center;justify-content:center;color:#C9A84C;font-size:10px;font-weight:600;letter-spacing:2px;">LOGO</div>
+      ${logo}
       <span style="color:#C9A84C;font-size:13px;font-weight:500;">${esc(b.header.website || 'www.twoja-strona.pl')}</span>
     </div>
     <div style="text-align:right;color:#fff;font-size:11px;line-height:1.8;">
@@ -347,15 +352,10 @@ export function buildContractSlaHtml(
 
     const sectionsHtml = b.sections.map(key => renderSection(key, b, editorMode, activeSection)).join('\n')
 
-    return `<!DOCTYPE html>
-<html lang="pl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-${buildCss(editorMode, zoom)}
-</head>
-<body>
-<div class="doc">
+    return buildHtmlDocument({
+        title: 'Umowa IT — Opieka SLA',
+        css: buildCss(editorMode, zoom),
+        body: `<div class="doc">
   <div${headerAttr}>${renderHeader(b)}${renderTitle(b)}</div>
   <div class="content" style="padding:24px 48px 40px;">
     ${sectionsHtml}
@@ -366,9 +366,8 @@ ${buildCss(editorMode, zoom)}
     <div style="color:#475569;font-size:11px;margin-top:4px;">Nr umowy: ${esc(b.header.contractNumber)}</div>
   </div>
 </div>
-${editorMode ? buildEditorScript() : ''}
-</body>
-</html>`
+${editorMode ? buildEditorScript() : ''}`,
+    })
 }
 
 export function buildContractSlaHtmlFromSaved(

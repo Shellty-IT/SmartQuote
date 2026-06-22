@@ -5,7 +5,9 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { buildWebsiteV2Html } from '@/lib/pdf/website-v2-html'
+import { addDocumentActionLinks, publicDocumentUrl } from '@/lib/pdf/document-action-links'
 import { htmlToPdfBuffer } from '@/lib/pdf/puppeteer'
+import { documentTemplateMismatch } from '@/lib/pdf/template-guard'
 
 export const maxDuration = 10
 export const dynamic = 'force-dynamic'
@@ -45,10 +47,13 @@ export async function GET(
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: offerRaw } = (await offerRes.json()) as { data: Record<string, any> }
+    const mismatch = documentTemplateMismatch(offerRaw, 'website_v2')
+    if (mismatch) return mismatch
 
     let profileName: string | null = null
     let profileEmail = ''
-    let companyData: { name: string | null; website: string | null; logo: string | null; phone: string | null; email: string | null } | null = null
+    let profileAvatar: string | null = null
+    let companyData: { name: string | null; website: string | null; logo: string | null; logoLight: string | null; logoDark: string | null; phone: string | null; email: string | null } | null = null
 
     if (settingsRes.ok) {
         try {
@@ -56,11 +61,14 @@ export async function GET(
             const { data: settings } = (await settingsRes.json()) as { data: Record<string, any> }
             profileName = settings?.profile?.name ?? null
             profileEmail = settings?.profile?.email ?? ''
+            profileAvatar = settings?.profile?.avatar ?? null
             if (settings?.companyInfo) {
                 companyData = {
                     name: settings.companyInfo.name ?? null,
                     website: settings.companyInfo.website ?? null,
                     logo: settings.companyInfo.logo ?? null,
+                    logoLight: settings.companyInfo.logoLight ?? settings.companyInfo.logo ?? null,
+                    logoDark: settings.companyInfo.logoDark ?? null,
                     phone: settings.companyInfo.phone ?? null,
                     email: settings.companyInfo.email ?? settings?.profile?.email ?? null,
                 }
@@ -77,12 +85,12 @@ export async function GET(
         createdAt: offerRaw.createdAt ?? new Date().toISOString(),
         blocks: offerRaw.blocks ?? null,
         client: { name: offerRaw.client?.name ?? '', company: offerRaw.client?.company ?? null },
-        user: { name: profileName, email: profileEmail, companyInfo: companyData },
+        user: { name: profileName, email: profileEmail, avatar: profileAvatar, companyInfo: companyData },
     }
 
     let html: string
     try {
-        html = buildWebsiteV2Html(offerData)
+        html = addDocumentActionLinks(buildWebsiteV2Html(offerData), publicDocumentUrl('offer', offerRaw.publicToken, 'accept'), 'accept')
     } catch (err) {
         const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
         console.error('[website-v2-pdf] buildWebsiteV2Html threw:', detail)

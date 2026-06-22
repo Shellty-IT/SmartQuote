@@ -3,6 +3,7 @@
 
 import { use, useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useContract } from '@/hooks/useContracts';
 import { contractsApi } from '@/lib/api';
 import { Button, ConfirmDialog } from '@/components/ui';
@@ -13,6 +14,8 @@ import { useToast } from '@/contexts/ToastContext';
 import type { ContractStatus } from '@/types';
 import { useTranslations } from '@/i18n';
 import { PdfPreviewModal } from '@/components/pdf/PdfPreviewModal';
+import { downloadContractDocument, previewContractDocument } from '@/lib/document-pdf';
+import { getContractEditPath } from '@/lib/document-pdf';
 import { ContractTemplateTab } from './components/ContractTemplateTab';
 import { cn } from '@/lib/utils';
 import { NotesFeed } from '@/components/notes/NotesFeed';
@@ -105,11 +108,14 @@ function StatusTimeline({ currentStatus, t }: { currentStatus: ContractStatus; t
 
 export default function ContractDetailsPage({ params }: PageProps) {
     const { id } = use(params);
+    const searchParams = useSearchParams();
     const toast = useToast();
     const t = useTranslations('contractDetailPage');
     const statusTr = useTranslations('statuses');
     const { contract, loading, error, refetch } = useContract(id);
-    const [activeTab, setActiveTab] = useState<'details' | 'template'>('details');
+    const [activeTab, setActiveTab] = useState<'details' | 'template'>(() =>
+        searchParams.get('tab') === 'template' ? 'template' : 'details',
+    );
     const [statusConfirm, setStatusConfirm] = useState<{ next: ContractStatus; label: string; description: string } | null>(null);
     const [isChangingStatus, setIsChangingStatus] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
@@ -118,6 +124,7 @@ export default function ContractDetailsPage({ params }: PageProps) {
     const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
     const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
     const [pdfPreviewError, setPdfPreviewError] = useState<string | null>(null);
+    const [pdfPreviewFrameType, setPdfPreviewFrameType] = useState<'pdf' | 'html'>('pdf');
 
     const STATUS_ACTIONS: Record<ContractStatus, StatusAction[]> = {
         DRAFT: [
@@ -155,7 +162,7 @@ export default function ContractDetailsPage({ params }: PageProps) {
         if (!contract) return;
         setIsDownloading(true);
         try {
-            const blob = await contractsApi.downloadPdf(contract.id);
+            const blob = await downloadContractDocument(contract.id, contract.templateType ?? 'classic');
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -177,10 +184,11 @@ export default function ContractDetailsPage({ params }: PageProps) {
         setIsPreviewing(true);
         setPdfPreviewError(null);
         try {
-            const blob = await contractsApi.previewPdf(contract.id);
+            const preview = await previewContractDocument(contract.id, contract.templateType ?? 'classic');
+            setPdfPreviewFrameType(preview.frameType);
             setPdfPreviewUrl((current) => {
-                if (current) window.URL.revokeObjectURL(current);
-                return window.URL.createObjectURL(blob);
+                if (current?.startsWith('blob:')) window.URL.revokeObjectURL(current);
+                return preview.frameType === 'html' ? preview.url : window.URL.createObjectURL(preview.blob);
             });
             setPdfPreviewOpen(true);
         } catch (err) {
@@ -633,7 +641,7 @@ export default function ContractDetailsPage({ params }: PageProps) {
                             <h2 className="text-lg font-semibold text-foreground">{t.actionsSection}</h2>
                         </div>
                         <div className="p-6 space-y-3">
-                            <Link href={`/dashboard/contracts/${contract.id}/edit`}>
+                            <Link href={getContractEditPath(contract.id, contract.templateType)}>
                                 <Button variant="outline" className="w-full">
                                     <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -738,6 +746,7 @@ export default function ContractDetailsPage({ params }: PageProps) {
                 frameTitle={t.pdfPreview.frameTitle}
                 openInNewTabLabel={t.pdfPreview.openInNewTab}
                 loadingLabel={t.pdfPreview.loading}
+                frameType={pdfPreviewFrameType}
             />
         </div>
     );

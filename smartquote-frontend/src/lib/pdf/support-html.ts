@@ -2,7 +2,7 @@
 // Faithfully reproduces the "Wsparcie" (IT Support / SLA) template.
 // Design: ocean navy #0F4C75 + emerald #10B981, Outfit font, mint backgrounds.
 
-import { EMBEDDED_FONTS_CSS } from './embedded-fonts'
+import { buildHtmlDocument } from './html-shell'
 import type { SupportBlocks } from './support-blocks'
 
 export interface SupportOfferData {
@@ -11,6 +11,7 @@ export interface SupportOfferData {
     validUntil?: string
     clientName?: string
     userLogoUrl?: string
+    userLogoDarkUrl?: string
     userCompanyName?: string
     userEmail?: string
     userPhone?: string
@@ -37,7 +38,6 @@ function editorWrap(editorMode: boolean, key: string, inner: string): string {
 
 function baseCss(editorMode: boolean): string {
     return `
-${EMBEDDED_FONTS_CSS}
 *{box-sizing:border-box;}
 body{margin:0;background:#E2E8F0;font-family:'Outfit Variable','Outfit',system-ui,sans-serif;color:#0F172A;-webkit-font-smoothing:antialiased;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 .lnk{color:#10B981;text-decoration:none;font-weight:600;}
@@ -65,12 +65,16 @@ body{margin:0;background:#E2E8F0;font-family:'Outfit Variable','Outfit',system-u
 @media print{
   body{background:#fff;}
   .page{padding:0 !important;}
-  .doc{box-shadow:none !important;max-width:100% !important;}
+  .doc{box-shadow:none !important;max-width:100% !important;border-radius:0 !important;overflow:visible !important;}
   .cover-pattern{display:none !important;}
   .page-break{page-break-before:always;}
-  .sec,.cover,.foot{break-inside:avoid-page;}
+  /* Sections are allowed to flow across pages; only individual cards/rows stay atomic */
   .pkg-card,.prio-card,.sla-table tr{break-inside:avoid;}
+  /* Cap large headings so stress-filled text doesn't take up an entire page */
+  .sec h2, .cover h1 { font-size: 24px !important; line-height: 1.35 !important; }
   thead{display:table-header-group;}
+  @page{size:A4;margin:10mm 0;}
+  .cover{min-height:100vh;}
 }
 ${editorMode ? `
 .sq-block{cursor:pointer;position:relative;transition:outline .15s;}
@@ -82,12 +86,12 @@ ${editorMode ? `
 
 // ── S1 — Cover ────────────────────────────────────────────────────────────────
 
-function renderCover(b: SupportBlocks, offer: SupportOfferData): string {
+function renderCover(b: SupportBlocks, offer: SupportOfferData, editorMode: boolean): string {
     const offerNum = esc(offer.offerNumber ?? '2025/SLA/001')
     const offerDate = esc(offer.offerDate ?? '')
     const clientName = esc(offer.clientName ?? 'NAZWA FIRMY')
     const website = esc(b.cover.websiteUrl || offer.userWebsite || 'www.twoja-strona.pl')
-    const logoUrl = offer.userLogoUrl
+    const logoUrl = offer.userLogoDarkUrl || offer.userLogoUrl
 
     const rows = b.cover.monitorRows.map(r =>
         `<div style="display:flex;align-items:baseline;gap:8px;"><span style="color:#10B981;">&#9679;</span><span>${esc(r.label)}</span><span style="flex:1;border-bottom:1.5px dotted rgba(255,255,255,0.18);"></span><span style="color:#10B981;font-weight:600;">${esc(r.status)}</span></div>`
@@ -101,8 +105,8 @@ function renderCover(b: SupportBlocks, offer: SupportOfferData): string {
         ? `<img src="${esc(logoUrl)}" alt="logo" style="width:46px;height:46px;border-radius:10px;object-fit:contain;">`
         : `<div style="width:46px;height:46px;border-radius:10px;border:1.5px dashed rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,0.85);">LOGO</div>`
 
-    return `
-<section class="cover" style="position:relative;background:#0F4C75;color:#fff;padding:40px 48px 44px;overflow:hidden;">
+    const inner = `
+<section class="cover pdf-full-bleed" style="position:relative;background:#0F4C75;color:#fff;padding:40px 48px 44px;overflow:hidden;">
   <div class="cover-pattern" style="position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,0.05) 1.4px,transparent 1.4px);background-size:22px 22px;z-index:0;"></div>
   <div style="position:relative;z-index:1;">
     <div class="cover-top" style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;margin-bottom:44px;">
@@ -112,7 +116,7 @@ function renderCover(b: SupportBlocks, offer: SupportOfferData): string {
     <div class="cover-grid" style="display:grid;grid-template-columns:1.05fr 0.95fr;gap:40px;align-items:center;">
       <div>
         <div style="font-size:13px;font-weight:600;letter-spacing:3px;color:#10B981;margin-bottom:18px;">${esc(b.cover.heroTagline)}</div>
-        <h1 style="margin:0;font-size:46px;line-height:1.06;font-weight:700;letter-spacing:-1px;">${esc(b.cover.heroTitle)}<br><span style="color:#10B981;">i Umowa SLA</span></h1>
+        <h1 style="margin:0;font-size:46px;line-height:1.06;font-weight:700;letter-spacing:-1px;">${esc(b.cover.heroTitle)}<br><span style="color:#10B981;">${esc(b.cover.heroTitleSuffix)}</span></h1>
         <p style="margin:20px 0 0;font-style:italic;color:rgba(255,255,255,0.7);font-size:16px;">Dla: <strong>${clientName}</strong></p>
         <p style="margin:18px 0 0;color:rgba(255,255,255,0.88);font-size:18px;line-height:1.5;max-width:30ch;">${esc(b.cover.heroSubtitle)}</p>
       </div>
@@ -121,11 +125,11 @@ function renderCover(b: SupportBlocks, offer: SupportOfferData): string {
           <span style="width:10px;height:10px;border-radius:999px;background:#EF4444;"></span>
           <span style="width:10px;height:10px;border-radius:999px;background:#F59E0B;"></span>
           <span style="width:10px;height:10px;border-radius:999px;background:#10B981;"></span>
-          <span style="margin-left:auto;font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:1px;">SYSTEM MONITOR</span>
+          <span style="margin-left:auto;font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:1px;">${esc(b.cover.monitorLabel)}</span>
         </div>
         <div class="mono" style="display:flex;flex-direction:column;gap:11px;font-size:13px;color:rgba(255,255,255,0.85);">${rows}</div>
         <div style="margin-top:18px;">
-          <div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:6px;"><span>Dost&#281;pno&#347;&#263;</span><span style="color:#10B981;font-weight:600;">99.9%</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:6px;"><span>${esc(b.cover.availabilityLabel)}</span><span style="color:#10B981;font-weight:600;">${esc(b.cover.availabilityValue)}</span></div>
           <div style="height:7px;border-radius:999px;background:rgba(255,255,255,0.1);overflow:hidden;"><div style="height:100%;width:99%;background:#10B981;border-radius:999px;"></div></div>
         </div>
       </div>
@@ -133,6 +137,7 @@ function renderCover(b: SupportBlocks, offer: SupportOfferData): string {
     <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:40px;">${pills}</div>
   </div>
 </section>`
+    return editorWrap(editorMode, 'cover', inner)
 }
 
 // ── S2 — Benefits ─────────────────────────────────────────────────────────────
@@ -467,20 +472,20 @@ function renderFooter(b: SupportBlocks, offer: SupportOfferData, editorMode: boo
     const offerNum = esc(offer.offerNumber ?? '2025/SLA/001')
     const offerDate = esc(offer.offerDate ?? '')
     const validUntil = esc(offer.validUntil ?? foot.validityDate)
-    const logoUrl = offer.userLogoUrl
+    const logoUrl = offer.userLogoDarkUrl || offer.userLogoUrl
 
     const logoEl = logoUrl
         ? `<img src="${esc(logoUrl)}" alt="logo" style="width:40px;height:40px;border-radius:9px;object-fit:contain;">`
         : `<div style="width:40px;height:40px;border-radius:9px;border:1.5px dashed rgba(255,255,255,0.35);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,0.8);">LOGO</div>`
 
     const inner = `
-<footer class="foot" style="position:relative;background:#0F172A;color:#fff;padding:56px 48px 40px;overflow:hidden;">
+<footer class="foot pdf-full-bleed" style="position:relative;background:#0F172A;color:#fff;padding:56px 48px 40px;overflow:hidden;">
   <span class="wm wm-l">08</span>
   <div style="position:relative;z-index:1;">
     <div style="text-align:center;max-width:60ch;margin:0 auto;">
       <h2 style="margin:0;font-size:32px;font-weight:700;letter-spacing:-0.5px;line-height:1.15;">${esc(foot.ctaHeadline)}</h2>
       <p style="margin:16px 0 28px;color:rgba(255,255,255,0.7);font-size:16px;">${esc(foot.ctaLead)} <strong>${esc(foot.startDate)}</strong>.</p>
-      <a href="#" style="display:inline-block;background:#10B981;color:#0F172A;font-weight:700;font-size:16px;padding:16px 38px;border-radius:999px;text-decoration:none;box-shadow:0 8px 24px rgba(16,185,129,0.3);">${esc(foot.ctaButtonLabel)}</a>
+      <a href="#" data-sq-action="accept" style="display:inline-block;background:#10B981;color:#0F172A;font-weight:700;font-size:16px;padding:16px 38px;border-radius:999px;text-decoration:none;box-shadow:0 8px 24px rgba(16,185,129,0.3);">${esc(foot.ctaButtonLabel)}</a>
       <div style="margin-top:16px;font-size:13px;color:rgba(255,255,255,0.5);">Oferta wa&#380;na do ${validUntil}</div>
     </div>
     <div style="height:1px;background:rgba(255,255,255,0.1);margin:40px 0 32px;"></div>
@@ -539,22 +544,15 @@ export function buildSupportHtml(
     const editorMode = options?.editorMode ?? false
     const sectionsHtml = blocks.sections.map(k => renderSection(k, blocks, editorMode)).join('\n')
 
-    return `<!DOCTYPE html>
-<html lang="pl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Opieka techniczna IT &#8212; Oferta</title>
-<style>${baseCss(editorMode)}</style>
-</head>
-<body>
-<div class="page" style="padding:28px 18px;min-height:100vh;">
+    return buildHtmlDocument({
+        title: 'Opieka techniczna IT — Oferta',
+        css: baseCss(editorMode),
+        body: `<div class="page" style="padding:28px 18px;min-height:100vh;">
   <div class="doc" style="max-width:840px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 18px 60px rgba(15,76,117,0.14);">
-    ${renderCover(blocks, offer)}
+    ${renderCover(blocks, offer, editorMode)}
     ${sectionsHtml}
     ${renderFooter(blocks, offer, editorMode)}
   </div>
-</div>
-</body>
-</html>`
+</div>`,
+    })
 }

@@ -122,8 +122,24 @@ export function HeaderEditor({ block, onChange }: { block: HeaderBlock; onChange
                     onChange={(e) => onChange({ ...block, tag: e.target.value })}
                 />
             </Field>
+            <Field label="Tytuł w nagłówku">
+                <input
+                    className={inputCls}
+                    value={block.titleOverride ?? ''}
+                    placeholder="Domyślnie: tytuł oferty"
+                    onChange={(e) => onChange({ ...block, titleOverride: e.target.value })}
+                />
+            </Field>
+            <Field label="Podtytuł / klient w nagłówku">
+                <input
+                    className={inputCls}
+                    value={block.clientLabelOverride ?? ''}
+                    placeholder="Domyślnie: nazwa klienta"
+                    onChange={(e) => onChange({ ...block, clientLabelOverride: e.target.value })}
+                />
+            </Field>
             <div className="rounded-lg bg-muted/40 px-3 py-2.5 text-xs text-muted-foreground leading-relaxed">
-                💡 <strong>Tytuł oferty</strong> i <strong>nazwa klienta</strong> pobierane są automatycznie z danych oferty.<br />
+                💡 Puste pola użyją automatycznie danych oferty i klienta.<br />
                 <strong>Logo</strong> pochodzi z <em>Ustawienia → Firma → Logo</em>.<br />
                 <strong>Strona firmowa</strong> pochodzi z <em>Ustawienia → Firma → Witryna</em>.
             </div>

@@ -167,7 +167,7 @@ function ClassicTemplateEditor() {
 
 // ── Shared demo offer builders ────────────────────────────────────────────────
 
-function buildOldStyleOffer(session: ReturnType<typeof useSession>['data'], companyInfo: CompanyInfo | null) {
+function buildOldStyleOffer(session: ReturnType<typeof useSession>['data'], companyInfo: CompanyInfo | null, avatar?: string | null) {
     return {
         number: 'SZABLON',
         title: 'Przykładowy dokument',
@@ -179,11 +179,14 @@ function buildOldStyleOffer(session: ReturnType<typeof useSession>['data'], comp
         user: {
             name: session?.user?.name ?? null,
             email: session?.user?.email ?? '',
+            avatar: avatar ?? null,
             companyInfo: companyInfo
                 ? {
                       name: companyInfo.name,
                       website: companyInfo.website,
                       logo: companyInfo.logo,
+                      logoLight: companyInfo.logoLight,
+                      logoDark: companyInfo.logoDark,
                       phone: companyInfo.phone,
                       email: companyInfo.email ?? null,
                   }
@@ -198,6 +201,7 @@ function buildNewStyleOffer(session: ReturnType<typeof useSession>['data'], comp
         offerDate: new Date().toLocaleDateString('pl-PL'),
         clientName: 'Przykładowy Klient',
         userLogoUrl: companyInfo?.logo ?? undefined,
+        userLogoDarkUrl: companyInfo?.logoDark ?? undefined,
         userCompanyName: companyInfo?.name ?? session?.user?.name ?? undefined,
         userEmail: companyInfo?.email ?? session?.user?.email ?? undefined,
         userPhone: companyInfo?.phone ?? undefined,
@@ -285,13 +289,13 @@ function ShopTemplateEditor({ session, companyInfo }: { session: ReturnType<type
 
 // ── WebsiteV2 template editor ─────────────────────────────────────────────────
 
-function WebsiteV2TemplateEditor({ session, companyInfo }: { session: ReturnType<typeof useSession>['data']; companyInfo: CompanyInfo | null }) {
+function WebsiteV2TemplateEditor({ session, companyInfo, profileAvatar }: { session: ReturnType<typeof useSession>['data']; companyInfo: CompanyInfo | null; profileAvatar: string | null }) {
     const [blocks, setBlocks] = useState<WebsiteV2Blocks>(() => {
         const saved = loadFromStorage<WebsiteV2Blocks>(LS_KEYS.website_v2)
         return saved ? mergeWebsiteV2WithDefaults(saved) : buildDefaultWebsiteV2Blocks()
     })
     const { saved, flash } = useSaveIndicator()
-    const offer = useMemo(() => buildOldStyleOffer(session, companyInfo), [session, companyInfo])
+    const offer = useMemo(() => buildOldStyleOffer(session, companyInfo, profileAvatar), [session, companyInfo, profileAvatar])
 
     const handleBlocksChange = useCallback((updated: WebsiteV2Blocks) => {
         setBlocks(updated)
@@ -452,7 +456,7 @@ type DocType = 'classic' | 'proposal' | 'shop' | 'website_v2' | 'website_v3' | '
 const DOC_TYPE_META: { key: DocType; label: string; icon: string }[] = [
     { key: 'classic', label: 'Uniwersalny - systemowy', icon: '📄' },
     { key: 'universal', label: 'Uniwersalny - klasyczny', icon: '💼' },
-    { key: 'proposal', label: 'Strona internetowa - V1', icon: '🌐' },
+    { key: 'proposal', label: 'Strona internetowa - v1', icon: '🌐' },
     { key: 'website_v2', label: 'Strona internetowa - domyślny', icon: '🖥' },
     { key: 'website_v3', label: 'Strona internetowa - zaawansowany', icon: '✨' },
     { key: 'mobile_simple', label: 'Aplikacja mobilna - domyślny', icon: '✅' },
@@ -461,14 +465,24 @@ const DOC_TYPE_META: { key: DocType; label: string; icon: string }[] = [
     { key: 'support', label: 'Wsparcie IT / SLA', icon: '🛡' },
 ]
 
+const FAMILY_ICONS: Partial<Record<DocType, string>> = {
+    proposal: '🌐',
+    website_v2: '🌐',
+    website_v3: '🌐',
+    mobile_app: '📱',
+    mobile_simple: '📱',
+}
+
 export function DocumentTemplatesTab() {
     const tr = useTranslations('offerTemplatesPage')
     const { data: session } = useSession()
     const [companyInfo, setCompanyInfo] = useState<CompanyInfo | null>(null)
+    const [profileAvatar, setProfileAvatar] = useState<string | null>(null)
     const [docType, setDocType] = useState<DocType>('classic')
 
     useEffect(() => {
         settingsApi.getCompany().then(setCompanyInfo).catch(() => {})
+        settingsApi.getProfile().then(profile => setProfileAvatar(profile.avatar)).catch(() => {})
     }, [])
 
     return (
@@ -488,7 +502,7 @@ export function DocumentTemplatesTab() {
                                     : 'border-border bg-card text-muted-foreground hover:border-border/60 hover:text-foreground',
                             )}
                         >
-                            <span>{t.icon}</span>
+                            <span>{FAMILY_ICONS[t.key] ?? t.icon}</span>
                             {t.label}
                         </button>
                     ))}
@@ -498,7 +512,7 @@ export function DocumentTemplatesTab() {
             {docType === 'classic' && <ClassicTemplateEditor />}
             {docType === 'proposal' && <ProposalTemplateEditor session={session} companyInfo={companyInfo} />}
             {docType === 'shop' && <ShopTemplateEditor session={session} companyInfo={companyInfo} />}
-            {docType === 'website_v2' && <WebsiteV2TemplateEditor session={session} companyInfo={companyInfo} />}
+            {docType === 'website_v2' && <WebsiteV2TemplateEditor session={session} companyInfo={companyInfo} profileAvatar={profileAvatar} />}
             {docType === 'website_v3' && <WebsiteV3TemplateEditor session={session} companyInfo={companyInfo} />}
             {docType === 'support' && <SupportTemplateEditor session={session} companyInfo={companyInfo} />}
             {docType === 'mobile_app' && <MobileAppTemplateEditor session={session} companyInfo={companyInfo} />}

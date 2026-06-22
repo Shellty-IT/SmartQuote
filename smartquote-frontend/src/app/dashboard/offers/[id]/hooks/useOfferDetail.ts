@@ -1,8 +1,7 @@
 // src/app/dashboard/offers/[id]/hooks/useOfferDetail.ts
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useOffer, useOfferAnalytics, useOfferComments } from '@/hooks/useOffers';
 import { offersApi, ai, ksefApi } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
@@ -14,19 +13,22 @@ import type { Tab } from '../constants';
 import type { OfferStatus } from '@/types';
 import type { ObserverInsight, ClosingStrategy } from '@/types/ai';
 import type { KsefAvailability } from '@/types/ksef.types';
+import { downloadOfferDocument, previewOfferDocument } from '@/lib/document-pdf';
 
 export function useOfferDetail(offerId: string) {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const toast = useToast();
     const tr = useTranslations('offerDetail');
     const commonTr = useTranslations('common');
     const statusTr = useTranslations('statuses');
-    const { data: session } = useSession();
     const { offer, isLoading, error, refresh } = useOffer(offerId);
     const { analytics, refresh: refreshAnalytics } = useOfferAnalytics(offerId);
     const { comments, isSending, addComment, refresh: refreshComments } = useOfferComments(offerId);
 
-    const [activeTab, setActiveTab] = useState<Tab>('details');
+    const [activeTab, setActiveTab] = useState<Tab>(() =>
+        searchParams.get('tab') === 'template' ? 'template' : 'details',
+    );
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
     const [deleteModal, setDeleteModal] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -171,40 +173,11 @@ export function useOfferDetail(offerId: string) {
         }
     };
 
-    const fetchOfferPdfBlob = useCallback(async () => {
-        if (!offer) return;
-        const token = session?.accessToken || localStorage.getItem('token');
-        if (!token) {
-            toast.error(tr.toasts.noAuth, tr.toasts.noAuthDesc);
-            return;
-        }
-
-        const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
-        const response = await fetch(`${apiUrl}/api/offers/${offer.id}/pdf`, {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${token}` },
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error((errorData as { message?: string }).message || `Error ${response.status}`);
-        }
-
-        return response.blob();
-    }, [offer, session?.accessToken, toast, tr.toasts.noAuth, tr.toasts.noAuthDesc]);
-
     const handleDownloadPDF = async () => {
         if (!offer) return;
         setIsDownloadingPDF(true);
         try {
-            let blob: Blob;
-            if (offer.templateType === 'proposal') {
-                blob = await offersApi.downloadProposalPdf(offer.id);
-            } else {
-                const fetched = await fetchOfferPdfBlob();
-                if (!fetched) return;
-                blob = fetched;
-            }
+            const blob = await downloadOfferDocument(offer.id, offer.templateType);
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
@@ -226,23 +199,13 @@ export function useOfferDetail(offerId: string) {
         setIsPreviewingPDF(true);
         setPdfPreviewError(null);
         try {
-            if (offer.templateType === 'proposal') {
-                // Proposal: show HTML preview in iframe
-                const htmlUrl = offersApi.getProposalPreviewUrl(offer.id);
-                setPdfPreviewUrl(htmlUrl);
-                setPdfPreviewFrameType('html');
-                setPdfPreviewOpen(true);
-            } else {
-                // Classic: show PDF blob
-                const blob = await fetchOfferPdfBlob();
-                if (!blob) return;
-                setPdfPreviewFrameType('pdf');
-                setPdfPreviewUrl((currentUrl) => {
-                    if (currentUrl) window.URL.revokeObjectURL(currentUrl);
-                    return window.URL.createObjectURL(blob);
-                });
-                setPdfPreviewOpen(true);
-            }
+            const preview = await previewOfferDocument(offer.id, offer.templateType);
+            setPdfPreviewFrameType(preview.frameType);
+            setPdfPreviewUrl((currentUrl) => {
+                if (currentUrl?.startsWith('blob:')) window.URL.revokeObjectURL(currentUrl);
+                return preview.frameType === 'html' ? preview.url : window.URL.createObjectURL(preview.blob);
+            });
+            setPdfPreviewOpen(true);
         } catch (err) {
             const message = err instanceof Error ? err.message : commonTr.errorTitle;
             setPdfPreviewError(message);

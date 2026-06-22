@@ -67,6 +67,12 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
         publicOffersApi.registerView(token).catch(() => {});
     }, [token]);
 
+    useEffect(() => {
+        if (window.location.hash === '#accept' && !isFinalized) {
+            setAcceptDialogOpen(true);
+        }
+    }, [isFinalized]);
+
     const trackSelectionDebounced = useCallback(
         (states: Record<string, ItemState>, variant: string | null) => {
             if (trackingTimeout.current) {
@@ -220,7 +226,17 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
 
     return (
         <div className="space-y-6">
-            <OfferHeader
+            {offer.templateType !== 'classic' ? (
+                <iframe
+                    src={`/api/public/offers/${token}/preview`}
+                    title={`Oferta ${offer.number}`}
+                    className="w-full min-h-[1200px] rounded-2xl border border-slate-200 bg-white"
+                    onLoad={(event) => {
+                        const height = event.currentTarget.contentDocument?.documentElement.scrollHeight;
+                        if (height) event.currentTarget.style.height = `${height}px`;
+                    }}
+                />
+            ) : <OfferHeader
                 seller={offer.seller}
                 client={offer.client}
                 offerNumber={offer.number}
@@ -230,7 +246,7 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                 validUntil={offer.validUntil}
                 expired={expired}
                 primaryColor={primaryColor}
-            />
+            />}
 
             {error && (
                 <ErrorAlert
@@ -241,7 +257,7 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
 
             {requireAuditTrail && <AuditTrailInfoAlert />}
 
-            {hasVariants && (
+            {offer.templateType === 'classic' && hasVariants && (
                 <VariantSelector
                     variants={variants}
                     selectedVariant={selectedVariant}
@@ -251,7 +267,7 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                 />
             )}
 
-            <OfferItemsSection
+            {offer.templateType === 'classic' && <OfferItemsSection
                 items={visibleItems}
                 itemStates={itemStates}
                 selectedVariant={selectedVariant}
@@ -259,9 +275,9 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                 onQuantityChange={handleQuantityChange}
                 disabled={isFinalized}
                 primaryColor={primaryColor}
-            />
+            />}
 
-            <OfferCalculator
+            {offer.templateType === 'classic' && <OfferCalculator
                 totalNet={totals.totalNet}
                 totalVat={totals.totalVat}
                 totalGross={totals.totalGross}
@@ -269,12 +285,12 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                 selectedCount={totals.selectedCount}
                 totalCount={totals.totalVisible}
                 primaryColor={primaryColor}
-            />
+            />}
 
-            <OfferTerms
+            {offer.templateType === 'classic' && <OfferTerms
                 terms={offer.terms || ''}
                 paymentDays={offer.paymentDays}
-            />
+            />}
 
             <CommentSection
                 comments={comments}

@@ -12,7 +12,7 @@ import type { ShopBlocks } from '@/lib/pdf/shop-blocks'
 import type { OfferContext } from '@/components/offers/editor/block-editors'
 
 interface StepShopTemplateProps {
-    client: Client | null
+    client: Pick<Client, 'name' | 'company'> | null
     offerTitle: string
     onTitleChange: (title: string) => void
     totalGross: number
@@ -57,6 +57,8 @@ export default function StepShopTemplate({
                 name: companyInfo.name,
                 website: companyInfo.website,
                 logo: companyInfo.logo,
+                logoLight: companyInfo.logoLight,
+                logoDark: companyInfo.logoDark,
                 phone: companyInfo.phone,
                 email: companyInfo.email ?? null,
             } : null,

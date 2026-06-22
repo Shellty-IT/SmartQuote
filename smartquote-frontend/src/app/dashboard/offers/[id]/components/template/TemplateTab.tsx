@@ -33,6 +33,7 @@ import type { SupportOfferData } from '@/lib/pdf/support-html'
 import type { MobileAppOfferData } from '@/lib/pdf/mobile-app-html'
 import type { MobileSimpleOfferData } from '@/lib/pdf/mobile-simple-html'
 import type { OfferContext } from '@/components/offers/editor/block-editors'
+import { downloadOfferDocument } from '@/lib/document-pdf'
 
 // ── Main TemplateTab ──────────────────────────────────────────────────────────
 
@@ -75,42 +76,19 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
     )
     const [isDownloading, setIsDownloading] = useState(false)
     const [companyInfo, setCompanyInfo] = useState<CompanyInfo | null>(null)
+    const [profileAvatar, setProfileAvatar] = useState<string | null>(null)
 
     // Load company info for logo + website in the document editor
     useEffect(() => {
         settingsApi.getCompany().then(setCompanyInfo).catch(() => {})
+        settingsApi.getProfile().then(profile => setProfileAvatar(profile.avatar)).catch(() => {})
     }, [])
 
     const handleDownload = async () => {
         setIsDownloading(true)
         try {
-            let blob: Blob
-            let filename: string
-            if (templateType === 'shop') {
-                blob = await offersApi.downloadShopPdf(offer.id)
-                filename = `Oferta_${offer.number.replace(/\//g, '-')}_sklep.pdf`
-            } else if (templateType === 'website_v2') {
-                blob = await offersApi.downloadWebsiteV2Pdf(offer.id)
-                filename = `Oferta_${offer.number.replace(/\//g, '-')}_strona-v2.pdf`
-            } else if (templateType === 'website_v3') {
-                blob = await offersApi.downloadWebsiteV3Pdf(offer.id)
-                filename = `Oferta_${offer.number.replace(/\//g, '-')}_strona-v3.pdf`
-            } else if (templateType === 'support') {
-                blob = await offersApi.downloadSupportPdf(offer.id)
-                filename = `Oferta_${offer.number.replace(/\//g, '-')}_wsparcie.pdf`
-            } else if (templateType === 'mobile_app') {
-                blob = await offersApi.downloadMobileAppPdf(offer.id)
-                filename = `Oferta_${offer.number.replace(/\//g, '-')}_mobile-app.pdf`
-            } else if (templateType === 'mobile_simple') {
-                blob = await offersApi.downloadMobileSimplePdf(offer.id)
-                filename = `Oferta_${offer.number.replace(/\//g, '-')}_mobile-simple.pdf`
-            } else if (templateType === 'universal') {
-                blob = await offersApi.downloadUniversalPdf(offer.id)
-                filename = `Oferta_${offer.number.replace(/\//g, '-')}_universal.pdf`
-            } else {
-                blob = await offersApi.downloadProposalPdf(offer.id)
-                filename = `Propozycja_${offer.number.replace(/\//g, '-')}.pdf`
-            }
+            const blob = await downloadOfferDocument(offer.id, templateType)
+            const filename = `Oferta_${offer.number.replace(/\//g, '-')}.pdf`
             const url = URL.createObjectURL(blob)
             const a = document.createElement('a')
             a.href = url
@@ -139,7 +117,7 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
         setIsClassicPreviewing(true)
         setClassicPreviewError(null)
         try {
-            const blob = await offersApi.downloadPdf(offer.id)
+            const blob = await offersApi.downloadClassicPdf(offer.id)
             const url = URL.createObjectURL(blob)
             setClassicPreviewUrl((old) => { if (old) URL.revokeObjectURL(old); return url })
             setClassicPreviewOpen(true)
@@ -154,7 +132,7 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
     const handleClassicDownload = async () => {
         setIsClassicDownloading(true)
         try {
-            const blob = await offersApi.downloadPdf(offer.id)
+            const blob = await offersApi.downloadClassicPdf(offer.id)
             const url = URL.createObjectURL(blob)
             const a = document.createElement('a')
             a.href = url
@@ -188,15 +166,18 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
         user: {
             name: session?.user?.name ?? null,
             email: session?.user?.email ?? '',
+            avatar: profileAvatar,
             companyInfo: companyInfo ? {
                 name: companyInfo.name,
                 website: companyInfo.website,
                 logo: companyInfo.logo,
+                logoLight: companyInfo.logoLight,
+                logoDark: companyInfo.logoDark,
                 phone: companyInfo.phone,
             } : null,
         },
         blocks,
-    }), [offer, session, companyInfo, blocks])
+    }), [offer, session, profileAvatar, companyInfo, blocks])
 
     const shopOfferData = useMemo(() => ({
         id: offer.id,
@@ -217,6 +198,8 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
                 name: companyInfo.name,
                 website: companyInfo.website,
                 logo: companyInfo.logo,
+                logoLight: companyInfo.logoLight,
+                logoDark: companyInfo.logoDark,
                 phone: companyInfo.phone,
                 email: companyInfo.email ?? null,
             } : null,
@@ -267,16 +250,19 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
         user: {
             name: session?.user?.name ?? null,
             email: session?.user?.email ?? '',
+            avatar: profileAvatar,
             companyInfo: companyInfo ? {
                 name: companyInfo.name,
                 website: companyInfo.website,
                 logo: companyInfo.logo,
+                logoLight: companyInfo.logoLight,
+                logoDark: companyInfo.logoDark,
                 phone: companyInfo.phone,
                 email: companyInfo.email ?? null,
             } : null,
         },
         blocks: websiteV2Blocks,
-    }), [offer, session, companyInfo, websiteV2Blocks])
+    }), [offer, session, profileAvatar, companyInfo, websiteV2Blocks])
 
     const handleWebsiteV2BlocksChange = useCallback(async (updatedBlocks: WebsiteV2Blocks) => {
         setWebsiteV2Blocks(updatedBlocks)
@@ -299,7 +285,7 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
         user: {
             name: session?.user?.name ?? null,
             email: session?.user?.email ?? '',
-            companyInfo: companyInfo ? { name: companyInfo.name, website: companyInfo.website, logo: companyInfo.logo, phone: companyInfo.phone, email: companyInfo.email ?? null } : null,
+            companyInfo: companyInfo ? { name: companyInfo.name, website: companyInfo.website, logo: companyInfo.logo, logoLight: companyInfo.logoLight, logoDark: companyInfo.logoDark, phone: companyInfo.phone, email: companyInfo.email ?? null } : null,
         },
         blocks: websiteV3Blocks,
     }), [offer, session, companyInfo, websiteV3Blocks])
@@ -319,6 +305,7 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
         validUntil: offer.validUntil ? new Date(offer.validUntil).toLocaleDateString('pl-PL') : undefined,
         clientName: offer.client?.name,
         userLogoUrl: companyInfo?.logo ?? undefined,
+        userLogoDarkUrl: companyInfo?.logoDark ?? undefined,
         userCompanyName: companyInfo?.name ?? session?.user?.name ?? undefined,
         userEmail: companyInfo?.email ?? session?.user?.email ?? undefined,
         userPhone: companyInfo?.phone ?? undefined,
@@ -340,6 +327,7 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
         validUntil: offer.validUntil ? new Date(offer.validUntil).toLocaleDateString('pl-PL') : undefined,
         clientName: offer.client?.name,
         userLogoUrl: companyInfo?.logo ?? undefined,
+        userLogoDarkUrl: companyInfo?.logoDark ?? undefined,
         userCompanyName: companyInfo?.name ?? session?.user?.name ?? undefined,
         userEmail: companyInfo?.email ?? session?.user?.email ?? undefined,
         userPhone: companyInfo?.phone ?? undefined,
@@ -361,6 +349,7 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
         validUntil: offer.validUntil ? new Date(offer.validUntil).toLocaleDateString('pl-PL') : undefined,
         clientName: offer.client?.name,
         userLogoUrl: companyInfo?.logo ?? undefined,
+        userLogoDarkUrl: companyInfo?.logoDark ?? undefined,
         userCompanyName: companyInfo?.name ?? session?.user?.name ?? undefined,
         userEmail: companyInfo?.email ?? session?.user?.email ?? undefined,
         userPhone: companyInfo?.phone ?? undefined,
@@ -381,6 +370,7 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
         offerDate: offer.createdAt ? new Date(offer.createdAt).toLocaleDateString('pl-PL') : undefined,
         clientName: offer.client?.name,
         userLogoUrl: companyInfo?.logo ?? undefined,
+        userLogoDarkUrl: companyInfo?.logoDark ?? undefined,
         userCompanyName: companyInfo?.name ?? session?.user?.name ?? undefined,
         userEmail: companyInfo?.email ?? session?.user?.email ?? undefined,
         userPhone: companyInfo?.phone ?? undefined,

@@ -27,8 +27,12 @@ export const offersApi = {
         api.post<Offer>(`/offers/${id}/duplicate`),
     stats: () =>
         api.get<OffersStats>('/offers/stats'),
-    downloadPdf: (id: string) =>
-        api.downloadBlob(`/offers/${id}/pdf`),
+    /** Classic template — download PDF (rendered by Vercel/Puppeteer) */
+    downloadClassicPdf: async (id: string): Promise<Blob> => {
+        const res = await fetch(`/api/offers/${id}/pdf/classic`)
+        if (!res.ok) throw new Error(`PDF generation failed: ${res.status}`)
+        return res.blob()
+    },
     publish: (id: string) =>
         api.post<PublishOfferResult>(`/offers/${id}/publish`),
     unpublish: (id: string) =>

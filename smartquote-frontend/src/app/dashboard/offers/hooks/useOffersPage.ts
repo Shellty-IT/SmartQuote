@@ -7,6 +7,7 @@ import { offersApi } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
 import { useTranslations } from '@/i18n';
 import { Offer, OfferStatus } from '@/types';
+import { getOfferEditPath } from '@/lib/document-pdf';
 
 export function useOffersPage() {
     const router = useRouter();
@@ -55,7 +56,7 @@ export function useOffersPage() {
             const response = await offersApi.duplicate(offer.id);
             if (response.data?.id) {
                 toast.success(tr.duplicated, tr.duplicatedDesc);
-                router.push(`/dashboard/offers/${response.data.id}/edit`);
+                router.push(getOfferEditPath(response.data.id, response.data.templateType));
             }
         } catch {
             toast.error(commonTr.errorTitle, tr.deleteError);
@@ -99,7 +100,7 @@ export function useOffersPage() {
     };
 
     const navigateToOffer = (id: string) => router.push(`/dashboard/offers/${id}`);
-    const navigateToEdit = (id: string) => router.push(`/dashboard/offers/${id}/edit`);
+    const navigateToEdit = (offer: Offer) => router.push(getOfferEditPath(offer.id, offer.templateType));
 
     return {
         search,

@@ -13,7 +13,7 @@ import {
     UpdateContractInput,
     GetContractsParams,
 } from '../types';
-import { NotFoundError } from '../errors/domain.errors';
+import { NotFoundError, ValidationError } from '../errors/domain.errors';
 
 function toDate(value: Date | string | undefined | null): Date | null {
     if (!value) return null;
@@ -132,6 +132,10 @@ export class ContractsService {
         const existing = await contractsRepository.findById(id, userId);
         if (!existing) throw new NotFoundError('Umowa');
 
+        if (data.templateType !== undefined && data.templateType !== (existing.templateType ?? 'classic')) {
+            throw new ValidationError('Nie można zmienić szablonu istniejącej umowy');
+        }
+
         const updateData: UpdateContractData = {
             title: data.title,
             description: data.description,
@@ -143,7 +147,6 @@ export class ContractsService {
             paymentTerms: data.paymentTerms,
             paymentDays: data.paymentDays,
             notes: data.notes,
-            templateType: data.templateType,
             blocks: data.blocks !== undefined
                 ? (data.blocks === null ? Prisma.JsonNull : data.blocks as Prisma.InputJsonValue)
                 : undefined,

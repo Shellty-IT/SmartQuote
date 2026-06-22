@@ -36,13 +36,27 @@ export function UniversalDocumentEditor({
     offerContext,
 }: UniversalDocumentEditorProps) {
     const [panelView, setPanelView] = useState<PanelView>(null)
-    const { panelWidth, onResizeMouseDown } = useResizablePanel('sq_editor_panel_width')
+    const {
+        containerRef,
+        previewPanelStyle,
+        editorPanelStyle,
+        handleStyle,
+        isDragging,
+        onResizeMouseDown,
+    } = useResizablePanel('sq_preview_ratio_universal', { mode: 'preview-ratio' })
     const { zoom, zoomIn, zoomOut } = useZoom()
 
     const srcdoc = useMemo(
         () => buildUniversalHtml(blocks, offer, { editorMode: true }),
         [blocks, offer],
     )
+
+    const aiOfferContext = useMemo<OfferContext>(() => ({
+        title: offerContext?.title ?? offer.offerNumber ?? 'Oferta',
+        clientName: offerContext?.clientName ?? offer.clientName ?? 'Klient',
+        totalGross: offerContext?.totalGross ?? 0,
+        currency: offerContext?.currency ?? 'PLN',
+    }), [offerContext, offer.offerNumber, offer.clientName])
 
     useEffect(() => {
         const handler = (event: MessageEvent) => {
@@ -61,14 +75,14 @@ export function UniversalDocumentEditor({
     const panelOpen = panelView !== null
 
     return (
-        <div className="flex flex-col gap-3">
+        <div className="flex h-full min-h-[700px] flex-col gap-0 rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
             {/* Toolbar */}
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap border-b border-border bg-card px-4 py-2.5">
                 <TemplateAIFillButton
                     blocks={blocks}
                     onBlocksChange={onBlocksChange}
-                    clientName={offer.clientName ?? 'Klient'}
-                    title={offer.offerNumber ?? 'Oferta'}
+                    clientName={aiOfferContext.clientName}
+                    title={aiOfferContext.title}
                     templateType="universal"
                 />
                 <div className="mx-1 h-4 w-px bg-border" />
@@ -109,13 +123,20 @@ export function UniversalDocumentEditor({
                 </div>
             </div>
 
-            <p className="text-xs text-muted-foreground">
+            <p className="border-b border-border bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
                 Kliknij dowolną sekcję w podglądzie, aby otworzyć edytor. Przycisk &quot;Sekcje&quot; zarządza kolejnością i widocznością sekcji.
             </p>
 
             {/* Editor + side panel */}
-            <div className="flex border border-border rounded-xl overflow-hidden" style={{ minHeight: 700 }}>
-                <div className="flex-1 overflow-auto bg-slate-100">
+            <div ref={containerRef} className="flex flex-1 min-h-0">
+                <div
+                    className={cn(
+                        'min-w-0 overflow-auto bg-slate-100',
+                        panelOpen ? 'flex-shrink-0' : 'flex-1',
+                        !isDragging && 'transition-all duration-300',
+                    )}
+                    style={panelOpen ? previewPanelStyle : undefined}
+                >
                     <div
                         style={{
                             transformOrigin: 'top left',
@@ -125,23 +146,38 @@ export function UniversalDocumentEditor({
                     >
                         <iframe
                             srcDoc={srcdoc}
-                            className="w-full border-0"
+                            className={cn('w-full border-0', isDragging && 'pointer-events-none')}
                             style={{ minHeight: `${700 / zoom}px`, height: `${900 / zoom}px` }}
                             title="Podgląd szablonu Szablon uniwersalny"
                         />
                     </div>
                 </div>
 
+                {panelOpen && (
+                    <div
+                        role="separator"
+                        aria-orientation="vertical"
+                        title="ZmieĹ„ szerokoĹ›Ä‡ podglÄ…du"
+                        onMouseDown={onResizeMouseDown}
+                        className={cn(
+                            'group relative z-20 cursor-col-resize bg-border/70 hover:bg-primary/30',
+                            !isDragging && 'transition-colors',
+                            isDragging && 'bg-primary/30',
+                        )}
+                        style={handleStyle}
+                    >
+                        <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-border group-hover:bg-primary/50" />
+                    </div>
+                )}
+
                 <div
-                    className={cn('flex-shrink-0 overflow-hidden border-l border-border relative', panelOpen ? '' : '!w-0')}
-                    style={panelOpen ? { width: panelWidth } : undefined}
-                >
-                    {panelOpen && (
-                        <div
-                            onMouseDown={onResizeMouseDown}
-                            className="absolute left-0 top-0 bottom-0 w-1.5 cursor-ew-resize z-20 hover:bg-primary/20 transition-colors"
-                        />
+                    className={cn(
+                        'min-w-0 overflow-hidden border-l border-border',
+                        panelOpen ? '' : 'w-0 flex-shrink-0',
+                        !isDragging && 'transition-all duration-300',
                     )}
+                    style={panelOpen ? editorPanelStyle : undefined}
+                >
                     {panelOpen && (
                         <UniversalBlockEditorPanel
                             view={panelView}
@@ -149,7 +185,7 @@ export function UniversalDocumentEditor({
                             onChange={onBlocksChange}
                             onClose={() => setPanelView(null)}
                             onOpenSections={() => setPanelView({ kind: 'sections' })}
-                            offerContext={offerContext}
+                            offerContext={aiOfferContext}
                         />
                     )}
                 </div>

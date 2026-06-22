@@ -3,6 +3,7 @@
 // GET /api/public/contracts/:token/dedicated/preview  →  text/html
 
 import { buildContractDedicatedHtmlFromSaved } from '@/lib/pdf/contract-dedicated-html'
+import { addDocumentActionLinks } from '@/lib/pdf/document-action-links'
 
 export const maxDuration = 10
 export const dynamic = 'force-dynamic'
@@ -34,7 +35,7 @@ export async function GET(
 
     let html: string
     try {
-        html = buildContractDedicatedHtmlFromSaved(contract.blocks, { editorMode: false })
+        html = addDocumentActionLinks(buildContractDedicatedHtmlFromSaved(contract.blocks, { editorMode: false }), `/contract/view/${token}#sign`, 'sign')
     } catch (err) {
         const detail = err instanceof Error ? err.message : String(err)
         return new Response(`<pre>Error: ${detail}</pre>`, {

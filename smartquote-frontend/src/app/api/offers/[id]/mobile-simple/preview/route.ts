@@ -1,5 +1,5 @@
 // src/app/api/offers/[id]/mobile-simple/preview/route.ts
-// Returns HTML preview for the "Aplikacja mobilna - simple" template.
+// Returns HTML preview for the "Aplikacja mobilna - domyślny" template.
 // GET /api/offers/:id/mobile-simple/preview → text/html
 
 import { getServerSession } from 'next-auth'
@@ -22,6 +22,7 @@ interface RawOfferData {
 
 interface RawCompanySettings {
     logo?: string | null
+    logoDark?: string | null
     name?: string | null
     email?: string | null
     phone?: string | null
@@ -75,6 +76,7 @@ export async function GET(
             : undefined,
         clientName: offer.client?.name ?? undefined,
         userLogoUrl: companySettings?.logo ?? undefined,
+        userLogoDarkUrl: companySettings?.logoDark ?? undefined,
         userCompanyName: companySettings?.name ?? offer.user?.name ?? undefined,
         userEmail: companySettings?.email ?? offer.user?.email ?? undefined,
         userPhone: companySettings?.phone ?? undefined,

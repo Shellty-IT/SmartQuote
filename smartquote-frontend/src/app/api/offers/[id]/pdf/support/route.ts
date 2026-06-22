@@ -5,8 +5,10 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { buildSupportHtml, type SupportOfferData } from '@/lib/pdf/support-html'
+import { addDocumentActionLinks, publicDocumentUrl } from '@/lib/pdf/document-action-links'
 import { mergeSupportWithDefaults, buildDefaultSupportBlocks } from '@/lib/pdf/support-blocks'
 import { htmlToPdfBuffer } from '@/lib/pdf/puppeteer'
+import { documentTemplateMismatch } from '@/lib/pdf/template-guard'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -24,6 +26,7 @@ interface RawOfferData {
 
 interface RawCompanySettings {
     logo?: string | null
+    logoDark?: string | null
     name?: string | null
     email?: string | null
     phone?: string | null
@@ -59,6 +62,8 @@ export async function GET(
     }
 
     const { data: offer } = (await offerRes.json()) as { data: RawOfferData }
+    const mismatch = documentTemplateMismatch(offer, 'support')
+    if (mismatch) return mismatch
 
     let companySettings: RawCompanySettings | null = null
     if (settingsRes.ok) {
@@ -77,6 +82,7 @@ export async function GET(
             : undefined,
         clientName: offer.client?.name ?? undefined,
         userLogoUrl: companySettings?.logo ?? undefined,
+        userLogoDarkUrl: companySettings?.logoDark ?? undefined,
         userCompanyName: companySettings?.name ?? offer.user?.name ?? undefined,
         userEmail: companySettings?.email ?? offer.user?.email ?? undefined,
         userPhone: companySettings?.phone ?? undefined,
@@ -89,7 +95,7 @@ export async function GET(
 
     let html: string
     try {
-        html = buildSupportHtml(blocks, offerData)
+        html = addDocumentActionLinks(buildSupportHtml(blocks, offerData), publicDocumentUrl('offer', (offer as RawOfferData & { publicToken?: string }).publicToken, 'accept'), 'accept')
     } catch (err) {
         const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
         console.error('[support-pdf] buildSupportHtml threw:', detail)

@@ -74,9 +74,13 @@ export interface SupportTermItem {
 export interface SupportCoverBlock {
     heroTagline: string
     heroTitle: string
+    heroTitleSuffix: string
     heroSubtitle: string
     pills: string[]
     monitorRows: SupportMonitorRow[]
+    monitorLabel: string
+    availabilityLabel: string
+    availabilityValue: string
     validityDays: number
     websiteUrl: string
 }
@@ -178,6 +182,7 @@ export function buildDefaultSupportBlocks(): SupportBlocks {
         cover: {
             heroTagline: 'PROPOZYCJA WSPÓŁPRACY',
             heroTitle: 'Opieka techniczna IT',
+            heroTitleSuffix: 'i Umowa SLA',
             heroSubtitle: 'Twoje systemy działają. Zawsze. A jeśli coś się stanie — jestem gotowy.',
             pills: ['🛡️ Monitoring 24/7', '⚡ Szybki czas reakcji', '📊 Miesięczny raport'],
             monitorRows: [
@@ -186,6 +191,9 @@ export function buildDefaultSupportBlocks(): SupportBlocks {
                 { label: 'Certyfikat SSL', status: 'WAŻNY' },
                 { label: 'Ostatni backup', status: '2h temu' },
             ],
+            monitorLabel: 'SYSTEM MONITOR',
+            availabilityLabel: 'Dostępność',
+            availabilityValue: '99.9%',
             validityDays: 30,
             websiteUrl: 'www.twoja-strona.pl',
         },

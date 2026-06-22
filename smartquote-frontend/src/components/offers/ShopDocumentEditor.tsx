@@ -45,7 +45,14 @@ export function ShopDocumentEditor({
     offerContext,
 }: ShopDocumentEditorProps) {
     const [panelView, setPanelView] = useState<PanelView>(null)
-    const { panelWidth, onResizeMouseDown } = useResizablePanel('sq_editor_panel_width')
+    const {
+        containerRef,
+        previewPanelStyle,
+        editorPanelStyle,
+        handleStyle,
+        isDragging,
+        onResizeMouseDown,
+    } = useResizablePanel('sq_preview_ratio_shop', { mode: 'preview-ratio' })
     const { zoom, zoomIn, zoomOut } = useZoom()
     const [refreshKey, setRefreshKey] = useState(0)
 
@@ -153,28 +160,50 @@ export function ShopDocumentEditor({
             </div>
 
             {/* Main area: document + panel */}
-            <div className="flex flex-1 min-h-0">
-                <div className="flex-1 min-w-0 overflow-auto bg-[#CDD2E2] transition-all duration-300">
+            <div ref={containerRef} className="flex flex-1 min-h-0">
+                <div
+                    className={cn(
+                        'min-w-0 overflow-auto bg-[#CDD2E2]',
+                        panelOpen ? 'flex-shrink-0' : 'flex-1',
+                        !isDragging && 'transition-all duration-300',
+                    )}
+                    style={panelOpen ? previewPanelStyle : undefined}
+                >
                     <iframe
                         key={refreshKey}
                         srcDoc={srcdoc}
                         title="Podgląd oferty — Sklep internetowy"
                         sandbox="allow-scripts allow-same-origin"
-                        className="h-full w-full"
+                        className={cn('h-full w-full', isDragging && 'pointer-events-none')}
                         style={{ minHeight: 700 }}
                     />
                 </div>
 
+                {panelOpen && (
+                    <div
+                        role="separator"
+                        aria-orientation="vertical"
+                        title="ZmieĹ„ szerokoĹ›Ä‡ podglÄ…du"
+                        onMouseDown={onResizeMouseDown}
+                        className={cn(
+                            'group relative z-20 cursor-col-resize bg-border/70 hover:bg-primary/30',
+                            !isDragging && 'transition-colors',
+                            isDragging && 'bg-primary/30',
+                        )}
+                        style={handleStyle}
+                    >
+                        <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-border group-hover:bg-primary/50" />
+                    </div>
+                )}
+
                 <div
-                    className={cn('flex-shrink-0 overflow-hidden border-l border-border relative', panelOpen ? '' : '!w-0')}
-                    style={panelOpen ? { width: panelWidth } : undefined}
-                >
-                    {panelOpen && (
-                        <div
-                            onMouseDown={onResizeMouseDown}
-                            className="absolute left-0 top-0 bottom-0 w-1.5 cursor-ew-resize z-20 hover:bg-primary/20 transition-colors"
-                        />
+                    className={cn(
+                        'min-w-0 overflow-hidden border-l border-border',
+                        panelOpen ? '' : 'w-0 flex-shrink-0',
+                        !isDragging && 'transition-all duration-300',
                     )}
+                    style={panelOpen ? editorPanelStyle : undefined}
+                >
                     {showSections && (
                         <ShopSectionManagerPanel
                             blocks={blocks}

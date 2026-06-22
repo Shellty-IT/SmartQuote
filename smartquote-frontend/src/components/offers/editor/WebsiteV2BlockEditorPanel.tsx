@@ -65,7 +65,7 @@ export function WebsiteV2BlockEditorPanel({ blockKey, blocks, onSave, onClose, o
 
     function renderEditor() {
         switch (blockKey) {
-            case 'cover':      return <CoverEditorV2 blocks={draft} onChange={setDraft} />
+            case 'cover':      return <CoverEditorV2 blocks={draft} onChange={setDraft} offerContext={offerContext} />
             case 'footer':     return <FooterEditorV2 blocks={draft} onChange={setDraft} />
             case 'problem':    return <ProblemEditor blocks={draft} onChange={setDraft} offerContext={offerContext} />
             case 'about':      return <AboutEditorV2 blocks={draft} onChange={setDraft} offerContext={offerContext} />

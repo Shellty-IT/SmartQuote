@@ -42,6 +42,8 @@ export interface ServicesHeaderBlock {
     contractNumber: string
     date: string
     place: string
+    logoUrl: string
+    logoDarkUrl: string
 }
 
 export interface ServicesParty {
@@ -212,6 +214,8 @@ export function buildDefaultContractServicesBlocks(): ContractServicesBlocks {
             contractNumber: '',
             date: '',
             place: '',
+            logoUrl: '',
+            logoDarkUrl: '',
         },
 
         parties: {

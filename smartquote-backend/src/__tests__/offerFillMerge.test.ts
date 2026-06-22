@@ -1,5 +1,5 @@
 // src/__tests__/offerFillMerge.test.ts
-import { diffMergeBlocks } from '../services/ai/offer-fill'
+import { completionMessageWithoutBlocks, diffMergeBlocks, mergeProposalPatch } from '../services/ai/offer-fill'
 
 type Blocks = Parameters<typeof diffMergeBlocks>[1]
 
@@ -113,5 +113,31 @@ describe('diffMergeBlocks — non-destructive merge', () => {
         const ai = blocks({ intro: { enabled: true, paragraphs: ['Text'] } })
         const result = diffMergeBlocks(current, ai)
         expect(result.customField).toBe('value')
+    })
+})
+
+describe('AI offer patch validation', () => {
+    it('accepts a partial section patch and preserves the remaining template', () => {
+        const current = {
+            intro: { enabled: true, paragraphs: ['Stary wstęp'] },
+            scope: { enabled: true, title: 'Zakres', items: [{ html: 'Bez zmian' }] },
+        }
+
+        const result = mergeProposalPatch(current, {
+            intro: { paragraphs: ['Nowy wstęp dla klubu sportowego'] },
+        })
+
+        expect(result).not.toBeNull()
+        expect(result?.intro).toEqual({ enabled: true, paragraphs: ['Nowy wstęp dla klubu sportowego'] })
+        expect(result?.scope).toEqual(current.scope)
+    })
+
+    it('rejects a patch with an invalid field type', () => {
+        expect(mergeProposalPatch({}, { intro: { paragraphs: 'not-an-array' } })).toBeNull()
+    })
+
+    it('does not claim success when no blocks can be applied', () => {
+        expect(completionMessageWithoutBlocks('Szablon został wypełniony przykładowymi danymi'))
+            .toContain('Nie udało mi się przygotować poprawnych danych')
     })
 })

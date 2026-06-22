@@ -1,8 +1,8 @@
 // src/lib/pdf/mobile-simple-html.ts
-// HTML generator for the "Aplikacja mobilna - simple" offer template.
+// HTML generator for the "Aplikacja mobilna - domyślny" offer template.
 // Design: teal #0D9488 + orange #F97316, Outfit font, clean B2C-friendly layout.
 
-import { EMBEDDED_FONTS_CSS } from './embedded-fonts'
+import { buildHtmlDocument } from './html-shell'
 import {
     type MobileSimpleBlocks,
     type MobileSimpleSectionKey,
@@ -14,17 +14,27 @@ export interface MobileSimpleOfferData {
     validUntil?: string
     clientName?: string
     userLogoUrl?: string
+    userLogoDarkUrl?: string
     userCompanyName?: string
     userEmail?: string
     userPhone?: string
     userWebsite?: string
 }
 
+function esc(value: unknown): string {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+}
+
 // ── Editor wrap helper ────────────────────────────────────────────────────────
 
 function editorWrap(editorMode: boolean, key: string, inner: string): string {
     if (!editorMode) return inner
-    return `<div class="sq-block" data-key="${key}" onclick="window.parent.postMessage({type:'sq:editBlock',blockKey:'${key}'},location.origin)" style="cursor:pointer;outline:2px solid transparent;border-radius:4px;" onmouseover="this.style.outline='2px solid #0D9488'" onmouseout="this.style.outline='2px solid transparent'">${inner}</div>`
+    return `<div class="sq-block" data-key="${key}" onclick="event.stopPropagation();window.parent.postMessage({type:'sq:editBlock',blockKey:'${key}'},'*')" style="cursor:pointer;outline:2px solid transparent;border-radius:4px;" onmouseover="this.style.outline='2px solid #0D9488'" onmouseout="this.style.outline='2px solid transparent'">${inner}</div>`
 }
 
 // ── Cover ─────────────────────────────────────────────────────────────────────
@@ -42,28 +52,28 @@ function renderCover(
     `).join('')
 
     const coverHtml = `
-<section class="cover">
+<section class="cover pdf-full-bleed">
     <div class="cover-inner">
         <div class="cover-left">
-            <div class="cover-tag">Oferta handlowa</div>
-            <h1 class="cover-title">${b.projectName}</h1>
-            <p class="cover-subtitle">Aplikacja mobilna dla <strong>${b.clientName || offer.clientName || 'Twojej firmy'}</strong></p>
+            <div class="cover-tag">${esc(b.coverTag)}</div>
+            <h1 class="cover-title">${esc(b.projectName)}</h1>
+            <p class="cover-subtitle">${esc(b.subtitlePrefix)} <strong>${esc(b.clientName || offer.clientName || 'Twojej firmy')}</strong></p>
             <div class="cover-meta">
                 ${offer.offerNumber ? `<span class="meta-pill">Nr: ${offer.offerNumber}</span>` : ''}
                 ${offer.offerDate ? `<span class="meta-pill">Data: ${offer.offerDate}</span>` : ''}
             </div>
             <div class="cover-highlights">
                 <div class="highlight-card">
-                    <div class="highlight-value">${b.readyWeeks} tyg.</div>
-                    <div class="highlight-label">Czas realizacji</div>
+                    <div class="highlight-value">${esc(b.readyWeeks)} tyg.</div>
+                    <div class="highlight-label">${esc(b.deliveryLabel)}</div>
                 </div>
                 <div class="highlight-card">
-                    <div class="highlight-value">${b.priceText} zł</div>
-                    <div class="highlight-label">Cena netto</div>
+                    <div class="highlight-value">${esc(b.priceText)} zł</div>
+                    <div class="highlight-label">${esc(b.priceLabel)}</div>
                 </div>
                 <div class="highlight-card">
-                    <div class="highlight-value">2</div>
-                    <div class="highlight-label">Platformy</div>
+                    <div class="highlight-value">${esc(b.platformCount)}</div>
+                    <div class="highlight-label">${esc(b.platformLabel)}</div>
                 </div>
             </div>
         </div>
@@ -72,7 +82,7 @@ function renderCover(
                 <div class="phone-frame">
                     <div class="phone-notch"></div>
                     <div class="phone-screen">
-                        <div class="app-nav">${b.projectName}</div>
+                        <div class="app-nav">${esc(b.projectName)}</div>
                         <div class="app-content">
                             <div class="app-tile app-tile-large"></div>
                             <div class="app-tiles-row">
@@ -268,10 +278,10 @@ function renderFooter(
 ): string {
     const companyName = offer.userCompanyName || ''
     const inner = `
-<footer class="footer">
+<footer class="footer pdf-full-bleed">
     <div class="footer-inner">
         <div class="footer-left">
-            ${offer.userLogoUrl ? `<img src="${offer.userLogoUrl}" class="footer-logo" alt="Logo" />` : ''}
+            ${offer.userLogoDarkUrl || offer.userLogoUrl ? `<img src="${offer.userLogoDarkUrl || offer.userLogoUrl}" class="footer-logo" alt="Logo" />` : ''}
             ${companyName ? `<div class="footer-company">${companyName}</div>` : ''}
             <p class="footer-tagline">${b.tagline}</p>
             <div class="footer-links">
@@ -1047,7 +1057,6 @@ body {
     max-width: 140px;
     object-fit: contain;
     margin-bottom: 12px;
-    filter: brightness(0) invert(1);
     display: block;
 }
 
@@ -1106,8 +1115,9 @@ body {
 
 /* Print */
 @media print {
-    .cover { page-break-after: avoid; }
-    .section { page-break-inside: avoid; }
+    @page { size: A4; margin: 10mm 0; }
+    .cover { min-height: 100vh; }
+    .section { break-inside: auto; page-break-inside: auto; }
 }
 `
 
@@ -1123,21 +1133,11 @@ export function buildMobileSimpleHtml(
         .map(key => renderSection(key, blocks, editorMode))
         .join('\n')
 
-    return `<!DOCTYPE html>
-<html lang="pl">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>${blocks.cover.projectName} — Aplikacja mobilna</title>
-<style>
-${EMBEDDED_FONTS_CSS}
-${CSS}
-</style>
-</head>
-<body>
-${renderCover(blocks.cover, offer, editorMode)}
+    return buildHtmlDocument({
+        title: `${blocks.cover.projectName} — Aplikacja mobilna`,
+        css: CSS,
+        body: `${renderCover(blocks.cover, offer, editorMode)}
 ${sections}
-${renderFooter(blocks.footer, offer, editorMode)}
-</body>
-</html>`
+${renderFooter(blocks.footer, offer, editorMode)}`,
+    })
 }

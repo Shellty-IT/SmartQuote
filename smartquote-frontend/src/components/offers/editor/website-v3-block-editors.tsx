@@ -40,6 +40,9 @@ export function CoverEditorV3({ blocks, onChange }: { blocks: WebsiteV3Blocks; o
     const set = (patch: Partial<typeof c>) => onChange({ ...blocks, cover: { ...c, ...patch } })
     return (
         <div className="flex flex-col gap-4">
+            <Field label="Etykieta nad tytułem">
+                <input className={inputCls} value={c.badgeLabel ?? ''} onChange={(e) => set({ badgeLabel: e.target.value })} />
+            </Field>
             <Field label="Podtytuł nagłówka">
                 <input className={inputCls} value={c.subtitle} onChange={(e) => set({ subtitle: e.target.value })} />
             </Field>

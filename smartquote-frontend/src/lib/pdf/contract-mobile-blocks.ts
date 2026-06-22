@@ -38,6 +38,8 @@ export interface MobileHeaderBlock {
     date: string
     website: string
     city: string
+    logoUrl: string
+    logoDarkUrl: string
 }
 
 export interface MobilePartiesBlock {
@@ -170,6 +172,8 @@ export function buildDefaultContractMobileBlocks(): ContractMobileBlocks {
             date: '',
             website: 'www.twoja-strona.pl',
             city: '',
+            logoUrl: '',
+            logoDarkUrl: '',
         },
         parties: {
             contractor: { name: '', address: '', nip: '', email: '' },

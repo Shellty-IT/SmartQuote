@@ -88,6 +88,8 @@ model CompanyInfo {
   bankName     String?
   bankAccount  String?
   logo         String?
+  logoLight    String?
+  logoDark     String?
   primaryColor String?
 
   defaultPaymentDays Int     @default(14)

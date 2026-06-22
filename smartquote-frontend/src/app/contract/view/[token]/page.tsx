@@ -153,6 +153,12 @@ export default function PublicContractPage({ params }: PageProps) {
         if (token) loadContract(true);
     }, [token, loadContract]);
 
+    useEffect(() => {
+        if (data?.contract.status === 'PENDING_SIGNATURE' && window.location.hash === '#sign') {
+            setShowSignDialog(true);
+        }
+    }, [data?.contract.status]);
+
     const handleSign = async (signData: { signerName: string; signerEmail: string; signatureImage: string }) => {
         const response = await fetch(`${API_URL}/api/public/contracts/${token}/sign`, {
             method: 'POST',

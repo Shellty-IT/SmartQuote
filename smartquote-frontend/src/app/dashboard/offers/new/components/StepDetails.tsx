@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { ai } from '@/lib/api';
 import RichTextEditor from '@/components/email/RichTextEditor';
 import type { OfferDetails } from '../types';
+import { TemplateAIFillButton } from '@/components/offers/TemplateAIFillButton';
 
 interface StepDetailsProps {
     details: OfferDetails;
@@ -52,7 +53,22 @@ export default function StepDetails({ details, onUpdate, clientName, hideTemplat
 
     return (
         <div>
-            <h2 className="text-lg font-semibold text-foreground mb-4">{d.title}</h2>
+            <div className="mb-4 flex items-center justify-between gap-3">
+                <h2 className="text-lg font-semibold text-foreground">{d.title}</h2>
+                {details.templateType === 'classic' && (
+                    <TemplateAIFillButton
+                        blocks={details}
+                        onBlocksChange={(updated) => {
+                            for (const key of Object.keys(details) as Array<keyof OfferDetails>) {
+                                if (key in updated) onUpdate(key, updated[key]);
+                            }
+                        }}
+                        clientName={clientName ?? ''}
+                        title={details.title}
+                        templateType="classic"
+                    />
+                )}
+            </div>
             <div className="space-y-4">
                 <Input
                     data-testid="offer-title-input"

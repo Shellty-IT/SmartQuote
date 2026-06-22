@@ -384,8 +384,10 @@ export function useOfferForm(options?: { initialData?: Offer }) {
                         phone: lead.phone ?? undefined,
                         company: lead.company ?? undefined,
                     });
-                    if (!converted.data?.clientId) throw new Error('Lead conversion failed')
-                    resolvedClientId = converted.data.clientId;
+                    const convertedClientId = converted.data?.clientId
+                        ?? (converted.data as { client?: { id?: string } } | undefined)?.client?.id;
+                    if (!convertedClientId) throw new Error('Lead conversion failed')
+                    resolvedClientId = convertedClientId;
                 }
             }
 

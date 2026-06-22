@@ -3,6 +3,7 @@
 // GET /api/public/contracts/:token/pdf/short  →  application/pdf
 
 import { buildContractShortHtmlFromSaved } from '@/lib/pdf/contract-short-html'
+import { addDocumentActionLinks, publicDocumentUrl } from '@/lib/pdf/document-action-links'
 import { htmlToPdfBuffer } from '@/lib/pdf/puppeteer'
 
 // Vercel route config — 1 GB RAM + 10 s timeout (matches other PDF routes)
@@ -38,7 +39,7 @@ export async function GET(
     // 2. Build HTML from saved blocks
     let html: string
     try {
-        html = buildContractShortHtmlFromSaved(contract.blocks, { editorMode: false })
+        html = addDocumentActionLinks(buildContractShortHtmlFromSaved(contract.blocks, { editorMode: false }), publicDocumentUrl('contract', token, 'sign'), 'sign')
     } catch (err) {
         const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
         console.error('[public-contract-short-pdf] buildContractShortHtmlFromSaved threw:', detail)

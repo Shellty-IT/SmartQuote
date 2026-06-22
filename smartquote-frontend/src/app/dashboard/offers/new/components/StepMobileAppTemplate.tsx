@@ -12,7 +12,7 @@ import type { MobileAppOfferData } from '@/lib/pdf/mobile-app-html'
 import type { OfferContext } from '@/components/offers/editor/block-editors'
 
 interface StepMobileAppTemplateProps {
-    client: Client | null
+    client: Pick<Client, 'name' | 'company'> | null
     offerTitle: string
     onTitleChange: (title: string) => void
     blocks: MobileAppBlocks
@@ -38,6 +38,7 @@ export default function StepMobileAppTemplate({
         offerDate: new Date().toLocaleDateString('pl-PL'),
         clientName: client?.name ?? 'Klient',
         userLogoUrl: companyInfo?.logo ?? undefined,
+        userLogoDarkUrl: companyInfo?.logoDark ?? undefined,
         userCompanyName: companyInfo?.name ?? session?.user?.name ?? undefined,
         userEmail: companyInfo?.email ?? session?.user?.email ?? undefined,
         userPhone: companyInfo?.phone ?? undefined,
@@ -54,7 +55,7 @@ export default function StepMobileAppTemplate({
     return (
         <div className="flex flex-col gap-4">
             <div>
-                <h2 className="text-lg font-semibold text-foreground">Szablon: Aplikacja mobilna - zaawansowana</h2>
+                <h2 className="text-lg font-semibold text-foreground">Szablon: Aplikacja mobilna - zaawansowany</h2>
                 <p className="text-sm text-muted-foreground mt-0.5">
                     Kliknij dowolną sekcję na dokumencie, aby edytować jej treść.
                 </p>

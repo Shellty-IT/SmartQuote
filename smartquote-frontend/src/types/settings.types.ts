@@ -67,6 +67,8 @@ export interface CompanyInfo {
     bankName: string | null;
     bankAccount: string | null;
     logo: string | null;
+    logoLight: string | null;
+    logoDark: string | null;
     primaryColor: string | null;
     defaultPaymentDays: number;
     defaultTerms: string | null;
@@ -139,6 +141,8 @@ export interface UpdateCompanyInfoInput {
     bankName?: string | null;
     bankAccount?: string | null;
     logo?: string | null;
+    logoLight?: string | null;
+    logoDark?: string | null;
     primaryColor?: string | null;
     defaultPaymentDays?: number;
     defaultTerms?: string | null;

@@ -1,7 +1,11 @@
 // SmartQuote-AI/next.config.ts
 import type { NextConfig } from 'next';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const isDev = process.env.NODE_ENV === 'development';
+const frontendRoot = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.dirname(frontendRoot);
 
 // localhost:* is always safe to allow in connect-src — it is never accessible from the public internet,
 // so including it in the production build's CSP has zero security impact on Vercel deployments.
@@ -50,6 +54,10 @@ const previewFrameHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+    turbopack: {
+        root: repoRoot,
+    },
+
     async headers() {
         return [
             {

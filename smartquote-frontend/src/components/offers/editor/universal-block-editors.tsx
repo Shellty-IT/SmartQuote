@@ -86,12 +86,17 @@ function CheckboxField({ label, checked, onChange }: { label: string; checked: b
 
 // ── CoverEditor ───────────────────────────────────────────────────────────────
 
-export function CoverEditor({ blocks, onChange }: { blocks: UniversalBlocks; onChange: (b: UniversalBlocks) => void }) {
+export function CoverEditor({ blocks, onChange, offerContext }: { blocks: UniversalBlocks; onChange: (b: UniversalBlocks) => void; offerContext?: OfferContext }) {
     const c = blocks.cover
     const set = (patch: Partial<typeof c>) => onChange({ ...blocks, cover: { ...c, ...patch } })
 
     return (
         <div>
+            <AiGenerateButton
+                sectionKey="universal.cover"
+                offerContext={offerContext}
+                onResult={(data) => onChange({ ...blocks, cover: { ...blocks.cover, ...data as Partial<typeof c> } })}
+            />
             <SectionHeader>Oferta</SectionHeader>
             <Field label="Tytuł usługi / projektu"><TextInput value={c.serviceTitle} onChange={v => set({ serviceTitle: v })} /></Field>
             <Field label="Klient (dla kogo)"><TextInput value={c.clientName} onChange={v => set({ clientName: v })} /></Field>

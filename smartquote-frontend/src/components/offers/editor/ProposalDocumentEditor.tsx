@@ -226,7 +226,7 @@ export function ProposalDocumentEditor({
                         srcDoc={srcdoc}
                         title="Podgląd oferty"
                         sandbox="allow-scripts allow-same-origin"
-                        className="h-full w-full"
+                        className={cn('h-full w-full', isDragging && 'pointer-events-none')}
                         style={{ minHeight: 700 }}
                     />
                 </div>

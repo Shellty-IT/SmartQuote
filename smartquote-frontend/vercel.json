@@ -1,5 +1,9 @@
 {
   "functions": {
+    "src/app/api/offers/[id]/pdf/classic/route.ts": {
+      "memory": 1536,
+      "maxDuration": 30
+    },
     "src/app/api/offers/[id]/pdf/proposal/route.ts": {
       "memory": 1536,
       "maxDuration": 30

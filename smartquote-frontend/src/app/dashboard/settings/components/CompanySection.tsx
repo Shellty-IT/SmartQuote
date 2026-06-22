@@ -26,11 +26,12 @@ export default function CompanySection({ company, onUpdate }: Props) {
 
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+    const [uploadingLogo, setUploadingLogo] = useState<'light' | 'dark' | null>(null);
     const [success, setSuccess] = useState(false);
     const [logoError, setLogoError] = useState('');
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-    const [currentLogo, setCurrentLogo] = useState(company.logo || '');
+    const [currentLogoLight, setCurrentLogoLight] = useState(company.logoLight || company.logo || '');
+    const [currentLogoDark, setCurrentLogoDark] = useState(company.logoDark || '');
     const [formData, setFormData] = useState<UpdateCompanyInfoInput>({
         name: company.name || '',
         nip: company.nip || '',
@@ -50,7 +51,8 @@ export default function CompanySection({ company, onUpdate }: Props) {
         primaryColor: company.primaryColor || '',
     });
 
-    const logoInputRef = useRef<HTMLInputElement>(null);
+    const logoLightInputRef = useRef<HTMLInputElement>(null);
+    const logoDarkInputRef = useRef<HTMLInputElement>(null);
     const colorInputRef = useRef<HTMLInputElement>(null);
 
     const handleChange = (field: keyof UpdateCompanyInfoInput, value: string | number) => {
@@ -114,37 +116,40 @@ export default function CompanySection({ company, onUpdate }: Props) {
         setIsEditing(false);
     };
 
-    const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleLogoChange = async (variant: 'light' | 'dark', e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
         setLogoError('');
         if (!file.type.startsWith('image/')) { setLogoError(tr.company.logoSelectFile); return; }
         if (file.size > 2 * 1024 * 1024) { setLogoError(tr.company.logoTooBig); return; }
-        setIsUploadingLogo(true);
+        setUploadingLogo(variant);
         try {
             const base64 = await compressImage(file, 400, 400, 0.85);
-            await onUpdate({ logo: base64 });
-            setCurrentLogo(base64);
+            await onUpdate(variant === 'light' ? { logoLight: base64, logo: base64 } : { logoDark: base64 });
+            if (variant === 'light') setCurrentLogoLight(base64);
+            else setCurrentLogoDark(base64);
             setSuccess(true);
             setTimeout(() => setSuccess(false), 3000);
         } catch {
             setLogoError(tr.company.logoProcessError);
         } finally {
-            setIsUploadingLogo(false);
-            if (logoInputRef.current) logoInputRef.current.value = '';
+            setUploadingLogo(null);
+            const input = variant === 'light' ? logoLightInputRef.current : logoDarkInputRef.current;
+            if (input) input.value = '';
         }
     };
 
-    const handleRemoveLogo = async () => {
-        setIsUploadingLogo(true);
+    const handleRemoveLogo = async (variant: 'light' | 'dark') => {
+        setUploadingLogo(variant);
         try {
-            await onUpdate({ logo: '' });
-            setCurrentLogo('');
+            await onUpdate(variant === 'light' ? { logoLight: '', logo: '' } : { logoDark: '' });
+            if (variant === 'light') setCurrentLogoLight('');
+            else setCurrentLogoDark('');
             setSuccess(true);
             setTimeout(() => setSuccess(false), 3000);
         } catch {
         } finally {
-            setIsUploadingLogo(false);
+            setUploadingLogo(null);
         }
     };
 
@@ -172,49 +177,35 @@ export default function CompanySection({ company, onUpdate }: Props) {
                     )}
                 </div>
 
-                {/* Logo */}
-                <div className="flex flex-col sm:flex-row items-center gap-6 mb-8 pb-8 border-b border-border">
-                    <div
-                        onClick={() => logoInputRef.current?.click()}
-                        className={`relative w-28 h-28 rounded-2xl flex items-center justify-center border-2 border-dashed transition-all cursor-pointer group ${currentLogo ? 'border-primary/40 bg-card' : 'border-border hover:border-primary/50'}`}
-                        style={{ backgroundColor: currentLogo ? '#ffffff' : 'var(--surface-subtle)' }}
-                    >
-                        {isUploadingLogo ? (
-                            <svg className="w-8 h-8 text-primary animate-spin" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                            </svg>
-                        ) : currentLogo ? (
-                            <Image src={currentLogo} alt={tr.company.title} fill className="object-contain rounded-xl p-2" unoptimized={currentLogo.startsWith('data:')} />
-                        ) : (
-                            <div className="text-center">
-                                <svg className="w-8 h-8 text-muted-foreground group-hover:text-primary mx-auto mb-1 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <span className="text-xs text-muted-foreground group-hover:text-primary transition-colors">{tr.company.addLogo}</span>
-                            </div>
-                        )}
-                    </div>
-                    <input ref={logoInputRef} type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={handleLogoChange} className="hidden" />
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <Button variant="outline" size="sm" onClick={() => logoInputRef.current?.click()} disabled={isUploadingLogo}>
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                                </svg>
-                                {currentLogo ? tr.company.changeLogo : tr.company.uploadLogo}
-                            </Button>
-                            {currentLogo && (
-                                <button onClick={handleRemoveLogo} disabled={isUploadingLogo} className="text-xs font-medium text-destructive hover:text-destructive flex items-center gap-1 px-2 py-1 disabled:opacity-50">
-                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                    {tr.company.removeLogo}
+                {/* Logos for documents with light and dark backgrounds */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8 pb-8 border-b border-border">
+                    {([
+                        { variant: 'light' as const, label: 'Logo na jasne tło', value: currentLogoLight, inputRef: logoLightInputRef, background: '#ffffff' },
+                        { variant: 'dark' as const, label: 'Logo na ciemne tło', value: currentLogoDark, inputRef: logoDarkInputRef, background: '#1e293b' },
+                    ]).map(({ variant, label, value, inputRef, background }) => (
+                        <div key={variant} className="rounded-xl border border-border p-4">
+                            <p className="mb-3 text-sm font-medium text-foreground">{label}</p>
+                            <div className="flex items-center gap-4">
+                                <button type="button" onClick={() => inputRef.current?.click()} className="relative h-24 w-36 shrink-0 overflow-hidden rounded-xl border-2 border-dashed border-border transition-colors hover:border-primary/50" style={{ backgroundColor: background }}>
+                                    {uploadingLogo === variant ? (
+                                        <svg className="m-auto h-7 w-7 animate-spin text-primary" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>
+                                    ) : value ? (
+                                        <Image src={value} alt={label} fill className="object-contain p-3" unoptimized={value.startsWith('data:')} />
+                                    ) : (
+                                        <span className={`text-xs ${variant === 'dark' ? 'text-slate-300' : 'text-muted-foreground'}`}>{tr.company.addLogo}</span>
+                                    )}
                                 </button>
-                            )}
+                                <div className="flex flex-col items-start gap-2">
+                                    <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={(e) => handleLogoChange(variant, e)} className="hidden" />
+                                    <Button variant="outline" size="sm" onClick={() => inputRef.current?.click()} disabled={uploadingLogo !== null}>{value ? tr.company.changeLogo : tr.company.uploadLogo}</Button>
+                                    {value && <button type="button" onClick={() => handleRemoveLogo(variant)} disabled={uploadingLogo !== null} className="text-xs font-medium text-destructive disabled:opacity-50">{tr.company.removeLogo}</button>}
+                                </div>
+                            </div>
                         </div>
-                        {logoError && <p className="text-xs text-destructive mt-2">{logoError}</p>}
-                        <p className="text-xs text-muted-foreground mt-2">{tr.company.logoHint}</p>
+                    ))}
+                    <div className="lg:col-span-2">
+                        {logoError && <p className="text-xs text-destructive">{logoError}</p>}
+                        <p className="text-xs text-muted-foreground">System automatycznie dobierze wariant do tła w ofercie lub umowie. {tr.company.logoHint}</p>
                     </div>
                 </div>
 

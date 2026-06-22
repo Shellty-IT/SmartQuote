@@ -56,7 +56,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             {/* Content area shifts right by sidebar width on lg */}
             <div className={cn(
-                'flex min-w-0 flex-1 flex-col transition-all duration-300',
+                'sq-dashboard-content flex min-w-0 flex-1 flex-col transition-all duration-300',
                 collapsed ? 'lg:pl-[72px]' : 'lg:pl-[260px]'
             )}>
                 <Header onSearchOpen={() => setIsSearchOpen(true)} />
