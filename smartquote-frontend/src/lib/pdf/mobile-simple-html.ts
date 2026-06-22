@@ -2,7 +2,7 @@
 // HTML generator for the "Aplikacja mobilna - domyślny" offer template.
 // Design: teal #0D9488 + orange #F97316, Outfit font, clean B2C-friendly layout.
 
-import { EMBEDDED_FONTS_CSS } from './embedded-fonts'
+import { buildHtmlDocument } from './html-shell'
 import {
     type MobileSimpleBlocks,
     type MobileSimpleSectionKey,
@@ -1132,21 +1132,11 @@ export function buildMobileSimpleHtml(
         .map(key => renderSection(key, blocks, editorMode))
         .join('\n')
 
-    return `<!DOCTYPE html>
-<html lang="pl">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>${blocks.cover.projectName} — Aplikacja mobilna</title>
-<style>
-${EMBEDDED_FONTS_CSS}
-${CSS}
-</style>
-</head>
-<body>
-${renderCover(blocks.cover, offer, editorMode)}
+    return buildHtmlDocument({
+        title: `${blocks.cover.projectName} — Aplikacja mobilna`,
+        css: CSS,
+        body: `${renderCover(blocks.cover, offer, editorMode)}
 ${sections}
-${renderFooter(blocks.footer, offer, editorMode)}
-</body>
-</html>`
+${renderFooter(blocks.footer, offer, editorMode)}`,
+    })
 }

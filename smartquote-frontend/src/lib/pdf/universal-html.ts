@@ -2,7 +2,7 @@
 // HTML generator for the "Szablon uniwersalny" offer template.
 // Design: navy #1B3A5C + gold #C9A84C, Outfit Variable font (no external network).
 
-import { EMBEDDED_FONTS_CSS } from './embedded-fonts'
+import { buildHtmlDocument } from './html-shell'
 import type { UniversalBlocks, UniversalSectionKey } from './universal-blocks'
 
 export interface UniversalOfferData {
@@ -101,7 +101,7 @@ function renderSummary(blocks: UniversalBlocks, editorMode: boolean): string {
     const inner = `
 <section style="padding:64px 56px;background:#fff;">
   <div style="max-width:900px;margin:0 auto;">
-    <div style="font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:#C9A84C;font-weight:700;margin-bottom:10px;">${esc(s.eyebrow)}</div>
+    <div class="sec-eyebrow" style="font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:#C9A84C;font-weight:700;margin-bottom:10px;">${esc(s.eyebrow)}</div>
     <h2 style="font-size:1.9rem;font-weight:800;color:#1B3A5C;margin:0 0 40px;">${esc(s.title)}</h2>
     <div style="display:grid;grid-template-columns:3fr 2fr;gap:40px;align-items:start;">
       <!-- lead text with gold left-border -->
@@ -136,7 +136,7 @@ function renderNeeds(blocks: UniversalBlocks, editorMode: boolean): string {
     const inner = `
 <section style="padding:64px 56px;background:#F1F5F9;">
   <div style="max-width:900px;margin:0 auto;">
-    <div style="font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:#C9A84C;font-weight:700;margin-bottom:10px;">Analiza potrzeb</div>
+    <div class="sec-eyebrow" style="font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:#C9A84C;font-weight:700;margin-bottom:10px;">Analiza potrzeb</div>
     <h2 style="font-size:1.9rem;font-weight:800;color:#1B3A5C;margin:0 0 12px;">Dlaczego ten projekt?</h2>
     ${n.sourceNote ? `<p style="font-size:.82rem;color:#475569;margin:0 0 36px;">Na podstawie: ${esc(n.sourceNote)}</p>` : '<div style="margin-bottom:36px;"></div>'}
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;">
@@ -165,7 +165,7 @@ function renderScope(blocks: UniversalBlocks, editorMode: boolean): string {
     const inner = `
 <section style="padding:64px 56px;background:#fff;">
   <div style="max-width:900px;margin:0 auto;">
-    <div style="font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:#C9A84C;font-weight:700;margin-bottom:10px;">Zakres prac</div>
+    <div class="sec-eyebrow" style="font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:#C9A84C;font-weight:700;margin-bottom:10px;">Zakres prac</div>
     <h2 style="font-size:1.9rem;font-weight:800;color:#1B3A5C;margin:0 0 32px;">Co realizujemy?</h2>
 
     <!-- deliverables table -->
@@ -217,7 +217,7 @@ function renderTimeline(blocks: UniversalBlocks, editorMode: boolean): string {
     const inner = `
 <section style="padding:64px 56px;background:#F1F5F9;">
   <div style="max-width:900px;margin:0 auto;">
-    <div style="font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:#C9A84C;font-weight:700;margin-bottom:10px;">Harmonogram</div>
+    <div class="sec-eyebrow" style="font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:#C9A84C;font-weight:700;margin-bottom:10px;">Harmonogram</div>
     <h2 style="font-size:1.9rem;font-weight:800;color:#1B3A5C;margin:0 0 48px;">Plan pracy</h2>
 
     <!-- horizontal timeline -->
@@ -275,7 +275,7 @@ function renderPricingSimple(p: UniversalBlocks['pricing']): string {
     return `
 <section style="padding:64px 56px;background:#fff;">
   <div style="max-width:900px;margin:0 auto;">
-    <div style="font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:#C9A84C;font-weight:700;margin-bottom:10px;">Wycena</div>
+    <div class="sec-eyebrow" style="font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:#C9A84C;font-weight:700;margin-bottom:10px;">Wycena</div>
     <h2 style="font-size:1.9rem;font-weight:800;color:#1B3A5C;margin:0 0 36px;">Inwestycja</h2>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;">
       <!-- price card -->
@@ -316,7 +316,7 @@ function renderPricingDetailed(p: UniversalBlocks['pricing']): string {
     return `
 <section style="padding:64px 56px;background:#fff;">
   <div style="max-width:900px;margin:0 auto;">
-    <div style="font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:#C9A84C;font-weight:700;margin-bottom:10px;">Wycena szczegółowa</div>
+    <div class="sec-eyebrow" style="font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:#C9A84C;font-weight:700;margin-bottom:10px;">Wycena szczegółowa</div>
     <h2 style="font-size:1.9rem;font-weight:800;color:#1B3A5C;margin:0 0 32px;">Zestawienie kosztów</h2>
 
     ${p.categories.map(cat => `
@@ -369,7 +369,7 @@ function renderTerms(blocks: UniversalBlocks, editorMode: boolean): string {
     const inner = `
 <section style="padding:64px 56px;background:#F1F5F9;">
   <div style="max-width:900px;margin:0 auto;">
-    <div style="font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:#C9A84C;font-weight:700;margin-bottom:10px;">Warunki współpracy</div>
+    <div class="sec-eyebrow" style="font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:#C9A84C;font-weight:700;margin-bottom:10px;">Warunki współpracy</div>
     <h2 style="font-size:1.9rem;font-weight:800;color:#1B3A5C;margin:0 0 36px;">Zasady i reguły</h2>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
       ${t.cards.map(card => `
@@ -480,25 +480,20 @@ export function buildUniversalHtml(
 
     const sections = blocks.sections.map(key => renderSection(key, blocks, editorMode)).join('\n')
 
-    return `<!DOCTYPE html>
-<html lang="pl">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>${esc(blocks.cover.serviceTitle)} — Oferta</title>
-<style>
-${EMBEDDED_FONTS_CSS}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    return buildHtmlDocument({
+        title: `${esc(blocks.cover.serviceTitle)} — Oferta`,
+        css: `*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{font-family:'Outfit Variable','Outfit',sans-serif;background:#fff;color:#0F172A;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 a{color:inherit;text-decoration:none;}
 img{display:block;}
-${editorCss}
-</style>
-</head>
-<body>
-${renderCover(blocks, offer, editorMode)}
+@media print{
+  *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
+  section{padding:40px 44px !important;}
+  @page{size:A4;margin:0;}
+}
+${editorCss}`,
+        body: `${renderCover(blocks, offer, editorMode)}
 ${sections}
-${renderFooter(blocks, offer, editorMode)}
-</body>
-</html>`
+${renderFooter(blocks, offer, editorMode)}`,
+    })
 }

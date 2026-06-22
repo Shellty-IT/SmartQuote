@@ -8,7 +8,7 @@ import {
     type ContractShortBlocks,
     type ContractSectionKey,
 } from './contract-short-blocks'
-import { EMBEDDED_FONTS_CSS } from './embedded-fonts'
+import { buildHtmlDocument, buildContractPageRule } from './html-shell'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -114,20 +114,7 @@ function buildCss(editorMode: boolean, zoom: number): string {
       body { background: none; }
       .page { margin: 0; box-shadow: none; padding-bottom: 24mm; }
     }
-    @page {
-      size: A4;
-      margin: 16mm 17mm 24mm 17mm;
-      @bottom-left {
-        content: "shellty-it.github.io";
-        font-size: 7pt; color: #9E9E9E;
-        font-family: 'Source Sans 3', sans-serif;
-      }
-      @bottom-right {
-        content: "Strona " counter(page) " z " counter(pages);
-        font-size: 7pt; color: #9E9E9E;
-        font-family: 'Source Sans 3', sans-serif;
-      }
-    }
+    ${buildContractPageRule({ margins: '16mm 17mm 24mm 17mm', bottomLeft: 'shellty-it.github.io', counterColor: '#9E9E9E', counterSize: '7pt' })}
     .screen-footer {
       width: 210mm; margin: 0 auto;
       border-top: 1.5px solid var(--gm);
@@ -157,8 +144,8 @@ function buildCss(editorMode: boolean, zoom: number): string {
     .c-mv { font-size: 10pt; font-weight: 600; border-bottom: 1.5px solid var(--gm); min-width: 40mm; text-align: center; padding-bottom: 1px; min-height: 16px; }
 
     /* ── SECTIONS ── */
-    .sec { margin-bottom: 5mm; page-break-inside: avoid; }
-    .sec-h { display: flex; align-items: baseline; gap: 5px; border-bottom: 1.5px solid var(--gm); padding-bottom: 1.5mm; margin-bottom: 3mm; }
+    .sec { margin-bottom: 5mm; page-break-inside: avoid; break-inside: avoid; }
+    .sec-h { display: flex; align-items: baseline; gap: 5px; border-bottom: 1.5px solid var(--gm); padding-bottom: 1.5mm; margin-bottom: 3mm; break-after: avoid; page-break-after: avoid; }
     .sec-sym { font-size: 10pt; font-weight: 700; color: var(--gm); flex-shrink: 0; }
     .sec-title { font-size: 9.5pt; font-weight: 700; color: var(--gd); text-transform: uppercase; letter-spacing: 0.8px; }
 
@@ -171,14 +158,14 @@ function buildCss(editorMode: boolean, zoom: number): string {
     .pf-v { border-bottom: 1px solid #BDBDBD; flex: 1; min-height: 13px; padding-bottom: 1px; font-size: 9pt; }
 
     /* ── TEXT ── */
-    p { font-size: 9.5pt; line-height: 1.6; margin-bottom: 1.5mm; }
+    p { font-size: 9.5pt; line-height: 1.6; margin-bottom: 1.5mm; orphans: 3; widows: 3; }
     strong { font-weight: 700; }
 
     /* ── LISTS ── */
     ol.leg { padding-left: 5mm; margin: 1mm 0 2mm; }
-    ol.leg li { font-size: 9.5pt; line-height: 1.58; margin-bottom: 1.2mm; padding-left: 1mm; }
+    ol.leg li { font-size: 9.5pt; line-height: 1.58; margin-bottom: 1.2mm; padding-left: 1mm; orphans: 3; widows: 3; }
     ul.leg { padding-left: 4.5mm; margin: 1mm 0 1.5mm; list-style: none; }
-    ul.leg li { font-size: 9.5pt; line-height: 1.55; margin-bottom: 0.8mm; padding-left: 3.5mm; position: relative; }
+    ul.leg li { font-size: 9.5pt; line-height: 1.55; margin-bottom: 0.8mm; padding-left: 3.5mm; position: relative; orphans: 3; widows: 3; }
     ul.leg li::before { content: '–'; position: absolute; left: 0; color: var(--gm); font-weight: 700; }
 
     /* ── CHECKBOXES ── */
@@ -723,17 +710,10 @@ export function buildContractShortHtml(
         ? `Nr umowy: ${esc(blocks.header.contractNumber)}`
         : 'Nr umowy: ___/____'
 
-    return `<!DOCTYPE html>
-<html lang="pl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${esc(blocks.header.title)}</title>
-  <style>${EMBEDDED_FONTS_CSS}${buildCss(editorMode, zoom)}</style>
-</head>
-<body>
-
-${editorMode ? '<div class="sq-edit-hint">Kliknij sekcję aby edytować</div>' : ''}
+    return buildHtmlDocument({
+        title: esc(blocks.header.title),
+        css: buildCss(editorMode, zoom),
+        body: `${editorMode ? '<div class="sq-edit-hint">Kliknij sekcję aby edytować</div>' : ''}
 
 <div class="page">
 
@@ -751,9 +731,8 @@ ${sectionsHtml}
   <span class="sf-r">${esc(blocks.header.footerWebsite || blocks.header.kicker.split('·')[0]?.trim() || '')}</span>
 </div>
 
-${editorMode ? buildEditorScript() : ''}
-</body>
-</html>`
+${editorMode ? buildEditorScript() : ''}`,
+    })
 }
 
 /** Convenience: build from raw (possibly partial) saved blocks object */

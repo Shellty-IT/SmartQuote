@@ -2,7 +2,7 @@
 // HTML generator for the "Strona internetowa v2" offer template.
 // Pure function — no side effects, no imports of React/server utilities.
 
-import { EMBEDDED_FONTS_CSS } from './embedded-fonts'
+import { buildHtmlDocument } from './html-shell'
 import { mergeWebsiteV2WithDefaults, type WebsiteV2Blocks, type WebsiteV2SectionKey } from './website-v2-blocks'
 
 // ── Offer data interface ──────────────────────────────────────────────────────
@@ -72,10 +72,7 @@ function editorWrap(key: string, html: string, label: string, editorMode: boolea
 // ── CSS ───────────────────────────────────────────────────────────────────────
 
 function buildCss(): string {
-    return `
-<style>
-${EMBEDDED_FONTS_CSS}
-*, *::before, *::after { box-sizing: border-box; }
+    return `*, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 body {
   font-family: 'Outfit', -apple-system, system-ui, sans-serif;
@@ -100,7 +97,9 @@ a { color: inherit; text-decoration: none; }
   .dot-grid { background: #FFFFFF !important; }
   body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   section { break-inside: auto; overflow:visible !important; }
-  .inner { width:100% !important; max-width:100% !important; padding:52px 44px !important; }
+  .inner { width:100% !important; max-width:100% !important; padding:36px 44px !important; }
+  /* Cap large headings so stress-length text doesn't consume an entire page */
+  .inner h2 { font-size: 26px !important; line-height: 1.35 !important; margin-bottom: 22px !important; }
   .print-keep.print-keep-active { break-inside:avoid-page !important; page-break-inside:avoid !important; }
   .price-wrap { grid-template-columns:minmax(0,1fr) !important; align-items:start !important; }
   .price-wrap > div { width:100% !important; max-width:100% !important; }
@@ -111,8 +110,7 @@ a { color: inherit; text-decoration: none; }
   footer { break-inside:avoid-page !important; page-break-inside:avoid !important; }
   footer .inner { padding:28px 44px 20px !important; }
   footer .footer-grid + div { margin:20px 0 12px !important; }
-}
-</style>`
+}`
 }
 
 // ── Section renderers ─────────────────────────────────────────────────────────
@@ -588,14 +586,7 @@ export function buildWebsiteV2Html(
         ? `<style>body { transform: scale(${zoom}); transform-origin: top left; width: ${(100 / zoom).toFixed(2)}%; }</style>`
         : ''
 
-    return `<!DOCTYPE html>
-<html lang="pl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-${buildCss()}
-${zoomStyle}
-<script data-smartquote-template-pagination>
+    const paginationScript = `<script data-smartquote-template-pagination>
 (function () {
   function updatePrintKeeps() {
     var nodes = document.querySelectorAll('.print-keep');
@@ -607,14 +598,16 @@ ${zoomStyle}
   else updatePrintKeeps();
   window.addEventListener('beforeprint', updatePrintKeeps);
 }());
-</script>
-</head>
-<body>
-<div>
+</script>`
+
+    return buildHtmlDocument({
+        title: 'Oferta — Strona internetowa',
+        css: buildCss(),
+        extraHead: [zoomStyle, paginationScript].filter(Boolean).join('\n'),
+        body: `<div>
 ${renderCover(data, blocks, editorMode)}
 ${body}
 ${renderFooter(data, blocks, editorMode)}
-</div>
-</body>
-</html>`
+</div>`,
+    })
 }

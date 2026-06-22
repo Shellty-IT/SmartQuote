@@ -2,7 +2,7 @@
 // Faithfully reproduces the "Aplikacja mobilna - zaawansowana" template.
 // Design: deep indigo #1E1B4B + rose #F43F5E + indigo-light #818CF8, Outfit font.
 
-import { EMBEDDED_FONTS_CSS } from './embedded-fonts'
+import { buildHtmlDocument } from './html-shell'
 import type {
     MobileAppBlocks,
     MobileAppSectionKey,
@@ -45,7 +45,6 @@ function editorWrap(editorMode: boolean, key: string, inner: string): string {
 
 function baseCss(editorMode: boolean): string {
     return `
-${EMBEDDED_FONTS_CSS}
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
 body{font-family:'Outfit Variable','Outfit',-apple-system,sans-serif;color:#0F172A;background:#fff;-webkit-font-smoothing:antialiased;line-height:1.55;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
@@ -81,7 +80,11 @@ a{color:inherit;text-decoration:none;}
   .scroll-x td,.scroll-x th{overflow-wrap:anywhere !important;}
   section{break-inside:auto;max-width:100% !important;}
   .g2,.g3,.g4{grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;}
-  .pad,.cover-pad{max-width:100% !important;padding-left:44px !important;padding-right:44px !important;}
+  /* Reduce large top/bottom padding so sections don't waste page space */
+  .pad{max-width:100% !important;padding:44px 44px !important;}
+  .cover-pad{max-width:100% !important;padding-left:44px !important;padding-right:44px !important;}
+  /* Cap headings so stress-length text doesn't consume a full page */
+  section h2, section h1 { font-size: 24px !important; line-height: 1.35 !important; }
   .doc{box-shadow:none !important;}
 }
 ${editorMode ? `
@@ -713,20 +716,13 @@ export function buildMobileAppHtml(
     const editorMode = options?.editorMode ?? false
     const sectionsHtml = blocks.sections.map(k => renderSection(k, blocks, editorMode)).join('\n')
 
-    return `<!DOCTYPE html>
-<html lang="pl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Aplikacja mobilna &#8212; Propozycja</title>
-<style>${baseCss(editorMode)}</style>
-</head>
-<body>
-<div style="width:100%;overflow-x:hidden;">
+    return buildHtmlDocument({
+        title: 'Aplikacja mobilna — Propozycja',
+        css: baseCss(editorMode),
+        body: `<div style="width:100%;overflow-x:hidden;">
 ${renderCover(blocks, offer, editorMode)}
 ${sectionsHtml}
 ${renderFooter(blocks, offer, editorMode)}
-</div>
-</body>
-</html>`
+</div>`,
+    })
 }

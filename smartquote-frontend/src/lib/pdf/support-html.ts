@@ -2,7 +2,7 @@
 // Faithfully reproduces the "Wsparcie" (IT Support / SLA) template.
 // Design: ocean navy #0F4C75 + emerald #10B981, Outfit font, mint backgrounds.
 
-import { EMBEDDED_FONTS_CSS } from './embedded-fonts'
+import { buildHtmlDocument } from './html-shell'
 import type { SupportBlocks } from './support-blocks'
 
 export interface SupportOfferData {
@@ -38,7 +38,6 @@ function editorWrap(editorMode: boolean, key: string, inner: string): string {
 
 function baseCss(editorMode: boolean): string {
     return `
-${EMBEDDED_FONTS_CSS}
 *{box-sizing:border-box;}
 body{margin:0;background:#E2E8F0;font-family:'Outfit Variable','Outfit',system-ui,sans-serif;color:#0F172A;-webkit-font-smoothing:antialiased;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 .lnk{color:#10B981;text-decoration:none;font-weight:600;}
@@ -69,8 +68,10 @@ body{margin:0;background:#E2E8F0;font-family:'Outfit Variable','Outfit',system-u
   .doc{box-shadow:none !important;max-width:100% !important;}
   .cover-pattern{display:none !important;}
   .page-break{page-break-before:always;}
-  .sec,.cover,.foot{break-inside:avoid-page;}
+  /* Sections are allowed to flow across pages; only individual cards/rows stay atomic */
   .pkg-card,.prio-card,.sla-table tr{break-inside:avoid;}
+  /* Cap large headings so stress-filled text doesn't take up an entire page */
+  .sec h2, .cover h1 { font-size: 24px !important; line-height: 1.35 !important; }
   thead{display:table-header-group;}
 }
 ${editorMode ? `
@@ -541,22 +542,15 @@ export function buildSupportHtml(
     const editorMode = options?.editorMode ?? false
     const sectionsHtml = blocks.sections.map(k => renderSection(k, blocks, editorMode)).join('\n')
 
-    return `<!DOCTYPE html>
-<html lang="pl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Opieka techniczna IT &#8212; Oferta</title>
-<style>${baseCss(editorMode)}</style>
-</head>
-<body>
-<div class="page" style="padding:28px 18px;min-height:100vh;">
+    return buildHtmlDocument({
+        title: 'Opieka techniczna IT — Oferta',
+        css: baseCss(editorMode),
+        body: `<div class="page" style="padding:28px 18px;min-height:100vh;">
   <div class="doc" style="max-width:840px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 18px 60px rgba(15,76,117,0.14);">
     ${renderCover(blocks, offer, editorMode)}
     ${sectionsHtml}
     ${renderFooter(blocks, offer, editorMode)}
   </div>
-</div>
-</body>
-</html>`
+</div>`,
+    })
 }

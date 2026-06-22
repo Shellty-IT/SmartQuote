@@ -3,7 +3,7 @@
 // Used by: Puppeteer PDF route + HTML preview route.
 
 import { mergeShopWithDefaults, type ShopBlocks, type ShopSectionKey } from './shop-blocks'
-import { EMBEDDED_FONTS_CSS } from './embedded-fonts'
+import { buildHtmlDocument } from './html-shell'
 
 export interface ShopOfferData {
     number: string
@@ -73,7 +73,6 @@ function editorWrap(key: string, html: string, label: string, editorMode: boolea
 
 function buildCss(): string {
     return `
-${EMBEDDED_FONTS_CSS}
 
 * { box-sizing: border-box; }
 body {
@@ -298,6 +297,10 @@ a { color: inherit; text-decoration: none; }
   .cover-deco1, .cover-deco2, .footer-deco { display: none !important; }
   .sec { padding: 36px 40px !important; }
   .cover { page-break-after: always; }
+  /* Reduce rule's bottom margin so its break-after:avoid reliably glues it to the first content row */
+  .sec-rule { margin-bottom: 10px !important; }
+  /* Prevent a page break immediately before the main content grid of each section */
+  .grid-3, .grid-2, .grid-3opt, .timeline, .tags-wrap, .warranty-grid, .about-stats { break-before: avoid-page; page-break-before: avoid; }
   @page { size: A4; margin: 0; }
 }
 
@@ -738,22 +741,15 @@ export function buildShopHtml(
 </style>`
         : ''
 
-    return `<!DOCTYPE html>
-<html lang="pl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(data.title)}</title>
-<style>${buildCss()}</style>
-${zoomStyle}
-</head>
-<body>
-<div class="doc">
+    return buildHtmlDocument({
+        title: esc(data.title),
+        css: buildCss(),
+        extraHead: zoomStyle,
+        body: `<div class="doc">
   ${renderCover(data, blocks, editorMode)}
   ${sectionsHtml}
   ${renderFooter(data, blocks, editorMode)}
 </div>
-${editorScript}
-</body>
-</html>`
+${editorScript}`,
+    })
 }

@@ -7,7 +7,7 @@ import {
     type ContractServicesBlocks,
     type ContractServicesSectionKey,
 } from './contract-services-blocks'
-import { EMBEDDED_FONTS_CSS } from './embedded-fonts'
+import { buildHtmlDocument, buildContractPageRule } from './html-shell'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -116,12 +116,15 @@ function buildCss(editorMode: boolean, zoom: number): string {
       margin: 20px auto 48px;
       box-shadow: 0 1px 3px rgba(15,23,42,0.08), 0 8px 28px rgba(15,23,42,0.10);
     }
+    ${buildContractPageRule({ margins: '14mm 14mm 22mm' })}
+    .pad > div { break-inside: avoid; page-break-inside: avoid; }
+    .sec-h { break-after: avoid; page-break-after: avoid; }
+    p { orphans: 3; widows: 3; }
     @media print {
       body { background: #fff; }
       .sheet { margin: 0; max-width: none; box-shadow: none; }
       .page-break { page-break-before: always; }
       .avoid-break { page-break-inside: avoid; }
-      @page { size: A4; margin: 14mm; }
     }
 
     /* ── HEADER BAR ── */
@@ -188,7 +191,7 @@ function buildCss(editorMode: boolean, zoom: number): string {
 
     /* ── CLAUSE LIST ── */
     ol.clause { padding-left: 22px; font-size: 12.5px; line-height: 1.65; color: var(--tx); }
-    ol.clause > li { margin-bottom: 9px; }
+    ol.clause > li { margin-bottom: 9px; orphans: 3; widows: 3; }
     ol.clause > li:last-child { margin-bottom: 0; }
     ol.sub { margin: 7px 0 3px; padding-left: 20px; list-style-type: lower-latin; }
     ol.sub > li { margin-bottom: 4px; line-height: 1.6; font-size: 12px; }
@@ -637,17 +640,10 @@ export function buildContractServicesHtml(
         ? ` data-sq-section="header" class="c-header${activeSection === 'header' ? ' sq-active' : ''}"`
         : ' class="c-header"'
 
-    return `<!DOCTYPE html>
-<html lang="pl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${esc(h.contractTitle || 'Umowa o wykonanie strony internetowej')}</title>
-  <style>${EMBEDDED_FONTS_CSS}${buildCss(editorMode, zoom)}</style>
-</head>
-<body>
-
-${editorMode ? '<div class="sq-edit-hint">Kliknij sekcję aby edytować</div>' : ''}
+    return buildHtmlDocument({
+        title: esc(h.contractTitle || 'Umowa o wykonanie strony internetowej'),
+        css: buildCss(editorMode, zoom),
+        body: `${editorMode ? '<div class="sq-edit-hint">Kliknij sekcję aby edytować</div>' : ''}
 
 <div class="sheet">
 
@@ -682,9 +678,8 @@ ${editorMode ? '<div class="sq-edit-hint">Kliknij sekcję aby edytować</div>' :
 
 </div>
 
-${editorMode ? buildEditorScript() : ''}
-</body>
-</html>`
+${editorMode ? buildEditorScript() : ''}`,
+    })
 }
 
 export function buildContractServicesHtmlFromSaved(

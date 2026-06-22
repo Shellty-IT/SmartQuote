@@ -1,7 +1,7 @@
 // src/lib/pdf/contract-mobile-html.ts
 // HTML generator for the "Aplikacja mobilna" contract template.
 // Navy #1B3A5C / Gold #C9A84C design.
-import { EMBEDDED_FONTS_CSS } from './embedded-fonts'
+import { buildHtmlDocument, buildContractPageRule, CONTRACT_ORPHANS_CSS } from './html-shell'
 import {
     type ContractMobileBlocks,
     type MobileSectionKey,
@@ -32,21 +32,22 @@ function sectionAttr(key: string, editorMode: boolean, activeSection?: string | 
 }
 
 function buildCss(editorMode: boolean, zoom: number): string {
-    return `<style>
-${EMBEDDED_FONTS_CSS}
-*{box-sizing:border-box;}
+    return `*{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
 body{background:#EEF1F5;font-family:'Source Sans 3',system-ui,sans-serif;color:#0F172A;font-size:${zoom < 0.8 ? 13 : 13.5}px;line-height:1.65;-webkit-font-smoothing:antialiased;}
-.doc{max-width:800px;margin:0 auto;background:#fff;box-shadow:0 1px 8px rgba(15,23,42,0.12);overflow:hidden;}
+.doc{max-width:800px;margin:0 auto;background:#fff;box-shadow:0 1px 8px rgba(15,23,42,0.12);}
 .bar-inner{max-width:800px;margin:0 auto;padding:18px 48px;}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 table{border-collapse:collapse;width:100%;}
 th,td{text-align:left;}
 p{margin:7px 0;}
 @media(max-width:768px){.two-col{grid-template-columns:1fr!important;}.bar-inner,.content{padding-left:20px!important;padding-right:20px!important;}}
+${buildContractPageRule()}
+${CONTRACT_ORPHANS_CSS}
+.content>div{break-inside:avoid;page-break-inside:avoid;}
+h2{break-after:avoid;page-break-after:avoid;}
 @media print{body{font-size:11pt;background:#fff;}.doc{box-shadow:none;}.page-break{page-break-before:always;}}
-${editorMode ? `[data-sq-section]:hover{outline:2px solid #C9A84C;outline-offset:2px;}` : ''}
-</style>`
+${editorMode ? `[data-sq-section]:hover{outline:2px solid #C9A84C;outline-offset:2px;}` : ''}`
 }
 
 function buildEditorScript(): string {
@@ -349,15 +350,10 @@ export function buildContractMobileHtml(
     const sigAttr = editorMode ? ` data-sq-section="signatures" style="cursor:pointer;border-radius:4px;"` : ''
     const sectionsHtml = b.sections.map(key => renderSection(key, b, editorMode, activeSection)).join('\n')
 
-    return `<!DOCTYPE html>
-<html lang="pl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-${buildCss(editorMode, zoom)}
-</head>
-<body>
-<main class="doc">
+    return buildHtmlDocument({
+        title: 'Umowa IT — Aplikacja mobilna',
+        css: buildCss(editorMode, zoom),
+        body: `<main class="doc">
   <div${headerAttr}>${renderHeader(b)}${renderTitle(b)}</div>
   <div class="content" style="padding:1px 48px 40px;">
     ${sectionsHtml}
@@ -370,9 +366,8 @@ ${buildCss(editorMode, zoom)}
     </div>
   </div>
 </main>
-${editorMode ? buildEditorScript() : ''}
-</body>
-</html>`
+${editorMode ? buildEditorScript() : ''}`,
+    })
 }
 
 export function buildContractMobileHtmlFromSaved(

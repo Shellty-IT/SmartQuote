@@ -710,7 +710,8 @@ export function buildProposalHtml(offer: ProposalOfferData, options: BuildPropos
     .sec .ico { font-size: 13px; line-height: 1; flex-shrink: 0; }
     .sec h2 {
       font-size: 11px; font-weight: 700; color: var(--navy);
-      letter-spacing: 0.9px; text-transform: uppercase; white-space: nowrap;
+      letter-spacing: 0.9px; text-transform: uppercase;
+      overflow-wrap: anywhere; min-width: 0;
     }
     .sec::after {
       content: ''; flex: 1; height: 1.5px;
@@ -809,11 +810,11 @@ export function buildProposalHtml(offer: ProposalOfferData, options: BuildPropos
     .p-card.hot .pc-sub { color: rgba(255,255,255,0.8); font-weight: 600; font-size: 10px; }
     /* About + CTA */
     .bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
-    .about-box { background: var(--grey-bg); border-radius: 4px; padding: 5mm; }
-    .about-url { display: block; font-family: 'Courier New', monospace; font-size: 10.5px; font-weight: 700; color: var(--navy); text-decoration: none; margin-top: 4px; }
+    .about-box { background: var(--grey-bg); border-radius: 4px; padding: 5mm; min-width: 0; overflow: hidden; }
+    .about-url { display: block; font-family: 'Courier New', monospace; font-size: 10.5px; font-weight: 700; color: var(--navy); text-decoration: none; margin-top: 4px; word-break: break-all; overflow-wrap: anywhere; }
     .cta-box {
       background: var(--orange-dim); border: 1px solid var(--orange-border);
-      border-radius: 4px; padding: 5mm; display: flex; align-items: center;
+      border-radius: 4px; padding: 5mm; display: flex; align-items: center; min-width: 0;
     }
     .cta-box p { font-size: 11px; line-height: 1.7; color: var(--text); }
     /* Benefits */
