@@ -144,7 +144,7 @@ function buildCss(editorMode: boolean, zoom: number): string {
     .c-mv { font-size: 10pt; font-weight: 600; border-bottom: 1.5px solid var(--gm); min-width: 40mm; text-align: center; padding-bottom: 1px; min-height: 16px; }
 
     /* ── SECTIONS ── */
-    .sec { margin-bottom: 5mm; page-break-inside: avoid; break-inside: avoid; }
+    .sec { margin-bottom: 5mm; }
     .sec-h { display: flex; align-items: baseline; gap: 5px; border-bottom: 1.5px solid var(--gm); padding-bottom: 1.5mm; margin-bottom: 3mm; break-after: avoid; page-break-after: avoid; }
     .sec-sym { font-size: 10pt; font-weight: 700; color: var(--gm); flex-shrink: 0; }
     .sec-title { font-size: 9.5pt; font-weight: 700; color: var(--gd); text-transform: uppercase; letter-spacing: 0.8px; }
@@ -201,7 +201,7 @@ function buildCss(editorMode: boolean, zoom: number): string {
     .bl { display: inline-block; border-bottom: 1px solid #BDBDBD; min-width: 28mm; min-height: 13px; vertical-align: bottom; }
 
     /* ── SIGNATURE ── */
-    .sig-wrap { border: 2px solid var(--gm); border-radius: 4px; overflow: hidden; margin-top: 6mm; page-break-inside: avoid; }
+    .sig-wrap { border: 2px solid var(--gm); border-radius: 4px; overflow: hidden; margin-top: 6mm; }
     .sig-hd { background: var(--gd); color: white; text-align: center; padding: 2mm; font-size: 8.5pt; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
     .sig-cols { display: grid; grid-template-columns: 1fr 1fr; }
     .sig-col { padding: 4mm 4.5mm; }

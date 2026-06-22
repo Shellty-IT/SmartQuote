@@ -117,7 +117,7 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
         setIsClassicPreviewing(true)
         setClassicPreviewError(null)
         try {
-            const blob = await offersApi.downloadPdf(offer.id)
+            const blob = await offersApi.downloadClassicPdf(offer.id)
             const url = URL.createObjectURL(blob)
             setClassicPreviewUrl((old) => { if (old) URL.revokeObjectURL(old); return url })
             setClassicPreviewOpen(true)
@@ -132,7 +132,7 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
     const handleClassicDownload = async () => {
         setIsClassicDownloading(true)
         try {
-            const blob = await offersApi.downloadPdf(offer.id)
+            const blob = await offersApi.downloadClassicPdf(offer.id)
             const url = URL.createObjectURL(blob)
             const a = document.createElement('a')
             a.href = url

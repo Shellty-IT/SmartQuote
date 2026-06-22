@@ -296,12 +296,12 @@ a { color: inherit; text-decoration: none; }
   .doc { box-shadow: none !important; }
   .cover-deco1, .cover-deco2, .footer-deco { display: none !important; }
   .sec { padding: 36px 40px !important; }
-  .cover { page-break-after: always; }
+  .cover { page-break-after: always; min-height: 100vh; }
   /* Reduce rule's bottom margin so its break-after:avoid reliably glues it to the first content row */
   .sec-rule { margin-bottom: 10px !important; }
   /* Prevent a page break immediately before the main content grid of each section */
   .grid-3, .grid-2, .grid-3opt, .timeline, .tags-wrap, .warranty-grid, .about-stats { break-before: avoid-page; page-break-before: avoid; }
-  @page { size: A4; margin: 0; }
+  @page { size: A4; margin: 10mm 0; }
 }
 
 /* ── responsive ── */
@@ -336,7 +336,7 @@ function renderCover(data: ShopOfferData, blocks: ShopBlocks, editorMode: boolea
     const offerNumber = esc(data.number)
 
     const inner = `
-  <section class="sec cover" style="position:relative;">
+  <section class="sec cover pdf-full-bleed" style="position:relative;">
     <div class="cover-deco1"></div>
     <div class="cover-deco2"></div>
     <div style="position:relative;">
@@ -650,7 +650,7 @@ function renderFooter(data: ShopOfferData, blocks: ShopBlocks, editorMode: boole
     const f = blocks.footer
 
     const inner = `
-  <section class="sec shop-footer" style="position:relative;">
+  <section class="sec shop-footer pdf-full-bleed" style="position:relative;">
     <div class="footer-deco"></div>
     <div style="position:relative;">
       <div style="display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:40px;">

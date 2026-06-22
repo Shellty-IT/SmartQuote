@@ -345,7 +345,7 @@ img{display:block;}
   .doc-footer{position:fixed;bottom:0;left:0;right:0;}
   thead{display:table-header-group;}
   tr{break-inside:avoid;}
-  @page{size:A4;margin:0;}
+  @page{size:A4;margin:10mm 0 16mm;}
 }`
 
     return buildHtmlDocument({

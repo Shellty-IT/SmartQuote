@@ -50,7 +50,7 @@ describe('website v2 document branding', () => {
         expect(html).not.toContain('#FEF3C7')
         expect(html).not.toContain('#92400E')
         expect(html).toContain('data:image/webp;base64,SCREENSHOT')
-        expect(html).toContain('section { break-inside: auto; }')
+        expect(html).toContain('section { break-inside: auto;')
         expect(html).not.toContain('section { break-inside: avoid; }')
         expect(html).toContain('.price-wrap { grid-template-columns:minmax(0,1fr) !important;')
         expect(html).toContain('.price-wrap > div:last-child {')

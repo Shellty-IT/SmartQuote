@@ -110,6 +110,7 @@ a { color: inherit; text-decoration: none; }
   footer { break-inside:avoid-page !important; page-break-inside:avoid !important; }
   footer .inner { padding:28px 44px 20px !important; }
   footer .footer-grid + div { margin:20px 0 12px !important; }
+  @page{size:A4;margin:10mm 0;}
 }`
 }
 
@@ -129,7 +130,7 @@ function renderCover(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editorMo
         : (data.totalGross > 0 ? `${data.totalGross.toLocaleString('pl-PL')} zł` : 'do wyceny')
 
     const inner = `
-  <section class="dot-grid" style="position:relative; background:#FFFFFF; background-image:radial-gradient(#DBEAFE 1.4px, transparent 1.4px); background-size:26px 26px;">
+  <section class="dot-grid pdf-full-bleed" style="position:relative; background:#FFFFFF; background-image:radial-gradient(#DBEAFE 1.4px, transparent 1.4px); background-size:26px 26px;">
     <div class="inner" style="max-width:1180px; margin:0 auto; padding:56px 48px 92px; position:relative; z-index:1;">
       <div class="cover-top" style="display:flex; justify-content:space-between; align-items:flex-start;">
         <div style="display:flex; flex-direction:column; gap:8px;">
@@ -515,7 +516,7 @@ function renderFooter(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editorM
     const validDate = addDays(data.createdAt, data.paymentDays ?? 14)
 
     const inner = `
-  <footer style="background:#1E293B; color:#FFFFFF;">
+  <footer class="pdf-full-bleed" style="background:#1E293B; color:#FFFFFF;">
     <div class="inner" style="max-width:1080px; margin:0 auto; padding:56px 48px 40px;">
       <div class="footer-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:32px; align-items:start;">
         <div>

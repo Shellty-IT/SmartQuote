@@ -922,7 +922,7 @@ export function buildProposalHtml(offer: ProposalOfferData, options: BuildPropos
   </div>
 
   <footer class="footer"${editorMode ? ' data-block="footer"' : ''}>
-    <div class="footer-left">Oferta przygotowana ${footerCustomNote}dla: <strong>${esc(offer.client.name)}</strong> · <strong>Strona 1 / 2</strong>${authorSuffix}</div>
+    <div class="footer-left">Oferta przygotowana ${footerCustomNote}dla: <strong>${esc(offer.client.name)}</strong> · <strong>Strona 1</strong>${authorSuffix}</div>
     <div class="footer-divider"></div>
     <div class="footer-right">${footerRight}</div>
   </footer>
@@ -937,7 +937,7 @@ export function buildProposalHtml(offer: ProposalOfferData, options: BuildPropos
   </div>
 
   <footer class="footer"${editorMode ? ' data-block="footer"' : ''}>
-    <div class="footer-left">Oferta ${esc(offer.number)} · <strong>Strona 2 / 2</strong>${authorSuffix}</div>
+    <div class="footer-left">Oferta ${esc(offer.number)} · <strong>Strona 2</strong>${authorSuffix}</div>
     <div class="footer-divider"></div>
     <div class="footer-right">${footerRight}</div>
   </footer>

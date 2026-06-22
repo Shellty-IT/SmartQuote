@@ -28,6 +28,7 @@ import { buildDefaultContractSlaBlocks } from '../src/lib/pdf/contract-sla-block
 import { buildContractSlaHtml } from '../src/lib/pdf/contract-sla-html'
 import { buildDefaultContractMobileBlocks } from '../src/lib/pdf/contract-mobile-blocks'
 import { buildContractMobileHtml } from '../src/lib/pdf/contract-mobile-html'
+import { buildClassicHtml, type ClassicOfferData } from '../src/lib/pdf/classic-html'
 
 const localEnv = await fs.readFile(path.resolve('.env.local'), 'utf8')
 for (const line of localEnv.split(/\r?\n/)) {
@@ -76,9 +77,26 @@ const compactOffer = {
     userWebsite: commonOffer.user.companyInfo.website,
 }
 
+const classicOffer: ClassicOfferData = {
+    number: 'OFF/2026/AUDYT', title: 'Kompleksowa realizacja projektu cyfrowego',
+    description: 'Oferta obejmuje pełny zakres prac projektowych, wdrożeniowych i szkoleniowych.',
+    terms: 'Płatność w terminie 14 dni od daty wystawienia faktury. Rękojmia 12 miesięcy.',
+    status: 'SENT', totalNet: 20244, totalVat: 4656.12, totalGross: 24900, currency: 'PLN',
+    validUntil: '2026-07-05T00:00:00.000Z', paymentDays: 14, createdAt: '2026-06-21T10:00:00.000Z',
+    client: { type: 'COMPANY', name: 'Jan Kowalski', company: 'Przykładowy Klub Sportowy Sp. z o.o.', nip: '1234567890', email: 'jan@example.com', phone: '+48 123 456 789', address: 'ul. Sportowa 1', city: 'Warszawa', postalCode: '00-001' },
+    user: { name: 'Anna Nowak', email: 'kontakt@example.com', company: 'SmartQuote Studio', nip: '9876543210', phone: '+48 500 600 700', address: 'ul. Cyfrowa 7', city: 'Kraków', postalCode: '30-001', logo: null, website: 'https://example.com' },
+    items: [
+        { name: 'Projekt graficzny UI/UX', description: 'Kompletny projekt interfejsu użytkownika', quantity: 1, unit: 'kpl', unitPrice: 4000, vatRate: 23, discount: 0, totalNet: 4000, variantName: null },
+        { name: 'Wdrożenie aplikacji webowej', description: 'Frontend React + backend Node.js', quantity: 1, unit: 'kpl', unitPrice: 8000, vatRate: 23, discount: 0, totalNet: 8000, variantName: null },
+        { name: 'Testy i zapewnienie jakości', description: 'Testy automatyczne i manualne', quantity: 40, unit: 'h', unitPrice: 150, vatRate: 23, discount: 0, totalNet: 6000, variantName: null },
+        { name: 'Szkolenie z obsługi systemu', description: 'Szkolenie dla zespołu zamawiającego', quantity: 8, unit: 'h', unitPrice: 300, vatRate: 23, discount: 10, totalNet: 2160, variantName: null },
+    ],
+}
+
 type TemplateCase = { name: string; build: (stressed: boolean) => string }
 
 const cases: TemplateCase[] = [
+    { name: 'offer-classic', build: long => buildClassicHtml(long ? stress(classicOffer) : classicOffer) },
     { name: 'offer-proposal', build: long => buildProposalHtml({ ...commonOffer, blocks: long ? stress(buildDefaultBlocks(commonOffer.client.name)) : buildDefaultBlocks(commonOffer.client.name) }) },
     { name: 'offer-shop', build: long => buildShopHtml({ ...commonOffer, blocks: long ? stress(buildDefaultShopBlocks()) : buildDefaultShopBlocks() }) },
     { name: 'offer-website-v2', build: long => buildWebsiteV2Html({ ...commonOffer, blocks: long ? stress(buildDefaultWebsiteV2Blocks()) : buildDefaultWebsiteV2Blocks() }) },

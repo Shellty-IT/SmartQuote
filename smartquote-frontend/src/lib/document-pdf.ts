@@ -1,4 +1,4 @@
-import { contractsApi, offersApi } from '@/lib/api'
+import { contractsApi } from '@/lib/api'
 
 export type OfferDocumentTemplate =
     | 'classic' | 'proposal' | 'shop' | 'website_v2' | 'website_v3'
@@ -6,8 +6,8 @@ export type OfferDocumentTemplate =
 export type ContractDocumentTemplate = 'classic' | 'short' | 'services' | 'dedicated' | 'sla' | 'mobile'
 export type DocumentPreview = { frameType: 'html'; url: string } | { frameType: 'pdf'; blob: Blob }
 
-const offerRoutes: Record<Exclude<OfferDocumentTemplate, 'classic'>, string> = {
-    proposal: 'proposal', shop: 'shop', website_v2: 'website-v2', website_v3: 'website-v3',
+const offerRoutes: Record<OfferDocumentTemplate, string> = {
+    classic: 'classic', proposal: 'proposal', shop: 'shop', website_v2: 'website-v2', website_v3: 'website-v3',
     support: 'support', mobile_app: 'mobile-app', mobile_simple: 'mobile-simple', universal: 'universal',
 }
 const contractRoutes: Record<Exclude<ContractDocumentTemplate, 'classic'>, string> = {
@@ -33,7 +33,6 @@ export function getContractEditPath(id: string, template: ContractDocumentTempla
 
 export async function downloadOfferDocument(id: string, template: string | null | undefined): Promise<Blob> {
     const type = normalizeOfferTemplate(template)
-    if (type === 'classic') return offersApi.downloadPdf(id)
     const response = await fetch(`/api/offers/${id}/pdf/${offerRoutes[type]}`)
     if (!response.ok) throw new Error(`PDF generation failed: ${response.status}`)
     return response.blob()

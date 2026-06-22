@@ -72,9 +72,14 @@ a{color:inherit;text-decoration:none;}
   .wm{font-size:90px !important;}
 }
 @media print{
+  @page{size:A4;margin:10mm 0;}
+  @page sq-full-bleed{size:A4;margin:0;}
   .orb,.no-print{display:none !important;}
   body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   .pb{page-break-before:always;}
+  .sq-full-bleed-page{page:sq-full-bleed;}
+  .sq-cover{break-after:page;page-break-after:always;}
+  .sq-footer{break-before:page;page-break-before:always;break-inside:avoid-page !important;page-break-inside:avoid !important;}
   .scroll-x{overflow-x:visible !important;max-width:100% !important;}
   .scroll-x table{width:100% !important;min-width:0 !important;table-layout:fixed !important;}
   .scroll-x td,.scroll-x th{overflow-wrap:anywhere !important;}
@@ -112,7 +117,7 @@ function renderCover(b: MobileAppBlocks, offer: MobileAppOfferData, editorMode: 
     ).join('')
 
     const inner = `
-<section style="position:relative;background:#1E1B4B;color:#fff;overflow:hidden;">
+<section class="sq-full-bleed-page sq-cover" style="position:relative;background:#1E1B4B;color:#fff;overflow:hidden;">
   <div class="orb" style="position:absolute;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,#F43F5E,transparent 70%);filter:blur(60px);opacity:0.18;top:-160px;right:-120px;pointer-events:none;"></div>
   <div class="orb" style="position:absolute;width:460px;height:460px;border-radius:50%;background:radial-gradient(circle,#818CF8,transparent 70%);filter:blur(60px);opacity:0.20;bottom:-180px;left:-140px;pointer-events:none;"></div>
   <div class="orb" style="position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,#818CF8,transparent 70%);filter:blur(60px);opacity:0.12;top:40%;left:45%;pointer-events:none;"></div>
@@ -650,7 +655,7 @@ function renderFooter(b: MobileAppBlocks, offer: MobileAppOfferData, editorMode:
         : `<div style="display:flex;align-items:center;justify-content:center;width:54px;height:54px;border-radius:14px;border:1.5px solid rgba(255,255,255,0.22);background:rgba(255,255,255,0.06);font-weight:800;font-size:13px;letter-spacing:1px;">LOGO</div>`
 
     const inner = `
-<section class="pb" style="position:relative;background:#1E1B4B;color:#fff;overflow:hidden;">
+<section class="pb sq-full-bleed-page sq-footer" style="position:relative;background:#1E1B4B;color:#fff;overflow:hidden;">
   <div class="orb" style="position:absolute;width:480px;height:480px;border-radius:50%;background:radial-gradient(circle,#F43F5E,transparent 70%);filter:blur(60px);opacity:0.18;top:-160px;left:-120px;pointer-events:none;"></div>
   <div class="orb" style="position:absolute;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,#818CF8,transparent 70%);filter:blur(60px);opacity:0.20;bottom:-160px;right:-120px;pointer-events:none;"></div>
   <div class="pad" style="position:relative;">

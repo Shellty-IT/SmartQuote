@@ -52,7 +52,7 @@ function renderCover(
     `).join('')
 
     const coverHtml = `
-<section class="cover">
+<section class="cover pdf-full-bleed">
     <div class="cover-inner">
         <div class="cover-left">
             <div class="cover-tag">${esc(b.coverTag)}</div>
@@ -278,7 +278,7 @@ function renderFooter(
 ): string {
     const companyName = offer.userCompanyName || ''
     const inner = `
-<footer class="footer">
+<footer class="footer pdf-full-bleed">
     <div class="footer-inner">
         <div class="footer-left">
             ${offer.userLogoDarkUrl || offer.userLogoUrl ? `<img src="${offer.userLogoDarkUrl || offer.userLogoUrl}" class="footer-logo" alt="Logo" />` : ''}
@@ -1115,8 +1115,9 @@ body {
 
 /* Print */
 @media print {
-    .cover { page-break-after: avoid; }
-    .section { page-break-inside: avoid; }
+    @page { size: A4; margin: 10mm 0; }
+    .cover { min-height: 100vh; }
+    .section { break-inside: auto; page-break-inside: auto; }
 }
 `
 

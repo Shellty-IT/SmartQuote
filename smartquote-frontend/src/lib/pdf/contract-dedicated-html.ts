@@ -48,7 +48,7 @@ p{margin:6px 0;}
 @media(max-width:768px){.two-col{grid-template-columns:1fr!important;}.bar-inner,.content,.titlebar,.footerbar{padding-left:20px!important;padding-right:20px!important;}}
 ${buildContractPageRule()}
 ${CONTRACT_ORPHANS_CSS}
-.content>div{break-inside:avoid;page-break-inside:avoid;}
+.content>div{break-inside:auto;page-break-inside:auto;}
 h2{break-after:avoid;page-break-after:avoid;}
 @media print{body{font-size:11pt;background:#fff;}.doc{box-shadow:none;}.page-break{page-break-before:always;}}
 ${editorMode ? `[data-sq-section]:hover{outline:2px solid #C9A84C;outline-offset:2px;}` : ''}`

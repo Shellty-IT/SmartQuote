@@ -112,7 +112,7 @@ ${zoom !== 1 ? `body{zoom:${zoom};}` : ''}
   /* Cap large headings so stress-length text does not consume a full page */
   section h2{font-size:26px !important;line-height:1.35 !important;margin-bottom:22px !important;}
   .pagebreak{break-before:page;page-break-before:always;}
-  @page{size:A4;margin:0;}
+  @page{size:A4;margin:10mm 0;}
 }
 `
 }
@@ -137,7 +137,7 @@ function renderCover(data: WebsiteV3OfferData, blocks: WebsiteV3Blocks, editorMo
     ).join('')
 
     const inner = `
-<section style="position:relative;padding:0;background:#0F172A;color:#fff;overflow:hidden;">
+<section class="pdf-full-bleed" style="position:relative;padding:0;background:#0F172A;color:#fff;overflow:hidden;">
   <div style="position:absolute;inset:0;background:radial-gradient(60% 55% at 18% 12%,rgba(124,58,237,0.55) 0%,rgba(124,58,237,0) 60%),radial-gradient(55% 60% at 88% 92%,rgba(6,182,212,0.45) 0%,rgba(6,182,212,0) 60%);"></div>
   <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px);background-size:48px 48px;"></div>
   <div style="position:relative;z-index:2;padding:32px 48px 72px;">
@@ -595,7 +595,7 @@ function renderFooter(data: WebsiteV3OfferData, blocks: WebsiteV3Blocks, editorM
         : `<div style="display:flex;align-items:center;justify-content:center;width:44px;height:44px;border:1.5px solid rgba(255,255,255,0.4);border-radius:11px;font-weight:800;font-size:12px;">${ci?.name ? esc(ci.name.slice(0, 3).toUpperCase()) : 'LOGO'}</div>`
     const validUntil = addDays(data.createdAt, blocks.cover.validityDays)
     const inner = `
-<section id="cta" style="position:relative;padding:88px 48px 56px;background:var(--grad);color:#fff;overflow:hidden;text-align:center;">
+<section id="cta" class="pdf-full-bleed" style="position:relative;padding:88px 48px 56px;background:var(--grad);color:#fff;overflow:hidden;text-align:center;">
   <div style="position:absolute;inset:0;background:radial-gradient(40% 60% at 50% 0%,rgba(255,255,255,0.18),transparent 60%);"></div>
   <div style="max-width:760px;margin:0 auto;position:relative;z-index:1;">
     <h2 style="margin:0;font-size:52px;font-weight:800;letter-spacing:-0.02em;line-height:1.05;">${esc(b.ctaHeadline)}</h2>

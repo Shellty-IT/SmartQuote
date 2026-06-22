@@ -45,7 +45,7 @@ function renderCover(blocks: UniversalBlocks, offer: UniversalOfferData, editorM
         : `<span style="font-size:1.35rem;font-weight:700;letter-spacing:.03em;color:#fff;">${esc(c.contractorName)}</span>`
 
     const inner = `
-<div style="background:#1B3A5C;color:#fff;min-height:100vh;position:relative;font-family:'Outfit Variable',sans-serif;display:flex;flex-direction:column;">
+<div class="pdf-full-bleed" style="background:#1B3A5C;color:#fff;min-height:100vh;position:relative;font-family:'Outfit Variable',sans-serif;display:flex;flex-direction:column;">
 
   <!-- top bar -->
   <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:40px 56px 0;">
@@ -399,7 +399,7 @@ function renderFooter(
         : `<div style="font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:10px;">${esc(offer.userCompanyName || blocks.cover.contractorName)}</div>`
 
     const inner = `
-<footer>
+<footer class="pdf-full-bleed">
   <!-- CTA band -->
   <div style="background:#C9A84C;padding:56px;text-align:center;">
     <h2 style="font-size:2.2rem;font-weight:800;color:#fff;margin:0 0 14px;">${esc(f.ctaTitle)}</h2>
@@ -489,7 +489,7 @@ img{display:block;}
 @media print{
   *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
   section{padding:40px 44px !important;}
-  @page{size:A4;margin:0;}
+  @page{size:A4;margin:10mm 0;}
 }
 ${editorCss}`,
         body: `${renderCover(blocks, offer, editorMode)}

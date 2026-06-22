@@ -117,7 +117,7 @@ function buildCss(editorMode: boolean, zoom: number): string {
       box-shadow: 0 1px 3px rgba(15,23,42,0.08), 0 8px 28px rgba(15,23,42,0.10);
     }
     ${buildContractPageRule({ margins: '14mm 14mm 22mm' })}
-    .pad > div { break-inside: avoid; page-break-inside: avoid; }
+    .pad > div { break-inside: auto; page-break-inside: auto; }
     .sec-h { break-after: avoid; page-break-after: avoid; }
     p { orphans: 3; widows: 3; }
     @media print {

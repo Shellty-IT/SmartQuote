@@ -65,7 +65,7 @@ body{margin:0;background:#E2E8F0;font-family:'Outfit Variable','Outfit',system-u
 @media print{
   body{background:#fff;}
   .page{padding:0 !important;}
-  .doc{box-shadow:none !important;max-width:100% !important;}
+  .doc{box-shadow:none !important;max-width:100% !important;border-radius:0 !important;overflow:visible !important;}
   .cover-pattern{display:none !important;}
   .page-break{page-break-before:always;}
   /* Sections are allowed to flow across pages; only individual cards/rows stay atomic */
@@ -73,6 +73,8 @@ body{margin:0;background:#E2E8F0;font-family:'Outfit Variable','Outfit',system-u
   /* Cap large headings so stress-filled text doesn't take up an entire page */
   .sec h2, .cover h1 { font-size: 24px !important; line-height: 1.35 !important; }
   thead{display:table-header-group;}
+  @page{size:A4;margin:10mm 0;}
+  .cover{min-height:100vh;}
 }
 ${editorMode ? `
 .sq-block{cursor:pointer;position:relative;transition:outline .15s;}
@@ -104,7 +106,7 @@ function renderCover(b: SupportBlocks, offer: SupportOfferData, editorMode: bool
         : `<div style="width:46px;height:46px;border-radius:10px;border:1.5px dashed rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,0.85);">LOGO</div>`
 
     const inner = `
-<section class="cover" style="position:relative;background:#0F4C75;color:#fff;padding:40px 48px 44px;overflow:hidden;">
+<section class="cover pdf-full-bleed" style="position:relative;background:#0F4C75;color:#fff;padding:40px 48px 44px;overflow:hidden;">
   <div class="cover-pattern" style="position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,0.05) 1.4px,transparent 1.4px);background-size:22px 22px;z-index:0;"></div>
   <div style="position:relative;z-index:1;">
     <div class="cover-top" style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;margin-bottom:44px;">
@@ -477,7 +479,7 @@ function renderFooter(b: SupportBlocks, offer: SupportOfferData, editorMode: boo
         : `<div style="width:40px;height:40px;border-radius:9px;border:1.5px dashed rgba(255,255,255,0.35);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,0.8);">LOGO</div>`
 
     const inner = `
-<footer class="foot" style="position:relative;background:#0F172A;color:#fff;padding:56px 48px 40px;overflow:hidden;">
+<footer class="foot pdf-full-bleed" style="position:relative;background:#0F172A;color:#fff;padding:56px 48px 40px;overflow:hidden;">
   <span class="wm wm-l">08</span>
   <div style="position:relative;z-index:1;">
     <div style="text-align:center;max-width:60ch;margin:0 auto;">
