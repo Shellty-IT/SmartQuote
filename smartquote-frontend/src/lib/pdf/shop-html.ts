@@ -9,6 +9,7 @@ export interface ShopOfferData {
     number: string
     title: string
     totalGross: number
+    totalNet?: number
     currency: string
     paymentDays: number
     createdAt: string | Date
@@ -522,11 +523,20 @@ function renderPricing(data: ShopOfferData, blocks: ShopBlocks, editorMode: bool
         </div>`).join('')}
       </div>` : ''
 
-    // Price summary — use priceOverride if set, else offer.totalGross
-    const totalGross = b.priceOverride !== null ? b.priceOverride : data.totalGross
-    const isNet = b.priceType === 'net'
-    const net = isNet ? totalGross : totalGross / 1.23
-    const vat = isNet ? net * 0.23 : totalGross - net
+    // Price summary — a manual override (interpreted per priceType) wins, otherwise
+    // the offer's computed total for that type is used. Both net and gross are always
+    // shown, so we derive whichever figure is missing from the chosen one.
+    const VAT = 1.23
+    let net: number
+    let totalGross: number
+    if (b.priceType === 'net') {
+        net = b.priceOverride !== null ? b.priceOverride : (data.totalNet ?? data.totalGross / VAT)
+        totalGross = net * VAT
+    } else {
+        totalGross = b.priceOverride !== null ? b.priceOverride : data.totalGross
+        net = totalGross / VAT
+    }
+    const vat = totalGross - net
 
     const inner = `
     <span class="sec-num">${String(num).padStart(2, '0')}</span>

@@ -3,6 +3,7 @@
 // Design: teal #0D9488 + orange #F97316, Outfit font, clean B2C-friendly layout.
 
 import { buildHtmlDocument } from './html-shell'
+import { resolveHeadlinePrice } from './money'
 import {
     type MobileSimpleBlocks,
     type MobileSimpleSectionKey,
@@ -19,6 +20,9 @@ export interface MobileSimpleOfferData {
     userEmail?: string
     userPhone?: string
     userWebsite?: string
+    totalNet?: number
+    totalGross?: number
+    currency?: string
 }
 
 function esc(value: unknown): string {
@@ -41,9 +45,22 @@ function editorWrap(editorMode: boolean, key: string, inner: string): string {
 
 function renderCover(
     b: MobileSimpleBlocks['cover'],
+    pricing: MobileSimpleBlocks['process'],
     offer: MobileSimpleOfferData,
     editorMode: boolean,
 ): string {
+    // Keep the cover price pill in sync with the actual offer total / override.
+    const coverPrice = resolveHeadlinePrice({
+        priceOverride: pricing.priceOverride,
+        priceType: pricing.priceType,
+        totalNet: offer.totalNet,
+        totalGross: offer.totalGross,
+    })
+    const coverPriceText = coverPrice.amount !== null
+        ? coverPrice.amount.toLocaleString('pl-PL')
+        : b.priceText
+    const coverPriceLabel = coverPrice.amount !== null ? `Cena ${coverPrice.label}` : b.priceLabel
+
     const promises = b.promises.map(p => `
         <div class="promise-item">
             <span class="promise-check">✓</span>
@@ -68,8 +85,8 @@ function renderCover(
                     <div class="highlight-label">${esc(b.deliveryLabel)}</div>
                 </div>
                 <div class="highlight-card">
-                    <div class="highlight-value">${esc(b.priceText)} zł</div>
-                    <div class="highlight-label">${esc(b.priceLabel)}</div>
+                    <div class="highlight-value">${esc(coverPriceText)} zł</div>
+                    <div class="highlight-label">${esc(coverPriceLabel)}</div>
                 </div>
                 <div class="highlight-card">
                     <div class="highlight-value">${esc(b.platformCount)}</div>
@@ -200,6 +217,7 @@ function renderTech(
 
 function renderProcess(
     b: MobileSimpleBlocks['process'],
+    offer: MobileSimpleOfferData,
     editorMode: boolean,
 ): string {
     const steps = b.steps.map((step, i) => `
@@ -221,8 +239,17 @@ function renderProcess(
         </div>
     `).join('')
 
-    const displayPrice = b.priceOverride != null
-        ? b.priceOverride.toLocaleString('pl-PL')
+    // Headline = manual override or the offer's computed total for the chosen
+    // net/gross type; falls back to the legacy free-text priceNet when neither
+    // is available.
+    const resolvedPrice = resolveHeadlinePrice({
+        priceOverride: b.priceOverride,
+        priceType: b.priceType,
+        totalNet: offer.totalNet,
+        totalGross: offer.totalGross,
+    })
+    const displayPrice = resolvedPrice.amount !== null
+        ? resolvedPrice.amount.toLocaleString('pl-PL')
         : b.priceNet
 
     const inner = `
@@ -239,7 +266,7 @@ function renderProcess(
             <div class="price-card">
                 <div class="price-card-header">Twoja inwestycja</div>
                 <div class="price-big">${displayPrice} <span class="price-currency">zł</span></div>
-                <div class="price-suffix">netto</div>
+                <div class="price-suffix">${resolvedPrice.label}</div>
                 <ul class="price-includes">
                     ${includes}
                 </ul>
@@ -310,12 +337,13 @@ function renderFooter(
 function renderSection(
     key: MobileSimpleSectionKey,
     blocks: MobileSimpleBlocks,
+    offer: MobileSimpleOfferData,
     editorMode: boolean,
 ): string {
     switch (key) {
         case 'checklist': return renderChecklist(blocks.checklist, editorMode)
         case 'tech': return renderTech(blocks.tech, editorMode)
-        case 'process': return renderProcess(blocks.process, editorMode)
+        case 'process': return renderProcess(blocks.process, offer, editorMode)
     }
 }
 
@@ -1130,13 +1158,13 @@ export function buildMobileSimpleHtml(
 ): string {
     const editorMode = options?.editorMode ?? false
     const sections = blocks.sections
-        .map(key => renderSection(key, blocks, editorMode))
+        .map(key => renderSection(key, blocks, offer, editorMode))
         .join('\n')
 
     return buildHtmlDocument({
         title: `${blocks.cover.projectName} — Aplikacja mobilna`,
         css: CSS,
-        body: `${renderCover(blocks.cover, offer, editorMode)}
+        body: `${renderCover(blocks.cover, blocks.process, offer, editorMode)}
 ${sections}
 ${renderFooter(blocks.footer, offer, editorMode)}`,
     })

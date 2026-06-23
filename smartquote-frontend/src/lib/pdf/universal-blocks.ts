@@ -90,6 +90,8 @@ export interface UniversalTimelineBlock {
 
 export interface UniversalPricingBlock {
     pricingMode: 'simple' | 'detailed'
+    /** Show the headline amount as net ('netto') or gross ('brutto'). */
+    priceType: 'net' | 'gross'
     simplePrice: string
     simpleIncludes: string[]
     categories: UniversalPricingCategory[]
@@ -192,6 +194,7 @@ export function buildDefaultUniversalBlocks(): UniversalBlocks {
         },
         pricing: {
             pricingMode: 'simple',
+            priceType: 'net',
             simplePrice: '00 000',
             simpleIncludes: [
                 'Analiza i projekt koncepcyjny',
@@ -276,6 +279,7 @@ export function mergeUniversalWithDefaults(saved: Partial<UniversalBlocks>): Uni
         pricing: {
             ...d.pricing,
             ...(saved.pricing ?? {}),
+            priceType: saved.pricing?.priceType === 'gross' ? 'gross' : 'net',
             simpleIncludes: Array.isArray(saved.pricing?.simpleIncludes) ? saved.pricing.simpleIncludes : d.pricing.simpleIncludes,
             categories: Array.isArray(saved.pricing?.categories) ? saved.pricing.categories : d.pricing.categories,
             payments: Array.isArray(saved.pricing?.payments) ? saved.pricing.payments : d.pricing.payments,

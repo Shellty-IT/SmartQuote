@@ -382,7 +382,18 @@ export function PricingEditor({ blocks, onChange }: { blocks: UniversalBlocks; o
                 />
             </Field>
 
-            <Field label="Cena nadpisana (priceOverride, PLN brutto — puste = auto z pozycji oferty)">
+            <Field label="Cena netto czy brutto?">
+                <SelectField
+                    value={p.priceType ?? 'net'}
+                    onChange={v => set({ priceType: v as 'net' | 'gross' })}
+                    options={[
+                        { value: 'net', label: 'Netto' },
+                        { value: 'gross', label: 'Brutto' },
+                    ]}
+                />
+            </Field>
+
+            <Field label="Cena nadpisana (priceOverride — puste = auto z pozycji oferty)">
                 <input
                     type="number"
                     min={0}

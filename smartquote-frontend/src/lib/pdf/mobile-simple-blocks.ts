@@ -84,6 +84,8 @@ export interface MobileSimpleProcessBlock {
     validUntil: string
     guarantees: MobileSimpleGuarantee[]
     priceOverride: number | null
+    /** Show the headline amount as net ('netto') or gross ('brutto'). */
+    priceType: 'net' | 'gross'
 }
 
 export interface MobileSimpleFooterBlock {
@@ -206,6 +208,7 @@ export function buildDefaultMobileSimpleBlocks(): MobileSimpleBlocks {
             payment2Percent: '50',
             payment2Amount: '6 000',
             validUntil: '',
+            priceType: 'net',
             guarantees: [
                 { emoji: '🛡️', label: 'Gwarancja 6 miesięcy na błędy' },
                 { emoji: '🔄', label: '3 rundy bezpłatnych poprawek' },
@@ -255,6 +258,7 @@ export function mergeMobileSimpleWithDefaults(saved: Partial<MobileSimpleBlocks>
             priceIncludes: Array.isArray(saved.process?.priceIncludes) ? saved.process.priceIncludes : defaults.process.priceIncludes,
             guarantees: Array.isArray(saved.process?.guarantees) ? saved.process.guarantees : defaults.process.guarantees,
             priceOverride: saved.process?.priceOverride !== undefined ? saved.process.priceOverride : defaults.process.priceOverride,
+            priceType: saved.process?.priceType === 'gross' ? 'gross' : 'net',
         },
         footer: { ...defaults.footer, ...(saved.footer ?? {}) },
     }

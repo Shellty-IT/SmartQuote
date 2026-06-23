@@ -90,6 +90,7 @@ export async function GET(
         number: String(offerRaw.number ?? ''),
         title: String(offerRaw.title ?? ''),
         totalGross: Number(offerRaw.totalGross ?? 0),
+        totalNet: Number(offerRaw.totalNet ?? 0),
         currency: String(offerRaw.currency ?? 'PLN'),
         paymentDays: Number(offerRaw.paymentDays ?? 14),
         createdAt: offerRaw.createdAt ?? new Date().toISOString(),
