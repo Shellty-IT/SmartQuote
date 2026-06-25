@@ -79,6 +79,7 @@ test.describe('Template: classic', () => {
     let state: LifecycleState
 
     test.beforeAll(async ({ browser }) => {
+        test.setTimeout(120_000)
         // Classic offers are created without blocks; items are passed separately.
         // We create the offer with the default templateType path (classic is default).
         const page = await browser.newPage()
@@ -154,7 +155,7 @@ test.describe('Template: classic', () => {
         } finally {
             await page.close()
         }
-    }, { timeout: 120_000 })
+    })
 
     test.afterAll(async ({ browser }) => {
         if (state) await cleanupOffer(browser, state)
@@ -314,8 +315,9 @@ test.describe('Template: proposal', () => {
     let state: LifecycleState
 
     test.beforeAll(async ({ browser }) => {
+        test.setTimeout(120_000)
         state = await setupOffer(browser, 'proposal', PROPOSAL_BLOCKS, 'E2E-Proposal')
-    }, { timeout: 120_000 })
+    })
 
     test.afterAll(async ({ browser }) => {
         if (state) await cleanupOffer(browser, state)
@@ -506,8 +508,9 @@ test.describe('Template: website_v2', () => {
     let state: LifecycleState
 
     test.beforeAll(async ({ browser }) => {
+        test.setTimeout(120_000)
         state = await setupOffer(browser, 'website_v2', WEBSITE_V2_BLOCKS, 'E2E-WebsiteV2')
-    }, { timeout: 120_000 })
+    })
 
     test.afterAll(async ({ browser }) => {
         if (state) await cleanupOffer(browser, state)
@@ -707,8 +710,9 @@ test.describe('Template: website_v3', () => {
     let state: LifecycleState
 
     test.beforeAll(async ({ browser }) => {
+        test.setTimeout(120_000)
         state = await setupOffer(browser, 'website_v3', WEBSITE_V3_BLOCKS, 'E2E-WebsiteV3')
-    }, { timeout: 120_000 })
+    })
 
     test.afterAll(async ({ browser }) => {
         if (state) await cleanupOffer(browser, state)
@@ -868,8 +872,9 @@ test.describe('Template: shop', () => {
     let state: LifecycleState
 
     test.beforeAll(async ({ browser }) => {
+        test.setTimeout(120_000)
         state = await setupOffer(browser, 'shop', SHOP_BLOCKS, 'E2E-Shop')
-    }, { timeout: 120_000 })
+    })
 
     test.afterAll(async ({ browser }) => {
         if (state) await cleanupOffer(browser, state)
@@ -938,8 +943,9 @@ test.describe('Template: mobile_simple', () => {
     let state: LifecycleState
 
     test.beforeAll(async ({ browser }) => {
+        test.setTimeout(120_000)
         state = await setupOffer(browser, 'mobile_simple', MOBILE_SIMPLE_BLOCKS, 'E2E-MobileSimple')
-    }, { timeout: 120_000 })
+    })
 
     test.afterAll(async ({ browser }) => {
         if (state) await cleanupOffer(browser, state)
@@ -1013,8 +1019,9 @@ test.describe('Template: mobile_app', () => {
     let state: LifecycleState
 
     test.beforeAll(async ({ browser }) => {
+        test.setTimeout(120_000)
         state = await setupOffer(browser, 'mobile_app', MOBILE_APP_BLOCKS, 'E2E-MobileApp')
-    }, { timeout: 120_000 })
+    })
 
     test.afterAll(async ({ browser }) => {
         if (state) await cleanupOffer(browser, state)
@@ -1086,8 +1093,9 @@ test.describe('Template: support', () => {
     let state: LifecycleState
 
     test.beforeAll(async ({ browser }) => {
+        test.setTimeout(120_000)
         state = await setupOffer(browser, 'support', SUPPORT_BLOCKS, 'E2E-Support')
-    }, { timeout: 120_000 })
+    })
 
     test.afterAll(async ({ browser }) => {
         if (state) await cleanupOffer(browser, state)
