@@ -42,6 +42,23 @@ function esc(s: string | number | null | undefined): string {
         .replace(/"/g, '&quot;')
 }
 
+// Guard against placeholder / hallucinated image URLs. The AI offer-fill agent
+// used to invent addresses like https://example.com/foo.jpg for portfolio
+// screenshots; those 404 and render as broken-image icons. Treat such URLs (and
+// empty/"#" values) as "no image" so the dashed placeholder shows instead.
+function isUsableImageUrl(url: string | null | undefined): boolean {
+    const u = (url ?? '').trim()
+    if (!u || u === '#') return false
+    if (u.startsWith('data:')) return true
+    try {
+        const host = new URL(u).hostname.toLowerCase()
+        return !/(^|\.)(example|test|localhost)\.(com|org|net)$/.test(host) && host !== 'localhost'
+    } catch {
+        // Relative path or malformed — keep it, the browser will resolve or fail gracefully.
+        return true
+    }
+}
+
 function formatDate(iso: string): string {
     try {
         return new Date(iso).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' })
@@ -296,8 +313,8 @@ function renderPortfolio(blocks: WebsiteV2Blocks, editorMode: boolean, sectionNu
       <div class="work-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:24px;">
         ${b.works.map(w => `
         <div style="border:1px solid #E2E8F0; border-radius:12px; overflow:hidden; box-shadow:0 4px 24px rgba(37,99,235,0.08);">
-          ${w.imageUrl
-            ? `<img src="${esc(w.imageUrl)}" alt="${esc(w.name)}" style="display:block;width:100%;height:180px;object-fit:cover;border-bottom:1px solid #E2E8F0;" />`
+          ${isUsableImageUrl(w.imageUrl)
+            ? `<img src="${esc(w.imageUrl)}" alt="${esc(w.name)}" onerror="this.style.display='none'" style="display:block;width:100%;height:180px;object-fit:cover;border-bottom:1px solid #E2E8F0;" />`
             : `<div style="height:180px; background:repeating-linear-gradient(45deg,#EFF6FF,#EFF6FF 11px,#F8FAFC 11px,#F8FAFC 22px); border-bottom:1px dashed #BFDBFE; display:flex; align-items:center; justify-content:center; color:#94A3B8; font-size:12px;">screenshot realizacji</div>`}
           <div style="padding:16px 18px;">
             <div style="font-weight:600; font-size:15px;">${esc(w.name)}</div>

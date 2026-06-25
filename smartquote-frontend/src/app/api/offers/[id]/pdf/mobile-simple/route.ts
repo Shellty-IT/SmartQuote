@@ -19,6 +19,9 @@ interface SessionWithToken { accessToken?: string }
 interface RawOfferData {
     number?: string | null
     createdAt?: string | null
+    totalNet?: number | null
+    totalGross?: number | null
+    currency?: string | null
     client?: { name?: string | null } | null
     user?: { name?: string | null; email?: string | null } | null
     blocks?: unknown
@@ -87,6 +90,9 @@ export async function GET(
         userEmail: companySettings?.email ?? offer.user?.email ?? undefined,
         userPhone: companySettings?.phone ?? undefined,
         userWebsite: companySettings?.website ?? undefined,
+        totalNet: offer.totalNet ?? undefined,
+        totalGross: offer.totalGross ?? undefined,
+        currency: offer.currency ?? undefined,
     }
 
     const blocks = offer.blocks

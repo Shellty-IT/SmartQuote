@@ -478,8 +478,18 @@ export function ProcessEditor({
             <Field label="Cena netto (tekst, wyświetlana gdy nie ma nadpisania)">
                 <TextInput value={b.priceNet} onChange={v => set({ priceNet: v })} placeholder="12 000" />
             </Field>
-            <Field label="Nadpisanie ceny (liczba, puste = brak)">
+            <Field label="Nadpisanie ceny (liczba, puste = auto z pozycji oferty)">
                 <NumberInput value={b.priceOverride} onChange={v => set({ priceOverride: v })} placeholder="np. 15000" />
+            </Field>
+            <Field label="Cena netto czy brutto?">
+                <select
+                    value={b.priceType ?? 'net'}
+                    onChange={e => set({ priceType: e.target.value as 'net' | 'gross' })}
+                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                >
+                    <option value="net">Netto</option>
+                    <option value="gross">Brutto</option>
+                </select>
             </Field>
 
             <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Co zawiera cena</p>

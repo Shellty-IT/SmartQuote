@@ -380,8 +380,20 @@ export function ShopPricingEditor({ blocks, onChange }: { blocks: ShopBlocks; on
                 <Input value={b.title} onChange={(v) => set({ title: v })} />
             </Field>
 
+            {/* Net / gross choice */}
+            <Field label="Cena netto czy brutto?">
+                <select
+                    value={b.priceType ?? 'gross'}
+                    onChange={(e) => set({ priceType: e.target.value as 'net' | 'gross' })}
+                    className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                    <option value="net">Netto (kwota netto, VAT doliczany)</option>
+                    <option value="gross">Brutto (kwota zawiera VAT)</option>
+                </select>
+            </Field>
+
             {/* Price override */}
-            <Field label="Cena nadrzędna (brutto, opcjonalna)">
+            <Field label="Cena nadrzędna (opcjonalna — zgodna z wyborem netto/brutto powyżej)">
                 <div className="flex items-center gap-2">
                     <input
                         type="number"

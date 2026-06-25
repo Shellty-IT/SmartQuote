@@ -3,6 +3,7 @@
 // Design: navy #1B3A5C + gold #C9A84C, Outfit Variable font (no external network).
 
 import { buildHtmlDocument } from './html-shell'
+import { formatMoney, priceTypeLabel, resolveHeadlinePrice } from './money'
 import type { UniversalBlocks, UniversalSectionKey } from './universal-blocks'
 
 export interface UniversalOfferData {
@@ -15,6 +16,11 @@ export interface UniversalOfferData {
     userEmail?: string
     userPhone?: string
     userWebsite?: string
+    // Computed totals from the offer's line items — used to fill the headline price
+    // when the user has not set a manual override on the pricing block.
+    totalNet?: number
+    totalGross?: number
+    currency?: string
 }
 
 function esc(s: string | undefined | null): string {
@@ -96,8 +102,20 @@ function renderCover(blocks: UniversalBlocks, offer: UniversalOfferData, editorM
 
 // ── Summary ───────────────────────────────────────────────────────────────────
 
-function renderSummary(blocks: UniversalBlocks, editorMode: boolean): string {
+function renderSummary(blocks: UniversalBlocks, offer: UniversalOfferData, editorMode: boolean): string {
     const s = blocks.summary
+    const { amount, label } = resolveHeadlinePrice({
+        priceOverride: blocks.pricing.priceOverride,
+        priceType: blocks.pricing.priceType,
+        totalNet: offer.totalNet,
+        totalGross: offer.totalGross,
+    })
+    // Use the offer's computed total when the user left valueFact as the placeholder;
+    // respect a hand-typed value otherwise.
+    const isPlaceholder = !s.valueFact.trim() || /^[0\s]+$/.test(s.valueFact)
+    const valueDisplay = amount !== null && isPlaceholder
+        ? `${formatMoney(amount, offer.currency)} ${label}`
+        : `${esc(s.valueFact)} ${offer.currency ?? 'PLN'} ${label}`
     const inner = `
 <section style="padding:64px 56px;background:#fff;">
   <div style="max-width:900px;margin:0 auto;">
@@ -120,7 +138,7 @@ function renderSummary(blocks: UniversalBlocks, editorMode: boolean): string {
         </div>
         <div style="background:#1B3A5C;border-radius:12px;padding:18px 20px;">
           <div style="font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.65);font-weight:600;margin-bottom:6px;">Wartość inwestycji</div>
-          <div style="font-size:1.15rem;font-weight:800;color:#C9A84C;">${esc(s.valueFact)} PLN netto</div>
+          <div style="font-size:1.15rem;font-weight:800;color:#C9A84C;">${valueDisplay}</div>
         </div>
       </div>
     </div>
@@ -263,15 +281,27 @@ function renderTimeline(blocks: UniversalBlocks, editorMode: boolean): string {
 
 // ── Pricing ───────────────────────────────────────────────────────────────────
 
-function renderPricing(blocks: UniversalBlocks, editorMode: boolean): string {
+function renderPricing(blocks: UniversalBlocks, offer: UniversalOfferData, editorMode: boolean): string {
     const p = blocks.pricing
     const inner = p.pricingMode === 'simple'
-        ? renderPricingSimple(p)
-        : renderPricingDetailed(p)
+        ? renderPricingSimple(p, offer)
+        : renderPricingDetailed(p, offer)
     return editorWrap(editorMode, 'pricing', inner)
 }
 
-function renderPricingSimple(p: UniversalBlocks['pricing']): string {
+function renderPricingSimple(p: UniversalBlocks['pricing'], offer: UniversalOfferData): string {
+    const { amount, label } = resolveHeadlinePrice({
+        priceOverride: p.priceOverride,
+        priceType: p.priceType,
+        totalNet: offer.totalNet,
+        totalGross: offer.totalGross,
+    })
+    const isPlaceholder = !p.simplePrice.trim() || /^[0\s]+$/.test(p.simplePrice)
+    // Headline = computed offer total (or override) when the manual field is still
+    // a placeholder; otherwise the hand-typed string is preserved.
+    const priceBig = amount !== null && isPlaceholder
+        ? formatMoney(amount, offer.currency)
+        : `${esc(p.simplePrice)} ${offer.currency ?? 'PLN'}`
     return `
 <section style="padding:64px 56px;background:#fff;">
   <div style="max-width:900px;margin:0 auto;">
@@ -281,8 +311,8 @@ function renderPricingSimple(p: UniversalBlocks['pricing']): string {
       <!-- price card -->
       <div style="background:#1B3A5C;border-radius:16px;padding:36px;">
         <div style="font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:16px;">Łączna wartość projektu</div>
-        <div style="font-size:2.8rem;font-weight:800;color:#C9A84C;line-height:1;">${esc(p.simplePrice)}</div>
-        <div style="font-size:.85rem;color:rgba(255,255,255,.6);margin-top:6px;">PLN netto</div>
+        <div style="font-size:2.8rem;font-weight:800;color:#C9A84C;line-height:1;">${priceBig}</div>
+        <div style="font-size:.85rem;color:rgba(255,255,255,.6);margin-top:6px;">${label}</div>
         <div style="height:1px;background:rgba(255,255,255,.15);margin:24px 0;"></div>
         <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;">
           ${p.simpleIncludes.map(item => `
@@ -302,7 +332,7 @@ function renderPricingSimple(p: UniversalBlocks['pricing']): string {
               <span style="font-size:.82rem;font-weight:600;color:#0F172A;">${esc(row.when)}</span>
               <span style="font-size:.82rem;font-weight:700;color:#1B3A5C;">${esc(row.percent)}%</span>
             </div>
-            ${row.amount && row.amount !== '0' ? `<div style="font-size:.75rem;color:#475569;">${esc(row.amount)} PLN netto</div>` : ''}
+            ${row.amount && row.amount !== '0' ? `<div style="font-size:.75rem;color:#475569;">${esc(row.amount)} ${offer.currency ?? 'PLN'} ${label}</div>` : ''}
           </div>`).join('')}
         </div>
         ${p.paymentNote ? `<p style="font-size:.78rem;color:#475569;margin-top:16px;line-height:1.6;">${esc(p.paymentNote)}</p>` : ''}
@@ -312,7 +342,9 @@ function renderPricingSimple(p: UniversalBlocks['pricing']): string {
 </section>`
 }
 
-function renderPricingDetailed(p: UniversalBlocks['pricing']): string {
+function renderPricingDetailed(p: UniversalBlocks['pricing'], offer: UniversalOfferData): string {
+    const currency = offer.currency ?? 'PLN'
+    const label = priceTypeLabel(p.priceType === 'gross' ? 'gross' : 'net')
     return `
 <section style="padding:64px 56px;background:#fff;">
   <div style="max-width:900px;margin:0 auto;">
@@ -332,12 +364,26 @@ function renderPricingDetailed(p: UniversalBlocks['pricing']): string {
               <div style="font-size:.75rem;font-weight:400;color:#475569;">${esc(item.description)}</div>
             </td>
             <td style="padding:11px 12px;color:#475569;text-align:center;white-space:nowrap;">${esc(item.qty)} ${esc(item.unit)}</td>
-            <td style="padding:11px 12px;color:#475569;text-align:right;white-space:nowrap;">${esc(item.unitPrice)} PLN</td>
-            <td style="padding:11px 12px;font-weight:700;color:#1B3A5C;text-align:right;white-space:nowrap;">${esc(item.value)} PLN</td>
+            <td style="padding:11px 12px;color:#475569;text-align:right;white-space:nowrap;">${esc(item.unitPrice)} ${currency}</td>
+            <td style="padding:11px 12px;font-weight:700;color:#1B3A5C;text-align:right;white-space:nowrap;">${esc(item.value)} ${currency}</td>
           </tr>`).join('')}
         </tbody>
       </table>
     </div>`).join('')}
+
+    ${(() => {
+        const { amount } = resolveHeadlinePrice({
+            priceOverride: p.priceOverride,
+            priceType: p.priceType,
+            totalNet: offer.totalNet,
+            totalGross: offer.totalGross,
+        })
+        return amount !== null ? `
+    <div style="display:flex;justify-content:flex-end;align-items:baseline;gap:14px;border-top:2px solid #1B3A5C;padding-top:14px;margin-top:8px;">
+      <span style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#1B3A5C;">Razem (${label})</span>
+      <span style="font-size:1.5rem;font-weight:800;color:#C9A84C;">${formatMoney(amount, currency)}</span>
+    </div>` : ''
+    })()}
 
     <!-- payment schedule -->
     <div style="margin-top:36px;display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;">
@@ -348,7 +394,7 @@ function renderPricingDetailed(p: UniversalBlocks['pricing']): string {
           <div style="display:flex;align-items:center;gap:12px;border-left:3px solid #C9A84C;padding:12px 14px;background:#F8FAFC;border-radius:0 8px 8px 0;">
             <span style="font-weight:800;color:#1B3A5C;min-width:36px;">${esc(row.percent)}%</span>
             <span style="font-size:.82rem;color:#0F172A;flex:1;">${esc(row.when)}</span>
-            ${row.amount && row.amount !== '0' ? `<span style="font-size:.78rem;color:#475569;">${esc(row.amount)} PLN</span>` : ''}
+            ${row.amount && row.amount !== '0' ? `<span style="font-size:.78rem;color:#475569;">${esc(row.amount)} ${currency}</span>` : ''}
           </div>`).join('')}
         </div>
       </div>
@@ -455,13 +501,13 @@ function renderFooter(
 
 // ── Section dispatcher ────────────────────────────────────────────────────────
 
-function renderSection(key: UniversalSectionKey, blocks: UniversalBlocks, editorMode: boolean): string {
+function renderSection(key: UniversalSectionKey, blocks: UniversalBlocks, offer: UniversalOfferData, editorMode: boolean): string {
     switch (key) {
-        case 'summary':  return renderSummary(blocks, editorMode)
+        case 'summary':  return renderSummary(blocks, offer, editorMode)
         case 'needs':    return renderNeeds(blocks, editorMode)
         case 'scope':    return renderScope(blocks, editorMode)
         case 'timeline': return renderTimeline(blocks, editorMode)
-        case 'pricing':  return renderPricing(blocks, editorMode)
+        case 'pricing':  return renderPricing(blocks, offer, editorMode)
         case 'terms':    return renderTerms(blocks, editorMode)
     }
 }
@@ -478,7 +524,7 @@ export function buildUniversalHtml(
     const editorCss = editorMode ? `
   .sq-block:hover { outline: 2px dashed #C9A84C !important; outline-offset: 2px; }` : ''
 
-    const sections = blocks.sections.map(key => renderSection(key, blocks, editorMode)).join('\n')
+    const sections = blocks.sections.map(key => renderSection(key, blocks, offer, editorMode)).join('\n')
 
     return buildHtmlDocument({
         title: `${esc(blocks.cover.serviceTitle)} — Oferta`,

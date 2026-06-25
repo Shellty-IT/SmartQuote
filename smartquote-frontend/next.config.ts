@@ -58,6 +58,14 @@ const nextConfig: NextConfig = {
         root: repoRoot,
     },
 
+    // Keep the Puppeteer/Chromium packages out of the bundle. When the bundler
+    // (Turbopack/webpack) relocates @sparticuz/chromium, its `bin/` directory —
+    // which holds the brotli-compressed Chromium binary — is dropped from the
+    // serverless function, and every PDF route fails at runtime with:
+    //   The input directory ".../@sparticuz/chromium/bin" does not exist.
+    // Externalizing leaves the package on disk so chromium.executablePath() works.
+    serverExternalPackages: ['@sparticuz/chromium', 'puppeteer-core'],
+
     async headers() {
         return [
             {

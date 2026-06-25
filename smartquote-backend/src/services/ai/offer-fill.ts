@@ -532,6 +532,7 @@ ZASADY STRUKTURY JSON:
 - Nie dodawaj markdowna, komentarzy ani tekstu poza JSON.
 - Nie usuwaj pol. Nie zamieniaj obiektow na tekst.
 - Zachowaj kontrolne pola techniczne i URL-e, chyba ze user wyraznie prosi o zmiane.
+- NIGDY nie wymyslaj adresow URL obrazkow ani plikow (pola typu imageUrl, image, photoUrl, src, avatar, logo). Jezeli nie masz prawdziwego adresu podanego przez uzytkownika, zostaw takie pole jako pusty string "" lub zachowaj aktualna wartosc. Zmyslone adresy (np. https://example.com/...jpg) daja zepsute obrazki.
 - Pola cenowe i kwoty dostosuj tylko tekstowo do kontekstu; priceOverride zostaw null, chyba ze user podal konkretna cene.
 - Dla list generuj kompletne, konkretne pozycje zamiast pustych placeholderow.
 - Dla umow zachowaj formalny, precyzyjny jezyk prawniczo-biznesowy, bez przesadnego marketingu.
