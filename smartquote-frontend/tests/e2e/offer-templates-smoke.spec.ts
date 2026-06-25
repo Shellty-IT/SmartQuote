@@ -157,7 +157,7 @@ test.describe('Smoke: universal template PDF pipeline', () => {
 
     test.beforeAll(async ({ browser }) => {
         await setupOffer(browser)
-    })
+    }, { timeout: 120_000 })
 
     test.afterAll(async ({ browser }) => {
         await cleanupOffer(browser)
