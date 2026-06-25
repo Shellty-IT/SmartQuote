@@ -198,10 +198,11 @@ export async function assertValidPdf(
 
 // ─── HTML preview assertions ───────────────────────────────────────────────────
 
+// 'undefined' and 'NaN' are intentionally absent — both appear in base64
+// font data (EMBEDDED_FONTS_CSS ~630 KB) embedded in offer preview HTML.
+// '[object Object]' is safe because '[' is not in the base64 alphabet.
 const DEFAULT_FORBIDDEN_PATTERNS = [
     '[object Object]',
-    'undefined',
-    'NaN',
     'HTML build failed',
     'PDF generation failed',
     'Template mismatch',
