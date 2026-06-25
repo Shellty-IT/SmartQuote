@@ -66,6 +66,34 @@ const nextConfig: NextConfig = {
     // Externalizing leaves the package on disk so chromium.executablePath() works.
     serverExternalPackages: ['@sparticuz/chromium', 'puppeteer-core'],
 
+    // serverExternalPackages alone is NOT enough on Vercel. The file tracer
+    // (@vercel/nft) decides which files to ship in each serverless function by
+    // statically following `require`/`import`. chromium.executablePath() builds
+    // the path to its `bin/` directory at RUNTIME via fs, so the tracer never
+    // sees those data files and drops them — producing the exact 500 above on
+    // every PDF route. outputFileTracingIncludes force-ships the whole package
+    // (JS + the brotli-compressed binary in bin/) into each /pdf/ function.
+    //
+    // Dynamic route segments are written as `*` (a single path segment) on
+    // purpose: a literal `[id]` would be parsed as a glob character class.
+    // Two value globs are provided so the include resolves whether the trace
+    // root is the frontend project or the monorepo root (Vercel uses the latter
+    // here, hence the `/var/task/smartquote-frontend/...` runtime path).
+    outputFileTracingIncludes: {
+        '/api/offers/*/pdf/*': [
+            './node_modules/@sparticuz/chromium/**',
+            './smartquote-frontend/node_modules/@sparticuz/chromium/**',
+        ],
+        '/api/contracts/*/pdf/*': [
+            './node_modules/@sparticuz/chromium/**',
+            './smartquote-frontend/node_modules/@sparticuz/chromium/**',
+        ],
+        '/api/public/contracts/*/pdf/*': [
+            './node_modules/@sparticuz/chromium/**',
+            './smartquote-frontend/node_modules/@sparticuz/chromium/**',
+        ],
+    },
+
     async headers() {
         return [
             {
