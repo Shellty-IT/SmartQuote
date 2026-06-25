@@ -892,3 +892,208 @@ test.describe('Template: shop', () => {
         await assertPreviewRenders(page, `/api/offers/${state.offerId}/shop/preview`)
     })
 })
+
+// ─── mobile_simple ────────────────────────────────────────────────────────────
+
+// Minimal fixture: only sentinel-carrying fields are set; merge function fills the rest.
+const MOBILE_SIMPLE_BLOCKS = {
+    version: 1,
+    sections: ['checklist', 'tech', 'process'] as const,
+    cover: {
+        coverTag: 'E2E-MobileSimple-CoverTag',
+    },
+    checklist: {
+        sectionTitle: 'E2E-MobileSimple-ChecklistTitle',
+    },
+    tech: {
+        sectionTitle: 'E2E-MobileSimple-TechTitle',
+    },
+    process: {
+        processTitle: 'E2E-MobileSimple-ProcessTitle',
+    },
+}
+
+test.describe('Template: mobile_simple', () => {
+    test.setTimeout(90_000)
+
+    let state: LifecycleState
+
+    test.beforeAll(async ({ browser }) => {
+        state = await setupOffer(browser, 'mobile_simple', MOBILE_SIMPLE_BLOCKS, 'E2E-MobileSimple')
+    })
+
+    test.afterAll(async ({ browser }) => {
+        if (state) await cleanupOffer(browser, state)
+    })
+
+    test.beforeEach(async ({ page }) => {
+        await login(page)
+    })
+
+    test('preview HTML contains all 3 section sentinels', async ({ page }) => {
+        await assertPreviewHtml(
+            page,
+            `/api/offers/${state.offerId}/mobile-simple/preview`,
+            {
+                requiredSentinels: [
+                    'E2E-MobileSimple-CoverTag',       // cover.coverTag
+                    'E2E-MobileSimple-ChecklistTitle', // checklist.sectionTitle
+                    'E2E-MobileSimple-TechTitle',      // tech.sectionTitle
+                    'E2E-MobileSimple-ProcessTitle',   // process.processTitle
+                ],
+            },
+        )
+    })
+
+    test('PDF is a valid, complete file', async ({ page }) => {
+        await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/mobile-simple`, { minBytes: 40_000 })
+    })
+
+    test('preview renders in browser without critical errors', async ({ page }) => {
+        await assertPreviewRenders(page, `/api/offers/${state.offerId}/mobile-simple/preview`)
+    })
+})
+
+// ─── mobile_app ───────────────────────────────────────────────────────────────
+
+const MOBILE_APP_BLOCKS = {
+    version: 1,
+    sections: ['vision', 'platform', 'scope', 'architecture', 'timeline', 'pricing', 'postlaunch', 'about'] as const,
+    vision: {
+        sectionTitle: 'E2E-MobileApp-VisionTitle',
+    },
+    platform: {
+        sectionTitle: 'E2E-MobileApp-PlatformTitle',
+    },
+    scope: {
+        sectionTitle: 'E2E-MobileApp-ScopeTitle',
+    },
+    architecture: {
+        sectionTitle: 'E2E-MobileApp-ArchTitle',
+    },
+    timeline: {
+        sectionTitle: 'E2E-MobileApp-TimelineTitle',
+    },
+    pricing: {
+        sectionTitle: 'E2E-MobileApp-PricingTitle',
+    },
+    postlaunch: {
+        sectionTitle: 'E2E-MobileApp-PostlaunchTitle',
+    },
+    about: {
+        sectionTitle: 'E2E-MobileApp-AboutTitle',
+    },
+}
+
+test.describe('Template: mobile_app', () => {
+    test.setTimeout(90_000)
+
+    let state: LifecycleState
+
+    test.beforeAll(async ({ browser }) => {
+        state = await setupOffer(browser, 'mobile_app', MOBILE_APP_BLOCKS, 'E2E-MobileApp')
+    })
+
+    test.afterAll(async ({ browser }) => {
+        if (state) await cleanupOffer(browser, state)
+    })
+
+    test.beforeEach(async ({ page }) => {
+        await login(page)
+    })
+
+    test('preview HTML contains all 8 section sentinels', async ({ page }) => {
+        await assertPreviewHtml(
+            page,
+            `/api/offers/${state.offerId}/mobile-app/preview`,
+            {
+                requiredSentinels: [
+                    'E2E-MobileApp-VisionTitle',     // vision.sectionTitle
+                    'E2E-MobileApp-PlatformTitle',   // platform.sectionTitle
+                    'E2E-MobileApp-ScopeTitle',      // scope.sectionTitle
+                    'E2E-MobileApp-ArchTitle',        // architecture.sectionTitle
+                    'E2E-MobileApp-TimelineTitle',   // timeline.sectionTitle
+                    'E2E-MobileApp-PricingTitle',    // pricing.sectionTitle
+                    'E2E-MobileApp-PostlaunchTitle', // postlaunch.sectionTitle
+                    'E2E-MobileApp-AboutTitle',      // about.sectionTitle
+                ],
+            },
+        )
+    })
+
+    test('PDF is a valid, complete file', async ({ page }) => {
+        await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/mobile-app`, { minBytes: 50_000 })
+    })
+
+    test('preview renders in browser without critical errors', async ({ page }) => {
+        await assertPreviewRenders(page, `/api/offers/${state.offerId}/mobile-app/preview`)
+    })
+})
+
+// ─── support ──────────────────────────────────────────────────────────────────
+
+const SUPPORT_BLOCKS = {
+    version: 1,
+    sections: ['benefits', 'packages', 'scope', 'sla', 'process', 'pricing'] as const,
+    benefits: {
+        sectionTitle: 'E2E-Support-BenefitsTitle',
+    },
+    packages: {
+        sectionTitle: 'E2E-Support-PackagesTitle',
+    },
+    scope: {
+        sectionTitle: 'E2E-Support-ScopeTitle',
+    },
+    sla: {
+        sectionTitle: 'E2E-Support-SlaTitle',
+    },
+    process: {
+        sectionTitle: 'E2E-Support-ProcessTitle',
+    },
+    pricing: {
+        sectionTitle: 'E2E-Support-PricingTitle',
+    },
+}
+
+test.describe('Template: support', () => {
+    test.setTimeout(90_000)
+
+    let state: LifecycleState
+
+    test.beforeAll(async ({ browser }) => {
+        state = await setupOffer(browser, 'support', SUPPORT_BLOCKS, 'E2E-Support')
+    })
+
+    test.afterAll(async ({ browser }) => {
+        if (state) await cleanupOffer(browser, state)
+    })
+
+    test.beforeEach(async ({ page }) => {
+        await login(page)
+    })
+
+    test('preview HTML contains all 6 section sentinels', async ({ page }) => {
+        await assertPreviewHtml(
+            page,
+            `/api/offers/${state.offerId}/support/preview`,
+            {
+                requiredSentinels: [
+                    'E2E-Support-BenefitsTitle', // benefits.sectionTitle
+                    'E2E-Support-PackagesTitle', // packages.sectionTitle
+                    'E2E-Support-ScopeTitle',    // scope.sectionTitle
+                    'E2E-Support-SlaTitle',      // sla.sectionTitle
+                    'E2E-Support-ProcessTitle',  // process.sectionTitle
+                    'E2E-Support-PricingTitle',  // pricing.sectionTitle
+                ],
+            },
+        )
+    })
+
+    test('PDF is a valid, complete file', async ({ page }) => {
+        await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/support`, { minBytes: 50_000 })
+    })
+
+    test('preview renders in browser without critical errors', async ({ page }) => {
+        await assertPreviewRenders(page, `/api/offers/${state.offerId}/support/preview`)
+    })
+})
