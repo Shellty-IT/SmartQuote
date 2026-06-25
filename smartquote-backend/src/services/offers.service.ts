@@ -1,6 +1,7 @@
 // src/services/offers.service.ts
 import { randomBytes } from 'crypto';
 import { OfferStatus, Prisma } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime/library';
 import { config } from '../config';
 import { createModuleLogger } from '../lib/logger';
 import { offersRepository, OfferItemData, UpdateOfferData } from '../repositories/offers.repository';
@@ -56,7 +57,24 @@ function getStatusTimestampKey(status: string): keyof UpdateOfferData | null {
 export class OffersService {
     async create(userId: string, data: CreateOfferInput) {
         const itemsWithTotals = buildItemsWithTotals(data.items);
-        const offerTotals = calculateOfferTotals(itemsWithTotals);
+        let offerTotals = calculateOfferTotals(itemsWithTotals);
+
+        // Document-template offers carry no line items — their price is typed into
+        // the block editor. Mirror that block price override onto the offer totals
+        // so the list, details and PDF all show the same value from the start.
+        if (data.blocks != null && offerTotals.totalGross.isZero()) {
+            const fromBlocks = syncTotalsFromBlocks(
+                data.blocks as Record<string, unknown>,
+                data.templateType,
+            );
+            if (fromBlocks) {
+                offerTotals = {
+                    totalNet: new Decimal(fromBlocks.totalNet),
+                    totalVat: new Decimal(fromBlocks.totalVat),
+                    totalGross: new Decimal(fromBlocks.totalGross),
+                };
+            }
+        }
 
         // Retry up to 5 times to handle rare concurrent-request collisions
         for (let attempt = 0; attempt < 5; attempt++) {
@@ -137,10 +155,14 @@ export class OffersService {
                 ? (data.blocks as Prisma.InputJsonValue)
                 : Prisma.JsonNull;
 
-            // When the proposal template has a priceOverride, sync it to the offer totals
-            // so all views (list, details, PDF) show the same price.
+            // When a block template has a priceOverride, sync it to the offer totals
+            // so all views (list, details, PDF) show the same price. The block key
+            // holding the override differs per template, hence existing.templateType.
             if (data.blocks != null && !data.items) {
-                const totals = syncTotalsFromBlocks(data.blocks as Record<string, unknown>);
+                const totals = syncTotalsFromBlocks(
+                    data.blocks as Record<string, unknown>,
+                    existing.templateType,
+                );
                 if (totals) {
                     updateData.totalGross = totals.totalGross;
                     updateData.totalNet = totals.totalNet;
