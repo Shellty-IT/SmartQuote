@@ -181,7 +181,10 @@ test.describe('Smoke: universal template PDF pipeline', () => {
     })
 
     test('PDF is a valid, complete file', async ({ page }) => {
-        await assertValidPdf(page, `/api/offers/${offerId}/pdf/universal`, { minBytes: 30_000 })
+        await assertValidPdf(page, `/api/offers/${offerId}/pdf/universal`, {
+            minBytes: 30_000,
+            expectedTexts: ['E2E-Universal-SummaryTitle', 'E2E-TimelineKickoff', 'E2E-TermsFormaUmowy'],
+        })
     })
 
     test('preview renders in browser without critical errors', async ({ page }) => {

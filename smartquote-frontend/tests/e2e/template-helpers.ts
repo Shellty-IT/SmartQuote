@@ -9,6 +9,7 @@
 
 import type { Page, APIRequestContext, ConsoleMessage, Browser } from '@playwright/test'
 import { expect } from '@playwright/test'
+import { PDFParse } from 'pdf-parse'
 import { login } from './helpers'
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
@@ -173,7 +174,7 @@ export async function loginAndSeed(
 export async function assertValidPdf(
     page: Page,
     pdfPath: string,
-    opts: { minBytes?: number } = {},
+    opts: { minBytes?: number; expectedTexts?: string[] } = {},
 ): Promise<void> {
     const minBytes = opts.minBytes ?? 20_000
 
@@ -194,6 +195,17 @@ export async function assertValidPdf(
 
     const tail = buf.slice(Math.max(0, buf.byteLength - 1024)).toString('ascii')
     expect(tail, `PDF missing %%EOF at ${pdfPath}`).toContain('%%EOF')
+
+    if (opts.expectedTexts && opts.expectedTexts.length > 0) {
+        const parser = new PDFParse({ data: buf, verbosity: 0 })
+        const result = await parser.getText()
+        await parser.destroy()
+        // Normalise whitespace: PDF text extractors may insert newlines mid-word
+        const text = result.text.replace(/\s+/g, ' ')
+        for (const expected of opts.expectedTexts) {
+            expect(text, `PDF ${pdfPath} missing text: "${expected}"`).toContain(expected)
+        }
+    }
 }
 
 // ─── HTML preview assertions ───────────────────────────────────────────────────

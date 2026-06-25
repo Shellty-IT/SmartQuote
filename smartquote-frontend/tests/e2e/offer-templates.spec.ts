@@ -5,13 +5,15 @@
 // Validation layers per template:
 //   HTML preview: sentinels for every section + forbidden garbage patterns
 //   PDF bytes: %PDF- header, %%EOF footer, content-type, min size
+//   PDF text:  section sentinels extracted from PDF content (via pdf-parse)
 //   Browser render: loads preview in Playwright, checks console errors
 //
 // Templates without a preview route (classic) only get PDF validation.
 //
 // Etap 2: classic, proposal
 // Etap 3: website_v2, website_v3, shop
-// Etap 4: mobile_simple, mobile_app, support  (to be added)
+// Etap 4: mobile_simple, mobile_app, support
+// Etap 5: PDF text assertions (pdf-parse) added to all PDF tests
 
 import { test, type Browser } from '@playwright/test'
 import {
@@ -165,7 +167,11 @@ test.describe('Template: classic', () => {
     test('PDF is a valid, complete file with correct content-type', async ({ page }) => {
         // Classic has no /preview route — PDF is the only endpoint to validate.
         // A 5-item offer with description/terms should produce at least 60 KB.
-        await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/classic`, { minBytes: 60_000 })
+        await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/classic`, {
+            minBytes: 60_000,
+            // Item names are ASCII-only — reliably extractable from Puppeteer PDF
+            expectedTexts: ['E2E-Item1-Implementacja', 'E2E-Item2-Projekt'],
+        })
     })
 })
 
@@ -358,11 +364,10 @@ test.describe('Template: proposal', () => {
 
     test('PDF is a valid, complete file', async ({ page }) => {
         // 2-page document with 11 sections → expect at least 80 KB
-        await assertValidPdf(
-            page,
-            `/api/offers/${state.offerId}/pdf/proposal`,
-            { minBytes: 80_000 },
-        )
+        await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/proposal`, {
+            minBytes: 80_000,
+            expectedTexts: ['E2E-ProposalHeader-Tag', 'E2E-ScopeTitle', 'E2E-BenefitsTitle'],
+        })
     })
 
     test('preview renders in browser without critical errors', async ({ page }) => {
@@ -529,7 +534,10 @@ test.describe('Template: website_v2', () => {
     })
 
     test('PDF is a valid, complete file', async ({ page }) => {
-        await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/website-v2`, { minBytes: 50_000 })
+        await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/website-v2`, {
+            minBytes: 50_000,
+            expectedTexts: ['E2E-WV2-ProblemTitle', 'E2E-WV2-FeaturesTitle', 'E2E-WV2-FaqTitle'],
+        })
     })
 
     test('preview renders in browser without critical errors', async ({ page }) => {
@@ -730,7 +738,10 @@ test.describe('Template: website_v3', () => {
     })
 
     test('PDF is a valid, complete file', async ({ page }) => {
-        await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/website-v3`, { minBytes: 60_000 })
+        await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/website-v3`, {
+            minBytes: 60_000,
+            expectedTexts: ['E2E-WV3-NeedsTitle', 'E2E-WV3-PricingTitle', 'E2E-WV3-AboutTitle'],
+        })
     })
 
     test('preview renders in browser without critical errors', async ({ page }) => {
@@ -885,7 +896,10 @@ test.describe('Template: shop', () => {
     })
 
     test('PDF is a valid, complete file', async ({ page }) => {
-        await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/shop`, { minBytes: 50_000 })
+        await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/shop`, {
+            minBytes: 50_000,
+            expectedTexts: ['E2E-Shop-ScopeTitle', 'E2E-Shop-PricingTitle', 'E2E-Shop-AboutTitle'],
+        })
     })
 
     test('preview renders in browser without critical errors', async ({ page }) => {
@@ -946,7 +960,10 @@ test.describe('Template: mobile_simple', () => {
     })
 
     test('PDF is a valid, complete file', async ({ page }) => {
-        await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/mobile-simple`, { minBytes: 40_000 })
+        await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/mobile-simple`, {
+            minBytes: 40_000,
+            expectedTexts: ['E2E-MobileSimple-ChecklistTitle', 'E2E-MobileSimple-TechTitle'],
+        })
     })
 
     test('preview renders in browser without critical errors', async ({ page }) => {
@@ -1022,7 +1039,10 @@ test.describe('Template: mobile_app', () => {
     })
 
     test('PDF is a valid, complete file', async ({ page }) => {
-        await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/mobile-app`, { minBytes: 50_000 })
+        await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/mobile-app`, {
+            minBytes: 50_000,
+            expectedTexts: ['E2E-MobileApp-VisionTitle', 'E2E-MobileApp-PricingTitle', 'E2E-MobileApp-AboutTitle'],
+        })
     })
 
     test('preview renders in browser without critical errors', async ({ page }) => {
@@ -1090,7 +1110,10 @@ test.describe('Template: support', () => {
     })
 
     test('PDF is a valid, complete file', async ({ page }) => {
-        await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/support`, { minBytes: 50_000 })
+        await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/support`, {
+            minBytes: 50_000,
+            expectedTexts: ['E2E-Support-BenefitsTitle', 'E2E-Support-SlaTitle', 'E2E-Support-PricingTitle'],
+        })
     })
 
     test('preview renders in browser without critical errors', async ({ page }) => {
