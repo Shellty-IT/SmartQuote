@@ -901,7 +901,9 @@ test.describe('Template: shop', () => {
     test('PDF is a valid, complete file', async ({ page }) => {
         await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/shop`, {
             minBytes: 50_000,
-            expectedTexts: ['E2E-Shop-ScopeTitle', 'E2E-Shop-PricingTitle', 'E2E-Shop-AboutTitle'],
+            // Section titles use letter-spacing CSS → spaced chars in PDF (e.g. "E 2 E - S C O P E").
+            // Use body/item text that extracts cleanly without CSS transforms.
+            expectedTexts: ['E2E-Shop-SummaryCol1', 'E2E-ScopeItem1', 'E2E-TLStep1'],
         })
     })
 
