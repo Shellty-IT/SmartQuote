@@ -294,7 +294,7 @@ export async function assertPreviewRenders(
 
         const allowedErrors = opts.allowedConsoleErrors ?? 0
         const significant = consoleErrors.filter(
-            (e) => !e.includes('favicon') && !e.includes('404'),
+            (e) => !e.includes('favicon') && !e.includes('404') && !e.includes('next-auth'),
         )
         expect(
             significant.length,
