@@ -366,7 +366,10 @@ test.describe('Template: proposal', () => {
         // 2-page document with 11 sections → expect at least 80 KB
         await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/proposal`, {
             minBytes: 80_000,
-            expectedTexts: ['E2E-ProposalHeader-Tag', 'E2E-ScopeTitle', 'E2E-BenefitsTitle'],
+            // Header uses letter-spacing (spaced chars in PDF) and titles use text-transform:
+            // uppercase — use body paragraph text and list item text instead, which are
+            // never transformed by CSS and extract reliably via pdf-parse.
+            expectedTexts: ['E2E-IntroParagraph1', 'E2E-ScopeItem1', 'E2E-DemoBody'],
         })
     })
 
