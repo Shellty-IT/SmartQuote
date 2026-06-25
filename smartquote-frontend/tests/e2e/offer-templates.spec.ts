@@ -10,7 +10,7 @@
 // Templates without a preview route (classic) only get PDF validation.
 //
 // Etap 2: classic, proposal
-// Etap 3: website_v2, website_v3, shop        (to be added)
+// Etap 3: website_v2, website_v3, shop
 // Etap 4: mobile_simple, mobile_app, support  (to be added)
 
 import { test, type Browser } from '@playwright/test'
@@ -367,5 +367,528 @@ test.describe('Template: proposal', () => {
 
     test('preview renders in browser without critical errors', async ({ page }) => {
         await assertPreviewRenders(page, `/api/offers/${state.offerId}/proposal/preview`)
+    })
+})
+
+// ══════════════════════════════════════════════════════════════════════════════
+// WEBSITE V2
+// Szablon strona internetowa (domyślny) — 8 sekcji, wszystkie aktywne.
+// ══════════════════════════════════════════════════════════════════════════════
+
+const WEBSITE_V2_BLOCKS = {
+    version: 1,
+    sections: ['problem', 'about', 'features', 'portfolio', 'process', 'technology', 'pricing', 'faq'],
+    cover: {
+        title: 'E2E-WV2-CoverTitle',
+        recipientName: 'Firma E2E',
+        subtitle: 'Propozycja realizacji strony internetowej.',
+        knowledgePill: 'Obsługa bez technicznej wiedzy',
+        deadlineDays: 14,
+        validityDays: 14,
+    },
+    footer: { tagline: 'E2E-WV2-FooterTagline' },
+    problem: {
+        enabled: true,
+        title: 'E2E-WV2-ProblemTitle',
+        painPoints: [
+            { emoji: '😟', text: 'E2E-PainPoint1 — brak strony.' },
+            { emoji: '📱', text: 'E2E-PainPoint2 — stara strona.' },
+        ],
+        punchline: 'E2E-ProblemPunchline',
+    },
+    about: {
+        enabled: true,
+        title: 'E2E-WV2-AboutTitle',
+        name: 'E2E-AboutName',
+        role: 'Twórca stron',
+        bio: 'E2E-AboutBio — opis specjalisty.',
+        stats: [
+            { value: 'E2E-50+', label: 'stron' },
+            { value: 'E2E-8lat', label: 'doświadczenia' },
+        ],
+    },
+    features: {
+        enabled: true,
+        title: 'E2E-WV2-FeaturesTitle',
+        subtitle: 'E2E-FeaturesSubtitle',
+        items: [
+            { title: 'E2E-Feature1', description: 'Opis funkcji 1.' },
+            { title: 'E2E-Feature2', description: 'Opis funkcji 2.' },
+        ],
+        extras: ['E2E-Extra1', 'E2E-Extra2'],
+    },
+    portfolio: {
+        enabled: true,
+        title: 'E2E-WV2-PortfolioTitle',
+        subtitle: 'E2E-PortfolioSubtitle',
+        works: [
+            { name: 'E2E-Work1', url: '#', imageUrl: '' },
+            { name: 'E2E-Work2', url: '#', imageUrl: '' },
+        ],
+        testimonials: [
+            { stars: 5, text: 'E2E-Testimonial1', name: 'Jan K.', company: 'Firma A' },
+        ],
+    },
+    process: {
+        enabled: true,
+        title: 'E2E-WV2-ProcessTitle',
+        steps: [
+            { title: 'E2E-Step1', description: 'Rozmawiamy.' },
+            { title: 'E2E-Step2', description: 'Projektuję.' },
+            { title: 'E2E-Step3', description: 'Buduję.' },
+            { title: 'E2E-Step4', description: 'Oddaję.' },
+        ],
+        timelineNote: 'E2E-ProcessTimeline',
+    },
+    technology: {
+        enabled: true,
+        title: 'E2E-WV2-TechnologyTitle',
+        subtitle: 'E2E-TechSubtitle',
+        recommended: {
+            iconChar: 'W',
+            iconBg: '#21759B',
+            name: 'E2E-TechRecommended',
+            description: 'Opis rekomendowanej technologii.',
+            pros: ['Łatwa obsługa', 'Duży wybór'],
+        },
+        alternatives: [
+            {
+                name: 'E2E-TechAlt1',
+                subtitle: 'Nowoczesna',
+                badge: '⚡ ALT',
+                description: 'Opis alternatywy.',
+                pros: ['Szybkość', 'Design'],
+            },
+        ],
+        footer: 'E2E-TechFooter',
+    },
+    pricing: {
+        enabled: true,
+        priceOverride: null,
+        includes: [
+            'E2E-PricingInclude1',
+            'E2E-PricingInclude2',
+            'E2E-PricingInclude3',
+        ],
+        paymentSchedule: [
+            { percent: 50, label: 'E2E-PayStep1' },
+            { percent: 50, label: 'E2E-PayStep2' },
+        ],
+        guarantees: [
+            { emoji: '🛡️', text: 'E2E-Guarantee1' },
+        ],
+        costs: [
+            { type: 'Jednorazowo', amount: '—', description: 'E2E-CostDesc1' },
+        ],
+    },
+    faq: {
+        enabled: true,
+        title: 'E2E-WV2-FaqTitle',
+        subtitle: 'E2E-FaqSubtitle',
+        items: [
+            { question: 'E2E-FaqQ1?', answer: 'E2E-FaqA1.' },
+            { question: 'E2E-FaqQ2?', answer: 'E2E-FaqA2.' },
+        ],
+    },
+}
+
+test.describe('Template: website_v2', () => {
+    test.setTimeout(90_000)
+
+    let state: LifecycleState
+
+    test.beforeAll(async ({ browser }) => {
+        state = await setupOffer(browser, 'website_v2', WEBSITE_V2_BLOCKS, 'E2E-WebsiteV2')
+    })
+
+    test.afterAll(async ({ browser }) => {
+        if (state) await cleanupOffer(browser, state)
+    })
+
+    test.beforeEach(async ({ page }) => {
+        await login(page)
+    })
+
+    test('preview HTML contains all 8 section sentinels', async ({ page }) => {
+        await assertPreviewHtml(
+            page,
+            `/api/offers/${state.offerId}/website-v2/preview`,
+            {
+                requiredSentinels: [
+                    'E2E-WV2-ProblemTitle',
+                    'E2E-WV2-AboutTitle',
+                    'E2E-WV2-FeaturesTitle',
+                    'E2E-WV2-PortfolioTitle',
+                    'E2E-WV2-ProcessTitle',
+                    'E2E-WV2-TechnologyTitle',
+                    'E2E-PricingInclude1',
+                    'E2E-WV2-FaqTitle',
+                ],
+            },
+        )
+    })
+
+    test('PDF is a valid, complete file', async ({ page }) => {
+        await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/website-v2`, { minBytes: 50_000 })
+    })
+
+    test('preview renders in browser without critical errors', async ({ page }) => {
+        await assertPreviewRenders(page, `/api/offers/${state.offerId}/website-v2/preview`)
+    })
+})
+
+// ══════════════════════════════════════════════════════════════════════════════
+// WEBSITE V3
+// Szablon strona internetowa (zaawansowany) — 11 sekcji, wszystkie aktywne.
+// ══════════════════════════════════════════════════════════════════════════════
+
+const WEBSITE_V3_BLOCKS = {
+    version: 1,
+    sections: ['needs', 'packages', 'process', 'scope', 'timeline', 'pricing', 'portfolio', 'testimonials', 'about', 'stack', 'terms'],
+    cover: {
+        badgeLabel: 'E2E-WV3-BadgeLabel',
+        subtitle: 'PROPOZYCJA E2E STRONY INTERNETOWEJ',
+        promisePills: ['E2E-Pill1', 'E2E-Pill2', 'E2E-Pill3'],
+        deadlineDays: 21,
+        validityDays: 14,
+    },
+    footer: {
+        ctaHeadline: 'E2E-WV3-CtaHeadline',
+        ctaSubtitle: 'E2E-WV3-CtaSubtitle',
+    },
+    needs: {
+        enabled: true,
+        title: 'E2E-WV3-NeedsTitle',
+        intro: 'E2E-NeedsIntro — opis potrzeb klienta.',
+        challengeTitle: 'Wyzwanie',
+        challengeItems: ['E2E-Challenge1', 'E2E-Challenge2'],
+        responseTitle: 'Nasza odpowiedź',
+        responseItems: ['E2E-Response1', 'E2E-Response2'],
+    },
+    packages: {
+        enabled: true,
+        title: 'E2E-WV3-PackagesTitle',
+        subtitle: 'Pakiety',
+        packages: [
+            {
+                name: 'E2E-PackageStart',
+                tagline: 'dla startujących firm',
+                price: 'od 2 500',
+                highlighted: false,
+                ctaLabel: 'Wybieram',
+                features: [
+                    { label: 'Do 5 podstron', included: true },
+                    { label: 'SSL', included: true },
+                ],
+            },
+            {
+                name: 'E2E-PackageBiznes',
+                tagline: 'dla rozwijających się',
+                price: 'od 4 900',
+                highlighted: true,
+                ctaLabel: 'Wybieram Biznes',
+                features: [
+                    { label: 'Do 10 podstron', included: true },
+                    { label: 'CMS WordPress', included: true },
+                ],
+            },
+        ],
+    },
+    process: {
+        enabled: true,
+        title: 'E2E-WV3-ProcessTitle',
+        steps: [
+            { label: 'E2E-ProcessStep1', duration: '1 dzień', description: 'Briefing.' },
+            { label: 'E2E-ProcessStep2', duration: '2 dni', description: 'Projekt.' },
+            { label: 'E2E-ProcessStep3', duration: '5 dni', description: 'Kodowanie.' },
+        ],
+        timelineNote: 'E2E-ProcessTimelineNote',
+    },
+    scope: {
+        enabled: true,
+        title: 'E2E-WV3-ScopeTitle',
+        categories: [
+            {
+                title: 'E2E-ScopeCat1',
+                items: [
+                    { label: 'E2E-ScopeItem1', description: 'Opis.', optional: false },
+                    { label: 'E2E-ScopeItem2', optional: true },
+                ],
+            },
+            {
+                title: 'E2E-ScopeCat2',
+                items: [
+                    { label: 'E2E-ScopeItem3', description: 'Opis.', optional: false },
+                ],
+            },
+        ],
+    },
+    timeline: {
+        enabled: true,
+        title: 'E2E-WV3-TimelineTitle',
+        columnLabels: ['Tydz. 1', 'Tydz. 2', 'Tydz. 3'],
+        rows: [
+            { label: 'E2E-TimelineRow1', fills: [1, 0, 0] as Array<0 | 0.5 | 1> },
+            { label: 'E2E-TimelineRow2', fills: [0, 1, 0.5] as Array<0 | 0.5 | 1> },
+            { label: 'E2E-TimelineRow3', fills: [0, 0, 1] as Array<0 | 0.5 | 1> },
+        ],
+        estimatedCompletion: 'E2E-EstimatedCompletion',
+    },
+    pricing: {
+        enabled: true,
+        title: 'E2E-WV3-PricingTitle',
+        priceOverride: null,
+        items: [
+            { label: 'E2E-PricingItem1', details: 'szczegóły', price: '4 900', isExtra: false },
+            { label: 'E2E-PricingExtra1', details: 'opcja', price: '250', isExtra: true },
+        ],
+        paymentSteps: [
+            { percent: 40, label: 'Zaliczka', description: 'E2E-PayDesc1' },
+            { percent: 60, label: 'Płatność końcowa', description: 'E2E-PayDesc2' },
+        ],
+    },
+    portfolio: {
+        enabled: true,
+        title: 'E2E-WV3-PortfolioTitle',
+        portfolioUrl: '',
+        items: [
+            { name: 'E2E-PortfolioItem1', industry: 'IT', description: 'E2E opis projektu.', tech: 'WordPress', thumbColor: 'violet' },
+        ],
+    },
+    testimonials: {
+        enabled: true,
+        title: 'E2E-WV3-TestimonialsTitle',
+        items: [
+            { quote: 'E2E-Quote1', initials: 'JK', name: 'Jan K.', position: 'CEO, Firma E2E' },
+        ],
+    },
+    about: {
+        enabled: true,
+        title: 'E2E-WV3-AboutTitle',
+        bio1: 'E2E-AboutBio1',
+        bio2: 'E2E-AboutBio2',
+        stats: [
+            { value: 'E2E-6lat', label: 'doświadczenia' },
+            { value: 'E2E-80', label: 'projektów' },
+        ],
+    },
+    stack: {
+        enabled: true,
+        title: 'E2E-WV3-StackTitle',
+        technologies: ['E2E-Tech1', 'E2E-Tech2', 'WordPress', 'Next.js'],
+    },
+    terms: {
+        enabled: true,
+        title: 'E2E-WV3-TermsTitle',
+        guarantees: [
+            { emoji: '🛡️', title: 'E2E-Guarantee1', description: 'Gwarancja 12 miesięcy.' },
+            { emoji: '🔄', title: 'E2E-Guarantee2', description: '3 rundy poprawek.' },
+        ],
+        paymentTerms: 'E2E-PaymentTerms',
+        contractForm: 'E2E-ContractForm',
+        copyrightTerms: 'E2E-CopyrightTerms',
+    },
+}
+
+test.describe('Template: website_v3', () => {
+    test.setTimeout(90_000)
+
+    let state: LifecycleState
+
+    test.beforeAll(async ({ browser }) => {
+        state = await setupOffer(browser, 'website_v3', WEBSITE_V3_BLOCKS, 'E2E-WebsiteV3')
+    })
+
+    test.afterAll(async ({ browser }) => {
+        if (state) await cleanupOffer(browser, state)
+    })
+
+    test.beforeEach(async ({ page }) => {
+        await login(page)
+    })
+
+    test('preview HTML contains all 11 section sentinels', async ({ page }) => {
+        await assertPreviewHtml(
+            page,
+            `/api/offers/${state.offerId}/website-v3/preview`,
+            {
+                requiredSentinels: [
+                    'E2E-WV3-NeedsTitle',
+                    'E2E-WV3-PackagesTitle',
+                    'E2E-WV3-ProcessTitle',
+                    'E2E-WV3-ScopeTitle',
+                    'E2E-WV3-TimelineTitle',
+                    'E2E-WV3-PricingTitle',
+                    'E2E-WV3-PortfolioTitle',
+                    'E2E-WV3-TestimonialsTitle',
+                    'E2E-WV3-AboutTitle',
+                    'E2E-WV3-StackTitle',
+                    'E2E-WV3-TermsTitle',
+                ],
+            },
+        )
+    })
+
+    test('PDF is a valid, complete file', async ({ page }) => {
+        await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/website-v3`, { minBytes: 60_000 })
+    })
+
+    test('preview renders in browser without critical errors', async ({ page }) => {
+        await assertPreviewRenders(page, `/api/offers/${state.offerId}/website-v3/preview`)
+    })
+})
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SHOP
+// Szablon sklep internetowy — 8 sekcji, wszystkie aktywne.
+// ══════════════════════════════════════════════════════════════════════════════
+
+const SHOP_BLOCKS = {
+    version: 1,
+    sections: ['summary', 'scope', 'platforms', 'timeline', 'pricing', 'techStack', 'warranty', 'about'],
+    cover: {
+        tag: 'E2E-Shop-CoverTag',
+        subtitle: 'SKLEPU INTERNETOWEGO E2E',
+        validityDays: 30,
+    },
+    footer: {
+        ctaTitle: 'E2E-Shop-CtaTitle',
+        ctaSubtitle: 'E2E-Shop-CtaSubtitle',
+        ctaButtonText: 'AKCEPTUJĘ',
+    },
+    summary: {
+        enabled: true,
+        columns: [
+            { title: 'E2E-Shop-SummaryCol1', body: 'E2E opis celu projektu sklepu.' },
+            { title: 'E2E-Shop-SummaryCol2', body: 'E2E opis zakresu dostawy.' },
+        ],
+    },
+    scope: {
+        enabled: true,
+        title: 'E2E-Shop-ScopeTitle',
+        items: [
+            { icon: '🎨', title: 'E2E-ScopeItem1', description: 'Projekt graficzny.' },
+            { icon: '⚙️', title: 'E2E-ScopeItem2', description: 'Konfiguracja platformy.' },
+            { icon: '💳', title: 'E2E-ScopeItem3', description: 'Płatności online.' },
+        ],
+    },
+    platforms: {
+        enabled: true,
+        title: 'E2E-Shop-PlatformsTitle',
+        options: [
+            {
+                name: 'E2E-Platform-WooCommerce',
+                recommended: true,
+                pros: 'E2E-pros elastyczność',
+                cons: 'E2E-cons utrzymanie',
+                forWho: 'E2E-forWho małe sklepy',
+                priceFrom: '8 000 zł',
+            },
+            {
+                name: 'E2E-Platform-PrestaShop',
+                recommended: false,
+                pros: 'E2E-pros szybkość',
+                cons: 'E2E-cons plugin',
+                forWho: 'E2E-forWho średnie sklepy',
+                priceFrom: '10 000 zł',
+            },
+        ],
+    },
+    timeline: {
+        enabled: true,
+        title: 'E2E-Shop-TimelineTitle',
+        steps: [
+            { title: 'E2E-TLStep1', duration: '7 dni', description: 'Projekt graficzny.' },
+            { title: 'E2E-TLStep2', duration: '14 dni', description: 'Wdrożenie platformy.' },
+            { title: 'E2E-TLStep3', duration: '7 dni', description: 'Integracje i testy.' },
+        ],
+    },
+    pricing: {
+        enabled: true,
+        title: 'E2E-Shop-PricingTitle',
+        priceOverride: null,
+        priceType: 'net' as const,
+        items: [
+            { name: 'E2E-PricingItem1', description: 'Projekt + wdrożenie', price: '8 000 zł' },
+            { name: 'E2E-PricingItem2', description: 'Integracje', price: '2 000 zł' },
+        ],
+        extras: [
+            { name: 'E2E-PricingExtra1', price: '+ 1 500 zł' },
+        ],
+        paymentSchedule: [
+            { percent: '40%', description: 'E2E-PayDesc1' },
+            { percent: '60%', description: 'E2E-PayDesc2' },
+        ],
+    },
+    techStack: {
+        enabled: true,
+        title: 'E2E-Shop-TechStackTitle',
+        tags: ['E2E-Tag1-WooCommerce', 'E2E-Tag2-WordPress', 'PHP 8', 'WooCommerce'],
+        description: 'E2E-TechStackDescription',
+    },
+    warranty: {
+        enabled: true,
+        title: 'E2E-Shop-WarrantyTitle',
+        items: [
+            { icon: '🛡️', title: 'E2E-WarrantyItem1', description: 'Gwarancja 12 miesięcy.' },
+            { icon: '🔄', title: 'E2E-WarrantyItem2', description: '3 rundy poprawek.' },
+        ],
+        ctaTitle: 'E2E-WarrantyCtaTitle',
+        ctaSubtitle: 'E2E-WarrantyCtaSubtitle',
+        ctaButtonText: 'AKCEPTUJĘ',
+    },
+    about: {
+        enabled: true,
+        title: 'E2E-Shop-AboutTitle',
+        description: 'E2E-AboutDescription — opis wykonawcy.',
+        stats: [
+            { value: 'E2E-50+', label: 'sklepów' },
+            { value: 'E2E-8lat', label: 'doświadczenia' },
+        ],
+    },
+}
+
+test.describe('Template: shop', () => {
+    test.setTimeout(90_000)
+
+    let state: LifecycleState
+
+    test.beforeAll(async ({ browser }) => {
+        state = await setupOffer(browser, 'shop', SHOP_BLOCKS, 'E2E-Shop')
+    })
+
+    test.afterAll(async ({ browser }) => {
+        if (state) await cleanupOffer(browser, state)
+    })
+
+    test.beforeEach(async ({ page }) => {
+        await login(page)
+    })
+
+    test('preview HTML contains all 8 section sentinels', async ({ page }) => {
+        await assertPreviewHtml(
+            page,
+            `/api/offers/${state.offerId}/shop/preview`,
+            {
+                requiredSentinels: [
+                    'E2E-Shop-SummaryCol1',
+                    'E2E-Shop-ScopeTitle',
+                    'E2E-Shop-PlatformsTitle',
+                    'E2E-Shop-TimelineTitle',
+                    'E2E-Shop-PricingTitle',
+                    'E2E-Shop-TechStackTitle',
+                    'E2E-Shop-WarrantyTitle',
+                    'E2E-Shop-AboutTitle',
+                ],
+            },
+        )
+    })
+
+    test('PDF is a valid, complete file', async ({ page }) => {
+        await assertValidPdf(page, `/api/offers/${state.offerId}/pdf/shop`, { minBytes: 50_000 })
+    })
+
+    test('preview renders in browser without critical errors', async ({ page }) => {
+        await assertPreviewRenders(page, `/api/offers/${state.offerId}/shop/preview`)
     })
 })
