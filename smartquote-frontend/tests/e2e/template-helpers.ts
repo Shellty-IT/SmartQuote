@@ -36,7 +36,11 @@ function authHeaders(token: string): Record<string, string> {
 }
 
 function backendBaseUrl(): string {
-    return (process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8080').replace(/\/$/, '')
+    return (
+        process.env.PLAYWRIGHT_BACKEND_URL ??
+        process.env.NEXT_PUBLIC_BACKEND_URL ??
+        'http://localhost:8080'
+    ).replace(/\/$/, '')
 }
 
 /**

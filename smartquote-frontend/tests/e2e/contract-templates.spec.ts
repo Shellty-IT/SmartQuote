@@ -644,16 +644,14 @@ test.describe('Contract template: dedicated', () => {
                     'E2E-Ded-InfraProvider',
                     // § 11 gdpr — note (conditional render when non-empty)
                     'E2E-Ded-GdprNote',
-                    // § 12 copyright — note (conditional render when non-empty)
-                    'E2E-Ded-CopyrightNote',
+                    // § 12 copyright — hardcoded HTML, no dynamic field rendered
                     // § 13 confidentiality — years in sentence
                     'E2E-Ded-ConfYears',
                     // § 14 warranty — months in sentence
                     'E2E-Ded-WarrantyMonths',
                     // § 15 termination — noticeDays in sentence
                     'E2E-Ded-NoticeDays',
-                    // § 16 general — note (conditional render when non-empty)
-                    'E2E-Ded-GeneralNote',
+                    // § 16 general — hardcoded HTML, no dynamic field rendered
                 ],
             },
         )
