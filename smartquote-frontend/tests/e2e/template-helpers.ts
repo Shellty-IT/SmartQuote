@@ -134,6 +134,70 @@ export async function deleteOffer(
     })
 }
 
+export interface SeedContractOptions {
+    templateType: string
+    blocks?: unknown
+    title?: string
+    clientId: string
+}
+
+/**
+ * Creates a contract via the backend REST API and returns its id.
+ * Requires at least one item (schema validator enforces it).
+ */
+export async function seedContract(
+    token: string,
+    request: APIRequestContext,
+    opts: SeedContractOptions,
+): Promise<string> {
+    const { templateType, blocks, clientId } = opts
+    const title = opts.title ?? `E2E-Contract-${templateType}-${Date.now()}`
+    const baseUrl = backendBaseUrl()
+
+    const res = await request.post(`${baseUrl}/api/contracts`, {
+        headers: authHeaders(token),
+        data: {
+            clientId,
+            title,
+            templateType,
+            blocks: blocks ?? null,
+            items: [
+                {
+                    name: 'Usługa testowa E2E',
+                    quantity: 1,
+                    unitPrice: 5000,
+                    vatRate: 23,
+                    unit: 'szt.',
+                },
+            ],
+            paymentDays: 14,
+        },
+    })
+
+    if (!res.ok()) {
+        const text = await res.text()
+        throw new Error(`seedContract(${templateType}) [${res.status()}]: ${text.slice(0, 400)}`)
+    }
+    const body = await res.json()
+    const id = body?.data?.id as string | undefined
+    if (!id) throw new Error(`seedContract: no id in response: ${JSON.stringify(body).slice(0, 200)}`)
+    return id
+}
+
+/**
+ * Deletes a previously seeded contract. Call in afterAll cleanup.
+ */
+export async function deleteContract(
+    token: string,
+    request: APIRequestContext,
+    contractId: string,
+): Promise<void> {
+    const baseUrl = backendBaseUrl()
+    await request.delete(`${baseUrl}/api/contracts/${contractId}`, {
+        headers: authHeaders(token),
+    })
+}
+
 // ─── Login + seed convenience ─────────────────────────────────────────────────
 
 /**
