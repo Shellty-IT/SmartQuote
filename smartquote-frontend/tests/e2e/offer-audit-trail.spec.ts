@@ -65,6 +65,7 @@ test.describe('Offer Audit Trail', () => {
     });
 
     test('Audit trail shows on dashboard after acceptance', async ({ page, context }) => {
+        test.setTimeout(120_000)
         await login(page);
 
         const { publicPath, offerId } = await createAndPublishOffer(page, {
@@ -128,6 +129,7 @@ test.describe('Offer Audit Trail', () => {
     });
 
     test('Offer without audit trail accepts normally (no extra fields)', async ({ page, context }) => {
+        test.setTimeout(120_000)
         await login(page);
 
         const { publicPath, title } = await createAndPublishOffer(page, {

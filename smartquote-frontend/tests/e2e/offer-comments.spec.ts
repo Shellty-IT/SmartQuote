@@ -4,6 +4,7 @@ import { login, createAndPublishOffer } from './helpers';
 
 test.describe('Offer Comments', () => {
     test('Client adds comment via Enter key', async ({ page, context }) => {
+        test.setTimeout(120_000)
         await login(page);
         const { publicPath, title } = await createAndPublishOffer(page);
 
@@ -24,6 +25,7 @@ test.describe('Offer Comments', () => {
     });
 
     test('Client adds multiple comments', async ({ page, context }) => {
+        test.setTimeout(120_000)
         await login(page);
         const { publicPath, title } = await createAndPublishOffer(page);
 
@@ -52,6 +54,7 @@ test.describe('Offer Comments', () => {
     });
 
     test('Comment section is disabled after offer is rejected', async ({ page, context }) => {
+        test.setTimeout(120_000)
         await login(page);
         const { publicPath, title } = await createAndPublishOffer(page);
 

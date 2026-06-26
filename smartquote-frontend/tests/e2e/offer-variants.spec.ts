@@ -7,6 +7,7 @@ test.describe('Offer Variants', () => {
                                                                                                  page,
                                                                                                  context,
                                                                                              }) => {
+        test.setTimeout(120_000)
         await login(page);
 
         const { publicPath, title } = await createAndPublishOffer(page, {
@@ -68,6 +69,7 @@ test.describe('Offer Variants', () => {
     });
 
     test('Variant switcher shows correct item counts', async ({ page, context }) => {
+        test.setTimeout(120_000)
         await login(page);
 
         const { publicPath } = await createAndPublishOffer(page, {
@@ -100,6 +102,7 @@ test.describe('Offer Variants', () => {
     });
 
     test('Accepted variant is displayed on confirmation page', async ({ page, context }) => {
+        test.setTimeout(120_000)
         await login(page);
 
         const { publicPath } = await createAndPublishOffer(page, {

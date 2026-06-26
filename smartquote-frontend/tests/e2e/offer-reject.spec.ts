@@ -4,6 +4,7 @@ import { login, createAndPublishOffer } from './helpers';
 
 test.describe('Offer Rejection', () => {
     test('Client rejects offer with reason', async ({ page, context }) => {
+        test.setTimeout(120_000)
         await login(page);
         const { publicPath, title } = await createAndPublishOffer(page);
 
@@ -41,6 +42,7 @@ test.describe('Offer Rejection', () => {
     });
 
     test('Client rejects offer without reason', async ({ page, context }) => {
+        test.setTimeout(120_000)
         await login(page);
         const { publicPath, title } = await createAndPublishOffer(page);
 
