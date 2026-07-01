@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { leadsApi } from '@/lib/api/leads.api';
+import { ApiError, getApiFieldErrors } from '@/lib/api';
 import { Button, Input, Textarea } from '@/components/ui';
 import { useToast } from '@/contexts/ToastContext';
 import { useTranslations } from '@/i18n';
@@ -64,8 +65,14 @@ export default function NewLeadPage() {
             } else {
                 router.push('/dashboard/leads');
             }
-        } catch {
-            toast.error(commonTr.errorTitle, 'Nie udało się utworzyć leadu');
+        } catch (err) {
+            const fieldErrors = getApiFieldErrors(err);
+            if (Object.keys(fieldErrors).length > 0) {
+                setErrors(fieldErrors);
+                toast.error(commonTr.errorTitle, Object.values(fieldErrors)[0]);
+            } else {
+                toast.error(commonTr.errorTitle, err instanceof ApiError ? err.message : 'Nie udało się utworzyć leadu');
+            }
         } finally {
             setIsLoading(false);
         }

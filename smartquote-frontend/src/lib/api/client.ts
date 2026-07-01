@@ -272,6 +272,24 @@ class ApiClient {
     }
 }
 
+/**
+ * Maps backend Zod validation details (e.g. [{ field: 'body.email', message: 'Invalid email' }])
+ * to a flat Record<fieldName, message> usable directly as form field errors.
+ * Returns an empty object for non-validation errors (e.g. network failures, 500s).
+ */
+export function getApiFieldErrors(error: unknown): Record<string, string> {
+    if (!(error instanceof ApiError) || !Array.isArray(error.details)) return {};
+
+    const fieldErrors: Record<string, string> = {};
+    for (const detail of error.details) {
+        if (detail && typeof detail === 'object' && 'field' in detail && 'message' in detail) {
+            const field = String((detail as { field: unknown }).field).replace(/^body\./, '');
+            fieldErrors[field] = String((detail as { message: unknown }).message);
+        }
+    }
+    return fieldErrors;
+}
+
 export const api = new ApiClient(`${API_URL}/api`);
 
 export async function checkBackendHealth(): Promise<boolean> {
