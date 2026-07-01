@@ -107,7 +107,8 @@ export class LeadsService {
 
     async getStats(userId: string) {
         const [total, byStatus] = await Promise.all([
-            prisma.lead.count({ where: { userId } }),
+            // Converted leads are now clients — exclude them so "total" matches the leads list.
+            prisma.lead.count({ where: { userId, status: { not: 'CONVERTED' } } }),
             leadsRepository.countByStatus(userId),
         ]);
 

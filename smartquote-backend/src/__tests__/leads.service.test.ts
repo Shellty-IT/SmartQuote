@@ -230,7 +230,7 @@ describe('LeadsService.getStats', () => {
 
         expect(result.total).toBe(5);
         expect(result.byStatus.NEW).toBe(3);
-        expect(prismaMock.lead.count).toHaveBeenCalledWith({ where: { userId: USER_ID } });
+        expect(prismaMock.lead.count).toHaveBeenCalledWith({ where: { userId: USER_ID, status: { not: 'CONVERTED' } } });
         expect(repo.countByStatus).toHaveBeenCalledWith(USER_ID);
     });
 });
