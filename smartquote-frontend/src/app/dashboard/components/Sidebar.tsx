@@ -101,8 +101,8 @@ export default function Sidebar() {
                 'flex items-center gap-3 border-b border-sidebar-border px-5 pb-5 pt-6',
                 collapsed && 'justify-center px-3'
             )}>
-                <div className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-xl bg-gradient-primary shadow-glow ring-1 ring-white/20">
-                    <Image src="/logo.svg" alt="SmartQuote" width={28} height={28} className="object-contain" />
+                <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl">
+                    <Image src="/logo.svg" alt="SmartQuote" width={40} height={40} className="h-full w-full object-contain" />
                 </div>
                 {!collapsed && (
                     <div className="flex min-w-0 flex-col leading-tight">

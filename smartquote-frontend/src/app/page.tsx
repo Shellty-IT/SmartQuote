@@ -101,8 +101,8 @@ export default function LoginPage() {
             <div className="relative w-full max-w-md">
                 <div className="rounded-2xl border border-border bg-card p-8 shadow-elevated">
                     <div className="mb-8 text-center">
-                        <div className="mx-auto mb-4 grid h-16 w-16 place-items-center overflow-hidden rounded-2xl bg-gradient-primary shadow-glow ring-1 ring-white/20">
-                            <Image src="/logo.svg" alt="SmartQuote" width={40} height={40} className="object-contain" priority />
+                        <div className="mx-auto mb-4 h-16 w-16 overflow-hidden rounded-2xl">
+                            <Image src="/logo.svg" alt="SmartQuote" width={64} height={64} className="h-full w-full object-contain" priority />
                         </div>
                         <h1 className="text-2xl font-bold tracking-tight">SmartQuote</h1>
                         <p className="mt-1 text-sm text-muted-foreground">{tr.login.subtitle}</p>
