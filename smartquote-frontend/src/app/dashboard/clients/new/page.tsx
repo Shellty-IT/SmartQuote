@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { clientsApi } from '@/lib/api';
+import { clientsApi, ApiError, getApiFieldErrors } from '@/lib/api';
 import { Button, Input, Select, Textarea } from '@/components/ui';
 import { CreateClientInput } from '@/types';
 import { useToast } from '@/contexts/ToastContext';
@@ -85,8 +85,14 @@ export default function NewClientPage() {
             await clientsApi.create(cleanData);
             toast.success(t.toasts.addedTitle, t.toasts.addedDesc.replace('{name}', formData.name));
             router.push('/dashboard/clients');
-        } catch {
-            toast.error(t.toasts.error, t.toasts.addError);
+        } catch (err) {
+            const errors = getApiFieldErrors(err);
+            if (Object.keys(errors).length > 0) {
+                setFieldErrors(errors);
+                toast.error(t.toasts.error, Object.values(errors)[0]);
+            } else {
+                toast.error(t.toasts.error, err instanceof ApiError ? err.message : t.toasts.addError);
+            }
         } finally {
             setIsLoading(false);
         }

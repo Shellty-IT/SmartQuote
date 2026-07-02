@@ -29,7 +29,8 @@ const STATUS_COLORS: Record<LeadStatus, string> = {
     LOST:      'bg-slate-500/15 text-slate-500 dark:text-slate-400 ring-slate-500/20',
 };
 
-const ALL_STATUSES: LeadStatus[] = ['NEW', 'CONTACTED', 'CONVERTED', 'LOST'];
+// Converted leads have become clients and are no longer shown on the leads list.
+const ALL_STATUSES: LeadStatus[] = ['NEW', 'CONTACTED', 'LOST'];
 
 export default function LeadsPage() {
     const router = useRouter();
@@ -109,7 +110,7 @@ export default function LeadsPage() {
 
             {/* Stats bar */}
             {stats && (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                     <button
                         onClick={() => setStatusFilter(null)}
                         className={cn(

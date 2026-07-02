@@ -4,7 +4,7 @@
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useClient } from '@/hooks/useClients';
-import { clientsApi, ApiError } from '@/lib/api';
+import { clientsApi, ApiError, getApiFieldErrors } from '@/lib/api';
 import { Button, Input, Select, Textarea } from '@/components/ui';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { UpdateClientInput } from '@/types';
@@ -59,7 +59,11 @@ export default function EditClientPage({ params }: { params: Promise<{ id: strin
             toast.success(t.toasts.updated, t.toasts.updatedDesc);
             router.push(`/dashboard/clients/${id}`);
         } catch (err) {
-            if (err instanceof ApiError) {
+            const errors = getApiFieldErrors(err);
+            if (Object.keys(errors).length > 0) {
+                setFieldErrors(errors);
+                toast.error(t.toasts.saveError, Object.values(errors)[0]);
+            } else if (err instanceof ApiError) {
                 toast.error(t.toasts.saveError, err.message);
             } else {
                 toast.error(t.toasts.error, t.toasts.unexpectedError);

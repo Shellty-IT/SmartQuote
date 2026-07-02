@@ -51,7 +51,8 @@ export class LeadsRepository {
 
         const where = {
             userId,
-            ...(filter.status ? { status: filter.status as PrismaLeadStatus } : {}),
+            // A converted lead has become a client and no longer belongs on the leads list.
+            ...(filter.status ? { status: filter.status as PrismaLeadStatus } : { status: { not: PrismaLeadStatus.CONVERTED } }),
             ...(filter.search
                 ? {
                       OR: [

@@ -1,6 +1,6 @@
 // src/lib/api/index.ts
 
-export { api, ApiError, checkBackendHealth } from './client';
+export { api, ApiError, checkBackendHealth, getApiFieldErrors } from './client';
 export { authApi } from './auth.api';
 export { clientsApi } from './clients.api';
 export { offersApi } from './offers.api';
