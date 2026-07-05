@@ -379,7 +379,7 @@ export function mergeServicesWithDefaults(
 
     return {
         version: 1,
-        sections: filterValid(saved.sections ?? defaults.sections),
+        sections: Array.isArray(saved.sections) ? filterValid(saved.sections) : defaults.sections,
         header: { ...defaults.header, ...saved.header },
         parties: {
             ...defaults.parties,

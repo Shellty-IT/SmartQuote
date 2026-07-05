@@ -331,7 +331,7 @@ export function mergeShopWithDefaults(
 
     return {
         version: 1,
-        sections: filterValid(saved.sections ?? defaults.sections),
+        sections: Array.isArray(saved.sections) ? filterValid(saved.sections) : defaults.sections,
         cover: { ...defaults.cover, ...saved.cover },
         footer: { ...defaults.footer, ...saved.footer },
         summary: {
