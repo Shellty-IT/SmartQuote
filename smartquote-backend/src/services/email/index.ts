@@ -1,6 +1,6 @@
 // smartquote_backend/src/services/email/index.ts
 import { EmailSender } from './sender';
-import type { SmtpConfig } from '../../types';
+import type { SmtpConfig, EmailProviderConfig } from '../../types';
 
 class EmailService {
     private sender = new EmailSender();
@@ -9,32 +9,36 @@ class EmailService {
         return this.sender.testConnection(config);
     }
 
-    sendOfferAccepted(to: string, data: any, smtpConfig: SmtpConfig) {
-        return this.sender.sendOfferAccepted(to, data, smtpConfig);
+    testResendConnection(apiKey: string) {
+        return this.sender.testResendConnection(apiKey);
     }
 
-    sendOfferRejected(to: string, data: any, smtpConfig: SmtpConfig) {
-        return this.sender.sendOfferRejected(to, data, smtpConfig);
+    sendOfferAccepted(to: string, data: any, emailConfig: EmailProviderConfig) {
+        return this.sender.sendOfferAccepted(to, data, emailConfig);
     }
 
-    sendNewComment(to: string, data: any, smtpConfig: SmtpConfig) {
-        return this.sender.sendNewComment(to, data, smtpConfig);
+    sendOfferRejected(to: string, data: any, emailConfig: EmailProviderConfig) {
+        return this.sender.sendOfferRejected(to, data, emailConfig);
     }
 
-    sendOfferLink(to: string, data: any, smtpConfig: SmtpConfig) {
-        return this.sender.sendOfferLink(to, data, smtpConfig);
+    sendNewComment(to: string, data: any, emailConfig: EmailProviderConfig) {
+        return this.sender.sendNewComment(to, data, emailConfig);
     }
 
-    sendAcceptanceConfirmation(to: string, data: any, smtpConfig: SmtpConfig) {
-        return this.sender.sendAcceptanceConfirmation(to, data, smtpConfig);
+    sendOfferLink(to: string, data: any, emailConfig: EmailProviderConfig) {
+        return this.sender.sendOfferLink(to, data, emailConfig);
     }
 
-    sendSignatureConfirmation(to: string, data: any, smtpConfig: SmtpConfig) {
-        return this.sender.sendSignatureConfirmation(to, data, smtpConfig);
+    sendAcceptanceConfirmation(to: string, data: any, emailConfig: EmailProviderConfig) {
+        return this.sender.sendAcceptanceConfirmation(to, data, emailConfig);
     }
 
-    sendFollowUpReminder(to: string, data: any, smtpConfig: SmtpConfig) {
-        return this.sender.sendFollowUpReminder(to, data, smtpConfig);
+    sendSignatureConfirmation(to: string, data: any, emailConfig: EmailProviderConfig) {
+        return this.sender.sendSignatureConfirmation(to, data, emailConfig);
+    }
+
+    sendFollowUpReminder(to: string, data: any, emailConfig: EmailProviderConfig) {
+        return this.sender.sendFollowUpReminder(to, data, emailConfig);
     }
 }
 

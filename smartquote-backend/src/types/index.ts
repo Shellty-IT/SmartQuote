@@ -378,6 +378,16 @@ export interface SmtpConfig {
     replyTo?: string;
 }
 
+export interface ResendConfig {
+    apiKey: string;
+    from: string;
+    replyTo?: string;
+}
+
+export type EmailProviderConfig =
+    | { provider: 'smtp'; config: SmtpConfig }
+    | { provider: 'resend'; config: ResendConfig };
+
 export type EmailLogStatus = 'SENT' | 'FAILED' | 'DRAFT';
 
 export interface SendEmailInput {

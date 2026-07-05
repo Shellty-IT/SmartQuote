@@ -19,6 +19,10 @@ import type {
     UpdateSmtpConfigInput,
     TestSmtpConnectionInput,
     TestSmtpConnectionResult,
+    ResendConfigData,
+    UpdateResendConfigInput,
+    TestResendConnectionInput,
+    TestResendConnectionResult,
 } from '@/types';
 
 export function useSettings() {
@@ -182,6 +186,112 @@ export function useSmtpConfig() {
                 smtpPass: null,
                 smtpFrom: null,
                 smtpConfigured: false,
+            });
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Failed to delete configuration';
+            setError(message);
+            throw err;
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    return {
+        config,
+        isLoading,
+        isSaving,
+        isTesting,
+        isDeleting,
+        error,
+        refetch: fetchConfig,
+        updateConfig,
+        testConnection,
+        testSavedConnection,
+        deleteConfig,
+    };
+}
+
+export function useResendConfig() {
+    const [config, setConfig] = useState<ResendConfigData | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isTesting, setIsTesting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const fetchConfig = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const data = await settingsApi.getResendConfig();
+            setConfig(data);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to fetch Resend config');
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchConfig();
+    }, [fetchConfig]);
+
+    const updateConfig = async (data: UpdateResendConfigInput): Promise<ResendConfigData> => {
+        setIsSaving(true);
+        setError(null);
+        try {
+            const updated = await settingsApi.updateResendConfig(data);
+            setConfig(updated);
+            return updated;
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Failed to save configuration';
+            setError(message);
+            throw err;
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const testConnection = async (data: TestResendConnectionInput): Promise<TestResendConnectionResult> => {
+        setIsTesting(true);
+        setError(null);
+        try {
+            const result = await settingsApi.testResendConnection(data);
+            return result;
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Connection test error';
+            setError(message);
+            throw err;
+        } finally {
+            setIsTesting(false);
+        }
+    };
+
+    const testSavedConnection = async (): Promise<TestResendConnectionResult> => {
+        setIsTesting(true);
+        setError(null);
+        try {
+            const result = await settingsApi.testSavedResendConnection();
+            return result;
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Connection test error';
+            setError(message);
+            throw err;
+        } finally {
+            setIsTesting(false);
+        }
+    };
+
+    const deleteConfig = async (): Promise<void> => {
+        setIsDeleting(true);
+        setError(null);
+        try {
+            await settingsApi.deleteResendConfig();
+            setConfig({
+                resendApiKey: null,
+                resendFromEmail: null,
+                resendFromName: null,
+                resendConfigured: false,
             });
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Failed to delete configuration';

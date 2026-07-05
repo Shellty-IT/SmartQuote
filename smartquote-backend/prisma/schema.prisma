@@ -63,6 +63,12 @@ model UserSettings {
   smtpFrom       String?
   smtpConfigured Boolean @default(false)
 
+  emailProvider    String  @default("smtp")
+  resendApiKey     String?
+  resendFromEmail  String?
+  resendFromName   String?
+  resendConfigured Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

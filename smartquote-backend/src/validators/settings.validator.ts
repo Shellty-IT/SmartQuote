@@ -32,6 +32,7 @@ export const updateSettingsSchema = z.object({
         weeklyReport: z.boolean().optional(),
         aiTone: z.enum(['professional', 'friendly', 'formal']).optional(),
         aiAutoSuggestions: z.boolean().optional(),
+        emailProvider: z.enum(['smtp', 'resend']).optional(),
     }),
 });
 
@@ -98,5 +99,19 @@ export const testSmtpConnectionSchema = z.object({
         user: z.string().min(1, 'Użytkownik jest wymagany'),
         pass: z.string().min(1, 'Hasło jest wymagane'),
         from: z.string().optional(),
+    }),
+});
+
+export const updateResendConfigSchema = z.object({
+    body: z.object({
+        resendApiKey: z.string().max(500).optional(),
+        resendFromEmail: z.string().email('Nieprawidłowy adres e-mail').max(200),
+        resendFromName: z.string().max(200).optional(),
+    }),
+});
+
+export const testResendConnectionSchema = z.object({
+    body: z.object({
+        apiKey: z.string().min(1, 'Klucz API jest wymagany'),
     }),
 });

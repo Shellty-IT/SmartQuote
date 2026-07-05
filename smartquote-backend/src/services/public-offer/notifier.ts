@@ -2,7 +2,7 @@
 import { Logger } from 'pino';
 import { notificationService } from '../notification.service';
 import { emailService } from '../email';
-import { getDecryptedSmtpConfig } from '../settings.service';
+import { getUserEmailConfig } from '../settings.service';
 import { triggerPostMortem } from '../shared/postmortem.utils';
 
 export class PublicOfferNotifier {
@@ -89,10 +89,10 @@ export class PublicOfferNotifier {
             return;
         }
 
-        getDecryptedSmtpConfig(userId)
-            .then((smtpConfig) => {
-                if (!smtpConfig) {
-                    this.logger.warn({ userId }, 'SMTP not configured');
+        getUserEmailConfig(userId)
+            .then((emailConfig) => {
+                if (!emailConfig) {
+                    this.logger.warn({ userId }, 'Email provider not configured');
                     return;
                 }
 
@@ -111,7 +111,7 @@ export class PublicOfferNotifier {
                         sellerName: data.sellerName,
                         companyName: data.companyName,
                     },
-                    smtpConfig,
+                    emailConfig,
                 );
             })
             .then(() => {

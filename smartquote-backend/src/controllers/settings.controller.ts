@@ -181,6 +181,63 @@ export async function testSavedSmtpConnection(req: Request, res: Response, next:
     }
 }
 
+export async function getResendConfig(req: Request, res: Response, next: NextFunction) {
+    try {
+        const userId = req.user!.id;
+        const config = await settingsService.getResendConfig(userId);
+        successResponse(res, config);
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function updateResendConfig(req: Request, res: Response, next: NextFunction) {
+    try {
+        const userId = req.user!.id;
+        const config = await settingsService.updateResendConfig(userId, req.body);
+        successResponse(res, config);
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function deleteResendConfig(req: Request, res: Response, next: NextFunction) {
+    try {
+        const userId = req.user!.id;
+        const result = await settingsService.deleteResendConfig(userId);
+        successResponse(res, result);
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function testResendConnection(req: Request, res: Response, next: NextFunction) {
+    try {
+        const result = await settingsService.testResendConnection(req.body.apiKey);
+        if (result.success) {
+            successResponse(res, { connected: true, message: 'Połączenie z Resend udane' });
+        } else {
+            errorResponse(res, 'RESEND_TEST_FAILED', result.error || 'Nie udało się połączyć', 400);
+        }
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function testSavedResendConnection(req: Request, res: Response, next: NextFunction) {
+    try {
+        const userId = req.user!.id;
+        const result = await settingsService.testSavedResendConnection(userId);
+        if (result.success) {
+            successResponse(res, { connected: true, message: 'Połączenie z Resend udane' });
+        } else {
+            errorResponse(res, 'RESEND_TEST_FAILED', result.error || 'Nie udało się połączyć', 400);
+        }
+    } catch (error) {
+        next(error);
+    }
+}
+
 export async function deleteAccount(req: Request, res: Response, next: NextFunction) {
     try {
         const userId = req.user!.id;

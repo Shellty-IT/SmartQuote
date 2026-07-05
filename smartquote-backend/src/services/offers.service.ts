@@ -8,7 +8,7 @@ import { offersRepository, OfferItemData, UpdateOfferData } from '../repositorie
 import { CreateOfferInput, UpdateOfferInput, OfferItemInput } from '../types';
 import { generateOfferNumber } from '../utils/offerNumber';
 import { emailService } from './email';
-import { getDecryptedSmtpConfig } from './settings.service';
+import { getUserEmailConfig } from './settings.service';
 import { buildItemWithTotals, calculateOfferTotals, ItemWithTotals } from './shared/offer-calculations';
 import { triggerPostMortem } from './shared/postmortem.utils';
 import { NotFoundError, ValidationError, ExternalServiceError } from '../errors/domain.errors';
@@ -414,9 +414,9 @@ export class OffersService {
             throw new ValidationError('Klient nie ma podanego adresu email');
         }
 
-        const smtpConfig = await getDecryptedSmtpConfig(userId);
-        if (!smtpConfig) {
-            throw new ValidationError('Skonfiguruj skrzynkę pocztową w ustawieniach');
+        const emailConfig = await getUserEmailConfig(userId);
+        if (!emailConfig) {
+            throw new ValidationError('Skonfiguruj sposób wysyłki e-maili w ustawieniach');
         }
 
         let publicUrl: string;
@@ -441,7 +441,7 @@ export class OffersService {
                 sellerName: offer.user.name ?? offer.user.email,
                 companyName: offer.user.companyInfo?.name ?? null,
             },
-            smtpConfig,
+            emailConfig,
         );
 
         if (!sent) {
