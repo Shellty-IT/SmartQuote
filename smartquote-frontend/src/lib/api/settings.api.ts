@@ -16,6 +16,10 @@ import type {
     UpdateSmtpConfigInput,
     TestSmtpConnectionInput,
     TestSmtpConnectionResult,
+    ResendConfigData,
+    UpdateResendConfigInput,
+    TestResendConnectionInput,
+    TestResendConnectionResult,
 } from '@/types';
 
 export const settingsApi = {
@@ -116,6 +120,31 @@ export const settingsApi = {
     testSavedSmtpConnection: async (): Promise<TestSmtpConnectionResult> => {
         const response = await api.post<TestSmtpConnectionResult>('/settings/smtp/test-saved');
         return response.data as TestSmtpConnectionResult;
+    },
+
+    getResendConfig: async (): Promise<ResendConfigData> => {
+        const response = await api.get<ResendConfigData>('/settings/resend');
+        return response.data as ResendConfigData;
+    },
+
+    updateResendConfig: async (data: UpdateResendConfigInput): Promise<ResendConfigData> => {
+        const response = await api.put<ResendConfigData>('/settings/resend', data);
+        return response.data as ResendConfigData;
+    },
+
+    deleteResendConfig: async (): Promise<{ message: string }> => {
+        const response = await api.delete<{ message: string }>('/settings/resend');
+        return response.data as { message: string };
+    },
+
+    testResendConnection: async (data: TestResendConnectionInput): Promise<TestResendConnectionResult> => {
+        const response = await api.post<TestResendConnectionResult>('/settings/resend/test', data);
+        return response.data as TestResendConnectionResult;
+    },
+
+    testSavedResendConnection: async (): Promise<TestResendConnectionResult> => {
+        const response = await api.post<TestResendConnectionResult>('/settings/resend/test-saved');
+        return response.data as TestResendConnectionResult;
     },
 
     deleteAccount: async (): Promise<{ message: string }> => {

@@ -12,7 +12,7 @@ import ProfileSection from './components/ProfileSection';
 import SecuritySection from './components/SecuritySection';
 import CompanySection from './components/CompanySection';
 import NotificationsSection from './components/NotificationsSection';
-import SmtpSection from './components/SmtpSection';
+import EmailProviderTab from './components/EmailProviderTab';
 import AISection from './components/AISection';
 import ApiKeysSection from './components/ApiKeysSection';
 
@@ -67,7 +67,7 @@ export default function SettingsPage() {
             case 'security':      return <SecuritySection onChangePassword={actions.changePassword} />;
             case 'company':       return <CompanySection company={settings.companyInfo} onUpdate={actions.updateCompany} />;
             case 'notifications': return <NotificationsSection settings={settings.settings} onUpdate={actions.updatePreferences} />;
-            case 'smtp':          return <SmtpSection />;
+            case 'smtp':          return <EmailProviderTab emailProvider={settings.settings.emailProvider} onProviderChange={(emailProvider) => actions.updatePreferences({ emailProvider })} />;
             case 'ai':            return <AISection settings={settings.settings} onUpdate={actions.updatePreferences} />;
             case 'api-keys':      return <ApiKeysSection apiKeys={settings.apiKeys} onCreate={actions.createApiKey} onToggle={actions.toggleApiKey} onDelete={actions.deleteApiKey} />;
             default:              return null;

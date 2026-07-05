@@ -33,6 +33,12 @@ router.delete('/smtp', settingsController.deleteSmtpConfig);
 router.post('/smtp/test', validate(v.testSmtpConnectionSchema), settingsController.testSmtpConnection);
 router.post('/smtp/test-saved', settingsController.testSavedSmtpConnection);
 
+router.get('/resend', settingsController.getResendConfig);
+router.put('/resend', validate(v.updateResendConfigSchema), settingsController.updateResendConfig);
+router.delete('/resend', settingsController.deleteResendConfig);
+router.post('/resend/test', validate(v.testResendConnectionSchema), settingsController.testResendConnection);
+router.post('/resend/test-saved', settingsController.testSavedResendConnection);
+
 router.delete('/account', settingsController.deleteAccount);
 
 export default router;

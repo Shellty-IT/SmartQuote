@@ -13,7 +13,11 @@ const PRESETS: Record<string, { host: string; port: number }> = {
     custom:  { host: '',                     port: 587 },
 };
 
-export default function SmtpSection() {
+interface SmtpSectionProps {
+    isActive?: boolean;
+}
+
+export default function SmtpSection({ isActive = false }: SmtpSectionProps) {
     const tr = useTranslations('settings');
     const commonTr = useTranslations('common');
 
@@ -119,16 +123,23 @@ export default function SmtpSection() {
     }
 
     return (
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+        <div className={`rounded-2xl border bg-card p-6 shadow-card ${isActive ? 'border-primary/50 ring-1 ring-primary/20' : 'border-border'}`}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
                     <h2 className="text-lg font-semibold text-foreground">{tr.smtp.title}</h2>
                     <p className="text-sm text-muted-foreground">{tr.smtp.subtitle}</p>
                 </div>
-                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${isOwnMailboxActive ? 'bg-status-accepted/15 text-status-accepted' : 'bg-destructive/15 text-destructive'}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${isOwnMailboxActive ? 'bg-status-accepted' : 'bg-destructive'}`} />
-                    {isOwnMailboxActive ? tr.smtp.statusOwn : tr.smtp.statusNotConnected}
-                </span>
+                <div className="flex items-center gap-2">
+                    {isActive && (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-primary/15 text-primary">
+                            {tr.emailProviderSelector.activeLabel}
+                        </span>
+                    )}
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${isOwnMailboxActive ? 'bg-status-accepted/15 text-status-accepted' : 'bg-destructive/15 text-destructive'}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${isOwnMailboxActive ? 'bg-status-accepted' : 'bg-destructive'}`} />
+                        {isOwnMailboxActive ? tr.smtp.statusOwn : tr.smtp.statusNotConnected}
+                    </span>
+                </div>
             </div>
 
             {isOwnMailboxActive ? (

@@ -1,18 +1,10 @@
 // src/services/email/email-transport.ts
 import nodemailer from 'nodemailer';
 import { createModuleLogger } from '../../lib/logger';
-import type { EmailLogStatus } from '../../types';
+import { sendViaResend } from './resend-transport';
+import type { EmailLogStatus, EmailProviderConfig } from '../../types';
 
 const logger = createModuleLogger('email-transport');
-
-export interface SmtpConfig {
-    host: string;
-    port: number;
-    user: string;
-    pass: string;
-    from: string;
-    replyTo?: string;
-}
 
 export interface MailOptions {
     from: string;
@@ -57,8 +49,13 @@ export function appendLinksToBody(body: string, linkLines: string[]): string {
 
 export async function sendEmail(
     mailOptions: MailOptions,
-    smtpConfig: SmtpConfig,
+    emailConfig: EmailProviderConfig,
 ): Promise<{ status: EmailLogStatus; errorMessage?: string }> {
+    if (emailConfig.provider === 'resend') {
+        return sendViaResend(mailOptions, emailConfig.config);
+    }
+
+    const smtpConfig = emailConfig.config;
     const transporter = nodemailer.createTransport({
         host: smtpConfig.host,
         port: smtpConfig.port,

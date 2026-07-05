@@ -3,8 +3,8 @@ import { NotificationType } from '@prisma/client';
 import prisma from '../lib/prisma';
 import { createModuleLogger } from '../lib/logger';
 import { emailService } from './email';
-import { getDecryptedSmtpConfig } from './settings.service';
-import type { SmtpConfig } from '../types';
+import { getUserEmailConfig } from './settings.service';
+import type { EmailProviderConfig } from '../types';
 
 const logger = createModuleLogger('notification-service');
 
@@ -50,7 +50,9 @@ interface FollowUpReminderNotificationData {
 
 interface SmtpSettingsRow {
     emailNotifications: boolean;
+    emailProvider: string;
     smtpConfigured: boolean;
+    resendConfigured: boolean;
     offerNotifications?: boolean;
     followUpReminders?: boolean;
 }
@@ -81,22 +83,23 @@ class NotificationService {
     private async getSmtp(
         userId: string,
         settings: SmtpSettingsRow | null,
-    ): Promise<SmtpConfig | null> {
+    ): Promise<EmailProviderConfig | null> {
         if (!settings) return null;
-        if (!settings.emailNotifications || !settings.smtpConfigured) return null;
+        const isConfigured = settings.emailProvider === 'resend' ? settings.resendConfigured : settings.smtpConfigured;
+        if (!settings.emailNotifications || !isConfigured) return null;
 
         try {
-            return await getDecryptedSmtpConfig(userId);
+            return await getUserEmailConfig(userId);
         } catch (err: unknown) {
-            logger.error({ err, userId }, 'Failed to get SMTP config');
+            logger.error({ err, userId }, 'Failed to get email provider config');
             return null;
         }
     }
 
-    private async getSmtpIfEnabled(userId: string): Promise<SmtpConfig | null> {
+    private async getSmtpIfEnabled(userId: string): Promise<EmailProviderConfig | null> {
         const settings = await prisma.userSettings.findUnique({
             where: { userId },
-            select: { emailNotifications: true, offerNotifications: true, smtpConfigured: true },
+            select: { emailNotifications: true, offerNotifications: true, emailProvider: true, smtpConfigured: true, resendConfigured: true },
         });
 
         if (!settings?.offerNotifications) return null;
@@ -104,10 +107,10 @@ class NotificationService {
         return this.getSmtp(userId, settings);
     }
 
-    private async getSmtpForFollowUps(userId: string): Promise<SmtpConfig | null> {
+    private async getSmtpForFollowUps(userId: string): Promise<EmailProviderConfig | null> {
         const settings = await prisma.userSettings.findUnique({
             where: { userId },
-            select: { emailNotifications: true, followUpReminders: true, smtpConfigured: true },
+            select: { emailNotifications: true, followUpReminders: true, emailProvider: true, smtpConfigured: true, resendConfigured: true },
         });
 
         if (!settings?.followUpReminders) return null;

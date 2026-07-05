@@ -3,7 +3,7 @@ import { createHash } from 'crypto';
 import prisma from '../lib/prisma';
 import { Prisma } from '@prisma/client';
 import { emailService } from './email';
-import { getDecryptedSmtpConfig } from './settings.service';
+import { getUserEmailConfig } from './settings.service';
 import { createModuleLogger } from '../lib/logger';
 import { config } from '../config';
 
@@ -164,8 +164,8 @@ export class PublicContractService {
             log.error({ err, contractId: contract.id }, 'Notification error');
         });
 
-        const smtpConfig = await getDecryptedSmtpConfig(contract.user.id);
-        if (smtpConfig) {
+        const emailConfig = await getUserEmailConfig(contract.user.id);
+        if (emailConfig) {
             const frontendUrl = config.frontendUrl.replace(/\/$/, '');
 
             emailService.sendSignatureConfirmation(
@@ -182,7 +182,7 @@ export class PublicContractService {
                     sellerName: contract.user.name || 'SmartQuote',
                     companyName: contract.user.companyInfo?.name || null,
                 },
-                smtpConfig
+                emailConfig
             ).catch((err: unknown) => {
                 log.error({ err, contractId: contract.id }, 'Signature email error');
             });

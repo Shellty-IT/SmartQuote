@@ -1,7 +1,8 @@
 // smartquote_backend/src/services/email/sender.ts
 import nodemailer from 'nodemailer';
-import type { SmtpConfig } from '../../types';
+import type { SmtpConfig, EmailProviderConfig } from '../../types';
 import { emailTemplates } from './templates';
+import { sendViaResend, testResendApiKey } from './resend-transport';
 
 interface EmailOptions {
     readonly to: string;
@@ -46,7 +47,20 @@ export class EmailSender {
         }
     }
 
-    private async send(options: EmailOptions, smtpConfig: SmtpConfig): Promise<boolean> {
+    async testResendConnection(apiKey: string): Promise<{ success: boolean; error?: string }> {
+        return testResendApiKey(apiKey);
+    }
+
+    private async send(options: EmailOptions, emailConfig: EmailProviderConfig): Promise<boolean> {
+        if (emailConfig.provider === 'resend') {
+            const { status } = await sendViaResend(
+                { from: emailConfig.config.from, ...options },
+                emailConfig.config,
+            );
+            return status === 'SENT';
+        }
+
+        const smtpConfig = emailConfig.config;
         const transporter = this.createTransporter(smtpConfig);
         try {
             await transporter.sendMail({
@@ -62,42 +76,42 @@ export class EmailSender {
         }
     }
 
-    async sendOfferAccepted(to: string, data: any, smtpConfig: SmtpConfig): Promise<boolean> {
+    async sendOfferAccepted(to: string, data: any, emailConfig: EmailProviderConfig): Promise<boolean> {
         const url = `${this.frontendUrl}/dashboard/offers/${data.offerId}`;
         const { subject, html } = emailTemplates.offerAccepted(data, url);
-        return this.send({ to, subject, html }, smtpConfig);
+        return this.send({ to, subject, html }, emailConfig);
     }
 
-    async sendOfferRejected(to: string, data: any, smtpConfig: SmtpConfig): Promise<boolean> {
+    async sendOfferRejected(to: string, data: any, emailConfig: EmailProviderConfig): Promise<boolean> {
         const url = `${this.frontendUrl}/dashboard/offers/${data.offerId}`;
         const { subject, html } = emailTemplates.offerRejected(data, url);
-        return this.send({ to, subject, html }, smtpConfig);
+        return this.send({ to, subject, html }, emailConfig);
     }
 
-    async sendNewComment(to: string, data: any, smtpConfig: SmtpConfig): Promise<boolean> {
+    async sendNewComment(to: string, data: any, emailConfig: EmailProviderConfig): Promise<boolean> {
         const url = `${this.frontendUrl}/dashboard/offers/${data.offerId}`;
         const { subject, html } = emailTemplates.newComment(data, url);
-        return this.send({ to, subject, html }, smtpConfig);
+        return this.send({ to, subject, html }, emailConfig);
     }
 
-    async sendOfferLink(to: string, data: any, smtpConfig: SmtpConfig): Promise<boolean> {
+    async sendOfferLink(to: string, data: any, emailConfig: EmailProviderConfig): Promise<boolean> {
         const { subject, html } = emailTemplates.offerLink(data);
-        return this.send({ to, subject, html }, smtpConfig);
+        return this.send({ to, subject, html }, emailConfig);
     }
 
-    async sendAcceptanceConfirmation(to: string, data: any, smtpConfig: SmtpConfig): Promise<boolean> {
+    async sendAcceptanceConfirmation(to: string, data: any, emailConfig: EmailProviderConfig): Promise<boolean> {
         const { subject, html } = emailTemplates.acceptanceConfirmation(data);
-        return this.send({ to, subject, html }, smtpConfig);
+        return this.send({ to, subject, html }, emailConfig);
     }
 
-    async sendSignatureConfirmation(to: string, data: any, smtpConfig: SmtpConfig): Promise<boolean> {
+    async sendSignatureConfirmation(to: string, data: any, emailConfig: EmailProviderConfig): Promise<boolean> {
         const { subject, html } = emailTemplates.signatureConfirmation(data);
-        return this.send({ to, subject, html }, smtpConfig);
+        return this.send({ to, subject, html }, emailConfig);
     }
 
-    async sendFollowUpReminder(to: string, data: any, smtpConfig: SmtpConfig): Promise<boolean> {
+    async sendFollowUpReminder(to: string, data: any, emailConfig: EmailProviderConfig): Promise<boolean> {
         const url = `${this.frontendUrl}/dashboard/followups`;
         const { subject, html } = emailTemplates.followUpReminder(data, url);
-        return this.send({ to, subject, html }, smtpConfig);
+        return this.send({ to, subject, html }, emailConfig);
     }
 }

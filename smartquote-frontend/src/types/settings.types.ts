@@ -17,6 +17,11 @@ export interface UserSettings {
     smtpPass: string | null;
     smtpFrom: string | null;
     smtpConfigured: boolean;
+    emailProvider: 'smtp' | 'resend';
+    resendApiKey: string | null;
+    resendFromEmail: string | null;
+    resendFromName: string | null;
+    resendConfigured: boolean;
     createdAt: string;
     updatedAt: string;
 }
@@ -47,6 +52,28 @@ export interface TestSmtpConnectionInput {
 }
 
 export interface TestSmtpConnectionResult {
+    connected: boolean;
+    message: string;
+}
+
+export interface ResendConfigData {
+    resendApiKey: string | null;
+    resendFromEmail: string | null;
+    resendFromName: string | null;
+    resendConfigured: boolean;
+}
+
+export interface UpdateResendConfigInput {
+    resendApiKey?: string;
+    resendFromEmail: string;
+    resendFromName?: string;
+}
+
+export interface TestResendConnectionInput {
+    apiKey: string;
+}
+
+export interface TestResendConnectionResult {
     connected: boolean;
     message: string;
 }
@@ -125,6 +152,7 @@ export interface UpdateSettingsInput {
     weeklyReport?: boolean;
     aiTone?: 'professional' | 'friendly' | 'formal';
     aiAutoSuggestions?: boolean;
+    emailProvider?: 'smtp' | 'resend';
 }
 
 export interface UpdateCompanyInfoInput {

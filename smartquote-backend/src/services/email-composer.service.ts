@@ -4,13 +4,12 @@ import { NotFoundError, ValidationError } from '../errors/domain.errors';
 import { createModuleLogger } from '../lib/logger';
 import { config } from '../config';
 import { resolveAttachments } from './email/email-attachment-resolver';
-import { getDecryptedSmtpConfig } from './settings.service';
+import { getUserEmailConfig } from './settings.service';
 import {
     sendEmail,
     buildHtmlBody,
     htmlToPlainText,
     appendLinksToBody,
-    type SmtpConfig,
 } from './email/email-transport';
 import type {
     SendEmailInput,
@@ -20,6 +19,7 @@ import type {
     UpdateEmailTemplateInput,
     GetEmailLogsParams,
     EmailLogStatus,
+    EmailProviderConfig,
 } from '../types';
 
 const logger = createModuleLogger('email-composer');
@@ -30,13 +30,13 @@ interface SendResult {
     errorMessage?: string;
 }
 
-async function getSmtpOrThrow(userId: string): Promise<NonNullable<SmtpConfig>> {
-    const userSmtpConfig = await getDecryptedSmtpConfig(userId);
-    if (!userSmtpConfig) {
-        throw new ValidationError('Skonfiguruj skrzynkę pocztową w ustawieniach');
+async function getEmailConfigOrThrow(userId: string): Promise<EmailProviderConfig> {
+    const userEmailConfig = await getUserEmailConfig(userId);
+    if (!userEmailConfig) {
+        throw new ValidationError('Skonfiguruj sposób wysyłki e-maili w ustawieniach');
     }
-    logger.debug({ userId, host: userSmtpConfig.host }, 'Using user SMTP config for email delivery');
-    return userSmtpConfig;
+    logger.debug({ userId, provider: userEmailConfig.provider }, 'Using user email config for delivery');
+    return userEmailConfig;
 }
 
 class EmailComposerService {
@@ -66,7 +66,7 @@ class EmailComposerService {
             return { id: log.id, status: 'DRAFT' };
         }
 
-        const smtpConfig = await getSmtpOrThrow(userId);
+        const emailConfig = await getEmailConfigOrThrow(userId);
         const { nodemailerAttachments, linkLines } = await resolveAttachments(
             input.attachments ?? [],
             userId,
@@ -77,14 +77,14 @@ class EmailComposerService {
 
         const { status, errorMessage } = await sendEmail(
             {
-                from: smtpConfig.from,
+                from: emailConfig.config.from,
                 to: input.toName ? `"${input.toName}" <${input.to}>` : input.to,
                 subject: input.subject,
                 html: htmlBody,
                 text: htmlToPlainText(finalBody),
                 attachments: nodemailerAttachments,
             },
-            smtpConfig,
+            emailConfig,
         );
 
         const log = await emailComposerRepository.createLog({
@@ -110,7 +110,7 @@ class EmailComposerService {
         const draft = await emailComposerRepository.findDraftById(draftId, userId);
         if (!draft) throw new NotFoundError('Szkic');
 
-        const smtpConfig = await getSmtpOrThrow(userId);
+        const emailConfig = await getEmailConfigOrThrow(userId);
         const attachments = (draft.attachments as unknown as EmailAttachment[]) ?? [];
         const { nodemailerAttachments, linkLines } = await resolveAttachments(
             attachments,
@@ -122,14 +122,14 @@ class EmailComposerService {
 
         const { status, errorMessage } = await sendEmail(
             {
-                from: smtpConfig.from,
+                from: emailConfig.config.from,
                 to: draft.toName ? `"${draft.toName}" <${draft.to}>` : draft.to,
                 subject: draft.subject,
                 html: htmlBody,
                 text: htmlToPlainText(finalBody),
                 attachments: nodemailerAttachments,
             },
-            smtpConfig,
+            emailConfig,
         );
 
         const updated = await emailComposerRepository.updateLog(draftId, {
