@@ -14,7 +14,6 @@ import {
     offerIdParamSchema,
     latestInsightsSchema,
     insightsListSchema,
-    offerDescriptionSchema,
     generateSectionSchema,
     offerFillSchema,
     priceCheckSchema,
@@ -46,7 +45,6 @@ router.use(aiLimiter);
 
 router.post('/chat', validate(chatSchema), aiController.chat.bind(aiController));
 router.post('/generate-offer', validate(generateOfferSchema), aiController.generateOffer.bind(aiController));
-router.post('/offer-description', validate(offerDescriptionSchema), aiController.generateOfferDescription.bind(aiController));
 router.post('/generate-email', validate(generateEmailSchema), aiController.generateEmail.bind(aiController));
 router.post('/price-insight', validate(priceInsightSchema), aiController.priceInsight.bind(aiController));
 router.post('/generate-section', validate(generateSectionSchema), aiController.generateSection.bind(aiController));

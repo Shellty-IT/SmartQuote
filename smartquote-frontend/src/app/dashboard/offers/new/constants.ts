@@ -19,11 +19,17 @@ export function buildStepIds(
 ): Step[] {
     const isDocTemplate = templateType === 'proposal' || templateType === 'shop' || templateType === 'website_v2' || templateType === 'website_v3' || templateType === 'support' || templateType === 'mobile_app' || templateType === 'mobile_simple' || templateType === 'universal'
     if (isEditMode) {
+        // Classic keeps its legacy details+items edit flow untouched (the /edit
+        // page renders it); the new single-view editor is wired into the create
+        // flow and the detail-page template tab.
         return isDocTemplate
             ? ['client', 'details', 'template', 'summary']
             : ['client', 'details', 'items', 'summary'];
     }
-    return isDocTemplate
+    // Classic now uses the same single document-editor step as the other
+    // templates (client → type_choice → template → summary) instead of the
+    // old two-step details + items form.
+    return isDocTemplate || templateType === 'classic'
         ? ['client', 'type_choice', 'template', 'summary']
         : ['client', 'type_choice', 'details', 'items', 'summary'];
 }

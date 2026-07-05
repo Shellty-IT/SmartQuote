@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useSmtpConfig, useSenderEmail } from '@/hooks/useSettings';
+import { useSmtpConfig } from '@/hooks/useSettings';
 import { useTranslations } from '@/i18n';
 
 const PRESETS: Record<string, { host: string; port: number }> = {
@@ -26,32 +26,13 @@ export default function SmtpSection() {
     };
 
     const { config, isLoading: smtpLoading, updateConfig, testConnection, testSavedConnection, deleteConfig } = useSmtpConfig();
-    const { senderEmail, isLoading: senderLoading, isSaving: senderSaving, error: senderError, updateEmail } = useSenderEmail();
-
-    const [senderEmailInput, setSenderEmailInput] = useState('');
-    const [senderSaveSuccess, setSenderSaveSuccess] = useState(false);
-    const senderLoaded = useRef(false);
-
-    useEffect(() => {
-        if (senderLoading || senderLoaded.current) return;
-        senderLoaded.current = true;
-        requestAnimationFrame(() => { setSenderEmailInput(senderEmail); });
-    }, [senderEmail, senderLoading]);
-
-    const handleSenderSave = async () => {
-        setSenderSaveSuccess(false);
-        try {
-            await updateEmail(senderEmailInput.trim());
-            setSenderSaveSuccess(true);
-            setTimeout(() => setSenderSaveSuccess(false), 3000);
-        } catch {}
-    };
 
     const [form, setForm] = useState({ smtpHost: '', smtpPort: 587, smtpUser: '', smtpPass: '', smtpFrom: '' });
     const [selectedPreset, setSelectedPreset] = useState<string>('custom');
     const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
     const [saveSuccess, setSaveSuccess] = useState(false);
     const [deleteConfirm, setDeleteConfirm] = useState(false);
+    const [formOpen, setFormOpen] = useState(false);
     const configLoaded = useRef(false);
 
     useEffect(() => {
@@ -102,6 +83,7 @@ export default function SmtpSection() {
             await updateConfig({ smtpHost: form.smtpHost, smtpPort: form.smtpPort, smtpUser: form.smtpUser, smtpPass: form.smtpPass || undefined, smtpFrom: form.smtpFrom || undefined });
             setSaveSuccess(true);
             setForm(prev => ({ ...prev, smtpPass: '' }));
+            setFormOpen(false);
             setTimeout(() => setSaveSuccess(false), 3000);
         } catch {}
     };
@@ -119,11 +101,11 @@ export default function SmtpSection() {
 
     const canSave = form.smtpHost && form.smtpUser && (form.smtpPass || config?.smtpConfigured);
     const canTest = form.smtpHost && form.smtpUser;
-    const canSaveSender = senderEmailInput.trim().length > 0 && senderEmailInput.includes('@');
+    const isOwnMailboxActive = !!config?.smtpConfigured;
 
     const inputClass = 'w-full px-3 py-2.5 rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-transparent text-sm';
 
-    if (smtpLoading || senderLoading) {
+    if (smtpLoading) {
         return (
             <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                 <div className="flex items-center justify-center py-12">
@@ -137,85 +119,49 @@ export default function SmtpSection() {
     }
 
     return (
-        <div className="space-y-6">
-            {/* Sender address */}
-            <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                    <div>
-                        <h2 className="text-lg font-semibold text-foreground">{tr.smtp.senderTitle}</h2>
-                        <p className="text-sm text-muted-foreground">{tr.smtp.senderDesc}</p>
-                    </div>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-accepted/15 text-status-accepted text-xs font-medium">
-                        <span className="w-1.5 h-1.5 rounded-full bg-status-accepted" />
-                        {tr.smtp.active}
-                    </span>
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h2 className="text-lg font-semibold text-foreground">{tr.smtp.title}</h2>
+                    <p className="text-sm text-muted-foreground">{tr.smtp.subtitle}</p>
                 </div>
-
-                <div className="mb-4 p-3 bg-destructive/10 border border-destructive/25 rounded-xl flex items-start gap-2">
-                    <svg className="w-4 h-4 flex-shrink-0 mt-0.5 text-status-rejected" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className="text-sm text-destructive">{tr.smtp.senderNote}</span>
-                </div>
-
-                {senderError && <div className="mb-4 p-3 bg-destructive/10 border border-destructive/25 rounded-xl text-sm text-destructive">{senderError}</div>}
-
-                <div className="mb-6">
-                    <label className="block text-sm font-medium text-muted-foreground mb-1">{tr.smtp.yourEmail}</label>
-                    <input type="email" value={senderEmailInput} onChange={e => setSenderEmailInput(e.target.value)} placeholder="twoj@email.com" className={inputClass} />
-                    <p className="mt-1 text-xs text-muted-foreground">{tr.smtp.senderHint}</p>
-                </div>
-
-                <button
-                    onClick={handleSenderSave}
-                    disabled={!canSaveSender || senderSaving}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ backgroundColor: '#0891b2' }}
-                >
-                    {senderSaving ? (
-                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                        </svg>
-                    ) : senderSaveSuccess ? (
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                    ) : (
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                    )}
-                    {senderSaving ? tr.smtp.saving : senderSaveSuccess ? tr.smtp.savedOk : tr.smtp.saveAddress}
-                </button>
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${isOwnMailboxActive ? 'bg-status-accepted/15 text-status-accepted' : 'bg-destructive/15 text-destructive'}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${isOwnMailboxActive ? 'bg-status-accepted' : 'bg-destructive'}`} />
+                    {isOwnMailboxActive ? tr.smtp.statusOwn : tr.smtp.statusNotConnected}
+                </span>
             </div>
 
-            {/* Custom SMTP (disabled) */}
-            <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                    <div className="opacity-40">
-                        <h2 className="text-lg font-semibold text-foreground">{tr.smtp.smtpTitle}</h2>
-                        <p className="text-sm text-muted-foreground">{tr.smtp.smtpDesc}</p>
-                    </div>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary text-muted-foreground text-xs font-medium">
-                        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground" />
-                        {tr.smtp.requiresDomain}
-                    </span>
+            {isOwnMailboxActive ? (
+                <div className="mb-6 p-4 rounded-xl border border-status-accepted/25 bg-status-accepted/10">
+                    <p className="text-sm text-foreground">{tr.smtp.ownActiveInfo}</p>
+                    <p className="mt-2 text-sm">
+                        <span className="text-muted-foreground">{tr.smtp.sendingFrom}: </span>
+                        <span className="font-medium text-foreground">{config?.smtpFrom || config?.smtpUser}</span>
+                        <span className="text-muted-foreground"> {tr.smtp.via} {config?.smtpHost}</span>
+                    </p>
                 </div>
-
+            ) : (
                 <div className="mb-6 p-4 rounded-xl border border-destructive/25 bg-destructive/10">
-                    <div className="flex items-start gap-3">
-                        <svg className="w-5 h-5 text-status-rejected flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <div>
-                            <p className="text-sm font-bold text-destructive">{tr.smtp.unavailable}</p>
-                            <p className="text-sm mt-1 text-destructive">{tr.smtp.unavailableDesc}</p>
-                        </div>
-                    </div>
+                    <p className="text-sm text-foreground">{tr.smtp.notConnectedWarning}</p>
                 </div>
+            )}
 
-                <div className="opacity-40 pointer-events-none select-none">
+            {!formOpen ? (
+                <button
+                    onClick={() => setFormOpen(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm border border-border text-foreground hover:bg-secondary/50 transition-colors"
+                >
+                    {isOwnMailboxActive ? tr.smtp.editBtn : tr.smtp.connectOwnCta}
+                </button>
+            ) : (
+                <div className="pt-2 border-t border-border">
+                    <div className="flex items-center justify-between mt-4 mb-4">
+                        <h3 className="text-sm font-semibold text-foreground">{tr.smtp.smtpTitle}</h3>
+                        <button onClick={() => setFormOpen(false)} className="text-xs font-medium text-muted-foreground hover:text-foreground">
+                            {tr.smtp.cancelEditBtn}
+                        </button>
+                    </div>
+
                     <div className="mb-6">
                         <label className="mb-1.5 block text-sm font-medium text-foreground">{tr.smtp.provider}</label>
                         <div className="flex flex-wrap gap-2">
@@ -290,7 +236,7 @@ export default function SmtpSection() {
                         )}
                     </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }

@@ -103,6 +103,8 @@ function EmailComposerContent() {
     const router = useRouter();
     const composerTr = useTranslations('emailsNew');
     const {
+        smtpConfigured,
+        isLoadingSmtp,
         to, setTo,
         toName, setToName,
         subject, setSubject,
@@ -175,6 +177,13 @@ function EmailComposerContent() {
                             {composerTr.smtpLink}
                         </Link>
                     )}
+                </div>
+            )}
+
+            {!isLoadingSmtp && !smtpConfigured && (
+                <div className="mb-6 p-4 rounded-xl bg-destructive/10 border border-destructive/25 text-sm text-destructive">
+                    {composerTr.smtpConnectWarning}{' '}
+                    <Link href="/dashboard/settings" className="underline">{composerTr.smtpLink}</Link>
                 </div>
             )}
 
@@ -387,7 +396,7 @@ function EmailComposerContent() {
                     <button
                         type="button"
                         onClick={handleSend}
-                        disabled={isSending || isSavingDraft}
+                        disabled={isSending || isSavingDraft || (!isLoadingSmtp && !smtpConfigured)}
                         className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-primary hover:brightness-110 text-white text-sm font-medium transition-colors disabled:opacity-60"
                     >
                         {isSending ? (

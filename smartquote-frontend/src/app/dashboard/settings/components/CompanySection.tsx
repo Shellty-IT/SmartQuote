@@ -5,7 +5,7 @@ import { useState, useRef } from 'react';
 import Image from 'next/image';
 
 import Button from '@/components/ui/Button';
-import { compressImage } from '@/lib/imageUtils';
+import ImageCropModal from '@/components/ui/ImageCropModal';
 import { useTranslations } from '@/i18n';
 import type { CompanyInfo, UpdateCompanyInfoInput } from '@/types';
 
@@ -32,6 +32,7 @@ export default function CompanySection({ company, onUpdate }: Props) {
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
     const [currentLogoLight, setCurrentLogoLight] = useState(company.logoLight || company.logo || '');
     const [currentLogoDark, setCurrentLogoDark] = useState(company.logoDark || '');
+    const [cropLogo, setCropLogo] = useState<{ variant: 'light' | 'dark'; file: File } | null>(null);
     const [formData, setFormData] = useState<UpdateCompanyInfoInput>({
         name: company.name || '',
         nip: company.nip || '',
@@ -116,26 +117,32 @@ export default function CompanySection({ company, onUpdate }: Props) {
         setIsEditing(false);
     };
 
-    const handleLogoChange = async (variant: 'light' | 'dark', e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleLogoChange = (variant: 'light' | 'dark', e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
         setLogoError('');
         if (!file.type.startsWith('image/')) { setLogoError(tr.company.logoSelectFile); return; }
         if (file.size > 2 * 1024 * 1024) { setLogoError(tr.company.logoTooBig); return; }
+        setCropLogo({ variant, file });
+        const input = variant === 'light' ? logoLightInputRef.current : logoDarkInputRef.current;
+        if (input) input.value = '';
+    };
+
+    const handleLogoCropConfirm = async (dataUrl: string) => {
+        if (!cropLogo) return;
+        const { variant } = cropLogo;
+        setCropLogo(null);
         setUploadingLogo(variant);
         try {
-            const base64 = await compressImage(file, 400, 400, 0.85);
-            await onUpdate(variant === 'light' ? { logoLight: base64, logo: base64 } : { logoDark: base64 });
-            if (variant === 'light') setCurrentLogoLight(base64);
-            else setCurrentLogoDark(base64);
+            await onUpdate(variant === 'light' ? { logoLight: dataUrl, logo: dataUrl } : { logoDark: dataUrl });
+            if (variant === 'light') setCurrentLogoLight(dataUrl);
+            else setCurrentLogoDark(dataUrl);
             setSuccess(true);
             setTimeout(() => setSuccess(false), 3000);
         } catch {
             setLogoError(tr.company.logoProcessError);
         } finally {
             setUploadingLogo(null);
-            const input = variant === 'light' ? logoLightInputRef.current : logoDarkInputRef.current;
-            if (input) input.value = '';
         }
     };
 
@@ -409,6 +416,19 @@ export default function CompanySection({ company, onUpdate }: Props) {
                         ) : commonTr.saveChanges}
                     </Button>
                 </div>
+            )}
+
+            {cropLogo && (
+                <ImageCropModal
+                    file={cropLogo.file}
+                    title={cropLogo.variant === 'light' ? 'Logo na jasne tło' : 'Logo na ciemne tło'}
+                    aspect={1.5}
+                    shape="rect"
+                    outputWidth={480}
+                    outputHeight={320}
+                    onCancel={() => setCropLogo(null)}
+                    onConfirm={handleLogoCropConfirm}
+                />
             )}
         </div>
     );

@@ -16,8 +16,6 @@ import type {
     UpdateSmtpConfigInput,
     TestSmtpConnectionInput,
     TestSmtpConnectionResult,
-    SenderEmailData,
-    UpdateSenderEmailInput,
 } from '@/types';
 
 export const settingsApi = {
@@ -93,16 +91,6 @@ export const settingsApi = {
     deleteApiKey: async (id: string): Promise<{ message: string }> => {
         const response = await api.delete<{ message: string }>(`/settings/api-keys/${id}`);
         return response.data as { message: string };
-    },
-
-    getSenderEmail: async (): Promise<SenderEmailData> => {
-        const response = await api.get<SenderEmailData>('/settings/sender-email');
-        return response.data as SenderEmailData;
-    },
-
-    updateSenderEmail: async (data: UpdateSenderEmailInput): Promise<SenderEmailData> => {
-        const response = await api.put<SenderEmailData>('/settings/sender-email', data);
-        return response.data as SenderEmailData;
     },
 
     getSmtpConfig: async (): Promise<SmtpConfigData> => {

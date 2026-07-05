@@ -59,17 +59,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 ? (collapsed ? 'lg:pl-[104px]' : 'lg:pl-[292px]')
                 : '';
 
+    // Exposed as a CSS var (not just the Tailwind class above) so the AI drawer's
+    // "open" override in globals.css can add its own width on top of this instead
+    // of replacing it — otherwise a right-pinned dock's reserved space collapses
+    // the moment the drawer opens, and content renders underneath the dock.
+    const dockRightClearancePx = position === 'right' ? (collapsed ? 104 : 292) : 0;
+
     return (
         <div className="flex min-h-screen w-full bg-background text-foreground">
             <FloatingDock />
 
-            {/* Content area shifts to clear the floating dock on lg */}
-            <div className={cn(
-                'sq-dashboard-content flex min-w-0 flex-1 flex-col transition-all duration-300',
-                dockClearance
-            )}>
+            {/* Content area shifts to clear the floating dock on lg. The AI drawer's
+                padding-right squeeze (see .sq-ai-drawer-open in globals.css) is scoped
+                to <main> only, not this wrapper — Header is sticky and always sits above
+                the drawer's top offset (OfferAIDrawer's dockClearance.top), so it never
+                needs to make horizontal room for it. Squeezing it too just pushed its
+                right-aligned controls (language/theme/bell/profile) left, straight under
+                the centered top-pinned dock. */}
+            <div
+                className={cn('flex min-w-0 flex-1 flex-col transition-all duration-300', dockClearance)}
+                style={{ '--sq-dock-right-clearance': `${dockRightClearancePx}px` } as React.CSSProperties}
+            >
                 <Header onSearchOpen={() => setIsSearchOpen(true)} />
-                <main className="relative flex-1 overflow-x-hidden">
+                <main className="sq-dashboard-content relative flex-1 overflow-x-hidden transition-all duration-300">
                     {/* Subtle mesh gradient top overlay */}
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-[320px] bg-gradient-mesh opacity-50" />
                     <div className="relative">{children}</div>

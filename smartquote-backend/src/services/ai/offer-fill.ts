@@ -153,8 +153,17 @@ type ValidatedBlocks = z.infer<typeof ProposalBlocksSchema>
 
 const NO_APPLICABLE_BLOCKS_MESSAGE = 'Nie udało mi się przygotować poprawnych danych do zastosowania. Spróbuj ponownie lub poproś o wypełnienie jednej konkretnej sekcji.'
 
+// Catches every phrasing seen in practice where the model claims to have made a
+// change ("Dodałem...", "Wpisałem...", "Ustawiłem...") without actually setting
+// isComplete+blocks — a claim like that reaching the user unmodified is worse
+// than no reply at all, since they will look for content that was never applied.
 export function completionMessageWithoutBlocks(message: string): string {
-    return /(?:wypełni|uzupełni|zaktualiz|gotow|fill|updated|complete)/i.test(message)
+    // Additions use full past-tense endings ("dodał", not the truncated "doda")
+    // specifically so they don't also match the infinitive/question form of the
+    // same verb ("dodać") — an earlier draft matched "zmieni" against both
+    // "zmienił" (claim) and "zmienić" (a genuine clarifying question), which
+    // would have wrongly overwritten real questions with the fallback message.
+    return /(?:wypełni|uzupełni|zaktualiz|gotow|dodał|wpisał|ustawił|zmienił|poprawił|stworzył|utworzył|wygenerował|zapisał|fill|updated|complete|added|created|saved)/i.test(message)
         ? NO_APPLICABLE_BLOCKS_MESSAGE
         : message
 }
@@ -304,7 +313,8 @@ function deepMergeGeneric(current: unknown, generated: unknown): unknown {
     return generated ?? current
 }
 
-function mergeGenericBlocks(
+// Exported for testing.
+export function mergeGenericBlocks(
     current: Record<string, unknown>,
     generated: Record<string, unknown>,
 ): Record<string, unknown> {
@@ -342,23 +352,40 @@ async function genericOfferFillChat(
         { role: 'user', parts: [{ text: userMessage }] },
     ]
 
-    const response = await ai.models.generateContent({
-        model: config.gemini.model,
-        contents,
-        config: {
-            systemInstruction: buildGenericSystemPrompt(context),
-            temperature: 0.65,
-            maxOutputTokens: 24576,
-            responseMimeType: 'application/json',
-        },
-    })
+    const baseSystemPrompt = buildGenericSystemPrompt(context)
 
-    const raw = response.text ?? ''
-    let parsed: { message?: string; isComplete?: boolean; blocks?: unknown }
-    try {
-        parsed = JSON.parse(raw) as typeof parsed
-    } catch {
-        log.warn({ raw: raw.slice(0, 200), len: raw.length }, 'offer-fill generic: failed to parse structured response')
+    // Structured-output calls at temperature 0.65 occasionally return
+    // isComplete=true with a patch that doesn't actually change anything vs the
+    // saved state (see RETRY_NUDGE below for why). That's a dead end for the
+    // user on a single shot, so we retry once with a stronger corrective
+    // instruction before giving up and asking the user to clarify.
+    const RETRY_NUDGE = `
+
+UWAGA — POPRAWKA: Twoja poprzednia odpowiedz miala isComplete=true, ale "blocks" nie wprowadzalo zadnej realnej zmiany wzgledem AKTUALNEGO STANU SZABLONU (puste lub pominiete pola). To blad. Wiadomosc uzytkownika ponizej zawiera wystarczajace informacje biznesowe — uzyj ich TERAZ i zwroc w "blocks" realnie wypelnione, niepuste wartosci dla odpowiednich pol (np. "description").`
+
+    const callGemini = async (extraSystemNote: string) => {
+        const response = await ai.models.generateContent({
+            model: config.gemini.model,
+            contents,
+            config: {
+                systemInstruction: baseSystemPrompt + extraSystemNote,
+                temperature: 0.65,
+                maxOutputTokens: 24576,
+                responseMimeType: 'application/json',
+            },
+        })
+
+        const raw = response.text ?? ''
+        try {
+            return JSON.parse(raw) as { message?: string; isComplete?: boolean; blocks?: unknown }
+        } catch {
+            log.warn({ raw: raw.slice(0, 200), len: raw.length }, 'offer-fill generic: failed to parse structured response')
+            return null
+        }
+    }
+
+    let parsed = await callGemini('')
+    if (!parsed) {
         return {
             message: 'Odpowiedz AI byla niekompletna. Sprobuj ponownie albo podaj krotszy opis projektu.',
             blocks: null,
@@ -366,16 +393,42 @@ async function genericOfferFillChat(
         }
     }
 
-    const message = typeof parsed.message === 'string' ? parsed.message : 'Wypelnilem szablon.'
+    let message = typeof parsed.message === 'string' ? parsed.message : 'Wypelnilem szablon.'
     if (parsed.isComplete !== true || !parsed.blocks || typeof parsed.blocks !== 'object' || Array.isArray(parsed.blocks)) {
         return { message: completionMessageWithoutBlocks(message), blocks: null, isComplete: false }
     }
 
-    const blocks = mergeGenericBlocks(currentBlocks, parsed.blocks as Record<string, unknown>)
-    const hasChanges = JSON.stringify(blocks) !== JSON.stringify(currentBlocks)
+    let blocks = mergeGenericBlocks(currentBlocks, parsed.blocks as Record<string, unknown>)
+    let hasChanges = JSON.stringify(blocks) !== JSON.stringify(currentBlocks)
+
     if (!hasChanges) {
+        const retryParsed = await callGemini(RETRY_NUDGE)
+        if (
+            retryParsed &&
+            retryParsed.isComplete === true &&
+            retryParsed.blocks &&
+            typeof retryParsed.blocks === 'object' &&
+            !Array.isArray(retryParsed.blocks)
+        ) {
+            const retryBlocks = mergeGenericBlocks(currentBlocks, retryParsed.blocks as Record<string, unknown>)
+            const retryHasChanges = JSON.stringify(retryBlocks) !== JSON.stringify(currentBlocks)
+            if (retryHasChanges) {
+                blocks = retryBlocks
+                hasChanges = true
+                message = typeof retryParsed.message === 'string' ? retryParsed.message : message
+            }
+        }
+    }
+
+    if (!hasChanges) {
+        // Still nothing after the retry. Prefer the model's own message — it's
+        // often a legitimate clarifying question — but run it through the
+        // false-completion-claim filter, and fall back to a generic prompt only
+        // if that filter fires.
+        const fallback = 'Nie wykrylem zmian w szablonie. Doprecyzuj prosze, jaki projekt lub dokument mam opisac.'
+        const filtered = completionMessageWithoutBlocks(message)
         return {
-            message: 'Nie wykrylem zmian w szablonie. Doprecyzuj prosze, jaki projekt lub dokument mam opisac.',
+            message: filtered === NO_APPLICABLE_BLOCKS_MESSAGE ? fallback : filtered,
             blocks: null,
             isComplete: false,
         }
@@ -485,6 +538,22 @@ function buildGenericBlocksSummary(blocks: Record<string, unknown>): string {
         if (summary) lines.push(`${key}: ${summary}`)
     }
 
+    // Flat schemas (e.g. classic offers: title/description/terms/notes, no
+    // nested blocks at all) have no entries above — list the plain fields
+    // directly instead of leaving the model with an empty summary.
+    if (!blockKeys.length) {
+        const flatFields = Object.entries(blocks).filter(([, value]) => typeof value === 'string' || typeof value === 'number')
+        if (flatFields.length) {
+            lines.push('POLA (plaski schemat, bez blokow):')
+            for (const [field, value] of flatFields) {
+                const display = typeof value === 'string'
+                    ? (value.trim() ? `"${value.slice(0, 100)}"` : '(puste)')
+                    : String(value)
+                lines.push(`  ${field} = ${display}`)
+            }
+        }
+    }
+
     lines.push('=== KONIEC STANU ===')
     return lines.join('\n')
 }
@@ -503,7 +572,52 @@ function buildGenericSystemPrompt(ctx: OfferFillContext): string {
         ? `${currentBlocksJson.slice(0, 45000)}\n... [JSON skrocony, zachowaj widoczna strukture i aktualne wartosci]`
         : currentBlocksJson
 
-    return `Jestes doswiadczonym copywriterem B2B i specjalista od dokumentow handlowych IT. Pomagasz wypelniac szablon ${entityLabel} w aplikacji SmartQuote.
+    // Most templates handled by this generic path are nested "blocks" (objects
+    // with enabled/title/items). Classic offers are the exception: a flat object
+    // of plain fields (title/description/terms/notes/...) with no block/section
+    // concept at all. Without this, the model's own vocabulary bias toward
+    // "sections" and "enabled" flags (reinforced by every other example in this
+    // prompt) leads it to either invent a nested shape that silently fails to
+    // merge, or treat the flat fields as too thin to be worth filling.
+    const hasNestedBlocks = Object.values(currentBlocks).some(
+        (value) => value && typeof value === 'object' && !Array.isArray(value),
+    )
+    // Field-role guidance is keyed to the actual JSON key names, since classic/
+    // universal offers reliably use this exact flat shape (title/description/
+    // terms/notes) — unlike nested block templates, whose field names vary per
+    // template and can't be hardcoded here. Without calling out "notes" by name,
+    // the model treated it as just another free string field and dumped the
+    // main generated content there — the client never sees it, since it's the
+    // user's own private field, and "description" (which the client DOES see)
+    // was left blank. The offer looked completely unfilled.
+    const fieldRoleNote = 'description' in currentBlocks || 'notes' in currentBlocks
+        ? `
+
+ROLE KONKRETNYCH POL (waznosc krytyczna — czytelnik oferty widzi tylko niektore z nich):
+- "description": TO JEST GLOWNE, WIDOCZNE DLA KLIENTA miejsce na tresc oferty. Gdy uzytkownik opisuje projekt/uslugi/funkcje — ta tresc ZAWSZE trafia tutaj jako pelny, przekonujacy opis (HTML: <p>, <strong>, <ul><li>). To pole jest PRIORYTETEM przy wypelnianiu.
+- "terms": warunki platnosci/realizacji, tez widoczne dla klienta.
+- "notes": PRYWATNE — widzi je TYLKO wystawiajacy oferte, klient NIGDY. NIE wklejaj tu glownej tresci oferty ani rekomendacji technologicznych zamiast do "description". Zostaw puste, chyba ze uzytkownik WYRAZNIE prosi o wewnetrzna notatke/przypomnienie dla siebie (np. "zapisz sobie, ze...").
+- "title": tytul oferty — zmieniaj tylko gdy uzytkownik wyraznie o to prosi.`
+        : ''
+
+    const flatSchemaNote = hasNestedBlocks ? '' : `
+
+UWAGA — PLASKI SCHEMAT (bez blokow/sekcji):
+Powyzszy JSON nie ma zagniezdzonych blokow ani flag "enabled" — to zwykly zestaw pol tekstowych/liczbowych. Kazde pole typu string (poza tytulem, datami i polami technicznymi typu "templateType") to miejsce na PELNA, konkretna tresc biznesowa — traktuj je jak sekcje dokumentu, nie jak metadane.${fieldRoleNote}
+NIE zwracaj zagniezdzonych obiektow ani kluczy "sections"/"blocks" — patch ma miec DOKLADNIE te same klucze na najwyzszym poziomie co powyzszy JSON.`
+
+    // "classic" and "universal" are explicitly industry-agnostic templates — any
+    // business, not just IT. Every OTHER template in this app happens to be about
+    // websites/apps, and an earlier version of this prompt hardcoded "IT commercial
+    // documents specialist" unconditionally. That framing bled into classic/universal
+    // offers too, so the model would second-guess or refuse a non-IT business
+    // (e.g. "opis sprzedazy samochodu") instead of just writing it.
+    const isIndustryAgnostic = templateType === 'classic' || templateType === 'universal'
+    const personaLine = isIndustryAgnostic
+        ? `Jestes doswiadczonym copywriterem B2B, piszacym dokumenty handlowe dla firm z DOWOLNEJ branzy (nie tylko IT) — uslugi, handel, produkcja, gastronomia, motoryzacja, cokolwiek zglosi uzytkownik. Dopasuj tresc do branzy, ktora wynika z wiadomosci uzytkownika, tytulu oferty lub nazwy klienta — nie zakladaj domyslnie branzy IT i nie kwestionuj tematu, o ktory prosi uzytkownik.`
+        : `Jestes doswiadczonym copywriterem B2B i specjalista od dokumentow handlowych IT.`
+
+    return `${personaLine} Pomagasz wypelniac szablon ${entityLabel} w aplikacji SmartQuote.
 
 ${languageInstruction}
 
@@ -517,12 +631,15 @@ ${buildGenericBlocksSummary(currentBlocks)}
 
 AKTUALNY JSON BLOKOW JEST JEDNOCZESNIE SCHEMATEM WYJSCIA:
 ${clippedBlocksJson}
+${flatSchemaNote}
 
 TRYB PRACY:
 - Jezeli uzytkownik podal wystarczajacy opis projektu, branzy, uslugi lub oczekiwanej umowy, natychmiast wypelnij caly szablon.
 - Jezeli brakuje podstawowego kontekstu, zadaj jedno krotkie pytanie i ustaw isComplete=false.
 - Jezeli uzytkownik prosi o zmiane konkretnej sekcji, zmien tylko te sekcje i zachowaj reszte.
 - Jezeli uzytkownik prosi o wypelnienie od zera lub automatycznie, wypelnij wszystkie pola tekstowe we wszystkich blokach, ktore maja sens biznesowy.
+- TYLKO powyzszy "AKTUALNY JSON BLOKOW" / "AKTUALNY STAN SZABLONU" odzwierciedla to, co naprawde jest juz zapisane w ofercie — historia czatu ponizej to tylko rozmowa, NIE zapisana tresc. Jesli w rozmowie padly juz konkretne informacje (zakres, funkcje, technologia, branza, ceny), ale odpowiadajace pole w AKTUALNYM STANIE jest nadal puste, potraktuj to jako wciaz niewypelnione i uzupelnij je teraz, nawet jesli o tych informacjach mowiono kilka wiadomosci wczesniej. Nie zakladaj, ze cos zostalo juz zapisane tylko dlatego, ze zostalo wspomniane w czacie.
+- NIGDY nie zwracaj isComplete=true z "blocks", ktore w praktyce niczego nie zmieniaja (brak jakiejkolwiek nowej, niepustej wartosci wzgledem AKTUALNEGO STANU). Jesli naprawde nie masz nic nowego do dodania, ustaw isComplete=false i zadaj konkretne pytanie o brakujace informacje zamiast falszywie deklarowac ukonczenie.
 
 ZASADY STRUKTURY JSON:
 - Zwracaj dokladnie obiekt JSON: { "message": string, "isComplete": boolean, "blocks": null | object }.

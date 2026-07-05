@@ -3,6 +3,7 @@ import { createHash } from 'crypto';
 import prisma from '../lib/prisma';
 import { Prisma } from '@prisma/client';
 import { emailService } from './email';
+import { getDecryptedSmtpConfig } from './settings.service';
 import { createModuleLogger } from '../lib/logger';
 import { config } from '../config';
 
@@ -57,22 +58,10 @@ export class PublicContractService {
                     select: {
                         id: true,
                         name: true,
-                        email: true,
                         companyInfo: {
                             select: {
                                 name: true,
                                 email: true,
-                            },
-                        },
-                        settings: {
-                            select: {
-                                emailNotifications: true,
-                                smtpHost: true,
-                                smtpPort: true,
-                                smtpUser: true,
-                                smtpPass: true,
-                                smtpFrom: true,
-                                smtpConfigured: true,
                             },
                         },
                     },
@@ -175,16 +164,9 @@ export class PublicContractService {
             log.error({ err, contractId: contract.id }, 'Notification error');
         });
 
-        const settings = contract.user.settings;
-        if (settings?.smtpConfigured && settings.smtpHost && settings.smtpUser && settings.smtpPass) {
+        const smtpConfig = await getDecryptedSmtpConfig(contract.user.id);
+        if (smtpConfig) {
             const frontendUrl = config.frontendUrl.replace(/\/$/, '');
-            const smtpConfig = {
-                host: settings.smtpHost,
-                port: settings.smtpPort || 587,
-                user: settings.smtpUser,
-                pass: settings.smtpPass,
-                from: settings.smtpFrom || settings.smtpUser,
-            };
 
             emailService.sendSignatureConfirmation(
                 input.signerEmail,

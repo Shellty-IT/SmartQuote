@@ -225,6 +225,7 @@ function renderProblem(blocks: WebsiteV2Blocks, editorMode: boolean): string {
     const inner = `
   <section style="position:relative; background:#EFF6FF; overflow:hidden;">
     <div class="inner" style="max-width:920px; margin:0 auto; padding:80px 48px; position:relative; z-index:1;">
+      <div class="print-keep">
       <h2 style="margin:0 0 36px; font-size:40px; font-weight:700; letter-spacing:-1px; color:#1E293B;">${esc(b.title)}</h2>
       <div style="display:flex; flex-direction:column; gap:16px;">
         ${b.painPoints.map(p => `
@@ -232,6 +233,7 @@ function renderProblem(blocks: WebsiteV2Blocks, editorMode: boolean): string {
           <span style="font-size:30px; line-height:1;">${esc(p.emoji)}</span>
           <span style="font-size:17px; color:#1E293B;">${esc(p.text)}</span>
         </div>`).join('')}
+      </div>
       </div>
       <p style="text-align:center; margin:44px 0 0; font-size:26px; font-weight:700; color:#2563EB; letter-spacing:-0.5px;">${esc(b.punchline)}</p>
     </div>
@@ -249,12 +251,13 @@ function renderAbout(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editorMo
     const inner = `
   <section style="position:relative; background:#FFFFFF; overflow:hidden;">
     <div class="inner" style="max-width:1080px; margin:0 auto; padding:80px 48px; position:relative; z-index:1;">
+      <div class="print-keep">
       <h2 style="margin:0 0 40px; font-size:40px; font-weight:700; letter-spacing:-1px; color:#1E293B;">${esc(b.title)}</h2>
       <div class="about-grid" style="display:grid; grid-template-columns:220px minmax(0,1fr); gap:44px; align-items:center;">
         ${logoHtml}
         <div>
-          <div style="font-size:26px; font-weight:700; color:#1E293B;">${esc(b.name)}</div>
-          <div style="color:#2563EB; font-weight:600; font-size:15px; margin:4px 0 18px;">${esc(b.role)}</div>
+          <div style="font-size:22px; font-weight:700; color:#1E293B;">${esc(b.name)}</div>
+          <div style="color:#2563EB; font-weight:600; font-size:14px; margin:4px 0 16px;">${esc(b.role)}</div>
           <p style="margin:0 0 24px; font-size:17px; color:#64748B; max-width:560px;">${esc(b.bio)}</p>
           <div style="display:flex; flex-wrap:wrap; gap:14px;">
             ${b.stats.map(s => `
@@ -264,6 +267,7 @@ function renderAbout(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editorMo
             </div>`).join('')}
           </div>
         </div>
+      </div>
       </div>
     </div>
     ${secnum('03')}
@@ -277,6 +281,7 @@ function renderFeatures(blocks: WebsiteV2Blocks, editorMode: boolean): string {
     const inner = `
   <section style="position:relative; background:#EFF6FF; overflow:hidden;">
     <div class="inner" style="max-width:1080px; margin:0 auto; padding:80px 48px; position:relative; z-index:1;">
+      <div class="print-keep">
       <h2 style="margin:0 0 8px; font-size:40px; font-weight:700; letter-spacing:-1px; color:#1E293B;">${esc(b.title)}</h2>
       <p style="margin:0 0 40px; font-size:17px; color:#64748B;">${esc(b.subtitle)}</p>
       <div class="checklist-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:24px 48px;">
@@ -288,6 +293,7 @@ function renderFeatures(blocks: WebsiteV2Blocks, editorMode: boolean): string {
             <div style="color:#64748B; font-size:14.5px; margin-top:2px;">${esc(item.description)}</div>
           </div>
         </div>`).join('')}
+      </div>
       </div>
       ${b.extras.length ? `
       <div style="margin-top:44px; padding-top:28px; border-top:1px solid #BFDBFE;">
@@ -308,6 +314,7 @@ function renderPortfolio(blocks: WebsiteV2Blocks, editorMode: boolean, sectionNu
     const inner = `
   <section style="position:relative; background:#FFFFFF; overflow:hidden;">
     <div class="inner" style="max-width:1080px; margin:0 auto; padding:80px 48px; position:relative; z-index:1;">
+      <div class="print-keep">
       <h2 style="margin:0 0 8px; font-size:40px; font-weight:700; letter-spacing:-1px; color:#1E293B;">${esc(b.title)}</h2>
       <p style="margin:0 0 36px; font-size:17px; color:#64748B;">${esc(b.subtitle)}</p>
       <div class="work-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:24px;">
@@ -321,6 +328,7 @@ function renderPortfolio(blocks: WebsiteV2Blocks, editorMode: boolean, sectionNu
             ${w.url && w.url !== '#' ? `<a href="${esc(w.url)}" style="color:#2563EB; font-size:13.5px; font-weight:600;">zobacz stronę →</a>` : `<span style="color:#2563EB; font-size:13.5px; font-weight:600;">zobacz stronę →</span>`}
           </div>
         </div>`).join('')}
+      </div>
       </div>
       ${b.testimonials.length ? `
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:36px;">
@@ -349,15 +357,17 @@ function renderProcess(blocks: WebsiteV2Blocks, editorMode: boolean, sectionNum:
     const inner = `
   <section style="position:relative; background:#EFF6FF; overflow:hidden;">
     <div class="inner" style="max-width:1080px; margin:0 auto; padding:80px 48px; position:relative; z-index:1;">
+      <div class="print-keep">
       <h2 style="margin:0 0 48px; font-size:40px; font-weight:700; letter-spacing:-1px; color:#1E293B;">${esc(b.title)}</h2>
       <div class="stepper" style="position:relative; display:flex; justify-content:space-between; gap:24px;">
         <div class="stepper-line" style="position:absolute; top:28px; left:12%; right:12%; border-top:2px dashed #BFDBFE; z-index:0;"></div>
         ${b.steps.map((s, i) => `
-        <div style="position:relative; z-index:1; flex:1; text-align:center;">
+        <div class="print-keep" style="position:relative; z-index:1; flex:1; text-align:center;">
           <div style="width:56px; height:56px; border-radius:50%; background:#2563EB; color:#FFFFFF; font-size:24px; font-weight:700; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">${i + 1}</div>
           <div style="font-weight:700; font-size:18px; margin-bottom:8px;">${esc(s.title)}</div>
           <p style="margin:0; color:#64748B; font-size:14.5px;">${esc(s.description)}</p>
         </div>`).join('')}
+      </div>
       </div>
       ${b.timelineNote ? `
       <div class="print-keep" style="margin-top:48px; background:#FFFFFF; border:1px solid #BFDBFE; border-radius:12px; padding:22px 28px; display:flex; align-items:center; gap:14px; justify-content:center;">
@@ -377,10 +387,11 @@ function renderTechnology(blocks: WebsiteV2Blocks, editorMode: boolean, sectionN
     const inner = `
   <section class="pb-tech" style="position:relative; background:#FFFFFF; overflow:hidden;">
     <div class="inner" style="max-width:1080px; margin:0 auto; padding:80px 48px; position:relative; z-index:1;">
+      <div class="print-keep">
       <h2 style="margin:0 0 6px; font-size:40px; font-weight:700; letter-spacing:-1px; color:#1E293B;">${esc(b.title)}</h2>
       <p style="margin:0 0 36px; font-size:16px; color:#64748B; max-width:680px;">${esc(b.subtitle)}</p>
 
-      <div class="print-keep" style="position:relative; display:grid; grid-template-columns:auto minmax(0,1fr); gap:28px; align-items:start; background:#FFFFFF; border:2px solid #2563EB; border-radius:12px; padding:32px 30px; box-shadow:0 8px 32px rgba(37,99,235,0.15);">
+      <div style="position:relative; display:grid; grid-template-columns:auto minmax(0,1fr); gap:28px; align-items:start; background:#FFFFFF; border:2px solid #2563EB; border-radius:12px; padding:32px 30px; box-shadow:0 8px 32px rgba(37,99,235,0.15);">
         <span style="position:absolute; top:-13px; left:30px; background:#2563EB; color:#FFFFFF; border-radius:999px; padding:6px 16px; font-size:12px; font-weight:700; letter-spacing:0.5px;">★ MOJA REKOMENDACJA DLA CIEBIE</span>
         <div style="width:64px; height:64px; border-radius:50%; background:${esc(r.iconBg)}; color:#FFFFFF; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:700; margin-top:6px;">${esc(r.iconChar)}</div>
         <div>
@@ -391,9 +402,10 @@ function renderTechnology(blocks: WebsiteV2Blocks, editorMode: boolean, sectionN
           </div>
         </div>
       </div>
+      </div>
 
       ${b.alternatives.length ? `
-      <div style="font-weight:600; color:#64748B; font-size:14px; margin:34px 0 16px; text-transform:uppercase; letter-spacing:1px;">Mogę też pracować na:</div>
+      <div class="sec-label" style="font-weight:600; color:#64748B; font-size:14px; margin:34px 0 16px; text-transform:uppercase; letter-spacing:1px;">Mogę też pracować na:</div>
       <div class="tech-secondary" style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
         ${b.alternatives.map(a => `
         <div class="print-keep" style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:24px 26px;">
@@ -425,7 +437,7 @@ function renderPricing(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editor
 
     const priceGross = b.priceOverride ?? (data.totalGross > 0 ? data.totalGross : 0)
     const priceNet = priceGross > 0 ? Math.round(priceGross / 1.23) : 0
-    const validDate = addDays(data.createdAt, data.paymentDays ?? 14)
+    const validDate = addDays(data.createdAt, blocks.cover.validityDays ?? 14)
     const ci = data.user.companyInfo
 
     const inner = `
@@ -508,6 +520,7 @@ function renderFaq(blocks: WebsiteV2Blocks, editorMode: boolean, sectionNum: num
     const inner = `
   <section style="position:relative; background:#FFFFFF; overflow:hidden;">
     <div class="inner" style="max-width:1080px; margin:0 auto; padding:80px 48px; position:relative; z-index:1;">
+      <div class="print-keep">
       <h2 style="margin:0 0 8px; font-size:40px; font-weight:700; letter-spacing:-1px; color:#1E293B;">${esc(b.title)}</h2>
       <p style="margin:0 0 40px; font-size:17px; color:#64748B;">${esc(b.subtitle)}</p>
       <div class="faq-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
@@ -516,6 +529,7 @@ function renderFaq(blocks: WebsiteV2Blocks, editorMode: boolean, sectionNum: num
           <div style="font-weight:700; font-size:16px; color:#1E293B; margin-bottom:8px;">${esc(item.question)}</div>
           <p style="margin:0; color:#64748B; font-size:14.5px;">${esc(item.answer)}</p>
         </div>`).join('')}
+      </div>
       </div>
     </div>
     ${secnum(String(sectionNum).padStart(2, '0'))}
@@ -530,10 +544,10 @@ function renderFooter(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editorM
     const logoHtml = darkLogo
         ? `<img src="${esc(darkLogo)}" alt="logo" style="max-width:160px; max-height:64px; object-fit:contain;" />`
         : `<div style="width:128px; height:52px; border:1.5px dashed #475569; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:700; letter-spacing:2px; color:#94A3B8; font-size:13px; margin-bottom:16px;">LOGO</div>`
-    const validDate = addDays(data.createdAt, data.paymentDays ?? 14)
+    const validDate = addDays(data.createdAt, blocks.cover.validityDays ?? 14)
 
     const inner = `
-  <footer class="pdf-full-bleed" style="background:#1E293B; color:#FFFFFF;">
+  <footer style="background:#1E293B; color:#FFFFFF;">
     <div class="inner" style="max-width:1080px; margin:0 auto; padding:56px 48px 40px;">
       <div class="footer-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:32px; align-items:start;">
         <div>

@@ -140,4 +140,18 @@ describe('AI offer patch validation', () => {
         expect(completionMessageWithoutBlocks('Szablon został wypełniony przykładowymi danymi'))
             .toContain('Nie udało mi się przygotować poprawnych danych')
     })
+
+    // Real production reply that slipped through the old regex (only matched
+    // "wypełni/uzupełni/zaktualiz/gotow/fill/updated/complete"): the model said
+    // "Dodałem" (I added) instead, so the false claim reached the user verbatim
+    // while isComplete/blocks stayed null — the offer looked untouched.
+    it('catches a Polish "dodałem" (added) claim the original regex missed', () => {
+        expect(completionMessageWithoutBlocks("Dodałem teraz ogólny opis oferty IT do pola 'description'."))
+            .toContain('Nie udało mi się przygotować poprawnych danych')
+    })
+
+    it('leaves a genuine clarifying question untouched', () => {
+        const question = 'Czy chcesz zmienić typ dokumentu, czy potrzebujesz opisu dla innej branży?'
+        expect(completionMessageWithoutBlocks(question)).toBe(question)
+    })
 })

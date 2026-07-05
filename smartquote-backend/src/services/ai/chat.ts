@@ -21,8 +21,6 @@ import {
     buildOfferGenerationPrompt,
     buildEmailPrompt,
     buildClientAnalysisPrompt,
-    buildOfferDescriptionPrompt,
-    type OfferDescriptionContext,
 } from './prompts';
 
 const log = createModuleLogger('ai:chat');
@@ -395,21 +393,6 @@ export async function generateEmail(
 
     const prompt = buildEmailPrompt(type, context);
     return callGemini(ai, prompt);
-}
-
-export async function generateOfferDescription(
-    ai: GoogleGenAI | null,
-    ctx: OfferDescriptionContext,
-): Promise<string> {
-    if (!ai) throw new Error('AI nie jest skonfigurowany');
-    const prompt = buildOfferDescriptionPrompt(ctx);
-    const raw = await callGemini(ai, prompt);
-    // Sanitise: strip any accidental markdown fences if model adds them
-    return raw
-        .replace(/^```html\s*/i, '')
-        .replace(/^```\s*/i, '')
-        .replace(/\s*```$/i, '')
-        .trim();
 }
 
 export async function analyzeClient(

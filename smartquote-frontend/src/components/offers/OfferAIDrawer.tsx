@@ -2,19 +2,21 @@
 // Sliding panel with AI conversation for filling an offer or contract template.
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Send, Sparkles, CheckCircle, Maximize2, Minimize2, GripVertical } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { ai } from '@/lib/api'
 import { useAIChat } from '@/contexts/AIChatContext'
 import { useLanguage } from '@/i18n'
+import { useDockSettings } from '@/app/providers'
 
 const MIN_WIDTH = 320
 const MAX_WIDTH_RATIO = 0.85 // max 85vw
 const DEFAULT_INPUT_HEIGHT = 96
 const MAX_INPUT_HEIGHT_RATIO = 0.5 // textarea grows up to ~half the viewport (≈ half the bar)
 const LS_WIDTH_KEY = 'sq_ai_drawer_width'
+const DESKTOP_DRAWER_EDGE_GAP = 8
 
 interface Message {
     id: string
@@ -70,6 +72,32 @@ export function OfferAIDrawer({
 }: OfferAIDrawerProps) {
     const { setHideGlobalFab } = useAIChat()
     const { language } = useLanguage()
+    const { position: dockPosition, collapsed: dockCollapsed } = useDockSettings()
+
+    // Two things share screen space with this drawer and must stay visible/usable
+    // while it's open:
+    // - Header.tsx (search, language, theme, bell, profile) — a `sticky top-0`
+    //   bar rendered above every dashboard page, h-16 (64px). It has no idea the
+    //   drawer exists, so without this the drawer's top edge sits at y:0 and
+    //   covers it outright on every dock position, not just "top".
+    // - FloatingDock — only rendered at the lg breakpoint, and only when pinned
+    //   to 'top' or 'right' does it occupy the same edge as this drawer.
+    // On mobile (<768px) the drawer is an intentional full-screen takeover with
+    // its own backdrop, so neither clearance applies there.
+    const dockClearance = useMemo(() => {
+        const isDesktopDrawer = typeof window !== 'undefined' && window.innerWidth >= 768
+        if (!isDesktopDrawer) return { top: 0, bottom: 0, right: 0 }
+        const isDesktopDock = typeof window !== 'undefined' && window.innerWidth >= 1024
+        const HEADER_HEIGHT = 64
+        const dockTopClearance = isDesktopDock && dockPosition === 'top' ? 76 : 0
+        const dockBottomClearance = isDesktopDock && dockPosition === 'bottom' ? 76 : 0
+        const right = isDesktopDock && dockPosition === 'right' ? (dockCollapsed ? 104 : 292) : 0
+        return {
+            top: Math.max(HEADER_HEIGHT, dockTopClearance) + DESKTOP_DRAWER_EDGE_GAP,
+            bottom: dockBottomClearance + DESKTOP_DRAWER_EDGE_GAP,
+            right: right + DESKTOP_DRAWER_EDGE_GAP,
+        }
+    }, [dockPosition, dockCollapsed])
     const [messages, setMessages] = useState<Message[]>(() => [buildInitialMessage(false, entityType)])
     const [input, setInput] = useState('')
     const [isLoading, setIsLoading] = useState(false)
@@ -98,7 +126,7 @@ export function OfferAIDrawer({
         document.body.classList.toggle('sq-ai-drawer-resizing', isOpen && desktop && isWidthDragging)
 
         if (isOpen && desktop) {
-            document.body.style.setProperty('--sq-ai-drawer-width', `${drawerWidth}px`)
+            document.body.style.setProperty('--sq-ai-drawer-width', `${drawerWidth + DESKTOP_DRAWER_EDGE_GAP}px`)
         } else {
             document.body.style.removeProperty('--sq-ai-drawer-width')
         }
@@ -113,7 +141,7 @@ export function OfferAIDrawer({
             document.body.classList.toggle('sq-ai-drawer-resizing', isOpen && desktop && isWidthDragging)
 
             if (isOpen && desktop) {
-                document.body.style.setProperty('--sq-ai-drawer-width', `${drawerWidthRef.current}px`)
+                document.body.style.setProperty('--sq-ai-drawer-width', `${drawerWidthRef.current + DESKTOP_DRAWER_EDGE_GAP}px`)
             } else {
                 document.body.style.removeProperty('--sq-ai-drawer-width')
             }
@@ -166,7 +194,7 @@ export function OfferAIDrawer({
             'touches' in ev ? (ev as TouchEvent).touches[0]?.clientX : (ev as MouseEvent).clientX
 
         const resizeFromClientX = (clientX: number) => {
-            const next = Math.min(maxWidth, Math.max(MIN_WIDTH, window.innerWidth - clientX))
+            const next = Math.min(maxWidth, Math.max(MIN_WIDTH, window.innerWidth - DESKTOP_DRAWER_EDGE_GAP - clientX))
             drawerWidthRef.current = next
             setDrawerWidth(next)
         }
@@ -333,10 +361,11 @@ export function OfferAIDrawer({
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 28, stiffness: 280 }}
-                        className="fixed right-0 top-0 z-40 flex h-full flex-col bg-card border-l border-border shadow-2xl w-full"
+                        className="fixed z-40 flex w-full flex-col overflow-hidden border-l border-border bg-card shadow-elevated md:rounded-3xl md:border"
                         style={{
                             width: typeof window !== 'undefined' && window.innerWidth >= 768 ? drawerWidth : undefined,
                             transition: isWidthDragging ? 'none' : undefined,
+                            ...dockClearance,
                         }}
                     >
                         {/* Drag-to-resize handle — left edge, desktop only. Wide hit area for easy grab. */}
@@ -445,13 +474,13 @@ export function OfferAIDrawer({
                                 >
                                     <span className="h-1 w-10 rounded-full bg-border transition-colors group-hover:bg-primary" />
                                 </div>
-                                <div className="relative flex items-end gap-2">
+                                <div className="relative">
                                     {/* Quick expand/collapse toggle — top-right of the textarea */}
                                     <button
                                         type="button"
                                         onClick={toggleInputHeight}
                                         className="absolute z-10 rounded p-1 text-muted-foreground transition-colors hover:bg-secondary/60 hover:text-foreground"
-                                        style={{ right: '3.25rem', top: '0.375rem' }}
+                                        style={{ right: '0.5rem', top: '0.375rem' }}
                                         title={inputHeight > DEFAULT_INPUT_HEIGHT + 20 ? 'Zwiń pole tekstowe' : 'Powiększ pole tekstowe'}
                                     >
                                         {inputHeight > DEFAULT_INPUT_HEIGHT + 20
@@ -466,9 +495,14 @@ export function OfferAIDrawer({
                                         onKeyDown={handleKeyDown}
                                         placeholder="Napisz wiadomość… (Enter = wyślij)"
                                         disabled={isLoading}
-                                        className="flex-1 resize-none rounded-xl border border-border bg-secondary/40 px-3 py-2.5 pr-9 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50"
+                                        className="w-full resize-none rounded-xl border border-border bg-secondary/40 px-3 py-2.5 pr-9 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50"
                                         style={{ height: inputHeight }}
                                     />
+                                </div>
+                                <div className="mt-1.5 flex items-center justify-between gap-2">
+                                    <p className="text-xs text-muted-foreground truncate">
+                                        Shift+Enter = nowa linia · przeciągnij górną krawędź, aby powiększyć
+                                    </p>
                                     <Button
                                         type="button"
                                         size="sm"
@@ -479,9 +513,6 @@ export function OfferAIDrawer({
                                         <Send className="h-4 w-4" />
                                     </Button>
                                 </div>
-                                <p className="mt-1.5 text-center text-xs text-muted-foreground">
-                                    Shift+Enter = nowa linia · przeciągnij górną krawędź, aby powiększyć
-                                </p>
                             </div>
                         )}
                     </motion.div>

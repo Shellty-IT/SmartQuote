@@ -21,6 +21,7 @@ import StepSupportTemplate from './components/StepSupportTemplate';
 import StepMobileAppTemplate from './components/StepMobileAppTemplate';
 import StepMobileSimpleTemplate from './components/StepMobileSimpleTemplate';
 import StepUniversalTemplate from './components/StepUniversalTemplate';
+import StepClassicTemplate from './components/StepClassicTemplate';
 import WizardHeader from '@/components/ui/WizardHeader';
 
 export default function NewOfferContent() {
@@ -225,6 +226,19 @@ export default function NewOfferContent() {
                         onTitleChange={(v) => updateDetails('title', v)}
                         blocks={universalBlocks}
                         onBlocksChange={setUniversalBlocks}
+                    />
+                )}
+                {currentStep === 'template' && (offerDetails.templateType ?? 'classic') === 'classic' && (
+                    <StepClassicTemplate
+                        client={documentClient}
+                        details={offerDetails}
+                        onUpdate={updateDetails}
+                        items={items}
+                        totals={totals}
+                        uniqueVariants={uniqueVariants}
+                        onAddItem={addItem}
+                        onRemoveItem={removeItem}
+                        onUpdateItem={updateItem}
                     />
                 )}
                 {currentStep === 'summary' && (selectedClient || selectedLead) && (

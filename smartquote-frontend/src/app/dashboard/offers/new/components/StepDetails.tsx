@@ -1,12 +1,9 @@
 // src/app/dashboard/offers/new/components/StepDetails.tsx
 'use client';
 
-import { useState, useCallback } from 'react';
-import { Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui';
 import { useTranslations } from '@/i18n';
 import { cn } from '@/lib/utils';
-import { ai } from '@/lib/api';
 import RichTextEditor from '@/components/email/RichTextEditor';
 import type { OfferDetails } from '../types';
 import { TemplateAIFillButton } from '@/components/offers/TemplateAIFillButton';
@@ -26,30 +23,6 @@ interface StepDetailsProps {
 export default function StepDetails({ details, onUpdate, clientName, hideTemplateSelector = false }: StepDetailsProps) {
     const tr = useTranslations('offerNew');
     const d = tr.details;
-    const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
-    const [isPolishingDesc, setIsPolishingDesc] = useState(false);
-
-    const handleGenerateDescription = useCallback(async (mode: 'generate' | 'polish') => {
-        if (!details.title || details.title.length < 3) return;
-        if (mode === 'generate') setIsGeneratingDesc(true); else setIsPolishingDesc(true);
-        try {
-            const result = await ai.generateOfferDescription({
-                title: details.title,
-                clientName: clientName || 'Klient',
-                templateType: details.templateType,
-                currentText: mode === 'polish' ? details.description : undefined,
-                mode,
-            });
-            onUpdate('description', result);
-        } catch {
-            // toast is not available here — user sees no change on error (silent fail)
-        } finally {
-            setIsGeneratingDesc(false);
-            setIsPolishingDesc(false);
-        }
-    }, [details.title, details.description, details.templateType, clientName, onUpdate]);
-
-    const canAI = details.title.length >= 3;
 
     return (
         <div>
@@ -79,44 +52,10 @@ export default function StepDetails({ details, onUpdate, clientName, hideTemplat
                     required
                 />
 
-                {/* Description with AI */}
+                {/* Description — filled via the single "Wypełnij z AI" chat above, not
+                    per-field AI buttons (removed: redundant with the chat drawer). */}
                 <div>
-                    <div className="flex items-center justify-between mb-1">
-                        <label className="block text-sm font-medium text-foreground">{d.description}</label>
-                        <div className="flex items-center gap-1.5">
-                            <button
-                                type="button"
-                                disabled={!canAI || isGeneratingDesc || isPolishingDesc}
-                                onClick={() => handleGenerateDescription('generate')}
-                                title={canAI ? d.aiHint : d.offerTitlePlaceholder}
-                                className={cn(
-                                    'flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors',
-                                    canAI
-                                        ? 'bg-primary/10 text-primary hover:bg-primary/20'
-                                        : 'cursor-not-allowed opacity-40 bg-muted text-muted-foreground',
-                                )}
-                            >
-                                <Sparkles className="h-3 w-3" />
-                                {isGeneratingDesc ? d.aiGenerating : d.aiGenerate}
-                            </button>
-                            {details.description && (
-                                <button
-                                    type="button"
-                                    disabled={!canAI || isGeneratingDesc || isPolishingDesc}
-                                    onClick={() => handleGenerateDescription('polish')}
-                                    className={cn(
-                                        'flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors',
-                                        canAI
-                                            ? 'bg-primary/10 text-primary hover:bg-primary/20'
-                                            : 'cursor-not-allowed opacity-40 bg-muted text-muted-foreground',
-                                    )}
-                                >
-                                    <Sparkles className="h-3 w-3" />
-                                    {isPolishingDesc ? d.aiGenerating : d.aiPolish}
-                                </button>
-                            )}
-                        </div>
-                    </div>
+                    <label className="block text-sm font-medium text-foreground mb-1">{d.description}</label>
                     <RichTextEditor
                         value={details.description}
                         onChange={(v) => onUpdate('description', v)}

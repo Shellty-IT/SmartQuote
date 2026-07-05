@@ -413,6 +413,7 @@ export function useOfferForm(options?: { initialData?: Offer }) {
                  isMobileApp ? `Aplikacja mobilna — ${entityName}` :
                  isMobileSimple ? `Aplikacja mobilna — ${entityName}` :
                  isUniversal ? `Oferta — ${entityName}` :
+                 offerDetails.templateType === 'classic' ? `Oferta — ${entityName}` :
                  `Propozycja — ${entityName}`);
 
             const docTemplatePriceOverride = isShop

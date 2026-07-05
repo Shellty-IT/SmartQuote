@@ -7,6 +7,7 @@ import { emailsApi } from '@/lib/api/emails.api';
 import { offersApi } from '@/lib/api/offers.api';
 import { clientsApi } from '@/lib/api/clients.api';
 import { contractsApi } from '@/lib/api/contracts.api';
+import { useSmtpConfig } from '@/hooks/useSettings';
 import { BUILT_IN_TEMPLATES } from '@/types/email.types';
 import type {
     EmailAttachment,
@@ -26,6 +27,8 @@ interface ComposerErrors {
 export function useEmailComposer(draftId?: string) {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { config: smtpConfig, isLoading: isLoadingSmtp } = useSmtpConfig();
+    const smtpConfigured = smtpConfig?.smtpConfigured === true;
 
     const [to, setTo] = useState('');
     const [toName, setToName] = useState('');
@@ -269,6 +272,10 @@ export function useEmailComposer(draftId?: string) {
 
     const handleSend = useCallback(async () => {
         if (!validate()) return;
+        if (!smtpConfigured) {
+            setErrorMessage('Connect your own mailbox in Settings → Mailbox before sending.');
+            return;
+        }
         setIsSending(true);
         setErrorMessage('');
         setSuccessMessage('');
@@ -290,15 +297,11 @@ export function useEmailComposer(draftId?: string) {
             setTimeout(() => router.push('/dashboard/emails'), 1500);
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : 'Send error';
-            if (msg.includes('SMTP_NOT_CONFIGURED')) {
-                setErrorMessage('SMTP not configured. Go to Settings → Mailbox to configure your email.');
-            } else {
-                setErrorMessage(msg);
-            }
+            setErrorMessage(msg);
         } finally {
             setIsSending(false);
         }
-    }, [validate, draftId, buildPayload, router]);
+    }, [validate, smtpConfigured, draftId, buildPayload, router]);
 
     const handleSaveDraft = useCallback(async () => {
         if (!to.trim() && !subject.trim() && !body.trim()) {
@@ -332,6 +335,8 @@ export function useEmailComposer(draftId?: string) {
     }, [to, toName, subject, body, clientId, offerId, contractId, attachments, draftId, buildPayload, router]);
 
     return {
+        smtpConfigured,
+        isLoadingSmtp,
         to, setTo,
         toName, setToName,
         subject, setSubject,

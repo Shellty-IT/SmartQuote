@@ -277,7 +277,7 @@ function renderPackages(blocks: WebsiteV3Blocks, editorMode: boolean, num: numbe
 function renderProcess(blocks: WebsiteV3Blocks, editorMode: boolean, num: number): string {
     const b = blocks.process
     const steps = b.steps.map((s, i) => `
-<div style="flex:1;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;">
+<div class="print-keep" style="flex:1;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;">
   <div style="width:54px;height:54px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px;box-shadow:0 8px 20px rgba(124,58,237,0.3);">${i + 1}</div>
   <div style="font-weight:700;font-size:16px;">${esc(s.label)}</div>
   <div style="font-size:12.5px;font-weight:600;color:var(--violet);">${esc(s.duration)}</div>

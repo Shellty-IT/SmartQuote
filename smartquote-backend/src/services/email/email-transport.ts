@@ -1,5 +1,5 @@
 // src/services/email/email-transport.ts
-import { config } from '../../config';
+import nodemailer from 'nodemailer';
 import { createModuleLogger } from '../../lib/logger';
 import type { EmailLogStatus } from '../../types';
 
@@ -11,6 +11,7 @@ export interface SmtpConfig {
     user: string;
     pass: string;
     from: string;
+    replyTo?: string;
 }
 
 export interface MailOptions {
@@ -54,131 +55,36 @@ export function appendLinksToBody(body: string, linkLines: string[]): string {
     return `${body}\n\n${'─'.repeat(40)}\n${linkLines.join('\n')}`;
 }
 
-function parseEmailAddress(emailString: string): { name?: string; email: string } {
-    const match = emailString.match(/^(?:"?([^"]*)"?\s)?<?([^>]+)>?$/);
-    const name = match?.[1]?.trim();
-    const email = match?.[2]?.trim() || emailString.trim();
-    return name ? { name, email } : { email };
-}
-
-function buildMailerSendAttachments(
-    attachments: any[] | undefined,
-): Array<{ content: string; filename: string; type?: string; disposition: string }> {
-    if (!attachments || attachments.length === 0) return [];
-
-    const result: Array<{ content: string; filename: string; type?: string; disposition: string }> = [];
-
-    for (const att of attachments) {
-        if (att.content && Buffer.isBuffer(att.content)) {
-            const filename = typeof att.filename === 'string' ? att.filename : 'attachment';
-            result.push({
-                content: att.content.toString('base64'),
-                filename,
-                type: att.contentType || 'application/octet-stream',
-                disposition: 'attachment',
-            });
-        }
-    }
-
-    return result;
-}
-
 export async function sendEmail(
     mailOptions: MailOptions,
     smtpConfig: SmtpConfig,
 ): Promise<{ status: EmailLogStatus; errorMessage?: string }> {
-    if (!config.mailersend.apiKey) {
-        logger.error('MailerSend API key not configured');
-        return {
-            status: 'FAILED',
-            errorMessage: 'MailerSend API key not configured',
-        };
-    }
+    const transporter = nodemailer.createTransport({
+        host: smtpConfig.host,
+        port: smtpConfig.port,
+        secure: smtpConfig.port === 465,
+        auth: { user: smtpConfig.user, pass: smtpConfig.pass },
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 10000,
+    });
 
     try {
-        const recipient = parseEmailAddress(mailOptions.to);
-        const mailerSendAttachments = buildMailerSendAttachments(mailOptions.attachments);
-
-        const payload: Record<string, unknown> = {
-            from: {
-                email: config.mailersend.fromEmail,
-                name: config.mailersend.fromName,
-            },
-            to: [
-                {
-                    email: recipient.email,
-                    name: recipient.name || recipient.email,
-                },
-            ],
+        await transporter.sendMail({
+            from: smtpConfig.from,
+            replyTo: smtpConfig.replyTo,
+            to: mailOptions.to,
             subject: mailOptions.subject,
             html: mailOptions.html,
             text: mailOptions.text,
-        };
-
-        if (mailerSendAttachments.length > 0) {
-            payload.attachments = mailerSendAttachments;
-        }
-
-        logger.info(
-            {
-                to: recipient.email,
-                subject: mailOptions.subject,
-                attachmentsCount: mailerSendAttachments.length,
-            },
-            'Sending email via MailerSend',
-        );
-
-        const response = await fetch('https://api.mailersend.com/v1/email', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${config.mailersend.apiKey}`,
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-            body: JSON.stringify(payload),
+            attachments: mailOptions.attachments,
         });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ message: response.statusText })) as { message?: string; errors?: Record<string, string[]> };
-            const errorMessage = errorData.message || JSON.stringify(errorData.errors) || `HTTP ${response.status}`;
-            logger.error({ status: response.status, errorData, to: recipient.email }, 'MailerSend send failed');
-            return {
-                status: 'FAILED',
-                errorMessage,
-            };
-        }
-
-        const messageId = response.headers.get('x-message-id') || 'unknown';
-        logger.info({ messageId, to: recipient.email, attachmentsCount: mailerSendAttachments.length }, 'Email sent successfully via MailerSend');
+        logger.info({ to: mailOptions.to, host: smtpConfig.host }, 'Email sent successfully via user SMTP');
         return { status: 'SENT' };
     } catch (err: any) {
-        logger.error({ err, to: mailOptions.to }, 'MailerSend send exception');
-        return {
-            status: 'FAILED',
-            errorMessage: err.message || 'Unknown error',
-        };
-    }
-}
-
-export async function testConnection(smtpConfig: SmtpConfig): Promise<{ success: boolean; error?: string }> {
-    if (!config.mailersend.apiKey) {
-        return { success: false, error: 'MailerSend API key not configured' };
-    }
-
-    try {
-        const response = await fetch('https://api.mailersend.com/v1/domains', {
-            headers: {
-                'Authorization': `Bearer ${config.mailersend.apiKey}`,
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-        });
-
-        if (!response.ok) {
-            return { success: false, error: `Invalid API key (HTTP ${response.status})` };
-        }
-
-        return { success: true };
-    } catch (err: any) {
-        return { success: false, error: err.message };
+        logger.error({ err, to: mailOptions.to, host: smtpConfig.host }, 'User SMTP send exception');
+        return { status: 'FAILED', errorMessage: err.message || 'Unknown error' };
+    } finally {
+        transporter.close();
     }
 }

@@ -4,6 +4,7 @@ import { NotFoundError, ValidationError } from '../errors/domain.errors';
 import { createModuleLogger } from '../lib/logger';
 import { config } from '../config';
 import { resolveAttachments } from './email/email-attachment-resolver';
+import { getDecryptedSmtpConfig } from './settings.service';
 import {
     sendEmail,
     buildHtmlBody,
@@ -30,23 +31,12 @@ interface SendResult {
 }
 
 async function getSmtpOrThrow(userId: string): Promise<NonNullable<SmtpConfig>> {
-    if (!config.mailersend.apiKey) {
-        logger.error('MailerSend API key not configured');
-        throw new ValidationError(
-            'Wysyłanie maili jest tymczasowo niedostępne. Skontaktuj się z administratorem.'
-        );
+    const userSmtpConfig = await getDecryptedSmtpConfig(userId);
+    if (!userSmtpConfig) {
+        throw new ValidationError('Skonfiguruj skrzynkę pocztową w ustawieniach');
     }
-
-    const dummySmtpConfig: SmtpConfig = {
-        host: 'mailersend-api',
-        port: 443,
-        user: 'api',
-        pass: 'api',
-        from: config.mailersend.fromEmail,
-    };
-
-    logger.debug({ userId }, 'Using MailerSend HTTP API for email delivery');
-    return dummySmtpConfig;
+    logger.debug({ userId, host: userSmtpConfig.host }, 'Using user SMTP config for email delivery');
+    return userSmtpConfig;
 }
 
 class EmailComposerService {

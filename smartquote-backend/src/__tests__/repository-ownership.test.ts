@@ -38,7 +38,7 @@ jest.mock('../services/shared/postmortem.utils', () => ({
 }));
 
 jest.mock('../services/email', () => ({ emailService: { sendOfferEmail: jest.fn() } }));
-jest.mock('../services/settings.service', () => ({ getEffectiveSmtpConfig: jest.fn() }));
+jest.mock('../services/settings.service', () => ({ getDecryptedSmtpConfig: jest.fn() }));
 jest.mock('../services/pdf', () => ({ pdfService: { generateOfferPDF: jest.fn() } }));
 jest.mock('../utils/offerNumber', () => ({ generateOfferNumber: jest.fn().mockResolvedValue('OFF/2026/001') }));
 
