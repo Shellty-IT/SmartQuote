@@ -29,6 +29,8 @@ function EditDraftContent({ draftId }: { draftId: string }) {
     const router = useRouter();
     const tr = useTranslations('emailsNew');
     const {
+        smtpConfigured,
+        isLoadingSmtp,
         to, setTo,
         toName, setToName,
         subject, setSubject,
@@ -100,6 +102,13 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                             {tr.smtpRedirect}
                         </Link>
                     )}
+                </div>
+            )}
+
+            {!isLoadingSmtp && !smtpConfigured && (
+                <div className="mb-6 p-4 rounded-xl bg-destructive/10 border border-destructive/25 text-sm text-destructive">
+                    {tr.smtpConnectWarning}{' '}
+                    <Link href="/dashboard/settings" className="underline">{tr.smtpLink}</Link>
                 </div>
             )}
 
@@ -323,7 +332,7 @@ function EditDraftContent({ draftId }: { draftId: string }) {
                     <button
                         type="button"
                         onClick={handleSend}
-                        disabled={isSending || isSavingDraft}
+                        disabled={isSending || isSavingDraft || (!isLoadingSmtp && !smtpConfigured)}
                         className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-primary hover:brightness-110 text-white text-sm font-medium transition-colors disabled:opacity-60"
                     >
                         {isSending ? (

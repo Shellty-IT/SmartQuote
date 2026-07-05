@@ -322,7 +322,7 @@ export default function FloatingDock() {
                     {DOCK_POSITION_OPTIONS.map((option) => (
                         <DropdownMenuItem
                             key={option.value}
-                            onClick={() => setPosition(option.value)}
+                            onSelect={() => setPosition(option.value)}
                             className={cn('gap-2', position === option.value && 'text-primary')}
                         >
                             <option.icon className="h-4 w-4" />
@@ -607,11 +607,13 @@ export default function FloatingDock() {
         </div>
     );
 
-    const outerStyle = isDragging
-        ? { left: drag.x, top: drag.y }
-        : position === 'floating'
-            ? { left: floatCoords.x, top: floatCoords.y }
-            : undefined;
+    const outerStyle = {
+        ...(isDragging
+            ? { left: drag.x, top: drag.y }
+            : position === 'floating'
+                ? { left: floatCoords.x, top: floatCoords.y }
+                : undefined),
+    };
 
     return (
         <TooltipProvider delayDuration={300}>
@@ -630,7 +632,7 @@ export default function FloatingDock() {
             {isDragging && (
                 <>
                     <div className={cn(
-                        'pointer-events-none fixed left-1/2 top-0.0 z-30 hidden h-16 w-[min(48rem,calc(100vw-2rem))] -translate-x-1/2 rounded-3xl border-2 border-dashed transition-colors lg:block',
+                        'pointer-events-none fixed left-1/2 top-0 z-30 hidden h-16 w-[min(48rem,calc(100vw-2rem))] -translate-x-1/2 rounded-3xl border-2 border-dashed transition-colors lg:block',
                         nearTop ? 'border-primary/60 bg-primary/10' : 'border-sidebar-border/60 bg-sidebar/40'
                     )} />
                     <div className={cn(
@@ -652,13 +654,16 @@ export default function FloatingDock() {
             <div
                 style={outerStyle}
                 className={cn(
-                    'fixed z-40 hidden lg:block',
+                    // z-50: side drawers (e.g. OfferAIDrawer) sit at z-40 and can share
+                    // this same top/right edge when pinned there — the dock must stay
+                    // above them so it's never visually covered.
+                    'fixed z-50 hidden lg:block',
                     !isDragging && 'transition-all duration-300 ease-out',
                     isDragging && 'opacity-95',
                     showHorizontal
                         ? position === 'top'
-                            ? 'inset-x-0 top-0.0 mx-auto w-fit max-w-[calc(100vw-2rem)] xl:max-w-[calc(100vw-48rem)]'
-                            : 'inset-x-0 bottom-0.0 mx-auto w-fit max-w-[calc(100vw-2rem)]'
+                            ? 'inset-x-0 top-0 mx-auto w-fit max-w-[calc(100vw-2rem)] xl:max-w-[calc(100vw-48rem)]'
+                            : 'inset-x-0 bottom-0 mx-auto w-fit max-w-[calc(100vw-2rem)]'
                         : position === 'left' && !isDragging
                             ? 'left-4 top-4 bottom-4'
                             : position === 'right' && !isDragging

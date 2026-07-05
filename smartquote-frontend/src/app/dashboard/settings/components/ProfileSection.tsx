@@ -5,7 +5,7 @@ import { useState, useRef } from 'react';
 import { signOut } from 'next-auth/react';
 
 import Button from '@/components/ui/Button';
-import { compressImage } from '@/lib/imageUtils';
+import ImageCropModal from '@/components/ui/ImageCropModal';
 import { useTranslations } from '@/i18n';
 import { settingsApi } from '@/lib/api';
 import type { UserProfile, UpdateProfileInput } from '@/types';
@@ -32,6 +32,7 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
     const [deleteConfirm, setDeleteConfirm] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
     const [deleteError, setDeleteError] = useState('');
+    const [cropFile, setCropFile] = useState<File | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -54,24 +55,28 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
         setIsEditing(false);
     };
 
-    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
         setAvatarError('');
         if (!file.type.startsWith('image/')) { setAvatarError(tr.profile.avatarSelectFile); return; }
         if (file.size > 2 * 1024 * 1024) { setAvatarError(tr.profile.avatarTooBig); return; }
+        setCropFile(file);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const handleCropConfirm = async (dataUrl: string) => {
+        setCropFile(null);
         setIsUploadingAvatar(true);
         try {
-            const base64 = await compressImage(file, 200, 200, 0.8);
-            await onUpdate({ avatar: base64 });
-            setCurrentAvatar(base64);
+            await onUpdate({ avatar: dataUrl });
+            setCurrentAvatar(dataUrl);
             setSuccess(true);
             setTimeout(() => setSuccess(false), 3000);
         } catch {
             setAvatarError(tr.profile.avatarProcessError);
         } finally {
             setIsUploadingAvatar(false);
-            if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
 
@@ -299,6 +304,19 @@ export default function ProfileSection({ profile, onUpdate }: Props) {
                     </button>
                 </div>
             </div>
+
+            {cropFile && (
+                <ImageCropModal
+                    file={cropFile}
+                    title={tr.profile.changePicture}
+                    aspect={1}
+                    shape="circle"
+                    outputWidth={300}
+                    outputHeight={300}
+                    onCancel={() => setCropFile(null)}
+                    onConfirm={handleCropConfirm}
+                />
+            )}
         </div>
     );
 }

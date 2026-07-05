@@ -8,7 +8,7 @@ import { offersRepository, OfferItemData, UpdateOfferData } from '../repositorie
 import { CreateOfferInput, UpdateOfferInput, OfferItemInput } from '../types';
 import { generateOfferNumber } from '../utils/offerNumber';
 import { emailService } from './email';
-import { getEffectiveSmtpConfig } from './settings.service';
+import { getDecryptedSmtpConfig } from './settings.service';
 import { buildItemWithTotals, calculateOfferTotals, ItemWithTotals } from './shared/offer-calculations';
 import { triggerPostMortem } from './shared/postmortem.utils';
 import { NotFoundError, ValidationError, ExternalServiceError } from '../errors/domain.errors';
@@ -133,6 +133,10 @@ export class OffersService {
 
         const previousStatus = existing.status;
 
+        // Set below when a block priceOverride syncs onto the offer's single
+        // placeholder item too (see the blocks-handling block further down).
+        let syncedItems: ItemWithTotals[] | undefined;
+
         const updateData: UpdateOfferData = {
             title: data.title,
             description: data.description,
@@ -158,7 +162,10 @@ export class OffersService {
             // When a block template has a priceOverride, sync it to the offer totals
             // so all views (list, details, PDF) show the same price. The block key
             // holding the override differs per template, hence existing.templateType.
-            if (data.blocks != null && !data.items) {
+            // Document-template offers never populate `items` (no items step in their
+            // wizard), so the frontend sends `items: []` on every block-only save —
+            // an empty array is truthy, so this must check length, not just presence.
+            if (data.blocks != null && (!data.items || data.items.length === 0)) {
                 const totals = syncTotalsFromBlocks(
                     data.blocks as Record<string, unknown>,
                     existing.templateType,
@@ -167,6 +174,31 @@ export class OffersService {
                     updateData.totalGross = totals.totalGross;
                     updateData.totalNet = totals.totalNet;
                     updateData.totalVat = totals.totalVat;
+
+                    // Doc-template offers carry a single placeholder item mirroring
+                    // the headline price. Without this, the items table shows a
+                    // stale price (usually 0) while the totals just below it
+                    // already reflect the newly synced value.
+                    if (existing.items.length === 1) {
+                        const placeholder = existing.items[0];
+                        const quantity = Number(placeholder.quantity) || 1;
+                        const discount = Number(placeholder.discount) || 0;
+                        const divisor = quantity * (1 - discount / 100);
+                        const unitPrice = divisor > 0 ? totals.totalNet / divisor : totals.totalNet;
+                        syncedItems = buildItemsWithTotals([{
+                            name: placeholder.name,
+                            description: placeholder.description ?? undefined,
+                            quantity,
+                            unit: placeholder.unit,
+                            unitPrice,
+                            vatRate: Number(placeholder.vatRate),
+                            discount,
+                            isOptional: placeholder.isOptional,
+                            minQuantity: placeholder.minQuantity ?? undefined,
+                            maxQuantity: placeholder.maxQuantity ?? undefined,
+                            variantName: placeholder.variantName ?? undefined,
+                        }]);
+                    }
                 }
             }
         }
@@ -195,6 +227,13 @@ export class OffersService {
                     totalGross: offerTotals.totalGross,
                 },
                 itemsWithTotals.map(mapItemToData),
+            );
+        } else if (syncedItems) {
+            result = await offersRepository.updateWithItems(
+                id,
+                userId,
+                updateData,
+                syncedItems.map(mapItemToData),
             );
         } else {
             result = await offersRepository.update(id, userId, updateData);
@@ -375,7 +414,7 @@ export class OffersService {
             throw new ValidationError('Klient nie ma podanego adresu email');
         }
 
-        const smtpConfig = await getEffectiveSmtpConfig(userId);
+        const smtpConfig = await getDecryptedSmtpConfig(userId);
         if (!smtpConfig) {
             throw new ValidationError('Skonfiguruj skrzynkę pocztową w ustawieniach');
         }

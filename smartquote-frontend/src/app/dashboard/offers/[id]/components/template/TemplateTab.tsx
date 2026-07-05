@@ -2,10 +2,12 @@
 'use client'
 
 import { useState, useCallback, useEffect, useMemo } from 'react'
+import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { useQueryClient } from '@tanstack/react-query'
-import { Eye, Download } from 'lucide-react'
+import { Eye, Download, Pencil } from 'lucide-react'
 import { Button } from '@/components/ui'
+import { Button as LinkButton } from '@/components/ui/Button'
 import { PdfPreviewModal } from '@/components/pdf/PdfPreviewModal'
 import { ProposalDocumentEditor } from '@/components/offers/editor/ProposalDocumentEditor'
 import { ShopDocumentEditor } from '@/components/offers/ShopDocumentEditor'
@@ -494,6 +496,15 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
             {/* ── CLASSIC: PDF preview + download ───────────────────────────── */}
             {templateType === 'classic' && (
                 <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-card">
+                    {/* Classic offers have no block editor here — their content (line
+                        items, pricing, details) is edited through the offer wizard.
+                        Without this link, this tab looks like a dead end. */}
+                    <LinkButton asChild>
+                        <Link href={`/dashboard/offers/${offer.id}/edit`}>
+                            <Pencil className="h-4 w-4" />
+                            {ttr.editItemsBtn}
+                        </Link>
+                    </LinkButton>
                     <Button variant="outline" onClick={handleClassicPreview} disabled={isClassicPreviewing}>
                         <Eye className="h-4 w-4" />
                         {isClassicPreviewing ? '…' : ttr.previewBtn}

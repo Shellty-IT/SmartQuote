@@ -93,6 +93,13 @@ export function CoverEditorV2({ blocks, onChange, offerContext }: { blocks: Webs
             <Field label="Pill / obietnica">
                 <Input value={c.knowledgePill ?? ''} onChange={e => onChange({ ...blocks, cover: { ...c, knowledgePill: e.target.value } })} />
             </Field>
+            <Field label="Cena brutto (widoczna na okładce i w sekcji „Ile to kosztuje”)">
+                <NumberInput
+                    value={blocks.pricing.priceOverride ?? ''}
+                    placeholder="Pozostaw puste = „do wyceny”"
+                    onChange={e => onChange({ ...blocks, pricing: { ...blocks.pricing, priceOverride: e.target.value ? Number(e.target.value) : null } })}
+                />
+            </Field>
             <Field label="Realizacja do X dni">
                 <NumberInput value={c.deadlineDays} onChange={e => onChange({ ...blocks, cover: { ...c, deadlineDays: Number(e.target.value) } })} />
             </Field>

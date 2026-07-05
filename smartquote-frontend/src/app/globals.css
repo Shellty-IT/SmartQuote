@@ -211,16 +211,35 @@
 }
 
 @layer utilities {
+    /* The floating nav dock only renders at the lg breakpoint (see FloatingDock's
+       `hidden lg:block`). --sq-dock-right-clearance is set inline (on the flex
+       column wrapping Header + this <main>) regardless of viewport, so below lg
+       it must be forced back to 0 here or the AI-drawer rule below would
+       reserve padding for a dock that isn't actually showing. */
+    @media (max-width: 1023.98px) {
+        .sq-dashboard-content {
+            --sq-dock-right-clearance: 0px !important;
+        }
+    }
+
     @media (min-width: 768px) {
+        /* Scoped to <main> (not the Header+main wrapper) — Header is sticky and
+           always sits above the drawer's top offset, so it never overlaps it and
+           doesn't need to squeeze. Squeezing it too used to push its right-aligned
+           controls (language/theme/bell/profile) left, under the centered
+           top-pinned dock. Adds to (not replaces) any padding-right the dashboard
+           layout already reserves for a right-pinned nav dock — see
+           --sq-dock-right-clearance in dashboard/layout.tsx. Without the addition,
+           opening this drawer while the dock is pinned right would collapse the
+           dock's own clearance and let content render underneath it. */
         body.sq-ai-drawer-open .sq-dashboard-content {
-            padding-right: var(--sq-ai-drawer-width, 320px);
+            padding-right: calc(var(--sq-dock-right-clearance, 0px) + var(--sq-ai-drawer-width, 320px));
         }
 
         body.sq-ai-drawer-open.sq-ai-drawer-resizing .sq-dashboard-content {
             transition: none !important;
         }
     }
-
     .bg-gradient-primary { background-image: var(--gradient-primary); }
     .bg-gradient-sidebar { background-image: var(--gradient-sidebar); }
     .bg-gradient-mesh { background-image: var(--gradient-mesh); }

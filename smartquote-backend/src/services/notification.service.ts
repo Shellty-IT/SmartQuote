@@ -3,7 +3,7 @@ import { NotificationType } from '@prisma/client';
 import prisma from '../lib/prisma';
 import { createModuleLogger } from '../lib/logger';
 import { emailService } from './email';
-import { getEffectiveSmtpConfig } from './settings.service';
+import { getDecryptedSmtpConfig } from './settings.service';
 import type { SmtpConfig } from '../types';
 
 const logger = createModuleLogger('notification-service');
@@ -86,7 +86,7 @@ class NotificationService {
         if (!settings.emailNotifications || !settings.smtpConfigured) return null;
 
         try {
-            return await getEffectiveSmtpConfig(userId);
+            return await getDecryptedSmtpConfig(userId);
         } catch (err: unknown) {
             logger.error({ err, userId }, 'Failed to get SMTP config');
             return null;

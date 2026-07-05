@@ -19,33 +19,10 @@ const configSchema = z.object({
     DATABASE_URL: z.string().min(1, 'DATABASE_URL jest wymagany'),
     GEMINI_API_KEY: z.string().default(''),
     GEMINI_MODEL: z.string().default('gemini-2.5-flash'),
-    SMTP_HOST: z.string().optional(),
-    SMTP_PORT: z
-        .string()
-        .optional()
-        .transform((v) => (v ? parseInt(v, 10) : undefined)),
-    SMTP_USER: z.string().optional(),
-    SMTP_PASS: z.string().optional(),
-    SMTP_FROM: z.string().optional(),
-    MAILERSEND_API_KEY: z.string().optional(),
-    MAILERSEND_FROM_EMAIL: z.string().default('noreply@trial-xxx.mailersend.net'),
-    MAILERSEND_FROM_NAME: z.string().default('SmartQuote AI'),
-    ENCRYPTION_KEY: z.string().min(32, 'ENCRYPTION_KEY musi mieć minimum 32 znaki').optional(),
     CRON_SECRET: z.string().optional(),
     KSEF_MASTER_URL: z.string().default('http://localhost:5000'),
     KSEF_MASTER_API_KEY: z.string().default(''),
     KSEF_AVAILABILITY_CACHE_TTL_MS: z.string().default('300000').transform((v) => parseInt(v, 10)),
-}).superRefine((data, ctx) => {
-    // ENCRYPTION_KEY is required whenever SMTP credentials are configured,
-    // because SMTP passwords are stored encrypted in the database.
-    const smtpNeedsKey = data.SMTP_USER || data.SMTP_PASS;
-    if (smtpNeedsKey && !data.ENCRYPTION_KEY) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['ENCRYPTION_KEY'],
-            message: 'ENCRYPTION_KEY (min 32 znaków) jest wymagany gdy SMTP_USER lub SMTP_PASS są ustawione',
-        });
-    }
 });
 
 function validateConfig() {
@@ -77,19 +54,6 @@ export const config = {
         apiKey: env.GEMINI_API_KEY,
         model: env.GEMINI_MODEL,
     },
-    smtp: {
-        host: env.SMTP_HOST,
-        port: env.SMTP_PORT,
-        user: env.SMTP_USER,
-        pass: env.SMTP_PASS,
-        from: env.SMTP_FROM,
-    },
-    mailersend: {
-        apiKey: env.MAILERSEND_API_KEY,
-        fromEmail: env.MAILERSEND_FROM_EMAIL,
-        fromName: env.MAILERSEND_FROM_NAME,
-    },
-    encryptionKey: env.ENCRYPTION_KEY,
     cronSecret: env.CRON_SECRET,
     ksef: {
         masterUrl: env.KSEF_MASTER_URL,

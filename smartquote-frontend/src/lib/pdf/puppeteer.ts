@@ -153,6 +153,15 @@ export async function htmlToPdfBuffer(html: string): Promise<Buffer> {
     let fontStatus: 'ready' | 'timeout' = 'ready'
 
     try {
+        // Emulate print media BEFORE content loads. page.pdf() always renders with
+        // print CSS regardless, but the in-page pagination script (preparePagination /
+        // updatePrintKeeps) runs on DOMContentLoaded and measures element heights via
+        // getBoundingClientRect() — without print emulation active at that point, it
+        // measures screen-layout sizes (different padding/widths/font sizes than the
+        // actual print layout), so break-inside:avoid decisions are made against the
+        // wrong box sizes and blocks land on the wrong side of a page break.
+        await page.emulateMediaType('print')
+
         // Parse the DOM but do NOT block on 'load' — a single slow or unreachable
         // remote image (logo, avatar, portfolio thumbnail) would otherwise keep
         // the 'load' event from ever firing and hang setContent until timeout.

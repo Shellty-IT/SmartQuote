@@ -27,9 +27,6 @@ router.post('/api-keys', validate(v.createApiKeySchema), settingsController.crea
 router.patch('/api-keys/:id/toggle', settingsController.toggleApiKey);
 router.delete('/api-keys/:id', settingsController.deleteApiKey);
 
-router.get('/sender-email', settingsController.getSenderEmail);
-router.put('/sender-email', settingsController.updateSenderEmail);
-
 router.get('/smtp', settingsController.getSmtpConfig);
 router.put('/smtp', validate(v.updateSmtpConfigSchema), settingsController.updateSmtpConfig);
 router.delete('/smtp', settingsController.deleteSmtpConfig);

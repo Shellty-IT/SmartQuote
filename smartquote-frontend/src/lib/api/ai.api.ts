@@ -96,18 +96,6 @@ export const ai = {
         };
     },
 
-    generateOfferDescription: async (params: {
-        title: string;
-        clientName: string;
-        clientType?: string;
-        templateType?: string;
-        currentText?: string;
-        mode: 'generate' | 'polish';
-    }): Promise<string> => {
-        const response = await api.post<{ description: string }>('/ai/offer-description', params);
-        return (response.data as { description: string }).description;
-    },
-
     /**
      * Multi-turn conversation that collects project info and returns ProposalBlocks.
      * When isComplete is true, blocks contains the generated template content.

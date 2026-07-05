@@ -51,17 +51,6 @@ export const priceInsightSchema = z.object({
     }),
 });
 
-export const offerDescriptionSchema = z.object({
-    body: z.object({
-        title: z.string().min(1).max(300),
-        clientName: z.string().min(1).max(200),
-        clientType: z.string().max(100).optional(),
-        templateType: z.string().max(50).optional(),
-        currentText: z.string().max(5000).optional(),
-        mode: z.enum(['generate', 'polish']).default('generate'),
-    }),
-});
-
 export const offerIdParamSchema = z.object({
     params: z.object({
         offerId: z.string().cuid(),

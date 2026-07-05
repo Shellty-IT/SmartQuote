@@ -72,6 +72,15 @@ function money(n: number, cur = ''): string {
     return n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + (cur ? ' ' + cur : '')
 }
 
+// Wraps a region in a clickable overlay that tells the parent editor which
+// section to open. Only active in editorMode — the PDF/preview output stays
+// untouched. `block` makes the whole rectangular area clickable (e.g. the
+// items table) while `inline-block` keeps flow layout (e.g. a title line).
+function editWrap(editorMode: boolean, key: string, inner: string, display: 'block' | 'inline-block' = 'block'): string {
+    if (!editorMode) return inner
+    return `<div class="sq-edit" data-key="${key}" style="display:${display};cursor:pointer;border-radius:4px;" onclick="event.stopPropagation();window.parent.postMessage({type:'sq:editBlock',blockKey:'${key}'},'*')">${inner}</div>`
+}
+
 function fmtDate(iso: string | null | undefined): string {
     if (!iso) return '-'
     const d = new Date(iso)
@@ -322,11 +331,36 @@ function renderTotals(d: ClassicOfferData): string {
 
 // ── Main export ───────────────────────────────────────────────────────────────
 
-export function buildClassicHtml(data: ClassicOfferData): string {
+export function buildClassicHtml(data: ClassicOfferData, options?: { editorMode?: boolean }): string {
+    const editorMode = options?.editorMode ?? false
     const today = fmtDate(new Date().toISOString())
     const company = data.user.company || data.user.name || null
     const website = data.user.website?.replace(/^https?:\/\//, '') ?? null
     const footerParts = [company, website, today].filter(Boolean).join(' · ')
+
+    // In editorMode, always render a clickable region for each section — even
+    // when empty — so the user has an obvious target to click and fill.
+    const titleInner = data.title
+        ? `<div style="font-size:11pt;font-weight:700;color:#1e293b;margin-bottom:4px;">${esc(data.title)}</div>`
+        : (editorMode ? `<div style="font-size:11pt;font-weight:700;color:#94a3b8;margin-bottom:4px;font-style:italic;">Kliknij, aby dodać tytuł oferty…</div>` : '')
+
+    const descInner = data.description
+        ? `<div style="font-size:8pt;color:#64748b;line-height:1.6;margin-bottom:8px;white-space:pre-line;">${esc(data.description)}</div>`
+        : (editorMode ? `<div style="font-size:8pt;color:#94a3b8;line-height:1.6;margin-bottom:8px;font-style:italic;">Kliknij, aby dodać opis oferty…</div>` : '')
+
+    const termsInner = data.terms
+        ? `<div style="margin-bottom:12px;">
+    <div style="font-size:9pt;font-weight:700;color:#1e293b;margin-bottom:4px;">Warunki:</div>
+    <div style="font-size:8pt;color:#64748b;line-height:1.6;white-space:pre-line;">${esc(data.terms)}</div>
+  </div>`
+        : (editorMode ? `<div style="margin-bottom:12px;">
+    <div style="font-size:9pt;font-weight:700;color:#1e293b;margin-bottom:4px;">Warunki:</div>
+    <div style="font-size:8pt;color:#94a3b8;line-height:1.6;font-style:italic;">Kliknij, aby dodać warunki płatności i współpracy…</div>
+  </div>` : '')
+
+    const editorCss = editorMode ? `
+.sq-edit{transition:outline-color .12s;outline:2px dashed transparent;outline-offset:2px;}
+.sq-edit:hover{outline-color:#0891b2 !important;background:rgba(8,145,178,0.04);}` : ''
 
     const css = `*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{
@@ -346,7 +380,7 @@ img{display:block;}
   thead{display:table-header-group;}
   tr{break-inside:avoid;}
   @page{size:A4;margin:10mm 0 16mm;}
-}`
+}${editorCss}`
 
     return buildHtmlDocument({
         title: `Oferta ${esc(data.number)}`,
@@ -354,16 +388,12 @@ img{display:block;}
         body: `${renderHeader(data)}
 <div class="content">
   ${renderParties(data)}
-  ${renderMetaBar(data)}
-  ${data.title ? `<div style="font-size:11pt;font-weight:700;color:#1e293b;margin-bottom:4px;">${esc(data.title)}</div>` : ''}
-  ${data.description ? `<div style="font-size:8pt;color:#64748b;line-height:1.6;margin-bottom:8px;white-space:pre-line;">${esc(data.description)}</div>` : ''}
-  ${renderItemsTable(data)}
-  ${renderTotals(data)}
-  ${data.terms ? `
-  <div style="margin-bottom:12px;">
-    <div style="font-size:9pt;font-weight:700;color:#1e293b;margin-bottom:4px;">Warunki:</div>
-    <div style="font-size:8pt;color:#64748b;line-height:1.6;white-space:pre-line;">${esc(data.terms)}</div>
-  </div>` : ''}
+  ${editWrap(editorMode, 'info', renderMetaBar(data))}
+  ${editWrap(editorMode, 'info', titleInner)}
+  ${editWrap(editorMode, 'description', descInner)}
+  ${editWrap(editorMode, 'items', `${renderItemsTable(data)}
+  ${renderTotals(data)}`)}
+  ${editWrap(editorMode, 'terms', termsInner)}
   <div style="display:flex;flex-direction:column;align-items:flex-end;margin-top:16px;">
     <div style="border-top:0.5px solid #e2e8f0;width:175px;margin-bottom:3px;"></div>
     <div style="font-size:7pt;color:#94a3b8;width:175px;text-align:center;">Podpis</div>
