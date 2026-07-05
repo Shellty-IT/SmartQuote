@@ -12,7 +12,7 @@ workflow umów i automatyczne follow-upy oparte o Google Gemini.**
 [![Node.js](https://img.shields.io/badge/Node-%3E%3D18.0-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![License](https://img.shields.io/badge/license-Proprietary-red)](#-licencja)
 
-**[🚀 Demo na żywo](https://smartquote-ai.vercel.app)** &nbsp;·&nbsp; [🇬🇧 English version](./README.md)
+**[🚀 Demo na żywo](https://smart-quote.shellty.pl)** &nbsp;·&nbsp; [🇬🇧 English version](./README.md)
 
 </div>
 
@@ -88,7 +88,7 @@ Oba projekty mają osobne drzewa zależności, osobne pipeline'y CI i osobne wdr
           │                 │                       │
           ▼                 ▼                       ▼
   ┌──────────────┐  ┌────────────────┐   ┌──────────────────┐
-  │  Neon DB     │  │ Google Gemini  │   │  SMTP / MailerSend│
+  │  Neon DB     │  │ Google Gemini  │   │  SMTP / Resend   │
   │  PostgreSQL  │  │ 2.5 Flash      │   │  (konfiguracja    │
   └──────────────┘  └────────────────┘   │  per użytkownik)  │
                                          └──────────────────┘
@@ -105,7 +105,7 @@ Oba projekty mają osobne drzewa zależności, osobne pipeline'y CI i osobne wdr
 
 ## 🔑 Demo na żywo
 
-**URL:** https://smart-quote-ai.vercel.app
+**URL:** https://smart-quote.shellty.pl
 
 Instancja demo umożliwia bezpłatną otwartą rejestrację — utwórz konto i przetestuj wszystkie funkcje.
 Przykładowych klientów, oferty i umowy można lokalnie załadować przez `npm run seed`.
@@ -135,7 +135,7 @@ Przykładowych klientów, oferty i umowy można lokalnie załadować przez `npm 
 - 🎨 **Dynamiczny branding** — logo i kolor wiodący per użytkownik zaszyte w PDF
 - 🧾 **Kalkulacje VAT** — automatyczne liczenie podatku per pozycja
 - 🔏 **Certyfikaty akceptacji** — audit trail z podpisem SHA-256 zaszyty w PDF oferty
-- 📨 **Email composer** — emaile HTML z załącznikami PDF (Nodemailer / MailerSend)
+- 📨 **Email composer** — emaile HTML z załącznikami PDF (Nodemailer SMTP / Resend)
 - 🧰 **Szablony ofert** — wielokrotnego użytku rusztowanie ofert
 
 ### Funkcje publiczne i integracje
@@ -177,7 +177,7 @@ Przykładowych klientów, oferty i umowy można lokalnie załadować przez `npm 
 | Logowanie   | Pino 8 + pino-pretty                                   |
 | Security    | Helmet, allow-list CORS, `express-rate-limit`          |
 | PDF         | PDFKit + DejaVu Sans (UTF-8)                           |
-| Email       | Nodemailer 6 (SMTP / MailerSend)                       |
+| Email       | Nodemailer 6 (SMTP) / Resend API — wybór per użytkownik |
 | Testy       | Jest 29 + ts-jest                                      |
 | Wdrożenie   | Render                                                 |
 
@@ -198,7 +198,7 @@ Przykładowych klientów, oferty i umowy można lokalnie załadować przez `npm 
 - **Klucz API Google Gemini** — do uzyskania w [Google AI Studio](https://aistudio.google.com/app/apikey)
 
 Opcjonalnie:
-- **Dane SMTP** lub **klucz API MailerSend**, jeśli chcesz wysyłać prawdziwe emaile
+- **Dane SMTP** lub **klucz API Resend**, jeśli chcesz wysyłać prawdziwe emaile (konfigurowane per użytkownik w aplikacji, nie przez zmienne środowiskowe)
 
 ---
 
@@ -268,18 +268,14 @@ npm run dev
 | `NODE_ENV`              | ❌       | Środowisko uruchomienia                                     | `development` / `production` / `test`              |
 | `FRONTEND_URL`          | ✅       | Dozwolony origin CORS (URL frontendu)                       | `http://localhost:3000`                            |
 | `CLIENT_URL`            | ✅       | Dodatkowy dozwolony origin CORS                             | `http://localhost:3000`                            |
-| `ENCRYPTION_KEY`        | ❌       | 32-znakowy klucz do szyfrowania kluczy API w bazie          | `32-char-encryption-key-here`                      |
-| `SMTP_HOST`             | ❌       | Hostname serwera SMTP                                       | `smtp.gmail.com`                                   |
-| `SMTP_PORT`             | ❌       | Port serwera SMTP                                           | `587`                                              |
-| `SMTP_USER`             | ❌       | Nazwa użytkownika SMTP                                      | `ty@gmail.com`                                     |
-| `SMTP_PASS`             | ❌       | Hasło SMTP / hasło aplikacji                                | `app-password`                                     |
-| `SMTP_FROM`             | ❌       | Domyślny nagłówek `From:`                                   | `SmartQuote AI <noreply@smartquote.ai>`            |
-| `MAILERSEND_API_KEY`    | ❌       | Klucz API MailerSend (alternatywa dla SMTP)                 | `mlsn....`                                         |
-| `MAILERSEND_FROM_EMAIL` | ❌       | Email nadawcy MailerSend                                    | `noreply@trial-xxx.mailersend.net`                 |
-| `MAILERSEND_FROM_NAME`  | ❌       | Nazwa nadawcy MailerSend                                    | `SmartQuote AI`                                    |
+| `ENCRYPTION_KEY`        | ❌       | 32-znakowy klucz szyfrujący zapisane hasła SMTP / klucze API Resend | `32-char-encryption-key-here`              |
 | `KSEF_MASTER_URL`       | ❌       | URL zewnętrznego API KSeF / e-fakturowania                  | `http://localhost:5000`                            |
 | `KSEF_MASTER_API_KEY`   | ❌       | Klucz API mostu KSeF                                        | `sk_smartquote_ksef_bridge_secret`                 |
 | `CRON_SECRET`           | ❌       | Bearer token uwierzytelniający wywołania `/cron/reminders`  | `random-cron-secret`                               |
+
+> Wysyłka e-maili (SMTP lub Resend) **nie** jest konfigurowana przez zmienne środowiskowe —
+> każdy użytkownik podłącza własną skrzynkę lub konto Resend w Ustawienia > Skrzynka pocztowa
+> w samej aplikacji, zapisywane zaszyfrowane per użytkownik w bazie danych.
 
 Pełny szablon dostępny w [`smartquote-backend/.env.example`](smartquote-backend/.env).
 
