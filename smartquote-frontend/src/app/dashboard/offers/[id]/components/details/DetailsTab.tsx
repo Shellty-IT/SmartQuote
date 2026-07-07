@@ -3,24 +3,7 @@
 
 import { formatCurrency } from '@/lib/utils';
 import type { Offer } from '@/types';
-
-// Extract template price override from proposal blocks (if set)
-function getTemplatePrice(offer: Offer): { gross: number; net: number; type: 'net' | 'gross' } | null {
-    if (offer.templateType !== 'proposal' || !offer.blocks) return null
-    try {
-        const blocks = offer.blocks as Record<string, unknown>
-        const pe = blocks.pricingExtra as Record<string, unknown> | undefined
-        if (!pe || pe.priceOverride == null) return null
-        const override = Number(pe.priceOverride)
-        const type = (pe.priceType as string | undefined) === 'net' ? 'net' : 'gross'
-        if (isNaN(override) || override <= 0) return null
-        return type === 'gross'
-            ? { gross: override, net: Math.round((override / 1.23) * 100) / 100, type }
-            : { gross: Math.round(override * 1.23 * 100) / 100, net: override, type }
-    } catch {
-        return null
-    }
-}
+import { resolveTemplatePrice, syncSingleDisplayItemToTemplatePrice } from '@/lib/offer-template-price';
 import type { VariantData } from '../../utils';
 import { VariantInfo } from './VariantInfo';
 import { ItemsTable } from './ItemsTable';
@@ -28,7 +11,7 @@ import { ClientCard } from './ClientCard';
 import { DetailsCard } from './DetailsCard';
 import { AuditTrailCard } from './AuditTrailCard';
 import { ActionsCard } from './ActionsCard';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Sparkles, Loader2 } from 'lucide-react';
 import { useTranslations } from '@/i18n';
 import { NotesFeed } from '@/components/notes/NotesFeed';
@@ -66,7 +49,15 @@ export function DetailsTab({
                            }: DetailsTabProps) {
     const detailsTr = useTranslations('offerDetail').details;
     const auditLog = offer.acceptanceLog ?? null;
-    const templatePrice = getTemplatePrice(offer);
+    const templatePrice = resolveTemplatePrice(offer.blocks, offer.templateType);
+    const displayItems = useMemo(
+        () => syncSingleDisplayItemToTemplatePrice(offer.items, templatePrice),
+        [offer.items, templatePrice],
+    );
+    const displayVariantData = useMemo(
+        () => templatePrice ? { groups: [{ name: null, items: displayItems }], variantNames: [] } : variantData,
+        [displayItems, templatePrice, variantData],
+    );
 
     const [priceCheckResults, setPriceCheckResults] = useState<PriceCheckResult[] | null>(null);
     const [isCheckingPrices, setIsCheckingPrices] = useState(false);
@@ -74,7 +65,7 @@ export function DetailsTab({
     const handlePriceCheck = async () => {
         setIsCheckingPrices(true);
         try {
-            const results = await ai.priceCheck(offer.items || [], offer.currency ?? 'PLN');
+            const results = await ai.priceCheck(displayItems, offer.currency ?? 'PLN');
             setPriceCheckResults(results);
         } catch {
             // silently fail
@@ -107,11 +98,11 @@ export function DetailsTab({
                 <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-lg font-semibold text-foreground">
-                            {detailsTr.items} ({offer.items?.length || 0})
+                            {detailsTr.items} ({displayItems.length})
                         </h2>
                         <button
                             onClick={handlePriceCheck}
-                            disabled={isCheckingPrices || !offer.items?.length}
+                            disabled={isCheckingPrices || !displayItems.length}
                             className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-semibold text-muted-foreground transition hover:bg-secondary hover:text-foreground disabled:opacity-50"
                         >
                             {isCheckingPrices ? (
@@ -123,9 +114,9 @@ export function DetailsTab({
                         </button>
                     </div>
 
-                    {variantData.variantNames.length > 0 ? (
+                    {displayVariantData.variantNames.length > 0 ? (
                         <div className="space-y-6">
-                            {variantData.groups.map((group, gi) => (
+                            {displayVariantData.groups.map((group, gi) => (
                                 <div key={gi}>
                                     <div className={`flex items-center gap-2 mb-3 pb-2 border-b ${group.name ? 'border-primary/25 ' : 'border-border'}`}>
                                         {group.name ? (
@@ -150,7 +141,7 @@ export function DetailsTab({
                             ))}
                         </div>
                     ) : (
-                        <ItemsTable items={offer.items || []} priceCheckResults={priceCheckResults} />
+                        <ItemsTable items={displayItems} priceCheckResults={priceCheckResults} />
                     )}
 
                     <div className="mt-4 pt-4 border-t border-border">
@@ -163,8 +154,8 @@ export function DetailsTab({
                                             <span className="font-medium text-foreground">{formatCurrency(templatePrice.net)}</span>
                                         </div>
                                         <div className="flex justify-between text-sm">
-                                            <span className="text-muted-foreground">VAT (23%):</span>
-                                            <span className="font-medium text-foreground">{formatCurrency(Math.round((templatePrice.gross - templatePrice.net) * 100) / 100)}</span>
+                                            <span className="text-muted-foreground">VAT ({templatePrice.vatRate}%):</span>
+                                            <span className="font-medium text-foreground">{formatCurrency(templatePrice.vat)}</span>
                                         </div>
                                         <div className="flex justify-between text-lg pt-2 border-t border-border">
                                             <span className="font-semibold text-foreground">{detailsTr.total}</span>
@@ -190,7 +181,7 @@ export function DetailsTab({
                                         </div>
                                     </>
                                 )}
-                                {variantData.variantNames.length > 0 && (
+                                {displayVariantData.variantNames.length > 0 && (
                                     <p className="text-xs text-muted-foreground text-right">
                                         * {detailsTr.sharedPlusFirst}
                                     </p>

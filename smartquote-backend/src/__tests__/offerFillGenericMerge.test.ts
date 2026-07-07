@@ -70,3 +70,46 @@ describe('mergeGenericBlocks — classic offer (flat, non-block schema)', () => 
         expect(result).toEqual(current)
     })
 })
+
+describe('mergeGenericBlocks - section activation', () => {
+    it('adds an enabled block to sections when AI activates it without updating the layout list', () => {
+        const current = {
+            sections: ['problem', 'pricing'],
+            problem: { enabled: true, title: 'Wyzwanie' },
+            portfolio: { enabled: false, title: '', items: [] },
+            pricing: { enabled: true, title: 'Wycena' },
+        }
+
+        const result = mergeGenericBlocks(current, {
+            portfolio: {
+                enabled: true,
+                title: 'Przykladowe realizacje',
+                items: [{ title: 'Strona firmy budowlanej', url: 'https://shellty.pl/customer-test' }],
+            },
+        })
+
+        expect((result.portfolio as Record<string, unknown>).enabled).toBe(true)
+        expect(result.sections).toEqual(['problem', 'pricing', 'portfolio'])
+    })
+
+    it('reattaches enabled blocks to page layouts when the template uses page arrays', () => {
+        const current = {
+            page1Sections: ['intro'],
+            page2Sections: ['scope'],
+            intro: { enabled: true, paragraphs: ['Intro'] },
+            scope: { enabled: true, items: [{ html: 'Zakres' }] },
+            technology: { enabled: false, body: '', options: [] },
+        }
+
+        const result = mergeGenericBlocks(current, {
+            technology: {
+                enabled: true,
+                body: 'WordPress jako rekomendowana technologia przy hostingu home.pl.',
+            },
+        })
+
+        expect((result.technology as Record<string, unknown>).enabled).toBe(true)
+        expect(result.page1Sections).toEqual(['intro'])
+        expect(result.page2Sections).toEqual(['scope', 'technology'])
+    })
+})

@@ -15,7 +15,7 @@ import {
     type OfferContext,
 } from './BlockEditorPanel'
 import { buildProposalHtml, type ProposalOfferData } from '@/lib/pdf/proposal-html'
-import { mergeWithDefaults, type ProposalBlocks } from '@/lib/pdf/proposal-blocks'
+import { ALL_SECTION_KEYS, mergeWithDefaults, type ProposalBlocks } from '@/lib/pdf/proposal-blocks'
 import { cn } from '@/lib/utils'
 import { useResizablePanel } from '@/hooks/useResizablePanel'
 import { useZoom, ZOOM_LEVELS, ZOOM_LABELS } from '@/hooks/useZoom'
@@ -38,8 +38,7 @@ export interface ProposalDocumentEditorProps {
 
 const VALID_BLOCK_KEYS: EditableBlockKey[] = [
     'header', 'footer',
-    'intro', 'demo', 'structure', 'scope',
-    'testing', 'technology', 'pricingExtra', 'about',
+    ...ALL_SECTION_KEYS,
 ]
 
 type PanelView = { kind: 'block'; key: EditableBlockKey } | { kind: 'sections' } | null

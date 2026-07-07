@@ -5,6 +5,7 @@ import StatusBadge from '@/components/ui/StatusBadge';
 import { formatDate, formatCurrency, getInitials, cn } from '@/lib/utils';
 import { useTranslations } from '@/i18n';
 import type { Offer } from '@/types';
+import { resolveTemplatePrice } from '@/lib/offer-template-price';
 
 interface OfferTableRowProps {
     offer: Offer;
@@ -18,6 +19,9 @@ interface OfferTableRowProps {
 export function OfferTableRow({ offer, onView, onEdit, onDuplicate, onDelete, onCopyLink }: OfferTableRowProps) {
     const tr = useTranslations('offerDetail');
     const commonTr = useTranslations('common');
+    const templatePrice = resolveTemplatePrice(offer.blocks, offer.templateType);
+    const totalGross = templatePrice?.gross ?? Number(offer.totalGross);
+    const totalNet = templatePrice?.net ?? Number(offer.totalNet);
 
     const isExpired =
         offer.validUntil &&
@@ -87,8 +91,8 @@ export function OfferTableRow({ offer, onView, onEdit, onDuplicate, onDelete, on
             </td>
 
             <td className="px-4 py-3 text-right">
-                <p className="font-semibold tabular-nums">{formatCurrency(Number(offer.totalGross))}</p>
-                <p className="text-xs text-muted-foreground tabular-nums">{tr.details.subtotal.replace(':', '')} {formatCurrency(Number(offer.totalNet))}</p>
+                <p className="font-semibold tabular-nums">{formatCurrency(totalGross)}</p>
+                <p className="text-xs text-muted-foreground tabular-nums">{tr.details.subtotal.replace(':', '')} {formatCurrency(totalNet)}</p>
             </td>
 
             <td className="px-4 py-3">

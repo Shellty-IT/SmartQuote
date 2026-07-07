@@ -53,7 +53,7 @@ type NavKey = 'dashboard' | 'offers' | 'offerTemplates' | 'contracts' | 'clients
 // sell (offers → contracts) → supporting tools → activity/comms → AI.
 const NAV_ITEMS: { key: NavKey; href: string; icon: React.ElementType; stat: string | null; badgeTone: 'default' | 'primary' | 'success' | 'info' | 'warning' | 'violet' }[] = [
     { key: 'dashboard',      href: '/dashboard',                 icon: LayoutDashboard, stat: null,        badgeTone: 'default' },
-    { key: 'leads',          href: '/dashboard/leads',           icon: UserSearch,      stat: 'leads',     badgeTone: 'warning' },
+    { key: 'leads',          href: '/dashboard/leads',           icon: UserSearch,      stat: 'leads',     badgeTone: 'info'    },
     { key: 'clients',        href: '/dashboard/clients',         icon: Users,           stat: 'clients',   badgeTone: 'info'    },
     { key: 'offers',         href: '/dashboard/offers',          icon: FileText,        stat: 'offers',    badgeTone: 'primary' },
     { key: 'contracts',      href: '/dashboard/contracts',       icon: ScrollText,      stat: 'contracts', badgeTone: 'success' },
@@ -70,7 +70,7 @@ const BADGE_TONE: Record<string, string> = {
     primary: 'bg-gradient-primary text-white',
     success: 'bg-[color-mix(in_oklab,var(--status-accepted)_18%,transparent)] text-[var(--status-accepted)]',
     info:    'bg-[color-mix(in_oklab,var(--status-open)_18%,transparent)] text-[var(--status-open)]',
-    warning: 'bg-[oklch(0.65_0.18_60)/18%] text-[oklch(0.55_0.14_60)] dark:text-[oklch(0.78_0.14_60)]',
+    warning: 'bg-[color-mix(in_oklab,var(--primary)_14%,transparent)] text-primary',
     violet:  'bg-[oklch(0.93_0.07_300)] text-[oklch(0.4_0.18_300)] dark:bg-[oklch(0.3_0.08_300)] dark:text-[oklch(0.85_0.1_300)]',
     default: 'bg-secondary text-secondary-foreground',
 };
@@ -79,7 +79,7 @@ const BADGE_DOT_TONE: Record<string, string> = {
     primary: 'bg-primary',
     success: 'bg-[var(--status-accepted)]',
     info:    'bg-[var(--status-open)]',
-    warning: 'bg-[oklch(0.65_0.18_60)]',
+    warning: 'bg-primary',
     violet:  'bg-[oklch(0.6_0.18_300)]',
     default: 'bg-muted-foreground',
 };

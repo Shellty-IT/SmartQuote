@@ -37,9 +37,10 @@ module.exports = {
         '!src/services/ai/closing-strategy.service.ts',
         '!src/services/ai/price-insight.service.ts',
         '!src/services/ai/analysis.ts',
-        // ── Email transport (requires SMTP / MailerSend) ─────────────────────
+        // ── Email transport (requires SMTP / Resend) ──────────────────────────
         '!src/services/email/email-attachment-resolver.ts',
         '!src/services/email/email-transport.ts',
+        '!src/services/email/resend-transport.ts',
         '!src/services/email/sender.ts',
         '!src/services/email/index.ts',
         // ── Misc services with external dependencies ─────────────────────────

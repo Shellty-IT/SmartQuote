@@ -358,6 +358,20 @@ export class OffersRepository {
         return prisma.offer.count({ where: { userId } });
     }
 
+    async findValuesForStats(userId: string) {
+        return prisma.offer.findMany({
+            where: { userId },
+            select: {
+                status: true,
+                templateType: true,
+                blocks: true,
+                totalNet: true,
+                totalVat: true,
+                totalGross: true,
+            },
+        });
+    }
+
     async aggregateTotalGross(userId: string, statusFilter?: OfferStatus) {
         return prisma.offer.aggregate({
             where: { userId, ...(statusFilter ? { status: statusFilter } : {}) },

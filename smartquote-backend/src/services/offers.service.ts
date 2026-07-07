@@ -44,6 +44,86 @@ function buildItemsWithTotals(items: OfferItemInput[]): ItemWithTotals[] {
     return items.map((item, index) => buildItemWithTotals(item, index));
 }
 
+function syncSinglePlaceholderItem(
+    item: ItemWithTotals,
+    totals: { totalNet: number; totalVat: number; totalGross: number },
+): ItemWithTotals {
+    const quantity = Number(item.quantity) || 1;
+    const discount = Number(item.discount) || 0;
+    const divisor = quantity * (1 - discount / 100);
+    const unitPrice = divisor > 0 ? totals.totalNet / divisor : totals.totalNet;
+
+    return buildItemsWithTotals([{
+        name: item.name,
+        description: item.description ?? undefined,
+        quantity,
+        unit: item.unit,
+        unitPrice,
+        vatRate: 23,
+        discount,
+        isOptional: item.isOptional,
+        minQuantity: item.minQuantity ?? undefined,
+        maxQuantity: item.maxQuantity ?? undefined,
+        variantName: item.variantName ?? undefined,
+    }])[0];
+}
+
+type OfferWithBlockTotals = {
+    templateType: string | null;
+    blocks: Prisma.JsonValue | null;
+    totalNet: Decimal;
+    totalVat: Decimal;
+    totalGross: Decimal;
+    items?: Array<{
+        quantity: Decimal | number;
+        discount: Decimal | number;
+        unitPrice: Decimal;
+        vatRate: Decimal;
+        totalNet: Decimal;
+        totalVat: Decimal;
+        totalGross: Decimal;
+    }>;
+};
+
+function normalizeOfferFromBlockTotals<T extends OfferWithBlockTotals>(offer: T): T {
+    if (!offer.blocks || typeof offer.blocks !== 'object' || Array.isArray(offer.blocks)) {
+        return offer;
+    }
+
+    const totals = syncTotalsFromBlocks(
+        offer.blocks as Record<string, unknown>,
+        offer.templateType ?? 'classic',
+    );
+    if (!totals) return offer;
+
+    const normalized = {
+        ...offer,
+        totalNet: new Decimal(totals.totalNet),
+        totalVat: new Decimal(totals.totalVat),
+        totalGross: new Decimal(totals.totalGross),
+    };
+
+    if (offer.items?.length !== 1) return normalized;
+
+    const item = offer.items[0];
+    const quantity = Number(item.quantity) || 1;
+    const discount = Number(item.discount) || 0;
+    const divisor = quantity * (1 - discount / 100);
+    const unitPrice = divisor > 0 ? totals.totalNet / divisor : totals.totalNet;
+
+    return {
+        ...normalized,
+        items: [{
+            ...item,
+            unitPrice: new Decimal(unitPrice).toDecimalPlaces(2),
+            vatRate: new Decimal(23),
+            totalNet: new Decimal(totals.totalNet),
+            totalVat: new Decimal(totals.totalVat),
+            totalGross: new Decimal(totals.totalGross),
+        }],
+    };
+}
+
 function getStatusTimestampKey(status: string): keyof UpdateOfferData | null {
     const map: Partial<Record<string, keyof UpdateOfferData>> = {
         SENT: 'sentAt',
@@ -56,16 +136,16 @@ function getStatusTimestampKey(status: string): keyof UpdateOfferData | null {
 
 export class OffersService {
     async create(userId: string, data: CreateOfferInput) {
-        const itemsWithTotals = buildItemsWithTotals(data.items);
+        let itemsWithTotals = buildItemsWithTotals(data.items);
         let offerTotals = calculateOfferTotals(itemsWithTotals);
 
         // Document-template offers carry no line items — their price is typed into
         // the block editor. Mirror that block price override onto the offer totals
         // so the list, details and PDF all show the same value from the start.
-        if (data.blocks != null && offerTotals.totalGross.isZero()) {
+        if (data.blocks != null) {
             const fromBlocks = syncTotalsFromBlocks(
                 data.blocks as Record<string, unknown>,
-                data.templateType,
+                data.templateType ?? 'classic',
             );
             if (fromBlocks) {
                 offerTotals = {
@@ -73,6 +153,9 @@ export class OffersService {
                     totalVat: new Decimal(fromBlocks.totalVat),
                     totalGross: new Decimal(fromBlocks.totalGross),
                 };
+                if (itemsWithTotals.length === 1) {
+                    itemsWithTotals = [syncSinglePlaceholderItem(itemsWithTotals[0], fromBlocks)];
+                }
             }
         }
 
@@ -120,11 +203,15 @@ export class OffersService {
     async findById(id: string, userId: string) {
         const offer = await offersRepository.findById(id, userId);
         if (!offer) throw new NotFoundError('Oferta');
-        return offer;
+        return normalizeOfferFromBlockTotals(offer);
     }
 
     async findAll(userId: string, query: Record<string, string | undefined>) {
-        return offersRepository.findAll({ userId, ...query });
+        const result = await offersRepository.findAll({ userId, ...query });
+        return {
+            ...result,
+            offers: result.offers.map(normalizeOfferFromBlockTotals),
+        };
     }
 
     async update(id: string, userId: string, data: UpdateOfferInput) {
@@ -191,7 +278,7 @@ export class OffersService {
                             quantity,
                             unit: placeholder.unit,
                             unitPrice,
-                            vatRate: Number(placeholder.vatRate),
+                            vatRate: 23,
                             discount,
                             isOptional: placeholder.isOptional,
                             minQuantity: placeholder.minQuantity ?? undefined,
@@ -260,12 +347,20 @@ export class OffersService {
     }
 
     async getStats(userId: string) {
-        const [statuses, total, totalValue, acceptedValue] = await Promise.all([
+        const [statuses, total, valueRows] = await Promise.all([
             offersRepository.groupByStatus(userId),
             offersRepository.count(userId),
-            offersRepository.aggregateTotalGross(userId),
-            offersRepository.aggregateTotalGross(userId, 'ACCEPTED'),
+            offersRepository.findValuesForStats(userId),
         ]);
+        const normalizedValues = valueRows.map(normalizeOfferFromBlockTotals);
+        const sumGross = (status?: OfferStatus) => normalizedValues.reduce((sum, offer) => {
+            if (status && offer.status !== status) return sum;
+            return sum + Number(offer.totalGross);
+        }, 0);
+        const valueByStatus = normalizedValues.reduce((acc, offer) => {
+            acc[offer.status] = (acc[offer.status] ?? 0) + Number(offer.totalGross);
+            return acc;
+        }, {} as Partial<Record<OfferStatus, number>>);
 
         return {
             total,
@@ -273,14 +368,14 @@ export class OffersService {
                 (acc, s) => {
                     acc[s.status] = {
                         count: s._count.status,
-                        value: s._sum.totalGross?.toNumber() ?? 0,
+                        value: valueByStatus[s.status] ?? 0,
                     };
                     return acc;
                 },
                 {} as Record<string, { count: number; value: number }>,
             ),
-            totalValue: totalValue._sum.totalGross?.toNumber() ?? 0,
-            acceptedValue: acceptedValue._sum.totalGross?.toNumber() ?? 0,
+            totalValue: sumGross(),
+            acceptedValue: sumGross('ACCEPTED'),
         };
     }
 

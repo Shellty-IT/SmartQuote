@@ -6,6 +6,7 @@ import StatusBadge from '@/components/ui/StatusBadge';
 import { formatDate, formatCurrency, getInitials, cn } from '@/lib/utils';
 import { useTranslations } from '@/i18n';
 import type { Offer } from '@/types';
+import { resolveTemplatePrice } from '@/lib/offer-template-price';
 
 interface OfferMobileCardProps {
     offer: Offer;
@@ -19,6 +20,9 @@ interface OfferMobileCardProps {
 export function OfferMobileCard({ offer, onView, onEdit, onDuplicate, onDelete, onCopyLink }: OfferMobileCardProps) {
     const tr = useTranslations('offerDetail');
     const commonTr = useTranslations('common');
+    const templatePrice = resolveTemplatePrice(offer.blocks, offer.templateType);
+    const totalGross = templatePrice?.gross ?? Number(offer.totalGross);
+    const totalNet = templatePrice?.net ?? Number(offer.totalNet);
 
     const isExpired =
         offer.validUntil &&
@@ -65,8 +69,8 @@ export function OfferMobileCard({ offer, onView, onEdit, onDuplicate, onDelete, 
                     </p>
                 </div>
                 <div className="text-right">
-                    <p className="font-bold tabular-nums">{formatCurrency(Number(offer.totalGross))}</p>
-                    <p className="text-xs text-muted-foreground tabular-nums">{formatCurrency(Number(offer.totalNet))}</p>
+                    <p className="font-bold tabular-nums">{formatCurrency(totalGross)}</p>
+                    <p className="text-xs text-muted-foreground tabular-nums">{formatCurrency(totalNet)}</p>
                 </div>
             </div>
 
