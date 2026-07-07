@@ -9,7 +9,7 @@ import { addDocumentActionLinks, publicDocumentUrl } from '@/lib/pdf/document-ac
 import { htmlToPdfBuffer } from '@/lib/pdf/puppeteer'
 import { documentTemplateMismatch } from '@/lib/pdf/template-guard'
 
-export const maxDuration = 10
+export const maxDuration = 60
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 

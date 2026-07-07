@@ -1,13 +1,36 @@
 // tests/e2e/contract-lifecycle.spec.ts
 import { test, expect } from '@playwright/test';
-import { login, createContract, changeContractStatus, publishContract, waitForContractPage } from './helpers';
+import { login, changeContractStatus, publishContract, waitForContractPage } from './helpers';
+import { deleteContract, ensureClientId, getAccessToken, seedContract } from './template-helpers';
+
+async function seedClassicContract(page: Parameters<typeof getAccessToken>[0]) {
+    const token = await getAccessToken(page);
+    const clientId = await ensureClientId(token, page.request);
+    const title = `Umowa-E2E-${Date.now()}`;
+    const contractId = await seedContract(token, page.request, {
+        templateType: 'classic',
+        clientId,
+        title,
+    });
+    return { contractId, title, token };
+}
 
 test.describe('Contract Lifecycle', () => {
+    const contractsToCleanup: Array<{ id: string; token: string }> = [];
+
+    test.afterEach(async ({ page }) => {
+        while (contractsToCleanup.length > 0) {
+            const contract = contractsToCleanup.pop()!;
+            await deleteContract(contract.token, page.request, contract.id);
+        }
+    });
+
     test('Create contract → Send to signature → Mark as signed → Complete', async ({ page }) => {
         test.setTimeout(120000);
 
         await login(page);
-        const { contractId, title } = await createContract(page);
+        const { contractId, title, token } = await seedClassicContract(page);
+        contractsToCleanup.push({ id: contractId, token });
 
         await page.goto(`/dashboard/contracts/${contractId}`, { waitUntil: 'networkidle' });
         await waitForContractPage(page);
@@ -31,7 +54,8 @@ test.describe('Contract Lifecycle', () => {
 
     test('Create contract → Send to signature → Terminate', async ({ page }) => {
         await login(page);
-        const { contractId } = await createContract(page);
+        const { contractId, token } = await seedClassicContract(page);
+        contractsToCleanup.push({ id: contractId, token });
 
         await changeContractStatus(page, contractId, /wyślij do podpisu/i);
 
@@ -48,7 +72,8 @@ test.describe('Contract Lifecycle', () => {
 
     test('Publish contract and verify public link is active', async ({ page }) => {
         await login(page);
-        const { contractId } = await createContract(page);
+        const { contractId, token } = await seedClassicContract(page);
+        contractsToCleanup.push({ id: contractId, token });
 
         const publicPath = await publishContract(page, contractId);
         expect(publicPath).toMatch(/^\/contract\/view\//);
