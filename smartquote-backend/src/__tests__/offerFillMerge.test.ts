@@ -32,12 +32,13 @@ describe('diffMergeBlocks — non-destructive merge', () => {
     })
 
     it('lets AI enable a previously disabled section (false→true)', () => {
-        const current = { testing: { enabled: false, intro: '', cards: [] } }
+        const current = { testing: { enabled: false, intro: '', cards: [] }, page1Sections: ['intro'], page2Sections: ['scope'] }
         const ai = blocks({
             testing: { enabled: true, intro: 'Testy', cards: [{ icon: '✓', title: 'QA', description: 'Pełne testy' }] },
         })
         const result = diffMergeBlocks(current, ai)
         expect((result.testing as Record<string, unknown>).enabled).toBe(true)
+        expect(result.page2Sections).toEqual(['scope', 'testing'])
     })
 
     it('re-attaches a still-enabled section the AI dropped from the page layout', () => {
@@ -134,6 +135,55 @@ describe('AI offer patch validation', () => {
 
     it('rejects a patch with an invalid field type', () => {
         expect(mergeProposalPatch({}, { intro: { paragraphs: 'not-an-array' } })).toBeNull()
+    })
+
+    it('normalizes common AI shape drift instead of discarding the whole proposal patch', () => {
+        const current = {
+            scope: { enabled: true, title: 'Zakres', items: [{ html: 'Stary zakres' }] },
+            pricingExtra: { enabled: true, timeline: '2-4 tygodnie', priceOverride: null, priceType: 'gross' },
+            page1Sections: ['intro'],
+            page2Sections: ['scope', 'pricingExtra'],
+        }
+
+        const result = mergeProposalPatch(current, {
+            version: '1',
+            page1Sections: ['intro', 'zakres', 'intro'],
+            page2Sections: ['zakres', 'pricing'],
+            scope: {
+                enabled: 'tak',
+                items: ['Formularz kontaktowy i 2-5 podstron dla firmy budowlanej.'],
+            },
+            pricingExtra: {
+                enabled: 'true',
+                priceOverride: '2000 zl brutto',
+                priceType: 'brutto',
+            },
+        })
+
+        expect(result).not.toBeNull()
+        expect((result?.scope as Record<string, unknown>).items).toEqual([
+            { html: 'Formularz kontaktowy i 2-5 podstron dla firmy budowlanej.' },
+        ])
+        expect((result?.pricingExtra as Record<string, unknown>).priceOverride).toBe(2000)
+        expect((result?.pricingExtra as Record<string, unknown>).priceType).toBe('gross')
+        expect(result?.page1Sections).toEqual(['intro', 'scope'])
+        expect(result?.page2Sections).toEqual(['pricingExtra'])
+    })
+
+    it('applies valid sections even when one sibling section is malformed', () => {
+        const current = {
+            intro: { enabled: true, paragraphs: ['Stary wstep'] },
+            scope: { enabled: true, title: 'Zakres', items: [{ html: 'Stary zakres' }] },
+        }
+
+        const result = mergeProposalPatch(current, {
+            intro: { paragraphs: { text: 'To powinno zostac odrzucone' } },
+            scope: { items: ['Nowy poprawny zakres'] },
+        })
+
+        expect(result).not.toBeNull()
+        expect(result?.intro).toEqual(current.intro)
+        expect((result?.scope as Record<string, unknown>).items).toEqual([{ html: 'Nowy poprawny zakres' }])
     })
 
     it('does not claim success when no blocks can be applied', () => {

@@ -27,6 +27,14 @@ describe('syncTotalsFromBlocks', () => {
         expect(result).toEqual({ totalNet: 10000, totalVat: 2300, totalGross: 12300 });
     });
 
+    it('keeps proposal gross overrides as the final gross amount', () => {
+        const result = syncTotalsFromBlocks(
+            { pricingExtra: { priceOverride: 2000, priceType: 'gross' } },
+            'proposal',
+        );
+        expect(result).toEqual({ totalNet: 1626.02, totalVat: 373.98, totalGross: 2000 });
+    });
+
     it('reads the pricing block for the universal template', () => {
         const result = syncTotalsFromBlocks(
             { pricing: { priceOverride: 5000, priceType: 'net' } },

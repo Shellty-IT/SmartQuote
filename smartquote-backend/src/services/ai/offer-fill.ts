@@ -41,85 +41,121 @@ export interface OfferFillResult {
 // Covers every field that proposal-html.ts reads at runtime. Fields not listed here
 // would pass Zod but could silently break rendering if they carry garbage.
 
-const SectionKeySchema = z.enum([
+const SECTION_KEY_VALUES = [
     'intro', 'demo', 'structure', 'scope', 'testing', 'technology', 'pricingExtra', 'about',
     'benefits', 'process', 'stats',
-])
+] as const
+
+const SectionKeySchema = z.enum(SECTION_KEY_VALUES)
+
+const StringFromPrimitiveSchema = z.preprocess((value) => {
+    if (typeof value === 'number' || typeof value === 'boolean') return String(value)
+    return value
+}, z.string())
+
+const BooleanFromPrimitiveSchema = z.preprocess((value) => {
+    if (typeof value === 'string') {
+        const normalized = value.trim().toLowerCase()
+        if (['true', 'tak', 'yes', '1', 'enabled', 'wlaczone', 'włączone'].includes(normalized)) return true
+        if (['false', 'nie', 'no', '0', 'disabled', 'wylaczone', 'wyłączone'].includes(normalized)) return false
+    }
+    return value
+}, z.boolean())
+
+const PriceOverrideSchema = z.preprocess((value) => {
+    if (value === '' || value === undefined) return null
+    if (typeof value === 'string') {
+        const trimmed = value.trim().toLowerCase()
+        if (!trimmed || ['null', 'none', 'brak'].includes(trimmed)) return null
+        const match = trimmed.replace(/\s/g, '').match(/-?\d+(?:[,.]\d+)?/)
+        if (match) return Number(match[0].replace(',', '.'))
+    }
+    return value
+}, z.number().finite().nullable())
+
+const PriceTypeSchema = z.preprocess((value) => {
+    if (typeof value === 'string') {
+        const normalized = value.trim().toLowerCase()
+        if (['gross', 'brutto'].includes(normalized)) return 'gross'
+        if (['net', 'netto'].includes(normalized)) return 'net'
+    }
+    return value
+}, z.enum(['net', 'gross']))
 
 // Shared sub-schema — used in demo.urls and technology.options[].urls.
-const DemoUrlSchema = z.object({ href: z.string(), label: z.string() })
+const DemoUrlSchema = z.object({ href: StringFromPrimitiveSchema, label: StringFromPrimitiveSchema })
 
 const ProposalBlocksSchema = z.object({
-    version: z.literal(1).optional(),
+    version: z.preprocess((value) => value === '1' ? 1 : value, z.literal(1)).optional(),
     page1Sections: z.array(SectionKeySchema).optional(),
     page2Sections: z.array(SectionKeySchema).optional(),
-    header: z.object({ enabled: z.boolean(), tag: z.string() }).partial().optional(),
-    footer: z.object({ enabled: z.boolean(), customNote: z.string(), showAuthor: z.boolean() }).partial().optional(),
-    intro: z.object({ enabled: z.boolean(), paragraphs: z.array(z.string()) }).partial().optional(),
+    header: z.object({ enabled: BooleanFromPrimitiveSchema, tag: StringFromPrimitiveSchema, titleOverride: StringFromPrimitiveSchema, clientLabelOverride: StringFromPrimitiveSchema }).partial().optional(),
+    footer: z.object({ enabled: BooleanFromPrimitiveSchema, customNote: StringFromPrimitiveSchema, showAuthor: BooleanFromPrimitiveSchema }).partial().optional(),
+    intro: z.object({ enabled: BooleanFromPrimitiveSchema, paragraphs: z.array(StringFromPrimitiveSchema) }).partial().optional(),
     demo: z.object({
-        enabled: z.boolean(),
-        title: z.string(),
-        body: z.string(),
+        enabled: BooleanFromPrimitiveSchema,
+        title: StringFromPrimitiveSchema,
+        body: StringFromPrimitiveSchema,
         // renderDemo() iterates urls, reads warning, reads note — all must be validated.
         urls: z.array(DemoUrlSchema),
-        warning: z.string().optional(),
-        note: z.string().optional(),
+        warning: StringFromPrimitiveSchema.optional(),
+        note: StringFromPrimitiveSchema.optional(),
     }).partial().optional(),
     structure: z.object({
-        enabled: z.boolean(),
-        title: z.string(),
-        items: z.array(z.object({ icon: z.string(), name: z.string(), description: z.string() })),
-        note: z.string().optional(),   // renderStructure() reads s.note
+        enabled: BooleanFromPrimitiveSchema,
+        title: StringFromPrimitiveSchema,
+        items: z.array(z.object({ icon: StringFromPrimitiveSchema, name: StringFromPrimitiveSchema, description: StringFromPrimitiveSchema })),
+        note: StringFromPrimitiveSchema.optional(),   // renderStructure() reads s.note
     }).partial().optional(),
     scope: z.object({
-        enabled: z.boolean(),
-        title: z.string(),
-        items: z.array(z.object({ html: z.string() })),
+        enabled: BooleanFromPrimitiveSchema,
+        title: StringFromPrimitiveSchema,
+        items: z.array(z.object({ html: StringFromPrimitiveSchema })),
     }).partial().optional(),
     testing: z.object({
-        enabled: z.boolean(),
-        intro: z.string(),
-        cards: z.array(z.object({ icon: z.string(), title: z.string(), description: z.string() })),
-        note: z.string().optional(),   // renderTesting() reads t.note
+        enabled: BooleanFromPrimitiveSchema,
+        intro: StringFromPrimitiveSchema,
+        cards: z.array(z.object({ icon: StringFromPrimitiveSchema, title: StringFromPrimitiveSchema, description: StringFromPrimitiveSchema })),
+        note: StringFromPrimitiveSchema.optional(),   // renderTesting() reads t.note
     }).partial().optional(),
     technology: z.object({
-        enabled: z.boolean(),
-        body: z.string(),
+        enabled: BooleanFromPrimitiveSchema,
+        body: StringFromPrimitiveSchema,
         // renderTechnology() iterates options and reads note — both were absent before.
         options: z.array(z.object({
-            icon: z.string(),
-            title: z.string(),
+            icon: StringFromPrimitiveSchema,
+            title: StringFromPrimitiveSchema,
             urls: z.array(DemoUrlSchema),
         })),
-        note: z.string().optional(),
+        note: StringFromPrimitiveSchema.optional(),
     }).partial().optional(),
     pricingExtra: z.object({
-        enabled: z.boolean(),
-        timeline: z.string(),
-        timelineSub: z.string(),
-        contractType: z.string(),
-        contractSub: z.string(),
-        priceOverride: z.number().nullable(),
-        priceType: z.enum(['net', 'gross']),
+        enabled: BooleanFromPrimitiveSchema,
+        timeline: StringFromPrimitiveSchema,
+        timelineSub: StringFromPrimitiveSchema,
+        contractType: StringFromPrimitiveSchema,
+        contractSub: StringFromPrimitiveSchema,
+        priceOverride: PriceOverrideSchema,
+        priceType: PriceTypeSchema,
     }).partial().optional(),
     about: z.object({
-        enabled: z.boolean(),
-        ctaText: z.string(),
-        aboutBoxTitle: z.string(),
+        enabled: BooleanFromPrimitiveSchema,
+        ctaText: StringFromPrimitiveSchema,
+        aboutBoxTitle: StringFromPrimitiveSchema,
     }).partial().optional(),
     benefits: z.object({
-        enabled: z.boolean(),
-        title: z.string(),
-        items: z.array(z.object({ icon: z.string(), title: z.string(), description: z.string() })),
+        enabled: BooleanFromPrimitiveSchema,
+        title: StringFromPrimitiveSchema,
+        items: z.array(z.object({ icon: StringFromPrimitiveSchema, title: StringFromPrimitiveSchema, description: StringFromPrimitiveSchema })),
     }).partial().optional(),
     process: z.object({
-        enabled: z.boolean(),
-        title: z.string(),
-        steps: z.array(z.object({ title: z.string(), description: z.string() })),
+        enabled: BooleanFromPrimitiveSchema,
+        title: StringFromPrimitiveSchema,
+        steps: z.array(z.object({ title: StringFromPrimitiveSchema, description: StringFromPrimitiveSchema })),
     }).partial().optional(),
     stats: z.object({
-        enabled: z.boolean(),
-        items: z.array(z.object({ value: z.string(), label: z.string() })),
+        enabled: BooleanFromPrimitiveSchema,
+        items: z.array(z.object({ value: StringFromPrimitiveSchema, label: StringFromPrimitiveSchema })),
     }).partial().optional(),
 }).passthrough().superRefine((value, ctx) => {
     // Structural integrity of the page layout. SectionKeySchema already restricts the
@@ -177,7 +213,168 @@ function isProposalTemplate(ctx: OfferFillContext): boolean {
 // "substantive" — non-empty string or non-empty array.  This prevents the model
 // from accidentally clearing sections it was not asked to change.
 
-const SECTION_KEYS = ['intro', 'demo', 'structure', 'scope', 'testing', 'technology', 'pricingExtra', 'about', 'benefits', 'process', 'stats'] as const
+const SECTION_KEYS = SECTION_KEY_VALUES
+
+const SECTION_KEY_ALIASES: Record<string, typeof SECTION_KEYS[number]> = {
+    pricing: 'pricingExtra',
+    price: 'pricingExtra',
+    wycena: 'pricingExtra',
+    cena: 'pricingExtra',
+    zakres: 'scope',
+    struktura: 'structure',
+    demourls: 'demo',
+    technologia: 'technology',
+    technologie: 'technology',
+    testy: 'testing',
+    korzysci: 'benefits',
+    'korzyści': 'benefits',
+    proces: 'process',
+    statystyki: 'stats',
+    kontakt: 'about',
+    cta: 'about',
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return !!value && typeof value === 'object' && !Array.isArray(value)
+}
+
+function normalizeSectionKey(value: unknown): typeof SECTION_KEYS[number] | null {
+    if (typeof value !== 'string') return null
+    const direct = SECTION_KEYS.find(key => key === value)
+    if (direct) return direct
+    const normalized = value
+        .trim()
+        .replace(/\s+/g, '')
+        .replace(/[-_]/g, '')
+        .toLowerCase()
+    const byNormalized = SECTION_KEYS.find(key => key.toLowerCase() === normalized)
+    if (byNormalized) return byNormalized
+    return SECTION_KEY_ALIASES[normalized] ?? null
+}
+
+function normalizeSectionList(value: unknown): unknown {
+    if (!Array.isArray(value)) return value
+    const result: Array<typeof SECTION_KEYS[number]> = []
+    for (const rawKey of value) {
+        const key = normalizeSectionKey(rawKey)
+        if (key && !result.includes(key)) result.push(key)
+    }
+    return result
+}
+
+function normalizeDemoUrl(value: unknown): unknown {
+    if (typeof value === 'string') return { href: value, label: value.replace(/^https?:\/\//, '') || 'link' }
+    if (!isRecord(value)) return value
+    const href = value.href ?? value.url ?? value.link
+    const label = value.label ?? value.title ?? value.name ?? (typeof href === 'string' ? href.replace(/^https?:\/\//, '') : undefined)
+    return { ...value, ...(href !== undefined ? { href } : {}), ...(label !== undefined ? { label } : {}) }
+}
+
+function normalizeItemArray(value: unknown, mapper: (item: unknown) => unknown): unknown {
+    return Array.isArray(value) ? value.map(mapper) : value
+}
+
+function normalizeProposalSection(key: string, section: unknown): unknown {
+    if (!isRecord(section)) return section
+    const normalized: Record<string, unknown> = { ...section }
+
+    if (key === 'demo') {
+        normalized.urls = normalizeItemArray(normalized.urls, normalizeDemoUrl)
+    }
+
+    if (key === 'structure') {
+        normalized.items = normalizeItemArray(normalized.items, (item) => {
+            if (typeof item === 'string') return { icon: '', name: item, description: item }
+            if (!isRecord(item)) return item
+            const name = item.name ?? item.title ?? item.label
+            const description = item.description ?? item.desc ?? item.body ?? item.text ?? name
+            return { ...item, icon: item.icon ?? '', ...(name !== undefined ? { name } : {}), ...(description !== undefined ? { description } : {}) }
+        })
+    }
+
+    if (key === 'scope') {
+        normalized.items = normalizeItemArray(normalized.items, (item) => {
+            if (typeof item === 'string') return { html: item }
+            if (!isRecord(item)) return item
+            const html = item.html ?? item.text ?? item.description ?? item.title
+            return { ...item, ...(html !== undefined ? { html } : {}) }
+        })
+    }
+
+    if (key === 'testing' || key === 'benefits') {
+        const arrayKey = key === 'testing' ? 'cards' : 'items'
+        normalized[arrayKey] = normalizeItemArray(normalized[arrayKey], (item) => {
+            if (typeof item === 'string') return { icon: '', title: item, description: item }
+            if (!isRecord(item)) return item
+            const title = item.title ?? item.name ?? item.label
+            const description = item.description ?? item.desc ?? item.body ?? item.text ?? title
+            return { ...item, icon: item.icon ?? '', ...(title !== undefined ? { title } : {}), ...(description !== undefined ? { description } : {}) }
+        })
+    }
+
+    if (key === 'technology') {
+        normalized.options = normalizeItemArray(normalized.options, (item) => {
+            if (typeof item === 'string') return { icon: '', title: item, urls: [] }
+            if (!isRecord(item)) return item
+            const title = item.title ?? item.name ?? item.label
+            const urls = Array.isArray(item.urls) ? item.urls.map(normalizeDemoUrl) : []
+            return { ...item, icon: item.icon ?? '', urls, ...(title !== undefined ? { title } : {}) }
+        })
+    }
+
+    if (key === 'process') {
+        normalized.steps = normalizeItemArray(normalized.steps, (item) => {
+            if (typeof item === 'string') return { title: item, description: item }
+            if (!isRecord(item)) return item
+            const title = item.title ?? item.name ?? item.label
+            const description = item.description ?? item.desc ?? item.body ?? item.text ?? title
+            return { ...item, ...(title !== undefined ? { title } : {}), ...(description !== undefined ? { description } : {}) }
+        })
+    }
+
+    if (key === 'stats') {
+        normalized.items = normalizeItemArray(normalized.items, (item) => {
+            if (typeof item === 'string') return { value: item, label: item }
+            if (!isRecord(item)) return item
+            const value = item.value ?? item.number ?? item.amount
+            const label = item.label ?? item.title ?? item.name ?? item.description
+            return { ...item, ...(value !== undefined ? { value } : {}), ...(label !== undefined ? { label } : {}) }
+        })
+    }
+
+    return normalized
+}
+
+function normalizeProposalPatch(rawPatch: unknown): Record<string, unknown> | null {
+    if (!isRecord(rawPatch)) return null
+    const normalized: Record<string, unknown> = { ...rawPatch }
+
+    if ('sections' in normalized && !('page1Sections' in normalized) && !('page2Sections' in normalized)) {
+        normalized.page2Sections = normalized.sections
+    }
+
+    if ('page1Sections' in normalized) normalized.page1Sections = normalizeSectionList(normalized.page1Sections)
+    if ('page2Sections' in normalized) normalized.page2Sections = normalizeSectionList(normalized.page2Sections)
+    if (Array.isArray(normalized.page1Sections) && Array.isArray(normalized.page2Sections)) {
+        const onPage1 = new Set(normalized.page1Sections)
+        normalized.page2Sections = normalized.page2Sections.filter(key => !onPage1.has(key))
+    }
+
+    for (const key of SECTION_KEYS) {
+        if (key in normalized) normalized[key] = normalizeProposalSection(key, normalized[key])
+    }
+
+    return normalized
+}
+
+function salvageValidProposalPatch(normalizedPatch: Record<string, unknown>): Record<string, unknown> {
+    const salvaged: Record<string, unknown> = {}
+    for (const [key, value] of Object.entries(normalizedPatch)) {
+        const singleFieldValidation = ProposalBlocksSchema.safeParse({ [key]: value })
+        if (singleFieldValidation.success) salvaged[key] = value
+    }
+    return salvaged
+}
 
 function isSubstantive(value: unknown): boolean {
     if (Array.isArray(value)) return value.length > 0
@@ -239,8 +436,17 @@ export function mergeProposalPatch(
     current: Record<string, unknown> | undefined,
     rawPatch: unknown,
 ): Record<string, unknown> | null {
-    const validation = ProposalBlocksSchema.safeParse(rawPatch)
-    if (!validation.success) return null
+    const normalizedPatch = normalizeProposalPatch(rawPatch)
+    if (!normalizedPatch) return null
+
+    let validation = ProposalBlocksSchema.safeParse(normalizedPatch)
+    if (!validation.success) {
+        const salvaged = salvageValidProposalPatch(normalizedPatch)
+        if (Object.keys(salvaged).length === 0) return null
+        validation = ProposalBlocksSchema.safeParse(salvaged)
+        if (!validation.success) return null
+    }
+
     return current
         ? diffMergeBlocks(current, validation.data)
         : validation.data as Record<string, unknown>
@@ -319,9 +525,50 @@ export function mergeGenericBlocks(
     generated: Record<string, unknown>,
 ): Record<string, unknown> {
     const merged = deepMergeGeneric(current, generated)
-    return merged && typeof merged === 'object' && !Array.isArray(merged)
-        ? merged as Record<string, unknown>
-        : current
+    if (!merged || typeof merged !== 'object' || Array.isArray(merged)) return current
+    const mergedObj = merged as Record<string, unknown>
+    reattachEnabledGenericSections(mergedObj, current)
+    return mergedObj
+}
+
+function reattachEnabledGenericSections(
+    result: Record<string, unknown>,
+    current: Record<string, unknown>,
+): void {
+    const enabledSectionKeys = Object.keys(current).filter((key) => {
+        const section = result[key]
+        return isRecord(section) && section.enabled === true
+    })
+    if (!enabledSectionKeys.length) return
+
+    if (Array.isArray(result.sections)) {
+        const knownKeys = new Set(Object.keys(current))
+        const sections = (result.sections as unknown[])
+            .filter((key): key is string => typeof key === 'string' && knownKeys.has(key))
+        for (const key of enabledSectionKeys) {
+            if (!sections.includes(key)) sections.push(key)
+        }
+        result.sections = sections
+        return
+    }
+
+    const hasPageLayout = Array.isArray(result.page1Sections) || Array.isArray(result.page2Sections)
+    if (!hasPageLayout) return
+
+    const page1 = Array.isArray(result.page1Sections) ? [...(result.page1Sections as string[])] : []
+    const page2 = Array.isArray(result.page2Sections) ? [...(result.page2Sections as string[])] : []
+    const placed = new Set([...page1, ...page2])
+    const currentPage1 = Array.isArray(current.page1Sections) ? (current.page1Sections as string[]) : []
+
+    for (const key of enabledSectionKeys) {
+        if (placed.has(key)) continue
+        if (currentPage1.includes(key)) page1.push(key)
+        else page2.push(key)
+        placed.add(key)
+    }
+
+    result.page1Sections = page1
+    result.page2Sections = page2
 }
 
 async function genericOfferFillChat(
@@ -638,6 +885,7 @@ TRYB PRACY:
 - Jezeli brakuje podstawowego kontekstu, zadaj jedno krotkie pytanie i ustaw isComplete=false.
 - Jezeli uzytkownik prosi o zmiane konkretnej sekcji, zmien tylko te sekcje i zachowaj reszte.
 - Jezeli uzytkownik prosi o wypelnienie od zera lub automatycznie, wypelnij wszystkie pola tekstowe we wszystkich blokach, ktore maja sens biznesowy.
+- Jezeli opis projektu lub polecenie uzytkownika uzasadnia sekcje, ktore byly wylaczone (np. portfolio/demo, technologia/CMS, proces, FAQ, testy, referencje), aktywuj je przez enabled=true i wypelnij konkretna trescia. Jesli szablon ma liste "sections", "page1Sections" lub "page2Sections", dodaj tam aktywowana sekcje, aby byla widoczna w dokumencie.
 - TYLKO powyzszy "AKTUALNY JSON BLOKOW" / "AKTUALNY STAN SZABLONU" odzwierciedla to, co naprawde jest juz zapisane w ofercie — historia czatu ponizej to tylko rozmowa, NIE zapisana tresc. Jesli w rozmowie padly juz konkretne informacje (zakres, funkcje, technologia, branza, ceny), ale odpowiadajace pole w AKTUALNYM STANIE jest nadal puste, potraktuj to jako wciaz niewypelnione i uzupelnij je teraz, nawet jesli o tych informacjach mowiono kilka wiadomosci wczesniej. Nie zakladaj, ze cos zostalo juz zapisane tylko dlatego, ze zostalo wspomniane w czacie.
 - NIGDY nie zwracaj isComplete=true z "blocks", ktore w praktyce niczego nie zmieniaja (brak jakiejkolwiek nowej, niepustej wartosci wzgledem AKTUALNEGO STANU). Jesli naprawde nie masz nic nowego do dodania, ustaw isComplete=false i zadaj konkretne pytanie o brakujace informacje zamiast falszywie deklarowac ukonczenie.
 
@@ -645,6 +893,7 @@ ZASADY STRUKTURY JSON:
 - Zwracaj dokladnie obiekt JSON: { "message": string, "isComplete": boolean, "blocks": null | object }.
 - Gdy isComplete=true, "blocks" ma zawierac tylko zmienione bloki jako czesciowy patch w tej samej strukturze co AKTUALNY JSON BLOKOW.
 - Nie kopiuj niezmienionych blokow. sections/page arrays zwracaj tylko, gdy uzytkownik prosi o zmiane ukladu.
+- Wyjatek: jesli aktywujesz wylaczona sekcje, mozesz zwrocic zaktualizowane sections/page arrays z ta sekcja, zeby dokument ja renderowal.
 - Zachowaj typy pol: string zostaje stringiem, number numberem, boolean booleanem, array arrayem, object objectem.
 - Nie dodawaj markdowna, komentarzy ani tekstu poza JSON.
 - Nie usuwaj pol. Nie zamieniaj obiektow na tekst.

@@ -21,6 +21,7 @@ import { mergeSupportWithDefaults, buildDefaultSupportBlocks, type SupportBlocks
 import { mergeMobileAppWithDefaults, buildDefaultMobileAppBlocks, type MobileAppBlocks } from '@/lib/pdf/mobile-app-blocks';
 import { mergeMobileSimpleWithDefaults, buildDefaultMobileSimpleBlocks, type MobileSimpleBlocks } from '@/lib/pdf/mobile-simple-blocks';
 import { mergeUniversalWithDefaults, buildDefaultUniversalBlocks, type UniversalBlocks } from '@/lib/pdf/universal-blocks';
+import { resolveTemplatePrice } from '@/lib/offer-template-price';
 import { buildStepIds } from '../new/constants';
 
 export function calculateItemTotal(item: ExtendedOfferItem): OfferTotalsData {
@@ -416,29 +417,16 @@ export function useOfferForm(options?: { initialData?: Offer }) {
                  offerDetails.templateType === 'classic' ? `Oferta — ${entityName}` :
                  `Propozycja — ${entityName}`);
 
-            const docTemplatePriceOverride = isShop
-                ? (shopBlocks.pricing.priceOverride ?? 0)
-                : isWebsiteV2
-                ? (websiteV2Blocks.pricing.priceOverride ?? 0)
-                : isWebsiteV3
-                ? (websiteV3Blocks.pricing.priceOverride ?? 0)
-                : isSupport
-                ? (supportBlocks.pricing.priceOverride ?? 0)
-                : isMobileApp
-                ? (mobileAppBlocks.pricing.priceOverride ?? 0)
-                : isMobileSimple
-                ? (mobileSimpleBlocks.process.priceOverride ?? 0)
-                : isUniversal
-                ? (universalBlocks.pricing.priceOverride ?? 0)
-                : (proposalBlocks.pricingExtra.priceOverride ?? 0);
+            const submittedBlocks = isProposal ? (proposalBlocks as unknown) : isShop ? (shopBlocks as unknown) : isWebsiteV2 ? (websiteV2Blocks as unknown) : isWebsiteV3 ? (websiteV3Blocks as unknown) : isSupport ? (supportBlocks as unknown) : isMobileApp ? (mobileAppBlocks as unknown) : isMobileSimple ? (mobileSimpleBlocks as unknown) : isUniversal ? (universalBlocks as unknown) : null;
+            const templatePrice = resolveTemplatePrice(submittedBlocks, offerDetails.templateType);
 
             const proposalPlaceholderItem = {
                 name: submittedTitle,
                 description: undefined,
                 quantity: 1,
                 unit: 'szt.',
-                unitPrice: docTemplatePriceOverride,
-                vatRate: 23,
+                unitPrice: templatePrice?.net ?? 0,
+                vatRate: templatePrice?.vatRate ?? 23,
                 discount: 0,
                 isOptional: false,
             };
@@ -469,7 +457,7 @@ export function useOfferForm(options?: { initialData?: Offer }) {
                 paymentDays: offerDetails.paymentDays,
                 requireAuditTrail: offerDetails.requireAuditTrail,
                 templateType: offerDetails.templateType ?? 'classic',
-                blocks: isProposal ? (proposalBlocks as unknown) : isShop ? (shopBlocks as unknown) : isWebsiteV2 ? (websiteV2Blocks as unknown) : isWebsiteV3 ? (websiteV3Blocks as unknown) : isSupport ? (supportBlocks as unknown) : isMobileApp ? (mobileAppBlocks as unknown) : isMobileSimple ? (mobileSimpleBlocks as unknown) : isUniversal ? (universalBlocks as unknown) : null,
+                blocks: submittedBlocks,
                 items: submittedItems,
             };
 
