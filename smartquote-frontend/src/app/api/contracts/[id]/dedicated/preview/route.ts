@@ -5,6 +5,7 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { buildContractDedicatedHtmlFromSaved } from '@/lib/pdf/contract-dedicated-html'
+import { applyPdfPreviewMode } from '@/lib/pdf/print-preview'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -38,7 +39,7 @@ export async function GET(
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: contract } = (await contractRes.json()) as { data: Record<string, any> }
-    const html = buildContractDedicatedHtmlFromSaved(contract.blocks, { editorMode: false })
+    const html = applyPdfPreviewMode(buildContractDedicatedHtmlFromSaved(contract.blocks, { editorMode: false }))
 
     return new Response(html, {
         status: 200,

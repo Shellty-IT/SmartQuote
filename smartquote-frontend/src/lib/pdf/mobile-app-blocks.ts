@@ -12,6 +12,8 @@ export type MobileAppSectionKey =
     | 'postlaunch'
     | 'about'
 
+export type MobileAppPageBreakKey = 'cover' | MobileAppSectionKey
+
 // ── Sub-types ─────────────────────────────────────────────────────────────────
 
 export interface MobileAppVisionCard {
@@ -217,6 +219,7 @@ export interface MobileAppFooterBlock {
 export interface MobileAppBlocks {
     version: 1
     sections: MobileAppSectionKey[]
+    pageBreakAfter: MobileAppPageBreakKey[]
     cover: MobileAppCoverBlock
     footer: MobileAppFooterBlock
     vision: MobileAppVisionBlock
@@ -235,6 +238,7 @@ export function buildDefaultMobileAppBlocks(): MobileAppBlocks {
     return {
         version: 1,
         sections: ['vision', 'platform', 'scope', 'architecture', 'timeline', 'pricing', 'postlaunch', 'about'],
+        pageBreakAfter: [],
         cover: {
             eyebrow: 'Propozycja realizacji',
             titlePrefix: 'Twoja aplikacja',
@@ -487,11 +491,15 @@ export function buildDefaultMobileAppBlocks(): MobileAppBlocks {
 export function mergeMobileAppWithDefaults(saved: Partial<MobileAppBlocks>): MobileAppBlocks {
     const d = buildDefaultMobileAppBlocks()
     const validSections = new Set<MobileAppSectionKey>(['vision', 'platform', 'scope', 'architecture', 'timeline', 'pricing', 'postlaunch', 'about'])
+    const validPageBreaks = new Set<MobileAppPageBreakKey>(['cover', 'vision', 'platform', 'scope', 'architecture', 'timeline', 'pricing', 'postlaunch', 'about'])
     return {
         version: 1,
         sections: Array.isArray(saved.sections)
             ? (saved.sections.filter(s => validSections.has(s)) as MobileAppSectionKey[])
             : d.sections,
+        pageBreakAfter: Array.isArray(saved.pageBreakAfter)
+            ? (saved.pageBreakAfter.filter(s => validPageBreaks.has(s)) as MobileAppPageBreakKey[])
+            : d.pageBreakAfter,
         cover: saved.cover ? { ...d.cover, ...saved.cover } : d.cover,
         footer: saved.footer ? { ...d.footer, ...saved.footer } : d.footer,
         vision: saved.vision ? { ...d.vision, ...saved.vision } : d.vision,

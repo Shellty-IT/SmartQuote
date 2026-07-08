@@ -4,6 +4,7 @@
 
 import { buildHtmlDocument } from './html-shell'
 import { resolveHeadlinePrice } from './money'
+import { withPageBreakAfter } from './section-layout'
 import {
     type MobileSimpleBlocks,
     type MobileSimpleSectionKey,
@@ -1158,13 +1159,16 @@ export function buildMobileSimpleHtml(
 ): string {
     const editorMode = options?.editorMode ?? false
     const sections = blocks.sections
-        .map(key => renderSection(key, blocks, offer, editorMode))
+        .map(key => withPageBreakAfter(
+            renderSection(key, blocks, offer, editorMode),
+            blocks.pageBreakAfter.includes(key),
+        ))
         .join('\n')
 
     return buildHtmlDocument({
         title: `${blocks.cover.projectName} — Aplikacja mobilna`,
         css: CSS,
-        body: `${renderCover(blocks.cover, blocks.process, offer, editorMode)}
+        body: `${withPageBreakAfter(renderCover(blocks.cover, blocks.process, offer, editorMode), blocks.pageBreakAfter.includes('cover'))}
 ${sections}
 ${renderFooter(blocks.footer, offer, editorMode)}`,
     })

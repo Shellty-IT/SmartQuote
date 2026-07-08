@@ -147,6 +147,7 @@ model Lead {
   status    LeadStatus @default(NEW)
   clientId  String?
   client         Client?         @relation(fields: [clientId], references: [id])
+  offers         Offer[]
   notesList      Note[]
   calendarEvents CalendarEvent[]
   createdAt      DateTime        @default(now())
@@ -234,8 +235,10 @@ model Offer {
 
   userId       String
   user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  clientId     String
-  client       Client             @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId     String?
+  client       Client?            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  leadId       String?
+  lead         Lead?              @relation(fields: [leadId], references: [id], onDelete: Cascade)
   items        OfferItem[]
   followUps    FollowUp[]
   contracts    Contract[]
@@ -253,6 +256,7 @@ model Offer {
   @@index([userId, status])
   @@index([userId, createdAt])
   @@index([clientId])
+  @@index([leadId])
   @@index([status])
   @@index([createdAt])
   @@index([publicToken])

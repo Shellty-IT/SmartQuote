@@ -13,6 +13,7 @@ import {
     type EditableShopBlockKey,
 } from './editor/ShopBlockEditorPanel'
 import { buildShopHtml, type ShopOfferData } from '@/lib/pdf/shop-html'
+import { applyPdfPreviewMode } from '@/lib/pdf/print-preview'
 import { mergeShopWithDefaults, type ShopBlocks } from '@/lib/pdf/shop-blocks'
 import { cn } from '@/lib/utils'
 import { useResizablePanel } from '@/hooks/useResizablePanel'
@@ -57,8 +58,8 @@ export function ShopDocumentEditor({
     const [refreshKey, setRefreshKey] = useState(0)
 
     const srcdoc = useMemo(
-        () => buildShopHtml({ ...offer, blocks }, { editorMode: true, zoom }),
-        [offer, blocks, zoom],
+        () => applyPdfPreviewMode(buildShopHtml({ ...offer, blocks }, { editorMode: true })),
+        [offer, blocks],
     )
 
     // Listen for postMessage events from the iframe
@@ -86,6 +87,7 @@ export function ShopDocumentEditor({
     const handleSaveSections = useCallback(
         (updatedBlocks: ShopBlocks) => {
             onBlocksChange(updatedBlocks)
+            setRefreshKey(n => n + 1)
             setPanelView(null)
         },
         [onBlocksChange],
@@ -98,7 +100,7 @@ export function ShopDocumentEditor({
     const editingBlock = panelView?.kind === 'block' ? panelView.key : null
 
     return (
-        <div className="flex h-full min-h-[700px] flex-col gap-0 rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="flex h-[clamp(520px,calc(100vh-190px),900px)] min-h-0 flex-col gap-0 rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
             {/* Toolbar */}
             <div className="flex items-center gap-2 border-b border-border bg-card px-4 py-2.5">
                 <div className="flex-1 min-w-0">
@@ -169,14 +171,15 @@ export function ShopDocumentEditor({
                     )}
                     style={panelOpen ? previewPanelStyle : undefined}
                 >
-                    <iframe
-                        key={refreshKey}
-                        srcDoc={srcdoc}
-                        title="Podgląd oferty — Sklep internetowy"
-                        sandbox="allow-scripts allow-same-origin"
-                        className={cn('h-full w-full', isDragging && 'pointer-events-none')}
-                        style={{ minHeight: 700 }}
-                    />
+                    <div style={{ transformOrigin: 'top left', transform: `scale(${zoom})`, width: `${100 / zoom}%`, height: `${100 / zoom}%` }}>
+                        <iframe
+                            key={`${refreshKey}:${srcdoc.length}`}
+                            srcDoc={srcdoc}
+                            title="Podgląd oferty — Sklep internetowy"
+                            sandbox="allow-scripts allow-same-origin"
+                            className={cn('h-full w-full border-0', isDragging && 'pointer-events-none')}
+                        />
+                    </div>
                 </div>
 
                 {panelOpen && (

@@ -159,12 +159,13 @@ export class ObserverService {
         interactions: typeof offer.interactions,
         clientComments: typeof offer.comments,
     ): ObserverPromptData {
+        const recipient = offer.client ?? offer.lead;
         return {
             offerNumber: offer.number,
             offerTitle: offer.title,
-            clientName: offer.client.name,
-            clientCompany: offer.client.company,
-            clientType: offer.client.type,
+            clientName: recipient?.name ?? 'Nieznany',
+            clientCompany: recipient?.company ?? null,
+            clientType: offer.client?.type ?? 'LEAD',
             totalGross: String(offer.totalGross),
             statusLabel: offerStatusLabels[offer.status] ?? offer.status,
             itemsFormatted: offer.items

@@ -25,6 +25,13 @@ function isDecided(status: string): boolean {
     return status === 'ACCEPTED' || status === 'REJECTED';
 }
 
+function getOfferRecipient(offer: {
+    client: { name: string; company?: string | null; email?: string | null } | null;
+    lead?: { name: string; company?: string | null; email?: string | null } | null;
+}) {
+    return offer.client ?? offer.lead ?? { name: 'Odbiorca', company: null, email: null };
+}
+
 export class PublicOfferService {
     private readonly logger = createModuleLogger('public-offer-service');
     private readonly calculator: PublicOfferCalculator;
@@ -83,11 +90,12 @@ export class PublicOfferService {
         this.logger.info({ offerId: offer.id, isFirstView }, 'View registered');
 
         if (isFirstView) {
+            const recipient = getOfferRecipient(offer);
             this.notifier.fireViewed(offer.userId, {
                 offerId: offer.id,
                 offerNumber: offer.number,
                 offerTitle: offer.title,
-                clientName: offer.client.name,
+                clientName: recipient.name,
             });
         }
 
@@ -108,6 +116,7 @@ export class PublicOfferService {
         const calculation = this.calculator.calculate(offer.items, selectedItems, selectedVariant);
         const acceptedAt = new Date();
         const auditLog = this.buildAuditLog(offer, calculation, acceptedAt, selectedVariant, ipAddress, userAgent, clientName, clientEmail);
+        const recipient = getOfferRecipient(offer);
 
         await publicOfferRepository.acceptOfferTransaction(
             offer.id,
@@ -128,10 +137,10 @@ export class PublicOfferService {
         this.notifier.fireAccepted(offer.user.id, offer.id, calculation.grossValue, offer);
 
         if (offer.requireAuditTrail && auditLog?.contentHash) {
-            this.notifier.fireAcceptanceEmail(offer.user.id, clientEmail ?? offer.client.email, {
+            this.notifier.fireAcceptanceEmail(offer.user.id, clientEmail ?? recipient.email ?? null, {
                 offerNumber: offer.number,
                 offerTitle: offer.title,
-                clientName: clientName ?? offer.client.name,
+                clientName: clientName ?? recipient.name,
                 totalGross: calculation.grossValue,
                 currency: offer.currency,
                 contentHash: auditLog.contentHash,
@@ -149,9 +158,9 @@ export class PublicOfferService {
                 offerId: offer.id,
                 offerNumber: offer.number,
                 offerTitle: offer.title,
-                clientName: offer.client.name,
-                clientCompany: offer.client.company,
-                clientEmail: offer.client.email,
+                clientName: recipient.name,
+                clientCompany: recipient.company,
+                clientEmail: recipient.email,
                 selectedVariant: selectedVariant ?? null,
                 totalNet: calculation.netValue,
                 totalVat: calculation.vatValue,
@@ -185,13 +194,14 @@ export class PublicOfferService {
         this.logger.info({ offerId: offer.id }, 'Offer rejected');
 
         this.notifier.fireRejected(offer.user.id, offer.id, reason, offer);
+        const recipient = getOfferRecipient(offer);
 
         return {
             success: true as const,
             data: {
                 offerId: offer.id,
                 offerNumber: offer.number,
-                clientName: offer.client.name,
+                clientName: recipient.name,
                 reason: reason ?? null,
                 sellerEmail: offer.user.email,
                 sellerName: offer.user.name,
@@ -214,7 +224,7 @@ export class PublicOfferService {
             offerId: offer.id,
             offerNumber: offer.number,
             offerTitle: offer.title,
-            clientName: offer.client.name,
+            clientName: getOfferRecipient(offer).name,
             commentPreview: content,
         });
 
@@ -272,7 +282,7 @@ export class PublicOfferService {
                 maxQuantity: item.maxQuantity,
                 variantName: item.variantName,
             })),
-            client: { name: offer.client.name, company: offer.client.company },
+            client: { name: getOfferRecipient(offer).name, company: getOfferRecipient(offer).company },
             seller: {
                 name: offer.user.name,
                 email: offer.user.email,
@@ -331,8 +341,8 @@ export class PublicOfferService {
                 selectedVariant: selectedVariant ?? null,
                 items: calculation.clientSelectedData,
             } as unknown as Prisma.InputJsonValue,
-            clientName: clientName ?? offer.client.name,
-            clientEmail: clientEmail ?? offer.client.email ?? '',
+            clientName: clientName ?? getOfferRecipient(offer).name,
+            clientEmail: clientEmail ?? getOfferRecipient(offer).email ?? '',
             selectedVariant: selectedVariant ?? null,
             totalNet: calculation.netValue,
             totalVat: calculation.vatValue,

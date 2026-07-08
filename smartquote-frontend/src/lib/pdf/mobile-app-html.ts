@@ -3,6 +3,7 @@
 // Design: deep indigo #1E1B4B + rose #F43F5E + indigo-light #818CF8, Outfit font.
 
 import { buildHtmlDocument } from './html-shell'
+import { withPageBreakAfter } from './section-layout'
 import type {
     MobileAppBlocks,
     MobileAppSectionKey,
@@ -719,13 +720,18 @@ export function buildMobileAppHtml(
     options?: { editorMode?: boolean },
 ): string {
     const editorMode = options?.editorMode ?? false
-    const sectionsHtml = blocks.sections.map(k => renderSection(k, blocks, editorMode)).join('\n')
+    const sectionsHtml = blocks.sections
+        .map(k => withPageBreakAfter(
+            renderSection(k, blocks, editorMode),
+            blocks.pageBreakAfter.includes(k),
+        ))
+        .join('\n')
 
     return buildHtmlDocument({
         title: 'Aplikacja mobilna — Propozycja',
         css: baseCss(editorMode),
         body: `<div style="width:100%;overflow-x:hidden;">
-${renderCover(blocks, offer, editorMode)}
+${withPageBreakAfter(renderCover(blocks, offer, editorMode), blocks.pageBreakAfter.includes('cover'))}
 ${sectionsHtml}
 ${renderFooter(blocks, offer, editorMode)}
 </div>`,

@@ -200,7 +200,7 @@ export default function OfferDetailPage({ params }: PageProps) {
                 validUntil={offer.validUntil}
                 currentToken={offer.publicToken}
                 isInteractive={offer.isInteractive}
-                clientEmail={offer.client?.email || null}
+                clientEmail={(offer.client ?? offer.lead)?.email || null}
                 onPublished={handlePublished}
             />
 

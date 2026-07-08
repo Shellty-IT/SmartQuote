@@ -3,6 +3,7 @@
 // Design: teal #0D9488 + orange #F97316, clean Nunito-style layout.
 
 export type MobileSimpleSectionKey = 'checklist' | 'tech' | 'process'
+export type MobileSimplePageBreakKey = 'cover' | MobileSimpleSectionKey
 
 // ── Sub-types ─────────────────────────────────────────────────────────────────
 
@@ -102,6 +103,7 @@ export interface MobileSimpleFooterBlock {
 export interface MobileSimpleBlocks {
     version: 1
     sections: MobileSimpleSectionKey[]
+    pageBreakAfter: MobileSimplePageBreakKey[]
     cover: MobileSimpleCoverBlock
     checklist: MobileSimpleChecklistBlock
     tech: MobileSimpleTechBlock
@@ -115,6 +117,7 @@ export function buildDefaultMobileSimpleBlocks(): MobileSimpleBlocks {
     return {
         version: 1,
         sections: ['checklist', 'tech', 'process'],
+        pageBreakAfter: [],
         cover: {
             coverTag: 'Oferta handlowa',
             projectName: 'MyApp',
@@ -230,6 +233,7 @@ export function buildDefaultMobileSimpleBlocks(): MobileSimpleBlocks {
 // ── Merge ─────────────────────────────────────────────────────────────────────
 
 const VALID_SECTIONS = new Set<MobileSimpleSectionKey>(['checklist', 'tech', 'process'])
+const VALID_PAGE_BREAK_KEYS = new Set<MobileSimplePageBreakKey>(['cover', 'checklist', 'tech', 'process'])
 
 export function mergeMobileSimpleWithDefaults(saved: Partial<MobileSimpleBlocks>): MobileSimpleBlocks {
     const defaults = buildDefaultMobileSimpleBlocks()
@@ -238,6 +242,9 @@ export function mergeMobileSimpleWithDefaults(saved: Partial<MobileSimpleBlocks>
         sections: Array.isArray(saved.sections)
             ? (saved.sections as string[]).filter((k): k is MobileSimpleSectionKey => VALID_SECTIONS.has(k as MobileSimpleSectionKey))
             : defaults.sections,
+        pageBreakAfter: Array.isArray(saved.pageBreakAfter)
+            ? (saved.pageBreakAfter as string[]).filter((k): k is MobileSimplePageBreakKey => VALID_PAGE_BREAK_KEYS.has(k as MobileSimplePageBreakKey))
+            : defaults.pageBreakAfter,
         cover: { ...defaults.cover, ...(saved.cover ?? {}) },
         checklist: {
             ...defaults.checklist,

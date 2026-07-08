@@ -55,7 +55,7 @@ function hasMeaningfulTemplateContent(blocks: Record<string, unknown>): boolean 
         if (seen.has(value)) return false
         seen.add(value)
         return Object.entries(value as Record<string, unknown>)
-            .some(([key, child]) => key !== 'version' && key !== 'sections' && key !== 'page1Sections' && key !== 'page2Sections' && walk(child))
+            .some(([key, child]) => key !== 'version' && key !== 'sections' && key !== 'page1Sections' && key !== 'page2Sections' && key !== 'pageBreakAfter' && walk(child))
     }
     return walk(blocks)
 }

@@ -5,6 +5,7 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { buildMobileAppHtml, type MobileAppOfferData } from '@/lib/pdf/mobile-app-html'
+import { applyPdfPreviewMode } from '@/lib/pdf/print-preview'
 import { mergeMobileAppWithDefaults, buildDefaultMobileAppBlocks } from '@/lib/pdf/mobile-app-blocks'
 
 export const dynamic = 'force-dynamic'
@@ -87,7 +88,7 @@ export async function GET(
         ? mergeMobileAppWithDefaults(offer.blocks)
         : buildDefaultMobileAppBlocks()
 
-    const html = buildMobileAppHtml(blocks, offerData)
+    const html = applyPdfPreviewMode(buildMobileAppHtml(blocks, offerData))
 
     return new Response(html, {
         status: 200,

@@ -3,6 +3,7 @@
 // Pure function — no side effects, no imports of React/server utilities.
 
 import { buildHtmlDocument } from './html-shell'
+import { withPageBreakAfter } from './section-layout'
 import { mergeWebsiteV2WithDefaults, type WebsiteV2Blocks, type WebsiteV2SectionKey } from './website-v2-blocks'
 
 // ── Offer data interface ──────────────────────────────────────────────────────
@@ -611,7 +612,7 @@ export function buildWebsiteV2Html(
     const body = blocks.sections.map((key) => {
         const html = renderSection(key, data, blocks, editorMode, sectionCounter)
         if (html) sectionCounter++
-        return html
+        return withPageBreakAfter(html, blocks.pageBreakAfter.includes(key))
     }).join('\n')
 
     const zoomStyle = zoom !== 1
@@ -637,7 +638,7 @@ export function buildWebsiteV2Html(
         css: buildCss(),
         extraHead: [zoomStyle, paginationScript].filter(Boolean).join('\n'),
         body: `<div>
-${renderCover(data, blocks, editorMode)}
+${withPageBreakAfter(renderCover(data, blocks, editorMode), blocks.pageBreakAfter.includes('cover'))}
 ${body}
 ${renderFooter(data, blocks, editorMode)}
 </div>`,

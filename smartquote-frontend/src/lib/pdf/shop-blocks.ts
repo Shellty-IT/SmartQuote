@@ -148,6 +148,8 @@ export type ShopSectionKey =
     | 'warranty'
     | 'about'
 
+export type ShopPageBreakKey = 'cover' | ShopSectionKey
+
 export const DEFAULT_SHOP_SECTIONS: ShopSectionKey[] = [
     'summary', 'scope', 'platforms', 'timeline', 'pricing', 'techStack', 'warranty', 'about',
 ]
@@ -160,6 +162,7 @@ export interface ShopBlocks {
     version: 1
     /** Section keys in render order (cover + footer are always present outside this array) */
     sections: ShopSectionKey[]
+    pageBreakAfter: ShopPageBreakKey[]
     cover: ShopCoverBlock
     footer: ShopFooterBlock
     summary: SummaryBlock
@@ -178,6 +181,7 @@ export function buildDefaultShopBlocks(): ShopBlocks {
     return {
         version: 1,
         sections: [...DEFAULT_SHOP_SECTIONS],
+        pageBreakAfter: [],
 
         cover: {
             tag: 'Propozycja realizacji',
@@ -327,11 +331,14 @@ export function mergeShopWithDefaults(
     if (!saved) return defaults
 
     const validSet = new Set<string>(ALL_SHOP_SECTION_KEYS)
+    const validPageBreakSet = new Set<string>(['cover', ...ALL_SHOP_SECTION_KEYS])
     const filterValid = (arr: ShopSectionKey[]) => arr.filter((k) => validSet.has(k))
+    const filterValidPageBreak = (arr: ShopPageBreakKey[]) => arr.filter((k) => validPageBreakSet.has(k))
 
     return {
         version: 1,
         sections: Array.isArray(saved.sections) ? filterValid(saved.sections) : defaults.sections,
+        pageBreakAfter: Array.isArray(saved.pageBreakAfter) ? filterValidPageBreak(saved.pageBreakAfter) : defaults.pageBreakAfter,
         cover: { ...defaults.cover, ...saved.cover },
         footer: { ...defaults.footer, ...saved.footer },
         summary: {

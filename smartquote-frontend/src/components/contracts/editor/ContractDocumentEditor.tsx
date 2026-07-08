@@ -12,6 +12,7 @@ import {
 import { ContractEditorToolbar } from './ContractEditorToolbar'
 import { TemplateAIFillButton } from '@/components/offers/TemplateAIFillButton'
 import { buildContractShortHtml } from '@/lib/pdf/contract-short-html'
+import { applyPdfPreviewMode } from '@/lib/pdf/print-preview'
 import { mergeContractWithDefaults, type ContractShortBlocks } from '@/lib/pdf/contract-short-blocks'
 import { cn } from '@/lib/utils'
 import { useResizablePanel } from '@/hooks/useResizablePanel'
@@ -65,8 +66,8 @@ export function ContractDocumentEditor({
     useContractCompanyLogo(blocks, onBlocksChange)
 
     const srcdoc = useMemo(
-        () => buildContractShortHtml(blocks, { editorMode: true, zoom, activeSection: activeKey }),
-        [blocks, zoom, activeKey],
+        () => applyPdfPreviewMode(buildContractShortHtml(blocks, { editorMode: true, activeSection: activeKey })),
+        [blocks, activeKey],
     )
 
     // Listen for postMessage events from the iframe
@@ -109,7 +110,7 @@ export function ContractDocumentEditor({
     const editingSection = panelView?.kind === 'section' ? panelView.key : null
 
     return (
-        <div className="flex h-full min-h-[700px] flex-col gap-0 rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="flex h-[clamp(520px,calc(100vh-190px),900px)] min-h-0 flex-col gap-0 rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
             <ContractEditorToolbar
                 zoom={zoom}
                 zoomIn={zoomIn}
@@ -145,14 +146,15 @@ export function ContractDocumentEditor({
                     )}
                     style={panelOpen ? previewPanelStyle : undefined}
                 >
-                    <iframe
-                        key={refreshKey}
-                        srcDoc={srcdoc}
-                        title="Podgląd umowy"
-                        sandbox="allow-scripts allow-same-origin"
-                        className={cn('h-full w-full', isDragging && 'pointer-events-none')}
-                        style={{ minHeight: 700 }}
-                    />
+                    <div style={{ transformOrigin: 'top left', transform: `scale(${zoom})`, width: `${100 / zoom}%`, height: `${100 / zoom}%` }}>
+                        <iframe
+                            key={refreshKey}
+                            srcDoc={srcdoc}
+                            title="Podgląd umowy"
+                            sandbox="allow-scripts allow-same-origin"
+                            className={cn('h-full w-full border-0', isDragging && 'pointer-events-none')}
+                        />
+                    </div>
                 </div>
 
                 {panelOpen && (

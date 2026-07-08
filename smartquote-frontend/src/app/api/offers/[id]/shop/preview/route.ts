@@ -5,6 +5,7 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { buildShopHtml } from '@/lib/pdf/shop-html'
+import { applyPdfPreviewMode } from '@/lib/pdf/print-preview'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -93,7 +94,7 @@ export async function GET(
 
     let html: string
     try {
-        html = buildShopHtml(shopOffer)
+        html = applyPdfPreviewMode(buildShopHtml(shopOffer))
     } catch (err) {
         const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
         console.error('[shop-preview] buildShopHtml threw:', detail)

@@ -10,6 +10,8 @@ export type SupportSectionKey =
     | 'process'
     | 'pricing'
 
+export type SupportPageBreakKey = 'cover' | SupportSectionKey
+
 // ── Sub-types ─────────────────────────────────────────────────────────────────
 
 export interface SupportMonitorRow {
@@ -163,6 +165,7 @@ export interface SupportFooterBlock {
 export interface SupportBlocks {
     version: 1
     sections: SupportSectionKey[]
+    pageBreakAfter: SupportPageBreakKey[]
     cover: SupportCoverBlock
     footer: SupportFooterBlock
     benefits: SupportBenefitsBlock
@@ -179,6 +182,7 @@ export function buildDefaultSupportBlocks(): SupportBlocks {
     return {
         version: 1,
         sections: ['benefits', 'packages', 'scope', 'sla', 'process', 'pricing'],
+        pageBreakAfter: [],
         cover: {
             heroTagline: 'PROPOZYCJA WSPÓŁPRACY',
             heroTitle: 'Opieka techniczna IT',
@@ -414,11 +418,15 @@ export function buildDefaultSupportBlocks(): SupportBlocks {
 export function mergeSupportWithDefaults(saved: Partial<SupportBlocks>): SupportBlocks {
     const d = buildDefaultSupportBlocks()
     const validSections = new Set<SupportSectionKey>(['benefits', 'packages', 'scope', 'sla', 'process', 'pricing'])
+    const validPageBreaks = new Set<SupportPageBreakKey>(['cover', 'benefits', 'packages', 'scope', 'sla', 'process', 'pricing'])
     return {
         version: 1,
         sections: Array.isArray(saved.sections)
             ? (saved.sections.filter(s => validSections.has(s)) as SupportSectionKey[])
             : d.sections,
+        pageBreakAfter: Array.isArray(saved.pageBreakAfter)
+            ? (saved.pageBreakAfter.filter(s => validPageBreaks.has(s)) as SupportPageBreakKey[])
+            : d.pageBreakAfter,
         cover: saved.cover ? { ...d.cover, ...saved.cover } : d.cover,
         footer: saved.footer ? { ...d.footer, ...saved.footer } : d.footer,
         benefits: saved.benefits ? { ...d.benefits, ...saved.benefits } : d.benefits,

@@ -200,6 +200,7 @@ export class ContractsService {
     async createContractFromOffer(offerId: string, userId: string) {
         const offer = await contractsRepository.findOfferForContract(offerId, userId);
         if (!offer) throw new NotFoundError('Oferta');
+        if (!offer.clientId) throw new ValidationError('Najpierw skonwertuj lead na klienta, aby utworzyć umowę');
 
         return this.createContract(userId, {
             title: `Umowa - ${offer.title}`,

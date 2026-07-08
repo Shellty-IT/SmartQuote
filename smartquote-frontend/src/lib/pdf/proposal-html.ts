@@ -4,6 +4,7 @@
 
 import { mergeWithDefaults, type ProposalBlocks, type SectionKey } from './proposal-blocks'
 import { EMBEDDED_FONTS_CSS } from './embedded-fonts'
+import { withPageBreakAfter } from './section-layout'
 
 export interface ProposalOfferData {
     number: string
@@ -514,6 +515,9 @@ function renderSection(
     offer: ProposalOfferData,
     editorMode: boolean,
 ): string {
+    const block = blocks[key] as { enabled?: boolean }
+    if (block.enabled === false) return ''
+
     if (editorMode) {
         switch (key) {
             case 'intro':       return wrapEditable(renderIntro(blocks, true), 'intro', blocks.intro.enabled)
@@ -601,14 +605,20 @@ export function buildProposalHtml(offer: ProposalOfferData, options: BuildPropos
             const isTT = bothRender && (
                 (cur === 'testing' && next === 'technology') ||
                 (cur === 'technology' && next === 'testing')
-            )
+            ) && !blocks.pageBreakAfter.includes(cur)
             if (isTT) {
                 const leftHtml = renderSection(cur, blocks, offer, editorMode)
                 const rightHtml = renderSection(next, blocks, offer, editorMode)
-                parts.push(`<div style="display:grid;grid-template-columns:1fr 1fr;gap:6mm;margin-bottom:0;">${leftHtml}${rightHtml}</div>`)
+                parts.push(withPageBreakAfter(
+                    `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6mm;margin-bottom:0;">${leftHtml}${rightHtml}</div>`,
+                    blocks.pageBreakAfter.includes(next),
+                ))
                 i += 2
             } else {
-                parts.push(renderSection(cur, blocks, offer, editorMode))
+                parts.push(withPageBreakAfter(
+                    renderSection(cur, blocks, offer, editorMode),
+                    blocks.pageBreakAfter.includes(cur),
+                ))
                 i++
             }
         }
@@ -657,7 +667,7 @@ export function buildProposalHtml(offer: ProposalOfferData, options: BuildPropos
     }
     @media print {
       body { background: none; }
-      .page { margin: 0; break-after: page; box-shadow: none; }
+      .page { margin: 0; box-shadow: none; }
     }
     /* ── HEADER ── */
     .header {

@@ -20,6 +20,7 @@ export class AIRepository {
                         status: true,
                         createdAt: true,
                         client: { select: { name: true } },
+                        lead: { select: { name: true } },
                     },
                 },
             },
@@ -47,6 +48,7 @@ export class AIRepository {
             include: {
                 items: { orderBy: { position: 'asc' } },
                 client: { select: { name: true, company: true, type: true } },
+                lead: { select: { name: true, company: true } },
                 views: { orderBy: { viewedAt: 'asc' } },
                 interactions: { orderBy: { createdAt: 'asc' }, take: 100 },
                 comments: { orderBy: { createdAt: 'asc' } },
@@ -62,6 +64,7 @@ export class AIRepository {
             include: {
                 items: { orderBy: { position: 'asc' } },
                 client: { select: { name: true, company: true, type: true } },
+                lead: { select: { name: true, company: true } },
                 comments: { orderBy: { createdAt: 'asc' } },
             },
         });

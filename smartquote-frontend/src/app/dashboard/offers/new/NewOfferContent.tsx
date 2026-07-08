@@ -39,10 +39,12 @@ export default function NewOfferContent() {
         offerDetails,
         updateDetails,
         items,
+        summaryItems,
         addItem,
         removeItem,
         updateItem,
         totals,
+        summaryTotals,
         uniqueVariants,
         stepIds,
         goToStep,
@@ -245,8 +247,8 @@ export default function NewOfferContent() {
                     <StepSummary
                         client={selectedClient ?? { name: selectedLead!.name, email: selectedLead!.email }}
                         details={offerDetails}
-                        items={items}
-                        totals={totals}
+                        items={summaryItems}
+                        totals={summaryTotals}
                         uniqueVariants={uniqueVariants}
                     />
                 )}

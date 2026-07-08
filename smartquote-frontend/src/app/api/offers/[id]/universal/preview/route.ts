@@ -5,6 +5,7 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { buildUniversalHtml, type UniversalOfferData } from '@/lib/pdf/universal-html'
+import { applyPdfPreviewMode } from '@/lib/pdf/print-preview'
 import { mergeUniversalWithDefaults, buildDefaultUniversalBlocks } from '@/lib/pdf/universal-blocks'
 
 export const dynamic = 'force-dynamic'
@@ -93,7 +94,7 @@ export async function GET(
         ? mergeUniversalWithDefaults(offer.blocks)
         : buildDefaultUniversalBlocks()
 
-    const html = buildUniversalHtml(blocks, offerData)
+    const html = applyPdfPreviewMode(buildUniversalHtml(blocks, offerData))
 
     return new Response(html, {
         status: 200,

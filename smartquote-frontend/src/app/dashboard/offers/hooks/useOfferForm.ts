@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useClients } from '@/hooks/useClients';
 import { useLeads } from '@/hooks/useLeads';
 import { offersApi, ApiError } from '@/lib/api';
-import { leadsApi } from '@/lib/api/leads.api';
 import { useToast } from '@/contexts/ToastContext';
 import { useTranslations } from '@/i18n';
 import type { Client, CreateOfferInput, OfferTemplate, Offer } from '@/types';
@@ -23,6 +22,36 @@ import { mergeMobileSimpleWithDefaults, buildDefaultMobileSimpleBlocks, type Mob
 import { mergeUniversalWithDefaults, buildDefaultUniversalBlocks, type UniversalBlocks } from '@/lib/pdf/universal-blocks';
 import { resolveTemplatePrice } from '@/lib/offer-template-price';
 import { buildStepIds } from '../new/constants';
+
+const DOCUMENT_TEMPLATE_TYPES = new Set([
+    'proposal',
+    'shop',
+    'website_v2',
+    'website_v3',
+    'support',
+    'mobile_app',
+    'mobile_simple',
+    'universal',
+]);
+
+function isDocumentTemplateType(templateType?: string | null): boolean {
+    return DOCUMENT_TEMPLATE_TYPES.has(templateType ?? '');
+}
+
+function buildSubmittedTitle(templateType: OfferDetails['templateType'], entityName: string, title?: string): string {
+    const trimmedTitle = title?.trim();
+    if (trimmedTitle) return trimmedTitle;
+
+    return templateType === 'shop' ? `Sklep — ${entityName}` :
+        templateType === 'website_v2' ? `Strona WWW — ${entityName}` :
+            templateType === 'website_v3' ? `Strona WWW v3 — ${entityName}` :
+                templateType === 'support' ? `Wsparcie IT — ${entityName}` :
+                    templateType === 'mobile_app' ? `Aplikacja mobilna — ${entityName}` :
+                        templateType === 'mobile_simple' ? `Aplikacja mobilna — ${entityName}` :
+                            templateType === 'universal' ? `Oferta — ${entityName}` :
+                                templateType === 'classic' ? `Oferta — ${entityName}` :
+                                    `Propozycja — ${entityName}`;
+}
 
 export function calculateItemTotal(item: ExtendedOfferItem): OfferTotalsData {
     const quantity = item.quantity || 0;
@@ -166,7 +195,9 @@ export function useOfferForm(options?: { initialData?: Offer }) {
     const [selectedClient, setSelectedClient] = useState<Client | null>(() => {
         return options?.initialData?.client || null;
     });
-    const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+    const [selectedLead, setSelectedLead] = useState<Lead | null>(() => {
+        return options?.initialData?.lead || null;
+    });
 
     const [offerDetails, setOfferDetails] = useState<OfferDetails>(() => {
         if (options?.initialData) {
@@ -230,6 +261,7 @@ export function useOfferForm(options?: { initialData?: Offer }) {
             if (client) {
                 preselectedApplied.current = true;
                 setSelectedClient(client);
+                setSelectedLead(null);
                 setCurrentStep('type_choice');
             }
         } else if (!isEditMode && preselectedLeadId && leads.length > 0) {
@@ -237,6 +269,7 @@ export function useOfferForm(options?: { initialData?: Offer }) {
             if (lead) {
                 preselectedApplied.current = true;
                 setSelectedLead(lead);
+                setSelectedClient(null);
                 setCurrentStep('type_choice');
             }
         }
@@ -257,6 +290,85 @@ export function useOfferForm(options?: { initialData?: Offer }) {
     }, [items]);
 
     const uniqueVariants = useMemo(() => getUniqueVariants(items), [items]);
+
+    const entityName = selectedClient?.name ?? selectedLead?.name ?? 'Klient';
+    const submittedTitle = useMemo(
+        () => buildSubmittedTitle(offerDetails.templateType, entityName, offerDetails.title),
+        [entityName, offerDetails.templateType, offerDetails.title],
+    );
+
+    const submittedBlocks = useMemo(() => {
+        switch (offerDetails.templateType) {
+            case 'proposal':
+                return proposalBlocks as unknown;
+            case 'shop':
+                return shopBlocks as unknown;
+            case 'website_v2':
+                return websiteV2Blocks as unknown;
+            case 'website_v3':
+                return websiteV3Blocks as unknown;
+            case 'support':
+                return supportBlocks as unknown;
+            case 'mobile_app':
+                return mobileAppBlocks as unknown;
+            case 'mobile_simple':
+                return mobileSimpleBlocks as unknown;
+            case 'universal':
+                return universalBlocks as unknown;
+            default:
+                return null;
+        }
+    }, [
+        offerDetails.templateType,
+        proposalBlocks,
+        shopBlocks,
+        websiteV2Blocks,
+        websiteV3Blocks,
+        supportBlocks,
+        mobileAppBlocks,
+        mobileSimpleBlocks,
+        universalBlocks,
+    ]);
+
+    const templatePrice = useMemo(
+        () => resolveTemplatePrice(submittedBlocks, offerDetails.templateType),
+        [submittedBlocks, offerDetails.templateType],
+    );
+
+    const summaryItems = useMemo<ExtendedOfferItem[]>(() => {
+        if (!isEditMode && isDocumentTemplateType(offerDetails.templateType)) {
+            return [{
+                ...emptyItem,
+                name: submittedTitle,
+                unitPrice: templatePrice?.net ?? 0,
+                vatRate: templatePrice?.vatRate ?? 23,
+            }];
+        }
+
+        return items;
+    }, [isEditMode, items, offerDetails.templateType, submittedTitle, templatePrice]);
+
+    const summaryTotals = useMemo(() => {
+        if (!isEditMode && isDocumentTemplateType(offerDetails.templateType) && templatePrice) {
+            return {
+                totalNet: templatePrice.net,
+                totalVat: templatePrice.vat,
+                totalGross: templatePrice.gross,
+            };
+        }
+
+        return summaryItems.reduce(
+            (acc, item) => {
+                const itemTotals = calculateItemTotal(item);
+                return {
+                    totalNet: acc.totalNet + itemTotals.totalNet,
+                    totalVat: acc.totalVat + itemTotals.totalVat,
+                    totalGross: acc.totalGross + itemTotals.totalGross,
+                };
+            },
+            { totalNet: 0, totalVat: 0, totalGross: 0 }
+        );
+    }, [isEditMode, offerDetails.templateType, summaryItems, templatePrice]);
 
     const stepIds = useMemo(
         () => buildStepIds(offerDetails.templateType ?? 'classic', isEditMode),
@@ -370,28 +482,6 @@ export function useOfferForm(options?: { initialData?: Offer }) {
         setIsSubmitting(true);
 
         try {
-            // Resolve clientId — convert lead to client if needed
-            let resolvedClientId: string;
-            if (selectedClient) {
-                resolvedClientId = selectedClient.id;
-            } else {
-                const lead = selectedLead!;
-                if (lead.clientId) {
-                    resolvedClientId = lead.clientId;
-                } else {
-                    const converted = await leadsApi.convert(lead.id, {
-                        name: lead.name,
-                        email: lead.email ?? undefined,
-                        phone: lead.phone ?? undefined,
-                        company: lead.company ?? undefined,
-                    });
-                    const convertedClientId = converted.data?.clientId
-                        ?? (converted.data as { client?: { id?: string } } | undefined)?.client?.id;
-                    if (!convertedClientId) throw new Error('Lead conversion failed')
-                    resolvedClientId = convertedClientId;
-                }
-            }
-
             const entityName = selectedClient?.name ?? selectedLead?.name ?? 'Klient';
 
             const isProposal = offerDetails.templateType === 'proposal';
@@ -448,7 +538,8 @@ export function useOfferForm(options?: { initialData?: Offer }) {
                 }));
 
             const data: CreateOfferInput = {
-                clientId: resolvedClientId,
+                clientId: selectedClient?.id ?? null,
+                leadId: selectedLead?.id ?? null,
                 title: submittedTitle,
                 description: offerDetails.description || undefined,
                 validUntil: offerDetails.validUntil || undefined,
@@ -502,10 +593,12 @@ export function useOfferForm(options?: { initialData?: Offer }) {
         offerDetails,
         updateDetails,
         items,
+        summaryItems,
         addItem,
         removeItem,
         updateItem,
         totals,
+        summaryTotals,
         uniqueVariants,
         stepIds,
         goToStep,

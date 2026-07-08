@@ -74,10 +74,11 @@ export function DetailsTab({
         }
     };
 
-    const clientData = {
-        id: offer.client.id,
-        name: offer.client.name,
-        email: offer.client.email || '',
+    const recipientData = {
+        id: (offer.client ?? offer.lead)!.id,
+        name: (offer.client ?? offer.lead)!.name,
+        email: (offer.client ?? offer.lead)!.email || '',
+        type: offer.client ? 'client' as const : 'lead' as const,
     };
 
     return (
@@ -221,7 +222,7 @@ export function DetailsTab({
             </div>
 
             <div className="space-y-6">
-                <ClientCard client={clientData} />
+                <ClientCard recipient={recipientData} />
                 <DetailsCard offer={offer} isExpired={isExpired} />
                 <AuditTrailCard
                     auditLog={auditLog}

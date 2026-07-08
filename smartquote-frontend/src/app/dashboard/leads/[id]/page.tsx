@@ -282,7 +282,7 @@ export default function LeadDetailPage({ params }: PageProps) {
                                 onClick={() => {
                                     const url = lead.status === 'CONVERTED' && lead.clientId
                                         ? `/dashboard/offers/new?clientId=${lead.clientId}`
-                                        : `/dashboard/offers/new`;
+                                        : `/dashboard/offers/new?leadId=${lead.id}`;
                                     router.push(url);
                                 }}
                                 className="group flex w-full items-center gap-3 rounded-xl border border-border bg-surface-subtle p-3 text-left transition hover:border-primary/30 hover:bg-secondary"

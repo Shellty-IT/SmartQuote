@@ -11,6 +11,8 @@ export type WebsiteV2SectionKey =
     | 'pricing'
     | 'faq'
 
+export type WebsiteV2PageBreakKey = 'cover' | WebsiteV2SectionKey
+
 // ── Sub-types ────────────────────────────────────────────────────────────────
 
 export interface WV2PainPoint { emoji: string; text: string }
@@ -122,6 +124,7 @@ export interface WV2FaqBlock {
 export interface WebsiteV2Blocks {
     version: 1
     sections: WebsiteV2SectionKey[]
+    pageBreakAfter: WebsiteV2PageBreakKey[]
     cover: WV2CoverBlock
     footer: WV2FooterBlock
     problem: WV2ProblemBlock
@@ -148,6 +151,7 @@ export function buildDefaultWebsiteV2Blocks(): WebsiteV2Blocks {
     return {
         version: 1,
         sections: [...DEFAULT_WV2_SECTIONS],
+        pageBreakAfter: [],
         cover: {
             title: 'Strona internetowa',
             recipientName: '',
@@ -286,6 +290,7 @@ export function buildDefaultWebsiteV2Blocks(): WebsiteV2Blocks {
 // ── Merge helper ──────────────────────────────────────────────────────────────
 
 const VALID_SECTIONS = new Set<WebsiteV2SectionKey>(ALL_WV2_SECTION_KEYS)
+const VALID_PAGE_BREAK_KEYS = new Set<WebsiteV2PageBreakKey>(['cover', ...ALL_WV2_SECTION_KEYS])
 
 export function mergeWebsiteV2WithDefaults(
     saved: Partial<WebsiteV2Blocks> | null | undefined,
@@ -298,6 +303,9 @@ export function mergeWebsiteV2WithDefaults(
         sections: Array.isArray(saved.sections)
             ? (saved.sections.filter((s) => VALID_SECTIONS.has(s)) as WebsiteV2SectionKey[])
             : defaults.sections,
+        pageBreakAfter: Array.isArray(saved.pageBreakAfter)
+            ? (saved.pageBreakAfter.filter((s) => VALID_PAGE_BREAK_KEYS.has(s)) as WebsiteV2PageBreakKey[])
+            : defaults.pageBreakAfter,
         cover: { ...defaults.cover, ...(saved.cover ?? {}) },
         footer: { ...defaults.footer, ...(saved.footer ?? {}) },
         problem: { ...defaults.problem, ...(saved.problem ?? {}) },

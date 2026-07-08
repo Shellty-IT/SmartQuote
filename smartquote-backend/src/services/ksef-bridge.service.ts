@@ -168,6 +168,7 @@ export class KsefBridgeService {
         });
 
         if (!offer) return null;
+        if (!offer.client) return null;
 
         const activeItems = offer.items.filter((item) => item.isSelected);
         const today = new Date().toISOString().split('T')[0];
@@ -238,6 +239,7 @@ export class KsefBridgeService {
         if (!offer) throw new Error('OFFER_NOT_FOUND');
         if (offer.invoiceSentAt) throw new Error('ALREADY_SENT');
         if (!offer.user.companyInfo?.nip) throw new Error('SELLER_NIP_MISSING');
+        if (!offer.client) throw new Error('BUYER_CLIENT_REQUIRED');
         if (!offer.client.nip) throw new Error('BUYER_NIP_MISSING');
         if (offer.items.length === 0) throw new Error('NO_ITEMS');
 

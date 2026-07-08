@@ -6,6 +6,7 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { buildSupportHtml, type SupportOfferData } from '@/lib/pdf/support-html'
+import { applyPdfPreviewMode } from '@/lib/pdf/print-preview'
 import { mergeSupportWithDefaults, buildDefaultSupportBlocks, type SupportBlocks } from '@/lib/pdf/support-blocks'
 
 export const dynamic = 'force-dynamic'
@@ -36,7 +37,7 @@ export async function POST(req: Request) {
         ? mergeSupportWithDefaults(body.blocks)
         : buildDefaultSupportBlocks()
 
-    const html = buildSupportHtml(blocks, offer)
+    const html = applyPdfPreviewMode(buildSupportHtml(blocks, offer))
 
     return new Response(html, {
         status: 200,

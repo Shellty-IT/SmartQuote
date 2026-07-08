@@ -13,6 +13,7 @@ export const ALL_SLA_SECTION_KEYS: SlaSectionKey[] = [
 ]
 
 export type SlaEditableSectionKey = SlaSectionKey | 'header' | 'signatures'
+export type SlaPageBreakKey = 'header' | SlaSectionKey
 
 // ── Sub-types ─────────────────────────────────────────────────────────────────
 
@@ -132,6 +133,7 @@ export interface SlaSignaturesBlock {
 export interface ContractSlaBlocks {
     version: 1
     sections: SlaSectionKey[]
+    pageBreakAfter: SlaPageBreakKey[]
     header: SlaHeaderBlock
     parties: SlaPartiesBlock
     subject: SlaSubjectBlock
@@ -154,6 +156,7 @@ export function buildDefaultContractSlaBlocks(): ContractSlaBlocks {
     return {
         version: 1,
         sections: [...ALL_SLA_SECTION_KEYS],
+        pageBreakAfter: [],
         header: {
             contractNumber: 'SLA/2026/001',
             date: '',
@@ -234,6 +237,7 @@ export function buildDefaultContractSlaBlocks(): ContractSlaBlocks {
 // ── Merge helper ──────────────────────────────────────────────────────────────
 
 const validSet = new Set<SlaSectionKey>(ALL_SLA_SECTION_KEYS)
+const validPageBreakSet = new Set<SlaPageBreakKey>(['header', ...ALL_SLA_SECTION_KEYS])
 
 export function mergeSlaWithDefaults(
     saved: Partial<ContractSlaBlocks> | null | undefined,
@@ -247,6 +251,9 @@ export function mergeSlaWithDefaults(
         sections: Array.isArray(saved.sections)
             ? (saved.sections as string[]).filter((k): k is SlaSectionKey => validSet.has(k as SlaSectionKey))
             : def.sections,
+        pageBreakAfter: Array.isArray(saved.pageBreakAfter)
+            ? (saved.pageBreakAfter as string[]).filter((k): k is SlaPageBreakKey => validPageBreakSet.has(k as SlaPageBreakKey))
+            : def.pageBreakAfter,
         header: { ...def.header, ...(saved.header ?? {}) },
         parties: {
             provider: { ...def.parties.provider, ...(saved.parties?.provider ?? {}) },

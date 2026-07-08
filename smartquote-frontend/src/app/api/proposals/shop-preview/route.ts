@@ -6,6 +6,7 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { buildShopHtml, type ShopOfferData } from '@/lib/pdf/shop-html'
+import { applyPdfPreviewMode } from '@/lib/pdf/print-preview'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -27,7 +28,7 @@ export async function POST(req: Request) {
         return new Response('Invalid JSON body', { status: 400 })
     }
 
-    const html = buildShopHtml(offer)
+    const html = applyPdfPreviewMode(buildShopHtml(offer))
 
     return new Response(html, {
         status: 200,

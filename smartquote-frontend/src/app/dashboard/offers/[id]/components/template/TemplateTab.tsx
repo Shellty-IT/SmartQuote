@@ -52,8 +52,11 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
     const toast = useToast()
 
     const templateType = (offer.templateType ?? 'classic') as 'classic' | 'proposal' | 'shop' | 'website_v2' | 'website_v3' | 'support' | 'mobile_app' | 'mobile_simple' | 'universal'
+    const recipient = offer.client ?? offer.lead
+    const recipientName = recipient?.name ?? ''
+    const recipientCompany = recipient?.company ?? null
     const [blocks, setBlocks] = useState<ProposalBlocks>(
-        mergeWithDefaults(offer.blocks as Partial<ProposalBlocks> | null, offer.client?.name),
+        mergeWithDefaults(offer.blocks as Partial<ProposalBlocks> | null, recipientName),
     )
     const [shopBlocks, setShopBlocks] = useState<ShopBlocks>(
         mergeShopWithDefaults(offer.blocks as Partial<ShopBlocks> | null),
@@ -162,8 +165,8 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
         paymentDays: offer.paymentDays ?? 14,
         createdAt: offer.createdAt,
         client: {
-            name: offer.client?.name ?? '',
-            company: offer.client?.company ?? null,
+            name: recipientName,
+            company: recipientCompany,
         },
         user: {
             name: session?.user?.name ?? null,
@@ -179,7 +182,7 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
             } : null,
         },
         blocks,
-    }), [offer, session, profileAvatar, companyInfo, blocks])
+    }), [offer, session, profileAvatar, companyInfo, blocks, recipientName, recipientCompany])
 
     const shopOfferData = useMemo(() => ({
         id: offer.id,
@@ -190,8 +193,8 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
         paymentDays: offer.paymentDays ?? 14,
         createdAt: offer.createdAt,
         client: {
-            name: offer.client?.name ?? '',
-            company: offer.client?.company ?? null,
+            name: recipientName,
+            company: recipientCompany,
         },
         user: {
             name: session?.user?.name ?? null,
@@ -207,7 +210,7 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
             } : null,
         },
         blocks: shopBlocks,
-    }), [offer, session, companyInfo, shopBlocks])
+    }), [offer, session, companyInfo, shopBlocks, recipientName, recipientCompany])
 
     const saveBlocks = useCallback(async (updatedBlocks: unknown) => {
         await offersApi.update(offer.id, { blocks: updatedBlocks })
@@ -246,8 +249,8 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
         paymentDays: offer.paymentDays ?? 14,
         createdAt: offer.createdAt,
         client: {
-            name: offer.client?.name ?? '',
-            company: offer.client?.company ?? null,
+            name: recipientName,
+            company: recipientCompany,
         },
         user: {
             name: session?.user?.name ?? null,
@@ -264,7 +267,7 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
             } : null,
         },
         blocks: websiteV2Blocks,
-    }), [offer, session, profileAvatar, companyInfo, websiteV2Blocks])
+    }), [offer, session, profileAvatar, companyInfo, websiteV2Blocks, recipientName, recipientCompany])
 
     const handleWebsiteV2BlocksChange = useCallback(async (updatedBlocks: WebsiteV2Blocks) => {
         setWebsiteV2Blocks(updatedBlocks)
@@ -283,14 +286,14 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
         currency: offer.currency ?? 'PLN',
         paymentDays: offer.paymentDays ?? 14,
         createdAt: offer.createdAt,
-        client: { name: offer.client?.name ?? '', company: offer.client?.company ?? null },
+        client: { name: recipientName, company: recipientCompany },
         user: {
             name: session?.user?.name ?? null,
             email: session?.user?.email ?? '',
             companyInfo: companyInfo ? { name: companyInfo.name, website: companyInfo.website, logo: companyInfo.logo, logoLight: companyInfo.logoLight, logoDark: companyInfo.logoDark, phone: companyInfo.phone, email: companyInfo.email ?? null } : null,
         },
         blocks: websiteV3Blocks,
-    }), [offer, session, companyInfo, websiteV3Blocks])
+    }), [offer, session, companyInfo, websiteV3Blocks, recipientName, recipientCompany])
 
     const handleWebsiteV3BlocksChange = useCallback(async (updatedBlocks: WebsiteV3Blocks) => {
         setWebsiteV3Blocks(updatedBlocks)
@@ -305,14 +308,14 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
         offerNumber: offer.number,
         offerDate: offer.createdAt ? new Date(offer.createdAt).toLocaleDateString('pl-PL') : undefined,
         validUntil: offer.validUntil ? new Date(offer.validUntil).toLocaleDateString('pl-PL') : undefined,
-        clientName: offer.client?.name,
+        clientName: recipientName,
         userLogoUrl: companyInfo?.logo ?? undefined,
         userLogoDarkUrl: companyInfo?.logoDark ?? undefined,
         userCompanyName: companyInfo?.name ?? session?.user?.name ?? undefined,
         userEmail: companyInfo?.email ?? session?.user?.email ?? undefined,
         userPhone: companyInfo?.phone ?? undefined,
         userWebsite: companyInfo?.website ?? undefined,
-    }), [offer, session, companyInfo])
+    }), [offer, session, companyInfo, recipientName])
 
     const handleSupportBlocksChange = useCallback(async (updatedBlocks: SupportBlocks) => {
         setSupportBlocks(updatedBlocks)
@@ -327,14 +330,14 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
         offerNumber: offer.number,
         offerDate: offer.createdAt ? new Date(offer.createdAt).toLocaleDateString('pl-PL') : undefined,
         validUntil: offer.validUntil ? new Date(offer.validUntil).toLocaleDateString('pl-PL') : undefined,
-        clientName: offer.client?.name,
+        clientName: recipientName,
         userLogoUrl: companyInfo?.logo ?? undefined,
         userLogoDarkUrl: companyInfo?.logoDark ?? undefined,
         userCompanyName: companyInfo?.name ?? session?.user?.name ?? undefined,
         userEmail: companyInfo?.email ?? session?.user?.email ?? undefined,
         userPhone: companyInfo?.phone ?? undefined,
         userWebsite: companyInfo?.website ?? undefined,
-    }), [offer, session, companyInfo])
+    }), [offer, session, companyInfo, recipientName])
 
     const handleMobileAppBlocksChange = useCallback(async (updatedBlocks: MobileAppBlocks) => {
         setMobileAppBlocks(updatedBlocks)
@@ -349,14 +352,14 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
         offerNumber: offer.number,
         offerDate: offer.createdAt ? new Date(offer.createdAt).toLocaleDateString('pl-PL') : undefined,
         validUntil: offer.validUntil ? new Date(offer.validUntil).toLocaleDateString('pl-PL') : undefined,
-        clientName: offer.client?.name,
+        clientName: recipientName,
         userLogoUrl: companyInfo?.logo ?? undefined,
         userLogoDarkUrl: companyInfo?.logoDark ?? undefined,
         userCompanyName: companyInfo?.name ?? session?.user?.name ?? undefined,
         userEmail: companyInfo?.email ?? session?.user?.email ?? undefined,
         userPhone: companyInfo?.phone ?? undefined,
         userWebsite: companyInfo?.website ?? undefined,
-    }), [offer, session, companyInfo])
+    }), [offer, session, companyInfo, recipientName])
 
     const handleMobileSimpleBlocksChange = useCallback(async (updatedBlocks: MobileSimpleBlocks) => {
         setMobileSimpleBlocks(updatedBlocks)
@@ -370,21 +373,21 @@ export function TemplateTab({ offer, onSaved }: TemplateTabProps) {
     const universalOfferData = useMemo<UniversalOfferData>(() => ({
         offerNumber: offer.number,
         offerDate: offer.createdAt ? new Date(offer.createdAt).toLocaleDateString('pl-PL') : undefined,
-        clientName: offer.client?.name,
+        clientName: recipientName,
         userLogoUrl: companyInfo?.logo ?? undefined,
         userLogoDarkUrl: companyInfo?.logoDark ?? undefined,
         userCompanyName: companyInfo?.name ?? session?.user?.name ?? undefined,
         userEmail: companyInfo?.email ?? session?.user?.email ?? undefined,
         userPhone: companyInfo?.phone ?? undefined,
         userWebsite: companyInfo?.website ?? undefined,
-    }), [offer, session, companyInfo])
+    }), [offer, session, companyInfo, recipientName])
 
     const offerContext = useMemo<OfferContext>(() => ({
         title: offer.title,
-        clientName: offer.client?.name ?? '',
+        clientName: recipientName,
         totalGross: Number(offer.totalGross ?? 0),
         currency: offer.currency ?? 'PLN',
-    }), [offer.title, offer.client?.name, offer.totalGross, offer.currency])
+    }), [offer.title, recipientName, offer.totalGross, offer.currency])
 
     const handleUniversalBlocksChange = useCallback(async (updatedBlocks: UniversalBlocks) => {
         setUniversalBlocks(updatedBlocks)

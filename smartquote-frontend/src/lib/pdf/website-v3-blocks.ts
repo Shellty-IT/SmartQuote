@@ -14,6 +14,8 @@ export type WebsiteV3SectionKey =
     | 'stack'
     | 'terms'
 
+export type WebsiteV3PageBreakKey = 'cover' | WebsiteV3SectionKey
+
 // ── Sub-types ─────────────────────────────────────────────────────────────────
 
 export interface WV3PackageFeature { label: string; included: boolean }
@@ -169,6 +171,7 @@ export interface WV3TermsBlock {
 export interface WebsiteV3Blocks {
     version: 1
     sections: WebsiteV3SectionKey[]
+    pageBreakAfter: WebsiteV3PageBreakKey[]
     cover: WV3CoverBlock
     footer: WV3FooterBlock
     needs: WV3NeedsBlock
@@ -192,6 +195,7 @@ export const DEFAULT_WV3_SECTIONS: WebsiteV3SectionKey[] = [
 ]
 
 const VALID_SECTIONS = new Set<string>(DEFAULT_WV3_SECTIONS)
+const VALID_PAGE_BREAK_KEYS = new Set<string>(['cover', ...DEFAULT_WV3_SECTIONS])
 
 // ── Defaults ─────────────────────────────────────────────────────────────────
 
@@ -199,6 +203,7 @@ export function buildDefaultWebsiteV3Blocks(): WebsiteV3Blocks {
     return {
         version: 1,
         sections: [...DEFAULT_WV3_SECTIONS],
+        pageBreakAfter: [],
         cover: {
             badgeLabel: 'Oferta handlowa',
             subtitle: 'PROPOZYCJA REALIZACJI STRONY INTERNETOWEJ',
@@ -442,6 +447,9 @@ export function mergeWebsiteV3WithDefaults(
         sections: Array.isArray(saved.sections)
             ? (saved.sections.filter((s) => VALID_SECTIONS.has(s)) as WebsiteV3SectionKey[])
             : defaults.sections,
+        pageBreakAfter: Array.isArray(saved.pageBreakAfter)
+            ? (saved.pageBreakAfter.filter((s) => VALID_PAGE_BREAK_KEYS.has(s)) as WebsiteV3PageBreakKey[])
+            : defaults.pageBreakAfter,
         cover: { ...defaults.cover, ...(saved.cover ?? {}) },
         footer: { ...defaults.footer, ...(saved.footer ?? {}) },
         needs: { ...defaults.needs, ...(saved.needs ?? {}) },

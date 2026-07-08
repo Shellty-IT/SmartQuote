@@ -44,7 +44,8 @@ const dateSchema = z.string()
 
 export const createOfferSchema = z.object({
     body: z.object({
-        clientId: z.string().min(1, 'ID klienta jest wymagane'),
+        clientId: z.string().min(1, 'ID klienta jest wymagane').optional().nullable(),
+        leadId: z.string().min(1, 'ID leada jest wymagane').optional().nullable(),
         title: z.string().min(3, 'Tytuł musi mieć minimum 3 znaki').max(300),
         description: z.string().max(5000).optional().nullable(),
         validUntil: dateSchema,
@@ -55,6 +56,9 @@ export const createOfferSchema = z.object({
         items: z.array(offerItemSchema).min(1, 'Oferta musi zawierać przynajmniej jedną pozycję'),
         templateType: z.string().max(50).optional().nullable(),
         blocks: z.unknown().optional().nullable(),
+    }).refine((data) => Boolean(data.clientId) !== Boolean(data.leadId), {
+        message: 'Należy wskazać klienta albo leada',
+        path: ['clientId'],
     }),
 });
 
@@ -63,7 +67,8 @@ export const updateOfferSchema = z.object({
         id: z.string().min(1, 'ID jest wymagane'),
     }),
     body: z.object({
-        clientId: z.string().optional(),
+        clientId: z.string().optional().nullable(),
+        leadId: z.string().optional().nullable(),
         title: z.string().min(3).max(300).optional(),
         description: z.string().max(5000).optional().nullable(),
         status: offerStatusEnum.optional(),
@@ -91,6 +96,7 @@ export const listOffersSchema = z.object({
         search: z.string().optional(),
         status: offerStatusEnum.optional(),
         clientId: z.string().optional(),
+        leadId: z.string().optional(),
         sortBy: z.enum(['number', 'title', 'totalGross', 'createdAt', 'validUntil']).optional().default('createdAt'),
         sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
         dateFrom: dateSchema,

@@ -6,6 +6,7 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { buildWebsiteV2Html, type WebsiteV2OfferData } from '@/lib/pdf/website-v2-html'
+import { applyPdfPreviewMode } from '@/lib/pdf/print-preview'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -25,7 +26,7 @@ export async function POST(req: Request) {
         return new Response('Invalid JSON body', { status: 400 })
     }
 
-    const html = buildWebsiteV2Html(offer)
+    const html = applyPdfPreviewMode(buildWebsiteV2Html(offer))
 
     return new Response(html, {
         status: 200,

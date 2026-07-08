@@ -11,6 +11,13 @@ const offerPublicIncludeFull = {
             email: true,
         },
     },
+    lead: {
+        select: {
+            name: true,
+            company: true,
+            email: true,
+        },
+    },
     user: {
         select: {
             name: true,
@@ -51,11 +58,13 @@ const offerPublicIncludeFull = {
 
 const offerPublicIncludeForView = {
     client: { select: { name: true } },
+    lead: { select: { name: true } },
 } satisfies Prisma.OfferInclude;
 
 const offerPublicIncludeForAccept = {
     items: { orderBy: { position: 'asc' as const } },
     client: { select: { id: true, name: true, company: true, email: true } },
+    lead: { select: { id: true, name: true, company: true, email: true } },
     user: {
         select: {
             id: true,
@@ -68,11 +77,13 @@ const offerPublicIncludeForAccept = {
 
 const offerPublicIncludeForReject = {
     client: { select: { id: true, name: true, company: true } },
+    lead: { select: { id: true, name: true, company: true } },
     user: { select: { id: true, email: true, name: true } },
 } satisfies Prisma.OfferInclude;
 
 const offerPublicIncludeForComment = {
     client: { select: { name: true } },
+    lead: { select: { name: true } },
     user: { select: { email: true } },
 } satisfies Prisma.OfferInclude;
 
@@ -95,6 +106,7 @@ export const publicOfferRepository = {
                 number: true,
                 title: true,
                 client: { select: { name: true } },
+                lead: { select: { name: true } },
             },
         });
     },
@@ -124,6 +136,7 @@ export const publicOfferRepository = {
                 number: true,
                 title: true,
                 client: { select: { name: true } },
+                lead: { select: { name: true } },
                 user: { select: { email: true } },
             },
         });

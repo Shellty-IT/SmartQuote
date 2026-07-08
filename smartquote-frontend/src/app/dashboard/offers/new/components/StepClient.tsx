@@ -100,7 +100,7 @@ export default function StepClient({
                 <div>
                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
                         Leady
-                        <span className="ml-2 text-[10px] normal-case font-normal text-muted-foreground/70">oferta zostanie wysłana po automatycznym przekształceniu leada w klienta</span>
+                        <span className="ml-2 text-[10px] normal-case font-normal text-muted-foreground/70">bez automatycznej konwersji na klienta</span>
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto">
                         {filteredLeads.map((lead) => (

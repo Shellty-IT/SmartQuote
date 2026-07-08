@@ -4,7 +4,7 @@
 
 import { Layers, X, ChevronUp, ChevronDown, Eye, EyeOff, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui'
-import type { MobileAppBlocks, MobileAppSectionKey } from '@/lib/pdf/mobile-app-blocks'
+import type { MobileAppBlocks, MobileAppPageBreakKey, MobileAppSectionKey } from '@/lib/pdf/mobile-app-blocks'
 import {
     CoverEditor, FooterEditor, VisionEditor, PlatformEditor, ScopeEditor,
     ArchitectureEditor, TimelineEditor, PricingEditor, PostLaunchEditor, AboutEditor,
@@ -74,6 +74,7 @@ function MobileAppSectionManagerPanel({
 }) {
     const active = blocks.sections
     const deleted = ALL_SECTION_KEYS.filter(k => !active.includes(k))
+    const pageBreakAfter = blocks.pageBreakAfter ?? []
 
     function move(idx: number, dir: -1 | 1) {
         const next = [...active]
@@ -84,11 +85,24 @@ function MobileAppSectionManagerPanel({
     }
 
     function remove(key: MobileAppSectionKey) {
-        onChange({ ...blocks, sections: active.filter(k => k !== key) })
+        onChange({
+            ...blocks,
+            sections: active.filter(k => k !== key),
+            pageBreakAfter: pageBreakAfter.filter(k => k !== key),
+        })
     }
 
     function restore(key: MobileAppSectionKey) {
         onChange({ ...blocks, sections: [...active, key] })
+    }
+
+    function togglePageBreakAfter(key: MobileAppPageBreakKey) {
+        onChange({
+            ...blocks,
+            pageBreakAfter: pageBreakAfter.includes(key)
+                ? pageBreakAfter.filter(k => k !== key)
+                : [...pageBreakAfter, key],
+        })
     }
 
     return (
@@ -101,14 +115,39 @@ function MobileAppSectionManagerPanel({
                 <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
             </div>
             <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
-                {active.map((key, i) => (
+                <div className="flex items-center gap-2 p-2 rounded-lg border border-border bg-card">
+                    <span className="flex-1 text-sm font-medium">{BLOCK_LABELS.cover}</span>
+                    <span className="text-[10px] text-muted-foreground">pierwsza sekcja</span>
+                    <label className="flex cursor-pointer items-center gap-1 text-[10px] text-muted-foreground whitespace-nowrap">
+                        <input
+                            type="checkbox"
+                            checked={pageBreakAfter.includes('cover')}
+                            onChange={() => togglePageBreakAfter('cover')}
+                            className="h-3 w-3 rounded border-border text-primary focus:ring-ring"
+                        />
+                        nowa str.
+                    </label>
+                </div>
+                {active.map((key, i) => {
+                    const breaksAfter = pageBreakAfter.includes(key)
+                    return (
                     <div key={key} className="flex items-center gap-2 p-2 rounded-lg border border-border bg-card">
                         <span className="flex-1 text-sm font-medium">{SECTION_LABELS[key]}</span>
                         <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="p-1 hover:bg-muted rounded disabled:opacity-30"><ChevronUp className="w-3.5 h-3.5" /></button>
                         <button type="button" onClick={() => move(i, 1)} disabled={i === active.length - 1} className="p-1 hover:bg-muted rounded disabled:opacity-30"><ChevronDown className="w-3.5 h-3.5" /></button>
                         <button type="button" onClick={() => remove(key)} className="p-1 hover:bg-destructive/10 text-destructive rounded"><EyeOff className="w-3.5 h-3.5" /></button>
+                        <label className="flex cursor-pointer items-center gap-1 text-[10px] text-muted-foreground whitespace-nowrap">
+                            <input
+                                type="checkbox"
+                                checked={breaksAfter}
+                                onChange={() => togglePageBreakAfter(key)}
+                                className="h-3 w-3 rounded border-border text-primary focus:ring-ring"
+                            />
+                            nowa str.
+                        </label>
                     </div>
-                ))}
+                    )
+                })}
                 {deleted.length > 0 && (
                     <>
                         <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mt-4 mb-1">Usunięte z dokumentu</div>

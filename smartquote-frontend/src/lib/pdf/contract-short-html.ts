@@ -9,6 +9,7 @@ import {
     type ContractSectionKey,
 } from './contract-short-blocks'
 import { buildHtmlDocument, buildContractPageRule } from './html-shell'
+import { withPageBreakAfter } from './section-layout'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -702,7 +703,10 @@ export function buildContractShortHtml(
             const blockEnabled = (blocks[key] as { enabled?: boolean })?.enabled !== false
             if (!blockEnabled && !editorMode) return ''
             sectionNum++
-            return renderSection(key, blocks, sectionNum, editorMode, activeSection)
+            return withPageBreakAfter(
+                renderSection(key, blocks, sectionNum, editorMode, activeSection),
+                blocks.pageBreakAfter.includes(key),
+            )
         })
         .join('\n')
 
@@ -717,7 +721,7 @@ export function buildContractShortHtml(
 
 <div class="page">
 
-  ${renderHeader(blocks, editorMode, activeSection)}
+  ${withPageBreakAfter(renderHeader(blocks, editorMode, activeSection), blocks.pageBreakAfter.includes('header'))}
 
 ${sectionsHtml}
 

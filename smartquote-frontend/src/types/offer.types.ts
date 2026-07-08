@@ -2,6 +2,7 @@
 
 import type { PaginationParams } from './api.types';
 import type { Client } from './client.types';
+import type { Lead } from './lead.types';
 
 export type OfferStatus =
     | 'DRAFT'
@@ -81,7 +82,8 @@ export interface Offer {
     blocks: unknown | null;
     createdAt: string;
     updatedAt: string;
-    client: Client;
+    client: Client | null;
+    lead: Lead | null;
     items: OfferItem[];
     _count?: {
         items: number;
@@ -106,7 +108,8 @@ export interface CreateOfferItemInput {
 }
 
 export interface CreateOfferInput {
-    clientId: string;
+    clientId?: string | null;
+    leadId?: string | null;
     title: string;
     description?: string | null;
     validUntil?: string | null;

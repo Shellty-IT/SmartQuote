@@ -8,6 +8,7 @@ export interface OffersFilter {
     search?: string;
     status?: string;
     clientId?: string;
+    leadId?: string;
     dateFrom?: string;
     dateTo?: string;
     sortBy?: string;
@@ -48,7 +49,8 @@ export interface CreateOfferData {
     totalVat: Prisma.Decimal | number;
     totalGross: Prisma.Decimal | number;
     userId: string;
-    clientId: string;
+    clientId?: string | null;
+    leadId?: string | null;
     items: OfferItemData[];
     templateType?: string | null;
     blocks?: Prisma.InputJsonValue | typeof Prisma.JsonNull;
@@ -80,6 +82,9 @@ const offerWithClientSelect = {
     client: {
         select: { id: true, name: true, company: true } as const,
     },
+    lead: {
+        select: { id: true, name: true, company: true, email: true, phone: true } as const,
+    },
     _count: {
         select: { items: true } as const,
     },
@@ -87,6 +92,7 @@ const offerWithClientSelect = {
 
 const offerFullInclude = {
     client: true,
+    lead: true,
     items: {
         orderBy: { position: 'asc' } as const,
     },
@@ -98,6 +104,7 @@ const offerFullInclude = {
 
 const offerWithUserInclude = {
     client: true,
+    lead: true,
     items: { orderBy: { position: 'asc' } as const },
     acceptanceLog: true,
     user: {
@@ -177,6 +184,7 @@ export class OffersRepository {
             where: { id, userId },
             include: {
                 client: true,
+                lead: true,
                 user: {
                     select: {
                         name: true,
@@ -195,6 +203,7 @@ export class OffersRepository {
             where: { id, userId },
             include: {
                 client: true,
+                lead: true,
                 items: { orderBy: { position: 'asc' } as const },
                 user: {
                     select: {
@@ -241,6 +250,7 @@ export class OffersRepository {
                 { number: { contains: filter.search, mode: 'insensitive' } },
                 { title: { contains: filter.search, mode: 'insensitive' } },
                 { client: { name: { contains: filter.search, mode: 'insensitive' } } },
+                { lead: { name: { contains: filter.search, mode: 'insensitive' } } },
             ];
         }
 
@@ -250,6 +260,10 @@ export class OffersRepository {
 
         if (filter.clientId) {
             where.clientId = filter.clientId;
+        }
+
+        if (filter.leadId) {
+            where.leadId = filter.leadId;
         }
 
         if (filter.dateFrom || filter.dateTo) {
@@ -292,6 +306,9 @@ export class OffersRepository {
                 client: {
                     select: { id: true, name: true, email: true, company: true } as const,
                 },
+                lead: {
+                    select: { id: true, name: true, email: true, phone: true, company: true } as const,
+                },
                 items: {
                     orderBy: { position: 'asc' } as const,
                 },
@@ -308,6 +325,7 @@ export class OffersRepository {
                 data,
                 include: {
                     client: true,
+                    lead: true,
                     items: { orderBy: { position: 'asc' } as const },
                 },
             });
@@ -334,6 +352,7 @@ export class OffersRepository {
                 },
                 include: {
                     client: true,
+                    lead: true,
                     items: { orderBy: { position: 'asc' } as const },
                 },
             });
@@ -382,7 +401,7 @@ export class OffersRepository {
     async findForDuplicate(id: string, userId: string) {
         return prisma.offer.findFirst({
             where: { id, userId },
-            include: { items: true },
+            include: { items: true, client: true, lead: true },
         });
     }
 

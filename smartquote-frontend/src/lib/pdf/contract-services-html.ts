@@ -8,6 +8,7 @@ import {
     type ContractServicesSectionKey,
 } from './contract-services-blocks'
 import { buildHtmlDocument, buildContractPageRule } from './html-shell'
+import { withPageBreakAfter } from './section-layout'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -618,7 +619,10 @@ export function buildContractServicesHtml(
             const blockEnabled = sectionBlock?.enabled !== false
             if (!blockEnabled && !editorMode) return ''
             secNum++
-            return renderSection(key, blocks, secNum, editorMode, activeSection)
+            return withPageBreakAfter(
+                renderSection(key, blocks, secNum, editorMode, activeSection),
+                blocks.pageBreakAfter.includes(key),
+            )
         })
         .join('\n')
 
@@ -647,7 +651,7 @@ export function buildContractServicesHtml(
 
 <div class="sheet">
 
-  <div${headerAttr}>
+  ${withPageBreakAfter(`<div${headerAttr}>
     <div class="c-logo-box">
       ${logo}
       ${h.websiteUrl ? `<span class="c-url">${esc(h.websiteUrl)}</span>` : '<span class="c-url"><span style="color:rgba(201,168,76,0.5)">www.twoja-strona.pl</span></span>'}
@@ -656,7 +660,7 @@ export function buildContractServicesHtml(
       <div>Nr umowy: ${h.contractNumber ? esc(h.contractNumber) : '<span style="opacity:0.5">NR / ROK</span>'}</div>
       <div>Data: ${h.date ? esc(h.date) : '<span style="opacity:0.5">DD.MM.RRRR</span>'}</div>
     </div>
-  </div>
+  </div>`, blocks.pageBreakAfter.includes('header'))}
 
   <div class="pad">
 

@@ -15,6 +15,7 @@ import { NotFoundError, ValidationError, ExternalServiceError } from '../errors/
 import { mapToPDFUser, mapToPDFClient } from './pdf/data-mapper';
 import { pdfService } from './pdf';
 import { syncTotalsFromBlocks } from '../utils/syncTotalsFromBlocks';
+import prisma from '../lib/prisma';
 
 const logger = createModuleLogger('offers-service');
 const frontendUrl = config.frontendUrl.replace(/\/$/, '');
@@ -134,8 +135,43 @@ function getStatusTimestampKey(status: string): keyof UpdateOfferData | null {
     return map[status] ?? null;
 }
 
+function mapLeadToClientRaw(lead: {
+    id: string;
+    name: string;
+    email: string | null;
+    phone: string | null;
+    company: string | null;
+}) {
+    return {
+        id: lead.id,
+        type: 'PERSON',
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone,
+        company: lead.company,
+        nip: null,
+        address: null,
+        city: null,
+        postalCode: null,
+    };
+}
+
 export class OffersService {
     async create(userId: string, data: CreateOfferInput) {
+        if (Boolean(data.clientId) === Boolean(data.leadId)) {
+            throw new ValidationError('Należy wskazać klienta albo leada');
+        }
+
+        if (data.clientId) {
+            const client = await prisma.client.findFirst({ where: { id: data.clientId, userId }, select: { id: true } });
+            if (!client) throw new NotFoundError('Klient');
+        }
+
+        if (data.leadId) {
+            const lead = await prisma.lead.findFirst({ where: { id: data.leadId, userId }, select: { id: true } });
+            if (!lead) throw new NotFoundError('Lead');
+        }
+
         let itemsWithTotals = buildItemsWithTotals(data.items);
         let offerTotals = calculateOfferTotals(itemsWithTotals);
 
@@ -178,7 +214,8 @@ export class OffersService {
                     totalVat: offerTotals.totalVat,
                     totalGross: offerTotals.totalGross,
                     userId,
-                    clientId: data.clientId,
+                    clientId: data.clientId ?? null,
+                    leadId: data.leadId ?? null,
                     items: itemsWithTotals.map(mapItemToData),
                     templateType: data.templateType ?? 'classic',
                     blocks: data.blocks != null
@@ -401,6 +438,7 @@ export class OffersService {
             totalGross: original.totalGross,
             userId,
             clientId: original.clientId,
+            leadId: original.leadId,
             templateType: original.templateType ?? 'classic',
             blocks: original.blocks ?? undefined,
             items: original.items.map((item) => ({
@@ -485,7 +523,7 @@ export class OffersService {
                 phone: offer.user.companyInfo?.phone ?? offer.user.phone,
                 companyInfo: offer.user.companyInfo,
             }),
-            client: mapToPDFClient(offer.client),
+            client: mapToPDFClient(offer.client ?? mapLeadToClientRaw(offer.lead!)),
         };
 
         const buffer = await pdfService.generateOfferPDF(
@@ -505,8 +543,9 @@ export class OffersService {
         const offer = await offersRepository.findByIdForEmail(offerId, userId);
         if (!offer) throw new NotFoundError('Oferta');
 
-        if (!offer.client.email) {
-            throw new ValidationError('Klient nie ma podanego adresu email');
+        const recipient = offer.client ?? (offer.lead ? mapLeadToClientRaw(offer.lead) : null);
+        if (!recipient?.email) {
+            throw new ValidationError('Odbiorca nie ma podanego adresu email');
         }
 
         const emailConfig = await getUserEmailConfig(userId);
@@ -524,11 +563,11 @@ export class OffersService {
         }
 
         const sent = await emailService.sendOfferLink(
-            offer.client.email,
+            recipient.email,
             {
                 offerNumber: offer.number,
                 offerTitle: offer.title,
-                clientName: offer.client.name,
+                clientName: recipient.name,
                 totalGross: Number(offer.totalGross),
                 currency: offer.currency,
                 validUntil: offer.validUntil ? offer.validUntil.toISOString() : null,
@@ -543,9 +582,9 @@ export class OffersService {
             throw new ExternalServiceError('SMTP', 'Nie udało się wysłać emaila. Sprawdź konfigurację SMTP');
         }
 
-        logger.info({ offerId, clientEmail: offer.client.email }, 'Offer email sent');
+        logger.info({ offerId, clientEmail: recipient.email }, 'Offer email sent');
 
-        return { sent: true, email: offer.client.email };
+        return { sent: true, email: recipient.email };
     }
 
     async getOfferAnalytics(offerId: string, userId: string) {

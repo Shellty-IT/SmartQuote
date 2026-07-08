@@ -2,6 +2,7 @@
 // HTML generator for the "System dedykowany" contract template.
 // Navy #1B3A5C / Gold #C9A84C design — same as services template.
 import { buildHtmlDocument, buildContractPageRule, CONTRACT_ORPHANS_CSS } from './html-shell'
+import { withPageBreakAfter } from './section-layout'
 import {
     type ContractDedicatedBlocks,
     type DedicatedSectionKey,
@@ -473,14 +474,17 @@ export function buildContractDedicatedHtml(
     const signaturesAttr = sectionAttr('signatures', editorMode, activeSection)
 
     const sectionsHtml = b.sections
-        .map(key => renderSection(key, b, editorMode, activeSection))
+        .map(key => withPageBreakAfter(
+            renderSection(key, b, editorMode, activeSection),
+            b.pageBreakAfter.includes(key),
+        ))
         .join('\n')
 
     return buildHtmlDocument({
         title: 'Umowa IT — System dedykowany',
         css: buildCss(editorMode, zoom),
         body: `<div class="doc">
-  <div${headerAttr}>${renderHeader(b)}${renderTitle(b)}</div>
+  ${withPageBreakAfter(`<div${headerAttr}>${renderHeader(b)}${renderTitle(b)}</div>`, b.pageBreakAfter.includes('header'))}
   <div class="content" style="padding:24px 48px 40px;">
     ${sectionsHtml}
     <div${signaturesAttr}>${renderSignatures(b, false)}</div>
