@@ -5,7 +5,7 @@
 import { useState } from 'react'
 import { X, ChevronUp, ChevronDown, Eye, EyeOff, Layers } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { SupportBlocks, SupportSectionKey } from '@/lib/pdf/support-blocks'
+import type { SupportBlocks, SupportPageBreakKey, SupportSectionKey } from '@/lib/pdf/support-blocks'
 import type { OfferContext } from './block-editors'
 import {
     CoverEditorSupport,
@@ -61,6 +61,7 @@ interface SupportSectionManagerPanelProps {
 export function SupportSectionManagerPanel({ blocks, onChange, onClose }: SupportSectionManagerPanelProps) {
     const active = blocks.sections
     const removed = ALL_SECTIONS.filter(s => !active.includes(s))
+    const pageBreakAfter = blocks.pageBreakAfter ?? []
 
     const move = (i: number, dir: -1 | 1) => {
         const next = [...active]
@@ -71,11 +72,24 @@ export function SupportSectionManagerPanel({ blocks, onChange, onClose }: Suppor
     }
 
     const remove = (key: SupportSectionKey) => {
-        onChange({ ...blocks, sections: active.filter(s => s !== key) })
+        onChange({
+            ...blocks,
+            sections: active.filter(s => s !== key),
+            pageBreakAfter: pageBreakAfter.filter(s => s !== key),
+        })
     }
 
     const restore = (key: SupportSectionKey) => {
         onChange({ ...blocks, sections: [...active, key] })
+    }
+
+    const togglePageBreakAfter = (key: SupportPageBreakKey) => {
+        onChange({
+            ...blocks,
+            pageBreakAfter: pageBreakAfter.includes(key)
+                ? pageBreakAfter.filter(s => s !== key)
+                : [...pageBreakAfter, key],
+        })
     }
 
     return (
@@ -94,7 +108,22 @@ export function SupportSectionManagerPanel({ blocks, onChange, onClose }: Suppor
 
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Aktywne sekcje</p>
                 <div className="space-y-2 mb-6">
-                    {active.map((key, i) => (
+                    <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2">
+                        <span className="flex-1 text-sm">{BLOCK_LABELS.cover}</span>
+                        <span className="text-[10px] text-muted-foreground">pierwsza sekcja</span>
+                        <label className="flex cursor-pointer items-center gap-1 text-[10px] text-muted-foreground whitespace-nowrap">
+                            <input
+                                type="checkbox"
+                                checked={pageBreakAfter.includes('cover')}
+                                onChange={() => togglePageBreakAfter('cover')}
+                                className="h-3 w-3 rounded border-border text-primary focus:ring-ring"
+                            />
+                            nowa str.
+                        </label>
+                    </div>
+                    {active.map((key, i) => {
+                        const breaksAfter = pageBreakAfter.includes(key)
+                        return (
                         <div key={key} className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2">
                             <span className="flex-1 text-sm">{SECTION_LABELS[key]}</span>
                             <button
@@ -121,8 +150,18 @@ export function SupportSectionManagerPanel({ blocks, onChange, onClose }: Suppor
                             >
                                 <EyeOff className="h-4 w-4" />
                             </button>
+                            <label className="flex cursor-pointer items-center gap-1 text-[10px] text-muted-foreground whitespace-nowrap">
+                                <input
+                                    type="checkbox"
+                                    checked={breaksAfter}
+                                    onChange={() => togglePageBreakAfter(key)}
+                                    className="h-3 w-3 rounded border-border text-primary focus:ring-ring"
+                                />
+                                nowa str.
+                            </label>
                         </div>
-                    ))}
+                        )
+                    })}
                 </div>
 
                 {removed.length > 0 && (

@@ -17,6 +17,8 @@ export type ContractServicesSectionKey =
     | 'termination'
     | 'general'
 
+export type ContractServicesPageBreakKey = 'header' | ContractServicesSectionKey
+
 export const ALL_SERVICES_SECTION_KEYS: ContractServicesSectionKey[] = [
     'parties',
     'subject',
@@ -183,6 +185,7 @@ export interface ServicesSignaturesBlock {
 export interface ContractServicesBlocks {
     version: 1
     sections: ContractServicesSectionKey[]
+    pageBreakAfter: ContractServicesPageBreakKey[]
     header: ServicesHeaderBlock
     parties: ServicesPartiesBlock
     subject: ServicesSubjectBlock
@@ -207,6 +210,7 @@ export function buildDefaultContractServicesBlocks(): ContractServicesBlocks {
     return {
         version: 1,
         sections: [...ALL_SERVICES_SECTION_KEYS],
+        pageBreakAfter: [],
 
         header: {
             websiteUrl: '',
@@ -374,12 +378,16 @@ export function mergeServicesWithDefaults(
     if (!saved) return defaults
 
     const validSet = new Set<string>(ALL_SERVICES_SECTION_KEYS)
+    const validPageBreakSet = new Set<string>(['header', ...ALL_SERVICES_SECTION_KEYS])
     const filterValid = (arr: ContractServicesSectionKey[]) =>
         (arr ?? []).filter((k) => validSet.has(k))
+    const filterValidPageBreak = (arr: ContractServicesPageBreakKey[]) =>
+        (arr ?? []).filter((k) => validPageBreakSet.has(k))
 
     return {
         version: 1,
         sections: Array.isArray(saved.sections) ? filterValid(saved.sections) : defaults.sections,
+        pageBreakAfter: Array.isArray(saved.pageBreakAfter) ? filterValidPageBreak(saved.pageBreakAfter) : defaults.pageBreakAfter,
         header: { ...defaults.header, ...saved.header },
         parties: {
             ...defaults.parties,

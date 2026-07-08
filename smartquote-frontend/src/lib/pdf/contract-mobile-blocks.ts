@@ -13,6 +13,7 @@ export const ALL_MOBILE_SECTION_KEYS: MobileSectionKey[] = [
 ]
 
 export type MobileEditableSectionKey = MobileSectionKey | 'header' | 'signatures'
+export type MobilePageBreakKey = 'header' | MobileSectionKey
 
 // ── Sub-types ─────────────────────────────────────────────────────────────────
 
@@ -141,6 +142,7 @@ export interface MobileSignaturesBlock {
 export interface ContractMobileBlocks {
     version: 1
     sections: MobileSectionKey[]
+    pageBreakAfter: MobilePageBreakKey[]
     header: MobileHeaderBlock
     parties: MobilePartiesBlock
     subject: MobileSubjectBlock
@@ -167,6 +169,7 @@ export function buildDefaultContractMobileBlocks(): ContractMobileBlocks {
     return {
         version: 1,
         sections: [...ALL_MOBILE_SECTION_KEYS],
+        pageBreakAfter: [],
         header: {
             contractNumber: 'MOB/2026/001',
             date: '',
@@ -235,6 +238,7 @@ export function buildDefaultContractMobileBlocks(): ContractMobileBlocks {
 // ── Merge helper ──────────────────────────────────────────────────────────────
 
 const validSet = new Set<MobileSectionKey>(ALL_MOBILE_SECTION_KEYS)
+const validPageBreakSet = new Set<MobilePageBreakKey>(['header', ...ALL_MOBILE_SECTION_KEYS])
 
 export function mergeMobileWithDefaults(
     saved: Partial<ContractMobileBlocks> | null | undefined,
@@ -248,6 +252,9 @@ export function mergeMobileWithDefaults(
         sections: Array.isArray(saved.sections)
             ? (saved.sections as string[]).filter((k): k is MobileSectionKey => validSet.has(k as MobileSectionKey))
             : def.sections,
+        pageBreakAfter: Array.isArray(saved.pageBreakAfter)
+            ? (saved.pageBreakAfter as string[]).filter((k): k is MobilePageBreakKey => validPageBreakSet.has(k as MobilePageBreakKey))
+            : def.pageBreakAfter,
         header: { ...def.header, ...(saved.header ?? {}) },
         parties: {
             contractor: { ...def.parties.contractor, ...(saved.parties?.contractor ?? {}) },

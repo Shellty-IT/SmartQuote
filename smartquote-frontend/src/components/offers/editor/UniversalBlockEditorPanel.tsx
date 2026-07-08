@@ -6,7 +6,7 @@ import React from 'react'
 import { Layers, X, ChevronUp, ChevronDown, Eye, EyeOff, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui'
 import type { PanelView } from './MobileAppBlockEditorPanel'
-import type { UniversalBlocks, UniversalSectionKey } from '@/lib/pdf/universal-blocks'
+import type { UniversalBlocks, UniversalPageBreakKey, UniversalSectionKey } from '@/lib/pdf/universal-blocks'
 import {
     CoverEditor, SummaryEditor, NeedsEditor, ScopeEditor,
     TimelineEditor, PricingEditor, TermsEditor, FooterEditor,
@@ -45,6 +45,7 @@ function UniversalSectionManagerPanel({
 }) {
     const active = blocks.sections
     const deleted = ALL_SECTION_KEYS.filter(k => !active.includes(k))
+    const pageBreakAfter = blocks.pageBreakAfter ?? []
 
     const move = (i: number, dir: -1 | 1) => {
         const next = [...active]
@@ -55,10 +56,23 @@ function UniversalSectionManagerPanel({
     }
 
     const remove = (key: UniversalSectionKey) =>
-        onChange({ ...blocks, sections: active.filter(k => k !== key) })
+        onChange({
+            ...blocks,
+            sections: active.filter(k => k !== key),
+            pageBreakAfter: pageBreakAfter.filter(k => k !== key),
+        })
 
     const restore = (key: UniversalSectionKey) =>
         onChange({ ...blocks, sections: [...active, key] })
+
+    const togglePageBreakAfter = (key: UniversalPageBreakKey) => {
+        onChange({
+            ...blocks,
+            pageBreakAfter: pageBreakAfter.includes(key)
+                ? pageBreakAfter.filter(k => k !== key)
+                : [...pageBreakAfter, key],
+        })
+    }
 
     return (
         <div className="flex flex-col h-full">
@@ -72,7 +86,22 @@ function UniversalSectionManagerPanel({
                 </button>
             </div>
             <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
-                {active.map((key, i) => (
+                <div className="flex items-center gap-2 p-2 rounded-lg border border-border bg-card">
+                    <span className="flex-1 text-sm font-medium">{BLOCK_LABELS.cover}</span>
+                    <span className="text-[10px] text-muted-foreground">pierwsza sekcja</span>
+                    <label className="flex cursor-pointer items-center gap-1 text-[10px] text-muted-foreground whitespace-nowrap">
+                        <input
+                            type="checkbox"
+                            checked={pageBreakAfter.includes('cover')}
+                            onChange={() => togglePageBreakAfter('cover')}
+                            className="h-3 w-3 rounded border-border text-primary focus:ring-ring"
+                        />
+                        nowa str.
+                    </label>
+                </div>
+                {active.map((key, i) => {
+                    const breaksAfter = pageBreakAfter.includes(key)
+                    return (
                     <div key={key} className="flex items-center gap-2 p-2 rounded-lg border border-border bg-card">
                         <span className="flex-1 text-sm font-medium">{SECTION_LABELS[key]}</span>
                         <button type="button" onClick={() => move(i, -1)} disabled={i === 0}
@@ -87,8 +116,18 @@ function UniversalSectionManagerPanel({
                             className="p-1 hover:bg-destructive/10 text-destructive rounded">
                             <EyeOff className="w-3.5 h-3.5" />
                         </button>
+                        <label className="flex cursor-pointer items-center gap-1 text-[10px] text-muted-foreground whitespace-nowrap">
+                            <input
+                                type="checkbox"
+                                checked={breaksAfter}
+                                onChange={() => togglePageBreakAfter(key)}
+                                className="h-3 w-3 rounded border-border text-primary focus:ring-ring"
+                            />
+                            nowa str.
+                        </label>
                     </div>
-                ))}
+                    )
+                })}
                 {deleted.length > 0 && (
                     <>
                         <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mt-4 mb-1">

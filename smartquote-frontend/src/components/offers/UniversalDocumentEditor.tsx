@@ -8,6 +8,7 @@ import { Button } from '@/components/ui'
 import { TemplateAIFillButton } from './TemplateAIFillButton'
 import { UniversalBlockEditorPanel, type EditableUniversalBlockKey } from './editor/UniversalBlockEditorPanel'
 import { buildUniversalHtml, type UniversalOfferData } from '@/lib/pdf/universal-html'
+import { applyPdfPreviewMode } from '@/lib/pdf/print-preview'
 import type { UniversalBlocks, UniversalSectionKey } from '@/lib/pdf/universal-blocks'
 import { cn } from '@/lib/utils'
 import { useResizablePanel } from '@/hooks/useResizablePanel'
@@ -47,7 +48,7 @@ export function UniversalDocumentEditor({
     const { zoom, zoomIn, zoomOut } = useZoom()
 
     const srcdoc = useMemo(
-        () => buildUniversalHtml(blocks, offer, { editorMode: true }),
+        () => applyPdfPreviewMode(buildUniversalHtml(blocks, offer, { editorMode: true })),
         [blocks, offer],
     )
 
@@ -75,7 +76,7 @@ export function UniversalDocumentEditor({
     const panelOpen = panelView !== null
 
     return (
-        <div className="flex h-full min-h-[700px] flex-col gap-0 rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="flex h-[clamp(520px,calc(100vh-190px),900px)] min-h-0 flex-col gap-0 rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
             {/* Toolbar */}
             <div className="flex items-center gap-2 flex-wrap border-b border-border bg-card px-4 py-2.5">
                 <TemplateAIFillButton
@@ -142,12 +143,13 @@ export function UniversalDocumentEditor({
                             transformOrigin: 'top left',
                             transform: `scale(${zoom})`,
                             width: `${100 / zoom}%`,
+                            height: `${100 / zoom}%`,
                         }}
                     >
                         <iframe
+                            key={srcdoc.length}
                             srcDoc={srcdoc}
-                            className={cn('w-full border-0', isDragging && 'pointer-events-none')}
-                            style={{ minHeight: `${700 / zoom}px`, height: `${900 / zoom}px` }}
+                            className={cn('h-full w-full border-0', isDragging && 'pointer-events-none')}
                             title="Podgląd szablonu Szablon uniwersalny"
                         />
                     </div>

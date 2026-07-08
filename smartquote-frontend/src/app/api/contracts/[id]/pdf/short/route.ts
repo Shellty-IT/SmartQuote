@@ -9,8 +9,8 @@ import { addDocumentActionLinks, publicDocumentUrl } from '@/lib/pdf/document-ac
 import { htmlToPdfBuffer } from '@/lib/pdf/puppeteer'
 import { documentTemplateMismatch } from '@/lib/pdf/template-guard'
 
-// Vercel route config — 1 GB RAM + 10 s timeout (matches proposal PDF route)
-export const maxDuration = 10
+// PDF routes can exceed the default serverless budget on cold Chromium starts.
+export const maxDuration = 60
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 

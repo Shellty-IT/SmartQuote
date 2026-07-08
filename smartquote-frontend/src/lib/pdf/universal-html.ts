@@ -4,6 +4,7 @@
 
 import { buildHtmlDocument } from './html-shell'
 import { formatMoney, priceTypeLabel, resolveHeadlinePrice } from './money'
+import { withPageBreakAfter } from './section-layout'
 import type { UniversalBlocks, UniversalSectionKey } from './universal-blocks'
 
 export interface UniversalOfferData {
@@ -524,7 +525,12 @@ export function buildUniversalHtml(
     const editorCss = editorMode ? `
   .sq-block:hover { outline: 2px dashed #C9A84C !important; outline-offset: 2px; }` : ''
 
-    const sections = blocks.sections.map(key => renderSection(key, blocks, offer, editorMode)).join('\n')
+    const sections = blocks.sections
+        .map(key => withPageBreakAfter(
+            renderSection(key, blocks, offer, editorMode),
+            blocks.pageBreakAfter.includes(key),
+        ))
+        .join('\n')
 
     return buildHtmlDocument({
         title: `${esc(blocks.cover.serviceTitle)} — Oferta`,
@@ -538,7 +544,7 @@ img{display:block;}
   @page{size:A4;margin:10mm 0;}
 }
 ${editorCss}`,
-        body: `${renderCover(blocks, offer, editorMode)}
+        body: `${withPageBreakAfter(renderCover(blocks, offer, editorMode), blocks.pageBreakAfter.includes('cover'))}
 ${sections}
 ${renderFooter(blocks, offer, editorMode)}`,
     })

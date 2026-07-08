@@ -165,6 +165,8 @@ export interface ProposalBlocks {
     page1Sections: SectionKey[]
     /** Body section keys in render order on page 2 */
     page2Sections: SectionKey[]
+    /** Sections after which the next section starts on a new PDF page */
+    pageBreakAfter: SectionKey[]
     header: HeaderBlock
     footer: FooterBlock
     intro: IntroBlock
@@ -192,6 +194,7 @@ export function buildDefaultBlocks(clientName?: string): ProposalBlocks {
 
         page1Sections: [...DEFAULT_PAGE1_SECTIONS],
         page2Sections: [...DEFAULT_PAGE2_SECTIONS],
+        pageBreakAfter: [],
 
         header: {
             enabled: true,
@@ -340,6 +343,7 @@ export function mergeWithDefaults(
         version: 1,
         page1Sections: filterValid(saved.page1Sections ?? defaults.page1Sections),
         page2Sections: filterValid(saved.page2Sections ?? defaults.page2Sections),
+        pageBreakAfter: filterValid(saved.pageBreakAfter ?? defaults.pageBreakAfter),
         header: { ...defaults.header, ...saved.header },
         footer: { ...defaults.footer, ...saved.footer },
         intro: { ...defaults.intro, ...saved.intro },

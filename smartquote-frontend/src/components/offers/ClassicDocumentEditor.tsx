@@ -10,6 +10,7 @@ import { Button } from '@/components/ui'
 import { TemplateAIFillButton } from './TemplateAIFillButton'
 import { ClassicBlockEditorPanel, type EditableClassicKey } from './editor/ClassicBlockEditorPanel'
 import { buildClassicHtml, type ClassicOfferData } from '@/lib/pdf/classic-html'
+import { applyPdfPreviewMode } from '@/lib/pdf/print-preview'
 import { calculateItemTotal } from '@/app/dashboard/offers/hooks/useOfferForm'
 import type { OfferDetails, ExtendedOfferItem, OfferTotalsData } from '@/app/dashboard/offers/new/types'
 import type { PanelView } from './editor/MobileAppBlockEditorPanel'
@@ -120,7 +121,7 @@ export function ClassicDocumentEditor({
         }
     }, [number, details, status, totals, currency, createdAt, previewClient, previewUser, items])
 
-    const srcdoc = useMemo(() => buildClassicHtml(offerData, { editorMode: true }), [offerData])
+    const srcdoc = useMemo(() => applyPdfPreviewMode(buildClassicHtml(offerData, { editorMode: true })), [offerData])
 
     useEffect(() => {
         const handler = (event: MessageEvent) => {
@@ -146,7 +147,7 @@ export function ClassicDocumentEditor({
     }), [details.title, details.description, details.terms, details.notes])
 
     return (
-        <div className="flex h-full min-h-[700px] flex-col gap-0 rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="flex h-[clamp(520px,calc(100vh-190px),900px)] min-h-0 flex-col gap-0 rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
             {/* Toolbar */}
             <div className="flex items-center gap-2 flex-wrap border-b border-border bg-card px-4 py-2.5">
                 <TemplateAIFillButton
@@ -201,11 +202,10 @@ export function ClassicDocumentEditor({
                     )}
                     style={panelOpen ? previewPanelStyle : undefined}
                 >
-                    <div style={{ transformOrigin: 'top left', transform: `scale(${zoom})`, width: `${100 / zoom}%` }}>
+                    <div style={{ transformOrigin: 'top left', transform: `scale(${zoom})`, width: `${100 / zoom}%`, height: `${100 / zoom}%` }}>
                         <iframe
                             srcDoc={srcdoc}
-                            className={cn('w-full border-0', isDragging && 'pointer-events-none')}
-                            style={{ minHeight: `${700 / zoom}px`, height: `${900 / zoom}px` }}
+                            className={cn('h-full w-full border-0', isDragging && 'pointer-events-none')}
                             title="Podgląd oferty klasycznej"
                         />
                     </div>

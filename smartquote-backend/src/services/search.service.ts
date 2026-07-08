@@ -77,6 +77,7 @@ export class SearchService {
                     totalGross: true,
                     currency: true,
                     client: { select: { name: true } },
+                    lead: { select: { name: true } },
                 },
                 take,
             }),
@@ -136,7 +137,7 @@ export class SearchService {
                 status: o.status,
                 totalGross: o.totalGross,
                 currency: o.currency,
-                clientName: o.client.name,
+                clientName: (o.client ?? o.lead)?.name ?? 'Nieznany',
             })),
             contracts: contracts.map((c) => ({
                 id: c.id,

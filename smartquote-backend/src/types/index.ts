@@ -86,7 +86,8 @@ export interface OfferItemInput {
 export interface CreateOfferInput {
     title: string;
     description?: string;
-    clientId: string;
+    clientId?: string | null;
+    leadId?: string | null;
     validUntil?: Date | string;
     notes?: string;
     terms?: string;
@@ -109,6 +110,8 @@ export interface UpdateOfferInput {
     items?: OfferItemInput[];
     templateType?: string | null;
     blocks?: unknown | null;
+    clientId?: string | null;
+    leadId?: string | null;
 }
 
 export interface PublicOfferAcceptInput {

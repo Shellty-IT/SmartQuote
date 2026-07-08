@@ -5,6 +5,7 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { buildWebsiteV2Html } from '@/lib/pdf/website-v2-html'
+import { applyPdfPreviewMode } from '@/lib/pdf/print-preview'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -77,7 +78,7 @@ export async function GET(
 
     let html: string
     try {
-        html = buildWebsiteV2Html(offerData)
+        html = applyPdfPreviewMode(buildWebsiteV2Html(offerData))
     } catch (err) {
         const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
         console.error('[website-v2-preview] buildWebsiteV2Html threw:', detail)

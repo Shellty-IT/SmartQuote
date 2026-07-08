@@ -55,4 +55,29 @@ describe('website v2 document branding', () => {
         expect(html).toContain('.price-wrap { grid-template-columns:minmax(0,1fr) !important;')
         expect(html).toContain('.price-wrap > div:last-child {')
     })
+
+    it('can force the next section to start on a new page', () => {
+        const data = offer()
+        const blocks = data.blocks as ReturnType<typeof buildDefaultWebsiteV2Blocks>
+        blocks.pageBreakAfter = ['portfolio']
+        blocks.process.title = 'NEXT SECTION'
+
+        const html = buildWebsiteV2Html(data)
+
+        expect(html).toContain('sq-manual-page-break')
+        expect(html.indexOf('<div class="sq-manual-page-break" aria-hidden="true"></div>')).toBeLessThan(html.indexOf('NEXT SECTION'))
+    })
+
+    it('can force the first content section to start after the cover page', () => {
+        const data = offer()
+        const blocks = data.blocks as ReturnType<typeof buildDefaultWebsiteV2Blocks>
+        blocks.pageBreakAfter = ['cover']
+        blocks.problem.title = 'FIRST CONTENT SECTION'
+
+        const html = buildWebsiteV2Html(data)
+        const markerIndex = html.indexOf('<div class="sq-manual-page-break" aria-hidden="true"></div>')
+
+        expect(markerIndex).toBeGreaterThan(html.indexOf('dla Edytowalny Odbiorca'))
+        expect(markerIndex).toBeLessThan(html.indexOf('FIRST CONTENT SECTION'))
+    })
 })

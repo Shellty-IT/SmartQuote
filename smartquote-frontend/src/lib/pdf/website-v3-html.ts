@@ -3,6 +3,7 @@
 // Pure function — no side effects, no imports of React/server utilities.
 
 import { buildHtmlDocument } from './html-shell'
+import { withPageBreakAfter } from './section-layout'
 import { mergeWebsiteV3WithDefaults, type WebsiteV3Blocks, type WebsiteV3SectionKey } from './website-v3-blocks'
 
 // ── Offer data interface ──────────────────────────────────────────────────────
@@ -660,7 +661,7 @@ export function buildWebsiteV3Html(
         .map((key) => {
             const html = renderSection(key, data, blocks, editorMode, sectionNum)
             if (key !== 'stack') sectionNum++
-            return html
+            return withPageBreakAfter(html, blocks.pageBreakAfter.includes(key))
         })
         .join('\n')
 
@@ -668,7 +669,7 @@ export function buildWebsiteV3Html(
         title: 'Oferta — Strona internetowa',
         css: buildCss(zoom),
         body: `<div style="max-width:1280px;margin:0 auto;background:#fff;box-shadow:0 0 80px rgba(15,23,42,0.06);">
-${renderCover(data, blocks, editorMode)}
+${withPageBreakAfter(renderCover(data, blocks, editorMode), blocks.pageBreakAfter.includes('cover'))}
 ${sectionsHtml}
 ${renderFooter(data, blocks, editorMode)}
 </div>`,

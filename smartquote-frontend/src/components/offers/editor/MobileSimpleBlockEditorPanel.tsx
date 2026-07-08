@@ -6,7 +6,7 @@
 import React from 'react'
 import { X, ArrowUp, ArrowDown, EyeOff, Eye } from 'lucide-react'
 import type { PanelView } from './MobileAppBlockEditorPanel'
-import type { MobileSimpleBlocks, MobileSimpleSectionKey } from '@/lib/pdf/mobile-simple-blocks'
+import type { MobileSimpleBlocks, MobileSimplePageBreakKey, MobileSimpleSectionKey } from '@/lib/pdf/mobile-simple-blocks'
 import {
     CoverEditor,
     ChecklistEditor,
@@ -47,6 +47,7 @@ function MobileSimpleSectionManagerPanel({
 }) {
     const active = blocks.sections
     const deleted = ALL_SECTION_KEYS.filter(k => !active.includes(k))
+    const pageBreakAfter = blocks.pageBreakAfter ?? []
 
     const move = (i: number, dir: -1 | 1) => {
         const next = [...active]
@@ -57,11 +58,24 @@ function MobileSimpleSectionManagerPanel({
     }
 
     const remove = (key: MobileSimpleSectionKey) => {
-        onChange({ ...blocks, sections: active.filter(k => k !== key) })
+        onChange({
+            ...blocks,
+            sections: active.filter(k => k !== key),
+            pageBreakAfter: pageBreakAfter.filter(k => k !== key),
+        })
     }
 
     const restore = (key: MobileSimpleSectionKey) => {
         onChange({ ...blocks, sections: [...active, key] })
+    }
+
+    const togglePageBreakAfter = (key: MobileSimplePageBreakKey) => {
+        onChange({
+            ...blocks,
+            pageBreakAfter: pageBreakAfter.includes(key)
+                ? pageBreakAfter.filter(k => k !== key)
+                : [...pageBreakAfter, key],
+        })
     }
 
     return (
@@ -74,7 +88,22 @@ function MobileSimpleSectionManagerPanel({
             </div>
             <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
                 <p className="text-xs text-muted-foreground mb-2">Przeciągaj sekcje w górę/dół, ukryj lub przywróć.</p>
-                {active.map((key, i) => (
+                <div className="flex items-center gap-2 border border-border rounded-lg px-3 py-2 bg-background">
+                    <span className="text-sm font-medium flex-1">{BLOCK_LABELS.cover}</span>
+                    <span className="text-[10px] text-muted-foreground">pierwsza sekcja</span>
+                    <label className="flex cursor-pointer items-center gap-1 text-[10px] text-muted-foreground whitespace-nowrap">
+                        <input
+                            type="checkbox"
+                            checked={pageBreakAfter.includes('cover')}
+                            onChange={() => togglePageBreakAfter('cover')}
+                            className="h-3 w-3 rounded border-border text-primary focus:ring-ring"
+                        />
+                        nowa str.
+                    </label>
+                </div>
+                {active.map((key, i) => {
+                    const breaksAfter = pageBreakAfter.includes(key)
+                    return (
                     <div key={key} className="flex items-center gap-2 border border-border rounded-lg px-3 py-2 bg-background">
                         <span className="text-sm font-medium flex-1">{SECTION_LABELS[key]}</span>
                         <button type="button" onClick={() => move(i, -1)} disabled={i === 0}
@@ -89,8 +118,18 @@ function MobileSimpleSectionManagerPanel({
                             className="text-muted-foreground hover:text-destructive">
                             <EyeOff size={14} />
                         </button>
+                        <label className="flex cursor-pointer items-center gap-1 text-[10px] text-muted-foreground whitespace-nowrap">
+                            <input
+                                type="checkbox"
+                                checked={breaksAfter}
+                                onChange={() => togglePageBreakAfter(key)}
+                                className="h-3 w-3 rounded border-border text-primary focus:ring-ring"
+                            />
+                            nowa str.
+                        </label>
                     </div>
-                ))}
+                    )
+                })}
                 {deleted.length > 0 && (
                     <>
                         <p className="text-xs text-muted-foreground mt-4 mb-2 font-semibold uppercase tracking-wide">Usunięte</p>

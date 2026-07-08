@@ -4,6 +4,7 @@
 
 import { mergeShopWithDefaults, type ShopBlocks, type ShopSectionKey } from './shop-blocks'
 import { buildHtmlDocument } from './html-shell'
+import { withPageBreakAfter } from './section-layout'
 
 export interface ShopOfferData {
     number: string
@@ -700,6 +701,9 @@ function renderSection(
     editorMode: boolean,
     sectionNumber: number,
 ): string {
+    const block = blocks[key] as { enabled?: boolean }
+    if (block.enabled === false) return ''
+
     switch (key) {
         case 'summary': return renderSummary(blocks, editorMode, sectionNumber)
         case 'scope': return renderScope(blocks, editorMode, sectionNumber)
@@ -728,10 +732,12 @@ export function buildShopHtml(
 
     const blocks = mergeShopWithDefaults(data.blocks as Partial<ShopBlocks> | null)
 
-    // In editorMode, render all sections; otherwise skip disabled ones
-    const sectionsHtml = blocks.sections.map((key, idx) =>
-        renderSection(key, data, blocks, editorMode, idx + 2),
-    ).join('\n')
+    let sectionNumber = 2
+    const sectionsHtml = blocks.sections.map((key) => {
+        const html = renderSection(key, data, blocks, editorMode, sectionNumber)
+        if (html) sectionNumber++
+        return withPageBreakAfter(html, blocks.pageBreakAfter.includes(key))
+    }).join('\n')
 
     const editorScript = editorMode ? `
   <script>
@@ -756,7 +762,7 @@ export function buildShopHtml(
         css: buildCss(),
         extraHead: zoomStyle,
         body: `<div class="doc">
-  ${renderCover(data, blocks, editorMode)}
+  ${withPageBreakAfter(renderCover(data, blocks, editorMode), blocks.pageBreakAfter.includes('cover'))}
   ${sectionsHtml}
   ${renderFooter(data, blocks, editorMode)}
 </div>

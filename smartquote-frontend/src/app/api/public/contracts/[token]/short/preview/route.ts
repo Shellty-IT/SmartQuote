@@ -4,6 +4,7 @@
 
 import { buildContractShortHtmlFromSaved } from '@/lib/pdf/contract-short-html'
 import { addDocumentActionLinks } from '@/lib/pdf/document-action-links'
+import { applyPdfPreviewMode } from '@/lib/pdf/print-preview'
 
 export const maxDuration = 10
 export const dynamic = 'force-dynamic'
@@ -36,11 +37,11 @@ export async function GET(
 
     let html: string
     try {
-        html = addDocumentActionLinks(
+        html = applyPdfPreviewMode(addDocumentActionLinks(
             buildContractShortHtmlFromSaved(contract.blocks, { editorMode: false }),
             `/contract/view/${token}#sign`,
             'sign',
-        )
+        ))
     } catch (err) {
         const detail = err instanceof Error ? err.message : String(err)
         return new Response(`<pre>Error: ${detail}</pre>`, {

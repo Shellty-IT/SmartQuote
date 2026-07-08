@@ -2,6 +2,7 @@
 // HTML generator for the "Aplikacja mobilna" contract template.
 // Navy #1B3A5C / Gold #C9A84C design.
 import { buildHtmlDocument, buildContractPageRule, CONTRACT_ORPHANS_CSS } from './html-shell'
+import { withPageBreakAfter } from './section-layout'
 import {
     type ContractMobileBlocks,
     type MobileSectionKey,
@@ -348,13 +349,16 @@ export function buildContractMobileHtml(
     const b = blocks
     const headerAttr = editorMode ? ` data-sq-section="header" style="cursor:pointer;"` : ''
     const sigAttr = editorMode ? ` data-sq-section="signatures" style="cursor:pointer;border-radius:4px;"` : ''
-    const sectionsHtml = b.sections.map(key => renderSection(key, b, editorMode, activeSection)).join('\n')
+    const sectionsHtml = b.sections.map(key => withPageBreakAfter(
+        renderSection(key, b, editorMode, activeSection),
+        b.pageBreakAfter.includes(key),
+    )).join('\n')
 
     return buildHtmlDocument({
         title: 'Umowa IT — Aplikacja mobilna',
         css: buildCss(editorMode, zoom),
         body: `<main class="doc">
-  <div${headerAttr}>${renderHeader(b)}${renderTitle(b)}</div>
+  ${withPageBreakAfter(`<div${headerAttr}>${renderHeader(b)}${renderTitle(b)}</div>`, b.pageBreakAfter.includes('header'))}
   <div class="content" style="padding:1px 48px 40px;">
     ${sectionsHtml}
     <div${sigAttr}>${renderSignatures(b)}</div>

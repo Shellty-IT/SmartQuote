@@ -13,6 +13,7 @@ export const ALL_DEDICATED_SECTION_KEYS: DedicatedSectionKey[] = [
 ]
 
 export type DedicatedEditableSectionKey = DedicatedSectionKey | 'header' | 'signatures'
+export type DedicatedPageBreakKey = 'header' | DedicatedSectionKey
 
 // ── Sub-types ─────────────────────────────────────────────────────────────────
 
@@ -144,6 +145,7 @@ export interface DedicatedSignaturesBlock {
 export interface ContractDedicatedBlocks {
     version: 1
     sections: DedicatedSectionKey[]
+    pageBreakAfter: DedicatedPageBreakKey[]
     header: DedicatedHeaderBlock
     parties: DedicatedPartiesBlock
     subject: DedicatedSubjectBlock
@@ -170,6 +172,7 @@ export function buildDefaultContractDedicatedBlocks(): ContractDedicatedBlocks {
     return {
         version: 1,
         sections: [...ALL_DEDICATED_SECTION_KEYS],
+        pageBreakAfter: [],
         header: {
             contractNumber: 'SYS/2026/001',
             date: '',
@@ -237,6 +240,7 @@ export function buildDefaultContractDedicatedBlocks(): ContractDedicatedBlocks {
 // ── Merge helper ──────────────────────────────────────────────────────────────
 
 const validSet = new Set<DedicatedSectionKey>(ALL_DEDICATED_SECTION_KEYS)
+const validPageBreakSet = new Set<DedicatedPageBreakKey>(['header', ...ALL_DEDICATED_SECTION_KEYS])
 
 export function mergeDedicatedWithDefaults(
     saved: Partial<ContractDedicatedBlocks> | null | undefined,
@@ -250,6 +254,9 @@ export function mergeDedicatedWithDefaults(
         sections: Array.isArray(saved.sections)
             ? (saved.sections as string[]).filter((k): k is DedicatedSectionKey => validSet.has(k as DedicatedSectionKey))
             : def.sections,
+        pageBreakAfter: Array.isArray(saved.pageBreakAfter)
+            ? (saved.pageBreakAfter as string[]).filter((k): k is DedicatedPageBreakKey => validPageBreakSet.has(k as DedicatedPageBreakKey))
+            : def.pageBreakAfter,
         header: { ...def.header, ...(saved.header ?? {}) },
         parties: {
             contractor: { ...def.parties.contractor, ...(saved.parties?.contractor ?? {}) },

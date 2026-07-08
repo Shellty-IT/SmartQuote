@@ -5,6 +5,7 @@
 // Returns: text/html
 
 import { buildContractShortHtml } from '@/lib/pdf/contract-short-html'
+import { applyPdfPreviewMode } from '@/lib/pdf/print-preview'
 import type { ContractShortBlocks } from '@/lib/pdf/contract-short-blocks'
 
 export const dynamic = 'force-dynamic'
@@ -18,7 +19,7 @@ export async function POST(req: Request) {
         // invalid JSON — fall back to defaults
     }
 
-    const html = buildContractShortHtml(blocks)
+    const html = applyPdfPreviewMode(buildContractShortHtml(blocks))
     return new Response(html, {
         status: 200,
         headers: { 'Content-Type': 'text/html; charset=utf-8' },

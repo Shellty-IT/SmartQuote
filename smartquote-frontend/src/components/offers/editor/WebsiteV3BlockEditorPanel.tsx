@@ -4,7 +4,7 @@
 
 import { ArrowUp, ArrowDown, Eye, EyeOff, Trash2, Plus } from 'lucide-react'
 import { Button } from '@/components/ui'
-import type { WebsiteV3Blocks, WebsiteV3SectionKey } from '@/lib/pdf/website-v3-blocks'
+import type { WebsiteV3Blocks, WebsiteV3PageBreakKey, WebsiteV3SectionKey } from '@/lib/pdf/website-v3-blocks'
 import { DEFAULT_WV3_SECTIONS } from '@/lib/pdf/website-v3-blocks'
 import {
     CoverEditorV3, FooterEditorV3,
@@ -91,6 +91,7 @@ interface WebsiteV3SectionManagerPanelProps {
 export function WebsiteV3SectionManagerPanel({ blocks, onSave, onClose }: WebsiteV3SectionManagerPanelProps) {
     const active = blocks.sections
     const removed = DEFAULT_WV3_SECTIONS.filter((k) => !active.includes(k))
+    const pageBreakAfter = blocks.pageBreakAfter ?? []
 
     const update = (sections: WebsiteV3SectionKey[]) => onSave({ ...blocks, sections })
 
@@ -107,7 +108,20 @@ export function WebsiteV3SectionManagerPanel({ blocks, onSave, onClose }: Websit
         onSave({ ...blocks, [key]: { ...section, enabled: !(section.enabled !== false) } })
     }
 
-    const remove = (key: WebsiteV3SectionKey) => update(active.filter((k) => k !== key))
+    const togglePageBreakAfter = (key: WebsiteV3PageBreakKey) => {
+        onSave({
+            ...blocks,
+            pageBreakAfter: pageBreakAfter.includes(key)
+                ? pageBreakAfter.filter((k) => k !== key)
+                : [...pageBreakAfter, key],
+        })
+    }
+
+    const remove = (key: WebsiteV3SectionKey) => onSave({
+        ...blocks,
+        sections: active.filter((k) => k !== key),
+        pageBreakAfter: pageBreakAfter.filter((k) => k !== key),
+    })
     const restore = (key: WebsiteV3SectionKey) => update([...active, key])
 
     return (
@@ -118,9 +132,23 @@ export function WebsiteV3SectionManagerPanel({ blocks, onSave, onClose }: Websit
             </div>
             <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
                 <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2">
+                        <span className="flex-1 text-sm font-medium">{SECTION_LABELS.cover}</span>
+                        <span className="text-[10px] text-muted-foreground">pierwsza sekcja</span>
+                        <label className="flex cursor-pointer items-center gap-1 text-[10px] text-muted-foreground whitespace-nowrap">
+                            <input
+                                type="checkbox"
+                                checked={pageBreakAfter.includes('cover')}
+                                onChange={() => togglePageBreakAfter('cover')}
+                                className="h-3 w-3 rounded border-border text-primary focus:ring-ring"
+                            />
+                            nowa str.
+                        </label>
+                    </div>
                     {active.map((key, i) => {
                         const section = blocks[key] as { enabled?: boolean }
                         const enabled = section.enabled !== false
+                        const breaksAfter = pageBreakAfter.includes(key)
                         return (
                             <div key={key} className="flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2">
                                 <span className="flex-1 text-sm font-medium">{SECTION_LABELS[key as EditableWV3BlockKey] ?? key}</span>
@@ -135,6 +163,15 @@ export function WebsiteV3SectionManagerPanel({ blocks, onSave, onClose }: Websit
                                         ? <Eye className="w-4 h-4 text-primary" />
                                         : <EyeOff className="w-4 h-4 text-muted-foreground" />}
                                 </button>
+                                <label className="flex cursor-pointer items-center gap-1 text-[10px] text-muted-foreground whitespace-nowrap">
+                                    <input
+                                        type="checkbox"
+                                        checked={breaksAfter}
+                                        onChange={() => togglePageBreakAfter(key)}
+                                        className="h-3 w-3 rounded border-border text-primary focus:ring-ring"
+                                    />
+                                    nowa str.
+                                </label>
                                 <button type="button" title="Usuń z dokumentu" onClick={() => remove(key)}>
                                     <Trash2 className="w-4 h-4 text-destructive" />
                                 </button>

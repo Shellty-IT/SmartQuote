@@ -13,6 +13,8 @@ export type ContractSectionKey =
     | 'confidentiality'
     | 'finalProvisions'
 
+export type ContractPageBreakKey = 'header' | ContractSectionKey
+
 export const ALL_CONTRACT_SECTION_KEYS: ContractSectionKey[] = [
     'parties',
     'subject',
@@ -143,6 +145,7 @@ export interface ContractShortBlocks {
     version: 1
     /** Ordered list of section keys — controls which sections appear and in which order */
     sections: ContractSectionKey[]
+    pageBreakAfter: ContractPageBreakKey[]
     header: ContractHeaderBlock
     parties: ContractPartiesBlock
     subject: ContractSubjectBlock
@@ -163,6 +166,7 @@ export function buildDefaultContractBlocks(): ContractShortBlocks {
     return {
         version: 1,
         sections: [...ALL_CONTRACT_SECTION_KEYS],
+        pageBreakAfter: [],
 
         header: {
             kicker: 'Umowa cywilnoprawna · Usługi IT',
@@ -307,12 +311,16 @@ export function mergeContractWithDefaults(
     if (!saved) return defaults
 
     const validSet = new Set<string>(ALL_CONTRACT_SECTION_KEYS)
+    const validPageBreakSet = new Set<string>(['header', ...ALL_CONTRACT_SECTION_KEYS])
     const filterValid = (arr: ContractSectionKey[]) =>
         (arr ?? []).filter((k) => validSet.has(k))
+    const filterValidPageBreak = (arr: ContractPageBreakKey[]) =>
+        (arr ?? []).filter((k) => validPageBreakSet.has(k))
 
     return {
         version: 1,
         sections: Array.isArray(saved.sections) ? filterValid(saved.sections) : defaults.sections,
+        pageBreakAfter: Array.isArray(saved.pageBreakAfter) ? filterValidPageBreak(saved.pageBreakAfter) : defaults.pageBreakAfter,
         header: { ...defaults.header, ...saved.header },
         parties: {
             ...defaults.parties,

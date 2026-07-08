@@ -536,45 +536,43 @@ export default function FloatingDock() {
                 const badge = getBadge(item.stat, unreadNotifications);
                 const Icon = item.icon;
                 return (
-                    <div key={item.href} className="group relative shrink-0">
-                        <Link
-                            href={item.href}
-                            onClick={() => setMobileOpen(false)}
-                            className={cn(
-                                'grid h-11 w-11 place-items-center rounded-xl transition-all',
-                                active
-                                    ? 'bg-card text-foreground shadow-card ring-1 ring-border'
-                                    : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground'
-                            )}
-                        >
-                            <Icon
-                                className={cn('h-[18px] w-[18px]', active ? 'text-primary' : 'text-muted-foreground group-hover:text-sidebar-foreground')}
-                                strokeWidth={2}
-                            />
-                            {badge !== null && (
-                                <span className={cn(
-                                    'absolute right-1.5 top-1.5 h-2 w-2 rounded-full ring-2 ring-sidebar',
-                                    badge === 'loading' ? 'animate-pulse' : '',
-                                    BADGE_DOT_TONE[item.badgeTone],
-                                )} />
-                            )}
-                        </Link>
-                        <span className={cn(
-                            'pointer-events-none absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground opacity-0 shadow-card ring-1 ring-border transition-opacity group-hover:opacity-100',
-                            position === 'top' ? 'top-full mt-2' : 'bottom-full mb-2'
-                        )}>
-                            {tr.nav[item.key]}
-                        </span>
-                    </div>
+                    <Tooltip key={item.href}>
+                        <TooltipTrigger asChild>
+                            <Link
+                                href={item.href}
+                                onClick={() => setMobileOpen(false)}
+                                className={cn(
+                                    'relative grid h-11 w-11 shrink-0 place-items-center rounded-xl transition-all',
+                                    active
+                                        ? 'bg-card text-foreground shadow-card ring-1 ring-border'
+                                        : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground'
+                                )}
+                            >
+                                <Icon
+                                    className={cn('h-[18px] w-[18px]', active ? 'text-primary' : 'text-muted-foreground')}
+                                    strokeWidth={2}
+                                />
+                                {badge !== null && (
+                                    <span className={cn(
+                                        'absolute right-1.5 top-1.5 h-2 w-2 rounded-full ring-2 ring-sidebar',
+                                        badge === 'loading' ? 'animate-pulse' : '',
+                                        BADGE_DOT_TONE[item.badgeTone],
+                                    )} />
+                                )}
+                            </Link>
+                        </TooltipTrigger>
+                        <TooltipContent side={tooltipSide} sideOffset={8}>{tr.nav[item.key]}</TooltipContent>
+                    </Tooltip>
                 );
             })}
             <div className="mx-1 h-8 w-px shrink-0 bg-sidebar-border/70" />
-            <div className="group relative shrink-0">
+            <Tooltip>
+                <TooltipTrigger asChild>
                 <Link
                     href="/dashboard/settings"
                     onClick={() => setMobileOpen(false)}
                     className={cn(
-                        'grid h-11 w-11 place-items-center rounded-xl transition-all',
+                        'grid h-11 w-11 shrink-0 place-items-center rounded-xl transition-all',
                         isActive('/dashboard/settings')
                             ? 'bg-card text-foreground shadow-card ring-1 ring-border'
                             : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground'
@@ -582,27 +580,20 @@ export default function FloatingDock() {
                 >
                     <Settings className="h-[18px] w-[18px] text-muted-foreground" strokeWidth={2} />
                 </Link>
-                <span className={cn(
-                    'pointer-events-none absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground opacity-0 shadow-card ring-1 ring-border transition-opacity group-hover:opacity-100',
-                    position === 'top' ? 'top-full mt-2' : 'bottom-full mb-2'
-                )}>
-                    {commonTr.settings}
-                </span>
-            </div>
-            <div className="group relative shrink-0">
+                </TooltipTrigger>
+                <TooltipContent side={tooltipSide} sideOffset={8}>{commonTr.settings}</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+                <TooltipTrigger asChild>
                 <button
                     onClick={() => signOut({ callbackUrl: '/' })}
-                    className="grid h-11 w-11 place-items-center rounded-xl text-sidebar-foreground/80 transition-all hover:bg-destructive/10 hover:text-destructive"
+                    className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-sidebar-foreground/80 transition-all hover:bg-destructive/10 hover:text-destructive"
                 >
                     <LogOut className="h-[18px] w-[18px]" strokeWidth={2} />
                 </button>
-                <span className={cn(
-                    'pointer-events-none absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground opacity-0 shadow-card ring-1 ring-border transition-opacity group-hover:opacity-100',
-                    position === 'top' ? 'top-full mt-2' : 'bottom-full mb-2'
-                )}>
-                    {commonTr.logout}
-                </span>
-            </div>
+                </TooltipTrigger>
+                <TooltipContent side={tooltipSide} sideOffset={8}>{commonTr.logout}</TooltipContent>
+            </Tooltip>
             {pinMenu(position === 'top' ? 'bottom' : 'top')}
         </div>
     );

@@ -3,6 +3,7 @@
 // Design: ocean navy #0F4C75 + emerald #10B981, Outfit font, mint backgrounds.
 
 import { buildHtmlDocument } from './html-shell'
+import { withPageBreakAfter } from './section-layout'
 import type { SupportBlocks } from './support-blocks'
 
 export interface SupportOfferData {
@@ -542,14 +543,19 @@ export function buildSupportHtml(
     options?: { editorMode?: boolean },
 ): string {
     const editorMode = options?.editorMode ?? false
-    const sectionsHtml = blocks.sections.map(k => renderSection(k, blocks, editorMode)).join('\n')
+    const sectionsHtml = blocks.sections
+        .map(k => withPageBreakAfter(
+            renderSection(k, blocks, editorMode),
+            blocks.pageBreakAfter.includes(k),
+        ))
+        .join('\n')
 
     return buildHtmlDocument({
         title: 'Opieka techniczna IT — Oferta',
         css: baseCss(editorMode),
         body: `<div class="page" style="padding:28px 18px;min-height:100vh;">
   <div class="doc" style="max-width:840px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 18px 60px rgba(15,76,117,0.14);">
-    ${renderCover(blocks, offer, editorMode)}
+    ${withPageBreakAfter(renderCover(blocks, offer, editorMode), blocks.pageBreakAfter.includes('cover'))}
     ${sectionsHtml}
     ${renderFooter(blocks, offer, editorMode)}
   </div>

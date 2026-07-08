@@ -26,6 +26,7 @@ const insightWithOfferInclude = {
             title: true,
             totalGross: true,
             client: { select: { name: true, company: true } },
+            lead: { select: { name: true, company: true } },
         },
     },
 } as const;
@@ -41,6 +42,7 @@ const insightListInclude = {
             acceptedAt: true,
             rejectedAt: true,
             client: { select: { name: true, company: true } },
+            lead: { select: { name: true, company: true } },
         },
     },
 } as const;
@@ -58,6 +60,7 @@ export class FeedbackRepository {
             include: {
                 items: { orderBy: { position: 'asc' } },
                 client: { select: { name: true, company: true, type: true } },
+                lead: { select: { name: true, company: true } },
                 interactions: { orderBy: { createdAt: 'asc' }, take: 50 },
                 comments: { orderBy: { createdAt: 'asc' } },
                 views: true,
@@ -129,6 +132,7 @@ export class FeedbackRepository {
                     { title: { contains: filter.search, mode: 'insensitive' } },
                     { number: { contains: filter.search, mode: 'insensitive' } },
                     { client: { name: { contains: filter.search, mode: 'insensitive' } } },
+                    { lead: { name: { contains: filter.search, mode: 'insensitive' } } },
                 ],
             };
         }

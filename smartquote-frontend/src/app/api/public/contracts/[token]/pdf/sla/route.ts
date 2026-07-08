@@ -6,7 +6,7 @@ import { buildContractSlaHtmlFromSaved } from '@/lib/pdf/contract-sla-html'
 import { addDocumentActionLinks, publicDocumentUrl } from '@/lib/pdf/document-action-links'
 import { htmlToPdfBuffer } from '@/lib/pdf/puppeteer'
 
-export const maxDuration = 10
+export const maxDuration = 60
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 

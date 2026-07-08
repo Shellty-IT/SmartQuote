@@ -71,7 +71,7 @@ function buildScopeSummary(blocks: ProposalBlocks): string {
 // ── Block metadata ────────────────────────────────────────────────────────────
 
 const BLOCK_META: Record<
-    keyof Omit<ProposalBlocks, 'version' | 'page1Sections' | 'page2Sections'>,
+    keyof Omit<ProposalBlocks, 'version' | 'page1Sections' | 'page2Sections' | 'pageBreakAfter'>,
     { label: string; icon: string; alwaysEnabled?: boolean }
 > = {
     header:       { label: 'Nagłówek dokumentu', icon: '🏷️', alwaysEnabled: true },
@@ -119,6 +119,7 @@ export function SectionManagerPanel({ blocks, onSave, onClose }: SectionManagerP
     const removedKeys = ALL_SECTION_KEYS.filter(
         (k) => !draft.page1Sections.includes(k) && !draft.page2Sections.includes(k),
     )
+    const pageBreakAfter = draft.pageBreakAfter ?? []
 
     const moveUp = (page: 1 | 2, idx: number) => {
         if (idx === 0) return
@@ -151,6 +152,7 @@ export function SectionManagerPanel({ blocks, onSave, onClose }: SectionManagerP
             ...prev,
             page1Sections: prev.page1Sections.filter((k) => k !== sectionKey),
             page2Sections: prev.page2Sections.filter((k) => k !== sectionKey),
+            pageBreakAfter: (prev.pageBreakAfter ?? []).filter((k) => k !== sectionKey),
         }))
     }
 
@@ -165,6 +167,18 @@ export function SectionManagerPanel({ blocks, onSave, onClose }: SectionManagerP
             ...prev,
             [sectionKey]: { ...block, enabled: !block.enabled },
         }))
+    }
+
+    const togglePageBreakAfter = (sectionKey: SectionKey) => {
+        setDraft((prev) => {
+            const current = prev.pageBreakAfter ?? []
+            return {
+                ...prev,
+                pageBreakAfter: current.includes(sectionKey)
+                    ? current.filter((k) => k !== sectionKey)
+                    : [...current, sectionKey],
+            }
+        })
     }
 
     const renderPageGroup = (page: 1 | 2) => {
@@ -184,6 +198,7 @@ export function SectionManagerPanel({ blocks, onSave, onClose }: SectionManagerP
                     {sections.map((key, idx) => {
                         const meta = SECTION_META[key]
                         const blockEnabled = (draft[key] as { enabled: boolean }).enabled
+                        const breaksAfter = pageBreakAfter.includes(key)
                         return (
                             <div
                                 key={key}
@@ -243,6 +258,16 @@ export function SectionManagerPanel({ blocks, onSave, onClose }: SectionManagerP
                                 >
                                     → str.{page === 1 ? 2 : 1}
                                 </button>
+
+                                <label className="flex cursor-pointer items-center gap-1 text-[10px] text-muted-foreground whitespace-nowrap">
+                                    <input
+                                        type="checkbox"
+                                        checked={breaksAfter}
+                                        onChange={() => togglePageBreakAfter(key)}
+                                        className="h-3 w-3 rounded border-border text-primary focus:ring-ring"
+                                    />
+                                    nowa str.
+                                </label>
 
                                 {/* Remove */}
                                 <button
@@ -347,7 +372,7 @@ export function SectionManagerPanel({ blocks, onSave, onClose }: SectionManagerP
 
 // ── Main block editor panel ───────────────────────────────────────────────────
 
-export type EditableBlockKey = keyof Omit<ProposalBlocks, 'version' | 'page1Sections' | 'page2Sections'>
+export type EditableBlockKey = keyof Omit<ProposalBlocks, 'version' | 'page1Sections' | 'page2Sections' | 'pageBreakAfter'>
 
 export interface BlockEditorPanelProps {
     blockKey: EditableBlockKey

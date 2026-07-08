@@ -32,6 +32,27 @@ interface UserForPDF {
     } | null;
 }
 
+function mapLeadToPDFClient(lead: {
+    id: string;
+    name: string;
+    email: string | null;
+    phone: string | null;
+    company: string | null;
+}) {
+    return {
+        id: lead.id,
+        type: 'PERSON',
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone,
+        company: lead.company,
+        nip: null,
+        address: null,
+        city: null,
+        postalCode: null,
+    };
+}
+
 async function generateOfferPDFBuffer(offerId: string, userId: string): Promise<AttachmentBuffer> {
     const offer = await offersRepository.findByIdForPDFAttachment(offerId, userId);
     if (!offer) throw new NotFoundError('Oferta');
@@ -47,7 +68,7 @@ async function generateOfferPDFBuffer(offerId: string, userId: string): Promise<
     const pdfBuffer = await pdfService.generateOfferPDF({
         ...offer,
         user: mapToPDFUser(userForPDF),
-        client: mapToPDFClient(offer.client),
+        client: mapToPDFClient(offer.client ?? mapLeadToPDFClient(offer.lead!)),
         acceptanceLog: null,
     } as Parameters<typeof pdfService.generateOfferPDF>[0]);
 

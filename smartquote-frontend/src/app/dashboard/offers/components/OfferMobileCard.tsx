@@ -23,6 +23,7 @@ export function OfferMobileCard({ offer, onView, onEdit, onDuplicate, onDelete, 
     const templatePrice = resolveTemplatePrice(offer.blocks, offer.templateType);
     const totalGross = templatePrice?.gross ?? Number(offer.totalGross);
     const totalNet = templatePrice?.net ?? Number(offer.totalNet);
+    const recipient = offer.client ?? offer.lead;
 
     const isExpired =
         offer.validUntil &&
@@ -39,7 +40,7 @@ export function OfferMobileCard({ offer, onView, onEdit, onDuplicate, onDelete, 
             <div className="mb-3 flex items-start justify-between gap-3">
                 <div className="flex min-w-0 flex-1 items-center gap-3">
                     <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-primary text-[11px] font-bold text-white shadow-sm">
-                        {getInitials(offer.client?.name || '?')}
+                        {getInitials(recipient?.name || '?')}
                     </div>
                     <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
@@ -63,7 +64,7 @@ export function OfferMobileCard({ offer, onView, onEdit, onDuplicate, onDelete, 
 
             <div className="mb-3 flex items-center justify-between">
                 <div className="space-y-0.5">
-                    <p className="text-sm">{offer.client?.name || commonTr.unknown}</p>
+                    <p className="text-sm">{recipient?.name || commonTr.unknown}</p>
                     <p className={cn('text-xs', isExpired ? 'font-medium text-status-rejected' : 'text-muted-foreground')}>
                         {offer.validUntil ? formatDate(offer.validUntil) : '—'}
                     </p>

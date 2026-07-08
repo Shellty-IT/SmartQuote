@@ -3,6 +3,7 @@
 // Design: navy #1B3A5C + gold #C9A84C, IBM Plex Sans → Outfit Variable.
 
 export type UniversalSectionKey = 'summary' | 'needs' | 'scope' | 'timeline' | 'pricing' | 'terms'
+export type UniversalPageBreakKey = 'cover' | UniversalSectionKey
 
 // ── Sub-types ─────────────────────────────────────────────────────────────────
 
@@ -121,6 +122,7 @@ export interface UniversalFooterBlock {
 export interface UniversalBlocks {
     version: 1
     sections: UniversalSectionKey[]
+    pageBreakAfter: UniversalPageBreakKey[]
     cover: UniversalCoverBlock
     summary: UniversalSummaryBlock
     needs: UniversalNeedsBlock
@@ -137,6 +139,7 @@ export function buildDefaultUniversalBlocks(): UniversalBlocks {
     return {
         version: 1,
         sections: ['summary', 'needs', 'scope', 'timeline', 'pricing', 'terms'],
+        pageBreakAfter: [],
         cover: {
             serviceTitle: 'Tytuł usługi / projektu',
             clientName: 'Nazwa Klienta / Firmy',
@@ -254,6 +257,7 @@ export function buildDefaultUniversalBlocks(): UniversalBlocks {
 // ── Merge ─────────────────────────────────────────────────────────────────────
 
 const VALID_SECTIONS = new Set<UniversalSectionKey>(['summary', 'needs', 'scope', 'timeline', 'pricing', 'terms'])
+const VALID_PAGE_BREAK_KEYS = new Set<UniversalPageBreakKey>(['cover', 'summary', 'needs', 'scope', 'timeline', 'pricing', 'terms'])
 
 export function mergeUniversalWithDefaults(saved: Partial<UniversalBlocks>): UniversalBlocks {
     const d = buildDefaultUniversalBlocks()
@@ -262,6 +266,9 @@ export function mergeUniversalWithDefaults(saved: Partial<UniversalBlocks>): Uni
         sections: Array.isArray(saved.sections)
             ? (saved.sections as string[]).filter((k): k is UniversalSectionKey => VALID_SECTIONS.has(k as UniversalSectionKey))
             : d.sections,
+        pageBreakAfter: Array.isArray(saved.pageBreakAfter)
+            ? (saved.pageBreakAfter as string[]).filter((k): k is UniversalPageBreakKey => VALID_PAGE_BREAK_KEYS.has(k as UniversalPageBreakKey))
+            : d.pageBreakAfter,
         cover: { ...d.cover, ...(saved.cover ?? {}) },
         summary: { ...d.summary, ...(saved.summary ?? {}) },
         needs: { ...d.needs, ...(saved.needs ?? {}) },

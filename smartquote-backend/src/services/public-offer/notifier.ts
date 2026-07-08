@@ -26,13 +26,14 @@ export class PublicOfferNotifier {
 
     fireAccepted(userId: string, offerId: string, totalGross: number, offer: any): void {
         triggerPostMortem(userId, offerId, 'ACCEPTED', 'public');
+        const recipient = offer.client ?? offer.lead ?? { name: 'Odbiorca' };
 
         notificationService
             .offerAccepted(userId, offer.user.email, {
                 offerId,
                 offerNumber: offer.number,
                 offerTitle: offer.title,
-                clientName: offer.client.name,
+                clientName: recipient.name,
                 totalGross,
                 currency: offer.currency,
             })
@@ -43,13 +44,14 @@ export class PublicOfferNotifier {
 
     fireRejected(userId: string, offerId: string, reason: string | undefined, offer: any): void {
         triggerPostMortem(userId, offerId, 'REJECTED', 'public');
+        const recipient = offer.client ?? offer.lead ?? { name: 'Odbiorca' };
 
         notificationService
             .offerRejected(userId, offer.user.email, {
                 offerId,
                 offerNumber: offer.number,
                 offerTitle: offer.title,
-                clientName: offer.client.name,
+                clientName: recipient.name,
                 reason,
             })
             .catch((err: unknown) => {

@@ -106,13 +106,14 @@ export class FeedbackService {
             createdAt: i.createdAt.toISOString(),
         }));
 
+        const recipient = offer.client ?? offer.lead;
         const prompt = buildPostMortemPrompt({
             offerNumber: offer.number,
             offerTitle: offer.title,
             outcome,
-            clientName: offer.client.name,
-            clientCompany: offer.client.company,
-            clientType: offer.client.type,
+            clientName: recipient?.name ?? 'Nieznany',
+            clientCompany: recipient?.company ?? null,
+            clientType: offer.client?.type ?? 'LEAD',
             totalGross: String(offer.totalGross),
             variantBlock: buildVariantBlock(availableVariants, selectedVariant, variantHistory),
             selectionSummary: buildSelectionSummary(offer),

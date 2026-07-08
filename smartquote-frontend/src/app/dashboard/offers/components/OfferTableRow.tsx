@@ -22,6 +22,7 @@ export function OfferTableRow({ offer, onView, onEdit, onDuplicate, onDelete, on
     const templatePrice = resolveTemplatePrice(offer.blocks, offer.templateType);
     const totalGross = templatePrice?.gross ?? Number(offer.totalGross);
     const totalNet = templatePrice?.net ?? Number(offer.totalNet);
+    const recipient = offer.client ?? offer.lead;
 
     const isExpired =
         offer.validUntil &&
@@ -61,9 +62,9 @@ export function OfferTableRow({ offer, onView, onEdit, onDuplicate, onDelete, on
             <td className="px-4 py-3">
                 <div className="flex items-center gap-2.5">
                     <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-gradient-primary text-[10px] font-bold text-white">
-                        {getInitials(offer.client?.name || '?')}
+                        {getInitials(recipient?.name || '?')}
                     </div>
-                    <span className="text-sm font-medium">{offer.client?.name || commonTr.unknown}</span>
+                    <span className="text-sm font-medium">{recipient?.name || commonTr.unknown}</span>
                 </div>
             </td>
 

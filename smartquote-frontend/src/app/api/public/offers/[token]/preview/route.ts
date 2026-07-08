@@ -1,5 +1,6 @@
 import { buildPublicOfferHtml } from '@/lib/pdf/public-offer-html'
 import { addDocumentActionLinks } from '@/lib/pdf/document-action-links'
+import { applyPdfPreviewMode } from '@/lib/pdf/print-preview'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -17,6 +18,6 @@ export async function GET(_req: Request, { params }: { params: Promise<{ token: 
     const html = buildPublicOfferHtml(offer)
     if (!html) return new Response('Template not available', { status: 404 })
 
-    const linkedHtml = addDocumentActionLinks(html, `/offer/view/${token}#accept`, 'accept')
+    const linkedHtml = applyPdfPreviewMode(addDocumentActionLinks(html, `/offer/view/${token}#accept`, 'accept'))
     return new Response(linkedHtml, { headers: { 'Content-Type': 'text/html; charset=utf-8' } })
 }

@@ -5,7 +5,7 @@
 
 import { useState, useCallback } from 'react'
 import { X, ArrowUp, ArrowDown, Eye, EyeOff, Trash2, Plus } from 'lucide-react'
-import type { ShopBlocks, ShopSectionKey } from '@/lib/pdf/shop-blocks'
+import type { ShopBlocks, ShopPageBreakKey, ShopSectionKey } from '@/lib/pdf/shop-blocks'
 import { ALL_SHOP_SECTION_KEYS } from '@/lib/pdf/shop-blocks'
 import {
     CoverEditor,
@@ -142,6 +142,7 @@ export function ShopSectionManagerPanel({ blocks, onSave, onClose }: ShopSection
 
     const activeSections = draft.sections
     const removedSections = ALL_SHOP_SECTION_KEYS.filter((k) => !activeSections.includes(k))
+    const pageBreakAfter = draft.pageBreakAfter ?? []
 
     const move = (idx: number, dir: -1 | 1) => {
         const arr = [...activeSections]
@@ -156,8 +157,21 @@ export function ShopSectionManagerPanel({ blocks, onSave, onClose }: ShopSection
         setDraft({ ...draft, [key]: { ...section, enabled: !section.enabled } })
     }
 
+    const togglePageBreakAfter = (key: ShopPageBreakKey) => {
+        setDraft({
+            ...draft,
+            pageBreakAfter: pageBreakAfter.includes(key)
+                ? pageBreakAfter.filter((k) => k !== key)
+                : [...pageBreakAfter, key],
+        })
+    }
+
     const removeSection = (key: ShopSectionKey) => {
-        setDraft({ ...draft, sections: activeSections.filter((k) => k !== key) })
+        setDraft({
+            ...draft,
+            sections: activeSections.filter((k) => k !== key),
+            pageBreakAfter: pageBreakAfter.filter((k) => k !== key),
+        })
     }
 
     const addSection = (key: ShopSectionKey) => {
@@ -182,7 +196,25 @@ export function ShopSectionManagerPanel({ blocks, onSave, onClose }: ShopSection
 
                 {/* Active sections */}
                 <div className="space-y-1.5">
-                    {activeSections.map((key, idx) => (
+                    <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2">
+                        <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground/30" />
+                        <span className="flex-1 text-sm font-medium text-foreground truncate">
+                            {BLOCK_LABELS.cover}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">pierwsza sekcja</span>
+                        <label className="flex cursor-pointer items-center gap-1 text-[10px] text-muted-foreground whitespace-nowrap">
+                            <input
+                                type="checkbox"
+                                checked={pageBreakAfter.includes('cover')}
+                                onChange={() => togglePageBreakAfter('cover')}
+                                className="h-3 w-3 rounded border-border text-primary focus:ring-ring"
+                            />
+                            nowa str.
+                        </label>
+                    </div>
+                    {activeSections.map((key, idx) => {
+                        const breaksAfter = pageBreakAfter.includes(key)
+                        return (
                         <div
                             key={key}
                             className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2"
@@ -218,6 +250,15 @@ export function ShopSectionManagerPanel({ blocks, onSave, onClose }: ShopSection
                                 >
                                     {isEnabled(key) ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5 opacity-40" />}
                                 </button>
+                                <label className="flex cursor-pointer items-center gap-1 text-[10px] text-muted-foreground whitespace-nowrap">
+                                    <input
+                                        type="checkbox"
+                                        checked={breaksAfter}
+                                        onChange={() => togglePageBreakAfter(key)}
+                                        className="h-3 w-3 rounded border-border text-primary focus:ring-ring"
+                                    />
+                                    nowa str.
+                                </label>
                                 <button
                                     type="button"
                                     onClick={() => removeSection(key)}
@@ -228,7 +269,8 @@ export function ShopSectionManagerPanel({ blocks, onSave, onClose }: ShopSection
                                 </button>
                             </div>
                         </div>
-                    ))}
+                        )
+                    })}
                 </div>
 
                 {/* Removed sections restore */}

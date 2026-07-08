@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import puppeteer from 'puppeteer-core'
-import { applyPrintPagination } from '../src/lib/pdf/puppeteer'
+import { applyPrintPagination } from '../src/lib/pdf/print-preview'
 import { buildDefaultBlocks } from '../src/lib/pdf/proposal-blocks'
 import { buildProposalHtml } from '../src/lib/pdf/proposal-html'
 import { buildDefaultShopBlocks } from '../src/lib/pdf/shop-blocks'
