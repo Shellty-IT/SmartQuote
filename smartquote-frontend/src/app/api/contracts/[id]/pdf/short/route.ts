@@ -63,7 +63,7 @@ export async function GET(
         const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
         console.error('[contract-short-pdf] buildContractShortHtmlFromSaved threw:', detail)
         return new Response(
-            JSON.stringify({ error: 'HTML build failed', detail }),
+            JSON.stringify({ error: 'HTML build failed', ...(process.env.NODE_ENV === 'development' ? { detail } : {}) }),
             { status: 500, headers: { 'Content-Type': 'application/json' } },
         )
     }
@@ -76,7 +76,7 @@ export async function GET(
         const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
         console.error('[contract-short-pdf] Puppeteer error:', detail)
         return new Response(
-            JSON.stringify({ error: 'PDF generation failed', detail }),
+            JSON.stringify({ error: 'PDF generation failed', ...(process.env.NODE_ENV === 'development' ? { detail } : {}) }),
             { status: 500, headers: { 'Content-Type': 'application/json' } },
         )
     }

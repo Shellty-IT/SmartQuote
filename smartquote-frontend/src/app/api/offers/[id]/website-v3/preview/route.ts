@@ -54,7 +54,7 @@ export async function GET(
     } catch (err) {
         const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
         console.error('[website-v3-preview] buildWebsiteV3Html threw:', detail)
-        return new Response(JSON.stringify({ error: 'HTML build failed', detail }), {
+        return new Response(JSON.stringify({ error: 'HTML build failed', ...(process.env.NODE_ENV === 'development' ? { detail } : {}) }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' },
         })

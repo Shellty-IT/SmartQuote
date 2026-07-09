@@ -94,7 +94,7 @@ export async function GET(
     } catch (err) {
         const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
         console.error('[website-v2-pdf] buildWebsiteV2Html threw:', detail)
-        return new Response(JSON.stringify({ error: 'HTML build failed', detail }), {
+        return new Response(JSON.stringify({ error: 'HTML build failed', ...(process.env.NODE_ENV === 'development' ? { detail } : {}) }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' },
         })
@@ -106,7 +106,7 @@ export async function GET(
     } catch (err) {
         const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
         console.error('[website-v2-pdf] Puppeteer error:', detail)
-        return new Response(JSON.stringify({ error: 'PDF generation failed', detail }), {
+        return new Response(JSON.stringify({ error: 'PDF generation failed', ...(process.env.NODE_ENV === 'development' ? { detail } : {}) }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' },
         })

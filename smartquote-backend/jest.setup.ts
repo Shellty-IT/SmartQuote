@@ -2,4 +2,5 @@
 // These are fake values safe for unit/integration tests that don't hit a real DB.
 process.env.NODE_ENV = 'test';
 process.env.JWT_SECRET = 'test-jwt-secret-that-is-at-least-32-chars!!!';
+process.env.ENCRYPTION_KEY = 'test-encryption-key-32chars-pad!';
 process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/testdb';

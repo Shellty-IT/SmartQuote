@@ -39,7 +39,9 @@ export async function GET(
         html = applyPdfPreviewMode(addDocumentActionLinks(buildContractServicesHtmlFromSaved(contract.blocks, { editorMode: false }), `/contract/view/${token}#sign`, 'sign'))
     } catch (err) {
         const detail = err instanceof Error ? err.message : String(err)
-        return new Response(`<pre>Error: ${detail}</pre>`, {
+        console.error('[public-preview] HTML build failed:', detail)
+        const body = process.env.NODE_ENV === 'development' ? `<pre>Error: ${detail}</pre>` : '<pre>Wystąpił błąd podczas generowania podglądu</pre>'
+        return new Response(body, {
             status: 500,
             headers: { 'Content-Type': 'text/html; charset=utf-8' },
         })
