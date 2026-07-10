@@ -2,7 +2,7 @@
 // Faithfully reproduces the "Wsparcie" (IT Support / SLA) template.
 // Design: ocean navy #0F4C75 + emerald #10B981, Outfit font, mint backgrounds.
 
-import { buildHtmlDocument } from './html-shell'
+import { buildHtmlDocument, escapeHtml as esc } from './html-shell'
 import { withPageBreakAfter } from './section-layout'
 import type { SupportBlocks } from './support-blocks'
 
@@ -20,15 +20,6 @@ export interface SupportOfferData {
 }
 
 // ── Utility ───────────────────────────────────────────────────────────────────
-
-function esc(s: string | number | undefined | null): string {
-    if (s == null) return ''
-    return String(s)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 function editorWrap(editorMode: boolean, key: string, inner: string): string {
     if (!editorMode) return inner

@@ -33,8 +33,8 @@ interface AuthResponse {
 
 const TOKEN_EXPIRES_IN: SignOptions['expiresIn'] = '7d';
 
-function signToken(userId: string, email: string): string {
-    return jwt.sign({ id: userId, userId, email }, config.jwtSecret, { expiresIn: TOKEN_EXPIRES_IN });
+function signToken(userId: string, email: string, tokenVersion: number): string {
+    return jwt.sign({ id: userId, userId, email, tokenVersion }, config.jwtSecret, { expiresIn: TOKEN_EXPIRES_IN });
 }
 
 export async function register(data: RegisterInput): Promise<AuthResponse> {
@@ -63,7 +63,7 @@ export async function register(data: RegisterInput): Promise<AuthResponse> {
 
     return {
         user: { id: user.id, email: user.email, name: user.name, role: user.role },
-        token: signToken(user.id, user.email),
+        token: signToken(user.id, user.email, user.tokenVersion),
     };
 }
 
@@ -91,7 +91,7 @@ export async function login(data: LoginInput): Promise<AuthResponse> {
 
     return {
         user: { id: user.id, email: user.email, name: user.name, role: user.role },
-        token: signToken(user.id, user.email),
+        token: signToken(user.id, user.email, user.tokenVersion),
     };
 }
 

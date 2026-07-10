@@ -5,10 +5,19 @@
 import { buildContractDedicatedHtmlFromSaved } from '@/lib/pdf/contract-dedicated-html'
 import { addDocumentActionLinks } from '@/lib/pdf/document-action-links'
 import { applyPdfPreviewMode } from '@/lib/pdf/print-preview'
+import {
+    getBackendUrl,
+    fetchJsonOrRespond,
+    buildHtmlPreviewOrRespond,
+    htmlResponse,
+} from '@/lib/pdf/route-helpers'
 
 export const maxDuration = 10
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyRecord = Record<string, any>
 
 export async function GET(
     _req: Request,
@@ -16,39 +25,18 @@ export async function GET(
 ) {
     const { token } = await params
 
-    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8080').replace(/\/$/, '')
-
-    const contractRes = await fetch(`${backendUrl}/api/public/contracts/${token}`, {
-        cache: 'no-store',
-    })
-
-    if (!contractRes.ok) {
-        const status = contractRes.status === 404 ? 404 : 502
-        return new Response(JSON.stringify({ error: 'Contract not found' }), {
-            status,
-            headers: { 'Content-Type': 'application/json' },
-        })
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data } = (await contractRes.json()) as { data: { contract: Record<string, any> } }
+    const data = await fetchJsonOrRespond<{ contract: AnyRecord }>(
+        `${getBackendUrl()}/api/public/contracts/${token}`,
+        { cache: 'no-store' },
+        'Contract not found',
+    )
+    if (data instanceof Response) return data
     const contract = data.contract
 
-    let html: string
-    try {
-        html = applyPdfPreviewMode(addDocumentActionLinks(buildContractDedicatedHtmlFromSaved(contract.blocks, { editorMode: false }), `/contract/view/${token}#sign`, 'sign'))
-    } catch (err) {
-        const detail = err instanceof Error ? err.message : String(err)
-        console.error('[public-preview] HTML build failed:', detail)
-        const body = process.env.NODE_ENV === 'development' ? `<pre>Error: ${detail}</pre>` : '<pre>Wystąpił błąd podczas generowania podglądu</pre>'
-        return new Response(body, {
-            status: 500,
-            headers: { 'Content-Type': 'text/html; charset=utf-8' },
-        })
-    }
+    const html = buildHtmlPreviewOrRespond('public-contract-dedicated-preview', () =>
+        applyPdfPreviewMode(addDocumentActionLinks(buildContractDedicatedHtmlFromSaved(contract.blocks, { editorMode: false }), `/contract/view/${token}#sign`, 'sign')),
+    )
+    if (html instanceof Response) return html
 
-    return new Response(html, {
-        status: 200,
-        headers: { 'Content-Type': 'text/html; charset=utf-8' },
-    })
+    return htmlResponse(html)
 }

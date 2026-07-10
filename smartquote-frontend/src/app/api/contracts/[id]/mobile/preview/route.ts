@@ -2,17 +2,21 @@
 // Returns raw HTML for the "Aplikacja mobilna" template — used for in-browser preview (iframe).
 // GET /api/contracts/:id/mobile/preview  →  text/html
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { buildContractMobileHtmlFromSaved } from '@/lib/pdf/contract-mobile-html'
 import { applyPdfPreviewMode } from '@/lib/pdf/print-preview'
+import {
+    getBackendUrl,
+    requireAccessToken,
+    fetchJsonOrRespond,
+    buildHtmlOrRespond,
+    htmlResponse,
+} from '@/lib/pdf/route-helpers'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-interface SessionWithToken {
-    accessToken?: string
-}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyRecord = Record<string, any>
 
 export async function GET(
     _req: Request,
@@ -20,29 +24,20 @@ export async function GET(
 ) {
     const { id } = await params
 
-    const session = (await getServerSession(authOptions)) as SessionWithToken | null
-    if (!session?.accessToken) {
-        return new Response('Unauthorized', { status: 401 })
-    }
+    const accessToken = await requireAccessToken()
+    if (accessToken instanceof Response) return accessToken
 
-    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8080').replace(/\/$/, '')
-    const contractRes = await fetch(`${backendUrl}/api/contracts/${id}`, {
-        headers: { Authorization: `Bearer ${session.accessToken}` },
-        cache: 'no-store',
-    })
+    const contract = await fetchJsonOrRespond<AnyRecord>(
+        `${getBackendUrl()}/api/contracts/${id}`,
+        { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' },
+        'Contract not found',
+    )
+    if (contract instanceof Response) return contract
 
-    if (!contractRes.ok) {
-        return new Response('Contract not found', {
-            status: contractRes.status === 404 ? 404 : 502,
-        })
-    }
+    const html = buildHtmlOrRespond('contract-mobile-preview', () =>
+        applyPdfPreviewMode(buildContractMobileHtmlFromSaved(contract.blocks, { editorMode: false })),
+    )
+    if (html instanceof Response) return html
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: contract } = (await contractRes.json()) as { data: Record<string, any> }
-    const html = applyPdfPreviewMode(buildContractMobileHtmlFromSaved(contract.blocks, { editorMode: false }))
-
-    return new Response(html, {
-        status: 200,
-        headers: { 'Content-Type': 'text/html; charset=utf-8' },
-    })
+    return htmlResponse(html)
 }

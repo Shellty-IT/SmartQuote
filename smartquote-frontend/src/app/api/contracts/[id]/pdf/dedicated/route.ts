@@ -2,20 +2,24 @@
 // Generates a PDF for the "System dedykowany" contract template using Puppeteer.
 // GET /api/contracts/:id/pdf/dedicated  →  application/pdf
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { buildContractDedicatedHtmlFromSaved } from '@/lib/pdf/contract-dedicated-html'
 import { addDocumentActionLinks, publicDocumentUrl } from '@/lib/pdf/document-action-links'
-import { htmlToPdfBuffer } from '@/lib/pdf/puppeteer'
 import { documentTemplateMismatch } from '@/lib/pdf/template-guard'
+import {
+    getBackendUrl,
+    requireAccessToken,
+    fetchJsonOrRespond,
+    buildHtmlOrRespond,
+    renderPdfOrRespond,
+    pdfResponse,
+} from '@/lib/pdf/route-helpers'
 
 export const maxDuration = 60
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-interface SessionWithToken {
-    accessToken?: string
-}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyRecord = Record<string, any>
 
 export async function GET(
     _req: Request,
@@ -23,67 +27,27 @@ export async function GET(
 ) {
     const { id } = await params
 
-    const session = (await getServerSession(authOptions)) as SessionWithToken | null
-    if (!session?.accessToken) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-            status: 401,
-            headers: { 'Content-Type': 'application/json' },
-        })
-    }
+    const accessToken = await requireAccessToken()
+    if (accessToken instanceof Response) return accessToken
 
-    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8080').replace(/\/$/, '')
-    const authHeader = { Authorization: `Bearer ${session.accessToken}` }
+    const contract = await fetchJsonOrRespond<AnyRecord>(
+        `${getBackendUrl()}/api/contracts/${id}`,
+        { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' },
+        'Contract not found',
+    )
+    if (contract instanceof Response) return contract
 
-    const contractRes = await fetch(`${backendUrl}/api/contracts/${id}`, {
-        headers: authHeader,
-        cache: 'no-store',
-    })
-
-    if (!contractRes.ok) {
-        const status = contractRes.status === 404 ? 404 : 502
-        return new Response(JSON.stringify({ error: 'Contract not found' }), {
-            status,
-            headers: { 'Content-Type': 'application/json' },
-        })
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: contract } = (await contractRes.json()) as { data: Record<string, any> }
     const mismatch = documentTemplateMismatch(contract, 'dedicated')
     if (mismatch) return mismatch
 
-    let html: string
-    try {
-        html = addDocumentActionLinks(buildContractDedicatedHtmlFromSaved(contract.blocks, { editorMode: false }), publicDocumentUrl('contract', contract.publicToken, 'sign'), 'sign')
-    } catch (err) {
-        const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
-        console.error('[contract-dedicated-pdf] buildContractDedicatedHtmlFromSaved threw:', detail)
-        return new Response(
-            JSON.stringify({ error: 'HTML build failed', ...(process.env.NODE_ENV === 'development' ? { detail } : {}) }),
-            { status: 500, headers: { 'Content-Type': 'application/json' } },
-        )
-    }
+    const html = buildHtmlOrRespond('contract-dedicated-pdf', () =>
+        addDocumentActionLinks(buildContractDedicatedHtmlFromSaved(contract.blocks, { editorMode: false }), publicDocumentUrl('contract', contract.publicToken, 'sign'), 'sign'),
+    )
+    if (html instanceof Response) return html
 
-    let buffer: Buffer
-    try {
-        buffer = await htmlToPdfBuffer(html)
-    } catch (err) {
-        const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
-        console.error('[contract-dedicated-pdf] Puppeteer error:', detail)
-        return new Response(
-            JSON.stringify({ error: 'PDF generation failed', ...(process.env.NODE_ENV === 'development' ? { detail } : {}) }),
-            { status: 500, headers: { 'Content-Type': 'application/json' } },
-        )
-    }
+    const buffer = await renderPdfOrRespond('contract-dedicated-pdf', html)
+    if (buffer instanceof Response) return buffer
 
     const number = String(contract.number ?? id)
-    const filename = `Umowa_${number.replace(/\//g, '-')}_system_dedykowany.pdf`
-    return new Response(new Uint8Array(buffer), {
-        status: 200,
-        headers: {
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="${filename}"`,
-            'Content-Length': String(buffer.length),
-        },
-    })
+    return pdfResponse(buffer, `Umowa_${number.replace(/\//g, '-')}_system_dedykowany.pdf`)
 }

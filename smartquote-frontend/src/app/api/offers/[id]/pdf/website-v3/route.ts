@@ -2,18 +2,20 @@
 // Generates a PDF for the "Strona internetowa v3" template using Puppeteer.
 // GET /api/offers/:id/pdf/website-v3 → application/pdf
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { buildWebsiteV3Html, type WebsiteV3OfferData } from '@/lib/pdf/website-v3-html'
 import { addDocumentActionLinks, publicDocumentUrl } from '@/lib/pdf/document-action-links'
-import { htmlToPdfBuffer } from '@/lib/pdf/puppeteer'
 import { documentTemplateMismatch } from '@/lib/pdf/template-guard'
+import {
+    getBackendUrl,
+    requireAccessToken,
+    buildHtmlOrRespond,
+    renderPdfOrRespond,
+    pdfResponse,
+} from '@/lib/pdf/route-helpers'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 export const maxDuration = 10
-
-interface SessionWithToken { accessToken?: string }
 
 export async function GET(
     _req: Request,
@@ -21,20 +23,18 @@ export async function GET(
 ) {
     const { id } = await params
 
-    const session = (await getServerSession(authOptions)) as SessionWithToken | null
-    if (!session?.accessToken) {
-        return new Response('Unauthorized', { status: 401 })
-    }
+    const accessToken = await requireAccessToken()
+    if (accessToken instanceof Response) return accessToken
 
-    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8080').replace(/\/$/, '')
+    const backendUrl = getBackendUrl()
 
     const [offerRes, settingsRes] = await Promise.all([
         fetch(`${backendUrl}/api/offers/${id}`, {
-            headers: { Authorization: `Bearer ${session.accessToken}` },
+            headers: { Authorization: `Bearer ${accessToken}` },
             cache: 'no-store',
         }),
         fetch(`${backendUrl}/api/settings/company`, {
-            headers: { Authorization: `Bearer ${session.accessToken}` },
+            headers: { Authorization: `Bearer ${accessToken}` },
             cache: 'no-store',
         }),
     ])
@@ -56,37 +56,14 @@ export async function GET(
         },
     }
 
-    let html: string
-    try {
-        html = addDocumentActionLinks(buildWebsiteV3Html(offerData), publicDocumentUrl('offer', (offer as WebsiteV3OfferData & { publicToken?: string }).publicToken, 'accept'), 'accept')
-    } catch (err) {
-        const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
-        console.error('[website-v3-pdf] buildWebsiteV3Html threw:', detail)
-        return new Response(JSON.stringify({ error: 'HTML build failed', ...(process.env.NODE_ENV === 'development' ? { detail } : {}) }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        })
-    }
+    const html = buildHtmlOrRespond('website-v3-pdf', () =>
+        addDocumentActionLinks(buildWebsiteV3Html(offerData), publicDocumentUrl('offer', (offer as WebsiteV3OfferData & { publicToken?: string }).publicToken, 'accept'), 'accept'),
+    )
+    if (html instanceof Response) return html
 
-    let pdfBuffer: Buffer
-    try {
-        pdfBuffer = await htmlToPdfBuffer(html)
-    } catch (err) {
-        const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
-        console.error('[website-v3-pdf] Puppeteer error:', detail)
-        return new Response(JSON.stringify({ error: 'PDF generation failed', ...(process.env.NODE_ENV === 'development' ? { detail } : {}) }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        })
-    }
+    const buffer = await renderPdfOrRespond('website-v3-pdf', html)
+    if (buffer instanceof Response) return buffer
 
     const safeNumber = offer.number?.replace(/\//g, '-') ?? id
-    return new Response(new Uint8Array(pdfBuffer), {
-        status: 200,
-        headers: {
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="Oferta_${safeNumber}_strona-v3.pdf"`,
-            'Content-Length': String(pdfBuffer.length),
-        },
-    })
+    return pdfResponse(buffer, `Oferta_${safeNumber}_strona-v3.pdf`)
 }

@@ -40,6 +40,7 @@ const MOCK_USER = {
     name: 'Test User',
     role: 'USER',
     isActive: true,
+    tokenVersion: 0,
     phone: null,
     avatar: null,
     createdAt: new Date(),
@@ -119,6 +120,16 @@ describe('register', () => {
         const decoded = jwt.decode(result.token) as Record<string, unknown>;
         expect(decoded.id).toBe(MOCK_USER.id);
         expect(decoded.email).toBe(MOCK_USER.email);
+    });
+
+    it('JWT token embeds the user\'s current tokenVersion', async () => {
+        (db.user.findUnique as jest.Mock).mockResolvedValue(null);
+        (db.user.create as jest.Mock).mockResolvedValue({ ...MOCK_USER, tokenVersion: 3 });
+
+        const result = await register({ email: 'test@example.com', password: 'password123' });
+
+        const decoded = jwt.decode(result.token) as Record<string, unknown>;
+        expect(decoded.tokenVersion).toBe(3);
     });
 });
 

@@ -41,7 +41,7 @@ export default function Header({ onSearchOpen }: HeaderProps) {
     const initials = getInitials(displayName);
 
     return (
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-xl sm:px-6">
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 pl-[6.75rem] backdrop-blur-xl sm:px-6 sm:pl-[7.25rem] lg:pl-6">
             {/* Search — opens command palette */}
             <button
                 onClick={onSearchOpen}

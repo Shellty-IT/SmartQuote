@@ -22,6 +22,8 @@ import {
     Settings,
     LogOut,
     ChevronsLeft,
+    Menu,
+    X,
     GripVertical,
     GripHorizontal,
     Pin,
@@ -294,6 +296,7 @@ export default function FloatingDock() {
     const isHorizontalMode = position === 'top' || position === 'bottom';
     const showHorizontal = isHorizontalMode && !isDragging;
     const tooltipSide = showHorizontal ? (position === 'top' ? 'bottom' : 'top') : position === 'right' ? 'left' : 'right';
+    const horizontalExpanded = showHorizontal && !collapsed;
 
     const DOCK_POSITION_OPTIONS: { value: DockPosition; label: string; icon: React.ElementType }[] = [
         { value: 'top',      label: commonTr.dockPinTop,      icon: PanelTop },
@@ -526,10 +529,118 @@ export default function FloatingDock() {
         </div>
     );
 
-    // Icon-only horizontal row, macOS-dock style — used when pinned to the top or bottom edge.
+    const mobileContent = (
+        <div className="flex h-full flex-col">
+            <div className="flex items-center gap-2 border-b border-sidebar-border px-4 py-3.5">
+                <Link href="/dashboard" onClick={() => setMobileOpen(false)} className="flex min-w-0 items-center gap-2.5">
+                    <div className="h-9 w-9 shrink-0 overflow-hidden rounded-xl">
+                        <Image src="/logo.svg" alt="SmartQuote" width={36} height={36} className="h-full w-full object-contain" />
+                    </div>
+                    <div className="flex min-w-0 flex-col leading-tight">
+                        <span className="truncate text-[15px] font-semibold tracking-tight text-sidebar-foreground">
+                            SmartQuote
+                        </span>
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sidebar-primary">
+                            AI Suite
+                        </span>
+                    </div>
+                </Link>
+                <button
+                    onClick={() => setMobileOpen(false)}
+                    className="ml-auto grid h-9 w-9 place-items-center rounded-lg text-muted-foreground transition hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+                    aria-label={commonTr.closeMenu}
+                >
+                    <X className="h-4.5 w-4.5" />
+                </button>
+            </div>
+
+            <nav className="scrollbar-thin flex-1 space-y-0.5 overflow-y-auto px-3 py-3">
+                <div className="px-3 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/70">
+                    {tr.workspace}
+                </div>
+                {NAV_ITEMS.map((item) => {
+                    const active = isActive(item.href);
+                    const badge = getBadge(item.stat, unreadNotifications);
+                    const Icon = item.icon;
+
+                    return (
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setMobileOpen(false)}
+                            className={cn(
+                                'group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all',
+                                active
+                                    ? 'bg-card text-foreground shadow-card ring-1 ring-border'
+                                    : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground'
+                            )}
+                        >
+                            {active && (
+                                <span className="absolute inset-y-1.5 left-0 w-[3px] rounded-r-full bg-gradient-primary" />
+                            )}
+                            <Icon
+                                className={cn(
+                                    'h-[18px] w-[18px] shrink-0 transition-colors',
+                                    active ? 'text-primary' : 'text-muted-foreground group-hover:text-sidebar-foreground'
+                                )}
+                                strokeWidth={2}
+                            />
+                            <span className="flex-1 truncate">{tr.nav[item.key]}</span>
+                            {badge !== null && (
+                                <span className={cn(
+                                    'rounded-full px-2 py-0.5 text-[10px] font-semibold tabular-nums',
+                                    badge === 'loading' ? 'animate-pulse' : '',
+                                    active ? 'bg-gradient-primary text-white' : BADGE_TONE[item.badgeTone],
+                                )}>
+                                    {badge === 'loading' ? '...' : badge > 9999 ? '9999+' : badge}
+                                </span>
+                            )}
+                        </Link>
+                    );
+                })}
+            </nav>
+
+            <div className="space-y-0.5 border-t border-sidebar-border/70 p-3">
+                <Link
+                    href="/dashboard/settings"
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                        'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground/80 transition-all hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
+                        isActive('/dashboard/settings') && 'bg-card text-foreground shadow-card ring-1 ring-border'
+                    )}
+                >
+                    <Settings className="h-[18px] w-[18px] shrink-0" strokeWidth={2} />
+                    <span>{commonTr.settings}</span>
+                </Link>
+
+                <button
+                    onClick={() => signOut({ callbackUrl: '/' })}
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground/80 transition-all hover:bg-destructive/10 hover:text-destructive"
+                >
+                    <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={2} />
+                    <span>{commonTr.logout}</span>
+                </button>
+            </div>
+        </div>
+    );
+
+    // Horizontal row used when pinned to the top or bottom edge.
     const horizontalContent = (
-        <div className="flex items-center gap-1 px-2 py-2">
+        <div className="flex min-w-max items-center gap-1 px-2 py-2">
             {gripHandle}
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <button
+                        type="button"
+                        onClick={() => setCollapsed(!collapsed)}
+                        aria-label={commonTr.collapsePanel}
+                        className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-muted-foreground transition hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+                    >
+                        <ChevronsLeft className={cn('h-4 w-4 transition-transform', collapsed ? 'rotate-180' : '')} />
+                    </button>
+                </TooltipTrigger>
+                <TooltipContent side={tooltipSide}>{commonTr.collapsePanel}</TooltipContent>
+            </Tooltip>
             <div className="mx-1 h-8 w-px shrink-0 bg-sidebar-border/70" />
             {NAV_ITEMS.map((item) => {
                 const active = isActive(item.href);
@@ -542,7 +653,8 @@ export default function FloatingDock() {
                                 href={item.href}
                                 onClick={() => setMobileOpen(false)}
                                 className={cn(
-                                    'relative grid h-11 w-11 shrink-0 place-items-center rounded-xl transition-all',
+                                    'relative flex h-11 shrink-0 items-center justify-center rounded-xl transition-all',
+                                    horizontalExpanded ? 'w-auto gap-2 px-3 text-sm font-medium' : 'w-11',
                                     active
                                         ? 'bg-card text-foreground shadow-card ring-1 ring-border'
                                         : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground'
@@ -552,12 +664,21 @@ export default function FloatingDock() {
                                     className={cn('h-[18px] w-[18px]', active ? 'text-primary' : 'text-muted-foreground')}
                                     strokeWidth={2}
                                 />
+                                {horizontalExpanded && (
+                                    <span className="whitespace-nowrap">{tr.nav[item.key]}</span>
+                                )}
                                 {badge !== null && (
                                     <span className={cn(
-                                        'absolute right-1.5 top-1.5 h-2 w-2 rounded-full ring-2 ring-sidebar',
+                                        horizontalExpanded
+                                            ? 'rounded-full px-2 py-0.5 text-[10px] font-semibold tabular-nums'
+                                            : 'absolute right-1.5 top-1.5 h-2 w-2 rounded-full ring-2 ring-sidebar',
                                         badge === 'loading' ? 'animate-pulse' : '',
-                                        BADGE_DOT_TONE[item.badgeTone],
-                                    )} />
+                                        horizontalExpanded
+                                            ? active ? 'bg-gradient-primary text-white' : BADGE_TONE[item.badgeTone]
+                                            : BADGE_DOT_TONE[item.badgeTone],
+                                    )}>
+                                        {horizontalExpanded ? badge === 'loading' ? '...' : badge > 9999 ? '9999+' : badge : null}
+                                    </span>
                                 )}
                             </Link>
                         </TooltipTrigger>
@@ -572,13 +693,15 @@ export default function FloatingDock() {
                     href="/dashboard/settings"
                     onClick={() => setMobileOpen(false)}
                     className={cn(
-                        'grid h-11 w-11 shrink-0 place-items-center rounded-xl transition-all',
+                        'flex h-11 shrink-0 items-center justify-center rounded-xl transition-all',
+                        horizontalExpanded ? 'w-auto gap-2 px-3 text-sm font-medium' : 'w-11',
                         isActive('/dashboard/settings')
                             ? 'bg-card text-foreground shadow-card ring-1 ring-border'
                             : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground'
                     )}
                 >
                     <Settings className="h-[18px] w-[18px] text-muted-foreground" strokeWidth={2} />
+                    {horizontalExpanded && <span className="whitespace-nowrap">{commonTr.settings}</span>}
                 </Link>
                 </TooltipTrigger>
                 <TooltipContent side={tooltipSide} sideOffset={8}>{commonTr.settings}</TooltipContent>
@@ -587,9 +710,13 @@ export default function FloatingDock() {
                 <TooltipTrigger asChild>
                 <button
                     onClick={() => signOut({ callbackUrl: '/' })}
-                    className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-sidebar-foreground/80 transition-all hover:bg-destructive/10 hover:text-destructive"
+                    className={cn(
+                        'flex h-11 shrink-0 items-center justify-center rounded-xl text-sidebar-foreground/80 transition-all hover:bg-destructive/10 hover:text-destructive',
+                        horizontalExpanded ? 'w-auto gap-2 px-3 text-sm font-medium' : 'w-11'
+                    )}
                 >
                     <LogOut className="h-[18px] w-[18px]" strokeWidth={2} />
+                    {horizontalExpanded && <span className="whitespace-nowrap">{commonTr.logout}</span>}
                 </button>
                 </TooltipTrigger>
                 <TooltipContent side={tooltipSide} sideOffset={8}>{commonTr.logout}</TooltipContent>
@@ -608,16 +735,23 @@ export default function FloatingDock() {
 
     return (
         <TooltipProvider delayDuration={300}>
-            {/* Mobile burger */}
-            <button
-                onClick={() => setMobileOpen(true)}
-                className="fixed left-4 top-4 z-30 grid h-10 w-10 place-items-center rounded-xl border border-border bg-card shadow-card lg:hidden"
-                aria-label={commonTr.openMenu}
-            >
-                <svg className="h-5 w-5 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-            </button>
+            {/* Mobile nav trigger */}
+            <div className="fixed left-3 top-3 z-30 flex h-10 items-center gap-1.5 rounded-2xl border border-sidebar-border/80 bg-gradient-sidebar p-1 shadow-card lg:hidden">
+                <button
+                    onClick={() => setMobileOpen(true)}
+                    className="grid h-8 w-8 place-items-center rounded-xl text-sidebar-foreground transition hover:bg-sidebar-accent/70"
+                    aria-label={commonTr.openMenu}
+                >
+                    <Menu className="h-5 w-5" />
+                </button>
+                <Link
+                    href="/dashboard"
+                    aria-label="SmartQuote"
+                    className="grid h-8 w-8 place-items-center overflow-hidden rounded-xl bg-card/60 ring-1 ring-sidebar-border/70"
+                >
+                    <Image src="/logo.svg" alt="SmartQuote" width={28} height={28} className="h-7 w-7 object-contain" priority />
+                </Link>
+            </div>
 
             {/* Snap-zone overlays — shown only while dragging the desktop dock */}
             {isDragging && (
@@ -652,9 +786,13 @@ export default function FloatingDock() {
                     !isDragging && 'transition-all duration-300 ease-out',
                     isDragging && 'opacity-95',
                     showHorizontal
-                        ? position === 'top'
-                            ? 'inset-x-0 top-0 mx-auto w-fit max-w-[calc(100vw-2rem)] xl:max-w-[calc(100vw-48rem)]'
-                            : 'inset-x-0 bottom-0 mx-auto w-fit max-w-[calc(100vw-2rem)]'
+                        ? horizontalExpanded
+                            ? position === 'top'
+                                ? 'left-4 right-4 top-0'
+                                : 'left-4 right-4 bottom-0'
+                            : position === 'top'
+                                ? 'inset-x-0 top-0 mx-auto w-fit max-w-[calc(100vw-2rem)] xl:max-w-[calc(100vw-48rem)]'
+                                : 'inset-x-0 bottom-0 mx-auto w-fit max-w-[calc(100vw-2rem)]'
                         : position === 'left' && !isDragging
                             ? 'left-4 top-4 bottom-4'
                             : position === 'right' && !isDragging
@@ -683,17 +821,8 @@ export default function FloatingDock() {
                         onClick={() => setMobileOpen(false)}
                         aria-hidden="true"
                     />
-                    <aside className="fixed left-0 top-0 z-50 flex h-screen w-[260px] flex-col border-r border-sidebar-border bg-gradient-sidebar lg:hidden">
-                        <button
-                            onClick={() => setMobileOpen(false)}
-                            className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-secondary"
-                            aria-label={commonTr.closeMenu}
-                        >
-                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                        {verticalContent}
+                    <aside className="fixed left-0 top-0 z-50 flex h-screen w-[260px] flex-col border-r border-sidebar-border bg-gradient-sidebar shadow-glow lg:hidden">
+                        {mobileContent}
                     </aside>
                 </>
             )}

@@ -2,16 +2,18 @@
 // Returns HTML preview for the "Szablon uniwersalny" template.
 // GET /api/offers/:id/universal/preview → text/html
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { buildUniversalHtml, type UniversalOfferData } from '@/lib/pdf/universal-html'
 import { applyPdfPreviewMode } from '@/lib/pdf/print-preview'
 import { mergeUniversalWithDefaults, buildDefaultUniversalBlocks } from '@/lib/pdf/universal-blocks'
+import {
+    getBackendUrl,
+    requireAccessToken,
+    buildHtmlOrRespond,
+    htmlResponse,
+} from '@/lib/pdf/route-helpers'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
-
-interface SessionWithToken { accessToken?: string }
 
 interface RawOfferData {
     number?: string | null
@@ -39,20 +41,18 @@ export async function GET(
 ) {
     const { id } = await params
 
-    const session = (await getServerSession(authOptions)) as SessionWithToken | null
-    if (!session?.accessToken) {
-        return new Response('Unauthorized', { status: 401 })
-    }
+    const accessToken = await requireAccessToken()
+    if (accessToken instanceof Response) return accessToken
 
-    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8080').replace(/\/$/, '')
+    const backendUrl = getBackendUrl()
 
     const [offerRes, settingsRes] = await Promise.all([
         fetch(`${backendUrl}/api/offers/${id}`, {
-            headers: { Authorization: `Bearer ${session.accessToken}` },
+            headers: { Authorization: `Bearer ${accessToken}` },
             cache: 'no-store',
         }),
         fetch(`${backendUrl}/api/settings/company`, {
-            headers: { Authorization: `Bearer ${session.accessToken}` },
+            headers: { Authorization: `Bearer ${accessToken}` },
             cache: 'no-store',
         }),
     ])
@@ -94,10 +94,8 @@ export async function GET(
         ? mergeUniversalWithDefaults(offer.blocks)
         : buildDefaultUniversalBlocks()
 
-    const html = applyPdfPreviewMode(buildUniversalHtml(blocks, offerData))
+    const html = buildHtmlOrRespond('universal-preview', () => applyPdfPreviewMode(buildUniversalHtml(blocks, offerData)))
+    if (html instanceof Response) return html
 
-    return new Response(html, {
-        status: 200,
-        headers: { 'Content-Type': 'text/html; charset=utf-8' },
-    })
+    return htmlResponse(html)
 }

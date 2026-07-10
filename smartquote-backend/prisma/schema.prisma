@@ -18,6 +18,10 @@ model User {
   avatar    String?
   role      UserRole @default(USER)
   isActive  Boolean  @default(true)
+  // Bumped whenever a stolen JWT must be invalidated before its 7-day expiry
+  // (currently: password change). Checked against the token's own claim in
+  // the auth middleware — see src/middleware/auth.ts.
+  tokenVersion Int   @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

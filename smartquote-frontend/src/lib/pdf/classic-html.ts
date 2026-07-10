@@ -3,7 +3,7 @@
 // Replicates the react-pdf OfferDocument layout in pure HTML/CSS for Puppeteer.
 // Design: teal #0891b2 header + slate body — formal business offer.
 
-import { buildHtmlDocument } from './html-shell'
+import { buildHtmlDocument, escapeHtml as esc } from './html-shell'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -59,14 +59,6 @@ export interface ClassicOfferData {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function esc(s: string | number | null | undefined): string {
-    return String(s ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 function money(n: number, cur = ''): string {
     return n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + (cur ? ' ' + cur : '')

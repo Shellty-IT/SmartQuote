@@ -5,6 +5,7 @@
 import { mergeWithDefaults, type ProposalBlocks, type SectionKey } from './proposal-blocks'
 import { EMBEDDED_FONTS_CSS } from './embedded-fonts'
 import { withPageBreakAfter } from './section-layout'
+import { escapeHtml as esc } from './html-shell'
 
 export interface ProposalOfferData {
     number: string
@@ -33,15 +34,6 @@ export interface ProposalOfferData {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function esc(s: string | null | undefined): string {
-    if (!s) return ''
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 /**
  * Returns an HTML-escaped href only if it uses a safe scheme (http/https) or is

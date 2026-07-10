@@ -59,10 +59,16 @@ export async function changePassword(
     if (!isValid) throw new Error('Nieprawidłowe obecne hasło');
 
     const hashedPassword = await bcrypt.hash(newPassword, 12);
-    await prisma.user.update({ where: { id: userId }, data: { password: hashedPassword } });
+    // Bumping tokenVersion invalidates every JWT issued before this point
+    // (they carry the old version), not just the 5-minute auth cache entry —
+    // otherwise a stolen token stays valid for up to 7 days post-change.
+    await prisma.user.update({
+        where: { id: userId },
+        data: { password: hashedPassword, tokenVersion: { increment: 1 } },
+    });
 
     authCache.invalidate(userId);
-    logger.info({ userId }, 'Password changed, auth cache invalidated');
+    logger.info({ userId }, 'Password changed, auth cache invalidated, tokenVersion bumped');
 
     return { message: 'Hasło zostało zmienione' };
 }
