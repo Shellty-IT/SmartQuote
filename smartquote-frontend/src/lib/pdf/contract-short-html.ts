@@ -8,19 +8,10 @@ import {
     type ContractShortBlocks,
     type ContractSectionKey,
 } from './contract-short-blocks'
-import { buildHtmlDocument, buildContractPageRule } from './html-shell'
+import { buildHtmlDocument, buildContractPageRule, escapeHtml as esc } from './html-shell'
 import { withPageBreakAfter } from './section-layout'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function esc(s: string | null | undefined): string {
-    if (!s) return ''
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 /** Pass-through for pre-sanitised HTML (e.g. items with <strong> tags) */
 function rawHtml(s: string | null | undefined): string {

@@ -2,7 +2,7 @@
 // HTML generator for the "Strona internetowa v2" offer template.
 // Pure function — no side effects, no imports of React/server utilities.
 
-import { buildHtmlDocument } from './html-shell'
+import { buildHtmlDocument, escapeHtml as esc } from './html-shell'
 import { withPageBreakAfter } from './section-layout'
 import { mergeWebsiteV2WithDefaults, type WebsiteV2Blocks, type WebsiteV2SectionKey } from './website-v2-blocks'
 
@@ -34,14 +34,6 @@ export interface WebsiteV2OfferData {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function esc(s: string | number | null | undefined): string {
-    return String(s ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 // Guard against placeholder / hallucinated image URLs. The AI offer-fill agent
 // used to invent addresses like https://example.com/foo.jpg for portfolio

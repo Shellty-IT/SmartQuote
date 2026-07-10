@@ -186,7 +186,7 @@ export default function LoginPage() {
                 <p className="mt-6 text-center text-xs text-muted-foreground">
                     © 2026 SmartQuote AI by{' '}
                     <a href="https://shellty-it.github.io/" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
-                        Shellty IT
+                        Shellty
                     </a>
                     {' · '}
                     <button

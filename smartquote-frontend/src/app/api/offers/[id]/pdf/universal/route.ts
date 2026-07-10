@@ -2,19 +2,21 @@
 // Generates a PDF for the "Szablon uniwersalny" template using Puppeteer.
 // GET /api/offers/:id/pdf/universal → application/pdf
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { buildUniversalHtml, type UniversalOfferData } from '@/lib/pdf/universal-html'
 import { addDocumentActionLinks, publicDocumentUrl } from '@/lib/pdf/document-action-links'
 import { mergeUniversalWithDefaults, buildDefaultUniversalBlocks } from '@/lib/pdf/universal-blocks'
-import { htmlToPdfBuffer } from '@/lib/pdf/puppeteer'
 import { documentTemplateMismatch } from '@/lib/pdf/template-guard'
+import {
+    getBackendUrl,
+    requireAccessToken,
+    buildHtmlOrRespond,
+    renderPdfOrRespond,
+    pdfResponse,
+} from '@/lib/pdf/route-helpers'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 export const maxDuration = 10
-
-interface SessionWithToken { accessToken?: string }
 
 interface RawOfferData {
     number?: string | null
@@ -25,6 +27,7 @@ interface RawOfferData {
     client?: { name?: string | null } | null
     user?: { name?: string | null; email?: string | null } | null
     blocks?: unknown
+    publicToken?: string
 }
 
 interface RawCompanySettings {
@@ -42,20 +45,18 @@ export async function GET(
 ) {
     const { id } = await params
 
-    const session = (await getServerSession(authOptions)) as SessionWithToken | null
-    if (!session?.accessToken) {
-        return new Response('Unauthorized', { status: 401 })
-    }
+    const accessToken = await requireAccessToken()
+    if (accessToken instanceof Response) return accessToken
 
-    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8080').replace(/\/$/, '')
+    const backendUrl = getBackendUrl()
 
     const [offerRes, settingsRes] = await Promise.all([
         fetch(`${backendUrl}/api/offers/${id}`, {
-            headers: { Authorization: `Bearer ${session.accessToken}` },
+            headers: { Authorization: `Bearer ${accessToken}` },
             cache: 'no-store',
         }),
         fetch(`${backendUrl}/api/settings/company`, {
-            headers: { Authorization: `Bearer ${session.accessToken}` },
+            headers: { Authorization: `Bearer ${accessToken}` },
             cache: 'no-store',
         }),
     ])
@@ -99,37 +100,14 @@ export async function GET(
         ? mergeUniversalWithDefaults(offer.blocks)
         : buildDefaultUniversalBlocks()
 
-    let html: string
-    try {
-        html = addDocumentActionLinks(buildUniversalHtml(blocks, offerData), publicDocumentUrl('offer', (offer as RawOfferData & { publicToken?: string }).publicToken, 'accept'), 'accept')
-    } catch (err) {
-        const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
-        console.error('[universal-pdf] buildUniversalHtml threw:', detail)
-        return new Response(JSON.stringify({ error: 'HTML build failed', detail }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        })
-    }
+    const html = buildHtmlOrRespond('universal-pdf', () =>
+        addDocumentActionLinks(buildUniversalHtml(blocks, offerData), publicDocumentUrl('offer', offer.publicToken, 'accept'), 'accept'),
+    )
+    if (html instanceof Response) return html
 
-    let buffer: Buffer
-    try {
-        buffer = await htmlToPdfBuffer(html)
-    } catch (err) {
-        const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
-        console.error('[universal-pdf] Puppeteer error:', detail)
-        return new Response(JSON.stringify({ error: 'PDF generation failed', detail }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        })
-    }
+    const buffer = await renderPdfOrRespond('universal-pdf', html)
+    if (buffer instanceof Response) return buffer
 
     const safeNumber = (offer.number ?? id).replace(/\//g, '-')
-    return new Response(new Uint8Array(buffer), {
-        status: 200,
-        headers: {
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="Oferta_${safeNumber}_universal.pdf"`,
-            'Content-Length': String(buffer.length),
-        },
-    })
+    return pdfResponse(buffer, `Oferta_${safeNumber}_universal.pdf`)
 }

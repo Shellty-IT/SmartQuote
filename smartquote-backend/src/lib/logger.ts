@@ -4,6 +4,12 @@ import { config, isDev } from '../config';
 
 export const logger = pino({
     level: process.env.LOG_LEVEL ?? (isDev ? 'debug' : 'info'),
+    // Public offer/contract tokens are bearer capabilities — never let them
+    // reach log storage in plaintext, even though URLs are separately masked.
+    redact: {
+        paths: ['token', '*.token', 'publicToken', '*.publicToken'],
+        censor: '[token]',
+    },
     transport: isDev
         ? {
             target: 'pino-pretty',

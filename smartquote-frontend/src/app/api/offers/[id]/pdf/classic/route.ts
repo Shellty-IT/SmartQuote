@@ -2,17 +2,19 @@
 // Generates a PDF for the "Klasyczny" template using Puppeteer.
 // GET /api/offers/:id/pdf/classic → application/pdf
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { buildClassicHtml, type ClassicOfferData } from '@/lib/pdf/classic-html'
-import { htmlToPdfBuffer } from '@/lib/pdf/puppeteer'
 import { documentTemplateMismatch } from '@/lib/pdf/template-guard'
+import {
+    getBackendUrl,
+    requireAccessToken,
+    buildHtmlOrRespond,
+    renderPdfOrRespond,
+    pdfResponse,
+} from '@/lib/pdf/route-helpers'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 export const maxDuration = 10
-
-interface SessionWithToken { accessToken?: string }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyRecord = Record<string, any>
@@ -23,13 +25,11 @@ export async function GET(
 ) {
     const { id } = await params
 
-    const session = (await getServerSession(authOptions)) as SessionWithToken | null
-    if (!session?.accessToken) {
-        return new Response('Unauthorized', { status: 401 })
-    }
+    const accessToken = await requireAccessToken()
+    if (accessToken instanceof Response) return accessToken
 
-    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8080').replace(/\/$/, '')
-    const authHeader = { Authorization: `Bearer ${session.accessToken}` }
+    const backendUrl = getBackendUrl()
+    const authHeader = { Authorization: `Bearer ${accessToken}` }
 
     const [offerRes, settingsRes] = await Promise.all([
         fetch(`${backendUrl}/api/offers/${id}`, { headers: authHeader, cache: 'no-store' }),
@@ -107,37 +107,12 @@ export async function GET(
             : [],
     }
 
-    let html: string
-    try {
-        html = buildClassicHtml(data)
-    } catch (err) {
-        const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
-        console.error('[classic-pdf] buildClassicHtml threw:', detail)
-        return new Response(JSON.stringify({ error: 'HTML build failed', detail }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        })
-    }
+    const html = buildHtmlOrRespond('classic-pdf', () => buildClassicHtml(data))
+    if (html instanceof Response) return html
 
-    let buffer: Buffer
-    try {
-        buffer = await htmlToPdfBuffer(html)
-    } catch (err) {
-        const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
-        console.error('[classic-pdf] Puppeteer error:', detail)
-        return new Response(JSON.stringify({ error: 'PDF generation failed', detail }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        })
-    }
+    const buffer = await renderPdfOrRespond('classic-pdf', html)
+    if (buffer instanceof Response) return buffer
 
     const safeNumber = (offer.number ?? id).replace(/\//g, '-')
-    return new Response(new Uint8Array(buffer), {
-        status: 200,
-        headers: {
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="Oferta_${safeNumber}_klasyczna.pdf"`,
-            'Content-Length': String(buffer.length),
-        },
-    })
+    return pdfResponse(buffer, `Oferta_${safeNumber}_klasyczna.pdf`)
 }

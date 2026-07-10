@@ -2,18 +2,23 @@
 // Generates a "Strona internetowa v2" offer PDF using Puppeteer.
 // GET /api/offers/:id/pdf/website-v2 → returns application/pdf
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { buildWebsiteV2Html } from '@/lib/pdf/website-v2-html'
 import { addDocumentActionLinks, publicDocumentUrl } from '@/lib/pdf/document-action-links'
-import { htmlToPdfBuffer } from '@/lib/pdf/puppeteer'
 import { documentTemplateMismatch } from '@/lib/pdf/template-guard'
+import {
+    getBackendUrl,
+    requireAccessToken,
+    buildHtmlOrRespond,
+    renderPdfOrRespond,
+    pdfResponse,
+} from '@/lib/pdf/route-helpers'
 
 export const maxDuration = 10
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-interface SessionWithToken { accessToken?: string }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyRecord = Record<string, any>
 
 export async function GET(
     _req: Request,
@@ -21,16 +26,11 @@ export async function GET(
 ) {
     const { id } = await params
 
-    const session = (await getServerSession(authOptions)) as SessionWithToken | null
-    if (!session?.accessToken) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-            status: 401,
-            headers: { 'Content-Type': 'application/json' },
-        })
-    }
+    const accessToken = await requireAccessToken()
+    if (accessToken instanceof Response) return accessToken
 
-    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8080').replace(/\/$/, '')
-    const authHeader = { Authorization: `Bearer ${session.accessToken}` }
+    const backendUrl = getBackendUrl()
+    const authHeader = { Authorization: `Bearer ${accessToken}` }
 
     const [offerRes, settingsRes] = await Promise.all([
         fetch(`${backendUrl}/api/offers/${id}`, { headers: authHeader, cache: 'no-store' }),
@@ -45,8 +45,7 @@ export async function GET(
         })
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: offerRaw } = (await offerRes.json()) as { data: Record<string, any> }
+    const { data: offerRaw } = (await offerRes.json()) as { data: AnyRecord }
     const mismatch = documentTemplateMismatch(offerRaw, 'website_v2')
     if (mismatch) return mismatch
 
@@ -57,8 +56,7 @@ export async function GET(
 
     if (settingsRes.ok) {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { data: settings } = (await settingsRes.json()) as { data: Record<string, any> }
+            const { data: settings } = (await settingsRes.json()) as { data: AnyRecord }
             profileName = settings?.profile?.name ?? null
             profileEmail = settings?.profile?.email ?? ''
             profileAvatar = settings?.profile?.avatar ?? null
@@ -88,37 +86,13 @@ export async function GET(
         user: { name: profileName, email: profileEmail, avatar: profileAvatar, companyInfo: companyData },
     }
 
-    let html: string
-    try {
-        html = addDocumentActionLinks(buildWebsiteV2Html(offerData), publicDocumentUrl('offer', offerRaw.publicToken, 'accept'), 'accept')
-    } catch (err) {
-        const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
-        console.error('[website-v2-pdf] buildWebsiteV2Html threw:', detail)
-        return new Response(JSON.stringify({ error: 'HTML build failed', detail }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        })
-    }
+    const html = buildHtmlOrRespond('website-v2-pdf', () =>
+        addDocumentActionLinks(buildWebsiteV2Html(offerData), publicDocumentUrl('offer', offerRaw.publicToken, 'accept'), 'accept'),
+    )
+    if (html instanceof Response) return html
 
-    let buffer: Buffer
-    try {
-        buffer = await htmlToPdfBuffer(html)
-    } catch (err) {
-        const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
-        console.error('[website-v2-pdf] Puppeteer error:', detail)
-        return new Response(JSON.stringify({ error: 'PDF generation failed', detail }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        })
-    }
+    const buffer = await renderPdfOrRespond('website-v2-pdf', html)
+    if (buffer instanceof Response) return buffer
 
-    const filename = `Oferta_${offerData.number.replace(/\//g, '-')}_strona-v2.pdf`
-    return new Response(new Uint8Array(buffer), {
-        status: 200,
-        headers: {
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="${filename}"`,
-            'Content-Length': String(buffer.length),
-        },
-    })
+    return pdfResponse(buffer, `Oferta_${offerData.number.replace(/\//g, '-')}_strona-v2.pdf`)
 }

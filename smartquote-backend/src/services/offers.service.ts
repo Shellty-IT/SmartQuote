@@ -15,6 +15,7 @@ import { NotFoundError, ValidationError, ExternalServiceError } from '../errors/
 import { mapToPDFUser, mapToPDFClient } from './pdf/data-mapper';
 import { pdfService } from './pdf';
 import { syncTotalsFromBlocks } from '../utils/syncTotalsFromBlocks';
+import { sanitizeRichText } from '../utils/sanitizeHtml';
 import prisma from '../lib/prisma';
 
 const logger = createModuleLogger('offers-service');
@@ -204,10 +205,10 @@ export class OffersService {
                 return await offersRepository.create({
                     number,
                     title: data.title,
-                    description: data.description,
+                    description: sanitizeRichText(data.description),
                     validUntil: data.validUntil ? new Date(data.validUntil) : null,
                     notes: data.notes,
-                    terms: data.terms,
+                    terms: sanitizeRichText(data.terms),
                     paymentDays: data.paymentDays ?? 14,
                     requireAuditTrail: data.requireAuditTrail ?? false,
                     totalNet: offerTotals.totalNet,
@@ -263,10 +264,10 @@ export class OffersService {
 
         const updateData: UpdateOfferData = {
             title: data.title,
-            description: data.description,
+            description: sanitizeRichText(data.description),
             validUntil: data.validUntil ? new Date(data.validUntil) : undefined,
             notes: data.notes,
-            terms: data.terms,
+            terms: sanitizeRichText(data.terms),
             paymentDays: data.paymentDays,
         };
 

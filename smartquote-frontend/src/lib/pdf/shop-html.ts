@@ -3,7 +3,7 @@
 // Used by: Puppeteer PDF route + HTML preview route.
 
 import { mergeShopWithDefaults, type ShopBlocks, type ShopSectionKey } from './shop-blocks'
-import { buildHtmlDocument } from './html-shell'
+import { buildHtmlDocument, escapeHtml as esc } from './html-shell'
 import { withPageBreakAfter } from './section-layout'
 
 export interface ShopOfferData {
@@ -35,15 +35,6 @@ export interface ShopOfferData {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function esc(s: string | null | undefined): string {
-    if (!s) return ''
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 function formatDate(d: string | Date): string {
     const dt = typeof d === 'string' ? new Date(d) : d

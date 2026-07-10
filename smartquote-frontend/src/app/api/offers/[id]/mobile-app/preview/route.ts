@@ -2,16 +2,18 @@
 // Returns HTML preview for the "Aplikacja mobilna - zaawansowana" template.
 // GET /api/offers/:id/mobile-app/preview → text/html
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { buildMobileAppHtml, type MobileAppOfferData } from '@/lib/pdf/mobile-app-html'
 import { applyPdfPreviewMode } from '@/lib/pdf/print-preview'
 import { mergeMobileAppWithDefaults, buildDefaultMobileAppBlocks } from '@/lib/pdf/mobile-app-blocks'
+import {
+    getBackendUrl,
+    requireAccessToken,
+    buildHtmlOrRespond,
+    htmlResponse,
+} from '@/lib/pdf/route-helpers'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
-
-interface SessionWithToken { accessToken?: string }
 
 interface RawOfferData {
     number?: string | null
@@ -36,20 +38,18 @@ export async function GET(
 ) {
     const { id } = await params
 
-    const session = (await getServerSession(authOptions)) as SessionWithToken | null
-    if (!session?.accessToken) {
-        return new Response('Unauthorized', { status: 401 })
-    }
+    const accessToken = await requireAccessToken()
+    if (accessToken instanceof Response) return accessToken
 
-    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8080').replace(/\/$/, '')
+    const backendUrl = getBackendUrl()
 
     const [offerRes, settingsRes] = await Promise.all([
         fetch(`${backendUrl}/api/offers/${id}`, {
-            headers: { Authorization: `Bearer ${session.accessToken}` },
+            headers: { Authorization: `Bearer ${accessToken}` },
             cache: 'no-store',
         }),
         fetch(`${backendUrl}/api/settings/company`, {
-            headers: { Authorization: `Bearer ${session.accessToken}` },
+            headers: { Authorization: `Bearer ${accessToken}` },
             cache: 'no-store',
         }),
     ])
@@ -88,10 +88,8 @@ export async function GET(
         ? mergeMobileAppWithDefaults(offer.blocks)
         : buildDefaultMobileAppBlocks()
 
-    const html = applyPdfPreviewMode(buildMobileAppHtml(blocks, offerData))
+    const html = buildHtmlOrRespond('mobile-app-preview', () => applyPdfPreviewMode(buildMobileAppHtml(blocks, offerData)))
+    if (html instanceof Response) return html
 
-    return new Response(html, {
-        status: 200,
-        headers: { 'Content-Type': 'text/html; charset=utf-8' },
-    })
+    return htmlResponse(html)
 }

@@ -5,19 +5,16 @@
 //   Body: ProposalOfferData (partial — missing id/number use placeholders)
 //   Returns: text/html
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { buildProposalHtml, type ProposalOfferData } from '@/lib/pdf/proposal-html'
 import { applyPdfPreviewMode } from '@/lib/pdf/print-preview'
+import { requireAccessToken, htmlResponse } from '@/lib/pdf/route-helpers'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 export async function POST(req: Request) {
-    const session = await getServerSession(authOptions)
-    if (!session) {
-        return new Response('Unauthorized', { status: 401 })
-    }
+    const accessToken = await requireAccessToken()
+    if (accessToken instanceof Response) return accessToken
 
     let body: Partial<ProposalOfferData>
     try {
@@ -39,10 +36,5 @@ export async function POST(req: Request) {
         blocks: body.blocks ?? null,
     }
 
-    const html = applyPdfPreviewMode(buildProposalHtml(offerData))
-
-    return new Response(html, {
-        status: 200,
-        headers: { 'Content-Type': 'text/html; charset=utf-8' },
-    })
+    return htmlResponse(applyPdfPreviewMode(buildProposalHtml(offerData)))
 }

@@ -6,8 +6,6 @@
 import type { Browser } from 'puppeteer-core'
 import { applyPrintPagination } from './print-preview'
 
-let _browser: Browser | null = null
-
 const SET_CONTENT_TIMEOUT_MS = Number(process.env.PDF_SET_CONTENT_TIMEOUT_MS ?? 15_000)
 const FONT_READY_TIMEOUT_MS = Number(process.env.PDF_FONT_READY_TIMEOUT_MS ?? 3_000)
 const IMAGE_READY_TIMEOUT_MS = Number(process.env.PDF_IMAGE_READY_TIMEOUT_MS ?? 5_000)
@@ -17,10 +15,10 @@ function elapsed(startedAt: number): number {
     return Date.now() - startedAt
 }
 
-async function getBrowser(): Promise<Browser> {
-    // Re-use an existing browser instance within a single lambda invocation.
-    if (_browser) return _browser
-
+// Launches a fresh, unshared browser per call. A module-level cached instance
+// previously raced across concurrent invocations sharing one lambda: whichever
+// request finished first closed the browser out from under the other.
+async function launchBrowser(): Promise<Browser> {
     const puppeteer = await import('puppeteer-core')
 
     let executablePath: string
@@ -35,7 +33,7 @@ async function getBrowser(): Promise<Browser> {
         ? []
         : (await import('@sparticuz/chromium')).default.args
 
-    _browser = await puppeteer.default.launch({
+    return puppeteer.default.launch({
         args: [
             ...chromiumArgs,
             '--no-sandbox',
@@ -45,15 +43,13 @@ async function getBrowser(): Promise<Browser> {
         executablePath,
         headless: true,
     })
-
-    return _browser
 }
 
 export async function htmlToPdfBuffer(html: string): Promise<Buffer> {
     html = applyPrintPagination(html)
     const totalStartedAt = Date.now()
     const browserStartedAt = Date.now()
-    const browser = await getBrowser()
+    const browser = await launchBrowser()
     const browserMs = elapsed(browserStartedAt)
     const pageStartedAt = Date.now()
     const page = await browser.newPage()
@@ -160,6 +156,5 @@ export async function htmlToPdfBuffer(html: string): Promise<Buffer> {
     } finally {
         await page.close()
         try { await browser.close() } catch { /* ignore */ }
-        _browser = null
     }
 }

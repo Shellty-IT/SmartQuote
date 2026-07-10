@@ -2,20 +2,23 @@
 // Generates a "Sklep internetowy" offer PDF using Puppeteer.
 // GET /api/offers/:id/pdf/shop → returns application/pdf
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { buildShopHtml } from '@/lib/pdf/shop-html'
 import { addDocumentActionLinks, publicDocumentUrl } from '@/lib/pdf/document-action-links'
-import { htmlToPdfBuffer } from '@/lib/pdf/puppeteer'
 import { documentTemplateMismatch } from '@/lib/pdf/template-guard'
+import {
+    getBackendUrl,
+    requireAccessToken,
+    buildHtmlOrRespond,
+    renderPdfOrRespond,
+    pdfResponse,
+} from '@/lib/pdf/route-helpers'
 
 export const maxDuration = 10
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-interface SessionWithToken {
-    accessToken?: string
-}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyRecord = Record<string, any>
 
 export async function GET(
     _req: Request,
@@ -23,16 +26,11 @@ export async function GET(
 ) {
     const { id } = await params
 
-    const session = (await getServerSession(authOptions)) as SessionWithToken | null
-    if (!session?.accessToken) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-            status: 401,
-            headers: { 'Content-Type': 'application/json' },
-        })
-    }
+    const accessToken = await requireAccessToken()
+    if (accessToken instanceof Response) return accessToken
 
-    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8080').replace(/\/$/, '')
-    const authHeader = { Authorization: `Bearer ${session.accessToken}` }
+    const backendUrl = getBackendUrl()
+    const authHeader = { Authorization: `Bearer ${accessToken}` }
 
     const [offerRes, settingsRes] = await Promise.all([
         fetch(`${backendUrl}/api/offers/${id}`, { headers: authHeader, cache: 'no-store' }),
@@ -47,8 +45,7 @@ export async function GET(
         })
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: offerRaw } = (await offerRes.json()) as { data: Record<string, any> }
+    const { data: offerRaw } = (await offerRes.json()) as { data: AnyRecord }
     const mismatch = documentTemplateMismatch(offerRaw, 'shop')
     if (mismatch) return mismatch
 
@@ -66,8 +63,7 @@ export async function GET(
 
     if (settingsRes.ok) {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { data: settings } = (await settingsRes.json()) as { data: Record<string, any> }
+            const { data: settings } = (await settingsRes.json()) as { data: AnyRecord }
             profileName = settings?.profile?.name ?? null
             profileEmail = settings?.profile?.email ?? ''
             if (settings?.companyInfo) {
@@ -106,37 +102,13 @@ export async function GET(
         },
     }
 
-    let html: string
-    try {
-        html = addDocumentActionLinks(buildShopHtml(shopOffer), publicDocumentUrl('offer', offerRaw.publicToken, 'accept'), 'accept')
-    } catch (err) {
-        const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
-        console.error('[shop-pdf] buildShopHtml threw:', detail)
-        return new Response(JSON.stringify({ error: 'HTML build failed', detail }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        })
-    }
+    const html = buildHtmlOrRespond('shop-pdf', () =>
+        addDocumentActionLinks(buildShopHtml(shopOffer), publicDocumentUrl('offer', offerRaw.publicToken, 'accept'), 'accept'),
+    )
+    if (html instanceof Response) return html
 
-    let buffer: Buffer
-    try {
-        buffer = await htmlToPdfBuffer(html)
-    } catch (err) {
-        const detail = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
-        console.error('[shop-pdf] Puppeteer error:', detail)
-        return new Response(JSON.stringify({ error: 'PDF generation failed', detail }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        })
-    }
+    const buffer = await renderPdfOrRespond('shop-pdf', html)
+    if (buffer instanceof Response) return buffer
 
-    const filename = `Oferta_${shopOffer.number.replace(/\//g, '-')}_sklep.pdf`
-    return new Response(new Uint8Array(buffer), {
-        status: 200,
-        headers: {
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="${filename}"`,
-            'Content-Length': String(buffer.length),
-        },
-    })
+    return pdfResponse(buffer, `Oferta_${shopOffer.number.replace(/\//g, '-')}_sklep.pdf`)
 }

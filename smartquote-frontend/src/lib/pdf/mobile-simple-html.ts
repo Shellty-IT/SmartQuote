@@ -2,7 +2,7 @@
 // HTML generator for the "Aplikacja mobilna - domyślny" offer template.
 // Design: teal #0D9488 + orange #F97316, Outfit font, clean B2C-friendly layout.
 
-import { buildHtmlDocument } from './html-shell'
+import { buildHtmlDocument, escapeHtml as esc } from './html-shell'
 import { resolveHeadlinePrice } from './money'
 import { withPageBreakAfter } from './section-layout'
 import {
@@ -24,15 +24,6 @@ export interface MobileSimpleOfferData {
     totalNet?: number
     totalGross?: number
     currency?: string
-}
-
-function esc(value: unknown): string {
-    return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;')
 }
 
 // ── Editor wrap helper ────────────────────────────────────────────────────────

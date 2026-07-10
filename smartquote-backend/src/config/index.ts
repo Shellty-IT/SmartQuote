@@ -16,6 +16,7 @@ const configSchema = z.object({
         .url('FRONTEND_URL musi być poprawnym URL')
         .default('http://localhost:3000'),
     JWT_SECRET: z.string().min(32, 'JWT_SECRET musi mieć minimum 32 znaki'),
+    ENCRYPTION_KEY: z.string().min(32, 'ENCRYPTION_KEY musi mieć minimum 32 znaki'),
     DATABASE_URL: z.string().min(1, 'DATABASE_URL jest wymagany'),
     GEMINI_API_KEY: z.string().default(''),
     GEMINI_MODEL: z.string().default('gemini-2.5-flash'),

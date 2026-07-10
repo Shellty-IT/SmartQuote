@@ -3,21 +3,24 @@
 // GET /api/offers/:id/pdf/proposal
 //   → returns application/pdf
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { buildProposalHtml } from '@/lib/pdf/proposal-html'
 import { addDocumentActionLinks, publicDocumentUrl } from '@/lib/pdf/document-action-links'
-import { htmlToPdfBuffer } from '@/lib/pdf/puppeteer'
 import { documentTemplateMismatch } from '@/lib/pdf/template-guard'
+import {
+    getBackendUrl,
+    requireAccessToken,
+    buildHtmlOrRespond,
+    renderPdfOrRespond,
+    pdfResponse,
+} from '@/lib/pdf/route-helpers'
 
 // Vercel route config — require adequate memory + allow up to 10s (Hobby limit)
 export const maxDuration = 10
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-interface SessionWithToken {
-    accessToken?: string
-}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyRecord = Record<string, any>
 
 export async function GET(
     _req: Request,
@@ -25,28 +28,15 @@ export async function GET(
 ) {
     const { id } = await params
 
-    // 1. Auth
-    const session = (await getServerSession(authOptions)) as SessionWithToken | null
-    if (!session?.accessToken) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-            status: 401,
-            headers: { 'Content-Type': 'application/json' },
-        })
-    }
+    const accessToken = await requireAccessToken()
+    if (accessToken instanceof Response) return accessToken
 
-    const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8080').replace(/\/$/, '')
-    const authHeader = { Authorization: `Bearer ${session.accessToken}` }
+    const backendUrl = getBackendUrl()
+    const authHeader = { Authorization: `Bearer ${accessToken}` }
 
-    // 2. Fetch offer + user settings in parallel
     const [offerRes, settingsRes] = await Promise.all([
-        fetch(`${backendUrl}/api/offers/${id}`, {
-            headers: authHeader,
-            cache: 'no-store',
-        }),
-        fetch(`${backendUrl}/api/settings`, {
-            headers: authHeader,
-            cache: 'no-store',
-        }),
+        fetch(`${backendUrl}/api/offers/${id}`, { headers: authHeader, cache: 'no-store' }),
+        fetch(`${backendUrl}/api/settings`, { headers: authHeader, cache: 'no-store' }),
     ])
 
     if (!offerRes.ok) {
@@ -57,8 +47,7 @@ export async function GET(
         })
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: offerRaw } = (await offerRes.json()) as { data: Record<string, any> }
+    const { data: offerRaw } = (await offerRes.json()) as { data: AnyRecord }
     const mismatch = documentTemplateMismatch(offerRaw, 'proposal')
     if (mismatch) return mismatch
 
@@ -69,8 +58,7 @@ export async function GET(
 
     if (settingsRes.ok) {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { data: settings } = (await settingsRes.json()) as { data: Record<string, any> }
+            const { data: settings } = (await settingsRes.json()) as { data: AnyRecord }
             profileName = settings?.profile?.name ?? null
             profileEmail = settings?.profile?.email ?? ''
             if (settings?.companyInfo) {
@@ -88,7 +76,6 @@ export async function GET(
         }
     }
 
-    // 3. Build ProposalOfferData combining offer + user/company info
     const proposalOffer = {
         number: String(offerRaw.number ?? ''),
         title: String(offerRaw.title ?? ''),
@@ -108,40 +95,13 @@ export async function GET(
         },
     }
 
-    // 4. Build HTML
-    let html: string
-    try {
-        html = addDocumentActionLinks(buildProposalHtml(proposalOffer), publicDocumentUrl('offer', offerRaw.publicToken, 'accept'), 'accept')
-    } catch (err) {
-        const stack = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
-        console.error('[proposal-pdf] buildProposalHtml threw:', stack)
-        return new Response(
-            JSON.stringify({ error: 'HTML build failed', detail: stack }),
-            { status: 500, headers: { 'Content-Type': 'application/json' } },
-        )
-    }
+    const html = buildHtmlOrRespond('proposal-pdf', () =>
+        addDocumentActionLinks(buildProposalHtml(proposalOffer), publicDocumentUrl('offer', offerRaw.publicToken, 'accept'), 'accept'),
+    )
+    if (html instanceof Response) return html
 
-    // 5. Render PDF via Puppeteer
-    let buffer: Buffer
-    try {
-        buffer = await htmlToPdfBuffer(html)
-    } catch (err) {
-        const stack = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
-        console.error('[proposal-pdf] Puppeteer error:', stack)
-        return new Response(
-            JSON.stringify({ error: 'PDF generation failed', detail: stack }),
-            { status: 500, headers: { 'Content-Type': 'application/json' } },
-        )
-    }
+    const buffer = await renderPdfOrRespond('proposal-pdf', html)
+    if (buffer instanceof Response) return buffer
 
-    // 6. Return PDF
-    const filename = `Oferta_${proposalOffer.number.replace(/\//g, '-')}_propozycja.pdf`
-    return new Response(new Uint8Array(buffer), {
-        status: 200,
-        headers: {
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="${filename}"`,
-            'Content-Length': String(buffer.length),
-        },
-    })
+    return pdfResponse(buffer, `Oferta_${proposalOffer.number.replace(/\//g, '-')}_propozycja.pdf`)
 }

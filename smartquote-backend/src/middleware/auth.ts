@@ -10,6 +10,7 @@ import prisma from '../lib/prisma';
 interface JwtPayload {
     id: string;
     email: string;
+    tokenVersion?: number;
 }
 
 function extractToken(authHeader: string | undefined): string {
@@ -39,6 +40,7 @@ async function resolveUser(userId: string) {
             name: true,
             role: true,
             isActive: true,
+            tokenVersion: true,
         },
     });
 
@@ -59,6 +61,12 @@ export async function authenticate(
         const token = extractToken(req.headers.authorization);
         const decoded = verifyToken(token);
         const user = await resolveUser(decoded.id);
+
+        // Tokens signed before this claim existed carry no tokenVersion — treat
+        // that as version 0, matching every user's DB default at rollout time.
+        if ((decoded.tokenVersion ?? 0) !== user.tokenVersion) {
+            throw new UnauthorizedError('Token został unieważniony, zaloguj się ponownie');
+        }
 
         req.user = {
             id: user.id,

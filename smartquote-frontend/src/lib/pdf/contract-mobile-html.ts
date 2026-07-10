@@ -1,7 +1,7 @@
 // src/lib/pdf/contract-mobile-html.ts
 // HTML generator for the "Aplikacja mobilna" contract template.
 // Navy #1B3A5C / Gold #C9A84C design.
-import { buildHtmlDocument, buildContractPageRule, CONTRACT_ORPHANS_CSS } from './html-shell'
+import { buildHtmlDocument, buildContractPageRule, CONTRACT_ORPHANS_CSS, escapeHtml as esc } from './html-shell'
 import { withPageBreakAfter } from './section-layout'
 import {
     type ContractMobileBlocks,
@@ -13,10 +13,6 @@ export interface ContractMobileHtmlOptions {
     editorMode?: boolean
     zoom?: number
     activeSection?: string | null
-}
-
-function esc(s: string | undefined | null): string {
-    return (s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
 function blank(val: string | undefined | null, label: string): string {

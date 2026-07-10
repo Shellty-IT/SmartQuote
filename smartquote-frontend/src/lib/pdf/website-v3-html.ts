@@ -2,7 +2,7 @@
 // HTML generator for the "Strona internetowa v3" offer template.
 // Pure function — no side effects, no imports of React/server utilities.
 
-import { buildHtmlDocument } from './html-shell'
+import { buildHtmlDocument, escapeHtml as esc } from './html-shell'
 import { withPageBreakAfter } from './section-layout'
 import { mergeWebsiteV3WithDefaults, type WebsiteV3Blocks, type WebsiteV3SectionKey } from './website-v3-blocks'
 
@@ -33,14 +33,6 @@ export interface WebsiteV3OfferData {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function esc(s: string | number | null | undefined): string {
-    return String(s ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 function formatDate(iso: string): string {
     try {

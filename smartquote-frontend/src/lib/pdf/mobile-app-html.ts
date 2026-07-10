@@ -2,7 +2,7 @@
 // Faithfully reproduces the "Aplikacja mobilna - zaawansowana" template.
 // Design: deep indigo #1E1B4B + rose #F43F5E + indigo-light #818CF8, Outfit font.
 
-import { buildHtmlDocument } from './html-shell'
+import { buildHtmlDocument, escapeHtml as esc } from './html-shell'
 import { withPageBreakAfter } from './section-layout'
 import type {
     MobileAppBlocks,
@@ -27,15 +27,6 @@ export interface MobileAppOfferData {
 }
 
 // ── Utility ───────────────────────────────────────────────────────────────────
-
-function esc(s: string | number | undefined | null): string {
-    if (s == null) return ''
-    return String(s)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 function editorWrap(editorMode: boolean, key: string, inner: string): string {
     if (!editorMode) return inner

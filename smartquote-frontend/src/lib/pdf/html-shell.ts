@@ -5,6 +5,18 @@
 
 import { EMBEDDED_FONTS_CSS } from './embedded-fonts'
 
+// ── HTML escaping ─────────────────────────────────────────────────────────────
+
+/** Escapes text for safe interpolation into HTML markup and double- or single-quoted attributes. */
+export function escapeHtml(value: unknown): string {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+}
+
 // ── Document shell ────────────────────────────────────────────────────────────
 
 export interface HtmlDocumentOptions {

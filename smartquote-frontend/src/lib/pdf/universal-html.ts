@@ -2,7 +2,7 @@
 // HTML generator for the "Szablon uniwersalny" offer template.
 // Design: navy #1B3A5C + gold #C9A84C, Outfit Variable font (no external network).
 
-import { buildHtmlDocument } from './html-shell'
+import { buildHtmlDocument, escapeHtml as esc } from './html-shell'
 import { formatMoney, priceTypeLabel, resolveHeadlinePrice } from './money'
 import { withPageBreakAfter } from './section-layout'
 import type { UniversalBlocks, UniversalSectionKey } from './universal-blocks'
@@ -22,15 +22,6 @@ export interface UniversalOfferData {
     totalNet?: number
     totalGross?: number
     currency?: string
-}
-
-function esc(s: string | undefined | null): string {
-    if (!s) return ''
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 function editorWrap(editorMode: boolean, key: string, inner: string): string {

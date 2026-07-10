@@ -5,6 +5,7 @@ interface CachedUser {
     name: string | null;
     role: string;
     isActive: boolean;
+    tokenVersion: number;
     cachedAt: number;
 }
 

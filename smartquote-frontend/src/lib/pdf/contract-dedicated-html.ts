@@ -1,7 +1,7 @@
 // src/lib/pdf/contract-dedicated-html.ts
 // HTML generator for the "System dedykowany" contract template.
 // Navy #1B3A5C / Gold #C9A84C design — same as services template.
-import { buildHtmlDocument, buildContractPageRule, CONTRACT_ORPHANS_CSS } from './html-shell'
+import { buildHtmlDocument, buildContractPageRule, CONTRACT_ORPHANS_CSS, escapeHtml as esc } from './html-shell'
 import { withPageBreakAfter } from './section-layout'
 import {
     type ContractDedicatedBlocks,
@@ -16,10 +16,6 @@ export interface ContractDedicatedHtmlOptions {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function esc(s: string | undefined | null): string {
-    return (s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
 
 function blank(val: string | undefined | null, label: string): string {
     const v = (val ?? '').trim()

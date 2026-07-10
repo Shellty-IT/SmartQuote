@@ -7,19 +7,10 @@ import {
     type ContractServicesBlocks,
     type ContractServicesSectionKey,
 } from './contract-services-blocks'
-import { buildHtmlDocument, buildContractPageRule } from './html-shell'
+import { buildHtmlDocument, buildContractPageRule, escapeHtml as esc } from './html-shell'
 import { withPageBreakAfter } from './section-layout'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function esc(s: string | null | undefined): string {
-    if (!s) return ''
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 function blank(value: string, label = ''): string {
     const inner = value ? esc(value) : (label ? `<span class="ph">${label}</span>` : '<span class="ph">…</span>')
