@@ -25,6 +25,18 @@ if (fs.existsSync(envPath)) {
 const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000';
 const baseOrigin = new URL(baseURL).origin;
 
+// Vercel preview deployments sit behind Deployment Protection (Vercel
+// Authentication) — this header is the documented way for automation to get
+// past that wall without disabling protection for real visitors.
+// https://vercel.com/docs/deployment-protection/methods-to-bypass-deployment-protection#protection-bypass-for-automation
+const vercelBypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+const extraHTTPHeaders = vercelBypassSecret
+    ? {
+        'x-vercel-protection-bypass': vercelBypassSecret,
+        'x-vercel-set-bypass-cookie': 'true',
+    }
+    : undefined;
+
 export default defineConfig({
     testDir: './tests/e2e',
     fullyParallel: false,
@@ -38,6 +50,7 @@ export default defineConfig({
     },
     use: {
         baseURL,
+        extraHTTPHeaders,
         storageState: {
             cookies: [],
             origins: [

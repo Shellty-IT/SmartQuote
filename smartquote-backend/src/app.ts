@@ -22,10 +22,21 @@ const allowedOrigins = new Set<string>(
     ),
 );
 
+// Vercel mints a fresh, unpredictable *.vercel.app URL for every PR/commit
+// preview deployment, so they can never be added to allowedOrigins by exact
+// value. Match them by pattern instead, scoped to this project + team only
+// (never a bare *.vercel.app wildcard, which would trust every other
+// Vercel-hosted site with credentialed requests too).
+const VERCEL_PREVIEW_ORIGIN = /^https:\/\/smart-quote-[a-z0-9]+-tomaszs-projects-52a41d56\.vercel\.app$/;
+
+function isAllowedOrigin(origin: string): boolean {
+    return allowedOrigins.has(origin) || VERCEL_PREVIEW_ORIGIN.test(origin);
+}
+
 app.use(
     cors({
         origin(origin, callback) {
-            if (!origin || allowedOrigins.has(origin)) {
+            if (!origin || isAllowedOrigin(origin)) {
                 callback(null, true);
             } else {
                 callback(new Error(`CORS: origin ${origin} nie jest dozwolony`));
