@@ -86,6 +86,7 @@ jobs:
       NEXT_PUBLIC_BACKEND_URL: ${{ secrets.NEXT_PUBLIC_BACKEND_URL }}
       TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
       TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
 
     steps:
       - name: Checkout
@@ -107,18 +108,67 @@ jobs:
       - name: Clean previous Playwright artifacts
         run: rm -rf playwright-report test-results
 
-      # ── PR: wait for Vercel preview deployment, then test against it ───────────
+      # ── PR: resolve + wait for Vercel preview deployment ────────────────────────
       # Vercel's GitHub integration creates a deployment for every PR automatically.
-      # This action polls GitHub's Deployments API using only GITHUB_TOKEN
-      # (no Vercel API key needed) and outputs the preview URL once it is live.
-      - name: Wait for Vercel preview deployment
+      # We resolve its URL via GitHub's Deployments API (GITHUB_TOKEN only, no
+      # Vercel API key needed) and poll it ourselves — rather than a third-party
+      # action — so we can attach the Vercel Deployment Protection bypass header.
+      # Preview deployments stay behind Vercel Authentication for everyone else;
+      # this header is the documented way to let only this CI job through.
+      - name: Resolve Vercel preview URL
         if: github.event_name == 'pull_request'
         id: vercel-preview
-        uses: patrickedqvist/wait-for-vercel-preview@v1.3.2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          max_timeout: 300
-          check_interval: 15
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          for i in {1..20}; do
+            DEPLOYMENT_ID=$(gh api "repos/${{ github.repository }}/deployments?sha=$SHA&per_page=10" \
+              --jq '[.[] | select(.environment | test("Preview"; "i"))][0].id' 2>/dev/null || echo "")
+
+            if [ -n "$DEPLOYMENT_ID" ] && [ "$DEPLOYMENT_ID" != "null" ]; then
+              URL=$(gh api "repos/${{ github.repository }}/deployments/$DEPLOYMENT_ID/statuses" \
+                --jq '[.[] | select(.state=="success") | .environment_url][0]' 2>/dev/null || echo "")
+
+              if [ -n "$URL" ] && [ "$URL" != "null" ]; then
+                echo "Found preview URL: $URL"
+                echo "url=$URL" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+            fi
+
+            echo "Attempt $i/20: Vercel deployment not ready yet, retrying in 15s..."
+            sleep 15
+          done
+
+          echo "Could not resolve the Vercel preview deployment URL after 5 minutes."
+          exit 1
+
+      - name: Wait for Vercel preview deployment to respond
+        if: github.event_name == 'pull_request'
+        env:
+          URL: ${{ steps.vercel-preview.outputs.url }}
+        run: |
+          echo "Target: $URL"
+
+          for i in {1..20}; do
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+              --max-time 15 --retry 0 \
+              -H "x-vercel-protection-bypass: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}" \
+              -H "x-vercel-set-bypass-cookie: true" \
+              "$URL" || echo "000")
+
+            if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "307" ] || [ "$HTTP_STATUS" = "302" ]; then
+              echo "Preview is responding (HTTP $HTTP_STATUS)"
+              exit 0
+            fi
+
+            echo "Attempt $i/20: HTTP $HTTP_STATUS — retrying in 15s..."
+            sleep 15
+          done
+
+          echo "Preview did not respond after ~5 minutes."
+          exit 1
 
       # ── push to main: poll production URL ─────────────────────────────────────
       - name: Wait for Vercel production deployment
