@@ -17,3 +17,5 @@ export { leadsApi } from './leads.api';
 export { notesApi } from './notes.api';
 export { searchApi } from './search.api';
 export { calendarApi } from './calendar.api';
+export { dashboardApi } from './dashboard.api';
+export type { SidebarStatsResponse } from './dashboard.api';

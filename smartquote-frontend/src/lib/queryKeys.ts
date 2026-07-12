@@ -52,3 +52,8 @@ export const leadKeys = {
     detail: (id: string) => ['lead', id] as const,
     stats: ['leads-stats'] as const,
 };
+
+export const dashboardKeys = {
+    all: ['dashboard'] as const,
+    sidebarStats: ['dashboard', 'sidebar-stats'] as const,
+};

@@ -1,6 +1,7 @@
 // src/lib/api/client.ts
 
 import { getSession, signOut } from 'next-auth/react';
+import { emitDataMutation } from '@/lib/data-mutation-events';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
 
@@ -138,6 +139,8 @@ class ApiClient {
                 data.error?.details
             );
         }
+
+        emitDataMutation({ endpoint, method: fetchOptions.method ?? 'GET' });
 
         return data;
     }

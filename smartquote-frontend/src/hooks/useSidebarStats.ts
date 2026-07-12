@@ -1,11 +1,16 @@
 'use client';
 
-import { useQueries } from '@tanstack/react-query';
-import { offersApi, clientsApi, contractsApi, followUpsApi } from '@/lib/api';
-import { leadsApi } from '@/lib/api/leads.api';
-import { clientKeys, contractKeys, followUpKeys, leadKeys, offerKeys, queryStaleTime } from '@/lib/queryKeys';
+import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { dashboardApi, type SidebarStatsResponse } from '@/lib/api';
+import { dashboardKeys, queryStaleTime } from '@/lib/queryKeys';
+import {
+    affectsSidebarStats,
+    DATA_MUTATION_EVENT,
+    type DataMutationDetail,
+} from '@/lib/data-mutation-events';
 
-interface SidebarStats {
+export interface SidebarStats {
     offers: number | undefined;
     contracts: number | undefined;
     clients: number | undefined;
@@ -15,55 +20,58 @@ interface SidebarStats {
 
 type SidebarStatKey = keyof SidebarStats;
 
-// Shared query config — each stat is cached independently and shared with entity hooks.
-// When useClients/useOffers/etc. invalidate their stats queries, the sidebar updates too.
-const STATS_QUERY_CONFIG = {
-    staleTime: queryStaleTime.dashboardStats,
-    refetchInterval: 60_000,
-} as const;
+export function mapSidebarStats(
+    data: SidebarStatsResponse | undefined,
+    isPending: boolean,
+): SidebarStats {
+    if (isPending && !data) {
+        return {
+            offers: undefined,
+            clients: undefined,
+            contracts: undefined,
+            followups: undefined,
+            leads: undefined,
+        };
+    }
+
+    return {
+        offers: data?.offers ?? 0,
+        clients: data?.clients ?? 0,
+        contracts: data?.contracts ?? 0,
+        followups: data?.followups ?? 0,
+        leads: data?.leads ?? 0,
+    };
+}
 
 export function useSidebarStats() {
-    const [offersRes, clientsRes, contractsRes, followupsRes, leadsRes] = useQueries({
-        queries: [
-            { queryKey: offerKeys.stats, queryFn: () => offersApi.stats(), ...STATS_QUERY_CONFIG },
-            { queryKey: clientKeys.stats, queryFn: () => clientsApi.stats(), ...STATS_QUERY_CONFIG },
-            { queryKey: contractKeys.stats, queryFn: () => contractsApi.stats(), ...STATS_QUERY_CONFIG },
-            { queryKey: followUpKeys.stats, queryFn: () => followUpsApi.stats(), ...STATS_QUERY_CONFIG },
-            { queryKey: leadKeys.stats, queryFn: () => leadsApi.stats(), ...STATS_QUERY_CONFIG },
-        ],
+    const { data, isPending, error, refetch } = useQuery({
+        queryKey: dashboardKeys.sidebarStats,
+        queryFn: () => dashboardApi.sidebarStats(),
+        staleTime: queryStaleTime.dashboardStats,
+        refetchInterval: 60_000,
     });
 
-    const stats: SidebarStats = {
-        offers: offersRes.isLoading ? undefined : offersRes.data?.data?.total ?? 0,
-        clients: clientsRes.isLoading ? undefined : clientsRes.data?.data?.total ?? 0,
-        contracts: contractsRes.isLoading ? undefined : contractsRes.data?.data?.total ?? 0,
-        followups: followupsRes.isLoading ? undefined :
-            (followupsRes.data?.data?.byStatus?.PENDING ?? 0) +
-            (followupsRes.data?.data?.overdue ?? 0),
-        leads: leadsRes.isLoading ? undefined :
-            (leadsRes.data?.data?.byStatus?.NEW ?? 0) +
-            (leadsRes.data?.data?.byStatus?.CONTACTED ?? 0),
+    useEffect(() => {
+        const handleMutation = (event: Event) => {
+            const detail = (event as CustomEvent<DataMutationDetail>).detail;
+            if (detail && affectsSidebarStats(detail)) {
+                void refetch();
+            }
+        };
+
+        window.addEventListener(DATA_MUTATION_EVENT, handleMutation);
+        return () => window.removeEventListener(DATA_MUTATION_EVENT, handleMutation);
+    }, [refetch]);
+
+    const stats = mapSidebarStats(data?.data, isPending);
+    const loading = Object.fromEntries(
+        (Object.keys(stats) as SidebarStatKey[]).map((key) => [key, isPending && stats[key] === undefined]),
+    ) as Record<SidebarStatKey, boolean>;
+
+    return {
+        stats,
+        loading,
+        isLoading: isPending,
+        error: error?.message ?? null,
     };
-
-    const loading: Record<SidebarStatKey, boolean> = {
-        offers: offersRes.isLoading,
-        clients: clientsRes.isLoading,
-        contracts: contractsRes.isLoading,
-        followups: followupsRes.isLoading,
-        leads: leadsRes.isLoading,
-    };
-
-    const isLoading = [offersRes, clientsRes, contractsRes, followupsRes, leadsRes].some(
-        (r) => r.isLoading,
-    );
-
-    const error =
-        offersRes.error?.message ??
-        clientsRes.error?.message ??
-        contractsRes.error?.message ??
-        followupsRes.error?.message ??
-        leadsRes.error?.message ??
-        null;
-
-    return { stats, loading, isLoading, error };
 }
