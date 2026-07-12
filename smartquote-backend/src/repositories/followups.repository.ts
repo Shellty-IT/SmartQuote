@@ -235,17 +235,20 @@ export const followUpsRepository = {
     },
 
     async validateRelations(userId: string, data: Pick<CreateFollowUpData, 'clientId' | 'offerId' | 'contractId'>) {
-        if (data.clientId) {
-            const client = await prisma.client.findFirst({ where: { id: data.clientId, userId } });
-            if (!client) throw new Error('Nie znaleziono klienta');
-        }
-        if (data.offerId) {
-            const offer = await prisma.offer.findFirst({ where: { id: data.offerId, userId } });
-            if (!offer) throw new Error('Nie znaleziono oferty');
-        }
-        if (data.contractId) {
-            const contract = await prisma.contract.findFirst({ where: { id: data.contractId, userId } });
-            if (!contract) throw new Error('Nie znaleziono umowy');
-        }
+        const [client, offer, contract] = await Promise.all([
+            data.clientId
+                ? prisma.client.findFirst({ where: { id: data.clientId, userId }, select: { id: true } })
+                : null,
+            data.offerId
+                ? prisma.offer.findFirst({ where: { id: data.offerId, userId }, select: { id: true } })
+                : null,
+            data.contractId
+                ? prisma.contract.findFirst({ where: { id: data.contractId, userId }, select: { id: true } })
+                : null,
+        ]);
+
+        if (data.clientId && !client) throw new Error('Nie znaleziono klienta');
+        if (data.offerId && !offer) throw new Error('Nie znaleziono oferty');
+        if (data.contractId && !contract) throw new Error('Nie znaleziono umowy');
     },
 };

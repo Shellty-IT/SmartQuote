@@ -385,11 +385,11 @@ export class OffersService {
     }
 
     async getStats(userId: string) {
-        const [statuses, total, valueRows] = await Promise.all([
+        const [statuses, valueRows] = await Promise.all([
             offersRepository.groupByStatus(userId),
-            offersRepository.count(userId),
             offersRepository.findValuesForStats(userId),
         ]);
+        const total = statuses.reduce((sum, status) => sum + status._count.status, 0);
         const normalizedValues = valueRows.map(normalizeOfferFromBlockTotals);
         const sumGross = (status?: OfferStatus) => normalizedValues.reduce((sum, offer) => {
             if (status && offer.status !== status) return sum;

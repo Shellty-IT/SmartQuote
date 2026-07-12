@@ -4,6 +4,7 @@ import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { publicOfferController } from '../controllers/publicOffer.controller';
 import { validate } from '../middleware/validate';
+import { requireJson } from '../middleware/requireJson';
 import {
     getPublicOfferSchema,
     viewPublicOfferSchema,
@@ -32,10 +33,10 @@ const publicLimiter = rateLimit({
 router.use(publicLimiter);
 
 router.get('/:token', validate(getPublicOfferSchema), publicOfferController.getOffer);
-router.post('/:token/view', validate(viewPublicOfferSchema), publicOfferController.registerView);
-router.post('/:token/accept', validate(acceptPublicOfferSchema), publicOfferController.acceptOffer);
-router.post('/:token/reject', validate(rejectPublicOfferSchema), publicOfferController.rejectOffer);
-router.post('/:token/comment', validate(commentPublicOfferSchema), publicOfferController.addComment);
-router.patch('/:token/selection', validate(selectionPublicOfferSchema), publicOfferController.trackSelection);
+router.post('/:token/view', requireJson, validate(viewPublicOfferSchema), publicOfferController.registerView);
+router.post('/:token/accept', requireJson, validate(acceptPublicOfferSchema), publicOfferController.acceptOffer);
+router.post('/:token/reject', requireJson, validate(rejectPublicOfferSchema), publicOfferController.rejectOffer);
+router.post('/:token/comment', requireJson, validate(commentPublicOfferSchema), publicOfferController.addComment);
+router.patch('/:token/selection', requireJson, validate(selectionPublicOfferSchema), publicOfferController.trackSelection);
 
 export default router;

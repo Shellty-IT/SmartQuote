@@ -3,6 +3,7 @@ import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { publicContractController } from '../controllers/publicContract.controller';
 import { validate } from '../middleware/validate';
+import { requireJson } from '../middleware/requireJson';
 import { z } from 'zod';
 
 const tokenSchema = z.object({
@@ -47,6 +48,6 @@ router.use(publicLimiter);
 
 router.get('/:token', validate(tokenSchema), publicContractController.getContract);
 router.get('/:token/pdf', validate(tokenSchema), publicContractController.downloadPdf);
-router.post('/:token/sign', validate(signContractSchema), publicContractController.signContract);
+router.post('/:token/sign', requireJson, validate(signContractSchema), publicContractController.signContract);
 
 export default router;

@@ -40,6 +40,13 @@ export class UnauthorizedError extends DomainError {
     }
 }
 
+export class UnsupportedMediaTypeError extends DomainError {
+    constructor(message = 'Nieobsługiwany format danych') {
+        super('UNSUPPORTED_MEDIA_TYPE', message, 415);
+        this.name = 'UnsupportedMediaTypeError';
+    }
+}
+
 export class ExternalServiceError extends DomainError {
     /** Original message from the external API — logged but never sent to the client. */
     readonly internalMessage?: string;

@@ -223,12 +223,12 @@ export class ContractsService {
     }
 
     async getContractsStats(userId: string) {
-        const [total, byStatus, values, activeContracts] = await Promise.all([
-            contractsRepository.count(userId),
+        const [byStatus, values, activeContracts] = await Promise.all([
             contractsRepository.groupByStatus(userId),
             contractsRepository.aggregateTotalGross(userId),
             contractsRepository.aggregateTotalGross(userId, 'ACTIVE'),
         ]);
+        const total = byStatus.reduce((sum, item) => sum + item._count.status, 0);
 
         const statusCounts: Record<string, number> = {
             DRAFT: 0,

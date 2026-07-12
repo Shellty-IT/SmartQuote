@@ -19,6 +19,7 @@ import searchRoutes from './search.routes';
 import leadsRoutes from './leads.routes';
 import notesRoutes from './notes.routes';
 import calendarRoutes from './calendar.routes';
+import dashboardRoutes from './dashboard.routes';
 
 const router = Router();
 
@@ -60,5 +61,6 @@ router.use('/search', searchRoutes);
 router.use('/leads', leadsRoutes);
 router.use('/notes', notesRoutes);
 router.use('/calendar', calendarRoutes);
+router.use('/dashboard', dashboardRoutes);
 
 export default router;

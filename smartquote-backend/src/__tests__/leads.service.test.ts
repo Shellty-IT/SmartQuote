@@ -223,14 +223,12 @@ describe('LeadsService.convert', () => {
 
 describe('LeadsService.getStats', () => {
     it('returns total count and per-status breakdown', async () => {
-        prismaMock.lead.count.mockResolvedValue(5 as never);
-        repo.countByStatus.mockResolvedValue({ NEW: 3, CONTACTED: 1, CONVERTED: 1, LOST: 0 } as never);
+        repo.countByStatus.mockResolvedValue({ NEW: 3, CONTACTED: 1, CONVERTED: 1, LOST: 2 } as never);
 
         const result = await service.getStats(USER_ID);
 
-        expect(result.total).toBe(5);
+        expect(result.total).toBe(6);
         expect(result.byStatus.NEW).toBe(3);
-        expect(prismaMock.lead.count).toHaveBeenCalledWith({ where: { userId: USER_ID, status: { not: 'CONVERTED' } } });
         expect(repo.countByStatus).toHaveBeenCalledWith(USER_ID);
     });
 });

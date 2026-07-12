@@ -199,6 +199,25 @@ describe('OffersService — ownership (IDOR prevention)', () => {
             ).resolves.not.toThrow();
         });
 
+        it('sanitizes rich text before persisting an update', async () => {
+            offersRepo.findById.mockResolvedValue(MOCK_OFFER as never);
+            offersRepo.update.mockResolvedValue(MOCK_OFFER as never);
+
+            await offersService.update(RESOURCE_ID, OWNER_ID, {
+                description: '<p onclick="alert(1)">Opis</p><script>alert(2)</script>',
+                terms: '<a href="javascript:alert(3)">Warunki</a>',
+            });
+
+            expect(offersRepo.update).toHaveBeenCalledWith(
+                RESOURCE_ID,
+                OWNER_ID,
+                expect.objectContaining({
+                    description: '<p>Opis</p>',
+                    terms: '<a rel="noopener noreferrer">Warunki</a>',
+                }),
+            );
+        });
+
         it('throws NotFoundError when findById returns null (foreign userId)', async () => {
             offersRepo.findById.mockResolvedValue(null);
 
