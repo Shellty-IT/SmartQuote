@@ -10,12 +10,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "moduleResolution": "node",
-    "jsx": "react",
-
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "jsx": "react"
   },
   "exclude": ["node_modules", "dist"],
   "include": ["src/**/*"]

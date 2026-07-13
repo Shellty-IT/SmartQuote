@@ -46,7 +46,7 @@
     "prisma": "^5.22.0",
     "ts-jest": "^29.4.6",
     "tsx": "^4.19.0",
-    "typescript": "^5.5.0"
+    "typescript": "5.9.3"
   },
   "overrides": {
     "@babel/core": "^7.29.1",
