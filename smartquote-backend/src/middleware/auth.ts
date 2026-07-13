@@ -22,7 +22,18 @@ function extractToken(authHeader: string | undefined): string {
 
 function verifyToken(token: string): JwtPayload {
     try {
-        return jwt.verify(token, config.jwtSecret) as JwtPayload;
+        const decoded = jwt.verify(token, config.jwtSecret, { algorithms: ['HS256'] });
+        if (
+            typeof decoded === 'string' ||
+            typeof decoded.id !== 'string' ||
+            decoded.id.length === 0 ||
+            typeof decoded.email !== 'string' ||
+            (decoded.tokenVersion !== undefined &&
+                (!Number.isInteger(decoded.tokenVersion) || decoded.tokenVersion < 0))
+        ) {
+            throw new Error('Invalid token payload');
+        }
+        return decoded as JwtPayload;
     } catch {
         throw new UnauthorizedError('Nieprawidłowy lub wygasły token');
     }

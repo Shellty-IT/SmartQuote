@@ -115,9 +115,8 @@ describe('asNumberOrNull', () => {
         expect(asNumberOrNull('abc')).toBeNull();
     });
 
-    it('treats null as 0 (Number(null) === 0, which is finite)', () => {
-        // Number(null) === 0 which is finite, so the function returns 0 — not null
-        expect(asNumberOrNull(null)).toBe(0);
+    it('returns null for null', () => {
+        expect(asNumberOrNull(null)).toBeNull();
     });
 
     it('returns null for undefined', () => {

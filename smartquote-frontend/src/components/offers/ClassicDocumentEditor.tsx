@@ -4,7 +4,7 @@
 // offer's real fields (title/description/terms + line items) — NOT a blocks JSONB.
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { Download, ZoomIn, ZoomOut } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { TemplateAIFillButton } from './TemplateAIFillButton'
@@ -123,8 +123,11 @@ export function ClassicDocumentEditor({
 
     const srcdoc = useMemo(() => applyPdfPreviewMode(buildClassicHtml(offerData, { editorMode: true })), [offerData])
 
+    const iframeRef = useRef<HTMLIFrameElement>(null)
+
     useEffect(() => {
         const handler = (event: MessageEvent) => {
+            if (event.source !== iframeRef.current?.contentWindow) return
             if (event.data?.type !== 'sq:editBlock') return
             const key = event.data.blockKey as string
             if (VALID_KEYS.has(key as EditableClassicKey)) {
@@ -204,9 +207,11 @@ export function ClassicDocumentEditor({
                 >
                     <div style={{ transformOrigin: 'top left', transform: `scale(${zoom})`, width: `${100 / zoom}%`, height: `${100 / zoom}%` }}>
                         <iframe
+                            ref={iframeRef}
                             srcDoc={srcdoc}
                             className={cn('h-full w-full border-0', isDragging && 'pointer-events-none')}
                             title="Podgląd oferty klasycznej"
+                            sandbox="allow-scripts"
                         />
                     </div>
                 </div>

@@ -2,7 +2,7 @@
 // Document-as-editor for the "System dedykowany" contract template.
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import {
     ContractDedicatedBlockEditorPanel,
     DedicatedSectionManagerPanel,
@@ -61,8 +61,11 @@ export function ContractDedicatedDocumentEditor({
         [blocks, activeKey],
     )
 
+    const iframeRef = useRef<HTMLIFrameElement>(null)
+
     useEffect(() => {
         const handler = (event: MessageEvent) => {
+            if (event.source !== iframeRef.current?.contentWindow) return
             if (event.data?.type === 'sq:editSection') {
                 const key = event.data.sectionKey as DedicatedEditableSectionKey
                 if (VALID_SECTION_KEYS.includes(key)) setPanelView({ kind: 'section', key })
@@ -117,7 +120,7 @@ export function ContractDedicatedDocumentEditor({
                     style={panelOpen ? previewPanelStyle : undefined}
                 >
                     <div style={{ transformOrigin: 'top left', transform: `scale(${zoom})`, width: `${100 / zoom}%`, height: `${100 / zoom}%` }}>
-                        <iframe key={refreshKey} srcDoc={srcdoc} title="Podgląd umowy" sandbox="allow-scripts allow-same-origin" className={cn('h-full w-full border-0', isDragging && 'pointer-events-none')} />
+                        <iframe ref={iframeRef} key={refreshKey} srcDoc={srcdoc} title="Podgląd umowy" sandbox="allow-scripts" className={cn('h-full w-full border-0', isDragging && 'pointer-events-none')} />
                     </div>
                 </div>
                 {panelOpen && (

@@ -2,7 +2,7 @@
 // iframe editor with zoom, postMessage, and download for "Szablon uniwersalny".
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { Download, Layers, ZoomIn, ZoomOut } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { TemplateAIFillButton } from './TemplateAIFillButton'
@@ -59,8 +59,11 @@ export function UniversalDocumentEditor({
         currency: offerContext?.currency ?? 'PLN',
     }), [offerContext, offer.offerNumber, offer.clientName])
 
+    const iframeRef = useRef<HTMLIFrameElement>(null)
+
     useEffect(() => {
         const handler = (event: MessageEvent) => {
+            if (event.source !== iframeRef.current?.contentWindow) return
             if (event.data?.type !== 'sq:editBlock') return
             const key = event.data.blockKey as string
             if (STATIC_KEYS.has(key as EditableUniversalBlockKey)) {
@@ -147,10 +150,12 @@ export function UniversalDocumentEditor({
                         }}
                     >
                         <iframe
+                            ref={iframeRef}
                             key={srcdoc.length}
                             srcDoc={srcdoc}
                             className={cn('h-full w-full border-0', isDragging && 'pointer-events-none')}
                             title="Podgląd szablonu Szablon uniwersalny"
+                            sandbox="allow-scripts"
                         />
                     </div>
                 </div>

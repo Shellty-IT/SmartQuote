@@ -22,7 +22,7 @@ jest.mock('../lib/prisma', () => ({
 import { LeadsService } from '../services/leads.service';
 import { leadsRepository } from '../repositories/leads.repository';
 import prisma from '../lib/prisma';
-import { NotFoundError } from '../errors/domain.errors';
+import { ConflictError, NotFoundError } from '../errors/domain.errors';
 
 const repo = leadsRepository as jest.Mocked<typeof leadsRepository>;
 const prismaMock = prisma as unknown as {
@@ -158,6 +158,12 @@ describe('LeadsService.delete', () => {
         repo.findById.mockResolvedValue(null);
         await expect(service.delete(LEAD_ID, 'attacker')).rejects.toThrow(NotFoundError);
         expect(repo.delete).not.toHaveBeenCalled();
+    });
+
+    it('preserves offers when the lead is referenced', async () => {
+        repo.findById.mockResolvedValue(MOCK_LEAD as never);
+        repo.delete.mockRejectedValue({ code: 'P2003' });
+        await expect(service.delete(LEAD_ID, USER_ID)).rejects.toThrow(ConflictError);
     });
 });
 

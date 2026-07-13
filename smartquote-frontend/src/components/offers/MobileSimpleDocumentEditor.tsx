@@ -2,7 +2,7 @@
 // iframe editor with zoom, postMessage, and download for "Aplikacja mobilna - domyślny".
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { Download, Layers, ZoomIn, ZoomOut } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { TemplateAIFillButton } from './TemplateAIFillButton'
@@ -52,8 +52,11 @@ export function MobileSimpleDocumentEditor({
         [blocks, offer],
     )
 
+    const iframeRef = useRef<HTMLIFrameElement>(null)
+
     useEffect(() => {
         const handler = (event: MessageEvent) => {
+            if (event.source !== iframeRef.current?.contentWindow) return
             if (event.data?.type !== 'sq:editBlock') return
             const key = event.data.blockKey as string
             if (STATIC_KEYS.has(key as EditableMobileSimpleBlockKey)) {
@@ -140,10 +143,12 @@ export function MobileSimpleDocumentEditor({
                         }}
                     >
                         <iframe
+                            ref={iframeRef}
                             key={srcdoc.length}
                             srcDoc={srcdoc}
                             className={cn('h-full w-full border-0', isDragging && 'pointer-events-none')}
                             title="Podgląd szablonu Aplikacja mobilna - domyślny"
+                            sandbox="allow-scripts"
                         />
                     </div>
                 </div>

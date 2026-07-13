@@ -5,7 +5,7 @@ import { z } from 'zod';
 dotenv.config();
 
 const configSchema = z.object({
-    PORT: z.string().default('8080').transform((v) => parseInt(v, 10)),
+    PORT: z.coerce.number().int().min(1).max(65535).default(8080),
     NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
     CLIENT_URL: z
         .string()
@@ -23,7 +23,7 @@ const configSchema = z.object({
     CRON_SECRET: z.string().optional(),
     KSEF_MASTER_URL: z.string().default('http://localhost:5000'),
     KSEF_MASTER_API_KEY: z.string().default(''),
-    KSEF_AVAILABILITY_CACHE_TTL_MS: z.string().default('300000').transform((v) => parseInt(v, 10)),
+    KSEF_AVAILABILITY_CACHE_TTL_MS: z.coerce.number().int().min(1000).max(86_400_000).default(300000),
 });
 
 function validateConfig() {

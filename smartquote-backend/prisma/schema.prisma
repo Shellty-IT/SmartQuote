@@ -117,7 +117,9 @@ model ApiKey {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   name        String
-  key         String    @unique
+  keyHash     String    @unique @map("key")
+  prefix      String
+  lastFour    String    @map("last_four")
   lastUsedAt  DateTime?
   expiresAt   DateTime?
   isActive    Boolean   @default(true)
@@ -127,7 +129,6 @@ model ApiKey {
   updatedAt DateTime @updatedAt
 
   @@index([userId])
-  @@index([key])
   @@map("api_keys")
 }
 
@@ -240,9 +241,9 @@ model Offer {
   userId       String
   user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   clientId     String?
-  client       Client?            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client       Client?            @relation(fields: [clientId], references: [id], onDelete: Restrict)
   leadId       String?
-  lead         Lead?              @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  lead         Lead?              @relation(fields: [leadId], references: [id], onDelete: Restrict)
   items        OfferItem[]
   followUps    FollowUp[]
   contracts    Contract[]
@@ -486,7 +487,7 @@ model Contract {
   userId    String
   user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   clientId  String
-  client    Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client    Client         @relation(fields: [clientId], references: [id], onDelete: Restrict)
   offerId   String?
   offer     Offer?         @relation(fields: [offerId], references: [id], onDelete: SetNull)
   items     ContractItem[]

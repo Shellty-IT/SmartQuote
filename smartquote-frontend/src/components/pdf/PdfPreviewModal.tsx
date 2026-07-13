@@ -51,6 +51,7 @@ export function PdfPreviewModal({
                             <iframe
                                 src={iframeSrc}
                                 title={frameTitle}
+                                sandbox={frameType === 'html' ? 'allow-scripts' : undefined}
                                 className="h-full w-full"
                             />
                         </div>

@@ -140,7 +140,10 @@ class ApiClient {
             );
         }
 
-        emitDataMutation({ endpoint, method: fetchOptions.method ?? 'GET' });
+        const method = (fetchOptions.method ?? 'GET').toUpperCase();
+        if (method !== 'GET' && method !== 'HEAD') {
+            emitDataMutation({ endpoint, method });
+        }
 
         return data;
     }
@@ -178,21 +181,21 @@ class ApiClient {
     async post<T>(endpoint: string, data?: unknown): Promise<ApiResponseShape<T>> {
         return this.request<T>(endpoint, {
             method: 'POST',
-            body: data ? JSON.stringify(data) : undefined,
+            body: data === undefined ? undefined : JSON.stringify(data),
         });
     }
 
     async put<T>(endpoint: string, data?: unknown): Promise<ApiResponseShape<T>> {
         return this.request<T>(endpoint, {
             method: 'PUT',
-            body: data ? JSON.stringify(data) : undefined,
+            body: data === undefined ? undefined : JSON.stringify(data),
         });
     }
 
     async patch<T>(endpoint: string, data?: unknown): Promise<ApiResponseShape<T>> {
         return this.request<T>(endpoint, {
             method: 'PATCH',
-            body: data ? JSON.stringify(data) : undefined,
+            body: data === undefined ? undefined : JSON.stringify(data),
         });
     }
 
@@ -263,14 +266,14 @@ class ApiClient {
     async postPublic<T>(endpoint: string, data?: unknown): Promise<ApiResponseShape<T>> {
         return this.requestPublic<T>(endpoint, {
             method: 'POST',
-            body: data ? JSON.stringify(data) : undefined,
+            body: data === undefined ? undefined : JSON.stringify(data),
         });
     }
 
     async patchPublic<T>(endpoint: string, data?: unknown): Promise<ApiResponseShape<T>> {
         return this.requestPublic<T>(endpoint, {
             method: 'PATCH',
-            body: data ? JSON.stringify(data) : undefined,
+            body: data === undefined ? undefined : JSON.stringify(data),
         });
     }
 }

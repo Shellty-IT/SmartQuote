@@ -2,6 +2,7 @@
 import prisma from '../lib/prisma';
 import { Prisma } from '@prisma/client';
 import type { CreateCalendarEventInput, UpdateCalendarEventInput } from '../types';
+import { validateOwnedRelations } from './ownership.repository';
 
 const eventInclude = {
     client: { select: { id: true, name: true } },
@@ -18,6 +19,13 @@ export interface CalendarEventsFilter {
 }
 
 export class CalendarRepository {
+    async validateRelations(
+        userId: string,
+        data: Pick<CreateCalendarEventInput, 'clientId' | 'offerId' | 'leadId'>,
+    ): Promise<void> {
+        await validateOwnedRelations(userId, data);
+    }
+
     async create(userId: string, data: CreateCalendarEventInput) {
         return prisma.calendarEvent.create({
             data: {

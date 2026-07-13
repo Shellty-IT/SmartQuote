@@ -70,11 +70,10 @@ describe('calculateItemTotals (shared)', () => {
         expect(result.totalGross.toNumber()).toBe(0);
     });
 
-    it('defaults vatRate to 23 when passed as 0 (falsy check: 0 || 23)', () => {
-        // Implementation uses `item.vatRate || 23`, so passing 0 still gives 23%
+    it('preserves a 0% VAT rate', () => {
         const result = calculateItemTotals({ quantity: 3, unitPrice: 150, vatRate: 0, discount: 0 });
-        expect(result.totalVat.toNumber()).toBe(103.5); // 450 * 0.23
-        expect(result.totalGross.toNumber()).toBe(553.5);
+        expect(result.totalVat.toNumber()).toBe(0);
+        expect(result.totalGross.toNumber()).toBe(450);
     });
 
     it('rounds to 2 decimal places', () => {
@@ -136,6 +135,12 @@ describe('buildItemWithTotals', () => {
         const { vatRate: _, ...noVat } = baseInput;
         const result = buildItemWithTotals(noVat, 0);
         expect(result.vatRate).toBe(23);
+    });
+
+    it('preserves a 0% VAT rate on built items', () => {
+        const result = buildItemWithTotals({ ...baseInput, vatRate: 0 }, 0);
+        expect(result.vatRate).toBe(0);
+        expect(result.totalVat.toNumber()).toBe(0);
     });
 
     it('defaults discount to 0 when not provided', () => {

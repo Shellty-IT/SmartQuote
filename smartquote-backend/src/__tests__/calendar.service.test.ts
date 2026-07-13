@@ -2,6 +2,7 @@
 
 jest.mock('../repositories/calendar.repository', () => ({
     calendarRepository: {
+        validateRelations: jest.fn(),
         create: jest.fn(),
         findById: jest.fn(),
         findAll: jest.fn(),

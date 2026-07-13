@@ -19,6 +19,7 @@ import { InlineEdit } from '@/components/ui';
 import { offersApi } from '@/lib/api/offers.api';
 import { ai } from '@/lib/api/ai.api';
 import type { PriceCheckResult } from '@/types/ai';
+import { richTextToPlainText } from '@/lib/rich-text';
 
 interface DetailsTabProps {
     offer: Offer;
@@ -61,6 +62,8 @@ export function DetailsTab({
 
     const [priceCheckResults, setPriceCheckResults] = useState<PriceCheckResult[] | null>(null);
     const [isCheckingPrices, setIsCheckingPrices] = useState(false);
+    const description = useMemo(() => richTextToPlainText(offer.description ?? ''), [offer.description]);
+    const terms = useMemo(() => richTextToPlainText(offer.terms ?? ''), [offer.terms]);
 
     const handlePriceCheck = async () => {
         setIsCheckingPrices(true);
@@ -74,23 +77,21 @@ export function DetailsTab({
         }
     };
 
-    const recipientData = {
-        id: (offer.client ?? offer.lead)!.id,
-        name: (offer.client ?? offer.lead)!.name,
-        email: (offer.client ?? offer.lead)!.email || '',
+    const recipient = offer.client ?? offer.lead;
+    const recipientData = recipient ? {
+        id: recipient.id,
+        name: recipient.name,
+        email: recipient.email || '',
         type: offer.client ? 'client' as const : 'lead' as const,
-    };
+    } : null;
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-                {offer.description && (
+                {description && (
                     <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                         <h2 className="text-lg font-semibold text-foreground mb-3">{detailsTr.description}</h2>
-                        <div
-                            className="prose prose-sm max-w-none text-foreground [&_strong]:text-foreground [&_a]:text-primary"
-                            dangerouslySetInnerHTML={{ __html: offer.description }}
-                        />
+                        <div className="whitespace-pre-wrap text-sm text-foreground">{description}</div>
                     </div>
                 )}
 
@@ -192,13 +193,10 @@ export function DetailsTab({
                     </div>
                 </div>
 
-                {offer.terms && (
+                {terms && (
                     <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
                         <h2 className="text-lg font-semibold text-foreground mb-3">{detailsTr.paymentTerms}</h2>
-                        <div
-                            className="prose prose-sm max-w-none text-foreground [&_strong]:text-foreground"
-                            dangerouslySetInnerHTML={{ __html: offer.terms }}
-                        />
+                        <div className="whitespace-pre-wrap text-sm text-foreground">{terms}</div>
                     </div>
                 )}
 
@@ -222,7 +220,7 @@ export function DetailsTab({
             </div>
 
             <div className="space-y-6">
-                <ClientCard recipient={recipientData} />
+                {recipientData && <ClientCard recipient={recipientData} />}
                 <DetailsCard offer={offer} isExpired={isExpired} />
                 <AuditTrailCard
                     auditLog={auditLog}

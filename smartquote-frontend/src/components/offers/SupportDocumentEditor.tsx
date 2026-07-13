@@ -2,7 +2,7 @@
 // Document-as-editor for the "Wsparcie" (IT Support / SLA) offer template.
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { Download, ZoomIn, ZoomOut } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { TemplateAIFillButton } from './TemplateAIFillButton'
@@ -52,8 +52,11 @@ export function SupportDocumentEditor({
         [blocks, offer],
     )
 
+    const iframeRef = useRef<HTMLIFrameElement>(null)
+
     useEffect(() => {
         const handler = (event: MessageEvent) => {
+            if (event.source !== iframeRef.current?.contentWindow) return
             if (event.data?.type === 'sq:editBlock') {
                 const key = event.data.blockKey as EditableSupportBlockKey
                 if (VALID_BLOCK_KEYS.has(key)) {
@@ -128,10 +131,12 @@ export function SupportDocumentEditor({
                         }}
                     >
                         <iframe
+                            ref={iframeRef}
                             key={srcdoc.length}
                             srcDoc={srcdoc}
                             className={cn('h-full w-full border-0', isDragging && 'pointer-events-none')}
                             title="Podgląd szablonu Wsparcie"
+                            sandbox="allow-scripts"
                         />
                     </div>
                 </div>

@@ -16,7 +16,7 @@ jest.mock('../repositories/clients.repository', () => ({
 
 import { ClientsService } from '../services/clients.service';
 import { clientsRepository } from '../repositories/clients.repository';
-import { NotFoundError } from '../errors/domain.errors';
+import { ConflictError, NotFoundError } from '../errors/domain.errors';
 
 const repo = clientsRepository as jest.Mocked<typeof clientsRepository>;
 
@@ -184,6 +184,11 @@ describe('ClientsService.delete', () => {
         repo.delete.mockResolvedValue(false as never);
 
         await expect(service.delete(CLIENT_ID, USER_ID)).rejects.toThrow(NotFoundError);
+    });
+
+    it('preserves history when the client is referenced', async () => {
+        repo.delete.mockRejectedValue({ code: 'P2003' });
+        await expect(service.delete(CLIENT_ID, USER_ID)).rejects.toThrow(ConflictError);
     });
 });
 

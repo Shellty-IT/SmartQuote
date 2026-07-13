@@ -8,7 +8,7 @@ import { authOptions } from '@/lib/auth'
 import { htmlToPdfBuffer } from './puppeteer'
 
 export function getBackendUrl(): string {
-    return (process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8080').replace(/\/$/, '')
+    return (process.env.BACKEND_URL ?? process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8080').replace(/\/$/, '')
 }
 
 interface SessionWithToken {

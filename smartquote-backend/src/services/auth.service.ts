@@ -34,7 +34,11 @@ interface AuthResponse {
 const TOKEN_EXPIRES_IN: SignOptions['expiresIn'] = '7d';
 
 function signToken(userId: string, email: string, tokenVersion: number): string {
-    return jwt.sign({ id: userId, userId, email, tokenVersion }, config.jwtSecret, { expiresIn: TOKEN_EXPIRES_IN });
+    return jwt.sign(
+        { id: userId, userId, email, tokenVersion },
+        config.jwtSecret,
+        { algorithm: 'HS256', expiresIn: TOKEN_EXPIRES_IN },
+    );
 }
 
 export async function register(data: RegisterInput): Promise<AuthResponse> {

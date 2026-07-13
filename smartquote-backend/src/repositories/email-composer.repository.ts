@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import prisma from '../lib/prisma';
 import type { GetEmailLogsParams, EmailAttachment } from '../types';
 import type { EmailLogStatus } from '../types';
+import { validateOwnedRelations } from './ownership.repository';
 
 export interface CreateEmailLogData {
     userId: string;
@@ -44,6 +45,13 @@ const emailLogRelationsInclude = {
 } as const;
 
 export class EmailComposerRepository {
+    async validateRelations(
+        userId: string,
+        data: Pick<CreateEmailLogData, 'clientId' | 'offerId' | 'contractId' | 'templateId'>,
+    ): Promise<void> {
+        await validateOwnedRelations(userId, data);
+    }
+
     async createLog(data: CreateEmailLogData) {
         return prisma.emailLog.create({
             data: {

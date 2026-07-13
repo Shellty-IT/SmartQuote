@@ -4,7 +4,7 @@
 // Panel edits → srcdoc is updated → iframe re-renders the updated document.
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Download, RefreshCw, ZoomIn, ZoomOut, Layers } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { TemplateAIFillButton } from '@/components/offers/TemplateAIFillButton'
@@ -80,8 +80,11 @@ export function ProposalDocumentEditor({
     }), [offer.title, offer.client.name, offer.totalGross, offer.currency])
 
     // Listen for postMessage events from the iframe
+    const iframeRef = useRef<HTMLIFrameElement>(null)
+
     useEffect(() => {
         const handler = (event: MessageEvent) => {
+            if (event.source !== iframeRef.current?.contentWindow) return
             if (event.data?.type === 'sq:editBlock') {
                 const key = event.data.blockKey as EditableBlockKey
                 if (VALID_BLOCK_KEYS.includes(key)) {
@@ -224,10 +227,11 @@ export function ProposalDocumentEditor({
                 >
                     <div style={{ transformOrigin: 'top left', transform: `scale(${zoom})`, width: `${100 / zoom}%`, height: `${100 / zoom}%` }}>
                         <iframe
+                            ref={iframeRef}
                             key={`${refreshKey}:${srcdoc.length}`}
                             srcDoc={srcdoc}
                             title="Podgląd oferty"
-                            sandbox="allow-scripts allow-same-origin"
+                            sandbox="allow-scripts"
                             className={cn('h-full w-full border-0', isDragging && 'pointer-events-none')}
                         />
                     </div>

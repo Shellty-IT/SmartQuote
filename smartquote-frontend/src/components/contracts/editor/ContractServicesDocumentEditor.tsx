@@ -3,7 +3,7 @@
 // Renders the contract HTML in an iframe. User clicks a section → side panel opens.
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import {
     ContractServicesBlockEditorPanel,
     ServicesSectionManagerPanel,
@@ -63,8 +63,11 @@ export function ContractServicesDocumentEditor({
         [blocks, activeKey],
     )
 
+    const iframeRef = useRef<HTMLIFrameElement>(null)
+
     useEffect(() => {
         const handler = (event: MessageEvent) => {
+            if (event.source !== iframeRef.current?.contentWindow) return
             if (event.data?.type === 'sq:editSection') {
                 const key = event.data.sectionKey as ServicesEditableSectionKey
                 if (VALID_SECTION_KEYS.includes(key)) setPanelView({ kind: 'section', key })
@@ -121,10 +124,11 @@ export function ContractServicesDocumentEditor({
                 >
                     <div style={{ transformOrigin: 'top left', transform: `scale(${zoom})`, width: `${100 / zoom}%`, height: `${100 / zoom}%` }}>
                         <iframe
+                            ref={iframeRef}
                             key={refreshKey}
                             srcDoc={srcdoc}
                             title="Podgląd umowy"
-                            sandbox="allow-scripts allow-same-origin"
+                            sandbox="allow-scripts"
                             className={cn('h-full w-full border-0', isDragging && 'pointer-events-none')}
                         />
                     </div>

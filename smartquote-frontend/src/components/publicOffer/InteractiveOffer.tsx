@@ -230,11 +230,8 @@ export default function InteractiveOffer({ token, data }: InteractiveOfferProps)
                 <iframe
                     src={`/api/public/offers/${token}/preview`}
                     title={`Oferta ${offer.number}`}
+                    sandbox="allow-scripts"
                     className="w-full min-h-[1200px] rounded-2xl border border-slate-200 bg-white"
-                    onLoad={(event) => {
-                        const height = event.currentTarget.contentDocument?.documentElement.scrollHeight;
-                        if (height) event.currentTarget.style.height = `${height}px`;
-                    }}
                 />
             ) : <OfferHeader
                 seller={offer.seller}

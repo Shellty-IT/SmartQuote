@@ -9,7 +9,7 @@ import type {
     UserProfile,
     UserSettings,
     CompanyInfo,
-    ApiKey,
+    CreatedApiKey,
     UpdateProfileInput,
     ChangePasswordInput,
     UpdateSettingsInput,
@@ -69,7 +69,7 @@ export function useSettings() {
         return updated;
     };
 
-    const createApiKey = async (data: CreateApiKeyInput): Promise<ApiKey & { key: string }> => {
+    const createApiKey = async (data: CreateApiKeyInput): Promise<CreatedApiKey> => {
         const newKey = await settingsApi.createApiKey(data);
         await fetchSettings();
         return newKey;

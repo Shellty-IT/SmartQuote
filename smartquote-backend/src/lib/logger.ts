@@ -7,7 +7,12 @@ export const logger = pino({
     // Public offer/contract tokens are bearer capabilities — never let them
     // reach log storage in plaintext, even though URLs are separately masked.
     redact: {
-        paths: ['token', '*.token', 'publicToken', '*.publicToken'],
+        paths: [
+            'token', '*.token', 'publicToken', '*.publicToken',
+            'password', '*.password', 'pass', '*.pass',
+            'apiKey', '*.apiKey', 'authorization', '*.authorization',
+            'signatureImage', '*.signatureImage',
+        ],
         censor: '[token]',
     },
     transport: isDev

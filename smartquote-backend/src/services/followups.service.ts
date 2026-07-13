@@ -104,6 +104,7 @@ export const followUpsService = {
     async update(id: string, userId: string, data: UpdateFollowUpData) {
         const existing = await followUpsRepository.findById(id, userId);
         if (!existing) throw new Error('Nie znaleziono follow-up');
+        await followUpsRepository.validateRelations(userId, data);
 
         const updateData: Prisma.FollowUpUpdateInput = {};
 

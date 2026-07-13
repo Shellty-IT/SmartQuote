@@ -107,12 +107,16 @@ export interface CompanyInfo {
 export interface ApiKey {
     id: string;
     name: string;
-    key: string;
+    maskedKey: string;
     lastUsedAt: string | null;
     expiresAt: string | null;
     isActive: boolean;
     permissions: string[];
     createdAt: string;
+}
+
+export interface CreatedApiKey {
+    secret: string;
 }
 
 export interface UserProfile {

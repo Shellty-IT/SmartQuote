@@ -9,6 +9,7 @@ const logger = createModuleLogger('NotesService');
 export class NotesService {
     async create(userId: string, data: CreateNoteInput) {
         logger.info('Creating note', { userId });
+        await notesRepository.validateRelations(userId, data);
         return notesRepository.create(userId, data);
     }
 

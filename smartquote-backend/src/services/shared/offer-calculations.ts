@@ -38,8 +38,8 @@ export interface ItemWithTotals {
 export function calculateItemTotals(item: ItemCalculation): ItemTotals {
     const quantity = new Decimal(item.quantity);
     const unitPrice = new Decimal(item.unitPrice);
-    const vatRate = new Decimal(item.vatRate || 23);
-    const discount = new Decimal(item.discount || 0);
+    const vatRate = new Decimal(item.vatRate ?? 23);
+    const discount = new Decimal(item.discount ?? 0);
 
     const discountMultiplier = new Decimal(1).minus(discount.dividedBy(100));
     const effectiveUnitPrice = unitPrice.times(discountMultiplier);
@@ -63,8 +63,8 @@ export function buildItemWithTotals(item: OfferItemInput, index: number): ItemWi
         quantity: item.quantity,
         unit: item.unit || 'szt.',
         unitPrice: item.unitPrice,
-        vatRate: item.vatRate || 23,
-        discount: item.discount || 0,
+        vatRate: item.vatRate ?? 23,
+        discount: item.discount ?? 0,
         totalNet: totals.totalNet,
         totalVat: totals.totalVat,
         totalGross: totals.totalGross,

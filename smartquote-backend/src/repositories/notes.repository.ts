@@ -1,6 +1,7 @@
 // src/repositories/notes.repository.ts
 import prisma from '../lib/prisma';
 import type { CreateNoteInput } from '../types';
+import { validateOwnedRelations } from './ownership.repository';
 
 export interface NotesEntityFilter {
     clientId?: string;
@@ -10,6 +11,10 @@ export interface NotesEntityFilter {
 }
 
 export class NotesRepository {
+    async validateRelations(userId: string, data: Omit<CreateNoteInput, 'content'>): Promise<void> {
+        await validateOwnedRelations(userId, data);
+    }
+
     async create(userId: string, data: CreateNoteInput) {
         return prisma.note.create({
             data: {

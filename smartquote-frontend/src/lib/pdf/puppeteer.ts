@@ -15,6 +15,15 @@ function elapsed(startedAt: number): number {
     return Date.now() - startedAt
 }
 
+export function isPdfResourceUrlAllowed(rawUrl: string): boolean {
+    try {
+        const protocol = new URL(rawUrl).protocol
+        return protocol === 'data:' || protocol === 'blob:' || protocol === 'about:'
+    } catch {
+        return false
+    }
+}
+
 // Launches a fresh, unshared browser per call. A module-level cached instance
 // previously raced across concurrent invocations sharing one lambda: whichever
 // request finished first closed the browser out from under the other.
@@ -62,6 +71,15 @@ export async function htmlToPdfBuffer(html: string): Promise<Buffer> {
     let fontStatus: 'ready' | 'timeout' = 'ready'
 
     try {
+        await page.setRequestInterception(true)
+        page.on('request', (request) => {
+            if (isPdfResourceUrlAllowed(request.url())) {
+                void request.continue()
+            } else {
+                void request.abort('blockedbyclient')
+            }
+        })
+
         // Emulate print media before content loads. The pagination script
         // measures DOM boxes on DOMContentLoaded, so it must see print layout.
         await page.emulateMediaType('print')

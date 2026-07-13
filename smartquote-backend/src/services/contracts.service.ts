@@ -17,8 +17,15 @@ import { NotFoundError, ValidationError } from '../errors/domain.errors';
 
 function toDate(value: Date | string | undefined | null): Date | null {
     if (!value) return null;
-    if (value instanceof Date) return value;
-    return new Date(value);
+    const date = value instanceof Date ? value : new Date(value);
+    if (!Number.isFinite(date.getTime())) throw new ValidationError('NieprawidĹ‚owa data');
+    return date;
+}
+
+function validateDateRange(startDate: Date | null, endDate: Date | null): void {
+    if (startDate && endDate && endDate < startDate) {
+        throw new ValidationError('Data zakoĹ„czenia nie moĹĽe poprzedzaÄ‡ daty rozpoczÄ™cia');
+    }
 }
 
 function generateContractNumberFormat(count: number): string {
@@ -97,6 +104,10 @@ export class ContractsService {
     }
 
     async createContract(userId: string, data: CreateContractInput) {
+        await contractsRepository.validateRelations(userId, data.clientId, data.offerId);
+        const startDate = toDate(data.startDate);
+        const endDate = toDate(data.endDate);
+        validateDateRange(startDate, endDate);
         const number = await generateContractNumber(userId);
 
         const calculatedItems = data.items.map((item: ContractItemInput, index: number) => ({
@@ -113,8 +124,8 @@ export class ContractsService {
             clientId: data.clientId,
             offerId: data.offerId,
             userId,
-            startDate: toDate(data.startDate),
-            endDate: toDate(data.endDate),
+            startDate,
+            endDate,
             terms: data.terms,
             paymentTerms: data.paymentTerms,
             paymentDays: data.paymentDays ?? 14,
@@ -135,6 +146,10 @@ export class ContractsService {
         if (data.templateType !== undefined && data.templateType !== (existing.templateType ?? 'classic')) {
             throw new ValidationError('Nie można zmienić szablonu istniejącej umowy');
         }
+
+        const nextStartDate = data.startDate !== undefined ? toDate(data.startDate) : existing.startDate;
+        const nextEndDate = data.endDate !== undefined ? toDate(data.endDate) : existing.endDate;
+        validateDateRange(nextStartDate, nextEndDate);
 
         const updateData: UpdateContractData = {
             title: data.title,

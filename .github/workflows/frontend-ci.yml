@@ -16,6 +16,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 defaults:
   run:
     working-directory: smartquote-frontend
@@ -38,13 +41,38 @@ jobs:
           cache-dependency-path: smartquote-frontend/package-lock.json
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: TypeScript check
         run: npx tsc --noEmit
 
       - name: Lint
         run: npm run lint
+
+      - name: Unit tests
+        run: npm run test:unit
+
+  security-audit:
+    name: Production Dependency Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: smartquote-frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run security audit
+        run: npm audit --omit=dev --audit-level=moderate
 
   build:
     name: Build
@@ -54,6 +82,8 @@ jobs:
 
     env:
       NEXT_PUBLIC_BACKEND_URL: ${{ secrets.NEXT_PUBLIC_BACKEND_URL }}
+      BACKEND_URL: ${{ secrets.NEXT_PUBLIC_BACKEND_URL }}
+      NEXT_PUBLIC_FRONTEND_URL: ${{ secrets.NEXTAUTH_URL }}
       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
       NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
 
@@ -69,7 +99,7 @@ jobs:
           cache-dependency-path: smartquote-frontend/package-lock.json
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build
         run: npm run build
@@ -81,6 +111,10 @@ jobs:
     # Runs on every PR to main (pre-deploy: tests the Vercel preview before merge)
     # and on every push to main (post-deploy: confirms production is healthy).
     timeout-minutes: 60
+
+    permissions:
+      contents: read
+      deployments: read
 
     env:
       NEXT_PUBLIC_BACKEND_URL: ${{ secrets.NEXT_PUBLIC_BACKEND_URL }}
@@ -100,7 +134,7 @@ jobs:
           cache-dependency-path: smartquote-frontend/package-lock.json
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium

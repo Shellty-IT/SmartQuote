@@ -23,8 +23,9 @@ export function parseStringArray(value: unknown): string[] {
 }
 
 export function parseNumber(value: unknown, fallback: number): number {
+    if (value === null || value === undefined || value === '') return fallback;
     const parsed = Number(value);
-    return isNaN(parsed) ? fallback : parsed;
+    return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 export function computeAvgPrice(prices: number[]): number {

@@ -1,7 +1,8 @@
 // src/services/clients.service.ts
 import { ClientType } from '@prisma/client';
 import { clientsRepository, ClientsFilter } from '../repositories/clients.repository';
-import { NotFoundError } from '../errors/domain.errors';
+import { ConflictError, NotFoundError } from '../errors/domain.errors';
+import { hasPrismaCode } from '../utils/prismaErrors';
 import type { CreateClientInput, UpdateClientInput, PaginationQuery } from '../types';
 
 const MAX_PAGE_LIMIT = 100;
@@ -63,8 +64,15 @@ export class ClientsService {
     }
 
     async delete(id: string, userId: string) {
-        const deleted = await clientsRepository.delete(id, userId);
-        if (!deleted) throw new NotFoundError('Klient');
+        try {
+            const deleted = await clientsRepository.delete(id, userId);
+            if (!deleted) throw new NotFoundError('Klient');
+        } catch (error: unknown) {
+            if (hasPrismaCode(error, 'P2003')) {
+                throw new ConflictError('Nie moĹĽna usunÄ…Ä‡ klienta powiÄ…zanego z ofertÄ… lub umowÄ…');
+            }
+            throw error;
+        }
     }
 
     async getStats(userId: string) {

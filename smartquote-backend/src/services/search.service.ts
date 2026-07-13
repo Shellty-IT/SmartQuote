@@ -1,9 +1,6 @@
 // src/services/search.service.ts
 import prisma from '../lib/prisma';
 import { MemoryCache } from '../lib/cache';
-import { createModuleLogger } from '../lib/logger';
-
-const logger = createModuleLogger('SearchService');
 const searchCache = new MemoryCache(200);
 
 export interface SearchResult {
@@ -41,21 +38,22 @@ export interface SearchResult {
 
 export class SearchService {
     async search(userId: string, q: string, limit: number): Promise<SearchResult> {
-        const cacheKey = `search:${userId}:${q}:${limit}`;
+        const normalizedQuery = q.trim();
+        const take = Math.max(1, Math.min(Math.trunc(limit) || 10, 100));
+        const cacheKey = `search:${userId}:${normalizedQuery.toLocaleLowerCase('pl-PL')}:${take}`;
         const cached = searchCache.get<SearchResult>(cacheKey);
         if (cached) return cached;
 
         const mode = 'insensitive' as const;
-        const take = limit;
 
-        const [clients, offers, contracts] = await Promise.all([
+        const [clients, offers, contracts, leads] = await Promise.all([
             prisma.client.findMany({
                 where: {
                     userId,
                     OR: [
-                        { name: { contains: q, mode } },
-                        { nip: { contains: q, mode } },
-                        { email: { contains: q, mode } },
+                        { name: { contains: normalizedQuery, mode } },
+                        { nip: { contains: normalizedQuery, mode } },
+                        { email: { contains: normalizedQuery, mode } },
                     ],
                 },
                 select: { id: true, name: true, email: true, company: true, type: true },
@@ -65,8 +63,8 @@ export class SearchService {
                 where: {
                     userId,
                     OR: [
-                        { title: { contains: q, mode } },
-                        { number: { contains: q, mode } },
+                        { title: { contains: normalizedQuery, mode } },
+                        { number: { contains: normalizedQuery, mode } },
                     ],
                 },
                 select: {
@@ -85,8 +83,8 @@ export class SearchService {
                 where: {
                     userId,
                     OR: [
-                        { title: { contains: q, mode } },
-                        { number: { contains: q, mode } },
+                        { title: { contains: normalizedQuery, mode } },
+                        { number: { contains: normalizedQuery, mode } },
                     ],
                 },
                 select: {
@@ -98,29 +96,19 @@ export class SearchService {
                 },
                 take,
             }),
-        ]);
-
-        // Try to search leads if the model exists
-        let leads: SearchResult['leads'] = [];
-        try {
-            const leadResults = await (prisma as any).lead?.findMany({
+            prisma.lead.findMany({
                 where: {
                     userId,
                     OR: [
-                        { name: { contains: q, mode } },
-                        { company: { contains: q, mode } },
-                        { email: { contains: q, mode } },
+                        { name: { contains: normalizedQuery, mode } },
+                        { company: { contains: normalizedQuery, mode } },
+                        { email: { contains: normalizedQuery, mode } },
                     ],
                 },
                 select: { id: true, name: true, company: true, email: true, status: true },
                 take,
-            });
-            if (leadResults) {
-                leads = leadResults;
-            }
-        } catch (err) {
-            logger.debug('Lead model not available for search', { err });
-        }
+            }),
+        ]);
 
         const result: SearchResult = {
             clients: clients.map((c) => ({

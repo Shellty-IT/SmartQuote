@@ -120,18 +120,28 @@ describe('SearchService.search — userId isolation', () => {
         expect(db.client.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 3 }));
         expect(db.offer.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 3 }));
     });
+
+    it('clamps an excessive limit', async () => {
+        await searchService.search(USER_ID, 'test', 999999);
+        expect(db.client.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 100 }));
+        expect(db.lead.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 100 }));
+    });
+
+    it('normalizes whitespace in the query', async () => {
+        await searchService.search(USER_ID, '  test  ', 5);
+        expect(db.client.findMany).toHaveBeenCalledWith(expect.objectContaining({
+            where: expect.objectContaining({
+                OR: expect.arrayContaining([{ name: { contains: 'test', mode: 'insensitive' } }]),
+            }),
+        }));
+    });
 });
 
 // ─── graceful lead fallback ───────────────────────────────────────────────────
 
-describe('SearchService.search — lead model fallback', () => {
-    it('returns empty leads array when lead query throws (model unavailable)', async () => {
+describe('SearchService.search — database failures', () => {
+    it('propagates a lead query failure', async () => {
         db.lead.findMany.mockRejectedValue(new Error('Model not found'));
-        db.client.findMany.mockResolvedValue([makeClient('c1')]);
-
-        const result = await searchService.search(USER_ID, 'kowal', 5);
-
-        expect(result.leads).toEqual([]);
-        expect(result.clients).toHaveLength(1);
+        await expect(searchService.search(USER_ID, 'kowal', 5)).rejects.toThrow('Model not found');
     });
 });

@@ -1,6 +1,7 @@
 // src/repositories/followups.repository.ts
 import { Prisma, FollowUpStatus, FollowUpType, Priority } from '@prisma/client';
 import prisma from '../lib/prisma';
+import { validateOwnedRelations } from './ownership.repository';
 
 export interface FollowUpQueryParams {
     page?: number;
@@ -235,20 +236,6 @@ export const followUpsRepository = {
     },
 
     async validateRelations(userId: string, data: Pick<CreateFollowUpData, 'clientId' | 'offerId' | 'contractId'>) {
-        const [client, offer, contract] = await Promise.all([
-            data.clientId
-                ? prisma.client.findFirst({ where: { id: data.clientId, userId }, select: { id: true } })
-                : null,
-            data.offerId
-                ? prisma.offer.findFirst({ where: { id: data.offerId, userId }, select: { id: true } })
-                : null,
-            data.contractId
-                ? prisma.contract.findFirst({ where: { id: data.contractId, userId }, select: { id: true } })
-                : null,
-        ]);
-
-        if (data.clientId && !client) throw new Error('Nie znaleziono klienta');
-        if (data.offerId && !offer) throw new Error('Nie znaleziono oferty');
-        if (data.contractId && !contract) throw new Error('Nie znaleziono umowy');
+        await validateOwnedRelations(userId, data);
     },
 };

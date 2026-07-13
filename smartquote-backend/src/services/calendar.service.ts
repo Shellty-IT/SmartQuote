@@ -9,6 +9,7 @@ const logger = createModuleLogger('CalendarService');
 export class CalendarService {
     async create(userId: string, data: CreateCalendarEventInput) {
         logger.info('Creating calendar event', { userId, title: data.title });
+        await calendarRepository.validateRelations(userId, data);
         return calendarRepository.create(userId, data);
     }
 
@@ -25,6 +26,7 @@ export class CalendarService {
     async update(id: string, userId: string, data: UpdateCalendarEventInput) {
         const existing = await calendarRepository.findById(id, userId);
         if (!existing) throw new NotFoundError('CalendarEvent');
+        await calendarRepository.validateRelations(userId, data);
         return calendarRepository.update(id, userId, data);
     }
 

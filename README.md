@@ -9,7 +9,7 @@ and automated follow-ups powered by Google Gemini.**
 [![Backend CI](https://github.com/Shellty-IT/SmartQuote/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/Shellty-IT/SmartQuote/actions/workflows/backend-ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16.1-black?logo=next.js&logoColor=white)](https://nextjs.org/)
-[![Node.js](https://img.shields.io/badge/Node-%3E%3D18.0-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Node.js](https://img.shields.io/badge/Node-%3E%3D22.17-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![License](https://img.shields.io/badge/license-Proprietary-red)](#-license)
 
 **[🚀 Live Demo](https://smart-quote.shellty.pl)** &nbsp;·&nbsp; [🇵🇱 Polska wersja](./README-PL.md)
@@ -164,7 +164,7 @@ Sample clients, offers, and contracts can be seeded locally with `npm run seed`.
 
 | Layer            | Technology                                           |
 |------------------|------------------------------------------------------|
-| Runtime          | Node.js ≥18                                          |
+| Runtime          | Node.js ≥20                                          |
 | Language         | TypeScript 5.5                                       |
 | Framework        | Express.js 4.21                                      |
 | Database         | PostgreSQL                                           |
@@ -188,13 +188,13 @@ Sample clients, offers, and contracts can be seeded locally with `npm run seed`.
 
 ## 📋 Prerequisites
 
-- **Node.js** ≥ 18.0 (20.x recommended)
-- **npm** ≥ 9.0 (ships with Node 18+)
+- **Node.js** ≥ 22.17 (24.x recommended)
+- **npm** ≥ 10.0
 - **PostgreSQL** ≥ 14 (for the backend; you can use a managed instance such as Render, Supabase or Neon)
 - **Git** ≥ 2.30
-- **Google Gemini API key** — obtain one at [Google AI Studio](https://aistudio.google.com/app/apikey)
 
 Optional:
+- **Google Gemini API key** for AI features — obtain one at [Google AI Studio](https://aistudio.google.com/app/apikey)
 - **SMTP credentials** or a **Resend API key** if you want to send real emails (configured per-user in-app, not via env vars)
 
 ---
@@ -215,7 +215,7 @@ cd smartquote-backend
 npm install
 
 # Configure environment
-cp .env .env
+cp .env.example .env
 # Edit .env — fill in DATABASE_URL, JWT_SECRET (min. 32 chars), GEMINI_API_KEY
 
 # Database setup
@@ -236,8 +236,7 @@ In a new terminal:
 cd smartquote-frontend
 npm install
 
-# Configure environment — create .env.local in smartquote-frontend/
-# (see the Environment Variables section below for the full list)
+cp .env.example .env.local
 
 # Start dev server
 npm run dev
@@ -259,30 +258,36 @@ npm run dev
 |-------------------------|----------|------------------------------------------------------------|----------------------------------------------------|
 | `DATABASE_URL`          | ✅       | PostgreSQL connection string                               | `postgresql://user:pass@localhost:5432/smartquote` |
 | `JWT_SECRET`            | ✅       | JWT signing secret, **min. 32 characters**                 | `super-secret-jwt-key-minimum-32-chars-long`       |
-| `GEMINI_API_KEY`        | ✅       | Google Gemini API key                                      | `AIzaSy...`                                        |
+| `GEMINI_API_KEY`        | ❌       | Google Gemini API key; AI features stay disabled when empty | `AIzaSy...`                                       |
 | `GEMINI_MODEL`          | ❌       | Gemini model identifier                                    | `gemini-2.5-flash` (default)                       |
 | `PORT`                  | ❌       | HTTP port                                                  | `8080` (default)                                   |
 | `NODE_ENV`              | ❌       | Runtime environment                                        | `development` / `production` / `test`              |
 | `FRONTEND_URL`          | ✅       | Allowed CORS origin (frontend URL)                         | `http://localhost:3000`                            |
 | `CLIENT_URL`            | ✅       | Additional allowed CORS origin                             | `http://localhost:3000`                            |
-| `ENCRYPTION_KEY`        | ❌       | 32-character key encrypting stored SMTP passwords / Resend API keys | `32-char-encryption-key-here`             |
+| `ENCRYPTION_KEY`        | ✅       | Secret with at least 32 characters for encrypting SMTP passwords / Resend API keys | `openssl rand -base64 32`       |
 | `KSEF_MASTER_URL`       | ❌       | External KSeF / e-invoicing API URL                        | `http://localhost:5000`                            |
 | `KSEF_MASTER_API_KEY`   | ❌       | API key for KSeF bridge                                    | `sk_smartquote_ksef_bridge_secret`                 |
+| `KSEF_AVAILABILITY_CACHE_TTL_MS` | ❌ | KSeF availability cache lifetime in milliseconds           | `300000`                                           |
 | `CRON_SECRET`           | ❌       | Bearer token used to authenticate `/cron/reminders` calls  | `random-cron-secret`                               |
+| `LOG_LEVEL`             | ❌       | Pino log level                                             | `debug` / `info` / `warn` / `error`                |
 
 > Email sending (SMTP or Resend) is **not** configured through env vars — each user connects
 > their own mailbox or Resend account from Settings > Skrzynka pocztowa in the app itself,
 > stored encrypted per-user in the database.
 
-A full template is available in [`smartquote-backend/.env.example`](smartquote-backend/.env).
+A full template is available in [`smartquote-backend/.env.example`](smartquote-backend/.env.example).
 
 ### Frontend (`smartquote-frontend/.env.local`)
 
 | Variable                  | Required | Description                                            | Example                   |
 |---------------------------|----------|--------------------------------------------------------|---------------------------|
 | `NEXT_PUBLIC_BACKEND_URL` | ✅       | Base URL of the backend API                            | `http://localhost:8080`   |
+| `BACKEND_URL`             | ✅       | Server-side backend URL used by NextAuth               | `http://localhost:8080`   |
+| `NEXT_PUBLIC_FRONTEND_URL`| ✅       | Public frontend URL used in generated document links   | `http://localhost:3000`   |
 | `NEXTAUTH_URL`            | ✅       | Public URL of the frontend (used by NextAuth.js)       | `http://localhost:3000`   |
 | `NEXTAUTH_SECRET`         | ✅       | NextAuth.js JWT signing secret, **min. 32 characters** | `openssl rand -base64 32` |
+
+A full template is available in [`smartquote-frontend/.env.example`](smartquote-frontend/.env.example).
 
 ---
 
@@ -463,7 +468,7 @@ The monorepo deploys both projects independently — there is no Docker setup.
 ### Backend — Render
 
 - Render auto-detects the Node.js project; set the root directory to `smartquote-backend/`
-- Build command: `npm install && npx prisma generate && npm run build`
+- Build command: `npm ci && npm run build`
 - Start command: `npm start`
 - Provision a PostgreSQL add-on and inject `DATABASE_URL` automatically
 - Run migrations on first deploy with the Render shell: `npx prisma migrate deploy`
@@ -474,7 +479,7 @@ For full CI (including E2E and smoke tests), configure these repository secrets 
 **Settings → Secrets and variables → Actions**:
 
 - **Backend:** `DATABASE_URL`, `JWT_SECRET`, `GEMINI_API_KEY`, `BACKEND_HEALTH_URL`
-- **Frontend:** `NEXT_PUBLIC_BACKEND_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`,
+- **Frontend:** `NEXT_PUBLIC_BACKEND_URL`, `BACKEND_URL`, `NEXT_PUBLIC_FRONTEND_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`,
   `PLAYWRIGHT_BASE_URL`, `TEST_EMAIL`, `TEST_PASSWORD`
 
 ---

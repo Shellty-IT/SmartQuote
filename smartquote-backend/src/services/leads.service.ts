@@ -1,7 +1,8 @@
 // src/services/leads.service.ts
 import prisma from '../lib/prisma';
 import { leadsRepository, LeadsFilter } from '../repositories/leads.repository';
-import { NotFoundError } from '../errors/domain.errors';
+import { ConflictError, NotFoundError } from '../errors/domain.errors';
+import { hasPrismaCode } from '../utils/prismaErrors';
 import { createModuleLogger } from '../lib/logger';
 import type { CreateLeadInput, UpdateLeadInput, ConvertLeadInput, LeadStatus } from '../types';
 
@@ -69,7 +70,14 @@ export class LeadsService {
     async delete(id: string, userId: string) {
         const existing = await leadsRepository.findById(id, userId);
         if (!existing) throw new NotFoundError('Lead');
-        return leadsRepository.delete(id, userId);
+        try {
+            return await leadsRepository.delete(id, userId);
+        } catch (error: unknown) {
+            if (hasPrismaCode(error, 'P2003')) {
+                throw new ConflictError('Nie moĹĽna usunÄ…Ä‡ leada powiÄ…zanego z ofertÄ…');
+            }
+            throw error;
+        }
     }
 
     async convert(id: string, userId: string, data: ConvertLeadInput) {

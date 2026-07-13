@@ -83,9 +83,8 @@ describe('toNumberOrNull', () => {
         expect(toNumberOrNull('2,5')).toBe(2.5)
     })
 
-    it('returns 0 for a string with only letters (regex strips to empty → Number("") = 0)', () => {
-        // Implementation strips non-numeric chars; empty string becomes 0, not null.
-        expect(toNumberOrNull('varies')).toBe(0)
+    it('returns null for a string without a numeric value', () => {
+        expect(toNumberOrNull('varies')).toBeNull()
     })
 
     it('returns null for null', () => {

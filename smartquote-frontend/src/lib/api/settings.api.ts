@@ -7,6 +7,7 @@ import type {
     UserSettings,
     CompanyInfo,
     ApiKey,
+    CreatedApiKey,
     UpdateProfileInput,
     ChangePasswordInput,
     UpdateSettingsInput,
@@ -22,10 +23,18 @@ import type {
     TestResendConnectionResult,
 } from '@/types';
 
+type ApiKeyResponse = Omit<ApiKey, 'maskedKey'> & { key: string };
+type AllSettingsResponse = Omit<AllSettings, 'apiKeys'> & { apiKeys: ApiKeyResponse[] };
+
+function toApiKey({ key, ...apiKey }: ApiKeyResponse): ApiKey {
+    return { ...apiKey, maskedKey: key };
+}
+
 export const settingsApi = {
     getAll: async (): Promise<AllSettings> => {
-        const response = await api.get<AllSettings>('/settings');
-        return response.data as AllSettings;
+        const response = await api.get<AllSettingsResponse>('/settings');
+        const data = response.data as AllSettingsResponse;
+        return { ...data, apiKeys: data.apiKeys.map(toApiKey) };
     },
 
     getProfile: async (): Promise<UserProfile> => {
@@ -78,18 +87,18 @@ export const settingsApi = {
     },
 
     getApiKeys: async (): Promise<ApiKey[]> => {
-        const response = await api.get<ApiKey[]>('/settings/api-keys');
-        return response.data as ApiKey[];
+        const response = await api.get<ApiKeyResponse[]>('/settings/api-keys');
+        return (response.data as ApiKeyResponse[]).map(toApiKey);
     },
 
-    createApiKey: async (data: CreateApiKeyInput): Promise<ApiKey & { key: string }> => {
-        const response = await api.post<ApiKey & { key: string }>('/settings/api-keys', data);
-        return response.data as ApiKey & { key: string };
+    createApiKey: async (data: CreateApiKeyInput): Promise<CreatedApiKey> => {
+        const response = await api.post<ApiKeyResponse>('/settings/api-keys', data);
+        return { secret: (response.data as ApiKeyResponse).key };
     },
 
     toggleApiKey: async (id: string): Promise<ApiKey> => {
-        const response = await api.patch<ApiKey>(`/settings/api-keys/${id}/toggle`);
-        return response.data as ApiKey;
+        const response = await api.patch<ApiKeyResponse>(`/settings/api-keys/${id}/toggle`);
+        return toApiKey(response.data as ApiKeyResponse);
     },
 
     deleteApiKey: async (id: string): Promise<{ message: string }> => {

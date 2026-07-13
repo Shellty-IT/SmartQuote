@@ -3,7 +3,7 @@
 // Renders the shop HTML in an iframe. User clicks a section → side panel opens.
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Download, RefreshCw, ZoomIn, ZoomOut, Layers } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { TemplateAIFillButton } from './TemplateAIFillButton'
@@ -63,8 +63,11 @@ export function ShopDocumentEditor({
     )
 
     // Listen for postMessage events from the iframe
+    const iframeRef = useRef<HTMLIFrameElement>(null)
+
     useEffect(() => {
         const handler = (event: MessageEvent) => {
+            if (event.source !== iframeRef.current?.contentWindow) return
             if (event.data?.type === 'sq:editBlock') {
                 const key = event.data.blockKey as EditableShopBlockKey
                 if (VALID_BLOCK_KEYS.includes(key)) {
@@ -173,10 +176,11 @@ export function ShopDocumentEditor({
                 >
                     <div style={{ transformOrigin: 'top left', transform: `scale(${zoom})`, width: `${100 / zoom}%`, height: `${100 / zoom}%` }}>
                         <iframe
+                            ref={iframeRef}
                             key={`${refreshKey}:${srcdoc.length}`}
                             srcDoc={srcdoc}
                             title="Podgląd oferty — Sklep internetowy"
-                            sandbox="allow-scripts allow-same-origin"
+                            sandbox="allow-scripts"
                             className={cn('h-full w-full border-0', isDragging && 'pointer-events-none')}
                         />
                     </div>

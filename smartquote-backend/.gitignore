@@ -12,6 +12,7 @@ generated/
 # Environment variables
 .env
 .env.*
+!.env.example
 
 # Prisma
 prisma/migrations/dev.db

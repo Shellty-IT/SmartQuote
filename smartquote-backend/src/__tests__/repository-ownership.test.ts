@@ -46,6 +46,7 @@ jest.mock('../utils/offerNumber', () => ({ generateOfferNumber: jest.fn().mockRe
 
 jest.mock('../repositories/contracts.repository', () => ({
     contractsRepository: {
+        validateRelations: jest.fn(),
         findById: jest.fn(),
         findPublicToken: jest.fn(),
         update: jest.fn(),
@@ -68,6 +69,7 @@ jest.mock('../repositories/contracts.repository', () => ({
 
 jest.mock('../repositories/notes.repository', () => ({
     notesRepository: {
+        validateRelations: jest.fn(),
         create: jest.fn(),
         findById: jest.fn(),
         findByEntity: jest.fn(),

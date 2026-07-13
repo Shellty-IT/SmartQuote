@@ -8,6 +8,8 @@ import { authCache } from '../lib/auth-cache';
 import { ksefBridgeService } from './ksef-bridge.service';
 import { createModuleLogger } from '../lib/logger';
 import type { SmtpConfig, ResendConfig, EmailProviderConfig } from '../types';
+import { NotFoundError } from '../errors/domain.errors';
+import { hasPrismaCode } from '../utils/prismaErrors';
 
 const logger = createModuleLogger('settings');
 
@@ -452,7 +454,8 @@ export async function getApiKeys(userId: string) {
         select: {
             id: true,
             name: true,
-            key: true,
+            prefix: true,
+            lastFour: true,
             lastUsedAt: true,
             expiresAt: true,
             isActive: true,
@@ -461,19 +464,24 @@ export async function getApiKeys(userId: string) {
         },
         orderBy: { createdAt: 'desc' },
     });
-    return apiKeys.map((key: {
-        key: string;
-        id: string;
-        name: string;
-        lastUsedAt: Date | null;
-        expiresAt: Date | null;
-        isActive: boolean;
-        permissions: string[];
-        createdAt: Date;
-    }) => ({
-        ...key,
-        key: `${key.key.slice(0, 8)}...${key.key.slice(-4)}`,
-    }));
+    return apiKeys.map(toApiKeyDto);
+}
+
+type ApiKeyDtoSource = {
+    id: string;
+    name: string;
+    prefix: string;
+    lastFour: string;
+    lastUsedAt: Date | null;
+    expiresAt: Date | null;
+    isActive: boolean;
+    permissions: string[];
+    createdAt: Date;
+};
+
+function toApiKeyDto(apiKey: ApiKeyDtoSource) {
+    const { prefix, lastFour, ...safeFields } = apiKey;
+    return { ...safeFields, key: `${prefix}...${lastFour}` };
 }
 
 export async function createApiKey(
@@ -485,28 +493,61 @@ export async function createApiKey(
         data: {
             userId,
             name: data.name,
-            key,
+            keyHash: crypto.createHash('sha256').update(key).digest('hex'),
+            prefix: key.slice(0, 8),
+            lastFour: key.slice(-4),
             permissions: data.permissions || ['read'],
             expiresAt: data.expiresAt,
         },
+        select: {
+            id: true,
+            name: true,
+            prefix: true,
+            lastFour: true,
+            lastUsedAt: true,
+            expiresAt: true,
+            isActive: true,
+            permissions: true,
+            createdAt: true,
+        },
     });
-    return { ...apiKey, key };
+    return { ...toApiKeyDto(apiKey), key };
 }
 
 export async function deleteApiKey(userId: string, keyId: string) {
-    const apiKey = await prisma.apiKey.findFirst({ where: { id: keyId, userId } });
-    if (!apiKey) throw new Error('Klucz API nie znaleziony');
-    await prisma.apiKey.delete({ where: { id: keyId } });
+    const result = await prisma.apiKey.deleteMany({ where: { id: keyId, userId } });
+    if (result.count === 0) throw new NotFoundError('Klucz API');
     return { message: 'Klucz API został usunięty' };
 }
 
 export async function toggleApiKey(userId: string, keyId: string) {
-    const apiKey = await prisma.apiKey.findFirst({ where: { id: keyId, userId } });
-    if (!apiKey) throw new Error('Klucz API nie znaleziony');
-    return prisma.apiKey.update({
-        where: { id: keyId },
-        data: { isActive: !apiKey.isActive },
+    const apiKey = await prisma.apiKey.findFirst({
+        where: { id: keyId, userId },
+        select: { id: true, isActive: true },
     });
+    if (!apiKey) throw new NotFoundError('Klucz API');
+    let updated;
+    try {
+        updated = await prisma.apiKey.update({
+            where: { id: keyId },
+            data: { isActive: !apiKey.isActive },
+            select: {
+                id: true,
+                name: true,
+                prefix: true,
+                lastFour: true,
+                lastUsedAt: true,
+                expiresAt: true,
+                isActive: true,
+                permissions: true,
+                createdAt: true,
+            },
+        });
+    } catch (error: unknown) {
+        if (hasPrismaCode(error, 'P2025')) throw new NotFoundError('Klucz API');
+        throw error;
+    }
+    return toApiKeyDto(updated);
 }
 
 export async function getAllSettings(userId: string) {

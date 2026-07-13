@@ -2,6 +2,8 @@
 
 import { Prisma, ContractStatus } from '@prisma/client';
 import prisma from '../lib/prisma';
+import { validateOwnedRelations } from './ownership.repository';
+import { ValidationError } from '../errors/domain.errors';
 
 export interface ContractsFilter {
     userId: string;
@@ -107,6 +109,20 @@ const contractWithUserInclude = {
 } as const;
 
 export class ContractsRepository {
+    async validateRelations(userId: string, clientId: string, offerId?: string | null): Promise<void> {
+        await validateOwnedRelations(userId, { clientId, offerId });
+
+        if (offerId) {
+            const offer = await prisma.offer.findFirst({
+                where: { id: offerId, userId },
+                select: { clientId: true },
+            });
+            if (offer?.clientId !== clientId) {
+                throw new ValidationError('Oferta i umowa muszÄ… dotyczyÄ‡ tego samego klienta');
+            }
+        }
+    }
+
     async findAll(filter: ContractsFilter) {
         const page = filter.page ?? 1;
         const limit = filter.limit ?? 10;

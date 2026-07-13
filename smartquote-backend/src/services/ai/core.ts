@@ -69,6 +69,7 @@ export function asNonEmptyStringOrNull(value: unknown): string | null {
 }
 
 export function asNumberOrNull(value: unknown): number | null {
+    if (value === null || value === undefined || value === '') return null;
     const n = typeof value === 'number' ? value : Number(value);
     return Number.isFinite(n) ? n : null;
 }

@@ -6,7 +6,7 @@ import { useState } from 'react';
 import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import { useTranslations } from '@/i18n';
-import type { ApiKey, CreateApiKeyInput } from '@/types';
+import type { ApiKey, CreatedApiKey, CreateApiKeyInput } from '@/types';
 
 function CopyIcon() {
     return (
@@ -26,7 +26,7 @@ function CheckIcon({ cls }: { cls?: string }) {
 
 interface Props {
     apiKeys: ApiKey[];
-    onCreate: (data: CreateApiKeyInput) => Promise<ApiKey & { key: string }>;
+    onCreate: (data: CreateApiKeyInput) => Promise<CreatedApiKey>;
     onToggle: (id: string) => Promise<void>;
     onDelete: (id: string) => Promise<void>;
 }
@@ -48,7 +48,7 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
         setIsCreating(true);
         try {
             const result = await onCreate({ name: newKeyName.trim() });
-            setNewKeyResult(result.key);
+            setNewKeyResult(result.secret);
             setNewKeyName('');
         } catch {
         } finally {
@@ -137,10 +137,7 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                                             )}
                                         </div>
                                         <div className="flex items-center gap-3 mt-1">
-                                            <code className="text-sm text-muted-foreground font-mono truncate max-w-[200px]">{apiKey.key}</code>
-                                            <button onClick={() => handleCopy(apiKey.key, apiKey.id)} className="text-muted-foreground hover:text-foreground flex-shrink-0">
-                                                {copiedId === apiKey.id ? <CheckIcon cls="text-status-accepted" /> : <CopyIcon />}
-                                            </button>
+                                            <code className="text-sm text-muted-foreground font-mono truncate max-w-[200px]">{apiKey.maskedKey}</code>
                                         </div>
                                         <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground flex-wrap">
                                             <span>{tr.apiKeys.created} {new Date(apiKey.createdAt).toLocaleDateString()}</span>
@@ -220,7 +217,7 @@ export default function ApiKeysSection({ apiKeys, onCreate, onToggle, onDelete }
                             <div className="flex items-center justify-between gap-4">
                                 <code className="text-sm font-mono text-foreground break-all">{newKeyResult}</code>
                                 <button onClick={() => handleCopy(newKeyResult, 'new')} className="flex-shrink-0 p-2 hover:bg-secondary/60 rounded-lg transition-colors">
-                                    {copiedId === 'new' ? <CheckIcon cls="text-status-accepted w-5 h-5" /> : <svg className="w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" /></svg>}
+                                    {copiedId === 'new' ? <CheckIcon cls="text-status-accepted w-5 h-5" /> : <CopyIcon />}
                                 </button>
                             </div>
                         </div>

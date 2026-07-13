@@ -2,6 +2,7 @@
 
 jest.mock('../repositories/notes.repository', () => ({
     notesRepository: {
+        validateRelations: jest.fn(),
         create: jest.fn(),
         findById: jest.fn(),
         findByEntity: jest.fn(),

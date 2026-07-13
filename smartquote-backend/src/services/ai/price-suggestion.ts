@@ -108,7 +108,9 @@ function extractSources(response: unknown): PriceSource[] {
 export function toNumberOrNull(v: unknown): number | null {
     if (typeof v === 'number' && Number.isFinite(v)) return v
     if (typeof v === 'string') {
-        const n = Number(v.replace(/[^\d.,-]/g, '').replace(/\s/g, '').replace(',', '.'))
+        const normalized = v.replace(/[^\d.,-]/g, '').replace(/\s/g, '').replace(',', '.')
+        if (!normalized || !/[\d]/.test(normalized)) return null
+        const n = Number(normalized)
         return Number.isFinite(n) ? n : null
     }
     return null

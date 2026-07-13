@@ -147,9 +147,8 @@ describe('parseNumber', () => {
         expect(parseNumber(undefined, 7)).toBe(7);
     });
 
-    it('treats null as 0 (Number(null) === 0, not NaN)', () => {
-        // Number(null) === 0, which is not NaN, so the function returns 0 — not the fallback
-        expect(parseNumber(null, 3)).toBe(0);
+    it('returns fallback for null', () => {
+        expect(parseNumber(null, 3)).toBe(3);
     });
 
     it('parses 0 correctly (not a fallback)', () => {

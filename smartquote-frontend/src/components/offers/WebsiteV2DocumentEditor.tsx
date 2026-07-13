@@ -2,7 +2,7 @@
 // Document-as-editor for the "Strona internetowa v2" offer template.
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Download, RefreshCw, ZoomIn, ZoomOut, Layers } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { TemplateAIFillButton } from './TemplateAIFillButton'
@@ -56,8 +56,11 @@ export function WebsiteV2DocumentEditor({
         [offer, blocks],
     )
 
+    const iframeRef = useRef<HTMLIFrameElement>(null)
+
     useEffect(() => {
         const handler = (event: MessageEvent) => {
+            if (event.source !== iframeRef.current?.contentWindow) return
             if (event.data?.type === 'sq:editBlock') {
                 const key = event.data.blockKey as EditableWV2BlockKey
                 if (VALID_BLOCK_KEYS.includes(key)) {
@@ -164,10 +167,11 @@ export function WebsiteV2DocumentEditor({
                 >
                     <div style={{ transformOrigin: 'top left', transform: `scale(${zoom})`, width: `${100 / zoom}%`, height: `${100 / zoom}%` }}>
                         <iframe
+                            ref={iframeRef}
                             key={`${refreshKey}:${srcdoc.length}`}
                             srcDoc={srcdoc}
                             title="Podgląd oferty — Strona internetowa - domyślny"
-                            sandbox="allow-scripts allow-same-origin"
+                            sandbox="allow-scripts"
                             className={cn('h-full w-full border-0', isDragging && 'pointer-events-none')}
                         />
                     </div>

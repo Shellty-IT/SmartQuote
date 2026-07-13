@@ -1,48 +1,52 @@
-// public/sw.js
-const CACHE_NAME = 'smartquote-v2';
+const CACHE_NAME = 'smartquote-static-v3';
 const OFFLINE_URL = '/offline.html';
-
 const PRECACHE_URLS = [
-    '/',
-    '/dashboard',
-    '/dashboard/offers',
-    '/dashboard/clients',
-    '/dashboard/ai',
-    '/offline.html',
+    OFFLINE_URL,
+    '/logo.svg',
+    '/favicon.ico',
+    '/apple-touch-icon.png',
+    '/android-chrome-192x192.png',
+    '/android-chrome-512x512.png',
+    '/site.webmanifest',
 ];
 
-const CACHE_STRATEGIES = {
-    cacheFirst: [
-        /\/icons\//,
-        /\/manifest\.json$/,
-        /\.woff2?$/,
-        /\.png$/,
-        /\.svg$/,
-        /\.ico$/,
-    ],
-    networkFirst: [
-        /\/dashboard/,
-        /\/offer\/view\//,
-    ],
-    networkOnly: [
-        /\/_next\//,
-        /\/api\//,
-        /\/auth\//,
-        /nextauth/,
-    ],
-};
+function isStaticAsset(url) {
+    if (url.origin !== self.location.origin) return false;
+    if (url.pathname.startsWith('/_next/static/')) return true;
+    return PRECACHE_URLS.includes(url.pathname);
+}
 
-function matchesPatterns(url, patterns) {
-    return patterns.some(function(pattern) {
-        return pattern.test(url);
-    });
+function isPrivatePath(pathname) {
+    return pathname === '/dashboard'
+        || pathname.startsWith('/dashboard/')
+        || pathname.startsWith('/offer/view/')
+        || pathname.startsWith('/contract/view/')
+        || pathname === '/api'
+        || pathname.startsWith('/api/')
+        || pathname === '/auth'
+        || pathname.startsWith('/auth/');
+}
+
+function safeNotificationPath(value) {
+    if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//')) return '/dashboard';
+    try {
+        const url = new URL(value, self.location.origin);
+        if (url.origin !== self.location.origin) return '/dashboard';
+        const allowed = url.pathname === '/dashboard'
+            || url.pathname.startsWith('/dashboard/')
+            || url.pathname.startsWith('/offer/view/')
+            || url.pathname.startsWith('/contract/view/');
+        return allowed ? `${url.pathname}${url.search}${url.hash}` : '/dashboard';
+    } catch {
+        return '/dashboard';
+    }
 }
 
 self.addEventListener('install', function(event) {
     event.waitUntil(
         caches.open(CACHE_NAME).then(function(cache) {
             return cache.addAll(PRECACHE_URLS).catch(function() {
-                return cache.addAll(['/offline.html']);
+                return cache.add(OFFLINE_URL);
             });
         })
     );
@@ -67,78 +71,41 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
-    var url = event.request.url;
-
     if (event.request.method !== 'GET') return;
 
-    if (matchesPatterns(url, CACHE_STRATEGIES.networkOnly)) {
-        return;
-    }
+    const url = new URL(event.request.url);
+    if (url.origin !== self.location.origin) return;
 
-    if (matchesPatterns(url, CACHE_STRATEGIES.cacheFirst)) {
+    if (event.request.mode === 'navigate') {
         event.respondWith(
-            caches.match(event.request).then(function(cached) {
-                if (cached) return cached;
-                return fetch(event.request).then(function(response) {
-                    if (response && response.status === 200) {
-                        var clone = response.clone();
-                        caches.open(CACHE_NAME).then(function(cache) {
-                            cache.put(event.request, clone);
-                        });
-                    }
-                    return response;
-                });
+            fetch(event.request).catch(function() {
+                return caches.match(OFFLINE_URL);
             })
         );
         return;
     }
 
-    if (matchesPatterns(url, CACHE_STRATEGIES.networkFirst)) {
-        event.respondWith(
-            fetch(event.request)
-                .then(function(response) {
-                    if (response && response.status === 200) {
-                        var clone = response.clone();
-                        caches.open(CACHE_NAME).then(function(cache) {
-                            cache.put(event.request, clone);
-                        });
-                    }
-                    return response;
-                })
-                .catch(function() {
-                    return caches.match(event.request).then(function(cached) {
-                        return cached || caches.match(OFFLINE_URL);
-                    });
-                })
-        );
-        return;
-    }
+    if (isPrivatePath(url.pathname)) return;
+    if (!isStaticAsset(url)) return;
 
     event.respondWith(
-        fetch(event.request)
-            .then(function(response) {
-                if (response && response.status === 200 && response.type === 'basic') {
-                    var clone = response.clone();
-                    caches.open(CACHE_NAME).then(function(cache) {
-                        cache.put(event.request, clone);
+        caches.match(event.request).then(function(cached) {
+            if (cached) return cached;
+            return fetch(event.request).then(function(response) {
+                if (response && response.ok && response.type === 'basic') {
+                    const clone = response.clone();
+                    void caches.open(CACHE_NAME).then(function(cache) {
+                        return cache.put(event.request, clone);
                     });
                 }
                 return response;
-            })
-            .catch(function() {
-                return caches.match(event.request).then(function(cached) {
-                    if (cached) return cached;
-                    if (event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html')) {
-                        return caches.match(OFFLINE_URL);
-                    }
-                    return new Response('', { status: 408, statusText: 'Offline' });
-                });
-            })
+            });
+        })
     );
 });
 
 self.addEventListener('push', function(event) {
-    var data = { title: 'SmartQuote AI', body: 'Nowe powiadomienie', url: '/dashboard' };
+    let data = { title: 'SmartQuote AI', body: 'Nowe powiadomienie', url: '/dashboard' };
 
     if (event.data) {
         try {
@@ -151,12 +118,12 @@ self.addEventListener('push', function(event) {
     event.waitUntil(
         self.registration.showNotification(data.title, {
             body: data.body,
-            icon: '/icons/icon-192x192.png',
-            badge: '/icons/icon-96x96.png',
+            icon: '/android-chrome-192x192.png',
+            badge: '/android-chrome-192x192.png',
             vibrate: [200, 100, 200],
             tag: data.tag || 'smartquote-notification',
             renotify: true,
-            data: { url: data.url || '/dashboard' },
+            data: { url: safeNotificationPath(data.url) },
             actions: [
                 { action: 'open', title: 'Otwórz' },
                 { action: 'dismiss', title: 'Odrzuć' },
@@ -167,21 +134,17 @@ self.addEventListener('push', function(event) {
 
 self.addEventListener('notificationclick', function(event) {
     event.notification.close();
-
-    var url = '/dashboard';
-    if (event.notification.data && event.notification.data.url) {
-        url = event.notification.data.url;
-    }
-
     if (event.action === 'dismiss') return;
 
+    const url = safeNotificationPath(event.notification.data && event.notification.data.url);
     event.waitUntil(
         self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
-            for (var i = 0; i < clientList.length; i++) {
-                var client = clientList[i];
-                if (client.url.includes('/dashboard') && 'focus' in client) {
-                    client.navigate(url);
-                    return client.focus();
+            for (let i = 0; i < clientList.length; i++) {
+                const client = clientList[i];
+                if ('navigate' in client && 'focus' in client) {
+                    return client.navigate(url).then(function() {
+                        return client.focus();
+                    });
                 }
             }
             return self.clients.openWindow(url);

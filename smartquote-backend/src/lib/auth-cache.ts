@@ -1,4 +1,6 @@
 // src/lib/auth-cache.ts
+import { MemoryCache } from './cache';
+
 interface CachedUser {
     id: string;
     email: string;
@@ -6,28 +8,18 @@ interface CachedUser {
     role: string;
     isActive: boolean;
     tokenVersion: number;
-    cachedAt: number;
 }
 
-const cache = new Map<string, CachedUser>();
-const TTL_MS = 5 * 60 * 1000;
+const cache = new MemoryCache(10_000);
+const TTL_SECONDS = 5 * 60;
 
 export const authCache = {
-    get(userId: string): Omit<CachedUser, 'cachedAt'> | null {
-        const cached = cache.get(userId);
-        if (!cached) return null;
-
-        if (Date.now() - cached.cachedAt > TTL_MS) {
-            cache.delete(userId);
-            return null;
-        }
-
-        const { cachedAt: _omit, ...user } = cached;
-        return user;
+    get(userId: string): CachedUser | null {
+        return cache.get<CachedUser>(userId);
     },
 
-    set(user: Omit<CachedUser, 'cachedAt'>): void {
-        cache.set(user.id, { ...user, cachedAt: Date.now() });
+    set(user: CachedUser): void {
+        cache.set(user.id, user, TTL_SECONDS);
     },
 
     invalidate(userId: string): void {

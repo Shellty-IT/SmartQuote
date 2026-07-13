@@ -47,6 +47,7 @@ class EmailComposerService {
     }
 
     async sendEmail(userId: string, input: SendEmailInput): Promise<SendResult> {
+        await emailComposerRepository.validateRelations(userId, input);
         if (input.saveAsDraft) {
             const log = await emailComposerRepository.createLog({
                 userId,
@@ -109,7 +110,6 @@ class EmailComposerService {
     async sendDraft(userId: string, draftId: string): Promise<SendResult> {
         const draft = await emailComposerRepository.findDraftById(draftId, userId);
         if (!draft) throw new NotFoundError('Szkic');
-
         const emailConfig = await getEmailConfigOrThrow(userId);
         const attachments = (draft.attachments as unknown as EmailAttachment[]) ?? [];
         const { nodemailerAttachments, linkLines } = await resolveAttachments(
@@ -145,6 +145,7 @@ class EmailComposerService {
     async updateDraft(userId: string, draftId: string, input: UpdateDraftInput): Promise<{ id: string }> {
         const draft = await emailComposerRepository.findDraftById(draftId, userId);
         if (!draft) throw new NotFoundError('Szkic');
+        await emailComposerRepository.validateRelations(userId, input);
 
         const updated = await emailComposerRepository.updateLog(draftId, {
             to: input.to,

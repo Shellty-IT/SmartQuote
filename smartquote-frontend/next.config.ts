@@ -10,18 +10,23 @@ const repoRoot = path.dirname(frontendRoot);
 // localhost:* is always safe to allow in connect-src — it is never accessible from the public internet,
 // so including it in the production build's CSP has zero security impact on Vercel deployments.
 // This covers both `next dev` and `next start` for local development without relying on env vars.
-const connectSrc = "connect-src 'self' https: http://localhost:* ws://localhost:*";
+const connectSrc = isDev
+    ? "connect-src 'self' https: http://localhost:* ws://localhost:*"
+    : "connect-src 'self' https:";
 
 // CSP builder — frame-ancestors controls who can embed this page in an iframe.
 // Default is 'none' (no embedding). Preview routes override it to 'self'.
 function buildCsp(frameAncestors: "'none'" | "'self'") {
     return [
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+        `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
         "style-src 'self' 'unsafe-inline'",
         "img-src 'self' data: blob: https:",
         "font-src 'self' data:",
         connectSrc,
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
         // Allow blob: and srcdoc iframes (PDF preview modal + document editor)
         // shellty-it.github.io needed for demo/about website previews in offer documents
         "frame-src 'self' blob: https://shellty-it.github.io",
@@ -107,7 +112,7 @@ const nextConfig: NextConfig = {
             },
             // Public offer page can also be previewed in the same modal
             {
-                source: '/public/offers/:token',
+                source: '/api/public/offers/:token/preview',
                 headers: previewFrameHeaders,
             },
             // Shop template preview — loaded in iframe inside ProposalDocumentEditor
@@ -267,7 +272,7 @@ const nextConfig: NextConfig = {
                 ],
             },
             {
-                source: '/manifest.json',
+                source: '/site.webmanifest',
                 headers: [
                     { key: 'Cache-Control', value: 'public, max-age=3600' },
                     { key: 'Content-Type', value: 'application/manifest+json' },
