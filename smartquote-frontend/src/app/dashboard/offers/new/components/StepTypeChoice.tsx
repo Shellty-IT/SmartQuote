@@ -1,445 +1,249 @@
 // src/app/dashboard/offers/new/components/StepTypeChoice.tsx
 
-import { useTranslations } from '@/i18n'
-import type { TemplateType } from '../constants'
+import {
+    Briefcase,
+    FileText,
+    Globe,
+    Layers,
+    Monitor,
+    ShieldCheck,
+    ShoppingCart,
+    Smartphone,
+    Sparkles,
+} from 'lucide-react';
+import type { ReactNode } from 'react';
+import { TemplateChoiceCard } from '@/components/ui';
+import { useTranslations } from '@/i18n';
+import type { TemplateType } from '../constants';
 
 interface StepTypeChoiceProps {
-    selectedType: TemplateType
-    onSelect: (type: TemplateType) => void
+    selectedType: TemplateType;
+    onSelect: (type: TemplateType) => void;
+}
+
+function OfferTemplatePreview({ type }: { type: TemplateType }) {
+    switch (type) {
+        case 'classic':
+            return (
+                <div className="h-full bg-card p-2.5">
+                    <div className="flex items-center justify-between">
+                        <div className="h-2 w-16 rounded-full bg-primary/70" />
+                        <div className="h-1.5 w-8 rounded-full bg-muted-foreground/25" />
+                    </div>
+                    <div className="mt-2 overflow-hidden rounded-md border border-border">
+                        <div className="grid grid-cols-[1fr_2.5rem] gap-2 bg-secondary/80 px-2 py-1">
+                            <div className="h-1.5 rounded-full bg-muted-foreground/35" />
+                            <div className="h-1.5 rounded-full bg-primary/35" />
+                        </div>
+                        {[0, 1].map((row) => (
+                            <div key={row} className="grid grid-cols-[1fr_2.5rem] gap-2 border-t border-border/70 px-2 py-1">
+                                <div className="h-1.5 rounded-full bg-muted-foreground/20" />
+                                <div className="h-1.5 rounded-full bg-muted-foreground/25" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        case 'universal':
+            return (
+                <div className="h-full bg-[linear-gradient(135deg,#173957,#102b46)] p-2.5 dark:bg-[linear-gradient(135deg,#112d48,#0b2238)]">
+                    <div className="flex items-center gap-2">
+                        <div className="h-8 w-1 rounded-full bg-[#d6b458]" />
+                        <div className="min-w-0 flex-1 space-y-1.5">
+                            <div className="h-2 w-3/4 rounded-full bg-[#d6b458]" />
+                            <div className="h-1.5 w-full rounded-full bg-white/30" />
+                            <div className="h-1.5 w-2/3 rounded-full bg-white/20" />
+                        </div>
+                    </div>
+                    <div className="mt-2 grid grid-cols-3 gap-1.5">
+                        <div className="h-4 rounded-md border border-[#d6b458]/30 bg-[#d6b458]/20" />
+                        <div className="h-4 rounded-md border border-white/10 bg-white/10" />
+                        <div className="h-4 rounded-md border border-white/10 bg-white/10" />
+                    </div>
+                </div>
+            );
+        case 'proposal':
+            return (
+                <div className="h-full bg-card">
+                    <div className="flex h-5 items-center gap-1.5 border-b border-border bg-secondary/70 px-2.5">
+                        <div className="size-1.5 rounded-full bg-red-400/70" />
+                        <div className="size-1.5 rounded-full bg-amber-400/70" />
+                        <div className="size-1.5 rounded-full bg-emerald-400/70" />
+                        <div className="ml-1 h-1.5 flex-1 rounded-full bg-muted-foreground/15" />
+                    </div>
+                    <div className="grid h-[3.75rem] grid-cols-[1.25fr_0.75fr] gap-2 p-2.5">
+                        <div className="space-y-1.5">
+                            <div className="h-2 w-2/3 rounded-full bg-primary/60" />
+                            <div className="h-1.5 w-full rounded-full bg-muted-foreground/25" />
+                            <div className="h-1.5 w-4/5 rounded-full bg-muted-foreground/20" />
+                        </div>
+                        <div className="rounded-lg bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-glow))] opacity-80" />
+                    </div>
+                </div>
+            );
+        case 'website_v2':
+            return (
+                <div className="h-full bg-card p-2.5">
+                    <div className="flex items-center justify-between">
+                        <div className="h-2 w-20 rounded-full bg-primary/55" />
+                        <div className="flex gap-1">
+                            <div className="size-1.5 rounded-full bg-muted-foreground/25" />
+                            <div className="size-1.5 rounded-full bg-muted-foreground/25" />
+                            <div className="size-1.5 rounded-full bg-muted-foreground/25" />
+                        </div>
+                    </div>
+                    <div className="mt-2 h-5 rounded-md bg-primary/10 p-1.5">
+                        <div className="h-1.5 w-3/5 rounded-full bg-primary/40" />
+                    </div>
+                    <div className="mt-1.5 grid grid-cols-3 gap-1.5">
+                        {[0, 1, 2].map((item) => (
+                            <div key={item} className="h-5 rounded-md border border-border bg-surface-subtle" />
+                        ))}
+                    </div>
+                </div>
+            );
+        case 'website_v3':
+            return (
+                <div className="h-full bg-card p-2.5">
+                    <div className="h-2 w-24 rounded-full bg-gradient-to-r from-violet-500 to-cyan-500" />
+                    <div className="mt-2 flex items-end gap-1.5">
+                        <div className="h-9 flex-1 rounded-md border border-border bg-surface-subtle p-1.5">
+                            <div className="h-1.5 w-3/4 rounded-full bg-muted-foreground/25" />
+                            <div className="mt-1.5 h-2 w-1/2 rounded-full bg-muted-foreground/20" />
+                        </div>
+                        <div className="h-11 flex-1 rounded-md border border-violet-500/35 bg-gradient-to-b from-violet-500/15 to-cyan-500/10 p-1.5">
+                            <div className="h-1.5 w-3/4 rounded-full bg-violet-500/55" />
+                            <div className="mt-1.5 h-2 w-1/2 rounded-full bg-cyan-500/35" />
+                        </div>
+                        <div className="h-9 flex-1 rounded-md border border-border bg-surface-subtle p-1.5">
+                            <div className="h-1.5 w-3/4 rounded-full bg-muted-foreground/25" />
+                            <div className="mt-1.5 h-2 w-1/2 rounded-full bg-muted-foreground/20" />
+                        </div>
+                    </div>
+                </div>
+            );
+        case 'shop':
+            return (
+                <div className="h-full bg-card p-2.5">
+                    <div className="flex items-center gap-2">
+                        <div className="h-2 w-16 rounded-full bg-primary/60" />
+                        <div className="h-1.5 flex-1 rounded-full bg-muted-foreground/15" />
+                        <div className="grid size-4 place-items-center rounded-full bg-primary/15">
+                            <div className="size-1.5 rounded-full bg-primary/60" />
+                        </div>
+                    </div>
+                    <div className="mt-2 grid grid-cols-3 gap-1.5">
+                        {[0, 1, 2].map((item) => (
+                            <div key={item} className="rounded-md border border-border bg-surface-subtle p-1.5">
+                                <div className="h-4 rounded bg-primary/10" />
+                                <div className="mt-1 h-1.5 w-3/4 rounded-full bg-muted-foreground/25" />
+                                <div className="mt-1 h-1.5 w-1/2 rounded-full bg-primary/35" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        case 'mobile_simple':
+            return (
+                <div className="flex h-full items-center gap-3 bg-[linear-gradient(135deg,#07665f,#0f9488)] px-3 py-2">
+                    <div className="flex h-14 w-8 shrink-0 flex-col rounded-[0.65rem] border border-white/25 bg-white/10 p-1">
+                        <div className="mx-auto h-1 w-3 rounded-full bg-white/40" />
+                        <div className="mt-1 flex-1 rounded-md bg-white/10 p-1">
+                            <div className="h-2 rounded bg-orange-400/80" />
+                            <div className="mt-1 h-1 rounded-full bg-white/30" />
+                            <div className="mt-1 h-1 rounded-full bg-white/20" />
+                        </div>
+                    </div>
+                    <div className="min-w-0 flex-1 space-y-1.5">
+                        <div className="h-2 w-3/4 rounded-full bg-orange-400/90" />
+                        <div className="h-1.5 w-full rounded-full bg-white/35" />
+                        <div className="h-1.5 w-4/5 rounded-full bg-white/25" />
+                        <div className="flex gap-1.5 pt-0.5">
+                            <div className="h-3 flex-1 rounded bg-white/12" />
+                            <div className="h-3 flex-1 rounded bg-white/12" />
+                        </div>
+                    </div>
+                </div>
+            );
+        case 'mobile_app':
+            return (
+                <div className="flex h-full items-center gap-3 bg-[linear-gradient(135deg,#211b51,#312468)] px-3 py-2">
+                    <div className="grid h-14 w-8 shrink-0 place-items-center rounded-[0.65rem] border border-white/25 bg-white/5">
+                        <div className="h-7 w-4 rounded bg-gradient-to-b from-rose-400 to-indigo-400 opacity-90" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                        <div className="h-2 w-3/4 rounded-full bg-rose-400/85" />
+                        <div className="mt-2 flex items-center gap-1.5">
+                            <div className="size-2 rounded-full bg-indigo-300" />
+                            <div className="h-1 flex-1 rounded-full bg-white/25" />
+                            <div className="size-2 rounded-full bg-purple-300" />
+                            <div className="h-1 flex-1 rounded-full bg-white/25" />
+                            <div className="size-2 rounded-full bg-rose-300" />
+                        </div>
+                        <div className="mt-2 h-1.5 w-full rounded-full bg-white/25" />
+                        <div className="mt-1.5 h-1.5 w-2/3 rounded-full bg-white/20" />
+                    </div>
+                </div>
+            );
+        case 'support':
+            return (
+                <div className="h-full bg-emerald-50 p-2.5 dark:bg-emerald-950/30">
+                    <div className="flex items-center justify-between">
+                        <div className="h-2 w-20 rounded-full bg-teal-800/85 dark:bg-teal-300/70" />
+                        <div className="h-1.5 w-10 rounded-full bg-emerald-500/30" />
+                    </div>
+                    <div className="mt-2 grid grid-cols-3 gap-1.5">
+                        <div className="h-8 rounded-md border border-emerald-200 bg-white/75 dark:border-emerald-700/50 dark:bg-white/5" />
+                        <div className="h-9 rounded-md border-2 border-teal-700 bg-blue-50 dark:border-teal-400/70 dark:bg-teal-400/10" />
+                        <div className="h-8 rounded-md border border-slate-800 bg-slate-900 dark:border-slate-600" />
+                    </div>
+                    <div className="mt-1.5 h-1.5 w-3/4 rounded-full bg-emerald-400/45" />
+                </div>
+            );
+    }
 }
 
 export default function StepTypeChoice({ selectedType, onSelect }: StepTypeChoiceProps) {
-    const tr = useTranslations('offerNew')
-    const c = tr.typeChoice
+    const tr = useTranslations('offerNew');
+    const c = tr.typeChoice;
+
+    const templates: Array<{
+        type: TemplateType;
+        label: string;
+        description: string;
+        icon: ReactNode;
+    }> = [
+        { type: 'classic', label: c.classicLabel, description: c.classicDesc, icon: <FileText className="size-5" /> },
+        { type: 'universal', label: c.universalLabel, description: c.universalDesc, icon: <Briefcase className="size-5" /> },
+        { type: 'proposal', label: c.proposalLabel, description: c.proposalDesc, icon: <Globe className="size-5" /> },
+        { type: 'website_v2', label: c.websiteV2Label, description: c.websiteV2Desc, icon: <Monitor className="size-5" /> },
+        { type: 'website_v3', label: c.websiteV3Label, description: c.websiteV3Desc, icon: <Sparkles className="size-5" /> },
+        { type: 'shop', label: c.shopLabel, description: c.shopDesc, icon: <ShoppingCart className="size-5" /> },
+        { type: 'mobile_simple', label: c.mobileSimpleLabel, description: c.mobileSimpleDesc, icon: <Smartphone className="size-5" /> },
+        { type: 'mobile_app', label: c.mobileAppLabel, description: c.mobileAppDesc, icon: <Layers className="size-5" /> },
+        { type: 'support', label: c.supportLabel, description: c.supportDesc, icon: <ShieldCheck className="size-5" /> },
+    ];
 
     return (
         <div data-testid="offer-step-type-choice">
-            <h2 className="text-lg font-semibold text-foreground mb-1">{c.title}</h2>
-            <p className="text-sm text-muted-foreground mb-6">{c.subtitle}</p>
+            <div className="mb-7">
+                <h2 className="text-xl font-semibold tracking-tight text-foreground">{c.title}</h2>
+                <p className="mt-1.5 max-w-2xl text-sm leading-5 text-muted-foreground">{c.subtitle}</p>
+            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {/* 1. Classic — Uniwersalny - systemowy */}
-                <button
-                    type="button"
-                    onClick={() => onSelect('classic')}
-                    className={`flex flex-col gap-4 p-5 rounded-xl border-2 text-left transition-all ${
-                        selectedType === 'classic'
-                            ? 'border-primary bg-primary/5'
-                            : 'border-border bg-card hover:bg-secondary/40'
-                    }`}
-                >
-                    <div className="flex items-start gap-3">
-                        <div
-                            className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                                selectedType === 'classic'
-                                    ? 'bg-primary text-white'
-                                    : 'bg-muted text-muted-foreground'
-                            }`}
-                        >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                    d="M3 10h18M3 6h18M3 14h18M3 18h18" />
-                            </svg>
-                        </div>
-                        <div className="flex-1">
-                            <p className="font-semibold text-foreground">{c.classicLabel}</p>
-                            <p className="text-sm text-muted-foreground mt-1">{c.classicDesc}</p>
-                        </div>
-                        {selectedType === 'classic' && (
-                            <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                        )}
-                    </div>
-                    <div className="rounded-lg bg-secondary/60 p-3 space-y-1.5">
-                        {[0, 1, 2].map((i) => (
-                            <div key={i} className="flex items-center gap-2">
-                                <div className="h-2 rounded bg-muted-foreground/30 flex-1" />
-                                <div className="h-2 w-12 rounded bg-muted-foreground/20" />
-                            </div>
-                        ))}
-                        <div className="flex justify-end mt-2">
-                            <div className="h-2.5 w-20 rounded bg-primary/40" />
-                        </div>
-                    </div>
-                </button>
-
-                {/* 2. Universal — Uniwersalny - klasyczny */}
-                <button
-                    type="button"
-                    onClick={() => onSelect('universal')}
-                    className={`flex flex-col gap-4 p-5 rounded-xl border-2 text-left transition-all ${
-                        selectedType === 'universal'
-                            ? 'border-primary bg-primary/5'
-                            : 'border-border bg-card hover:bg-secondary/40'
-                    }`}
-                >
-                    <div className="flex items-start gap-3">
-                        <div
-                            className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                                selectedType === 'universal'
-                                    ? 'bg-primary text-white'
-                                    : 'bg-muted text-muted-foreground'
-                            }`}
-                        >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                        <div className="flex-1">
-                            <p className="font-semibold text-foreground">{c.universalLabel}</p>
-                            <p className="text-sm text-muted-foreground mt-1">{c.universalDesc}</p>
-                        </div>
-                        {selectedType === 'universal' && (
-                            <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                        )}
-                    </div>
-                    <div className="rounded-lg p-3 space-y-1.5" style={{ background: '#1B3A5C' }}>
-                        <div className="flex items-start gap-2">
-                            <div className="w-1 rounded-full" style={{ background: '#C9A84C', minHeight: '40px' }} />
-                            <div className="flex-1 space-y-1">
-                                <div className="h-2 rounded w-3/4" style={{ background: '#C9A84C', opacity: 0.9 }} />
-                                <div className="h-1.5 rounded bg-white/20 w-full" />
-                                <div className="h-1.5 rounded bg-white/15 w-2/3" />
-                            </div>
-                        </div>
-                        <div className="flex gap-1 mt-1">
-                            <div className="h-3 flex-1 rounded" style={{ background: 'rgba(201,168,76,.3)' }} />
-                            <div className="h-3 flex-1 rounded bg-white/10" />
-                            <div className="h-3 flex-1 rounded bg-white/10" />
-                        </div>
-                    </div>
-                </button>
-
-                {/* 3. Proposal — Strona internetowa - v1 */}
-                <button
-                    type="button"
-                    onClick={() => onSelect('proposal')}
-                    className={`flex flex-col gap-4 p-5 rounded-xl border-2 text-left transition-all ${
-                        selectedType === 'proposal'
-                            ? 'border-primary bg-primary/5'
-                            : 'border-border bg-card hover:bg-secondary/40'
-                    }`}
-                >
-                    <div className="flex items-start gap-3">
-                        <div
-                            className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                                selectedType === 'proposal'
-                                    ? 'bg-primary text-white'
-                                    : 'bg-muted text-muted-foreground'
-                            }`}
-                        >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                    d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                            </svg>
-                        </div>
-                        <div className="flex-1">
-                            <p className="font-semibold text-foreground">{c.proposalLabel}</p>
-                            <p className="text-sm text-muted-foreground mt-1">{c.proposalDesc}</p>
-                        </div>
-                        {selectedType === 'proposal' && (
-                            <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                        )}
-                    </div>
-                    <div className="rounded-lg bg-secondary/60 p-3 space-y-1.5">
-                        <div className="h-3 w-24 rounded bg-primary/40" />
-                        <div className="h-2 rounded bg-muted-foreground/20 w-full" />
-                        <div className="h-2 rounded bg-muted-foreground/20 w-4/5" />
-                        <div className="h-2 rounded bg-muted-foreground/20 w-3/5" />
-                        <div className="flex gap-2 mt-2">
-                            <div className="h-5 flex-1 rounded bg-primary/30" />
-                            <div className="h-5 flex-1 rounded bg-muted-foreground/20" />
-                        </div>
-                    </div>
-                </button>
-
-                {/* 4. Website v2 — Strona internetowa - domyślny */}
-                <button
-                    type="button"
-                    onClick={() => onSelect('website_v2')}
-                    className={`flex flex-col gap-4 p-5 rounded-xl border-2 text-left transition-all ${
-                        selectedType === 'website_v2'
-                            ? 'border-primary bg-primary/5'
-                            : 'border-border bg-card hover:bg-secondary/40'
-                    }`}
-                >
-                    <div className="flex items-start gap-3">
-                        <div
-                            className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                                selectedType === 'website_v2'
-                                    ? 'bg-primary text-white'
-                                    : 'bg-muted text-muted-foreground'
-                            }`}
-                        >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                    d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                            </svg>
-                        </div>
-                        <div className="flex-1">
-                            <p className="font-semibold text-foreground">{c.websiteV2Label}</p>
-                            <p className="text-sm text-muted-foreground mt-1">{c.websiteV2Desc}</p>
-                        </div>
-                        {selectedType === 'website_v2' && (
-                            <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                        )}
-                    </div>
-                    <div className="rounded-lg bg-secondary/60 p-3 space-y-1.5">
-                        <div className="h-3 w-28 rounded bg-primary/40" />
-                        <div className="h-2 rounded bg-muted-foreground/20 w-full" />
-                        <div className="h-2 rounded bg-muted-foreground/20 w-5/6" />
-                        <div className="flex gap-1 mt-2">
-                            <div className="h-6 flex-1 rounded bg-muted-foreground/10 border border-muted-foreground/20" />
-                            <div className="h-6 flex-1 rounded bg-muted-foreground/10 border border-muted-foreground/20" />
-                            <div className="h-6 flex-1 rounded bg-primary/20 border border-primary/30" />
-                        </div>
-                    </div>
-                </button>
-
-                {/* 5. Website v3 — Strona internetowa - zaawansowany */}
-                <button
-                    type="button"
-                    onClick={() => onSelect('website_v3')}
-                    className={`flex flex-col gap-4 p-5 rounded-xl border-2 text-left transition-all ${
-                        selectedType === 'website_v3'
-                            ? 'border-primary bg-primary/5'
-                            : 'border-border bg-card hover:bg-secondary/40'
-                    }`}
-                >
-                    <div className="flex items-start gap-3">
-                        <div
-                            className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                                selectedType === 'website_v3'
-                                    ? 'bg-primary text-white'
-                                    : 'bg-muted text-muted-foreground'
-                            }`}
-                        >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                    d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                            </svg>
-                        </div>
-                        <div className="flex-1">
-                            <p className="font-semibold text-foreground">{c.websiteV3Label}</p>
-                            <p className="text-sm text-muted-foreground mt-1">{c.websiteV3Desc}</p>
-                        </div>
-                        {selectedType === 'website_v3' && (
-                            <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                        )}
-                    </div>
-                    <div className="rounded-lg bg-secondary/60 p-3 space-y-1.5">
-                        <div className="h-3 w-24 rounded" style={{ background: 'linear-gradient(90deg,#7C3AED,#06B6D4)' }} />
-                        <div className="h-2 rounded bg-muted-foreground/20 w-full" />
-                        <div className="h-2 rounded bg-muted-foreground/20 w-4/5" />
-                        <div className="flex gap-1 mt-2">
-                            <div className="h-6 flex-1 rounded bg-muted-foreground/10 border border-muted-foreground/20" />
-                            <div className="h-6 flex-1 rounded" style={{ background: 'linear-gradient(135deg,#7C3AED22,#06B6D422)', borderColor: '#7C3AED44' }} />
-                        </div>
-                    </div>
-                </button>
-
-                {/* 6. Mobile Simple — Aplikacja mobilna - domyślny */}
-                <button
-                    type="button"
-                    onClick={() => onSelect('mobile_simple')}
-                    className={`flex flex-col gap-4 p-5 rounded-xl border-2 text-left transition-all ${
-                        selectedType === 'mobile_simple'
-                            ? 'border-primary bg-primary/5'
-                            : 'border-border bg-card hover:bg-secondary/40'
-                    }`}
-                >
-                    <div className="flex items-start gap-3">
-                        <div
-                            className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                                selectedType === 'mobile_simple'
-                                    ? 'bg-primary text-white'
-                                    : 'bg-muted text-muted-foreground'
-                            }`}
-                        >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                    d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                        <div className="flex-1">
-                            <p className="font-semibold text-foreground">{c.mobileSimpleLabel}</p>
-                            <p className="text-sm text-muted-foreground mt-1">{c.mobileSimpleDesc}</p>
-                        </div>
-                        {selectedType === 'mobile_simple' && (
-                            <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                        )}
-                    </div>
-                    <div className="rounded-lg p-3 space-y-1.5" style={{ background: 'linear-gradient(135deg,#065F5B,#0D9488)' }}>
-                        <div className="flex items-center gap-2">
-                            <div className="w-8 h-14 rounded-lg border border-white/20 bg-white/10 flex-shrink-0 flex flex-col items-center justify-start pt-1 gap-0.5">
-                                <div className="w-4 h-1 rounded bg-white/40" />
-                                <div className="w-4 h-3 rounded bg-white/20 mt-1" />
-                                <div className="flex gap-0.5 mt-0.5">
-                                    <div className="w-1.5 h-2 rounded bg-white/20" />
-                                    <div className="w-1.5 h-2 rounded" style={{ background: '#F97316', opacity: 0.8 }} />
-                                </div>
-                            </div>
-                            <div className="flex-1 space-y-1">
-                                <div className="h-2 rounded w-3/4" style={{ background: '#F97316', opacity: 0.9 }} />
-                                <div className="h-1.5 rounded bg-white/30 w-full" />
-                                <div className="h-1.5 rounded bg-white/20 w-2/3" />
-                            </div>
-                        </div>
-                    </div>
-                </button>
-
-                {/* 7. Mobile App — Aplikacja mobilna - zaawansowany */}
-                <button
-                    type="button"
-                    onClick={() => onSelect('mobile_app')}
-                    className={`flex flex-col gap-4 p-5 rounded-xl border-2 text-left transition-all ${
-                        selectedType === 'mobile_app'
-                            ? 'border-primary bg-primary/5'
-                            : 'border-border bg-card hover:bg-secondary/40'
-                    }`}
-                >
-                    <div className="flex items-start gap-3">
-                        <div
-                            className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                                selectedType === 'mobile_app'
-                                    ? 'bg-primary text-white'
-                                    : 'bg-muted text-muted-foreground'
-                            }`}
-                        >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                    d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                        <div className="flex-1">
-                            <p className="font-semibold text-foreground">{c.mobileAppLabel}</p>
-                            <p className="text-sm text-muted-foreground mt-1">{c.mobileAppDesc}</p>
-                        </div>
-                        {selectedType === 'mobile_app' && (
-                            <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                        )}
-                    </div>
-                    <div className="rounded-lg p-3 space-y-1.5" style={{ background: '#1E1B4B' }}>
-                        <div className="flex items-center gap-2">
-                            <div className="w-8 h-14 rounded-lg border border-white/20 bg-white/5 flex-shrink-0 flex items-center justify-center">
-                                <div className="w-4 h-6 rounded bg-gradient-to-b from-rose-400 to-indigo-400 opacity-80" />
-                            </div>
-                            <div className="flex-1 space-y-1">
-                                <div className="h-2 rounded w-3/4" style={{ background: '#F43F5E', opacity: 0.8 }} />
-                                <div className="h-1.5 rounded bg-white/20 w-full" />
-                                <div className="h-1.5 rounded bg-white/20 w-2/3" />
-                            </div>
-                        </div>
-                    </div>
-                </button>
-
-                {/* 8. Shop — Sklep internetowy */}
-                <button
-                    type="button"
-                    onClick={() => onSelect('shop')}
-                    className={`flex flex-col gap-4 p-5 rounded-xl border-2 text-left transition-all ${
-                        selectedType === 'shop'
-                            ? 'border-primary bg-primary/5'
-                            : 'border-border bg-card hover:bg-secondary/40'
-                    }`}
-                >
-                    <div className="flex items-start gap-3">
-                        <div
-                            className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                                selectedType === 'shop'
-                                    ? 'bg-primary text-white'
-                                    : 'bg-muted text-muted-foreground'
-                            }`}
-                        >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                        </div>
-                        <div className="flex-1">
-                            <p className="font-semibold text-foreground">{c.shopLabel}</p>
-                            <p className="text-sm text-muted-foreground mt-1">{c.shopDesc}</p>
-                        </div>
-                        {selectedType === 'shop' && (
-                            <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                        )}
-                    </div>
-                    <div className="rounded-lg bg-secondary/60 p-3 space-y-1.5">
-                        <div className="flex gap-1.5">
-                            <div className="h-2 flex-1 rounded bg-primary/30" />
-                            <div className="h-2 flex-1 rounded bg-muted-foreground/20" />
-                            <div className="h-2 flex-1 rounded bg-muted-foreground/20" />
-                        </div>
-                        <div className="h-2 rounded bg-muted-foreground/20 w-full" />
-                        <div className="h-2 rounded bg-muted-foreground/20 w-3/4" />
-                        <div className="flex gap-2 mt-1">
-                            {[...Array(5)].map((_, i) => (
-                                <div key={i} className={`h-3 w-3 rounded-full ${i === 4 ? 'bg-primary/40' : 'bg-muted-foreground/20'}`} />
-                            ))}
-                        </div>
-                    </div>
-                </button>
-
-                {/* 9. Support — Wsparcie IT / SLA */}
-                <button
-                    type="button"
-                    onClick={() => onSelect('support')}
-                    className={`flex flex-col gap-4 p-5 rounded-xl border-2 text-left transition-all ${
-                        selectedType === 'support'
-                            ? 'border-primary bg-primary/5'
-                            : 'border-border bg-card hover:bg-secondary/40'
-                    }`}
-                >
-                    <div className="flex items-start gap-3">
-                        <div
-                            className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                                selectedType === 'support'
-                                    ? 'bg-primary text-white'
-                                    : 'bg-muted text-muted-foreground'
-                            }`}
-                        >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                            </svg>
-                        </div>
-                        <div className="flex-1">
-                            <p className="font-semibold text-foreground">{c.supportLabel}</p>
-                            <p className="text-sm text-muted-foreground mt-1">{c.supportDesc}</p>
-                        </div>
-                        {selectedType === 'support' && (
-                            <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                        )}
-                    </div>
-                    <div className="rounded-lg p-3 space-y-1.5" style={{ background: '#F0FDF9' }}>
-                        <div className="h-3 w-24 rounded" style={{ background: '#0F4C75' }} />
-                        <div className="flex gap-1 mt-1">
-                            <div className="h-8 flex-1 rounded border" style={{ background: '#fff', borderColor: '#E2E8F0' }} />
-                            <div className="h-8 flex-1 rounded border-2" style={{ background: '#EFF6FF', borderColor: '#0F4C75' }} />
-                            <div className="h-8 flex-1 rounded border" style={{ background: '#0F172A', borderColor: '#0F172A' }} />
-                        </div>
-                        <div className="h-2 rounded w-3/4" style={{ background: '#10B981', opacity: 0.4 }} />
-                    </div>
-                </button>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 xl:gap-5">
+                {templates.map((template) => (
+                    <TemplateChoiceCard
+                        key={template.type}
+                        selected={selectedType === template.type}
+                        onSelect={() => onSelect(template.type)}
+                        title={template.label}
+                        description={template.description}
+                        icon={template.icon}
+                        preview={<OfferTemplatePreview type={template.type} />}
+                    />
+                ))}
             </div>
         </div>
-    )
+    );
 }

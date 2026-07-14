@@ -111,7 +111,7 @@ export default function NewOfferContent() {
                 />
             </div>
 
-            <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-card">
+            <div className="mb-6 rounded-2xl border border-border bg-card p-4 shadow-card sm:p-6">
                 {currentStep === 'client' && (
                     <StepClient
                         clients={clients}

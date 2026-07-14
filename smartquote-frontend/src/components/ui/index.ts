@@ -43,5 +43,6 @@ export { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, 
 export { Checkbox } from './checkbox';
 export { Toaster } from './sonner';
 export { InlineEdit } from './InlineEdit';
+export { default as TemplateChoiceCard } from './TemplateChoiceCard';
 export { ToastContainer } from './Toast';
 export type { ToastType, ToastData } from './Toast';

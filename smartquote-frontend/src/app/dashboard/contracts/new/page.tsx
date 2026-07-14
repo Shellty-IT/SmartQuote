@@ -1,16 +1,16 @@
 // src/app/dashboard/contracts/new/page.tsx
 'use client';
 
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense, type ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useContracts } from '@/hooks/useContracts';
 import { useClients } from '@/hooks/useClients';
-import { Button, Input, Textarea, LoadingSpinner } from '@/components/ui';
+import { Button, Input, Textarea, LoadingSpinner, TemplateChoiceCard } from '@/components/ui';
 import { Client } from '@/types';
 import { useToast } from '@/contexts/ToastContext';
 import { useTranslations } from '@/i18n';
 import { cn, getInitials } from '@/lib/utils';
-import { FileText, FileCode } from 'lucide-react';
+import { Boxes, FileText, Globe, ShieldCheck, ShoppingCart, Smartphone } from 'lucide-react';
 import {
     buildDefaultContractBlocks,
     mergeContractWithDefaults,
@@ -100,41 +100,139 @@ function loadMobileBlocksFromStorage(): ContractMobileBlocks {
     return buildDefaultContractMobileBlocks();
 }
 
-// ── Template card ──────────────────────────────────────────────────────────────
+// ── Template previews ──────────────────────────────────────────────────────────
 
-function TemplateCard({ selected, onSelect, label, desc, icon, preview }: {
-    type: string; selected: boolean; onSelect: () => void;
-    label: string; desc: string; icon: React.ReactNode; preview: React.ReactNode;
-}) {
-    return (
-        <button
-            type="button"
-            onClick={onSelect}
-            className={cn(
-                'flex flex-col gap-4 p-5 rounded-xl border-2 text-left transition-all',
-                selected ? 'border-primary bg-primary/5' : 'border-border bg-card hover:bg-secondary/40',
-            )}
-        >
-            <div className="flex items-start gap-3">
-                <div className={cn(
-                    'w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0',
-                    selected ? 'bg-primary text-white' : 'bg-muted text-muted-foreground',
-                )}>
-                    {icon}
+function ContractTemplatePreview({ type }: { type: TemplateType }) {
+    switch (type) {
+        case 'classic':
+            return (
+                <div className="h-full bg-card p-2.5">
+                    <div className="flex items-center justify-between">
+                        <div className="h-2 w-20 rounded-full bg-primary/65" />
+                        <div className="h-1.5 w-8 rounded-full bg-muted-foreground/20" />
+                    </div>
+                    <div className="mt-2 overflow-hidden rounded-md border border-border">
+                        <div className="grid grid-cols-[1fr_2.5rem] gap-2 bg-secondary/80 px-2 py-1">
+                            <div className="h-1.5 rounded-full bg-muted-foreground/35" />
+                            <div className="h-1.5 rounded-full bg-primary/35" />
+                        </div>
+                        {[0, 1].map((row) => (
+                            <div key={row} className="grid grid-cols-[1fr_2.5rem] gap-2 border-t border-border/70 px-2 py-1">
+                                <div className="h-1.5 rounded-full bg-muted-foreground/20" />
+                                <div className="h-1.5 rounded-full bg-muted-foreground/25" />
+                            </div>
+                        ))}
+                    </div>
                 </div>
-                <div className="flex-1">
-                    <p className="font-semibold text-foreground">{label}</p>
-                    <p className="text-sm text-muted-foreground mt-1">{desc}</p>
+            );
+        case 'short':
+            return (
+                <div className="h-full bg-card p-2.5">
+                    <div className="flex items-center gap-2">
+                        <div className="h-8 w-1 rounded-full bg-primary/70" />
+                        <div className="flex-1">
+                            <div className="h-2 w-24 rounded-full bg-primary/50" />
+                            <div className="mt-1.5 h-1.5 w-3/5 rounded-full bg-muted-foreground/20" />
+                        </div>
+                    </div>
+                    <div className="mt-2 grid grid-cols-[1rem_1fr] items-center gap-x-2 gap-y-1.5">
+                        <div className="grid size-3 place-items-center rounded-full bg-primary/15 text-[6px] font-bold text-primary">1</div>
+                        <div className="h-1.5 rounded-full bg-muted-foreground/20" />
+                        <div className="grid size-3 place-items-center rounded-full bg-primary/15 text-[6px] font-bold text-primary">2</div>
+                        <div className="h-1.5 w-4/5 rounded-full bg-muted-foreground/20" />
+                    </div>
                 </div>
-                {selected && (
-                    <svg className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                )}
-            </div>
-            {preview}
-        </button>
-    );
+            );
+        case 'services':
+            return (
+                <div className="h-full bg-card">
+                    <div className="flex h-5 items-center gap-1.5 border-b border-border bg-secondary/70 px-2.5">
+                        <div className="size-1.5 rounded-full bg-red-400/70" />
+                        <div className="size-1.5 rounded-full bg-amber-400/70" />
+                        <div className="size-1.5 rounded-full bg-emerald-400/70" />
+                        <div className="ml-auto h-1.5 w-10 rounded-full bg-muted-foreground/15" />
+                    </div>
+                    <div className="p-2.5">
+                        <div className="h-2 w-20 rounded-full bg-amber-500/45" />
+                        <div className="mt-2 grid grid-cols-3 gap-1.5">
+                            {[0, 1, 2].map((item) => (
+                                <div key={item} className="h-7 rounded-md border border-border bg-surface-subtle p-1.5">
+                                    <div className="h-1.5 rounded-full bg-muted-foreground/20" />
+                                    <div className="mt-1.5 h-1.5 w-2/3 rounded-full bg-primary/25" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        case 'mobile':
+            return (
+                <div className="flex h-full items-center gap-3 bg-card px-3 py-2">
+                    <div className="flex h-14 w-8 shrink-0 flex-col rounded-[0.65rem] border border-primary/25 bg-primary/5 p-1">
+                        <div className="mx-auto h-1 w-3 rounded-full bg-primary/35" />
+                        <div className="mt-1 flex-1 rounded-md bg-primary/10 p-1">
+                            <div className="h-2 rounded bg-primary/35" />
+                            <div className="mt-1 h-1 rounded-full bg-muted-foreground/25" />
+                            <div className="mt-1 h-1 rounded-full bg-muted-foreground/20" />
+                        </div>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                        <div className="h-2 w-3/4 rounded-full bg-primary/55" />
+                        <div className="mt-2 flex items-center gap-1.5">
+                            <div className="size-2 rounded-full bg-emerald-500/55" />
+                            <div className="h-1.5 flex-1 rounded-full bg-muted-foreground/20" />
+                        </div>
+                        <div className="mt-1.5 flex items-center gap-1.5">
+                            <div className="size-2 rounded-full bg-emerald-500/55" />
+                            <div className="h-1.5 w-3/4 rounded-full bg-muted-foreground/20" />
+                        </div>
+                    </div>
+                </div>
+            );
+        case 'dedicated':
+            return (
+                <div className="h-full bg-card p-2.5">
+                    <div className="flex items-center justify-between">
+                        <div className="h-2 w-24 rounded-full bg-primary/60" />
+                        <div className="flex gap-1">
+                            <div className="size-1.5 rounded-full bg-emerald-500/60" />
+                            <div className="size-1.5 rounded-full bg-primary/50" />
+                        </div>
+                    </div>
+                    <div className="mt-3 flex items-center">
+                        {[0, 1, 2, 3].map((node, index) => (
+                            <div key={node} className="contents">
+                                <div className="h-7 flex-1 rounded-md border border-primary/15 bg-primary/10 p-1.5">
+                                    <div className="h-1.5 rounded-full bg-primary/30" />
+                                    <div className="mt-1 h-1 w-2/3 rounded-full bg-muted-foreground/20" />
+                                </div>
+                                {index < 3 && <div className="h-px w-2 bg-primary/30" />}
+                            </div>
+                        ))}
+                    </div>
+                    <div className="mx-auto mt-2 h-1.5 w-3/5 rounded-full bg-muted-foreground/15" />
+                </div>
+            );
+        case 'sla':
+            return (
+                <div className="h-full bg-emerald-50 p-2.5 dark:bg-emerald-950/30">
+                    <div className="flex items-center justify-between">
+                        <div className="h-2 w-20 rounded-full bg-teal-800/80 dark:bg-teal-300/70" />
+                        <div className="h-1.5 w-8 rounded-full bg-emerald-500/30" />
+                    </div>
+                    <div className="mt-2 flex gap-1.5">
+                        <div className="h-3 w-8 rounded-md bg-red-400/35" />
+                        <div className="h-3 w-8 rounded-md bg-orange-400/35" />
+                        <div className="h-3 w-8 rounded-md bg-amber-400/35" />
+                        <div className="h-3 w-8 rounded-md bg-emerald-400/35" />
+                    </div>
+                    <div className="mt-2 space-y-1.5">
+                        <div className="h-1.5 w-full rounded-full bg-teal-900/20 dark:bg-white/20" />
+                        <div className="h-1.5 w-4/5 rounded-full bg-teal-900/15 dark:bg-white/15" />
+                    </div>
+                </div>
+            );
+    }
 }
 
 // ── Simple step indicator ──────────────────────────────────────────────────────
@@ -377,6 +475,20 @@ function NewContractForm() {
         c.company?.toLowerCase().includes(clientSearch.toLowerCase())
     );
 
+    const contractTemplates: Array<{
+        type: TemplateType;
+        label: string;
+        description: string;
+        icon: ReactNode;
+    }> = [
+        { type: 'classic', label: tn.typeChoice.classicLabel, description: tn.typeChoice.classicDesc, icon: <FileText className="size-5" /> },
+        { type: 'short', label: tn.typeChoice.websiteLabel, description: tn.typeChoice.websiteDesc, icon: <Globe className="size-5" /> },
+        { type: 'services', label: tn.typeChoice.servicesLabel, description: tn.typeChoice.servicesDesc, icon: <ShoppingCart className="size-5" /> },
+        { type: 'mobile', label: tn.typeChoice.mobileLabel, description: tn.typeChoice.mobileDesc, icon: <Smartphone className="size-5" /> },
+        { type: 'dedicated', label: tn.typeChoice.dedicatedLabel, description: tn.typeChoice.dedicatedDesc, icon: <Boxes className="size-5" /> },
+        { type: 'sla', label: tn.typeChoice.slaLabel, description: tn.typeChoice.slaDesc, icon: <ShieldCheck className="size-5" /> },
+    ];
+
     return (
         <div className="w-full max-w-[1400px] space-y-4 px-4 py-3 md:px-6">
             <WizardHeader
@@ -467,132 +579,25 @@ function NewContractForm() {
 
             {/* ── STEP: type_choice ────────────────────────────────────────────── */}
             {step === 'type_choice' && (
-                <div data-testid="contract-step-type-choice" className="rounded-2xl border border-border bg-card p-6 shadow-card">
-                    <h2 className="text-lg font-semibold text-foreground mb-1">{tn.typeChoice.title}</h2>
-                    <p className="text-sm text-muted-foreground mb-6">{tn.typeChoice.subtitle}</p>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {/* Classic */}
-                        <TemplateCard
-                            type="classic"
-                            selected={templateType === 'classic'}
-                            onSelect={() => setTemplateType('classic')}
-                            label={tn.typeChoice.classicLabel}
-                            desc={tn.typeChoice.classicDesc}
-                            icon={<FileText className="w-5 h-5" />}
-                            preview={
-                                <div className="rounded-lg bg-secondary/60 p-3 space-y-1.5">
-                                    {[0, 1, 2].map((i) => (
-                                        <div key={i} className="flex items-center gap-2">
-                                            <div className="h-2 rounded bg-muted-foreground/30 flex-1" />
-                                            <div className="h-2 w-12 rounded bg-muted-foreground/20" />
-                                        </div>
-                                    ))}
-                                    <div className="flex justify-end mt-2">
-                                        <div className="h-2.5 w-20 rounded bg-primary/40" />
-                                    </div>
-                                </div>
-                            }
-                        />
-                        {/* Website / short */}
-                        <TemplateCard
-                            type="short"
-                            selected={templateType === 'short'}
-                            onSelect={() => setTemplateType('short')}
-                            label={tn.typeChoice.websiteLabel}
-                            desc={tn.typeChoice.websiteDesc}
-                            icon={<FileCode className="w-5 h-5" />}
-                            preview={
-                                <div className="rounded-lg bg-secondary/60 p-3 space-y-1.5">
-                                    <div className="h-3 w-24 rounded bg-primary/40" />
-                                    <div className="h-2 rounded bg-muted-foreground/20 w-full" />
-                                    <div className="h-2 rounded bg-muted-foreground/20 w-4/5" />
-                                    <div className="h-2 rounded bg-muted-foreground/20 w-3/5" />
-                                </div>
-                            }
-                        />
-                        {/* Mobile app */}
-                        <TemplateCard
-                            type="mobile"
-                            selected={templateType === 'mobile'}
-                            onSelect={() => setTemplateType('mobile')}
-                            label={tn.typeChoice.mobileLabel}
-                            desc={tn.typeChoice.mobileDesc}
-                            icon={<FileCode className="w-5 h-5" />}
-                            preview={
-                                <div className="rounded-lg bg-secondary/60 p-3 space-y-1.5">
-                                    <div className="h-2 w-16 rounded" style={{ background: 'rgba(27,58,92,0.4)' }} />
-                                    <div className="h-2 rounded bg-muted-foreground/20 w-full" />
-                                    <div className="h-2 rounded bg-muted-foreground/20 w-3/5" />
-                                    <div className="flex gap-1.5 mt-1">
-                                        <div className="h-2 flex-1 rounded bg-muted-foreground/20" />
-                                        <div className="h-2 flex-1 rounded bg-muted-foreground/20" />
-                                        <div className="h-2 flex-1 rounded bg-muted-foreground/20" />
-                                    </div>
-                                </div>
-                            }
-                        />
-                        {/* Services / sklep internetowy */}
-                        <TemplateCard
-                            type="services"
-                            selected={templateType === 'services'}
-                            onSelect={() => setTemplateType('services')}
-                            label={tn.typeChoice.servicesLabel}
-                            desc={tn.typeChoice.servicesDesc}
-                            icon={<FileCode className="w-5 h-5" />}
-                            preview={
-                                <div className="rounded-lg bg-secondary/60 p-3 space-y-1.5">
-                                    <div className="h-2 w-16 rounded" style={{ background: 'rgba(201,168,76,0.4)' }} />
-                                    <div className="h-2 rounded bg-muted-foreground/20 w-full" />
-                                    <div className="h-2 rounded bg-muted-foreground/20 w-4/5" />
-                                    <div className="h-px w-full bg-muted-foreground/20 mt-1" />
-                                    <div className="h-4 rounded" style={{ background: 'rgba(27,58,92,0.15)' }} />
-                                </div>
-                            }
-                        />
-                        {/* Dedicated system */}
-                        <TemplateCard
-                            type="dedicated"
-                            selected={templateType === 'dedicated'}
-                            onSelect={() => setTemplateType('dedicated')}
-                            label={tn.typeChoice.dedicatedLabel}
-                            desc={tn.typeChoice.dedicatedDesc}
-                            icon={<FileCode className="w-5 h-5" />}
-                            preview={
-                                <div className="rounded-lg bg-secondary/60 p-3 space-y-1.5">
-                                    <div className="h-2 w-20 rounded" style={{ background: 'rgba(27,58,92,0.4)' }} />
-                                    <div className="h-2 rounded bg-muted-foreground/20 w-full" />
-                                    <div className="flex gap-1.5 mt-1">
-                                        {[0,1,2,3].map(i => <div key={i} className="h-4 flex-1 rounded bg-muted-foreground/20" />)}
-                                    </div>
-                                    <div className="h-2 rounded bg-muted-foreground/20 w-3/4" />
-                                </div>
-                            }
-                        />
-                        {/* SLA / Opieka IT */}
-                        <TemplateCard
-                            type="sla"
-                            selected={templateType === 'sla'}
-                            onSelect={() => setTemplateType('sla')}
-                            label={tn.typeChoice.slaLabel}
-                            desc={tn.typeChoice.slaDesc}
-                            icon={<FileCode className="w-5 h-5" />}
-                            preview={
-                                <div className="rounded-lg bg-secondary/60 p-3 space-y-1.5">
-                                    <div className="h-2 w-14 rounded" style={{ background: 'rgba(201,168,76,0.4)' }} />
-                                    <div className="flex gap-1 mt-1">
-                                        <div className="h-3 w-4 rounded" style={{ background: 'rgba(220,38,38,0.3)' }} />
-                                        <div className="h-3 w-4 rounded" style={{ background: 'rgba(234,88,12,0.3)' }} />
-                                        <div className="h-3 w-4 rounded" style={{ background: 'rgba(202,138,4,0.3)' }} />
-                                        <div className="h-3 w-4 rounded" style={{ background: 'rgba(22,163,74,0.3)' }} />
-                                    </div>
-                                    <div className="h-2 rounded bg-muted-foreground/20 w-full" />
-                                    <div className="h-2 rounded bg-muted-foreground/20 w-4/5" />
-                                </div>
-                            }
-                        />
+                <div data-testid="contract-step-type-choice" className="rounded-2xl border border-border bg-card p-4 shadow-card sm:p-6">
+                    <div className="mb-7">
+                        <h2 className="text-xl font-semibold tracking-tight text-foreground">{tn.typeChoice.title}</h2>
+                        <p className="mt-1.5 max-w-2xl text-sm leading-5 text-muted-foreground">{tn.typeChoice.subtitle}</p>
                     </div>
 
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 xl:gap-5">
+                        {contractTemplates.map((template) => (
+                            <TemplateChoiceCard
+                                key={template.type}
+                                selected={templateType === template.type}
+                                onSelect={() => setTemplateType(template.type)}
+                                title={template.label}
+                                description={template.description}
+                                icon={template.icon}
+                                preview={<ContractTemplatePreview type={template.type} />}
+                            />
+                        ))}
+                    </div>
                     <div className="flex justify-between mt-6">
                         <Button variant="outline" type="button" onClick={() => setStep('client')}>
                             {commonTr.previous}

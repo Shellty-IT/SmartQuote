@@ -41,31 +41,33 @@ export default function Header({ onSearchOpen }: HeaderProps) {
     const initials = getInitials(displayName);
 
     return (
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 pl-[6.75rem] backdrop-blur-xl sm:px-6 sm:pl-[7.25rem] lg:pl-6">
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-border bg-background/80 px-4 pl-[6.75rem] backdrop-blur-xl sm:gap-3 sm:px-6 sm:pl-[7.25rem] lg:pl-6">
             {/* Search — opens command palette */}
             <button
                 onClick={onSearchOpen}
+                aria-label={commonTr.search}
                 className={cn(
-                    'relative flex flex-1 max-w-sm items-center gap-2 h-9 rounded-lg border border-border bg-secondary/60 px-3 text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:bg-card',
+                    'relative flex size-9 flex-none items-center justify-center rounded-lg border border-border bg-secondary/60 text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:bg-card',
+                    'sm:h-9 sm:w-auto sm:max-w-sm sm:flex-1 sm:justify-start sm:gap-2 sm:px-3',
                     searchOpen && 'flex-1 max-w-full',
                 )}
             >
                 <Search className="h-4 w-4 shrink-0" />
-                <span className="flex-1 text-left truncate">{commonTr.search}</span>
+                <span className="hidden flex-1 truncate text-left sm:block">{commonTr.search}</span>
                 <kbd className="hidden shrink-0 rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] sm:block">
                     Ctrl K
                 </kbd>
             </button>
 
             {/* Right controls — ml-auto pushes to right edge regardless of search width */}
-            <div className="ml-auto flex shrink-0 items-center gap-2">
+            <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
                 {/* Language switcher */}
                 <div className="flex items-center rounded-lg border border-border bg-card overflow-hidden">
                     <button
                         onClick={() => setLanguage('pl')}
                         aria-label="Polski"
                         className={cn(
-                            'h-9 px-2.5 text-xs font-semibold transition-colors',
+                            'h-9 px-2 text-xs font-semibold transition-colors sm:px-2.5',
                             language === 'pl'
                                 ? 'bg-gradient-primary text-white'
                                 : 'text-muted-foreground hover:text-foreground'
@@ -77,7 +79,7 @@ export default function Header({ onSearchOpen }: HeaderProps) {
                         onClick={() => setLanguage('en')}
                         aria-label="English"
                         className={cn(
-                            'h-9 px-2.5 text-xs font-semibold transition-colors',
+                            'h-9 px-2 text-xs font-semibold transition-colors sm:px-2.5',
                             language === 'en'
                                 ? 'bg-gradient-primary text-white'
                                 : 'text-muted-foreground hover:text-foreground'
@@ -116,7 +118,7 @@ export default function Header({ onSearchOpen }: HeaderProps) {
                 {/* Profile chip */}
                 <Link
                     href="/dashboard/settings"
-                    className="flex items-center gap-2.5 rounded-xl border border-border bg-card px-2 py-1.5 pr-3 shadow-sm transition hover:bg-secondary"
+                    className="flex items-center rounded-xl border border-border bg-card p-1.5 shadow-sm transition hover:bg-secondary sm:gap-2.5 sm:px-2 sm:py-1.5 sm:pr-3"
                 >
                     <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-lg">
                         {avatar ? (
