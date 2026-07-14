@@ -9,6 +9,7 @@ interface TemplateChoiceCardProps {
     description: string;
     icon: ReactNode;
     preview: ReactNode;
+    iconVariant?: 'default' | 'website';
 }
 
 /**
@@ -23,7 +24,10 @@ export default function TemplateChoiceCard({
     description,
     icon,
     preview,
+    iconVariant = 'default',
 }: TemplateChoiceCardProps) {
+    const websiteIcon = iconVariant === 'website';
+
     return (
         <button
             type="button"
@@ -43,9 +47,11 @@ export default function TemplateChoiceCard({
                 <span
                     className={cn(
                         'grid size-10 shrink-0 place-items-center rounded-xl border transition-colors',
-                        selected
-                            ? 'border-primary/30 bg-gradient-primary text-white shadow-sm'
-                            : 'border-border bg-surface-subtle text-muted-foreground group-hover:border-primary/20 group-hover:text-primary',
+                        websiteIcon
+                            ? 'border-sky-500/30 bg-sky-500 text-white shadow-sm group-hover:border-sky-500/40 group-hover:bg-sky-500'
+                            : selected
+                                ? 'border-primary/30 bg-gradient-primary text-white shadow-sm'
+                                : 'border-border bg-surface-subtle text-muted-foreground group-hover:border-primary/20 group-hover:text-primary',
                     )}
                     aria-hidden="true"
                 >

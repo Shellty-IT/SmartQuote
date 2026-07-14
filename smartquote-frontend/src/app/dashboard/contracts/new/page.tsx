@@ -592,10 +592,11 @@ function NewContractForm() {
                                 selected={templateType === template.type}
                                 onSelect={() => setTemplateType(template.type)}
                                 title={template.label}
-                                description={template.description}
-                                icon={template.icon}
-                                preview={<ContractTemplatePreview type={template.type} />}
-                            />
+                            description={template.description}
+                            icon={template.icon}
+                            iconVariant={template.type === 'short' ? 'website' : 'default'}
+                            preview={<ContractTemplatePreview type={template.type} />}
+                        />
                         ))}
                     </div>
                     <div className="flex justify-between mt-6">

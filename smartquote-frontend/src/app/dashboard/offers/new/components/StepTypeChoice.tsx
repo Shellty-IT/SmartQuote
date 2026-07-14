@@ -5,11 +5,9 @@ import {
     FileText,
     Globe,
     Layers,
-    Monitor,
     ShieldCheck,
     ShoppingCart,
     Smartphone,
-    Sparkles,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { TemplateChoiceCard } from '@/components/ui';
@@ -216,8 +214,8 @@ export default function StepTypeChoice({ selectedType, onSelect }: StepTypeChoic
         { type: 'classic', label: c.classicLabel, description: c.classicDesc, icon: <FileText className="size-5" /> },
         { type: 'universal', label: c.universalLabel, description: c.universalDesc, icon: <Briefcase className="size-5" /> },
         { type: 'proposal', label: c.proposalLabel, description: c.proposalDesc, icon: <Globe className="size-5" /> },
-        { type: 'website_v2', label: c.websiteV2Label, description: c.websiteV2Desc, icon: <Monitor className="size-5" /> },
-        { type: 'website_v3', label: c.websiteV3Label, description: c.websiteV3Desc, icon: <Sparkles className="size-5" /> },
+        { type: 'website_v2', label: c.websiteV2Label, description: c.websiteV2Desc, icon: <Globe className="size-5" /> },
+        { type: 'website_v3', label: c.websiteV3Label, description: c.websiteV3Desc, icon: <Globe className="size-5" /> },
         { type: 'shop', label: c.shopLabel, description: c.shopDesc, icon: <ShoppingCart className="size-5" /> },
         { type: 'mobile_simple', label: c.mobileSimpleLabel, description: c.mobileSimpleDesc, icon: <Smartphone className="size-5" /> },
         { type: 'mobile_app', label: c.mobileAppLabel, description: c.mobileAppDesc, icon: <Layers className="size-5" /> },
@@ -240,6 +238,7 @@ export default function StepTypeChoice({ selectedType, onSelect }: StepTypeChoic
                         title={template.label}
                         description={template.description}
                         icon={template.icon}
+                        iconVariant={['proposal', 'website_v2', 'website_v3'].includes(template.type) ? 'website' : 'default'}
                         preview={<OfferTemplatePreview type={template.type} />}
                     />
                 ))}
