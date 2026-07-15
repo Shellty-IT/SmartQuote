@@ -24,8 +24,55 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-    title: 'SmartQuote AI',
-    description: 'Intelligent CRM system with AI assistant for sales management',
+    metadataBase: new URL('https://smart-quote.shellty.pl'),
+    title: {
+        default: 'SmartQuote AI — CRM sprzedażowy z asystentem AI',
+        template: '%s | SmartQuote AI',
+    },
+    description: 'SmartQuote AI to CRM sprzedażowy, który usprawnia tworzenie ofert, obsługę klientów, e-podpisy i follow-upy dzięki inteligentnej automatyzacji.',
+    applicationName: 'SmartQuote AI',
+    keywords: ['CRM', 'sprzedaż', 'oferty handlowe', 'e-podpis', 'automatyzacja sprzedaży', 'AI'],
+    authors: [{ name: 'Shellty' }],
+    creator: 'Shellty',
+    publisher: 'Shellty',
+    alternates: {
+        canonical: '/',
+    },
+    openGraph: {
+        type: 'website',
+        locale: 'pl_PL',
+        url: '/',
+        siteName: 'SmartQuote AI',
+        title: 'SmartQuote AI — CRM sprzedażowy z asystentem AI',
+        description: 'Twórz oferty, rozwijaj relacje z klientami, podpisuj dokumenty i automatyzuj sprzedaż w jednym inteligentnym CRM.',
+        images: [
+            {
+                url: '/og-image-smartquote.webp',
+                width: 1200,
+                height: 630,
+                type: 'image/webp',
+                alt: 'SmartQuote AI — CRM i automatyzacja sprzedaży',
+            },
+            {
+                url: '/og-image-smartquote.png',
+                width: 1200,
+                height: 630,
+                type: 'image/png',
+                alt: 'SmartQuote AI — CRM i automatyzacja sprzedaży',
+            },
+        ],
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'SmartQuote AI — CRM sprzedażowy z asystentem AI',
+        description: 'Oferty, klienci, e-podpisy i automatyzacja sprzedaży w jednym inteligentnym CRM.',
+        images: [
+            {
+                url: '/og-image-smartquote.webp',
+                alt: 'SmartQuote AI — CRM i automatyzacja sprzedaży',
+            },
+        ],
+    },
     manifest: '/site.webmanifest',
     appleWebApp: {
         capable: true,
