@@ -42,7 +42,7 @@ export const listLeadsSchema = z.object({
         limit: z.string().optional(),
         search: z.string().optional(),
         status: leadStatusEnum.optional(),
-        sortBy: z.string().optional(),
+        sortBy: z.enum(['createdAt', 'updatedAt', 'name', 'status']).optional(),
         sortOrder: z.enum(['asc', 'desc']).optional(),
     }),
 });

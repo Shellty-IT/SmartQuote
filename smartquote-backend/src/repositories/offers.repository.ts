@@ -2,6 +2,7 @@
 
 import { Prisma, OfferStatus } from '@prisma/client';
 import prisma from '../lib/prisma';
+import { parseQueryInt } from '../utils/queryParsers';
 
 export interface OffersFilter {
     userId: string;
@@ -239,8 +240,8 @@ export class OffersRepository {
     }
 
     async findAll(filter: OffersFilter) {
-        const page = parseInt(filter.page ?? '1', 10);
-        const limit = parseInt(filter.limit ?? '20', 10);
+        const page = parseQueryInt(filter.page, 1);
+        const limit = parseQueryInt(filter.limit, 20, 100);
         const skip = (page - 1) * limit;
 
         const where: Prisma.OfferWhereInput = { userId: filter.userId };
@@ -369,7 +370,6 @@ export class OffersRepository {
             by: ['status'],
             where: { userId },
             _count: { status: true },
-            _sum: { totalGross: true },
         });
     }
 
@@ -377,9 +377,23 @@ export class OffersRepository {
         return prisma.offer.count({ where: { userId } });
     }
 
-    async findValuesForStats(userId: string) {
+    // Offers without blocks always carry their real price in the totalGross
+    // column, so their value can be summed in SQL. Offers with blocks may have
+    // a price override buried in the JSON (see syncTotalsFromBlocks) and need
+    // per-row normalization — kept in a separate, much smaller query below so
+    // getStats never has to hydrate every offer's JSONB blob just to add up
+    // three numbers.
+    async groupByStatusValueWithoutBlocks(userId: string) {
+        return prisma.offer.groupBy({
+            by: ['status'],
+            where: { userId, blocks: { equals: Prisma.JsonNull } },
+            _sum: { totalGross: true },
+        });
+    }
+
+    async findBlockOffersForStats(userId: string) {
         return prisma.offer.findMany({
-            where: { userId },
+            where: { userId, blocks: { not: Prisma.JsonNull } },
             select: {
                 status: true,
                 templateType: true,
