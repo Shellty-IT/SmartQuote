@@ -385,20 +385,29 @@ export class OffersService {
     }
 
     async getStats(userId: string) {
-        const [statuses, valueRows] = await Promise.all([
+        const [statuses, valueRowsWithoutBlocks, blockOffers] = await Promise.all([
             offersRepository.groupByStatus(userId),
-            offersRepository.findValuesForStats(userId),
+            offersRepository.groupByStatusValueWithoutBlocks(userId),
+            offersRepository.findBlockOffersForStats(userId),
         ]);
+
         const total = statuses.reduce((sum, status) => sum + status._count.status, 0);
-        const normalizedValues = valueRows.map(normalizeOfferFromBlockTotals);
-        const sumGross = (status?: OfferStatus) => normalizedValues.reduce((sum, offer) => {
-            if (status && offer.status !== status) return sum;
-            return sum + Number(offer.totalGross);
-        }, 0);
-        const valueByStatus = normalizedValues.reduce((acc, offer) => {
-            acc[offer.status] = (acc[offer.status] ?? 0) + Number(offer.totalGross);
-            return acc;
-        }, {} as Partial<Record<OfferStatus, number>>);
+
+        const valueByStatus: Partial<Record<OfferStatus, number>> = {};
+        for (const row of valueRowsWithoutBlocks) {
+            valueByStatus[row.status] = (valueByStatus[row.status] ?? 0) + Number(row._sum.totalGross ?? 0);
+        }
+
+        const normalizedBlockOffers = blockOffers.map(normalizeOfferFromBlockTotals);
+        for (const offer of normalizedBlockOffers) {
+            valueByStatus[offer.status] = (valueByStatus[offer.status] ?? 0) + Number(offer.totalGross);
+        }
+
+        const sumGross = (status?: OfferStatus) =>
+            Object.entries(valueByStatus).reduce((sum, [key, value]) => {
+                if (status && key !== status) return sum;
+                return sum + (value ?? 0);
+            }, 0);
 
         return {
             total,
@@ -554,14 +563,24 @@ export class OffersService {
             throw new ValidationError('Skonfiguruj sposób wysyłki e-maili w ustawieniach');
         }
 
-        let publicUrl: string;
-
+        // Reserve the public link before sending, but defer the DRAFT→SENT
+        // status flip until the email actually goes out. Flipping it here (as
+        // this used to, via publishOffer) meant a failed send still left the
+        // offer marked SENT with a sentAt timestamp — the dashboard would
+        // claim the client was notified when they never received anything.
+        let publicToken: string;
         if (offer.publicToken && offer.isInteractive) {
-            publicUrl = `${frontendUrl}/offer/view/${offer.publicToken}`;
+            publicToken = offer.publicToken;
         } else {
-            const publishResult = await this.publishOffer(offerId, userId);
-            publicUrl = publishResult.publicUrl;
+            publicToken = randomBytes(16).toString('base64url');
+            const updated = await offersRepository.update(offerId, userId, {
+                publicToken,
+                isInteractive: true,
+            });
+            if (!updated) throw new NotFoundError('Oferta');
         }
+
+        const publicUrl = `${frontendUrl}/offer/view/${publicToken}`;
 
         const sent = await emailService.sendOfferLink(
             recipient.email,
@@ -581,6 +600,13 @@ export class OffersService {
 
         if (!sent) {
             throw new ExternalServiceError('SMTP', 'Nie udało się wysłać emaila. Sprawdź konfigurację SMTP');
+        }
+
+        if (offer.status === 'DRAFT') {
+            await offersRepository.update(offerId, userId, {
+                status: 'SENT',
+                sentAt: new Date(),
+            });
         }
 
         logger.info({ offerId, clientEmail: recipient.email }, 'Offer email sent');
