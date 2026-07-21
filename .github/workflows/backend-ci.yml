@@ -25,7 +25,7 @@ defaults:
 
 jobs:
   lint-and-typecheck:
-    name: TypeScript Check
+    name: Lint + TypeScript Check
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -48,6 +48,9 @@ jobs:
 
       - name: TypeScript check
         run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
 
   test:
     name: Unit Tests + Coverage

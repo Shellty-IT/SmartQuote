@@ -631,7 +631,7 @@ UWAGA — POPRAWKA: Twoja poprzednia odpowiedz miala isComplete=true, ale "block
         }
     }
 
-    let parsed = await callGemini('')
+    const parsed = await callGemini('')
     if (!parsed) {
         return {
             message: 'Odpowiedz AI byla niekompletna. Sprobuj ponownie albo podaj krotszy opis projektu.',
