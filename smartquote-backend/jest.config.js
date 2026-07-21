@@ -28,6 +28,10 @@ module.exports = {
         '!src/services/publicContract.service.ts',
         '!src/services/publicOffer.service.ts',
         '!src/services/settings.service.ts',
+        '!src/services/settings/profile.service.ts',
+        '!src/services/settings/email-config.service.ts',
+        // api-keys.service.ts is deliberately NOT excluded — settingsApiKeys.test.ts
+        // already unit-tests it against a mocked Prisma client.
         // ── AI services that require live Gemini API calls ──────────────────
         '!src/services/ai/chat.ts',
         '!src/services/ai/feedback.service.ts',
