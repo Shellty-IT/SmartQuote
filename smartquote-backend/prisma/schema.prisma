@@ -16,6 +16,12 @@ model User {
   name      String?
   phone     String?
   avatar    String?
+  // role, isActive and tokenVersion are all read from authCache (src/lib/auth-cache.ts)
+  // by the auth middleware, cached for up to 5 minutes. Any write path that changes
+  // one of these three must call authCache.invalidate(userId) in the same function —
+  // otherwise a revoked/demoted/deactivated user stays privileged for up to 5 more
+  // minutes. changePassword() (src/services/settings/profile.service.ts) is currently
+  // the only path that mutates any of them, and does this correctly.
   role      UserRole @default(USER)
   isActive  Boolean  @default(true)
   // Bumped whenever a stolen JWT must be invalidated before its 7-day expiry
