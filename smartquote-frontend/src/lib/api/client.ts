@@ -31,6 +31,42 @@ interface ApiResponseShape<T = unknown> {
 
 let isSigningOut = false;
 
+// getSession() issues a fetch to /api/auth/session — without caching, every
+// parallel API call (e.g. the dashboard's useQueries) pays that round trip
+// again even though the underlying JWT is valid for 24h. A short TTL plus
+// in-flight dedup collapses concurrent calls into one fetch while staying
+// fresh enough to pick up a real sign-in/sign-out within a few seconds.
+const SESSION_CACHE_TTL_MS = 30_000;
+
+let cachedSession: { session: SessionWithToken | null; expiresAt: number } | null = null;
+let pendingSessionFetch: Promise<SessionWithToken | null> | null = null;
+
+async function getCachedSession(): Promise<SessionWithToken | null> {
+    const now = Date.now();
+    if (cachedSession && cachedSession.expiresAt > now) {
+        return cachedSession.session;
+    }
+
+    if (pendingSessionFetch) {
+        return pendingSessionFetch;
+    }
+
+    pendingSessionFetch = (getSession() as Promise<SessionWithToken | null>)
+        .then((session) => {
+            cachedSession = { session, expiresAt: Date.now() + SESSION_CACHE_TTL_MS };
+            return session;
+        })
+        .finally(() => {
+            pendingSessionFetch = null;
+        });
+
+    return pendingSessionFetch;
+}
+
+function invalidateSessionCache(): void {
+    cachedSession = null;
+}
+
 export class ApiError extends Error {
     readonly code: string;
     readonly status: number;
@@ -58,7 +94,7 @@ class ApiClient {
     }
 
     private async getAuthHeaders(): Promise<HeadersInit> {
-        const session = await getSession() as SessionWithToken | null;
+        const session = await getCachedSession();
         const headers: HeadersInit = {
             'Content-Type': 'application/json',
         };
@@ -106,6 +142,8 @@ class ApiClient {
 
     private async handleUnauthorized(response: Response): Promise<void> {
         if (response.status !== 401) return;
+
+        invalidateSessionCache();
 
         if (typeof window !== 'undefined' && !isSigningOut) {
             isSigningOut = true;
@@ -204,7 +242,7 @@ class ApiClient {
     }
 
     async downloadBlob(endpoint: string): Promise<Blob> {
-        const session = await getSession() as SessionWithToken | null;
+        const session = await getCachedSession();
         const headers: HeadersInit = {};
 
         if (session?.accessToken) {
@@ -229,7 +267,7 @@ class ApiClient {
     }
 
     async uploadFile<T>(endpoint: string, formData: FormData): Promise<ApiResponseShape<T>> {
-        const session = await getSession() as SessionWithToken | null;
+        const session = await getCachedSession();
         const headers: HeadersInit = {};
 
         if (session?.accessToken) {
