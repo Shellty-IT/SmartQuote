@@ -80,7 +80,20 @@ const authLimiter = rateLimit({
 app.use(globalLimiter);
 app.use('/api/auth', authLimiter);
 
-app.use(express.json({ limit: '10mb' }));
+// Only these two route groups ever carry base64 image data in the JSON body
+// (settings: company logo / avatar upload; offers: website_v2 template
+// portfolio screenshots) — everything else is structured text/numbers, so a
+// much smaller default closes off unnecessary memory pressure on public and
+// unauthenticated routes (login, public offer/contract view, KSeF webhook)
+// on Render's 512 MB free tier. body-parser skips re-parsing an already-
+// parsed body, so mounting the larger limit first for these two prefixes and
+// the smaller default afterwards for everyone else works correctly.
+const IMAGE_UPLOAD_JSON_LIMIT = '10mb';
+const DEFAULT_JSON_LIMIT = '1mb';
+
+app.use('/api/settings', express.json({ limit: IMAGE_UPLOAD_JSON_LIMIT }));
+app.use('/api/offers', express.json({ limit: IMAGE_UPLOAD_JSON_LIMIT }));
+app.use(express.json({ limit: DEFAULT_JSON_LIMIT }));
 app.use(express.urlencoded({ extended: true }));
 
 app.use((req: Request, _res: Response, next: NextFunction) => {
