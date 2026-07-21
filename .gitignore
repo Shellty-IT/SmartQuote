@@ -80,3 +80,4 @@ temp/
 # ---- Claude Code ----
 .claude/
 CLAUDE.md
+AGENTS.md
