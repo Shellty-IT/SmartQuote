@@ -60,7 +60,7 @@ describe('PDF print pagination', () => {
         expect(html).toContain('sq-pdf-preview-screen-frame')
         expect(html).toContain('sq-page-break-marker-layer')
         expect(html).toContain('Koniec strony ')
-        expect(html).toContain('layoutManualPageBreaks')
+        expect(html).toContain('function paginate')
         expect(html).toContain('width:794px!important')
         expect(html.indexOf('data-smartquote-pdf-preview-script')).toBeLessThan(html.indexOf('data-smartquote-print-pagination-script'))
     })
@@ -74,7 +74,7 @@ describe('PDF print pagination', () => {
         expect(html).toContain('sq-pdf-preview-page-margins')
         // spacer heights must be important — the print-rule clone carries
         // "height:0 !important" onto the screen and would zero them out
-        expect(html).toContain("setProperty('height', spacer + 'px', 'important')")
+        expect(html).toContain("setProperty('height', height + 'px', 'important')")
         // late image/font reflows realign the manual breaks
         expect(html).toContain('ResizeObserver')
         expect(html).toContain('document.fonts.ready')
