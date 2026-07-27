@@ -24,6 +24,14 @@ export interface UniversalOfferData {
     currency?: string
 }
 
+// Puppeteer PDF generation only embeds the WOFF subset in embedded-fonts.ts, whose
+// unicode-range excludes the Dingbats block (U+2700-27BF) — a bare "✓" character
+// renders blank in the exported PDF even though it shows fine in the live browser
+// preview. Use an inline SVG stroke instead so pros lists don't depend on glyph coverage.
+function checkIcon(color: string, size = 13): string {
+    return `<svg viewBox="0 0 16 16" width="${size}" height="${size}" fill="none" style="flex-shrink:0;"><path d="M3 8.5l3.2 3.2L13 4.5" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+}
+
 function editorWrap(editorMode: boolean, key: string, inner: string): string {
     if (!editorMode) return inner
     return `<div class="sq-block" data-key="${key}" style="cursor:pointer;outline-offset:2px;" onclick="event.stopPropagation();window.parent.postMessage({type:'sq:editBlock',blockKey:'${key}'},'*')">${inner}</div>`
@@ -309,7 +317,7 @@ function renderPricingSimple(p: UniversalBlocks['pricing'], offer: UniversalOffe
         <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;">
           ${p.simpleIncludes.map(item => `
           <li style="display:flex;align-items:flex-start;gap:8px;font-size:.85rem;color:rgba(255,255,255,.85);">
-            <span style="color:#C9A84C;font-weight:700;flex-shrink:0;">✓</span>
+            <span style="flex-shrink:0; margin-top:2px;">${checkIcon('#C9A84C')}</span>
             <span>${esc(item)}</span>
           </li>`).join('')}
         </ul>

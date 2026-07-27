@@ -34,6 +34,18 @@ export interface WebsiteV3OfferData {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
+// Puppeteer PDF generation only embeds the WOFF subset in embedded-fonts.ts, whose
+// unicode-range excludes the Dingbats block (U+2700-27BF) — bare "✓"/"✕" characters
+// render blank in the exported PDF even though they show fine in the live browser
+// preview. Use inline SVG strokes instead so lists don't depend on glyph coverage.
+function checkIcon(color: string, size = 13): string {
+    return `<svg viewBox="0 0 16 16" width="${size}" height="${size}" fill="none" style="flex-shrink:0;"><path d="M3 8.5l3.2 3.2L13 4.5" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+}
+
+function xIcon(color: string, size = 13): string {
+    return `<svg viewBox="0 0 16 16" width="${size}" height="${size}" fill="none" style="flex-shrink:0;"><path d="M4 4l8 8M12 4l-8 8" stroke="${color}" stroke-width="2.2" stroke-linecap="round"/></svg>`
+}
+
 function formatDate(iso: string): string {
     try {
         return new Date(iso).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' })
@@ -228,8 +240,8 @@ function renderPackages(blocks: WebsiteV3Blocks, editorMode: boolean, num: numbe
     const cards = b.packages.map((pkg) => {
         const features = pkg.features.map((f) =>
             f.included
-                ? `<div style="display:flex;gap:10px;"><span style="color:${pkg.highlighted ? '#22d3ee' : '#16a34a'};font-weight:700;">✓</span> ${esc(f.label)}</div>`
-                : `<div style="display:flex;gap:10px;color:${pkg.highlighted ? 'rgba(255,255,255,0.4)' : '#94A3B8'};"><span style="font-weight:700;">✕</span> ${esc(f.label)}</div>`
+                ? `<div style="display:flex;gap:10px;align-items:center;">${checkIcon(pkg.highlighted ? '#22d3ee' : '#16a34a')} ${esc(f.label)}</div>`
+                : `<div style="display:flex;gap:10px;align-items:center;color:${pkg.highlighted ? 'rgba(255,255,255,0.4)' : '#94A3B8'};">${xIcon(pkg.highlighted ? 'rgba(255,255,255,0.4)' : '#94A3B8')} ${esc(f.label)}</div>`
         ).join('')
         if (pkg.highlighted) {
             return `
@@ -309,7 +321,7 @@ function renderScope(blocks: WebsiteV3Blocks, editorMode: boolean, num: number):
         return cats.map((cat) => {
             const items = cat.items.map((item) => `
 <div style="display:flex;gap:12px;">
-  <span style="color:var(--violet);font-weight:700;flex-shrink:0;">✓</span>
+  <span style="flex-shrink:0; margin-top:2px;">${checkIcon('var(--violet)')}</span>
   <div>
     <div style="font-weight:600;">${esc(item.label)}${item.optional ? OPTIONAL_BADGE : ''}</div>
     ${item.description ? `<div style="font-size:13.5px;color:var(--muted);">${esc(item.description)}</div>` : ''}

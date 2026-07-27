@@ -169,9 +169,9 @@ function renderCover(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editorMo
           </h1>
           <p style="margin:26px 0 0; font-size:19px; color:#64748B; max-width:460px;">${esc(c.subtitle)}</p>
           <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:34px;">
-            <span style="display:inline-flex; align-items:center; gap:7px; background:#EFF6FF; color:#2563EB; border:1px solid #BFDBFE; border-radius:999px; padding:9px 16px; font-size:14px; font-weight:600;"><span style="color:#16A34A;">✓</span> Realizacja do ${ph(String(c.deadlineDays))} dni</span>
-            <span style="display:inline-flex; align-items:center; gap:7px; background:#EFF6FF; color:#2563EB; border:1px solid #BFDBFE; border-radius:999px; padding:9px 16px; font-size:14px; font-weight:600;"><span style="color:#16A34A;">✓</span> ${esc(c.knowledgePill)}</span>
-            <span style="display:inline-flex; align-items:center; gap:7px; background:#EFF6FF; color:#2563EB; border:1px solid #BFDBFE; border-radius:999px; padding:9px 16px; font-size:14px; font-weight:600;"><span style="color:#16A34A;">✓</span> Cena: ${ph(priceText)}</span>
+            <span style="display:inline-flex; align-items:center; gap:7px; background:#EFF6FF; color:#2563EB; border:1px solid #BFDBFE; border-radius:999px; padding:9px 16px; font-size:14px; font-weight:600;">${checkIcon('#16A34A')} Realizacja do ${ph(String(c.deadlineDays))} dni</span>
+            <span style="display:inline-flex; align-items:center; gap:7px; background:#EFF6FF; color:#2563EB; border:1px solid #BFDBFE; border-radius:999px; padding:9px 16px; font-size:14px; font-weight:600;">${checkIcon('#16A34A')} ${esc(c.knowledgePill)}</span>
+            <span style="display:inline-flex; align-items:center; gap:7px; background:#EFF6FF; color:#2563EB; border:1px solid #BFDBFE; border-radius:999px; padding:9px 16px; font-size:14px; font-weight:600;">${checkIcon('#16A34A')} Cena: ${ph(priceText)}</span>
           </div>
         </div>
 
@@ -284,7 +284,7 @@ function renderFeatures(blocks: WebsiteV2Blocks, editorMode: boolean): string {
       <div class="checklist-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:24px 48px;">
         ${b.items.map(item => `
         <div style="display:flex; gap:14px;">
-          <span style="color:#16A34A; font-size:22px; font-weight:700; line-height:1.2; flex-shrink:0;">✓</span>
+          <span style="flex-shrink:0; margin-top:3px;">${checkIcon('#16A34A', 18)}</span>
           <div>
             <div style="font-weight:600; font-size:17px;">${esc(item.title)}</div>
             <div style="color:#64748B; font-size:14.5px; margin-top:2px;">${esc(item.description)}</div>
@@ -432,6 +432,7 @@ function renderPricing(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editor
     const inner = `
   <section class="pb-price" style="position:relative; background:#EFF6FF; overflow:hidden;">
     <div class="inner" style="max-width:1080px; margin:0 auto; padding:80px 48px; position:relative; z-index:1;">
+      <div class="pdf-keep">
       <h2 style="margin:0 0 44px; font-size:40px; font-weight:700; letter-spacing:-1px; color:#1E293B; text-align:center;">Ile to kosztuje</h2>
 
       <div class="price-wrap" style="display:grid; grid-template-columns:minmax(0,600px) minmax(0,1fr); gap:32px; align-items:center; justify-content:center;">
@@ -448,7 +449,7 @@ function renderPricing(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editor
             <div style="height:1px; background:#E2E8F0; margin:28px 0;"></div>
             <div style="font-weight:700; font-size:15px; margin-bottom:14px;">Co zawiera ta kwota</div>
             <div style="display:flex; flex-direction:column; gap:10px;">
-              ${b.includes.map(inc => `<span style="font-size:15px; display:flex; gap:10px;"><span style="color:#16A34A; font-weight:700;">✓</span> ${esc(inc)}</span>`).join('')}
+              ${b.includes.map(inc => `<span style="font-size:15px; display:flex; align-items:center; gap:10px;">${checkIcon('#16A34A')} ${esc(inc)}</span>`).join('')}
             </div>` : ''}
 
             ${b.paymentSchedule.length ? `
@@ -480,6 +481,7 @@ function renderPricing(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editor
             <span style="font-size:15px; font-weight:600;">${esc(g.text)}</span>
           </div>`).join('')}
         </div>
+      </div>
       </div>
 
       ${b.costs.length ? `

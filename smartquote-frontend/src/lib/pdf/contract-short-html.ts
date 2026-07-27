@@ -18,6 +18,14 @@ function rawHtml(s: string | null | undefined): string {
     return s ?? ''
 }
 
+// Puppeteer PDF generation only embeds the WOFF subset in embedded-fonts.ts, whose
+// unicode-range excludes the Dingbats block (U+2700-27BF) — a bare "✓" character
+// (as text or as CSS `content: '✓'`) renders blank in the exported PDF even though
+// it shows fine in the live browser preview. Use an inline SVG stroke instead.
+function checkIcon(color: string): string {
+    return `<svg viewBox="0 0 16 16" width="2.6mm" height="2.6mm" fill="none" style="display:block; margin:auto;"><path d="M3 8.5l3.2 3.2L13 4.5" stroke="${color}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+}
+
 function blankField(value: string, minWidth = '28mm'): string {
     const style = minWidth !== '28mm' ? ` style="min-width:${minWidth}"` : ''
     return `<span class="bl"${style}>${esc(value)}</span>`
@@ -163,9 +171,8 @@ function buildCss(editorMode: boolean, zoom: number): string {
     /* ── CHECKBOXES ── */
     .chk-row { display: flex; gap: 5mm; flex-wrap: wrap; margin: 1.5mm 0 2mm; }
     .chk-item { display: flex; align-items: center; gap: 2.5mm; font-size: 9.5pt; }
-    .chk-box { width: 3.5mm; height: 3.5mm; border: 1.5px solid var(--gd); border-radius: 1px; flex-shrink: 0; background: white; }
-    .chk-box.checked { background: var(--gm); border-color: var(--gm); position: relative; }
-    .chk-box.checked::after { content: '✓'; position: absolute; top: -1px; left: 0.5px; font-size: 7px; color: white; font-weight: 700; }
+    .chk-box { width: 3.5mm; height: 3.5mm; border: 1.5px solid var(--gd); border-radius: 1px; flex-shrink: 0; background: white; display: flex; align-items: center; justify-content: center; }
+    .chk-box.checked { background: var(--gm); border-color: var(--gm); }
 
     /* ── PRICING BOX ── */
     .price-box { border: 2px solid var(--gm); border-radius: 4px; overflow: hidden; margin: 2.5mm 0 3mm; }
@@ -331,11 +338,11 @@ function renderSubject(
     <p>1. Przedmiotem umowy jest:</p>
     <div class="chk-row">
       <div class="chk-item">
-        <span class="chk-box${s.isNewSite ? ' checked' : ''}"></span>
+        <span class="chk-box${s.isNewSite ? ' checked' : ''}">${s.isNewSite ? checkIcon('#FFFFFF') : ''}</span>
         wykonanie nowej strony internetowej od podstaw
       </div>
       <div class="chk-item">
-        <span class="chk-box${s.isModernization ? ' checked' : ''}"></span>
+        <span class="chk-box${s.isModernization ? ' checked' : ''}">${s.isModernization ? checkIcon('#FFFFFF') : ''}</span>
         modernizacja istniejącej strony internetowej
       </div>
     </div>

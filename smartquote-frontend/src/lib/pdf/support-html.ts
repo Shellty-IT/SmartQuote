@@ -26,6 +26,18 @@ function editorWrap(editorMode: boolean, key: string, inner: string): string {
     return `<div class="sq-block" data-block-key="${key}" onclick="window.parent.postMessage({type:'sq:editBlock',blockKey:'${key}'},\'*\')" title="Kliknij, aby edytować">${inner}</div>`
 }
 
+// Puppeteer PDF generation only embeds the WOFF subset in embedded-fonts.ts, whose
+// unicode-range excludes the Dingbats block (U+2700-27BF) — a bare "✓"/"✗" character
+// (literal or as an HTML numeric entity) renders blank in the exported PDF even though
+// it shows fine in the live browser preview. Use inline SVG strokes instead.
+function checkIcon(color: string, size = 13): string {
+    return `<svg viewBox="0 0 16 16" width="${size}" height="${size}" fill="none" style="flex-shrink:0;"><path d="M3 8.5l3.2 3.2L13 4.5" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+}
+
+function xIcon(color: string, size = 13): string {
+    return `<svg viewBox="0 0 16 16" width="${size}" height="${size}" fill="none" style="flex-shrink:0;"><path d="M4 4l8 8M12 4l-8 8" stroke="${color}" stroke-width="2.2" stroke-linecap="round"/></svg>`
+}
+
 // ── Base CSS ──────────────────────────────────────────────────────────────────
 
 function baseCss(editorMode: boolean): string {
@@ -136,11 +148,11 @@ function renderCover(b: SupportBlocks, offer: SupportOfferData, editorMode: bool
 
 function renderBenefits(b: SupportBlocks['benefits'], editorMode: boolean): string {
     const withoutRows = b.withoutItems.map(it =>
-        `<div style="display:flex;gap:12px;align-items:flex-start;"><span style="color:#EF4444;font-weight:700;font-size:18px;line-height:1.3;flex:none;">&#10007;</span><div><div style="font-weight:600;color:#0F172A;">${esc(it.title)}</div><div style="font-size:14px;color:#475569;">${esc(it.description)}</div></div></div>`
+        `<div style="display:flex;gap:12px;align-items:flex-start;"><span style="margin-top:3px;">${xIcon('#EF4444', 16)}</span><div><div style="font-weight:600;color:#0F172A;">${esc(it.title)}</div><div style="font-size:14px;color:#475569;">${esc(it.description)}</div></div></div>`
     ).join('')
 
     const withRows = b.withItems.map(it =>
-        `<div style="display:flex;gap:12px;align-items:flex-start;"><span style="color:#16A34A;font-weight:700;font-size:18px;line-height:1.3;flex:none;">&#10003;</span><div><div style="font-weight:600;color:#0F172A;">${esc(it.title)}</div><div style="font-size:14px;color:#475569;">${esc(it.description)}</div></div></div>`
+        `<div style="display:flex;gap:12px;align-items:flex-start;"><span style="margin-top:3px;">${checkIcon('#16A34A', 16)}</span><div><div style="font-weight:600;color:#0F172A;">${esc(it.title)}</div><div style="font-size:14px;color:#475569;">${esc(it.description)}</div></div></div>`
     ).join('')
 
     const inner = `
@@ -172,7 +184,7 @@ function renderBenefits(b: SupportBlocks['benefits'], editorMode: boolean): stri
 function renderPlan(plan: SupportBlocks['packages']['plans'][0]): string {
     const features = plan.features.map(f =>
         f.included
-            ? `<div style="display:flex;gap:10px;color:#0F172A;"><span style="color:#16A34A;font-weight:700;">&#10003;</span><span>${esc(f.label)}</span></div>`
+            ? `<div style="display:flex;gap:10px;align-items:center;color:#0F172A;">${checkIcon('#16A34A')}<span>${esc(f.label)}</span></div>`
             : `<div style="display:flex;gap:10px;color:#94A3B8;"><span style="font-weight:700;">&#8212;</span><span>${esc(f.label)}</span></div>`
     ).join('')
 
@@ -248,11 +260,11 @@ function renderPackages(b: SupportBlocks['packages'], editorMode: boolean): stri
 
 function renderScope(b: SupportBlocks['scope'], editorMode: boolean): string {
     const includedRows = b.included.map(it =>
-        `<div style="display:flex;gap:11px;"><span style="color:#16A34A;font-weight:700;flex:none;">&#10003;</span><div><div style="font-weight:600;color:#0F172A;font-size:15px;">${esc(it.title)}</div><div style="font-size:13px;color:#475569;">${esc(it.description)}</div></div></div>`
+        `<div style="display:flex;gap:11px;"><span style="margin-top:3px;">${checkIcon('#16A34A')}</span><div><div style="font-weight:600;color:#0F172A;font-size:15px;">${esc(it.title)}</div><div style="font-size:13px;color:#475569;">${esc(it.description)}</div></div></div>`
     ).join('')
 
     const excludedRows = b.excluded.map(it =>
-        `<div style="display:flex;gap:11px;"><span style="color:#94A3B8;font-weight:700;flex:none;">&#10007;</span><div><div style="font-weight:600;color:#0F172A;font-size:15px;">${esc(it.title)}</div><div style="font-size:13px;color:#475569;">${esc(it.description)}</div></div></div>`
+        `<div style="display:flex;gap:11px;"><span style="margin-top:3px;">${xIcon('#94A3B8')}</span><div><div style="font-weight:600;color:#0F172A;font-size:15px;">${esc(it.title)}</div><div style="font-size:13px;color:#475569;">${esc(it.description)}</div></div></div>`
     ).join('')
 
     const inner = `
@@ -263,11 +275,11 @@ function renderScope(b: SupportBlocks['scope'], editorMode: boolean): string {
     <p style="margin:0 0 32px;color:#475569;font-size:16px;">${esc(b.sectionLead)}</p>
     <div class="two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
       <div style="background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:26px;box-shadow:0 4px 20px rgba(15,76,117,0.06);">
-        <div style="font-weight:700;font-size:16px;color:#16A34A;margin-bottom:18px;">${esc(b.includedTitle)}</div>
+        <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px;color:#16A34A;margin-bottom:18px;">${checkIcon('#16A34A')}<span>${esc(b.includedTitle.replace(/^[✓✔]\s*/, ''))}</span></div>
         <div style="display:flex;flex-direction:column;gap:15px;">${includedRows}</div>
       </div>
       <div style="background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:26px;box-shadow:0 4px 20px rgba(15,76,117,0.06);">
-        <div style="font-weight:700;font-size:16px;color:#EF4444;margin-bottom:18px;">${esc(b.excludedTitle)}</div>
+        <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px;color:#EF4444;margin-bottom:18px;">${xIcon('#EF4444')}<span>${esc(b.excludedTitle.replace(/^[✗✘]\s*/, ''))}</span></div>
         <div style="display:flex;flex-direction:column;gap:15px;">${excludedRows}</div>
         <div style="margin-top:20px;background:#FFFBEB;border-left:4px solid #F59E0B;border-radius:0 8px 8px 0;padding:14px 16px;font-style:italic;color:#475569;font-size:13px;">${esc(b.extraNote)}</div>
       </div>
@@ -398,16 +410,17 @@ function renderPricing(b: SupportBlocks['pricing'], editorMode: boolean): string
         { label: 'Godziny w puli', vals: pkgs.map(p => p.hours) },
         { label: 'Dodatkowa godzina poza pul&#261;', vals: pkgs.map(p => p.extraHourRate) },
         { label: 'Okres wypowiedzenia', vals: pkgs.map(p => p.noticePeriod) },
-        { label: 'Dost&#281;pno&#347;&#263; weekendowa', vals: pkgs.map(p => p.weekendAvailability ? '&#10003; Tak' : '&#8212;') },
+        { label: 'Dost&#281;pno&#347;&#263; weekendowa', vals: pkgs.map(p => p.weekendAvailability ? '__YES__' : '&#8212;') },
     ]
 
     const tableRows = rows7a.map((row, ri) => {
         const tds = row.vals.map((v, ci) => {
             const isStd = ci === 1
             const isNo = v === '&#8212;'
-            const isYes = v === '&#10003; Tak'
+            const isYes = v === '__YES__'
             const color = isNo ? '#94A3B8' : isYes ? '#16A34A' : '#334155'
-            return `<td style="padding:13px 16px;${isStd ? 'background:#F0FDF9;font-weight:600;' : ''}color:${color};">${v}</td>`
+            const display = isYes ? `${checkIcon('#16A34A', 12)} Tak` : v
+            return `<td style="padding:13px 16px;${isStd ? 'background:#F0FDF9;font-weight:600;' : ''}color:${color};"><span style="display:inline-flex;align-items:center;gap:6px;">${display}</span></td>`
         }).join('')
         const bg = ri % 2 !== 0 ? 'background:#F8FAFC;' : ''
         return `<tr style="${bg}border-top:1px solid #EEF2F6;"><td style="padding:13px 16px;font-weight:600;color:#0F172A;">${row.label}</td>${tds}</tr>`
@@ -418,7 +431,7 @@ function renderPricing(b: SupportBlocks['pricing'], editorMode: boolean): string
     ).join('')
 
     const reportItems = b.reportItems.map(item =>
-        `<div style="display:flex;gap:10px;font-size:14px;color:#334155;"><span style="color:#10B981;font-weight:700;">&#10003;</span>${esc(item)}</div>`
+        `<div style="display:flex;align-items:center;gap:10px;font-size:14px;color:#334155;">${checkIcon('#10B981')}${esc(item)}</div>`
     ).join('')
 
     const inner = `

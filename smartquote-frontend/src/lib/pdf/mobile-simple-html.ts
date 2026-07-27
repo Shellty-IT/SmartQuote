@@ -26,6 +26,14 @@ export interface MobileSimpleOfferData {
     currency?: string
 }
 
+// Puppeteer PDF generation only embeds the WOFF subset in embedded-fonts.ts, whose
+// unicode-range excludes the Dingbats block (U+2700-27BF) — a bare "✓" character
+// (as text or as CSS `content: '✓'`) renders blank in the exported PDF even though
+// it shows fine in the live browser preview. Use an inline SVG stroke instead.
+function checkIcon(color: string, size = 12): string {
+    return `<svg viewBox="0 0 16 16" width="${size}" height="${size}" fill="none" style="flex-shrink:0;"><path d="M3 8.5l3.2 3.2L13 4.5" stroke="${color}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+}
+
 // ── Editor wrap helper ────────────────────────────────────────────────────────
 
 function editorWrap(editorMode: boolean, key: string, inner: string): string {
@@ -55,7 +63,7 @@ function renderCover(
 
     const promises = b.promises.map(p => `
         <div class="promise-item">
-            <span class="promise-check">✓</span>
+            <span class="promise-check">${checkIcon('#FFFFFF', 10)}</span>
             <span>${p}</span>
         </div>
     `).join('')
@@ -124,7 +132,7 @@ function renderChecklist(
 ): string {
     const items = b.items.map(item => `
         <div class="check-item">
-            <span class="check-icon">✓</span>
+            <span class="check-icon">${checkIcon('#FFFFFF', 12)}</span>
             <div>
                 <div class="check-title">${item.title}</div>
                 <div class="check-desc">${item.description}</div>
@@ -164,7 +172,8 @@ function renderChecklist(
 // ── Tech ──────────────────────────────────────────────────────────────────────
 
 function renderTechCard(card: MobileSimpleBlocks['tech']['cardA'], isAccent: boolean): string {
-    const pros = card.pros.map(p => `<li>${p}</li>`).join('')
+    const proColor = isAccent ? '#F97316' : '#0D9488'
+    const pros = card.pros.map(p => `<li style="display:flex; align-items:center; gap:8px;">${checkIcon(proColor)}${p}</li>`).join('')
     const badgeClass = card.badgeVariant === 'accent' ? 'badge-accent' : 'badge-primary'
     return `
 <div class="tech-card ${isAccent ? 'tech-card-accent' : ''}">
@@ -222,7 +231,7 @@ function renderProcess(
         </div>
     `).join('')
 
-    const includes = b.priceIncludes.map(item => `<li>${item}</li>`).join('')
+    const includes = b.priceIncludes.map(item => `<li style="display:flex; align-items:center; gap:8px;">${checkIcon('#FFFFFF', 10)}${item}</li>`).join('')
 
     const guarantees = b.guarantees.map(g => `
         <div class="guarantee-card">
@@ -782,21 +791,6 @@ body {
 .tech-pros li {
     font-size: 13px;
     font-weight: 500;
-    padding-left: 20px;
-    position: relative;
-}
-
-.tech-pros li::before {
-    content: '✓';
-    position: absolute;
-    left: 0;
-    color: var(--primary);
-    font-weight: 700;
-    font-size: 12px;
-}
-
-.tech-card-accent .tech-pros li::before {
-    color: var(--accent);
 }
 
 .tech-alternative {
@@ -958,16 +952,6 @@ body {
     font-size: 12px;
     font-weight: 500;
     opacity: 0.9;
-    padding-left: 18px;
-    position: relative;
-}
-
-.price-includes li::before {
-    content: '✓';
-    position: absolute;
-    left: 0;
-    font-size: 10px;
-    opacity: 0.7;
 }
 
 .payment-schedule {

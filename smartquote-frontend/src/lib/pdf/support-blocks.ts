@@ -291,7 +291,7 @@ export function buildDefaultSupportBlocks(): SupportBlocks {
         scope: {
             sectionTitle: 'Co obejmuje opieka techniczna',
             sectionLead: 'Jasny zakres chroni obie strony.',
-            includedTitle: '✓ Objęte opieką',
+            includedTitle: 'Objęte opieką',
             included: [
                 { title: 'Aktualizacje CMS i wtyczek', description: 'Bieżące wgrywanie poprawek bezpieczeństwa i wersji.' },
                 { title: 'Monitorowanie dostępności strony', description: 'Automatyczne czujniki wykrywają awarię, zanim zauważy ją klient.' },
@@ -302,7 +302,7 @@ export function buildDefaultSupportBlocks(): SupportBlocks {
                 { title: 'Konsultacje techniczne', description: 'Doradztwo przy decyzjach dotyczących systemu.' },
                 { title: 'Miesięczne raportowanie', description: 'Pełna przejrzystość wykonanych prac i stanu systemu.' },
             ],
-            excludedTitle: '✗ Poza zakresem',
+            excludedTitle: 'Poza zakresem',
             excluded: [
                 { title: 'Tworzenie nowych funkcjonalności', description: 'Rozbudowa systemu o nowe moduły i sekcje.' },
                 { title: 'Redesign strony', description: 'Zmiana layoutu, brandingu czy całej szaty graficznej.' },

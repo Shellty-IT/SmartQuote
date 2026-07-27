@@ -33,6 +33,14 @@ function editorWrap(editorMode: boolean, key: string, inner: string): string {
     return `<div class="sq-block" data-block-key="${key}" onclick="window.parent.postMessage({type:'sq:editBlock',blockKey:'${key}'},\'*\')" title="Kliknij, aby edytować">${inner}</div>`
 }
 
+// Puppeteer PDF generation only embeds the WOFF subset in embedded-fonts.ts, whose
+// unicode-range excludes the Dingbats block (U+2700-27BF) — a bare "✓" character
+// (literal or as an HTML numeric entity) renders blank in the exported PDF even though
+// it shows fine in the live browser preview. Use an inline SVG stroke instead.
+function checkIcon(color: string, size = 13): string {
+    return `<svg viewBox="0 0 16 16" width="${size}" height="${size}" fill="none" style="flex-shrink:0;"><path d="M3 8.5l3.2 3.2L13 4.5" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+}
+
 // ── CSS ───────────────────────────────────────────────────────────────────────
 
 function baseCss(editorMode: boolean): string {
@@ -199,7 +207,7 @@ function renderPlatformCard(card: MobileAppBlocks['platform']['cards'][0], idx: 
     const bgStyle = isBudget ? 'background:#FAFAFC;' : 'background:#fff;'
     const tagClass = isBudget ? 'tag-pill-muted' : 'tag-pill'
     const iconStyle = idx === 0 ? 'font-size:34px;color:#61DAFB;' : idx === 1 ? 'font-size:34px;color:#02569B;font-weight:800;' : idx === 2 ? 'font-size:22px;font-weight:700;' : 'font-size:34px;'
-    const pros = card.pros.map(p => `<span style="color:#16A34A;">&#10003; ${esc(p)}</span>`).join('')
+    const pros = card.pros.map(p => `<span style="display:inline-flex;align-items:center;gap:6px;color:#16A34A;">${checkIcon('#16A34A')} ${esc(p)}</span>`).join('')
     const warns = card.warnings.map(w => `<span style="color:#F59E0B;">&#9888; ${esc(w)}</span>`).join('')
 
     return `
@@ -257,8 +265,8 @@ const STATUS_LABEL: Record<MobileAppFeatureStatus, string> = { included: '&#9745
 const STATUS_COLOR: Record<MobileAppFeatureStatus, string> = { included: '#16A34A', tbd: '#64748B', optional: '#B45309' }
 
 function renderScope(b: MobileAppBlocks['scope'], editorMode: boolean): string {
-    const mvpFeats = b.mvpFeatures.map(f => `<span>&#10003; ${esc(f)}</span>`).join('')
-    const fullFeats = b.fullFeatures.map(f => `<span>&#10003; ${esc(f)}</span>`).join('')
+    const mvpFeats = b.mvpFeatures.map(f => `<span style="display:inline-flex;align-items:center;gap:6px;">${checkIcon('currentColor')} ${esc(f)}</span>`).join('')
+    const fullFeats = b.fullFeatures.map(f => `<span style="display:inline-flex;align-items:center;gap:6px;">${checkIcon('currentColor')} ${esc(f)}</span>`).join('')
 
     const featureCards = b.features.map(f => `
 <div class="lift" style="background:#fff;border-radius:12px;border:1px solid #EDE9FE;box-shadow:0 6px 24px rgba(30,27,75,0.06);padding:24px;">
@@ -321,7 +329,7 @@ function renderScope(b: MobileAppBlocks['scope'], editorMode: boolean): string {
 // ── S5 — Architecture ─────────────────────────────────────────────────────────
 
 const BACKEND_STATUS_LABEL: Record<MobileAppBackendStatus, string> = {
-    selected: '&#10003; WYBRANA',
+    selected: `${checkIcon('currentColor', 11)} WYBRANA`,
     option: '&#9744; Opcja',
     alternative: '&#9744; Alternatywa',
 }
@@ -341,7 +349,7 @@ function renderArchitecture(b: MobileAppBlocks['architecture'], editorMode: bool
 <div class="lift" style="background:#fff;border-radius:12px;border-left:4px solid ${esc(opt.accentColor)};box-shadow:0 6px 24px rgba(30,27,75,0.06);padding:22px 26px;display:flex;gap:18px;align-items:flex-start;">
   <div style="font-size:26px;">${esc(opt.icon)}</div>
   <div style="flex:1;"><div style="font-weight:700;font-size:16px;">${esc(opt.title)}</div><p style="margin:5px 0 0;color:#475569;font-size:14px;">${esc(opt.description)}</p></div>
-  <span style="white-space:nowrap;padding:6px 12px;border-radius:999px;background:${BACKEND_STATUS_BG[opt.status]};color:${BACKEND_STATUS_COLOR[opt.status]};font-size:11px;font-weight:700;">${BACKEND_STATUS_LABEL[opt.status]}</span>
+  <span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap;padding:6px 12px;border-radius:999px;background:${BACKEND_STATUS_BG[opt.status]};color:${BACKEND_STATUS_COLOR[opt.status]};font-size:11px;font-weight:700;">${BACKEND_STATUS_LABEL[opt.status]}</span>
 </div>`).join('')
 
     const serverRows = b.serverCostRows.map((row, ri) => `
@@ -568,7 +576,7 @@ function renderPostLaunch(b: MobileAppBlocks['postlaunch'], editorMode: boolean)
         </div>
       </div>
     </div>
-    <div style="margin-top:18px;padding:16px 22px;border-radius:12px;background:#F0FDF4;border:1px solid #16A34A;color:#15803D;font-size:14.5px;">&#10003; Przygotowanie i submission do obu sklep&#243;w jest wliczone w projekt.</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:18px;padding:16px 22px;border-radius:12px;background:#F0FDF4;border:1px solid #16A34A;color:#15803D;font-size:14.5px;">${checkIcon('#16A34A')}<span>Przygotowanie i submission do obu sklep&#243;w jest wliczone w projekt.</span></div>
     <h3 style="margin:48px 0 18px;font-size:22px;font-weight:700;color:#1E1B4B;">Koszty utrzymania (miesi&#281;czne &#8212; po stronie klienta)</h3>
     <div class="scroll-x" style="border-radius:12px;overflow:hidden;box-shadow:0 6px 24px rgba(30,27,75,0.06);background:#fff;">
       <table style="width:100%;border-collapse:collapse;font-size:14px;min-width:560px;">
