@@ -396,7 +396,7 @@ function renderTechnology(blocks: WebsiteV2Blocks, editorMode: boolean, sectionN
               <div style="font-size:18px; font-weight:700;">${esc(a.name)}</div>
               <div style="color:#2563EB; font-weight:600; font-size:13.5px;">${esc(a.subtitle)}</div>
             </div>
-            <span style="margin-left:auto; background:#F59E0B; color:#1E293B; border-radius:999px; padding:4px 11px; font-size:11px; font-weight:700;">${esc(a.badge)}</span>
+            <span style="margin-left:auto; flex-shrink:0; white-space:nowrap; background:#F59E0B; color:#1E293B; border-radius:999px; padding:4px 11px; font-size:11px; font-weight:700;">${esc(a.badge)}</span>
           </div>
           <p style="margin:0 0 14px; color:#64748B; font-size:14px;">${esc(a.description)}</p>
           <div style="display:flex; flex-direction:column; gap:8px;">

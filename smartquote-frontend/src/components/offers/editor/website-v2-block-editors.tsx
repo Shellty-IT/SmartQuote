@@ -14,6 +14,7 @@ import type {
     WV2ProcessStep,
     WV2Guarantee,
     WV2FaqItem,
+    WV2TechAlt,
 } from '@/lib/pdf/website-v2-blocks'
 import { AiGenerateButton, type OfferContext } from './block-editors'
 import { compressImage } from '@/lib/imageUtils'
@@ -378,6 +379,9 @@ export function TechnologyEditorV2({ blocks, onChange }: { blocks: WebsiteV2Bloc
     const r = b.recommended
     const updateRec = (patch: Partial<typeof r>) => update({ recommended: { ...r, ...patch } })
     const [newPro, setNewPro] = useState('')
+    const updateAlt = (i: number, patch: Partial<WV2TechAlt>) => {
+        const alternatives = [...b.alternatives]; alternatives[i] = { ...alternatives[i], ...patch }; update({ alternatives })
+    }
     return (
         <div className="flex flex-col gap-5">
             <Field label="Tytuł"><Input value={b.title} onChange={e => update({ title: e.target.value })} /></Field>
@@ -404,6 +408,34 @@ export function TechnologyEditorV2({ blocks, onChange }: { blocks: WebsiteV2Bloc
                         <button type="button" onClick={() => { if (newPro.trim()) { updateRec({ pros: [...r.pros, newPro.trim()] }); setNewPro('') } }} className="rounded-md border border-border px-3 py-1.5 text-xs hover:bg-secondary"><Plus className="h-3 w-3" /></button>
                     </div>
                 </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+                <span className="text-xs font-medium text-muted-foreground">Mogę też pracować na (alternatywy)</span>
+                {b.alternatives.map((alt, i) => (
+                    <div key={i} className="flex flex-col gap-2 border border-border rounded-lg p-2.5">
+                        <div className="flex gap-2 items-start">
+                            <div className="flex-1 grid grid-cols-2 gap-2">
+                                <Field label="Nazwa"><Input value={alt.name} onChange={e => updateAlt(i, { name: e.target.value })} /></Field>
+                                <Field label="Podtytuł"><Input value={alt.subtitle} onChange={e => updateAlt(i, { subtitle: e.target.value })} /></Field>
+                            </div>
+                            <RemoveBtn onClick={() => update({ alternatives: b.alternatives.filter((_, j) => j !== i) })} />
+                        </div>
+                        <Field label="Odznaka (np. Nowoczesna)"><Input value={alt.badge} onChange={e => updateAlt(i, { badge: e.target.value })} /></Field>
+                        <Field label="Opis"><Textarea rows={2} value={alt.description} onChange={e => updateAlt(i, { description: e.target.value })} /></Field>
+                        <div className="flex flex-col gap-2">
+                            <span className="text-xs font-medium text-muted-foreground">Zalety (✓)</span>
+                            {alt.pros.map((pro, j) => (
+                                <div key={j} className="flex gap-2 items-center">
+                                    <Input value={pro} onChange={ev => { const pros = [...alt.pros]; pros[j] = ev.target.value; updateAlt(i, { pros }) }} />
+                                    <RemoveBtn onClick={() => updateAlt(i, { pros: alt.pros.filter((_, k) => k !== j) })} />
+                                </div>
+                            ))}
+                            <AddBtn onClick={() => updateAlt(i, { pros: [...alt.pros, 'Nowa zaleta'] })} label="Dodaj zaletę" />
+                        </div>
+                    </div>
+                ))}
+                <AddBtn onClick={() => update({ alternatives: [...b.alternatives, { name: 'Nowa technologia', subtitle: 'Podtytuł', badge: 'Nowość', description: 'Opis technologii...', pros: ['Zaleta'] }] })} label="Dodaj alternatywę" />
             </div>
 
             <Field label="Stopka sekcji (kursywa)"><Textarea rows={2} value={b.footer} onChange={e => update({ footer: e.target.value })} /></Field>
