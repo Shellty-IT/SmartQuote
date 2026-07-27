@@ -70,6 +70,14 @@ function ph(text: string): string {
     return `<span style="color:inherit; font-weight:700; white-space:nowrap;">${esc(text)}</span>`
 }
 
+// Puppeteer PDF generation only embeds the WOFF subset in embedded-fonts.ts, whose
+// unicode-range excludes the Dingbats block (U+2700-27BF) — a bare "✓" character
+// renders blank in the exported PDF even though it shows fine in the live browser
+// preview. Use an inline SVG stroke instead so pros lists don't depend on glyph coverage.
+function checkIcon(color: string, size = 13): string {
+    return `<svg viewBox="0 0 16 16" width="${size}" height="${size}" fill="none" style="flex-shrink:0;"><path d="M3 8.5l3.2 3.2L13 4.5" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+}
+
 function secnum(n: string): string {
     return `<span aria-hidden="true" style="position:absolute; top:8px; right:34px; font-size:180px; font-weight:700; opacity:0.04; color:#2563EB; line-height:1; z-index:0; pointer-events:none;">${n}</span>`
 }
@@ -380,7 +388,7 @@ function renderTechnology(blocks: WebsiteV2Blocks, editorMode: boolean, sectionN
           <div style="font-size:24px; font-weight:700;">${esc(r.name)}</div>
           <p style="margin:8px 0 18px; color:#64748B; font-size:15.5px; max-width:640px;">${esc(r.description)}</p>
           <div style="display:flex; flex-wrap:wrap; gap:10px 28px;">
-            ${r.pros.map(pro => `<span style="font-size:14.5px; display:flex; gap:9px;"><span style="color:#16A34A; font-weight:700;">✓</span> ${esc(pro)}</span>`).join('')}
+            ${r.pros.map(pro => `<span style="font-size:14.5px; display:flex; align-items:center; gap:9px;">${checkIcon('#16A34A')} ${esc(pro)}</span>`).join('')}
           </div>
         </div>
       </div>
@@ -400,7 +408,7 @@ function renderTechnology(blocks: WebsiteV2Blocks, editorMode: boolean, sectionN
           </div>
           <p style="margin:0 0 14px; color:#64748B; font-size:14px;">${esc(a.description)}</p>
           <div style="display:flex; flex-direction:column; gap:8px;">
-            ${a.pros.map(p => `<span style="font-size:13.5px; display:flex; gap:9px;"><span style="color:#16A34A; font-weight:700;">✓</span> ${esc(p)}</span>`).join('')}
+            ${a.pros.map(p => `<span style="font-size:13.5px; display:flex; align-items:center; gap:9px;">${checkIcon('#16A34A', 12)} ${esc(p)}</span>`).join('')}
           </div>
         </div>`).join('')}
       </div>` : ''}
