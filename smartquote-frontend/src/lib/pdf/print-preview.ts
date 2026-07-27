@@ -77,7 +77,7 @@ const PRINT_PAGINATION_STYLES = `<style data-smartquote-print-pagination>
     // sections stay splittable on purpose so they fill the page instead of
     // leaving a gap; oversized atomic blocks also stay splittable so they
     // degrade gracefully rather than being clipped.
-    var nodes = document.querySelectorAll('.card,[class*="-card"],[class*="-tile"],.pkg-card,.prio-card,.avoid,.avoid-break,.print-keep,.pdf-keep,.pdf-signatures,.sig-wrap,.sig-row,.sig-cols,.signature,.summary,.totals,.tl-step,.extra-item,.pay-cell,.grid > *,[class*="grid"] > *');
+    var nodes = document.querySelectorAll('.card,[class*="-card"],[class*="-tile"],.pkg-card,.prio-card,.avoid,.avoid-break,.pdf-keep,.pdf-signatures,.sig-wrap,.sig-row,.sig-cols,.signature,.summary,.totals,.tl-step,.extra-item,.pay-cell,.grid > *,[class*="grid"] > *');
     for(var i=0;i<nodes.length;i++){
       var node=nodes[i];
       node.classList.toggle('sq-keep-together', node.getBoundingClientRect().height <= maxHeight);
@@ -95,6 +95,16 @@ const PDF_PREVIEW_STYLES = `<script data-smartquote-pdf-preview-script>
   var A4_HEIGHT_PX = 297 * 96 / 25.4;
   var SHIM_CLASS = 'sq-page-push';
   var PUSH_ATTR = 'data-sq-page-push';
+  // Chrome's real page-fragmentation pass is an internal stage with no DOM/CSSOM
+  // exposure - what we read via getBoundingClientRect() is the continuous,
+  // unpaginated layout. Text near a page boundary can rewrap by a few pixels
+  // between that continuous pass and the real fragmented one (font hinting,
+  // margin handling at the break), so a break-inside:avoid block measured as
+  // fitting with only a hair of headroom can still be pushed by the real
+  // printer. Treat anything within this margin of the edge as "does not fit"
+  // too, so the preview leans toward the same blank-space-over-split bias the
+  // printer has, instead of drawing content the PDF will actually move.
+  var AVOID_FIT_SLACK_PX = 32;
   var cachedPageRules = null;
 
   function parseLen(value) {
@@ -466,7 +476,7 @@ const PDF_PREVIEW_STYLES = `<script data-smartquote-pdf-preview-script>
 
       if (atom.forced) {
         if (!atTop) push = limit - top;
-      } else if (atom.avoid && height > 0.5 && height <= pageHeight(atom.name) + 0.5 && top + height > limit + 0.5) {
+      } else if (atom.avoid && height > 0.5 && height <= pageHeight(atom.name) + 0.5 && top + height > limit - AVOID_FIT_SLACK_PX + 0.5) {
         push = limit - top;
       } else if (atom.glue && top + height <= limit + 0.5) {
         // break-after:avoid: this box must not be the last thing on a page.

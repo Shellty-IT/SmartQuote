@@ -95,7 +95,7 @@ a { color: inherit; text-decoration: none; }
 
 @media (max-width: 768px) {
   .inner { padding: 48px 22px !important; }
-  .cover-grid, .tech-secondary, .checklist-grid, .footer-grid, .price-wrap, .about-grid, .work-grid, .faq-grid, .costs-grid { grid-template-columns: 1fr !important; }
+  .cover-grid, .tech-secondary, .checklist-grid, .footer-grid, .price-wrap, .about-layout, .work-grid, .faq-grid, .costs-grid { grid-template-columns: 1fr !important; }
   .cover-top { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
   .stepper { flex-direction: column !important; gap: 36px !important; }
   .stepper-line { display: none !important; }
@@ -110,7 +110,6 @@ a { color: inherit; text-decoration: none; }
   .inner { width:100% !important; max-width:100% !important; padding:36px 44px !important; }
   /* Cap large headings so stress-length text doesn't consume an entire page */
   .inner h2 { font-size: 26px !important; line-height: 1.35 !important; margin-bottom: 22px !important; }
-  .print-keep.print-keep-active { break-inside:avoid-page !important; page-break-inside:avoid !important; }
   .price-wrap { grid-template-columns:minmax(0,1fr) !important; align-items:start !important; }
   .price-wrap > div { width:100% !important; max-width:100% !important; }
   .price-wrap > div:last-child { display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px !important; }
@@ -218,15 +217,13 @@ function renderProblem(blocks: WebsiteV2Blocks, editorMode: boolean): string {
     const inner = `
   <section style="position:relative; background:#EFF6FF; overflow:hidden;">
     <div class="inner" style="max-width:920px; margin:0 auto; padding:80px 48px; position:relative; z-index:1;">
-      <div class="print-keep">
       <h2 style="margin:0 0 36px; font-size:40px; font-weight:700; letter-spacing:-1px; color:#1E293B;">${esc(b.title)}</h2>
       <div style="display:flex; flex-direction:column; gap:16px;">
         ${b.painPoints.map(p => `
-        <div style="background:#FFFFFF; border-left:4px solid #F59E0B; border-radius:8px; padding:20px 24px; box-shadow:0 4px 24px rgba(37,99,235,0.08); display:flex; align-items:center; gap:18px;">
+        <div class="pdf-keep" style="background:#FFFFFF; border-left:4px solid #F59E0B; border-radius:8px; padding:20px 24px; box-shadow:0 4px 24px rgba(37,99,235,0.08); display:flex; align-items:center; gap:18px;">
           <span style="font-size:30px; line-height:1;">${esc(p.emoji)}</span>
           <span style="font-size:17px; color:#1E293B;">${esc(p.text)}</span>
         </div>`).join('')}
-      </div>
       </div>
       <p style="text-align:center; margin:44px 0 0; font-size:26px; font-weight:700; color:#2563EB; letter-spacing:-0.5px;">${esc(b.punchline)}</p>
     </div>
@@ -244,9 +241,9 @@ function renderAbout(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editorMo
     const inner = `
   <section style="position:relative; background:#FFFFFF; overflow:hidden;">
     <div class="inner" style="max-width:1080px; margin:0 auto; padding:80px 48px; position:relative; z-index:1;">
-      <div class="print-keep">
+      <div class="pdf-keep">
       <h2 style="margin:0 0 40px; font-size:40px; font-weight:700; letter-spacing:-1px; color:#1E293B;">${esc(b.title)}</h2>
-      <div class="about-grid" style="display:grid; grid-template-columns:220px minmax(0,1fr); gap:44px; align-items:center;">
+      <div class="about-layout" style="display:grid; grid-template-columns:220px minmax(0,1fr); gap:44px; align-items:center;">
         ${logoHtml}
         <div>
           <div style="font-size:22px; font-weight:700; color:#1E293B;">${esc(b.name)}</div>
@@ -274,7 +271,6 @@ function renderFeatures(blocks: WebsiteV2Blocks, editorMode: boolean): string {
     const inner = `
   <section style="position:relative; background:#EFF6FF; overflow:hidden;">
     <div class="inner" style="max-width:1080px; margin:0 auto; padding:80px 48px; position:relative; z-index:1;">
-      <div class="print-keep">
       <h2 style="margin:0 0 8px; font-size:40px; font-weight:700; letter-spacing:-1px; color:#1E293B;">${esc(b.title)}</h2>
       <p style="margin:0 0 40px; font-size:17px; color:#64748B;">${esc(b.subtitle)}</p>
       <div class="checklist-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:24px 48px;">
@@ -286,7 +282,6 @@ function renderFeatures(blocks: WebsiteV2Blocks, editorMode: boolean): string {
             <div style="color:#64748B; font-size:14.5px; margin-top:2px;">${esc(item.description)}</div>
           </div>
         </div>`).join('')}
-      </div>
       </div>
       ${b.extras.length ? `
       <div style="margin-top:44px; padding-top:28px; border-top:1px solid #BFDBFE;">
@@ -307,7 +302,6 @@ function renderPortfolio(blocks: WebsiteV2Blocks, editorMode: boolean, sectionNu
     const inner = `
   <section style="position:relative; background:#FFFFFF; overflow:hidden;">
     <div class="inner" style="max-width:1080px; margin:0 auto; padding:80px 48px; position:relative; z-index:1;">
-      <div class="print-keep">
       <h2 style="margin:0 0 8px; font-size:40px; font-weight:700; letter-spacing:-1px; color:#1E293B;">${esc(b.title)}</h2>
       <p style="margin:0 0 36px; font-size:17px; color:#64748B;">${esc(b.subtitle)}</p>
       <div class="work-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:24px;">
@@ -322,11 +316,10 @@ function renderPortfolio(blocks: WebsiteV2Blocks, editorMode: boolean, sectionNu
           </div>
         </div>`).join('')}
       </div>
-      </div>
       ${b.testimonials.length ? `
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:36px;">
         ${b.testimonials.map(t => `
-        <div style="background:#EFF6FF; border-radius:12px; padding:26px 28px;">
+        <div class="pdf-keep" style="background:#EFF6FF; border-radius:12px; padding:26px 28px;">
           <div style="color:#F59E0B; font-size:22px; margin-bottom:8px;">${'★'.repeat(t.stars)}</div>
           <p style="margin:0 0 16px; font-size:16px; color:#1E293B; font-style:italic;">„${esc(t.text)}"</p>
           <div style="display:flex; align-items:center; gap:12px;">
@@ -350,12 +343,12 @@ function renderProcess(blocks: WebsiteV2Blocks, editorMode: boolean, sectionNum:
     const inner = `
   <section style="position:relative; background:#EFF6FF; overflow:hidden;">
     <div class="inner" style="max-width:1080px; margin:0 auto; padding:80px 48px; position:relative; z-index:1;">
-      <div class="print-keep">
+      <div class="pdf-keep">
       <h2 style="margin:0 0 48px; font-size:40px; font-weight:700; letter-spacing:-1px; color:#1E293B;">${esc(b.title)}</h2>
       <div class="stepper" style="position:relative; display:flex; justify-content:space-between; gap:24px;">
         <div class="stepper-line" style="position:absolute; top:28px; left:12%; right:12%; border-top:2px dashed #BFDBFE; z-index:0;"></div>
         ${b.steps.map((s, i) => `
-        <div class="print-keep" style="position:relative; z-index:1; flex:1; text-align:center;">
+        <div style="position:relative; z-index:1; flex:1; text-align:center;">
           <div style="width:56px; height:56px; border-radius:50%; background:#2563EB; color:#FFFFFF; font-size:24px; font-weight:700; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">${i + 1}</div>
           <div style="font-weight:700; font-size:18px; margin-bottom:8px;">${esc(s.title)}</div>
           <p style="margin:0; color:#64748B; font-size:14.5px;">${esc(s.description)}</p>
@@ -363,7 +356,7 @@ function renderProcess(blocks: WebsiteV2Blocks, editorMode: boolean, sectionNum:
       </div>
       </div>
       ${b.timelineNote ? `
-      <div class="print-keep" style="margin-top:48px; background:#FFFFFF; border:1px solid #BFDBFE; border-radius:12px; padding:22px 28px; display:flex; align-items:center; gap:14px; justify-content:center;">
+      <div class="pdf-keep" style="margin-top:48px; background:#FFFFFF; border:1px solid #BFDBFE; border-radius:12px; padding:22px 28px; display:flex; align-items:center; gap:14px; justify-content:center;">
         <span style="font-size:24px;">⏱</span>
         <span style="color:#2563EB; font-weight:600; font-size:17px;">${esc(b.timelineNote)}</span>
       </div>` : ''}
@@ -380,11 +373,10 @@ function renderTechnology(blocks: WebsiteV2Blocks, editorMode: boolean, sectionN
     const inner = `
   <section class="pb-tech" style="position:relative; background:#FFFFFF; overflow:hidden;">
     <div class="inner" style="max-width:1080px; margin:0 auto; padding:80px 48px; position:relative; z-index:1;">
-      <div class="print-keep">
       <h2 style="margin:0 0 6px; font-size:40px; font-weight:700; letter-spacing:-1px; color:#1E293B;">${esc(b.title)}</h2>
       <p style="margin:0 0 36px; font-size:16px; color:#64748B; max-width:680px;">${esc(b.subtitle)}</p>
 
-      <div style="position:relative; display:grid; grid-template-columns:auto minmax(0,1fr); gap:28px; align-items:start; background:#FFFFFF; border:2px solid #2563EB; border-radius:12px; padding:32px 30px; box-shadow:0 8px 32px rgba(37,99,235,0.15);">
+      <div class="pdf-keep" style="position:relative; display:grid; grid-template-columns:auto minmax(0,1fr); gap:28px; align-items:start; background:#FFFFFF; border:2px solid #2563EB; border-radius:12px; padding:32px 30px; box-shadow:0 8px 32px rgba(37,99,235,0.15);">
         <span style="position:absolute; top:-13px; left:30px; background:#2563EB; color:#FFFFFF; border-radius:999px; padding:6px 16px; font-size:12px; font-weight:700; letter-spacing:0.5px;">★ MOJA REKOMENDACJA DLA CIEBIE</span>
         <div style="width:64px; height:64px; border-radius:50%; background:${esc(r.iconBg)}; color:#FFFFFF; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:700; margin-top:6px;">${esc(r.iconChar)}</div>
         <div>
@@ -395,13 +387,12 @@ function renderTechnology(blocks: WebsiteV2Blocks, editorMode: boolean, sectionN
           </div>
         </div>
       </div>
-      </div>
 
       ${b.alternatives.length ? `
       <div class="sec-label" style="font-weight:600; color:#64748B; font-size:14px; margin:34px 0 16px; text-transform:uppercase; letter-spacing:1px;">Mogę też pracować na:</div>
       <div class="tech-secondary" style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
         ${b.alternatives.map(a => `
-        <div class="print-keep" style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:24px 26px;">
+        <div class="pdf-keep" style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:24px 26px;">
           <div style="display:flex; align-items:center; gap:14px; margin-bottom:12px;">
             <div style="width:44px; height:44px; border-radius:50%; background:#1E293B; color:#FFFFFF; display:flex; align-items:center; justify-content:center; font-size:18px;">▲</div>
             <div>
@@ -436,7 +427,6 @@ function renderPricing(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editor
     const inner = `
   <section class="pb-price" style="position:relative; background:#EFF6FF; overflow:hidden;">
     <div class="inner" style="max-width:1080px; margin:0 auto; padding:80px 48px; position:relative; z-index:1;">
-      <div class="print-keep">
       <h2 style="margin:0 0 44px; font-size:40px; font-weight:700; letter-spacing:-1px; color:#1E293B; text-align:center;">Ile to kosztuje</h2>
 
       <div class="price-wrap" style="display:grid; grid-template-columns:minmax(0,600px) minmax(0,1fr); gap:32px; align-items:center; justify-content:center;">
@@ -462,7 +452,7 @@ function renderPricing(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editor
             <div style="display:flex; flex-direction:column; gap:12px;">
               ${b.paymentSchedule.map(ps => {
                   const amt = priceGross > 0 ? Math.round(priceGross * ps.percent / 100) : 0
-                  return `<div style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border-radius:8px; padding:12px 16px;">
+                  return `<div class="pdf-keep" style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border-radius:8px; padding:12px 16px;">
                   <span style="font-size:14.5px; color:#1E293B;">→ ${ph(String(ps.percent))}% ${esc(ps.label)}</span>
                   <span style="font-weight:700; color:#2563EB;">${amt > 0 ? `${amt.toLocaleString('pl-PL')} zł` : '—'}</span>
                 </div>`
@@ -480,16 +470,15 @@ function renderPricing(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editor
 
         <div style="display:flex; flex-direction:column; gap:16px;">
           ${b.guarantees.map(g => `
-          <div style="background:#FFFFFF; border-radius:12px; padding:20px 22px; box-shadow:0 4px 24px rgba(37,99,235,0.08); display:flex; align-items:center; gap:14px;">
+          <div class="pdf-keep" style="background:#FFFFFF; border-radius:12px; padding:20px 22px; box-shadow:0 4px 24px rgba(37,99,235,0.08); display:flex; align-items:center; gap:14px;">
             <span style="font-size:26px;">${esc(g.emoji)}</span>
             <span style="font-size:15px; font-weight:600;">${esc(g.text)}</span>
           </div>`).join('')}
         </div>
       </div>
-      </div>
 
       ${b.costs.length ? `
-      <div class="print-keep" style="margin-top:36px; background:#FFFFFF; border:1px solid #BFDBFE; border-radius:12px; padding:30px 32px;">
+      <div style="margin-top:36px; background:#FFFFFF; border:1px solid #BFDBFE; border-radius:12px; padding:30px 32px;">
         <div style="font-weight:700; font-size:18px; margin-bottom:4px;">Koszty jednorazowe i roczne — wszystko jawnie</div>
         <p style="margin:0 0 22px; color:#64748B; font-size:14.5px;">Nie ukrywam żadnych opłat. Poza wykonaniem strony są tylko niewielkie koszty roczne za jej działanie.</p>
         <div class="costs-grid" style="display:grid; grid-template-columns:${b.costs.length === 1 ? '1fr' : '1fr 1fr'}; gap:20px;">
@@ -513,7 +502,6 @@ function renderFaq(blocks: WebsiteV2Blocks, editorMode: boolean, sectionNum: num
     const inner = `
   <section style="position:relative; background:#FFFFFF; overflow:hidden;">
     <div class="inner" style="max-width:1080px; margin:0 auto; padding:80px 48px; position:relative; z-index:1;">
-      <div class="print-keep">
       <h2 style="margin:0 0 8px; font-size:40px; font-weight:700; letter-spacing:-1px; color:#1E293B;">${esc(b.title)}</h2>
       <p style="margin:0 0 40px; font-size:17px; color:#64748B;">${esc(b.subtitle)}</p>
       <div class="faq-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
@@ -522,7 +510,6 @@ function renderFaq(blocks: WebsiteV2Blocks, editorMode: boolean, sectionNum: num
           <div style="font-weight:700; font-size:16px; color:#1E293B; margin-bottom:8px;">${esc(item.question)}</div>
           <p style="margin:0; color:#64748B; font-size:14.5px;">${esc(item.answer)}</p>
         </div>`).join('')}
-      </div>
       </div>
     </div>
     ${secnum(String(sectionNum).padStart(2, '0'))}
@@ -611,24 +598,10 @@ export function buildWebsiteV2Html(
         ? `<style>body { transform: scale(${zoom}); transform-origin: top left; width: ${(100 / zoom).toFixed(2)}%; }</style>`
         : ''
 
-    const paginationScript = `<script data-smartquote-template-pagination>
-(function () {
-  function updatePrintKeeps() {
-    var nodes = document.querySelectorAll('.print-keep');
-    for (var i = 0; i < nodes.length; i++) {
-      nodes[i].classList.toggle('print-keep-active', nodes[i].getBoundingClientRect().height <= 1030);
-    }
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', updatePrintKeeps);
-  else updatePrintKeeps();
-  window.addEventListener('beforeprint', updatePrintKeeps);
-}());
-</script>`
-
     return buildHtmlDocument({
         title: 'Oferta — Strona internetowa',
         css: buildCss(),
-        extraHead: [zoomStyle, paginationScript].filter(Boolean).join('\n'),
+        extraHead: [zoomStyle].filter(Boolean).join('\n'),
         body: `<div>
 ${withPageBreakAfter(renderCover(data, blocks, editorMode), blocks.pageBreakAfter.includes('cover'))}
 ${body}

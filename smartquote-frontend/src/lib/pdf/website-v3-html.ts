@@ -270,7 +270,7 @@ function renderPackages(blocks: WebsiteV3Blocks, editorMode: boolean, num: numbe
 function renderProcess(blocks: WebsiteV3Blocks, editorMode: boolean, num: number): string {
     const b = blocks.process
     const steps = b.steps.map((s, i) => `
-<div class="print-keep" style="flex:1;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;">
+<div style="flex:1;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;">
   <div style="width:54px;height:54px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px;box-shadow:0 8px 20px rgba(124,58,237,0.3);">${i + 1}</div>
   <div style="font-weight:700;font-size:16px;">${esc(s.label)}</div>
   <div style="font-size:12.5px;font-weight:600;color:var(--violet);">${esc(s.duration)}</div>
@@ -280,6 +280,7 @@ function renderProcess(blocks: WebsiteV3Blocks, editorMode: boolean, num: number
 <section style="position:relative;padding:96px 48px;background:var(--bg-alt);overflow:hidden;">
   <div style="position:absolute;top:36px;left:40px;font-size:200px;font-weight:800;line-height:1;color:var(--violet);opacity:0.05;pointer-events:none;">${String(num).padStart(2, '0')}</div>
   <div style="max-width:1160px;margin:0 auto;position:relative;z-index:1;">
+    <div class="pdf-keep">
     <div style="text-align:center;margin-bottom:56px;">
       <div class="sec-eyebrow" style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">Jak pracuję</div>
       <h2 style="margin:12px 0 0;font-size:40px;font-weight:700;letter-spacing:-0.02em;">${esc(b.title)}</h2>
@@ -288,7 +289,8 @@ function renderProcess(blocks: WebsiteV3Blocks, editorMode: boolean, num: number
       <div class="stepper-line" style="position:absolute;top:26px;left:8%;right:8%;height:3px;background:var(--grad);border-radius:3px;z-index:0;"></div>
       <div class="stepper" style="display:flex;justify-content:space-between;gap:14px;position:relative;z-index:1;">${steps}</div>
     </div>
-    <div style="margin-top:48px;padding:20px 26px;border-radius:12px;background:rgba(124,58,237,0.08);border-left:4px solid var(--violet);font-size:16px;font-weight:500;">
+    </div>
+    <div class="pdf-keep" style="margin-top:48px;padding:20px 26px;border-radius:12px;background:rgba(124,58,237,0.08);border-left:4px solid var(--violet);font-size:16px;font-weight:500;">
       ℹ️ <strong>${esc(b.timelineNote)}</strong>
     </div>
   </div>
@@ -392,7 +394,7 @@ function renderPricing(data: WebsiteV3OfferData, blocks: WebsiteV3Blocks, editor
     const vat = gross - net
 
     const paymentSteps = b.paymentSteps.map((s) => `
-<div style="flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;">
+<div class="pdf-keep" style="flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;">
   <div style="width:44px;height:44px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:15px;z-index:1;">${s.percent}%</div>
   <div style="font-weight:600;margin-top:12px;">${esc(s.label)}</div>
   <div style="font-size:13px;color:var(--muted);">${esc(s.description)}</div>
@@ -500,8 +502,10 @@ function renderTestimonials(blocks: WebsiteV3Blocks, editorMode: boolean, num: n
   ${secNum(String(num).padStart(2, '0'))}
   <div style="max-width:1000px;margin:0 auto;position:relative;z-index:1;">
     <div class="sec-eyebrow" style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">Opinie klientów</div>
+    <div class="pdf-keep">
     <h2 style="margin:12px 0 40px;font-size:40px;font-weight:700;letter-spacing:-0.02em;">${esc(b.title)}</h2>
     <div class="grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">${cards}</div>
+    </div>
   </div>
 </section>`
     return editorWrap('testimonials', inner, 'Referencje', editorMode)
@@ -519,13 +523,15 @@ function renderAbout(blocks: WebsiteV3Blocks, editorMode: boolean, num: number):
   ${secNum(String(num).padStart(2, '0'))}
   <div style="max-width:1040px;margin:0 auto;position:relative;z-index:1;">
     <div class="sec-eyebrow" style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">Kto to zrobi</div>
+    <div class="pdf-keep">
     <h2 style="margin:12px 0 40px;font-size:40px;font-weight:700;letter-spacing:-0.02em;">${esc(b.title)}</h2>
-    <div class="about-grid" style="display:grid;grid-template-columns:1.4fr 1fr;gap:44px;align-items:center;">
+    <div class="about-layout" style="display:grid;grid-template-columns:1.4fr 1fr;gap:44px;align-items:center;">
       <div>
         <p style="margin:0 0 18px;font-size:17px;line-height:1.65;">${ph(b.bio1)}</p>
         <p style="margin:0 0 26px;font-size:16px;line-height:1.65;color:var(--muted);">${ph(b.bio2)}</p>
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;">${stats}</div>
+    </div>
     </div>
   </div>
 </section>`
@@ -564,7 +570,7 @@ function renderTerms(blocks: WebsiteV3Blocks, editorMode: boolean, num: number):
     <div class="sec-eyebrow" style="font-size:13px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--violet);">Spokój i bezpieczeństwo</div>
     <h2 style="margin:12px 0 44px;font-size:40px;font-weight:700;letter-spacing:-0.02em;">${esc(b.title)}</h2>
     <div class="grid-3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;">${cards}</div>
-    <div style="margin-top:32px;padding:26px 30px;border-radius:12px;background:rgba(124,58,237,0.08);border-left:4px solid var(--violet);">
+    <div class="pdf-keep" style="margin-top:32px;padding:26px 30px;border-radius:12px;background:rgba(124,58,237,0.08);border-left:4px solid var(--violet);">
       <div style="font-weight:700;margin-bottom:12px;">Warunki formalne</div>
       <div style="display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.5;">
         <div><strong>Płatność:</strong> ${ph(b.paymentTerms)}</div>
