@@ -322,12 +322,9 @@ function renderPortfolio(blocks: WebsiteV2Blocks, editorMode: boolean, sectionNu
         <div class="pdf-keep" style="background:#EFF6FF; border-radius:12px; padding:26px 28px;">
           <div style="color:#F59E0B; font-size:22px; margin-bottom:8px;">${'★'.repeat(t.stars)}</div>
           <p style="margin:0 0 16px; font-size:16px; color:#1E293B; font-style:italic;">„${esc(t.text)}"</p>
-          <div style="display:flex; align-items:center; gap:12px;">
-            <div style="width:40px; height:40px; border-radius:50%; background:repeating-linear-gradient(45deg,#EFF6FF,#EFF6FF 5px,#F8FAFC 5px,#F8FAFC 10px); border:1px dashed #BFDBFE;"></div>
-            <div>
-              <div style="font-weight:600; font-size:14px;">${esc(t.name)}</div>
-              <div style="color:#64748B; font-size:13px;">${esc(t.company)}</div>
-            </div>
+          <div>
+            <div style="font-weight:600; font-size:14px;">${esc(t.name)}</div>
+            <div style="color:#64748B; font-size:13px;">${esc(t.company)}</div>
           </div>
         </div>`).join('')}
       </div>` : ''}
