@@ -641,7 +641,17 @@ UWAGA — POPRAWKA: Twoja poprzednia odpowiedz miala isComplete=true, ale "block
     }
 
     let message = typeof parsed.message === 'string' ? parsed.message : 'Wypelnilem szablon.'
-    if (parsed.isComplete !== true || !parsed.blocks || typeof parsed.blocks !== 'object' || Array.isArray(parsed.blocks)) {
+    // Gemini's isComplete flag reflects whether IT considers the conversation
+    // finished, not whether it produced a usable patch — it regularly returns
+    // isComplete:false alongside a substantive "blocks" patch when the user's
+    // brief answers most fields but leaves a few genuinely unknown (e.g. explicit
+    // "[do uzupelnienia]" placeholders), together with a clarifying question about
+    // just those. Gating on isComplete here discarded that patch outright, so a
+    // detailed multi-field brief produced nothing at all. Apply whatever valid
+    // patch exists regardless of isComplete; the clarifying question still reaches
+    // the user via "message".
+    const hasBlocksObject = !!parsed.blocks && typeof parsed.blocks === 'object' && !Array.isArray(parsed.blocks)
+    if (!hasBlocksObject) {
         return { message: completionMessageWithoutBlocks(message), blocks: null, isComplete: false }
     }
 
@@ -899,6 +909,7 @@ ZASADY STRUKTURY JSON:
 - Nie usuwaj pol. Nie zamieniaj obiektow na tekst.
 - Zachowaj kontrolne pola techniczne i URL-e, chyba ze user wyraznie prosi o zmiane.
 - NIGDY nie wymyslaj adresow URL obrazkow ani plikow (pola typu imageUrl, image, photoUrl, src, avatar, logo). Jezeli nie masz prawdziwego adresu podanego przez uzytkownika, zostaw takie pole jako pusty string "" lub zachowaj aktualna wartosc. Zmyslone adresy (np. https://example.com/...jpg) daja zepsute obrazki.
+- To samo dotyczy danych tozsamosci i platnosci: nazwisko/nazwa firmy, adres, NIP/REGON, numer konta bankowego, dane kontaktowe. Uzytkownik czesto wkleja brief z wlasnymi notatkami-do-uzupelnienia w nawiasach, np. "[do uzupelnienia]", "[Twoje dane]", "[Twoj adres]", "do ustalenia". To NIE sa dane do wypelnienia — to oznaczenie braku danych. Dla takich pol zostaw pusty string "" (lub zachowaj aktualna wartosc), NIGDY nie wpisuj wymyslonej wartosci w stylu "Nazwa Twojej Firmy" / "Twoj Adres Firmowy" / "Numer Twojego Konta Bankowego" — wyglada jak realne dane, a nia nie jest, i userowi latwo to przeoczyc w gotowej umowie. W wiadomosci ("message") wypisz konkretnie, ktore z tych pol pozostaly puste i wymagaja uzupelnienia recznego.
 - Pola cenowe i kwoty dostosuj tylko tekstowo do kontekstu; priceOverride zostaw null, chyba ze user podal konkretna cene.
 - Dla list generuj kompletne, konkretne pozycje zamiast pustych placeholderow.
 - Dla umow zachowaj formalny, precyzyjny jezyk prawniczo-biznesowy, bez przesadnego marketingu.
@@ -1083,11 +1094,17 @@ export async function offerFillChat(
         }
 
         const message = typeof parsed.message === 'string' ? parsed.message : 'Generuję ofertę...'
-        const isComplete = parsed.isComplete === true
 
         let blocks: Record<string, unknown> | null = null
 
-        if (isComplete && parsed.blocks != null && typeof parsed.blocks === 'object' && !Array.isArray(parsed.blocks)) {
+        // See the matching comment in genericOfferFillChat: isComplete is the
+        // model's own "conversation finished" judgement, not a signal that the
+        // patch is empty. A brief with mostly-known fields and a couple of
+        // explicit unknowns often comes back as isComplete:false with a real,
+        // substantive "blocks" patch plus a clarifying question — apply the
+        // patch regardless and let the question reach the user via "message".
+        const hasBlocksObject = parsed.blocks != null && typeof parsed.blocks === 'object' && !Array.isArray(parsed.blocks)
+        if (hasBlocksObject) {
             blocks = mergeProposalPatch(context.currentBlocks, parsed.blocks)
             if (!blocks) {
                 log.warn('offer-fill: blocks failed validation, discarding')

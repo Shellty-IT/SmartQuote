@@ -112,7 +112,7 @@ function buildCss(editorMode: boolean, zoom: number): string {
     }
     @media print {
       body { background: none; }
-      .page { margin: 0; box-shadow: none; padding-bottom: 24mm; }
+      .page { margin: 0; width: auto; padding: 0; box-shadow: none; }
     }
     ${buildContractPageRule({ margins: '16mm 17mm 24mm 17mm', bottomLeft: 'shellty-it.github.io', counterColor: '#9E9E9E', counterSize: '7pt' })}
     .screen-footer {
@@ -252,7 +252,7 @@ function sectionAttr(key: ContractSectionKey, disabled: boolean, active: boolean
 
 function renderHeader(blocks: ContractShortBlocks, editorMode: boolean, activeSection: string | null): string {
     const h = blocks.header
-    const logoUrl = h.logoDarkUrl || h.logoUrl
+    const logoUrl = h.logoUrl || h.logoDarkUrl
     const attr = editorMode
         ? ` data-sq-section="header"${activeSection === 'header' ? ' class="sq-active"' : ''}`
         : ''
