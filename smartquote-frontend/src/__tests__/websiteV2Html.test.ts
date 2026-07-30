@@ -52,8 +52,8 @@ describe('website v2 document branding', () => {
         expect(html).toContain('data:image/webp;base64,SCREENSHOT')
         expect(html).toContain('section { break-inside: auto;')
         expect(html).not.toContain('section { break-inside: avoid; }')
-        expect(html).toContain('.price-wrap { grid-template-columns:minmax(0,1fr) !important;')
-        expect(html).toContain('.price-wrap > div:last-child {')
+        expect(html).toContain('.price-wrap { display:block !important; }')
+        expect(html).toContain('.price-aside {')
     })
 
     it('can force the next section to start on a new page', () => {

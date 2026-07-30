@@ -101,6 +101,14 @@ body {
 }
 a { color: inherit; text-decoration: none; }
 
+/* Pricing layout. On screen .price-main is transparent to the grid, so the
+   heading spans both columns and the investment card sits next to the
+   guarantees — exactly as before. In print it becomes a real box (see the
+   @media print block) so the heading and the card can be kept together as one
+   unbreakable unit without dragging the guarantees along. */
+.price-main { display: contents; }
+.price-title { grid-column: 1 / -1; }
+
 @media (max-width: 768px) {
   .inner { padding: 48px 22px !important; }
   .cover-grid, .tech-secondary, .checklist-grid, .footer-grid, .price-wrap, .about-layout, .work-grid, .faq-grid, .costs-grid { grid-template-columns: 1fr !important; }
@@ -118,11 +126,17 @@ a { color: inherit; text-decoration: none; }
   .inner { width:100% !important; max-width:100% !important; padding:36px 44px !important; }
   /* Cap large headings so stress-length text doesn't consume an entire page */
   .inner h2 { font-size: 26px !important; line-height: 1.35 !important; margin-bottom: 22px !important; }
-  .price-wrap { grid-template-columns:minmax(0,1fr) !important; align-items:start !important; }
-  .price-wrap > div { width:100% !important; max-width:100% !important; }
-  .price-wrap > div:last-child { display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px !important; }
-  .price-wrap > div:last-child > div { padding:14px !important; align-items:flex-start !important; }
-  .price-wrap > div:last-child span { min-width:0 !important; overflow-wrap:anywhere !important; }
+  /* Plain block flow, not a grid: a fragmented grid container can start on one
+     page and push its first row onto the next, which left the pricing heading
+     alone on an otherwise empty page. As blocks, the heading + card unit
+     (.price-main, marked .pdf-keep) simply moves as a whole when it does not
+     fit, and the guarantees flow on afterwards. */
+  .price-wrap { display:block !important; }
+  .price-main { display:block !important; }
+  .price-card { width:100% !important; max-width:100% !important; }
+  .price-aside { display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px !important; margin-top:32px !important; width:100% !important; }
+  .price-aside > div { padding:14px !important; align-items:flex-start !important; }
+  .price-aside span { min-width:0 !important; overflow-wrap:anywhere !important; }
   .work-grid > div, .faq-grid > div, .costs-grid > div, .checklist-grid > div { break-inside: avoid; }
   footer { break-inside:avoid-page !important; page-break-inside:avoid !important; }
   footer .inner { padding:28px 44px 20px !important; }
@@ -432,11 +446,10 @@ function renderPricing(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editor
     const inner = `
   <section class="pb-price" style="position:relative; background:#EFF6FF; overflow:hidden;">
     <div class="inner" style="max-width:1080px; margin:0 auto; padding:80px 48px; position:relative; z-index:1;">
-      <div class="pdf-keep">
-      <h2 style="margin:0 0 44px; font-size:40px; font-weight:700; letter-spacing:-1px; color:#1E293B; text-align:center;">Ile to kosztuje</h2>
-
       <div class="price-wrap" style="display:grid; grid-template-columns:minmax(0,600px) minmax(0,1fr); gap:32px; align-items:center; justify-content:center;">
-        <div style="background:#FFFFFF; border-radius:12px; box-shadow:0 12px 40px rgba(37,99,235,0.14); overflow:hidden; border:1px solid #E2E8F0;">
+        <div class="price-main pdf-keep">
+        <h2 class="price-title" style="margin:0 0 12px; font-size:40px; font-weight:700; letter-spacing:-1px; color:#1E293B; text-align:center;">Ile to kosztuje</h2>
+        <div class="price-card" style="background:#FFFFFF; border-radius:12px; box-shadow:0 12px 40px rgba(37,99,235,0.14); overflow:hidden; border:1px solid #E2E8F0;">
           <div style="background:#2563EB; color:#FFFFFF; text-align:center; padding:14px; font-weight:700; letter-spacing:2px; font-size:14px;">TWOJA INWESTYCJA</div>
           <div style="padding:36px 40px;">
             <div style="text-align:center;">
@@ -473,15 +486,15 @@ function renderPricing(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editor
             <div style="text-align:center; color:#64748B; font-style:italic; font-size:13.5px; margin-top:12px;">Oferta ważna do ${ph(validDate)}</div>
           </div>
         </div>
+        </div>
 
-        <div style="display:flex; flex-direction:column; gap:16px;">
+        <div class="price-aside" style="display:flex; flex-direction:column; gap:16px;">
           ${b.guarantees.map(g => `
           <div class="pdf-keep" style="background:#FFFFFF; border-radius:12px; padding:20px 22px; box-shadow:0 4px 24px rgba(37,99,235,0.08); display:flex; align-items:center; gap:14px;">
             <span style="font-size:26px;">${esc(g.emoji)}</span>
             <span style="font-size:15px; font-weight:600;">${esc(g.text)}</span>
           </div>`).join('')}
         </div>
-      </div>
       </div>
 
       ${b.costs.length ? `
