@@ -80,6 +80,13 @@ describe('website v2 document branding', () => {
         expect(markerIndex).toBeGreaterThan(html.indexOf('dla Edytowalny Odbiorca'))
         expect(markerIndex).toBeLessThan(html.indexOf('FIRST CONTENT SECTION'))
     })
+
+    it('does not render unsupported arrow glyphs in the payment schedule', () => {
+        const html = buildWebsiteV2Html(offer())
+
+        expect(html).toContain('50</span>% zaliczki na start')
+        expect(html).not.toContain('→')
+    })
 })
 
 describe('website v2 independent prices', () => {

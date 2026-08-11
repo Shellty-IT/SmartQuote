@@ -483,7 +483,7 @@ function renderPortfolio(blocks: WebsiteV3Blocks, editorMode: boolean, num: numb
 </div>`
     }).join('')
     const portfolioLink = b.portfolioUrl
-        ? `<div style="text-align:center;margin-top:36px;"><a href="${esc(b.portfolioUrl)}" style="display:inline-block;padding:13px 30px;border-radius:8px;border:1.5px solid var(--violet);color:var(--violet);font-weight:700;font-size:15px;">Zobacz pełne portfolio →</a></div>`
+        ? `<div style="text-align:center;margin-top:36px;"><a href="${esc(b.portfolioUrl)}" style="display:inline-block;padding:13px 30px;border-radius:8px;border:1.5px solid var(--violet);color:var(--violet);font-weight:700;font-size:15px;">Zobacz pełne portfolio</a></div>`
         : ''
     const inner = `
 <section style="position:relative;padding:96px 48px;background:var(--bg-alt);overflow:hidden;">
@@ -611,7 +611,7 @@ function renderFooter(data: WebsiteV3OfferData, blocks: WebsiteV3Blocks, editorM
   <div style="max-width:760px;margin:0 auto;position:relative;z-index:1;">
     <h2 style="margin:0;font-size:52px;font-weight:800;letter-spacing:-0.02em;line-height:1.05;">${esc(b.ctaHeadline)}</h2>
     <p style="margin:18px 0 36px;font-size:18px;color:rgba(255,255,255,0.9);">${esc(b.ctaSubtitle)}</p>
-    <div class="no-print" data-sq-action="accept" style="display:inline-block;padding:18px 44px;border-radius:999px;background:#fff;color:var(--violet);font-weight:800;font-size:17px;letter-spacing:0.01em;box-shadow:0 14px 40px rgba(0,0,0,0.2);">AKCEPTUJĘ OFERTĘ I CHCĘ ZACZĄĆ →</div>
+    <div class="no-print" data-sq-action="accept" style="display:inline-block;padding:18px 44px;border-radius:999px;background:#fff;color:var(--violet);font-weight:800;font-size:17px;letter-spacing:0.01em;box-shadow:0 14px 40px rgba(0,0,0,0.2);">AKCEPTUJĘ OFERTĘ I CHCĘ ZACZĄĆ</div>
     <div style="margin-top:48px;padding-top:32px;border-top:1px solid rgba(255,255,255,0.2);display:flex;flex-direction:column;align-items:center;gap:14px;">
       <div style="display:flex;align-items:center;gap:12px;">
         ${logoHtml}

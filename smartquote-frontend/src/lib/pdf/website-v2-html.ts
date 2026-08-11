@@ -334,7 +334,7 @@ function renderPortfolio(blocks: WebsiteV2Blocks, editorMode: boolean, sectionNu
             : `<div style="height:180px; background:repeating-linear-gradient(45deg,#EFF6FF,#EFF6FF 11px,#F8FAFC 11px,#F8FAFC 22px); border-bottom:1px dashed #BFDBFE; display:flex; align-items:center; justify-content:center; color:#94A3B8; font-size:12px;">screenshot realizacji</div>`}
           <div style="padding:16px 18px;">
             <div style="font-weight:600; font-size:15px;">${esc(w.name)}</div>
-            ${w.url && w.url !== '#' ? `<a href="${esc(w.url)}" style="color:#2563EB; font-size:13.5px; font-weight:600;">zobacz stronę →</a>` : `<span style="color:#2563EB; font-size:13.5px; font-weight:600;">zobacz stronę →</span>`}
+            ${w.url && w.url !== '#' ? `<a href="${esc(w.url)}" style="color:#2563EB; font-size:13.5px; font-weight:600;">zobacz stronę</a>` : `<span style="color:#2563EB; font-size:13.5px; font-weight:600;">zobacz stronę</span>`}
           </div>
         </div>`).join('')}
       </div>
@@ -482,7 +482,7 @@ function renderPricing(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editor
               ${b.paymentSchedule.map(ps => {
                   const amt = primaryPrice > 0 ? Math.round(primaryPrice * ps.percent) / 100 : 0
                   return `<div class="pdf-keep" style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border-radius:8px; padding:12px 16px;">
-                  <span style="font-size:14.5px; color:#1E293B;">→ ${ph(String(ps.percent))}% ${esc(ps.label)}</span>
+                  <span style="font-size:14.5px; color:#1E293B;">${ph(String(ps.percent))}% ${esc(ps.label)}</span>
                   <span style="font-weight:700; color:#2563EB;">${amt > 0 ? `${amt.toLocaleString('pl-PL')} zł ${primaryLabel}` : '—'}</span>
                 </div>`
               }).join('')}
