@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildDefaultWebsiteV2Blocks } from '@/lib/pdf/website-v2-blocks'
+import { buildDefaultWebsiteV2Blocks, mergeWebsiteV2WithDefaults, type WebsiteV2Blocks } from '@/lib/pdf/website-v2-blocks'
 import { buildWebsiteV2Html, type WebsiteV2OfferData } from '@/lib/pdf/website-v2-html'
 
 function offer(): WebsiteV2OfferData {
@@ -79,5 +79,62 @@ describe('website v2 document branding', () => {
 
         expect(markerIndex).toBeGreaterThan(html.indexOf('dla Edytowalny Odbiorca'))
         expect(markerIndex).toBeLessThan(html.indexOf('FIRST CONTENT SECTION'))
+    })
+})
+
+describe('website v2 independent prices', () => {
+    it('does not copy a price from offer totals or another section', () => {
+        const data = offer()
+        const blocks = data.blocks as WebsiteV2Blocks
+        data.totalGross = 999999
+        blocks.cover.priceOverride = 1200
+        blocks.cover.priceType = 'net'
+        blocks.pricing.priceOverride = null
+
+        const html = buildWebsiteV2Html(data)
+        const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ')
+
+        expect(text).toContain('Cena: 1200 zł netto')
+        expect(text).not.toContain('999 999 zł')
+        expect(html.match(/do wyceny/g)?.length).toBeGreaterThanOrEqual(1)
+    })
+
+    it('renders the pricing section from its own gross amount and labels the converted net amount', () => {
+        const data = offer()
+        const blocks = data.blocks as WebsiteV2Blocks
+        blocks.cover.priceOverride = 1200
+        blocks.cover.priceType = 'net'
+        blocks.pricing.priceOverride = 2460
+        blocks.pricing.priceType = 'gross'
+        blocks.pricing.costs = [{
+            type: 'Rocznie',
+            amount: '500 zł/rok',
+            priceType: 'net',
+            description: 'utrzymanie',
+        }]
+
+        const html = buildWebsiteV2Html(data)
+        const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ')
+
+        expect(text).toContain('Cena: 1200 zł netto')
+        expect(text).toContain('2460 zł')
+        expect(text).toContain('2000 zł netto')
+        expect(text).toContain('500 zł/rok netto')
+    })
+
+    it('adds independent price defaults to legacy saved blocks', () => {
+        const merged = mergeWebsiteV2WithDefaults({
+            cover: { title: 'Starsza oferta' },
+            pricing: {
+                priceOverride: 6150,
+                costs: [{ type: 'Rocznie', amount: '400 zł', description: 'hosting' }],
+            },
+        } as unknown as Partial<WebsiteV2Blocks>)
+
+        expect(merged.cover.priceOverride).toBeNull()
+        expect(merged.cover.priceType).toBe('gross')
+        expect(merged.pricing.priceOverride).toBe(6150)
+        expect(merged.pricing.priceType).toBe('gross')
+        expect(merged.pricing.costs[0].priceType).toBe('gross')
     })
 })

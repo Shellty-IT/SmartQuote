@@ -51,6 +51,17 @@ describe('syncTotalsFromBlocks', () => {
         expect(result).toEqual({ totalNet: 5000, totalVat: 1150, totalGross: 6150 });
     });
 
+    it('uses only the website pricing section and respects its net price type', () => {
+        const result = syncTotalsFromBlocks(
+            {
+                cover: { priceOverride: 999, priceType: 'gross' },
+                pricing: { priceOverride: 5000, priceType: 'net' },
+            },
+            'website_v2',
+        );
+        expect(result).toEqual({ totalNet: 5000, totalVat: 1150, totalGross: 6150 });
+    });
+
     it('defaults to the proposal pricingExtra path when templateType is omitted', () => {
         const result = syncTotalsFromBlocks({
             pricingExtra: { priceOverride: 12300, priceType: 'gross' },

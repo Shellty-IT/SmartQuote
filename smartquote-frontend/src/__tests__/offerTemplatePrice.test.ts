@@ -49,4 +49,19 @@ describe('offer template price resolution', () => {
             totalGross: 2000,
         }]);
     });
+
+    it('uses the website v2 pricing section type without reading the cover price', () => {
+        const price = resolveTemplatePrice({
+            cover: { priceOverride: 999, priceType: 'gross' },
+            pricing: { priceOverride: 5000, priceType: 'net' },
+        }, 'website_v2');
+
+        expect(price).toEqual({
+            net: 5000,
+            vat: 1150,
+            gross: 6150,
+            vatRate: 23,
+            type: 'net',
+        });
+    });
 });

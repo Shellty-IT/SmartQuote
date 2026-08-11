@@ -156,9 +156,9 @@ function renderCover(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editorMo
         ? `<img src="${esc(lightLogo)}" alt="logo" style="max-width:196px; max-height:78px; object-fit:contain;" />`
         : `<div style="width:196px; height:78px; border:1.5px dashed #BFDBFE; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:700; letter-spacing:2px; color:#94A3B8; font-size:13px; background:rgba(255,255,255,0.7);">LOGO</div>`
     const website = ci?.website ? `<a href="${esc(ci.website)}" style="color:#2563EB; font-weight:600; font-size:14px;">${esc(ci.website.replace(/^https?:\/\//, ''))}</a>` : ''
-    const priceText = blocks.pricing.priceOverride != null
-        ? `${blocks.pricing.priceOverride.toLocaleString('pl-PL')} zł`
-        : (data.totalGross > 0 ? `${data.totalGross.toLocaleString('pl-PL')} zł` : 'do wyceny')
+    const priceText = c.priceOverride != null && c.priceOverride > 0
+        ? `${c.priceOverride.toLocaleString('pl-PL')} zł ${c.priceType === 'net' ? 'netto' : 'brutto'}`
+        : 'do wyceny'
 
     const inner = `
   <section class="dot-grid pdf-full-bleed" style="position:relative; background:#FFFFFF; background-image:radial-gradient(#DBEAFE 1.4px, transparent 1.4px); background-size:26px 26px;">
@@ -438,8 +438,18 @@ function renderPricing(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editor
     const b = blocks.pricing
     if (!b.enabled) return ''
 
-    const priceGross = b.priceOverride ?? (data.totalGross > 0 ? data.totalGross : 0)
-    const priceNet = priceGross > 0 ? Math.round(priceGross / 1.23) : 0
+    const enteredPrice = b.priceOverride != null && b.priceOverride > 0 ? b.priceOverride : 0
+    const enteredType = b.priceType === 'net' ? 'net' : 'gross'
+    const priceNet = enteredPrice > 0
+        ? enteredType === 'net' ? enteredPrice : Math.round((enteredPrice / 1.23) * 100) / 100
+        : 0
+    const priceGross = enteredPrice > 0
+        ? enteredType === 'gross' ? enteredPrice : Math.round((enteredPrice * 1.23) * 100) / 100
+        : 0
+    const primaryPrice = enteredType === 'net' ? priceNet : priceGross
+    const secondaryPrice = enteredType === 'net' ? priceGross : priceNet
+    const primaryLabel = enteredType === 'net' ? 'netto' : 'brutto'
+    const secondaryLabel = enteredType === 'net' ? 'brutto' : 'netto'
     const validDate = addDays(data.createdAt, blocks.cover.validityDays ?? 14)
     const ci = data.user.companyInfo
 
@@ -453,8 +463,8 @@ function renderPricing(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editor
           <div style="background:#2563EB; color:#FFFFFF; text-align:center; padding:14px; font-weight:700; letter-spacing:2px; font-size:14px;">TWOJA INWESTYCJA</div>
           <div style="padding:36px 40px;">
             <div style="text-align:center;">
-              <div style="font-size:64px; font-weight:700; letter-spacing:-2px; color:#1E293B; line-height:1;">${priceNet > 0 ? `${ph(priceNet.toLocaleString('pl-PL'))} zł` : ph('do wyceny')}</div>
-              <div style="color:#64748B; font-size:14px; margin-top:8px;">netto · <span style="color:#1E293B; font-weight:600;">${priceGross > 0 ? `${ph(priceGross.toLocaleString('pl-PL'))} zł brutto` : '—'}</span> (z VAT 23%)</div>
+              <div style="font-size:64px; font-weight:700; letter-spacing:-2px; color:#1E293B; line-height:1;">${primaryPrice > 0 ? `${ph(primaryPrice.toLocaleString('pl-PL'))} zł` : ph('do wyceny')}</div>
+              <div style="color:#64748B; font-size:14px; margin-top:8px;">${primaryLabel} · <span style="color:#1E293B; font-weight:600;">${secondaryPrice > 0 ? `${ph(secondaryPrice.toLocaleString('pl-PL'))} zł ${secondaryLabel}` : '—'}</span> (VAT 23%)</div>
               <div style="color:#94A3B8; font-size:13px; margin-top:4px;">płatne jednorazowo za wykonanie strony</div>
             </div>
 
@@ -470,10 +480,10 @@ function renderPricing(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editor
             <div style="font-weight:700; font-size:15px; margin-bottom:14px;">Harmonogram płatności</div>
             <div style="display:flex; flex-direction:column; gap:12px;">
               ${b.paymentSchedule.map(ps => {
-                  const amt = priceGross > 0 ? Math.round(priceGross * ps.percent / 100) : 0
+                  const amt = primaryPrice > 0 ? Math.round(primaryPrice * ps.percent) / 100 : 0
                   return `<div class="pdf-keep" style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border-radius:8px; padding:12px 16px;">
                   <span style="font-size:14.5px; color:#1E293B;">→ ${ph(String(ps.percent))}% ${esc(ps.label)}</span>
-                  <span style="font-weight:700; color:#2563EB;">${amt > 0 ? `${amt.toLocaleString('pl-PL')} zł` : '—'}</span>
+                  <span style="font-weight:700; color:#2563EB;">${amt > 0 ? `${amt.toLocaleString('pl-PL')} zł ${primaryLabel}` : '—'}</span>
                 </div>`
               }).join('')}
             </div>` : ''}
@@ -505,7 +515,7 @@ function renderPricing(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editor
           ${b.costs.map((cost, i) => `
           <div style="background:${i === 0 ? '#EFF6FF' : '#FFF7ED'}; border:${i === 0 ? 'none' : '1px solid #FED7AA'}; border-radius:10px; padding:20px 22px;">
             <div style="font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:${i === 0 ? '#2563EB' : '#B45309'}; margin-bottom:8px;">${esc(cost.type)}</div>
-            <div style="font-size:28px; font-weight:700; color:#1E293B;">${ph(cost.amount)}</div>
+            <div style="font-size:28px; font-weight:700; color:#1E293B;">${ph(cost.amount)}${cost.amount.trim() && cost.amount.trim() !== '—' ? ` <span style="font-size:14px; font-weight:600; color:#64748B;">${cost.priceType === 'net' ? 'netto' : 'brutto'}</span>` : ''}</div>
             <div style="color:#64748B; font-size:13.5px; margin-top:4px;">${esc(cost.description)}</div>
           </div>`).join('')}
         </div>

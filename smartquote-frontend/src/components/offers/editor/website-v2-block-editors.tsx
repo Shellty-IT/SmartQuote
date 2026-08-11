@@ -13,6 +13,7 @@ import type {
     WV2Testimonial,
     WV2ProcessStep,
     WV2Guarantee,
+    WV2RecurringCost,
     WV2FaqItem,
     WV2TechAlt,
 } from '@/lib/pdf/website-v2-blocks'
@@ -59,6 +60,19 @@ function NumberInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
     )
 }
 
+function PriceTypeSelect({ value, onChange }: { value: 'net' | 'gross'; onChange: (value: 'net' | 'gross') => void }) {
+    return (
+        <select
+            value={value}
+            onChange={e => onChange(e.target.value as 'net' | 'gross')}
+            className="rounded-md border border-input bg-background px-2.5 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+        >
+            <option value="net">Netto</option>
+            <option value="gross">Brutto</option>
+        </select>
+    )
+}
+
 function AddBtn({ onClick, label }: { onClick: () => void; label: string }) {
     return (
         <button type="button" onClick={onClick} className="flex items-center gap-1.5 rounded-md border border-dashed border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-foreground transition-colors">
@@ -94,12 +108,18 @@ export function CoverEditorV2({ blocks, onChange, offerContext }: { blocks: Webs
             <Field label="Pill / obietnica">
                 <Input value={c.knowledgePill ?? ''} onChange={e => onChange({ ...blocks, cover: { ...c, knowledgePill: e.target.value } })} />
             </Field>
-            <Field label="Cena brutto (widoczna na okładce i w sekcji „Ile to kosztuje”)">
-                <NumberInput
-                    value={blocks.pricing.priceOverride ?? ''}
-                    placeholder="Pozostaw puste = „do wyceny”"
-                    onChange={e => onChange({ ...blocks, pricing: { ...blocks.pricing, priceOverride: e.target.value ? Number(e.target.value) : null } })}
-                />
+            <Field label="Cena na okładce">
+                <div className="flex gap-2">
+                    <NumberInput
+                        value={c.priceOverride ?? ''}
+                        placeholder="Pozostaw puste = „do wyceny”"
+                        onChange={e => onChange({ ...blocks, cover: { ...c, priceOverride: e.target.value ? Number(e.target.value) : null } })}
+                    />
+                    <PriceTypeSelect
+                        value={c.priceType ?? 'gross'}
+                        onChange={priceType => onChange({ ...blocks, cover: { ...c, priceType } })}
+                    />
+                </div>
             </Field>
             <Field label="Realizacja do X dni">
                 <NumberInput value={c.deadlineDays} onChange={e => onChange({ ...blocks, cover: { ...c, deadlineDays: Number(e.target.value) } })} />
@@ -451,17 +471,23 @@ export function PricingEditorV2({ blocks, onChange }: { blocks: WebsiteV2Blocks;
     const updateGuarantee = (i: number, patch: Partial<WV2Guarantee>) => {
         const gs = [...b.guarantees]; gs[i] = { ...gs[i], ...patch }; update({ guarantees: gs })
     }
-    const updateCost = (i: number, field: string, value: string) => {
-        const costs = [...b.costs]; costs[i] = { ...costs[i], [field]: value }; update({ costs })
+    const updateCost = (i: number, patch: Partial<WV2RecurringCost>) => {
+        const costs = [...b.costs]; costs[i] = { ...costs[i], ...patch }; update({ costs })
     }
     return (
         <div className="flex flex-col gap-4">
-            <Field label="Cena brutto (nadpisuje sumę pozycji)">
-                <NumberInput
-                    value={b.priceOverride ?? ''}
-                    placeholder="Pozostaw puste = z pozycji oferty"
-                    onChange={e => update({ priceOverride: e.target.value ? Number(e.target.value) : null })}
-                />
+            <Field label="Cena w sekcji „Ile to kosztuje”">
+                <div className="flex gap-2">
+                    <NumberInput
+                        value={b.priceOverride ?? ''}
+                        placeholder="Pozostaw puste = „do wyceny”"
+                        onChange={e => update({ priceOverride: e.target.value ? Number(e.target.value) : null })}
+                    />
+                    <PriceTypeSelect
+                        value={b.priceType ?? 'gross'}
+                        onChange={priceType => update({ priceType })}
+                    />
+                </div>
             </Field>
             <div className="flex flex-col gap-2">
                 <span className="text-xs font-medium text-muted-foreground">Zawiera w cenie</span>
@@ -499,16 +525,19 @@ export function PricingEditorV2({ blocks, onChange }: { blocks: WebsiteV2Blocks;
             <div className="flex flex-col gap-2">
                 <span className="text-xs font-medium text-muted-foreground">Koszty (jednorazowe / cykliczne)</span>
                 {b.costs.map((cost, i) => (
-                    <div key={i} className="grid grid-cols-3 gap-2 items-center border border-border rounded-lg p-2">
-                        <input value={cost.type} onChange={e => updateCost(i, 'type', e.target.value)} placeholder="Jednorazowo" className="rounded-md border border-input bg-background px-2 py-1.5 text-xs focus:outline-none" />
-                        <input value={cost.amount} onChange={e => updateCost(i, 'amount', e.target.value)} placeholder="Kwota" className="rounded-md border border-input bg-background px-2 py-1.5 text-xs focus:outline-none" />
-                        <div className="flex gap-1">
-                            <input value={cost.description} onChange={e => updateCost(i, 'description', e.target.value)} placeholder="Opis" className="flex-1 rounded-md border border-input bg-background px-2 py-1.5 text-xs focus:outline-none" />
+                    <div key={i} className="grid grid-cols-2 gap-2 items-center border border-border rounded-lg p-2">
+                        <input value={cost.type} onChange={e => updateCost(i, { type: e.target.value })} placeholder="Jednorazowo" className="rounded-md border border-input bg-background px-2 py-1.5 text-xs focus:outline-none" />
+                        <div className="flex gap-2">
+                            <input value={cost.amount} onChange={e => updateCost(i, { amount: e.target.value })} placeholder="Kwota" className="min-w-0 flex-1 rounded-md border border-input bg-background px-2 py-1.5 text-xs focus:outline-none" />
+                            <PriceTypeSelect value={cost.priceType ?? 'gross'} onChange={priceType => updateCost(i, { priceType })} />
+                        </div>
+                        <div className="col-span-2 flex gap-1">
+                            <input value={cost.description} onChange={e => updateCost(i, { description: e.target.value })} placeholder="Opis" className="flex-1 rounded-md border border-input bg-background px-2 py-1.5 text-xs focus:outline-none" />
                             <RemoveBtn onClick={() => update({ costs: b.costs.filter((_, j) => j !== i) })} />
                         </div>
                     </div>
                 ))}
-                <AddBtn onClick={() => update({ costs: [...b.costs, { type: 'Jednorazowo', amount: '—', description: 'opis kosztu' }] })} label="Dodaj koszt" />
+                <AddBtn onClick={() => update({ costs: [...b.costs, { type: 'Jednorazowo', amount: '—', priceType: 'gross', description: 'opis kosztu' }] })} label="Dodaj koszt" />
             </div>
         </div>
     )

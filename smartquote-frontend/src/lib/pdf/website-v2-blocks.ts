@@ -12,6 +12,7 @@ export type WebsiteV2SectionKey =
     | 'faq'
 
 export type WebsiteV2PageBreakKey = 'cover' | WebsiteV2SectionKey
+export type WebsiteV2PriceType = 'net' | 'gross'
 
 // ── Sub-types ────────────────────────────────────────────────────────────────
 
@@ -36,7 +37,12 @@ export interface WV2TechAlt {
     pros: string[]
 }
 export interface WV2PaymentStep { percent: number; label: string }
-export interface WV2RecurringCost { type: string; amount: string; description: string }
+export interface WV2RecurringCost {
+    type: string
+    amount: string
+    priceType: WebsiteV2PriceType
+    description: string
+}
 export interface WV2Guarantee { emoji: string; text: string }
 export interface WV2FaqItem { question: string; answer: string }
 
@@ -47,6 +53,8 @@ export interface WV2CoverBlock {
     recipientName: string
     subtitle: string
     knowledgePill: string
+    priceOverride: number | null
+    priceType: WebsiteV2PriceType
     deadlineDays: number
     validityDays: number
 }
@@ -106,6 +114,7 @@ export interface WV2TechnologyBlock {
 export interface WV2PricingBlock {
     enabled: boolean
     priceOverride: number | null
+    priceType: WebsiteV2PriceType
     includes: string[]
     paymentSchedule: WV2PaymentStep[]
     guarantees: WV2Guarantee[]
@@ -157,6 +166,8 @@ export function buildDefaultWebsiteV2Blocks(): WebsiteV2Blocks {
             recipientName: '',
             subtitle: 'Prosta, nowoczesna strona, która sprawi, że klienci znajdą Cię w internecie.',
             knowledgePill: 'Obsługa bez technicznej wiedzy',
+            priceOverride: null,
+            priceType: 'gross',
             deadlineDays: 14,
             validityDays: 14,
         },
@@ -251,6 +262,7 @@ export function buildDefaultWebsiteV2Blocks(): WebsiteV2Blocks {
         pricing: {
             enabled: true,
             priceOverride: null,
+            priceType: 'gross',
             includes: [
                 'Projekt i budowa całej strony',
                 'Wersja na telefon, tablet i komputer',
@@ -267,8 +279,8 @@ export function buildDefaultWebsiteV2Blocks(): WebsiteV2Blocks {
                 { emoji: '📞', text: 'Wsparcie po uruchomieniu' },
             ],
             costs: [
-                { type: 'Jednorazowo', amount: '—', description: 'wykonanie strony — płacisz raz' },
-                { type: 'Rocznie', amount: 'ok. 400 zł/rok', description: 'hosting + domena — płatne raz w roku, niezależnie ode mnie' },
+                { type: 'Jednorazowo', amount: '—', priceType: 'gross', description: 'wykonanie strony — płacisz raz' },
+                { type: 'Rocznie', amount: 'ok. 400 zł/rok', priceType: 'gross', description: 'hosting + domena — płatne raz w roku, niezależnie ode mnie' },
             ],
         },
         faq: {
@@ -292,6 +304,10 @@ export function buildDefaultWebsiteV2Blocks(): WebsiteV2Blocks {
 const VALID_SECTIONS = new Set<WebsiteV2SectionKey>(ALL_WV2_SECTION_KEYS)
 const VALID_PAGE_BREAK_KEYS = new Set<WebsiteV2PageBreakKey>(['cover', ...ALL_WV2_SECTION_KEYS])
 
+function normalizePriceType(value: unknown): WebsiteV2PriceType {
+    return value === 'net' ? 'net' : 'gross'
+}
+
 export function mergeWebsiteV2WithDefaults(
     saved: Partial<WebsiteV2Blocks> | null | undefined,
 ): WebsiteV2Blocks {
@@ -306,7 +322,11 @@ export function mergeWebsiteV2WithDefaults(
         pageBreakAfter: Array.isArray(saved.pageBreakAfter)
             ? (saved.pageBreakAfter.filter((s) => VALID_PAGE_BREAK_KEYS.has(s)) as WebsiteV2PageBreakKey[])
             : defaults.pageBreakAfter,
-        cover: { ...defaults.cover, ...(saved.cover ?? {}) },
+        cover: {
+            ...defaults.cover,
+            ...(saved.cover ?? {}),
+            priceType: normalizePriceType(saved.cover?.priceType),
+        },
         footer: { ...defaults.footer, ...(saved.footer ?? {}) },
         problem: { ...defaults.problem, ...(saved.problem ?? {}) },
         about: { ...defaults.about, ...(saved.about ?? {}) },
@@ -318,7 +338,17 @@ export function mergeWebsiteV2WithDefaults(
             ...(saved.technology ?? {}),
             recommended: { ...defaults.technology.recommended, ...(saved.technology?.recommended ?? {}) },
         },
-        pricing: { ...defaults.pricing, ...(saved.pricing ?? {}) },
+        pricing: {
+            ...defaults.pricing,
+            ...(saved.pricing ?? {}),
+            priceType: normalizePriceType(saved.pricing?.priceType),
+            costs: Array.isArray(saved.pricing?.costs)
+                ? saved.pricing.costs.map(cost => ({
+                    ...cost,
+                    priceType: normalizePriceType(cost.priceType),
+                }))
+                : defaults.pricing.costs,
+        },
         faq: { ...defaults.faq, ...(saved.faq ?? {}) },
     }
 }
