@@ -99,8 +99,8 @@ export function CoverEditorV2({ blocks, onChange, offerContext }: { blocks: Webs
             <Field label="Tytuł główny">
                 <Input value={c.title ?? ''} onChange={e => onChange({ ...blocks, cover: { ...c, title: e.target.value } })} />
             </Field>
-            <Field label="Nazwa odbiorcy">
-                <Input value={c.recipientName || offerContext?.clientName || ''} onChange={e => onChange({ ...blocks, cover: { ...c, recipientName: e.target.value } })} placeholder="Nazwa klienta lub leada" />
+            <Field label="Nazwa odbiorcy / branża">
+                <Input value={c.recipientName || offerContext?.clientName || ''} onChange={e => onChange({ ...blocks, cover: { ...c, recipientName: e.target.value } })} placeholder="Np. Andrzej Tomaszkiewicz lub branża gastronomiczna" />
             </Field>
             <Field label="Podtytuł (opis pod nagłówkiem)">
                 <Textarea value={c.subtitle} onChange={e => onChange({ ...blocks, cover: { ...c, subtitle: e.target.value } })} />

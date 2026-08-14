@@ -29,9 +29,25 @@ function offer(): WebsiteV2OfferData {
 describe('website v2 document branding', () => {
     it('uses an editable recipient without the gold placeholder styling', () => {
         const html = buildWebsiteV2Html(offer())
-        expect(html).toContain('dla Edytowalny Odbiorca')
+        const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ')
+        expect(text).toContain('dla Edytowalny Odbiorca')
         expect(html).not.toContain('dla <span style="background:#FEF3C7')
         expect(html).toContain('Oferta nr <strong style="color:#334155;">OFR/2026/019</strong>')
+    })
+
+    it('wraps cover headlines only between words, including long names and industries', () => {
+        const data = offer()
+        const blocks = data.blocks as ReturnType<typeof buildDefaultWebsiteV2Blocks>
+        blocks.cover.recipientName = 'Andrzej Tomaszkiewicz — branża gastronomiczna'
+
+        const html = buildWebsiteV2Html(data)
+        const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ')
+
+        expect(text).toContain('dla Andrzej Tomaszkiewicz — branża gastronomiczna')
+        expect(html).toContain('<span class="headline-word">Tomaszkiewicz</span>')
+        expect(html).toContain('<span class="headline-word">gastronomiczna</span>')
+        expect(html).toContain('white-space: nowrap !important;')
+        expect(html).toContain('grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);')
     })
 
     it('uses avatar for the author and background-specific logos', () => {
