@@ -70,6 +70,18 @@ function ph(text: string): string {
     return `<span style="color:inherit; font-weight:700; white-space:nowrap;">${esc(text)}</span>`
 }
 
+/**
+ * Keep headline words atomic while still allowing the browser to wrap at
+ * spaces. The shared PDF pagination styles deliberately allow emergency word
+ * breaking across the document, which is useful in tables but used to split
+ * names such as "Tomaszkiewicz" on the cover.
+ */
+function headlineWords(text: string): string {
+    return text.trim().split(/\s+/).filter(Boolean)
+        .map(word => `<span class="headline-word">${esc(word)}</span>`)
+        .join(' ')
+}
+
 // Puppeteer PDF generation only embeds the WOFF subset in embedded-fonts.ts, whose
 // unicode-range excludes the Dingbats block (U+2700-27BF) — a bare "✓" character
 // renders blank in the exported PDF even though it shows fine in the live browser
@@ -100,6 +112,32 @@ body {
   background: #FFFFFF;
 }
 a { color: inherit; text-decoration: none; }
+
+.cover-grid {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 36px;
+}
+.headline {
+  font-size: clamp(44px, 6.55vw, 58px);
+  line-height: 1.04;
+  font-weight: 700;
+  letter-spacing: -1.5px;
+}
+.headline-line {
+  display: block;
+  min-width: 0;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  hyphens: none !important;
+  text-wrap: balance;
+}
+.headline-word {
+  display: inline-block;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  hyphens: none !important;
+}
 
 /* Pricing layout. On screen .price-main is transparent to the grid, so the
    heading spans both columns and the investment card sits next to the
@@ -174,12 +212,12 @@ function renderCover(data: WebsiteV2OfferData, blocks: WebsiteV2Blocks, editorMo
         </div>
       </div>
 
-      <div class="cover-grid" style="display:grid; grid-template-columns:1.05fr 0.95fr; gap:56px; align-items:center; margin-top:64px;">
-        <div>
+      <div class="cover-grid" style="display:grid; align-items:center; margin-top:64px;">
+        <div style="min-width:0;">
           <div style="text-transform:uppercase; letter-spacing:4px; color:#2563EB; font-weight:700; font-size:13px; margin-bottom:18px;">Oferta</div>
-          <h1 class="headline" style="margin:0; font-size:58px; line-height:1.04; font-weight:700; letter-spacing:-1.5px;">
-            <span style="color:#1E293B;">${esc(c.title)}</span><br>
-            <span style="color:#2563EB;">dla ${esc(clientName)}</span>
+          <h1 class="headline" style="margin:0;">
+            <span class="headline-line" style="color:#1E293B;">${headlineWords(c.title)}</span>
+            <span class="headline-line" style="color:#2563EB;"><span class="headline-word">dla</span> ${headlineWords(clientName)}</span>
           </h1>
           <p style="margin:26px 0 0; font-size:19px; color:#64748B; max-width:460px;">${esc(c.subtitle)}</p>
           <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:34px;">
